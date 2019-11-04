@@ -3,7 +3,6 @@ package intellij;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Matrix;
-import nub.primitives.Point;
 import processing.core.PApplet;
 import processing.core.PMatrix3D;
 import processing.event.MouseEvent;

@@ -18,7 +18,6 @@ import nub.core.Interpolator;
 import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
-import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
@@ -349,15 +348,6 @@ public class Scene extends Graph implements PConstants {
   // OPENGL
 
   /**
-   * Same as {@code return setCenterFromPixel(new Point(x, y))}.
-   *
-   * @see #setCenterFromPixel(Point)
-   */
-  public boolean setCenterFromPixel(float x, float y) {
-    return setCenterFromPixel(new Point(x, y));
-  }
-
-  /**
    * The {@link #center()} is set to the point located under {@code pixel} on screen.
    * <p>
    * 2D windows always returns true.
@@ -365,8 +355,8 @@ public class Scene extends Graph implements PConstants {
    * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
    * {@code false} if none was found (in this case no {@link #center()} is set).
    */
-  public boolean setCenterFromPixel(Point pixel) {
-    Vector pup = pointUnderPixel(pixel);
+  public boolean setCenterFromPixel(int pixelX, int pixelY) {
+    Vector pup = pointUnderPixel(pixelX, pixelY);
     if (pup != null) {
       setCenter(pup);
       return true;
@@ -376,16 +366,16 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Returns the depth (z-value) of the object under the {@code pixel}. Used by
-   * {@link #pointUnderPixel(Point)}.
+   * {@link #pointUnderPixel(int, int)}.
    * <p>
    * The z-value ranges in [0..1] (near and far plane respectively). In 3D note that this
    * value is not a linear interpolation between {@link #zNear()} and {@link #zFar()}:
    * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z')} where {@code z'} is
    * the distance from the point you project to the eye, along the {@link #viewDirection()}.
    *
-   * @see #pointUnderPixel(Point)
+   * @see #pointUnderPixel(int, int)
    */
-  public float pixelDepth(Point pixel) {
+  public float pixelDepth(int pixelX, int pixelY) {
     PGraphicsOpenGL pggl;
     if (context() instanceof PGraphicsOpenGL)
       pggl = (PGraphicsOpenGL) context();
@@ -393,7 +383,7 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
     float[] depth = new float[1];
     PGL pgl = pggl.beginPGL();
-    pgl.readPixels(pixel.x(), (height() - pixel.y()), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
+    pgl.readPixels(pixelX, (height() - pixelY), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
         FloatBuffer.wrap(depth));
     pggl.endPGL();
     return depth[0];
@@ -403,28 +393,10 @@ public class Scene extends Graph implements PConstants {
    * Returns the world coordinates of the 3D point located at {@code pixel} (x,y) on
    * screen. May be null if no object is under pixel.
    */
-  public Vector pointUnderPixel(Point pixel) {
-    float depth = pixelDepth(pixel);
-    Vector point = location(new Vector(pixel.x(), pixel.y(), depth));
+  public Vector pointUnderPixel(int pixelX, int pixelY) {
+    float depth = pixelDepth(pixelX, pixelY);
+    Vector point = location(new Vector(pixelX, pixelY, depth));
     return (depth < 1.0f) ? point : null;
-  }
-
-  /**
-   * Same as {@code return pointUnderPixel(new Point(x, y))}.
-   *
-   * @see #pointUnderPixel(Point)
-   */
-  public Vector pointUnderPixel(float x, float y) {
-    return pointUnderPixel(new Point(x, y));
-  }
-
-  /**
-   * Same as {@code return pixelDepth(new Point(x, y))}.
-   *
-   * @see #pixelDepth(Point)
-   */
-  public float pixelDepth(float x, float y) {
-    return pixelDepth(new Point(x, y));
   }
 
   /**
@@ -462,23 +434,13 @@ public class Scene extends Graph implements PConstants {
   // 3. Drawing methods
 
   /**
-   * Convenience function that simply calls:
-   * {@code return setAnchorFromPixel(new Point(x, y))}.
-   *
-   * @see #setAnchorFromPixel(Point)
-   */
-  public boolean setAnchorFromPixel(float x, float y) {
-    return setAnchorFromPixel(new Point(x, y));
-  }
-
-  /**
    * The {@link #anchor()} is set to the point located under {@code pixel} on screen.
    * <p>
    * Returns {@code true} if a point was found under {@code pixel} and
    * {@code false} if none was found (in this case no {@link #anchor()} is set).
    */
-  public boolean setAnchorFromPixel(Point pixel) {
-    Vector pup = pointUnderPixel(pixel);
+  public boolean setAnchorFromPixel(int pixelX, int pixelY) {
+    Vector pup = pointUnderPixel(pixelX, pixelY);
     if (pup != null) {
       setAnchor(pup);
       // new animation
@@ -850,7 +812,7 @@ public class Scene extends Graph implements PConstants {
    * @see Graph#track(int, int, Node[])
    */
   public Node track(Node[] nodeArray) {
-    return track(mouse().x(), mouse().y(), nodeArray);
+    return track(mouseX(), mouseY(), nodeArray);
   }
 
   /**
@@ -859,17 +821,18 @@ public class Scene extends Graph implements PConstants {
    * @see Graph#track(int, int, List< Node >)
    */
   public Node track(List<Node> nodeList) {
-    return track(mouse().x(), mouse().y(), nodeList);
+    return track(mouseX(), mouseY(), nodeList);
   }
 
   /**
    * Same as {@code return track(mouse(), node)}.
    *
-   * @see #mouse()
+   * @see #mouseX()
+   * @see #mouseY()
    * @see Graph#tracks(Node, int, int)
    */
   public boolean tracks(Node node) {
-    return tracks(node, mouse().x(), mouse().y());
+    return tracks(node, mouseX(), mouseY());
   }
 
   @Override
@@ -2874,13 +2837,6 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Converts the {@code x, y} coordinates into a new {@link Point} and returns it.
-   */
-  public static Point toPoint(float x, float y) {
-    return new Point(x, y);
-  }
-
-  /**
    * Returns the last horizontal mouse displacement.
    */
   public float mouseDX() {
@@ -2929,57 +2885,75 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Returns the current mouse cursor position.
+   * Returns the current mouse x coordinate.
    */
-  public Point mouse() {
-    return toPoint(pApplet().mouseX - _upperLeftCornerX, pApplet().mouseY - _upperLeftCornerY);
+  public int mouseX() {
+    return pApplet().mouseX - _upperLeftCornerX;
   }
 
   /**
-   * Returns the previous mouse cursor position.
+   * Returns the current mouse y coordinate.
    */
-  public Point pmouse() {
-    return toPoint(pApplet().pmouseX - _upperLeftCornerX, pApplet().pmouseY - _upperLeftCornerY);
+  public int mouseY() {
+    return pApplet().mouseY - _upperLeftCornerY;
+  }
+
+  /**
+   * Returns the previous mouse x coordinate.
+   */
+  public int pmouseX() {
+    return pApplet().pmouseX - _upperLeftCornerX;
+  }
+
+  /**
+   * Returns the previous mouse y coordinate.
+   */
+  public int pmouseY() {
+    return pApplet().pmouseY - _upperLeftCornerY;
   }
 
   /**
    * Same as {@code return track(tag, mouse())}.
    *
    * @see #track(String, int, int)
-   * @see #mouse()
+   * @see #mouseX()
+   * @see #mouseY()
    */
   public Node track(String tag) {
-    return track(tag, mouse().x(), mouse().y());
+    return track(tag, mouseX(), mouseY());
   }
 
   /**
    * Same as {@code return track(mouse())}.
    *
    * @see #track(int, int)
-   * @see #mouse()
+   * @see #mouseX()
+   * @see #mouseY()
    */
   public Node track() {
-    return super.track(mouse().x(), mouse().y());
+    return super.track(mouseX(), mouseY());
   }
 
   /**
    * Same as {@code cast(tag, mouse())}.
    *
    * @see Graph#cast(String, int, int)
-   * @see #mouse()
+   * @see #mouseX()
+   * @see #mouseY()
    */
   public void cast(String tag) {
-    cast(tag, mouse().x(), mouse().y());
+    cast(tag, mouseX(), mouseY());
   }
 
   /**
    * Same as {@code cast(mouse())}.
    *
    * @see #cast(int, int)
-   * @see #mouse()
+   * @see #mouseX()
+   * @see #mouseY()
    */
   public void cast() {
-    cast(mouse().x(), mouse().y());
+    cast(mouseX(), mouseY());
   }
 
   /**
@@ -3017,11 +2991,13 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code spin(pmouse(), mouse())}.
    *
    * @see #spin(int, int, int, int)
-   * @see #pmouse()
-   * @see #mouse()
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
    */
   public void spin() {
-    spin(pmouse().x(), pmouse().y(), mouse().x(), mouse().y());
+    spin(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
   /**
@@ -3037,11 +3013,13 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code spin(pmouse(), mouse(), node)}.
    *
    * @see Graph#spin(Node, int, int, int, int)
-   * @see #pmouse()
-   * @see #mouse()
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
    */
   public void spin(Node node) {
-    spin(node, pmouse().x(), pmouse().y(), mouse().x(), mouse().y());
+    spin(node, pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
   // only eye
