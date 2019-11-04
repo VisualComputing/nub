@@ -145,13 +145,6 @@ public class Graph {
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected boolean _isProjectionViewInverseCached;
 
-  /**
-   * Returns the euclidean distance between two points.
-   */
-  public static float distance(float x1, float y1, float x2, float y2) {
-    return (float) Math.sqrt((float) Math.pow((x2 - x1), 2.0) + (float) Math.pow((y2 - y1), 2.0));
-  }
-
   // 3. Handlers
   protected class Ray {
     public String _tag;
@@ -2518,7 +2511,7 @@ public class Graph {
    * compares the color of a back-buffer at {@code (x,y)} against the {@link Node#id()}.
    * Returns true if both colors are the same, and false otherwise.
    * <p>
-   * This method should be overridden. Default implementation symply return {@code false}.
+   * This method should be overridden. Default implementation simply return {@code false}.
    *
    * @see Node#setPickingThreshold(float)
    */
@@ -2537,7 +2530,7 @@ public class Graph {
     float threshold = Math.abs(node.pickingThreshold()) < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position())
         : node.pickingThreshold() / 2;
     return threshold > 0 ? ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold)) :
-        distance(x, y, projection._vector[0], projection._vector[1]) < -threshold;
+        (float) Math.sqrt((float) Math.pow((projection._vector[0] - x), 2.0) + (float) Math.pow((projection._vector[1] - y), 2.0)) < -threshold;
   }
 
   /**
