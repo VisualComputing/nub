@@ -79,12 +79,11 @@ public class TRIK extends Solver {
         } else if(_stepCounter - 1 < _chain.size()){
             //for(int i = 1; i < _chain.size(); i++) {
             int i = _stepCounter - 1;
-            if (_lookAhead > 0 && i < _chain.size() - 1) {
-                System.out.println("Max Ahead : " + Math.min(_lookAhead, _chain.size() - i));
+            if(_lookAhead > 0 && i < _chain.size() - 1){
                 Quaternion delta = _lookAhead(_chain, _auxiliary_chain, _target, _direction, _enableWeight, _explore, mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>());
                 _chain.get(i - 1).rotate(delta);
             } else {
-                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(60), (float) Math.toRadians(60), _enableWeight, _direction);
+                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(15), (float) Math.toRadians(15), _enableWeight, _direction);
             }
         } else{
             _current = _error(_chain);
