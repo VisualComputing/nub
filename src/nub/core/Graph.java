@@ -3860,21 +3860,21 @@ public class Graph {
     translate(0, 0, delta, node);
   }
 
-  public void spin(Point point1, Point point2, Point center) {
+  public void spin(int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY) {
     spin(point1, point2, center, defaultNode());
   }
 
-  public void spin(Point point1, Point point2, Point center, Node node) {
+  public void spin(int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY, Node node) {
     if (node == null)
       throw new RuntimeException("spin(point1, point2, center, node) requires a non-null node param");
     spin(_spin(point1, point2, center, 1, node), node);
   }
 
-  public void spin(Point point1, Point point2, Point center, float sensitivity) {
+  public void spin(int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY, float sensitivity) {
     spin(point1, point2, center, sensitivity, defaultNode());
   }
 
-  public void spin(Point point1, Point point2, Point center, float sensitivity, Node node) {
+  public void spin(int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY, float sensitivity, Node node) {
     if (node == null)
       throw new RuntimeException("spin(point1, point2, center, sensitivity, node) requires a non-null node param");
     spin(_spin(point1, point2, center, sensitivity, node), node);
@@ -3909,23 +3909,23 @@ public class Graph {
   2. scene.eye().rotate(new Quaternion(new Vector(1,0,0), event.getCount() * 20*PI / width), scene.anchor());
 
   // Overkill 2: simply accomplish these with constraints
-  public void screenRotate(Point point1, Point point2) {
+  public void screenRotate(int point1X, int point1Y, int point2X, int point2Y) {
     screenRotate(point1, point2, 1);
   }
 
-  public void screenRotate(Point point1, Point point2, float sensitivity) {
+  public void screenRotate(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     screenRotate(point1, point2, sensitivity, eye());
   }
 
-  public void screenRotate(Point point1, Point point2, Node node) {
+  public void screenRotate(int point1X, int point1Y, int point2X, int point2Y, Node node) {
     screenRotate(point1, point2, 1, node);
   }
 
-  public void screenRotate(Point point1, Point point2, float sensitivity, Node node) {
+  public void screenRotate(int point1X, int point1Y, int point2X, int point2Y, float sensitivity, Node node) {
     spin(_spin2(point1, point2, sensitivity, node), node);
   }
 
-  protected Quaternion _spin2(Point point1, Point point2, float sensitivity, Node node) {
+  protected Quaternion _spin2(int point1X, int point1Y, int point2X, int point2Y, float sensitivity, Node node) {
     Quaternion quaternion;
     Vector vector;
     float x = point2.x();
