@@ -3652,17 +3652,11 @@ public class Graph {
    * three-dimensional orientation using a mouse.
    */
   protected Quaternion _spin(Node node, int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY, float sensitivity) {
-    float cx = centerX;
-    float cy = centerY;
-    float x = point2X;
-    float y = point2Y;
-    float prevX = point1X;
-    float prevY = point1Y;
     // Points on the deformed ball
-    float px = sensitivity * ((int) prevX - cx) / width();
-    float py = sensitivity * (isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / height();
-    float dx = sensitivity * (x - cx) / width();
-    float dy = sensitivity * (isLeftHanded() ? (y - cy) : (cy - y)) / height();
+    float px = sensitivity * (point1X - centerX) / width();
+    float py = sensitivity * (isLeftHanded() ? (point1Y - centerY) : (centerY - point1Y)) / height();
+    float dx = sensitivity * (point2X - centerX) / width();
+    float dy = sensitivity * (isLeftHanded() ? (point2Y - centerY) : (centerY - point2Y)) / height();
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
