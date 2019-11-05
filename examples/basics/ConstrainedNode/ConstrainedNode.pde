@@ -48,7 +48,7 @@ void setup() {
     @Override
     public void graphics(PGraphics pg) {
       Scene.drawAxes(pg, 40);
-      pg.fill(isTracked() ? 255 : 0, 0, 255);
+      pg.fill(isTagged() ? 255 : 0, 0, 255);
       Scene.drawTorusSolenoid(pg);
     }
   };
@@ -90,11 +90,11 @@ void mouseWheel(MouseEvent event) {
 
 void keyPressed() {
   if (key == 'i')
-    if (scene.isTrackedNode(iNode)) {
-      scene.resetTrackedNode();
+    if (scene.isTagged(iNode)) {
+      scene.untag(iNode);
       mouseTracking = true;
     } else {
-      scene.setTrackedNode(iNode);
+      scene.tag(iNode);
       mouseTracking = false;
     }
   if (key == 'b' || key == 'B') {
@@ -269,12 +269,12 @@ void displayDir(int dir, int x, int y, char c) {
 void displayText() {
   text("TRANSLATION :", 350, height - 30);
   displayDir(transDir, (350 + 105), height - 30, 'D');
-  displayType(constraints[activeConstraint].translationConstraintType(), 
+  displayType(constraints[activeConstraint].translationConstraintType(),
     350, height - 60, 'T');
 
   text("ROTATION :", width - 120, height - 30);
   displayDir(rotDir, width - 40, height - 30, 'B');
-  displayType(constraints[activeConstraint].rotationConstraintType(), 
+  displayType(constraints[activeConstraint].rotationConstraintType(),
     width - 120, height - 60, 'R');
 
   switch (activeConstraint) {

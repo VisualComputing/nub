@@ -35,7 +35,7 @@ void setup() {
     cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)),
       random(10, 40), random(10, 40), random(10, 40));
   scene.fit(1);
-  scene.setTrackedNode("keyboard", esfera);
+  scene.tag("keyboard", esfera);
 }
 
 void draw() {
@@ -92,10 +92,10 @@ void keyPressed() {
   if (key == 'S')
     scene.fit();
   if (key == 'u')
-    if (scene.trackedNode("keyboard") == null)
-      scene.setTrackedNode("keyboard", esfera);
+    if (scene.node("keyboard") == null)
+      scene.tag("keyboard", esfera);
     else
-      scene.resetTrackedNode("keyboard");
+      scene.removeTag("keyboard");
   if (key == CODED)
     if (keyCode == UP)
       scene.translate("keyboard", 0, -10);

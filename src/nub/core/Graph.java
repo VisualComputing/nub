@@ -3097,18 +3097,18 @@ public class Graph {
   /**
    * Disables tagging the node. Calls {@code unTag(node)} and then {@code node.disableTagging()}.
    *
-   * @see #unTag(Node)
+   * @see #untag(Node)
    * @see Node#disableTagging()
    */
   public void disableTagging(Node node) {
-    unTag(node);
+    untag(node);
     node.disableTagging();
   }
 
   /**
    * Removes the {@code node} tag.
    */
-  public void unTag(Node node) {
+  public void untag(Node node) {
     _tags.entrySet().removeIf(entry -> (node == entry.getValue()));
   }
 

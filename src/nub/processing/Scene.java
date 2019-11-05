@@ -2968,7 +2968,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code translate(trackedNode(tag))}.
+   * Same as {@code translate(node(tag))}.
    *
    * @see #translate(Node)
    */
@@ -3001,7 +3001,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code spin(trackedNode(tag)}.
+   * Same as {@code spin(node(tag)}.
    *
    * @see #spin(Node)
    */
