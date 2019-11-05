@@ -162,6 +162,7 @@ public class ShadowMappingSimple extends PApplet {
       shadowShader.set("shadowMap", shadowMap);
     }
     scene.render();
+    //scene.eye().disableTracking();
   }
 
   public void keyPressed() {
@@ -182,8 +183,8 @@ public class ShadowMappingSimple extends PApplet {
   }
 
   public void mouseMoved() {
-    if (scene.track() == null)
-      scene.tag(scene.eye());
+    scene.cast();
+    //scene.track();
   }
 
   public void mouseDragged() {

@@ -2398,7 +2398,10 @@ public class Graph {
    * @see #cast(String, int, int)
    */
   public Node track(String tag, int x, int y, Node[] nodeArray) {
-    removeTag(tag);
+    if (eye().isTrackingEnabled())
+      tag(tag, eye());
+    else
+      removeTag(tag);
     for (Node node : nodeArray)
       if (tracks(node, x, y)) {
         tag(tag, node);
@@ -2422,7 +2425,10 @@ public class Graph {
    * @see #track(String, int, int, Node[])
    */
   public Node track(String tag, int x, int y, List<Node> nodeList) {
-    removeTag(tag);
+    if (eye().isTrackingEnabled())
+      tag(tag, eye());
+    else
+      removeTag(tag);
     for (Node node : nodeList)
       if (tracks(node, x, y)) {
         tag(tag, node);
@@ -2465,7 +2471,10 @@ public class Graph {
    * @see #cast(String, int, int)
    */
   public Node track(String tag, int x, int y) {
-    removeTag(tag);
+    if (eye().isTrackingEnabled())
+      tag(tag, eye());
+    else
+      removeTag(tag);
     for (Node node : _leadingNodes())
       _track(tag, node, x, y);
     return node(tag);
@@ -2475,12 +2484,12 @@ public class Graph {
    * Use internally by {@link #track(String, int, int)}.
    */
   protected void _track(String tag, Node node, int x, int y) {
-    if (node(tag) == null && node.isTrackingEnabled())
+    if ((node(tag) == null || node(tag) == eye()) && node.isTrackingEnabled())
       if (tracks(node, x, y)) {
         tag(tag, node);
         return;
       }
-    if (!node.isCulled() && node(tag) == null)
+    if (!node.isCulled() && (node(tag) == null || node(tag) == eye()))
       for (Node child : node.children())
         _track(tag, child, x, y);
   }
@@ -2939,7 +2948,10 @@ public class Graph {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        removeTag(ray._tag);
+        if (eye().isTrackingEnabled())
+          tag(ray._tag, eye());
+        else
+          removeTag(ray._tag);
         // Condition is overkill. Use it only in place of resetTrackedNode
         //if (!isTracking(ray._tag))
         if (_tracks(node, ray._pixelX, ray._pixelY, projection)) {
@@ -2958,7 +2970,10 @@ public class Graph {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        removeTag(ray._tag);
+        if (eye().isTrackingEnabled())
+          tag(ray._tag, eye());
+        else
+          removeTag(ray._tag);
         // Condition is overkill. Use it only in place of resetTrackedNode
         //if (!isTracking(ray._tag))
         if (_tracks(node, ray._pixelX, ray._pixelY)) {
@@ -3130,7 +3145,7 @@ public class Graph {
    */
   public void alignWith(Node node) {
     if (node == null)
-      throw new RuntimeException("align(node) requires a non-null node param");
+      return;
     if (isEye(node))
       node.align(true);
     else
@@ -3160,7 +3175,7 @@ public class Graph {
    */
   public void focusWith(Node node) {
     if (node == null)
-      throw new RuntimeException("focus(node) requires a non-null node param");
+      return;
     if (isEye(node))
       node.projectOnLine(center(), viewDirection());
     else
@@ -3433,7 +3448,7 @@ public class Graph {
    */
   public void translate(Node node, float dx, float dy, float dz) {
     if (node == null)
-      throw new RuntimeException("translate(vector, node) requires a non-null node param");
+      return;
     node.translate(_translate(node, dx, dy, dz));
   }
 
@@ -3537,7 +3552,7 @@ public class Graph {
    */
   public void rotate(Node node, float roll, float pitch, float yaw) {
     if (node == null)
-      throw new RuntimeException("rotate(roll, pitch, yaw, node) requires a non-null node param");
+      return;
     spin(node, _rotate(node, roll, pitch, yaw));
   }
 
@@ -3634,7 +3649,7 @@ public class Graph {
    */
   public void spin(Node node, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     if (node == null)
-      throw new RuntimeException("spin(point1, point2, sensitivity, node) requires a non-null node param");
+      return;
     spin(node, _spin(node, point1X, point1Y, point2X, point2Y, sensitivity));
   }
 
@@ -3810,6 +3825,8 @@ public class Graph {
     return Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
   }
 
+  // TODO remove interact patterns and reimplement custom actions on node() and eye()
+
   /**
    * Tag-based generic interaction pattern. Same as {@code defaultNode(tag).interact(gesture)}.
    * <p>
@@ -3866,7 +3883,7 @@ public class Graph {
 
   public void spin(int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY, Node node) {
     if (node == null)
-      throw new RuntimeException("spin(point1, point2, center, node) requires a non-null node param");
+      return;
     spin(_spin(point1, point2, center, 1, node), node);
   }
 
@@ -3876,7 +3893,7 @@ public class Graph {
 
   public void spin(int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY, float sensitivity, Node node) {
     if (node == null)
-      throw new RuntimeException("spin(point1, point2, center, sensitivity, node) requires a non-null node param");
+      return;
     spin(_spin(point1, point2, center, sensitivity, node), node);
   }
 
