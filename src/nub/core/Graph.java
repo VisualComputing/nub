@@ -158,7 +158,7 @@ public class Graph {
   }
 
   protected TimingHandler _timingHandler;
-  protected HashMap<String, Node> _hids;
+  protected HashMap<String, Node> _tags;
   protected ArrayList<Ray> _rays;
 
   // 4. Graph
@@ -227,17 +227,19 @@ public class Graph {
     setMatrixHandler(matrixHandler(_fb));
     setWidth(width);
     setHeight(height);
+    _tags = new HashMap<String, Node>();
+    _rays = new ArrayList<Ray>();
     cacheProjectionViewInverse(false);
     _seeds = new ArrayList<Node>();
     _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
     setEye(new Node(this));
+    // interactivity defaults to the eye:
+    tag(eye());
     setType(type);
     if (is3D())
       setFOV((float) Math.PI / 3);
     fit();
-    _hids = new HashMap<String, Node>();
-    _rays = new ArrayList<Ray>();
     setRightHanded();
     enableBoundaryEquations(false);
     setZNearCoefficient(0.005f);
@@ -2398,15 +2400,17 @@ public class Graph {
    * @see #cast(String, int, int)
    */
   public Node track(String tag, int x, int y, Node[] nodeArray) {
-    if (eye().isTrackingEnabled())
-      tag(tag, eye());
-    else
-      removeTag(tag);
-    for (Node node : nodeArray)
-      if (tracks(node, x, y)) {
-        tag(tag, node);
-        break;
+    removeTag(tag);
+    for (Node node : nodeArray) {
+      if (node.isTrackingEnabled()) {
+        if (!isValid(tag) && (node == eye()))
+          tag(tag, eye());
+        else if (tracks(node, x, y)) {
+          tag(tag, node);
+          break;
+        }
       }
+    }
     return node(tag);
   }
 
@@ -2425,15 +2429,17 @@ public class Graph {
    * @see #track(String, int, int, Node[])
    */
   public Node track(String tag, int x, int y, List<Node> nodeList) {
-    if (eye().isTrackingEnabled())
-      tag(tag, eye());
-    else
-      removeTag(tag);
-    for (Node node : nodeList)
-      if (tracks(node, x, y)) {
-        tag(tag, node);
-        break;
+    removeTag(tag);
+    for (Node node : nodeList) {
+      if (node.isTrackingEnabled()) {
+        if (!isValid(tag) && (node == eye()))
+          tag(tag, eye());
+        else if (tracks(node, x, y)) {
+          tag(tag, node);
+          break;
+        }
       }
+    }
     return node(tag);
   }
 
@@ -2471,7 +2477,7 @@ public class Graph {
    * @see #cast(String, int, int)
    */
   public Node track(String tag, int x, int y) {
-    if (eye().isTrackingEnabled())
+    if (eye().isTrackingEnabled() && eye().isAttached(this))
       tag(tag, eye());
     else
       removeTag(tag);
@@ -2948,7 +2954,7 @@ public class Graph {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        if (eye().isTrackingEnabled())
+        if (eye().isTrackingEnabled() && eye().isAttached(this))
           tag(ray._tag, eye());
         else
           removeTag(ray._tag);
@@ -2970,7 +2976,7 @@ public class Graph {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        if (eye().isTrackingEnabled())
+        if (eye().isTrackingEnabled() && eye().isAttached(this))
           tag(ray._tag, eye());
         else
           removeTag(ray._tag);
@@ -3014,7 +3020,7 @@ public class Graph {
       System.out.println("Warning. Node cannot be tracked! Enable tracking on the node first by call node.enableTracking(true)");
       return;
     }
-    _hids.put(tag, node);
+    _tags.put(tag, node);
   }
 
   /**
@@ -3038,7 +3044,7 @@ public class Graph {
    * @see #tag(String, Node)
    */
   public Node node(String tag) {
-    return _hids.get(tag);
+    return _tags.get(tag);
   }
 
   /**
@@ -3054,7 +3060,7 @@ public class Graph {
    * Returns {@code true} if the {@code tag} currently tracks a non-null node and {@code false} otherwise.
    */
   public boolean isValid(String tag) {
-    return _hids.containsKey(tag);
+    return _tags.containsKey(tag);
   }
 
   /**
@@ -3090,7 +3096,14 @@ public class Graph {
    * @see #isTagged(String, Node)
    */
   public void clearTags() {
-    _hids.clear();
+    _tags.clear();
+  }
+
+  /**
+   * Removes tag for {@code node}.
+   */
+  public void unTag(Node node) {
+    _tags.entrySet().removeIf(entry -> (node == entry.getValue()));
   }
 
   /**
@@ -3113,7 +3126,7 @@ public class Graph {
    * @see #isTagged(String, Node)
    */
   public void removeTag(String tag) {
-    _hids.remove(tag);
+    _tags.remove(tag);
   }
 
   /**

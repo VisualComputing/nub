@@ -2312,6 +2312,8 @@ public class Node {
    */
   public void enableTracking(boolean flag) {
     _tracking = flag;
+    if (!flag && _graph != null)
+      _graph.unTag(this);
   }
 
   /**
@@ -2333,7 +2335,7 @@ public class Node {
    * @see Graph#isTagged(Node)
    */
   public boolean isTracked(Graph graph) {
-    return graph._hids.containsValue(this);
+    return graph._tags.containsValue(this);
   }
 
   /**
