@@ -100,16 +100,9 @@ import java.util.List;
  * <h2>Shapes</h2>
  * A node shape can be set from a retained-mode rendering object, see {@link #setShape(Object)};
  * or from an immediate-mode rendering procedure, see {@link #graphics(Object)}.
- * Picking a node is done according to a {@link #pickingThreshold()}. When a node is tracked
+ * Picking a node is done according to a {@link #pickingThreshold()}. When a node is tagged
  * it will be highlighted (scaled) according to a {@link #highlighting()} magnitude.
- * See also {@link #enableTracking(boolean)}.
- * <h2>Application Control</h2>
- * Implementing an application control for the node is a two step process:
- * <ul>
- * <li>Parse user gesture data by overriding {@link #interact(Object...)}.</li>
- * <li>Send gesture data to the node by calling {@link Graph#interact(String, Object...)} or
- * {@link Graph#interact(Node, Object...)}.</li>
- * </ul>
+ * See also {@link #enableTagging(boolean)}.
  * <h2>Syncing</h2>
  * Two nodes can be synced together ({@link #sync(Node, Node)}), meaning that they will
  * share their global parameters (position, orientation and magnitude) taken the one
@@ -136,7 +129,7 @@ public class Node {
   protected Constraint _constraint;
   protected long _lastUpdate;
 
-  // Tracking & Precision
+  // Tagging & Precision
   protected float _threshold;
 
   // ID
@@ -147,7 +140,7 @@ public class Node {
   protected Graph _graph;
   protected List<Node> _children;
   protected boolean _culled;
-  protected boolean _tracking;
+  protected boolean _tagging;
 
   // Rendering
   protected Object _shape;
@@ -368,7 +361,7 @@ public class Node {
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
     _lastUpdate = 0;
     _threshold = .2f;
-    _tracking = true;
+    _tagging = true;
     _highlight = 0.15f;
     if (graph() == null)
       return;
@@ -396,7 +389,7 @@ public class Node {
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
     _lastUpdate = node.lastUpdate();
     this._threshold = node._threshold;
-    this._tracking = node._tracking;
+    this._tagging = node._tagging;
 
     if (graph() == null)
       return;
@@ -2269,80 +2262,72 @@ public class Node {
   }
 
   /**
-   * Returns {@code true} if tracking is enabled.
+   * Returns {@code true} if tagging is enabled.
    *
-   * @see #enableTracking(boolean)
-   * @see #enableTracking()
-   * @see #disableTracking()
+   * @see #enableTagging(boolean)
+   * @see #enableTagging()
+   * @see #disableTagging()
    */
-  public boolean isTrackingEnabled() {
-    return _tracking;
+  public boolean isTaggingEnabled() {
+    return _tagging;
   }
 
   /**
-   * Same as {@code enableTracking(false)}.
+   * Same as {@code enableTagging(false)}.
    *
-   * @see #isTrackingEnabled()
-   * @see #enableTracking()
-   * @see #enableTracking(boolean)
+   * @see #isTaggingEnabled()
+   * @see #enableTagging()
+   * @see #enableTagging(boolean)
    */
-  public void disableTracking() {
-    enableTracking(false);
+  public void disableTagging() {
+    enableTagging(false);
   }
 
   /**
-   * Same as {@code enableTracking(true)}.
+   * Same as {@code enableTagging(true)}.
    *
-   * @see #isTrackingEnabled()
-   * @see #enableTracking(boolean)
-   * @see #disableTracking()
+   * @see #isTaggingEnabled()
+   * @see #enableTagging(boolean)
+   * @see #disableTagging()
    */
-  public void enableTracking() {
-    enableTracking(true);
+  public void enableTagging() {
+    enableTagging(true);
   }
 
   /**
-   * Enables node tracking according to {@code flag}. When tracking is disabled {@link Graph#tracks(Node, int, int)}
-   * returns {@code false}, {@link Graph#tag(String, Node)} does nothing while
-   * {@link Graph#track(String, int, int)} and {@link Graph#cast(int, int)} would bypass the node.
+   * Enables tagging of the node according to {@code flag}. When tagging is disabled
+   * {@link Graph#tracks(Node, int, int)} returns {@code false} and the node cannot be
+   * tagged (i.e., {@link Graph#tag(String, Node)}, {@link Graph#track(String, int, int)}
+   * and {@link Graph#cast(int, int)} never tag the node).
    *
-   * @see #isTrackingEnabled()
-   * @see #enableTracking()
-   * @see #disableTracking()
+   * @see #isTaggingEnabled()
+   * @see #enableTagging()
+   * @see #disableTagging()
    */
-  public void enableTracking(boolean flag) {
-    _tracking = flag;
-    if (!flag && _graph != null)
-      _graph.unTag(this);
+  public void enableTagging(boolean flag) {
+    _tagging = flag;
   }
 
   /**
-   * Same as {@code return isDetached() ? false : isTracked(graph())}. Use it if the node is
-   * attached to a {@link #graph()}. Use {@link #isTracked(Graph)} if the node {@link #isDetached()}.
+   * Same as {@code return !isDetached() && isTagged(graph())}. Use it if the node is
+   * attached to a {@link #graph()}. Use {@link #isTagged(Graph)} if the node {@link #isDetached()}.
    *
    * @see #isDetached()
-   * @see #isTracked(Graph)
+   * @see #isTagged(Graph)
    */
-  public boolean isTracked() {
-    return !isDetached() && isTracked(graph());
+  public boolean isTagged() {
+    return !isDetached() && isTagged(graph());
   }
 
   /**
-   * Returns {@code true} if the {@code node} is being tracked by the {@code graph} at least once
+   * Returns {@code true} if the {@code node} has been tagged by the {@code graph} at least once
    * and {@code false} otherwise.
    *
-   * @see Graph#isTagged(String, Node)
-   * @see Graph#isTagged(Node)
+   * @see Graph#hasTag(String, Node)
+   * @see Graph#hasNullTag(Node)
    */
-  public boolean isTracked(Graph graph) {
-    return graph._tags.containsValue(this);
-  }
-
-  /**
-   * Parse {@code gesture} params. Useful to implement the node as an for application control.
-   * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
-   */
-  public void interact(Object... gesture) {
+  public boolean isTagged(Graph graph) {
+    return graph.isTagged(this);
   }
 
   /**
@@ -2423,7 +2408,7 @@ public class Node {
   }
 
   /**
-   * Returns the highlighting magnitude use to scale the node when it's tracked.
+   * Returns the highlighting magnitude use to scale the node when it's tagged.
    *
    * @see #setHighlighting(float)
    * @see #pickingThreshold()

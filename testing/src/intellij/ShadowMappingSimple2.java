@@ -67,7 +67,7 @@ public class ShadowMappingSimple2 extends PApplet {
         if (graph() == mainScene) {
           pg.pushStyle();
           if (debug) {
-            pg.fill(0, mainScene.isTagged(this) ? 255 : 0, 255, 120);
+            pg.fill(0, mainScene.hasNullTag(this) ? 255 : 0, 255, 120);
             mainScene.drawFrustum(pg, lightScene);
           }
           Scene.drawAxes(pg, 300);

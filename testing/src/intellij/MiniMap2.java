@@ -76,7 +76,7 @@ public class MiniMap2 extends PApplet {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();
-        pg.fill(255, isTracked() ? 25 : 50, 0, 125);
+        pg.fill(255, isTagged() ? 25 : 50, 0, 125);
         pg.stroke(0, 0, 255);
         pg.strokeWeight(2);
         // comment and the above errors disappear

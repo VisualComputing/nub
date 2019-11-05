@@ -839,7 +839,7 @@ public class Scene extends Graph implements PConstants {
   protected boolean _tracks(Node node, int x, int y) {
     if (node == null || isEye(node))
       return false;
-    if (!node.isTrackingEnabled())
+    if (!node.isTaggingEnabled())
       return false;
     int index = y * width() + x;
     if (_backBuffer().pixels != null)
@@ -854,7 +854,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushStyle();
     pGraphics.pushMatrix();
 
-    if (node.isTracked())
+    if (isTagged(node))
       pGraphics.scale(1 + node.highlighting());
 
     if (node.shape() != null)
@@ -864,7 +864,7 @@ public class Scene extends Graph implements PConstants {
     else
       node.graphics(pGraphics);
 
-    if (node.pickingThreshold() == 0 && node.isTrackingEnabled())
+    if (node.pickingThreshold() == 0 && node.isTaggingEnabled())
       _bbNeed = frameCount();
 
     pGraphics.popStyle();
@@ -2384,14 +2384,14 @@ public class Scene extends Graph implements PConstants {
    * {@link #drawCross(float, float, float)} centered at the projected node origin.
    * If node is a Node instance the length of the cross is the node
    * {@link Node#pickingThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If node a Node instance and it is {@link #isTagged(Node)} it also applies
+   * If node a Node instance and it is {@link #hasNullTag(Node)} it also applies
    * a stroke highlight.
    *
    * @see #drawSquaredBullsEye(Node, float)
    */
   public void drawCross(Node node) {
     context().pushStyle();
-    if (node.isTracked())
+    if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
     drawCross(node, node.pickingThreshold() < 1 ? 200 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position()) : node.pickingThreshold());
     context().popStyle();
@@ -2470,7 +2470,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawSquaredBullsEye(float, float, float)} centered at the projected node origin.
    * The length of the target is the node {@link Node#pickingThreshold()}.
-   * If node {@link #isTagged(Node)} it also applies a stroke highlight.
+   * If node {@link #hasNullTag(Node)} it also applies a stroke highlight.
    *
    * @see #drawSquaredBullsEye(Node, float)
    * @see #drawCircledBullsEye(Node)
@@ -2480,7 +2480,7 @@ public class Scene extends Graph implements PConstants {
     if (node.pickingThreshold() == 0)
       return;
     context().pushStyle();
-    if (node.isTracked())
+    if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
     drawSquaredBullsEye(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToGraphRatio(node.position())
         : Math.abs(node.pickingThreshold()));
@@ -2566,7 +2566,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawCircledBullsEye(float, float, float)} centered at the projected node origin.
    * The length of the target is the node {@link Node#pickingThreshold()}.
-   * If node {@link #isTagged(Node)} it also applies a stroke highlight.
+   * If node {@link #hasNullTag(Node)} it also applies a stroke highlight.
    *
    * @see #drawSquaredBullsEye(Node, float)
    * @see #drawCircledBullsEye(Node)
@@ -2576,7 +2576,7 @@ public class Scene extends Graph implements PConstants {
     if (node.pickingThreshold() == 0)
       return;
     context().pushStyle();
-    if (node.isTracked())
+    if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
     drawCircledBullsEye(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToGraphRatio(node.position())
         : Math.abs(node.pickingThreshold()));

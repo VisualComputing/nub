@@ -42,7 +42,7 @@ public class Graph1 extends PApplet {
       graph.matrixHandler().applyMatrix(nodes[i].matrix());
       //model-view changed:
       setUniforms();
-      fill(0, nodes[i].isTracked(graph) ? 0 : 255, 255);
+      fill(0, nodes[i].isTagged(graph) ? 0 : 255, 255);
       box(5);
       graph.matrixHandler().popMatrix();
     }

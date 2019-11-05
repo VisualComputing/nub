@@ -75,7 +75,7 @@ public class ShadowMappingTutorial extends PApplet {
       public void graphics(PGraphics pg) {
         pg.pushStyle();
         if (debug) {
-          pg.fill(0, scene.isTagged(this) ? 255 : 0, 255, 120);
+          pg.fill(0, scene.hasNullTag(this) ? 255 : 0, 255, 120);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         }
         Scene.drawAxes(pg, 300);

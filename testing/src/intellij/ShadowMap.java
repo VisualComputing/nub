@@ -37,7 +37,7 @@ public class ShadowMap extends PApplet {
           pg.pushStyle();
           if (scene.node("light") == this) {
             Scene.drawAxes(pg, 150);
-            pg.fill(0, scene.isTagged(this) ? 255 : 0, 255, 120);
+            pg.fill(0, scene.hasNullTag(this) ? 255 : 0, 255, 120);
             Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
           } else {
             if (pg == shadowMap)
@@ -50,15 +50,6 @@ public class ShadowMap extends PApplet {
             pg.box(80);
           }
           pg.popStyle();
-        }
-        @Override
-        public void interact(Object... gesture) {
-          if (gesture.length == 1)
-            if (gesture[0] instanceof Integer)
-              if (zFar + (Integer) gesture[0] > zNear) {
-                zFar += (Integer) gesture[0];
-                depthShader.set("far", zFar);
-              }
         }
       };
       shapes[i].setPickingThreshold(0);
@@ -112,10 +103,12 @@ public class ShadowMap extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    if (event.isShiftDown())
-      // application control of the light: setting the light zFar plane
-      // is implemented as a custom behavior by node.interact()
-      scene.interact("light", event.getCount() * 20);
+    if (event.isShiftDown()) {
+      // custom interaction of the light node: setting the light
+      // zFar plane is implemented as a custom behavior by node.interact()
+      if (scene.node("light") != null)
+        depthShader.set("far", zFar += event.getCount() * 20);
+    }
     else
       scene.scale(event.getCount() * 20);
   }

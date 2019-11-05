@@ -66,7 +66,7 @@ public class AdaptivePrecision2 extends PApplet {
   }
 
   public void mouseClicked(MouseEvent event) {
-    scene.removeTag();
+    scene.removeNullTag();
     for (int i = 0; i < shapes.length; i++)
       if (scene.tracks(shapes[i])) {
         scene.tag(shapes[i]);

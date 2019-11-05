@@ -35,7 +35,7 @@ public class PassiveTransformations extends PApplet {
         @Override
         public void visit() {
           pushStyle();
-          fill(isTracked() ? 0 : 255, 0, 255);
+          fill(isTagged() ? 0 : 255, 0, 255);
           box(5);
           popStyle();
         }

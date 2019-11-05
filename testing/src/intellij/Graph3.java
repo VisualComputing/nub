@@ -41,7 +41,7 @@ public class Graph3 extends PApplet {
           framesShader.set("nub_transform", pmatrix);
 
           pushStyle();
-          fill(isTracked(graph) ? 0 : 255, 0, 255);
+          fill(isTagged(graph) ? 0 : 255, 0, 255);
           box(5);
           popStyle();
         }

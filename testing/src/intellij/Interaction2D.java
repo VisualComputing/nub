@@ -74,7 +74,7 @@ public class Interaction2D extends PApplet {
     scene.drawSquaredBullsEye(shape1);
     scene.beginHUD();
     Vector position = scene.screenLocation(shape1.position());
-    fill(shape1.isTracked() ? 0 : 255, shape1.isTracked() ? 255 : 0, shape1.isTracked() ? 0 : 255);
+    fill(shape1.isTagged() ? 0 : 255, shape1.isTagged() ? 255 : 0, shape1.isTagged() ? 0 : 255);
     textFont(font36);
     text("center", position.x(), position.y());
     scene.endHUD();

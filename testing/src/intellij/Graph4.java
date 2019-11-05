@@ -43,7 +43,7 @@ public class Graph4 extends PApplet {
         @Override
         public void visit() {
           pushStyle();
-          fill(isTracked(graph) ? 0 : 255, 0, 255);
+          fill(isTagged(graph) ? 0 : 255, 0, 255);
           box(5);
           popStyle();
         }

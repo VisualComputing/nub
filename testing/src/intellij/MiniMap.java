@@ -93,7 +93,7 @@ public class MiniMap extends PApplet {
       if (interactiveEye)
         minimap.tag(sceneEye);
       else
-        minimap.removeTag();
+        minimap.removeNullTag();
     }
     if (key == 'f')
       focus.fit(1);
@@ -163,7 +163,7 @@ public class MiniMap extends PApplet {
       minimap.drawAxes();
       minimap.render();
       // draw scene eye
-      minimap.context().fill(255, sceneEye.isTracked(minimap) ? 25 : 50, 0, 125);
+      minimap.context().fill(255, sceneEye.isTagged(minimap) ? 25 : 50, 0, 125);
       minimap.context().stroke(0, 0, 255);
       minimap.context().strokeWeight(2);
       // comment and the above errors disappear

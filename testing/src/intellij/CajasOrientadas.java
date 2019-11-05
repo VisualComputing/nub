@@ -110,7 +110,7 @@ public class CajasOrientadas extends PApplet {
           if (drawAxes)
             Scene.drawAxes(pg, PApplet.max(w, h, d) * 1.3f);
           pg.noStroke();
-          if (isTracked())
+          if (isTagged())
             pg.fill(255, 0, 0);
           else
             pg.fill(getColor());
@@ -186,7 +186,7 @@ public class CajasOrientadas extends PApplet {
             //DrawingUtils.drawAxes(parent, radius()*1.3f);
             Scene.drawAxes(pg, radius() * 1.3f);
           pg.noStroke();
-          if (iNode.isTracked()) {
+          if (iNode.isTagged()) {
             pg.fill(255, 0, 0);
             pg.sphere(radius() * 1.2f);
           } else {

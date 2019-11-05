@@ -342,7 +342,7 @@ public class NodeAPI4 extends PApplet {
     if (key == '-')
       scene.eye().setScaling(scene.eye().scaling() / 1.1f);
     if (key == 'e')
-      f1.enableTracking(!f1.isTrackingEnabled());
+      f1.enableTagging(!f1.isTaggingEnabled());
   }
 
   @Override

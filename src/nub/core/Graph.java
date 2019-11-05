@@ -56,9 +56,6 @@ import java.util.List;
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
  * take a node parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
  * <p>
- * Call {@link #interact(Node, Object...)} to send arbitrary gesture data to the node. Note that
- * {@link Node#interact(Object...)} should be overridden to implement the node custom behavior.
- * <p>
  * To check if a given node would be picked with a ray casted at a given screen position
  * use {@link #tracks(Node, int, int)}. Refer to {@link Node#pickingThreshold()} (and
  * {@link Node#setPickingThreshold(float)}) for the different node picking policies.
@@ -71,16 +68,16 @@ import java.util.List;
  * convention you defined in 1. Observations:
  * <ol>
  * <li>The interactivity methods are implemented in terms of the ones defined previously
- * by simply passing the tagged {@link #node(String)} to them (e.g.,{@link #scale(String, float)}
- * calls {@link #scale(Node, float)} passing the tagged default-node).</li>
+ * by simply passing the tagged node (see {@link #node(String)}) to them (e.g.,{@link #scale(String, float)}
+ * calls {@link #scale(Node, float)} passing the tagged node).</li>
  * <li>Many interactive methods support the {@code null} tag (e.g., {@link #scale(float delta)} simply
  * calls {@code scale(null, delta)}).</li>
- * <li>To update a tagged tracked-node using ray-casting call {@link #track(String, int, int, Node[])}
+ * <li>To tag the node to be tracked using ray-casting call {@link #track(String, int, int, Node[])}
  * (detached or attached nodes), {@link #track(String, int, int)} (only attached nodes) or
  * {@link #cast(String, int, int)} (only for attached nodes too). While {@link #track(String, int, int, Node[])} and
- * {@link #track(String, int, int)} update the tagged tracked-node synchronously (i.e., they return the
- * tagged tracked-node immediately), {@link #cast(String, int, int)} updates it asynchronously (i.e., it
- * optimally updates the tagged tracked-node during the next call to the {@link #render()} algorithm).</li>
+ * {@link #track(String, int, int)} update the tagged node synchronously (i.e., they return the tagged node
+ * immediately), {@link #cast(String, int, int)} updates it asynchronously (i.e., it
+ * optimally updates the tagged node during the next call to the {@link #render()} algorithm).</li>
  * </ol>
  * <h1>5. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
@@ -2356,7 +2353,7 @@ public class Graph {
   }
 
   /**
-   * @return last node a local eye parameter (different than the Node) was updated.
+   * @return last frame when a local eye parameter (different than the {@link #eye()}) was updated.
    * @see #lastUpdate()
    */
   protected long _lastNonEyeUpdate() {
@@ -2377,10 +2374,9 @@ public class Graph {
   }
 
   /**
-   * Updates the tagged tracked-node from the {@code nodeArray} and returns it.
-   * <p>
-   * To set the {@link #node(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #tracks(Node, int, int)}). If no node is found under the pixel, it returns {@code null}.
+   * Tags (with {@code tag} which may be {@code null}) the node in {@code nodeArray} picked with ray-casting
+   * at pixel {@code x, y} and returns it (see {@link #node(String)}). Tags the {@link #eye()} if no node is
+   * found under the pixel and if tagging is enabled for the {@code eye} (see {@link Node#isTaggingEnabled()}).
    * <p>
    * Use this version of the method instead of {@link #track(String, int, int)} when dealing with
    * detached nodes.
@@ -2392,8 +2388,8 @@ public class Graph {
    * @see #removeTag(String)
    * @see #tracks(Node, int, int)
    * @see #tag(String, Node)
-   * @see #isTagged(String, Node)
-   * @see Node#enableTracking(boolean)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
    * @see #cast(String, int, int)
@@ -2402,8 +2398,8 @@ public class Graph {
   public Node track(String tag, int x, int y, Node[] nodeArray) {
     removeTag(tag);
     for (Node node : nodeArray) {
-      if (node.isTrackingEnabled()) {
-        if (!isValid(tag) && (node == eye()))
+      if (node.isTaggingEnabled()) {
+        if (!isTagValid(tag) && (node == eye()))
           tag(tag, eye());
         else if (tracks(node, x, y)) {
           tag(tag, node);
@@ -2431,8 +2427,8 @@ public class Graph {
   public Node track(String tag, int x, int y, List<Node> nodeList) {
     removeTag(tag);
     for (Node node : nodeList) {
-      if (node.isTrackingEnabled()) {
-        if (!isValid(tag) && (node == eye()))
+      if (node.isTaggingEnabled()) {
+        if (!isTagValid(tag) && (node == eye()))
           tag(tag, eye());
         else if (tracks(node, x, y)) {
           tag(tag, node);
@@ -2455,10 +2451,9 @@ public class Graph {
   }
 
   /**
-   * Updates the tagged tracked-node and returns it. Note that {@code null} tags are allowed.
-   * <p>
-   * To set the {@link #node(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #tracks(Node, int, int)}). If no node is found under the pixel, it returns {@code null}.
+   * Tags (with {@code tag} which may be {@code null}) the node in {@link #nodes()} picked with ray-casting at pixel
+   * {@code x, y} and returns it (see {@link #node(String)}). Tags the {@link #eye()} if no node is found
+   * under the pixel and if tagging is enabled for the {@code eye} (see {@link Node#isTaggingEnabled()}).
    * <p>
    * Use this version of the method instead of {@link #track(String, int, int, Node[])} when dealing with
    * attached nodes to the graph.
@@ -2469,15 +2464,15 @@ public class Graph {
    * @see #removeTag(String)
    * @see #tracks(Node, int, int)
    * @see #tag(String, Node)
-   * @see #isTagged(String, Node)
-   * @see Node#enableTracking(boolean)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
    * @see #cast(String, int, int)
    * @see #cast(String, int, int)
    */
   public Node track(String tag, int x, int y) {
-    if (eye().isTrackingEnabled() && eye().isAttached(this))
+    if (eye().isTaggingEnabled() && eye().isAttached(this))
       tag(tag, eye());
     else
       removeTag(tag);
@@ -2490,7 +2485,7 @@ public class Graph {
    * Use internally by {@link #track(String, int, int)}.
    */
   protected void _track(String tag, Node node, int x, int y) {
-    if ((node(tag) == null || node(tag) == eye()) && node.isTrackingEnabled())
+    if ((node(tag) == null || node(tag) == eye()) && node.isTaggingEnabled())
       if (tracks(node, x, y)) {
         tag(tag, node);
         return;
@@ -2507,8 +2502,8 @@ public class Graph {
    * @see #node(String)
    * @see #removeTag(String)
    * @see #tag(String, Node)
-   * @see #isTagged(String, Node)
-   * @see Node#enableTracking(boolean)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
    */
@@ -2540,7 +2535,7 @@ public class Graph {
   protected boolean _tracks(Node node, int x, int y, Vector projection) {
     if (node == null || isEye(node))
       return false;
-    if (!node.isTrackingEnabled())
+    if (!node.isTaggingEnabled())
       return false;
     float threshold = Math.abs(node.pickingThreshold()) < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position())
         : node.pickingThreshold() / 2;
@@ -2558,22 +2553,21 @@ public class Graph {
   }
 
   /**
-   * Same as {@link #track(String, int, int)} but doesn't return immediately the tagged tracked-node.
-   * The algorithm schedules an updated of the tagged tracked-node for the next traversal and hence should be
-   * always be used in conjunction with {@link #render()}.
+   * Tags (with {@code tag} which may be {@code null}) the node in {@code nodeArray} picked with
+   * ray-casting at pixel {@code x, y}. The tagged node (see {@link #node(String)}) would available
+   * after the next call {@link #render()}. Tags the {@link #eye()} if no node is found under the
+   * pixel and if tagging is enabled for the {@code eye} (see {@link Node#isTaggingEnabled()}).
    * <p>
-   * This method is optimal since it updates the tagged tracked-node at traversal time. Prefer this method over
+   * This method is optimal since it tags the nodes at traversal time. Prefer this method over
    * {@link #track(String, int, int)} when dealing with several tags.
-   * <p>
-   * Note that {@code null} tags are allowed.
    *
    * @see #render()
    * @see #node(String)
    * @see #removeTag(String)
    * @see #tracks(Node, int, int)
    * @see #tag(String, Node)
-   * @see #isTagged(String, Node)
-   * @see Node#enableTracking(boolean)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
    * @see #cast(int, int)
@@ -2949,17 +2943,15 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (node.isTrackingEnabled() && !_rays.isEmpty() && node.pickingThreshold() != 0) {
+    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingThreshold() != 0) {
       Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        if (eye().isTrackingEnabled() && eye().isAttached(this))
+        if (eye().isTaggingEnabled() && eye().isAttached(this))
           tag(ray._tag, eye());
         else
           removeTag(ray._tag);
-        // Condition is overkill. Use it only in place of resetTrackedNode
-        //if (!isTracking(ray._tag))
         if (_tracks(node, ray._pixelX, ray._pixelY, projection)) {
           tag(ray._tag, node);
           it.remove();
@@ -2972,16 +2964,14 @@ public class Graph {
    * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
-    if (node.isTrackingEnabled() && !_rays.isEmpty() && node.pickingThreshold() == 0 && _bb != null) {
+    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingThreshold() == 0 && _bb != null) {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        if (eye().isTrackingEnabled() && eye().isAttached(this))
+        if (eye().isTaggingEnabled() && eye().isAttached(this))
           tag(ray._tag, eye());
         else
           removeTag(ray._tag);
-        // Condition is overkill. Use it only in place of resetTrackedNode
-        //if (!isTracking(ray._tag))
         if (_tracks(node, ray._pixelX, ray._pixelY)) {
           tag(ray._tag, node);
           it.remove();
@@ -2991,7 +2981,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code setTrackedNode(null, node)}.
+   * Same as {@code tag(null, node)}.
    *
    * @see #tag(String, Node)
    */
@@ -3000,31 +2990,30 @@ public class Graph {
   }
 
   /**
-   * Tags the node for tracking (see {@link #node(String)}). The {@code null} tag
-   * is allowed. Call this function if you want to set the tagged tracked node manually
-   * and {@link #track(String, int, int)} or {@link #cast(String, int, int)} to set it
-   * automatically using ray casting.
+   * Tags the {@code node} (with {@code tag} which may be {@code null})
+   * (see {@link #node(String)}). Call {@link #track(String, int, int)}
+   * or {@link #cast(String, int, int)} to tag the node with ray casting.
    *
    * @see #tracks(Node, int, int)
    * @see #track(String, int, int)
    * @see #removeTag(String)
-   * @see #isTagged(String, Node)
-   * @see Node#enableTracking(boolean)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
    */
   public void tag(String tag, Node node) {
     if (node == null) {
-      System.out.println("Warning. Cannot track a null node!");
+      System.out.println("Warning. Cannot tag a null node!");
       return;
     }
-    if (!node.isTrackingEnabled()) {
-      System.out.println("Warning. Node cannot be tracked! Enable tracking on the node first by call node.enableTracking(true)");
+    if (!node.isTaggingEnabled()) {
+      System.out.println("Warning. Node cannot be tagged! Enable tagging on the node first by call node.enableTagging(true)");
       return;
     }
     _tags.put(tag, node);
   }
 
   /**
-   * Same as {@code return trackedNode(null)}.
+   * Same as {@code return node(null)}.
    *
    * @see #node(String)
    */
@@ -3033,14 +3022,14 @@ public class Graph {
   }
 
   /**
-   * Returns the node tracked with {@code tag} which is usually set by ray casting (see
-   * {@link #track(String, int, int)}). May return {@code null}. Reset it with
+   * Returns the node tagged with {@code tag} (which may be {@code null}) which is usually set by
+   * ray casting (see {@link #track(String, int, int)}). May return {@code null}. Reset it with
    * {@link #removeTag(String)}.
    *
    * @see #tracks(Node, int, int)
    * @see #track(String, int, int)
    * @see #removeTag(String)
-   * @see #isTagged(String, Node)
+   * @see #hasTag(String, Node)
    * @see #tag(String, Node)
    */
   public Node node(String tag) {
@@ -3048,82 +3037,99 @@ public class Graph {
   }
 
   /**
-   * Same as {@code isTracking(null)}.
+   * Same as {@code isTagValid(null)}.
    *
-   * @see #isValid(String)
+   * @see #isTagValid(String)
    */
-  public boolean isValid() {
-    return isValid(null);
+  public boolean isNullTagValid() {
+    return isTagValid(null);
   }
 
   /**
-   * Returns {@code true} if the {@code tag} currently tracks a non-null node and {@code false} otherwise.
+   * Returns {@code true} if some node is tagged with {@code tag} (which may be {code null})
+   * and {@code false} otherwise.
    */
-  public boolean isValid(String tag) {
+  public boolean isTagValid(String tag) {
     return _tags.containsKey(tag);
   }
 
-  /**
-   * Same as {@code return isTrackedNode(null, node)}.
-   *
-   * @see #isTagged(String, Node)
-   * @see Node#isTracked()
-   */
   public boolean isTagged(Node node) {
-    return isTagged(null, node);
+    return _tags.containsValue(node);
   }
 
   /**
-   * Returns {@code true} if {@code node} is the current tagged {@link #node(String)} and {@code false} otherwise.
+   * Same as {@code return hasTag(null, node)}.
+   *
+   * @see #hasTag(String, Node)
+   * @see Node#isTagged()
+   */
+  public boolean hasNullTag(Node node) {
+    return hasTag(null, node);
+  }
+
+  /**
+   * Returns {@code true} if {@code node(tag)} (see {@link #node(String)})
+   * returns {@code node} and {@code false} otherwise.
    *
    * @see #tracks(Node, int, int)
    * @see #track(String, int, int)
    * @see #removeTag(String)
    * @see #tag(String, Node)
-   * @see Node#isTracked()
+   * @see Node#isTagged()
    */
-  public boolean isTagged(String tag, Node node) {
+  public boolean hasTag(String tag, Node node) {
     return node(tag) == node;
   }
 
   /**
-   * Resets all tagged {@link #node(String)}.
+   * Removes all tags {@link #node(String)}.
    *
    * @see #node(String)
    * @see #tracks(Node, int, int)
    * @see #track(String, int, int)
    * @see #tag(String, Node)
-   * @see #isTagged(String, Node)
+   * @see #hasTag(String, Node)
    */
   public void clearTags() {
     _tags.clear();
   }
 
   /**
-   * Removes tag for {@code node}.
+   * Disables tagging the node. Calls {@code unTag(node)} and then {@code node.disableTagging()}.
+   *
+   * @see #unTag(Node)
+   * @see Node#disableTagging()
+   */
+  public void disableTagging(Node node) {
+    unTag(node);
+    node.disableTagging();
+  }
+
+  /**
+   * Removes the {@code node} tag.
    */
   public void unTag(Node node) {
     _tags.entrySet().removeIf(entry -> (node == entry.getValue()));
   }
 
   /**
-   * Same as {@code resetTrackedNode(null)}.
+   * Same as {@code removeTag(null)}.
    *
    * @see #removeTag(String)
    */
-  public void removeTag() {
+  public void removeNullTag() {
     removeTag(null);
   }
 
   /**
-   * Resets the current tagged {@link #node(String)} so that a call to {@link #isValid(String)}
-   * will return {@code false}. Note that {@link #track(String, int, int)} will reset the tracked node automatically.
+   * Removes the {@code tag} so that a call to {@link #isTagValid(String)}
+   * will return {@code false}.
    *
    * @see #node(String)
    * @see #tracks(Node, int, int)
    * @see #track(String, int, int)
    * @see #tag(String, Node)
-   * @see #isTagged(String, Node)
+   * @see #hasTag(String, Node)
    */
   public void removeTag(String tag) {
     _tags.remove(tag);
@@ -3836,42 +3842,6 @@ public class Graph {
     }
     Vector eyeUp = eye().displacement(upVector);
     return Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
-  }
-
-  // TODO remove interact patterns and reimplement custom actions on node() and eye()
-
-  /**
-   * Tag-based generic interaction pattern. Same as {@code defaultNode(tag).interact(gesture)}.
-   * <p>
-   * Uses gesture data to interact with the tagged default node (either the {@link #eye()}
-   * or the tagged {@link #node(String)}.
-   * <p>
-   * Implement the node actual behavior by overriding {@link Node#interact(Object...)}.
-   *
-   * @see Node#interact(Object...)
-   * @see #interact(Node, Object...)
-   */
-  public void interact(String tag, Object... gesture) {
-    interact(node(tag), gesture);
-  }
-
-  /**
-   * Node generic interaction pattern. Same as {@code node.interact(gesture)}.
-   * <p>
-   * Uses gesture data to interact with the node.
-   * <p>
-   * Implement the node actual behavior by overriding {@link Node#interact(Object...)}.
-   *
-   * @see #interact(String, Object...)
-   * @see Node#interact(Object...)
-   */
-  public boolean interact(Node node, Object... gesture) {
-    if (node != null)
-      return false;
-    else {
-      node.interact(gesture);
-      return true;
-    }
   }
 
   /*
