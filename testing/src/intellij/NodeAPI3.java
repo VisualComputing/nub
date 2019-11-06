@@ -363,7 +363,7 @@ public class NodeAPI3 extends PApplet {
   @Override
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1) {
-      scene.track(new Node[]{f1, f2, f3, f4, f5});
+      scene.updateTag(new Node[]{f1, f2, f3, f4, f5});
     }
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)

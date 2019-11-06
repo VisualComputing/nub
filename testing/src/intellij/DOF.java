@@ -118,7 +118,7 @@ public class DOF extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast();
+    scene.tag();
   }
 
   @Override

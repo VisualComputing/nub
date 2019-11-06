@@ -50,7 +50,7 @@ public class Graph1 extends PApplet {
 
   @Override
   public void mouseMoved() {
-    graph.track(mouseX, mouseY, nodes);
+    graph.updateTag(mouseX, mouseY, nodes);
   }
 
   public void mouseDragged() {

@@ -2297,8 +2297,8 @@ public class Node {
   /**
    * Enables tagging of the node according to {@code flag}. When tagging is disabled
    * {@link Graph#tracks(Node, int, int)} returns {@code false} and the node cannot be
-   * tagged (i.e., {@link Graph#tag(String, Node)}, {@link Graph#track(String, int, int)}
-   * and {@link Graph#cast(int, int)} never tag the node).
+   * tagged (i.e., {@link Graph#tag(String, Node)}, {@link Graph#updateTag(String, int, int)}
+   * and {@link Graph#tag(int, int)} never tag the node).
    *
    * @see #isTaggingEnabled()
    * @see #enableTagging()

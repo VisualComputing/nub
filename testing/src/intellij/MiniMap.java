@@ -108,7 +108,7 @@ public class MiniMap extends PApplet {
   @Override
   public void mouseMoved() {
     if (!interactiveEye || focus == scene)
-      focus.cast();
+      focus.tag();
   }
 
   @Override

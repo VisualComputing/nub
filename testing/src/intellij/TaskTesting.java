@@ -145,7 +145,7 @@ public class TaskTesting extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.track();
+    scene.updateTag();
   }
 
   public void mouseDragged() {

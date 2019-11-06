@@ -347,7 +347,7 @@ public class NodeAPI4 extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.track(new Node[]{f1, f2, f3, f4, f5});
+    scene.updateTag(new Node[]{f1, f2, f3, f4, f5});
   }
 
   @Override

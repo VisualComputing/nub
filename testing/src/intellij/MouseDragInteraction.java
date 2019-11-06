@@ -92,7 +92,7 @@ public class MouseDragInteraction extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast();
+    scene.tag();
     //scene.track();
   }
 

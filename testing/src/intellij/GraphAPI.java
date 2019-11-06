@@ -98,7 +98,7 @@ public class GraphAPI extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast();
+    scene.tag();
   }
 
   @Override

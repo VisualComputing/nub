@@ -70,7 +70,7 @@ public class FlockOld extends PApplet {
 
   public void mouseClicked(MouseEvent event) {
     // picks up a boid avatar, may be null
-    avatar = scene.track();
+    avatar = scene.updateTag();
     if (avatar != null)
       thirdPerson();
     else if (scene.eye().reference() != null)

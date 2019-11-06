@@ -68,7 +68,7 @@ public class ConstrainedFrame extends PApplet {
 
   public void mouseMoved() {
     if (mouseTracking)
-      scene.track();
+      scene.updateTag();
   }
 
   public void mouseDragged() {

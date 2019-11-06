@@ -109,7 +109,7 @@ public class MiniMap2 extends PApplet {
 
   @Override
   public void mouseMoved() {
-    focus.cast();
+    focus.tag();
   }
 
   @Override

@@ -88,7 +88,7 @@ public class ShiftViewers extends PApplet {
 
   @Override
   public void mouseMoved() {
-    focus.cast();
+    focus.tag();
   }
 
   @Override

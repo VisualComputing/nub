@@ -57,7 +57,7 @@ public class AdaptivePrecision3 extends PApplet {
 
   public void mouseClicked(MouseEvent event) {
     //scene.track();
-    scene.cast();
+    scene.tag();
   }
 
   PShape shape() {

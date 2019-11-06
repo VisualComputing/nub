@@ -72,11 +72,11 @@ import java.util.List;
  * calls {@link #scale(Node, float)} passing the tagged node).</li>
  * <li>Many interactive methods support the {@code null} tag (e.g., {@link #scale(float delta)} simply
  * calls {@code scale(null, delta)}).</li>
- * <li>To tag the node to be tracked using ray-casting call {@link #track(String, int, int, Node[])}
- * (detached or attached nodes), {@link #track(String, int, int)} (only attached nodes) or
- * {@link #cast(String, int, int)} (only for attached nodes too). While {@link #track(String, int, int, Node[])} and
- * {@link #track(String, int, int)} update the tagged node synchronously (i.e., they return the tagged node
- * immediately), {@link #cast(String, int, int)} updates it asynchronously (i.e., it
+ * <li>To tag the node to be tracked using ray-casting call {@link #updateTag(String, int, int, Node[])}
+ * (detached or attached nodes), {@link #updateTag(String, int, int)} (only attached nodes) or
+ * {@link #tag(String, int, int)} (only for attached nodes too). While {@link #updateTag(String, int, int, Node[])} and
+ * {@link #updateTag(String, int, int)} update the tagged node synchronously (i.e., they return the tagged node
+ * immediately), {@link #tag(String, int, int)} updates it asynchronously (i.e., it
  * optimally updates the tagged node during the next call to the {@link #render()} algorithm).</li>
  * </ol>
  * <h1>5. Timing handling</h1>
@@ -2365,21 +2365,21 @@ public class Graph {
   /**
    * Same as {@code return track(null, x, y, nodeArray)}.
    *
-   * @see #track(String, int, int, Node[])
+   * @see #updateTag(String, int, int, Node[])
    */
-  public Node track(int x, int y, Node[] nodeArray) {
-    return track(null, x, y, nodeArray);
+  public Node updateTag(int x, int y, Node[] nodeArray) {
+    return updateTag(null, x, y, nodeArray);
   }
 
   /**
    * Tags (with {@code tag} which may be {@code null}) the node in {@code nodeArray} picked with ray-casting
    * at pixel {@code x, y} and returns it (see {@link #node(String)}).
    * <p>
-   * Use this version of the method instead of {@link #track(String, int, int)} when dealing with
+   * Use this version of the method instead of {@link #updateTag(String, int, int)} when dealing with
    * detached nodes.
    *
-   * @see #track(String, int, int)
-   * @see #track(String, int, int, List)
+   * @see #updateTag(String, int, int)
+   * @see #updateTag(String, int, int, List)
    * @see #render()
    * @see #node(String)
    * @see #removeTag(String)
@@ -2389,10 +2389,10 @@ public class Graph {
    * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(String, int, int)
-   * @see #cast(String, int, int)
+   * @see #tag(String, int, int)
+   * @see #tag(String, int, int)
    */
-  public Node track(String tag, int x, int y, Node[] nodeArray) {
+  public Node updateTag(String tag, int x, int y, Node[] nodeArray) {
     removeTag(tag);
     for (Node node : nodeArray)
       if (tracks(node, x, y)) {
@@ -2405,18 +2405,18 @@ public class Graph {
   /**
    * Same as {@code return track(null, x, y, nodeList)}.
    *
-   * @see #track(String, int, int, List)
+   * @see #updateTag(String, int, int, List)
    */
-  public Node track(int x, int y, List<Node> nodeList) {
-    return track(null, x, y, nodeList);
+  public Node updateTag(int x, int y, List<Node> nodeList) {
+    return updateTag(null, x, y, nodeList);
   }
 
   /**
-   * Same as {@link #track(String, int, int, Node[])} but using a node list instead of an array.
+   * Same as {@link #updateTag(String, int, int, Node[])} but using a node list instead of an array.
    *
-   * @see #track(String, int, int, Node[])
+   * @see #updateTag(String, int, int, Node[])
    */
-  public Node track(String tag, int x, int y, List<Node> nodeList) {
+  public Node updateTag(String tag, int x, int y, List<Node> nodeList) {
     removeTag(tag);
     for (Node node : nodeList)
       if (tracks(node, x, y)) {
@@ -2431,10 +2431,10 @@ public class Graph {
   /**
    * Same as {@code return track(null, x, y)}.
    *
-   * @see #track(String, int, int)
+   * @see #updateTag(String, int, int)
    */
-  public Node track(int x, int y) {
-    return track(null, x, y);
+  public Node updateTag(int x, int y) {
+    return updateTag(null, x, y);
   }
 
   /**
@@ -2442,10 +2442,10 @@ public class Graph {
    * {@code x, y} and returns it (see {@link #node(String)}). Tags the {@link #eye()} if no node is found
    * under the pixel and if tagging is enabled for the {@code eye} (see {@link Node#isTaggingEnabled()}).
    * <p>
-   * Use this version of the method instead of {@link #track(String, int, int, Node[])} when dealing with
+   * Use this version of the method instead of {@link #updateTag(String, int, int, Node[])} when dealing with
    * attached nodes to the graph.
    *
-   * @see #track(String, int, int, Node[])
+   * @see #updateTag(String, int, int, Node[])
    * @see #render()
    * @see #node(String)
    * @see #removeTag(String)
@@ -2455,10 +2455,10 @@ public class Graph {
    * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(String, int, int)
-   * @see #cast(String, int, int)
+   * @see #tag(String, int, int)
+   * @see #tag(String, int, int)
    */
-  public Node track(String tag, int x, int y) {
+  public Node updateTag(String tag, int x, int y) {
     removeTag(tag);
     for (Node node : _leadingNodes())
       _track(tag, node, x, y);
@@ -2466,7 +2466,7 @@ public class Graph {
   }
 
   /**
-   * Use internally by {@link #track(String, int, int)}.
+   * Use internally by {@link #updateTag(String, int, int)}.
    */
   protected void _track(String tag, Node node, int x, int y) {
     if (node(tag) == null && node.isTaggingEnabled())
@@ -2530,10 +2530,10 @@ public class Graph {
   /**
    * Same as {@code cast(null, x, y)}.
    *
-   * @see #cast(String, int, int)
+   * @see #tag(String, int, int)
    */
-  public void cast(int x, int y) {
-    cast(null, x, y);
+  public void tag(int x, int y) {
+    tag(null, x, y);
   }
 
   /**
@@ -2543,7 +2543,7 @@ public class Graph {
    * pixel and if tagging is enabled for the {@code eye} (see {@link Node#isTaggingEnabled()}).
    * <p>
    * This method is optimal since it tags the nodes at traversal time. Prefer this method over
-   * {@link #track(String, int, int)} when dealing with several tags.
+   * {@link #updateTag(String, int, int)} when dealing with several tags.
    *
    * @see #render()
    * @see #node(String)
@@ -2554,9 +2554,9 @@ public class Graph {
    * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(int, int)
+   * @see #tag(int, int)
    */
-  public void cast(String tag, int x, int y) {
+  public void tag(String tag, int x, int y) {
     _rays.add(new Ray(tag, x, y));
   }
 
@@ -2969,11 +2969,11 @@ public class Graph {
 
   /**
    * Tags the {@code node} (with {@code tag} which may be {@code null})
-   * (see {@link #node(String)}). Call {@link #track(String, int, int)}
-   * or {@link #cast(String, int, int)} to tag the node with ray casting.
+   * (see {@link #node(String)}). Call {@link #updateTag(String, int, int)}
+   * or {@link #tag(String, int, int)} to tag the node with ray casting.
    *
    * @see #tracks(Node, int, int)
-   * @see #track(String, int, int)
+   * @see #updateTag(String, int, int)
    * @see #removeTag(String)
    * @see #hasTag(String, Node)
    * @see Node#enableTagging(boolean)
@@ -3005,11 +3005,11 @@ public class Graph {
 
   /**
    * Returns the node tagged with {@code tag} (which may be {@code null}) which is usually set by
-   * ray casting (see {@link #track(String, int, int)}). May return {@code null}. Reset it with
+   * ray casting (see {@link #updateTag(String, int, int)}). May return {@code null}. Reset it with
    * {@link #removeTag(String)}.
    *
    * @see #tracks(Node, int, int)
-   * @see #track(String, int, int)
+   * @see #updateTag(String, int, int)
    * @see #removeTag(String)
    * @see #hasTag(String, Node)
    * @see #tag(String, Node)
@@ -3054,7 +3054,7 @@ public class Graph {
    * returns {@code node} and {@code false} otherwise.
    *
    * @see #tracks(Node, int, int)
-   * @see #track(String, int, int)
+   * @see #updateTag(String, int, int)
    * @see #removeTag(String)
    * @see #tag(String, Node)
    * @see Node#isTagged()
@@ -3068,7 +3068,7 @@ public class Graph {
    *
    * @see #node(String)
    * @see #tracks(Node, int, int)
-   * @see #track(String, int, int)
+   * @see #updateTag(String, int, int)
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
    */
@@ -3109,7 +3109,7 @@ public class Graph {
    *
    * @see #node(String)
    * @see #tracks(Node, int, int)
-   * @see #track(String, int, int)
+   * @see #updateTag(String, int, int)
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
    */

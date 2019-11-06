@@ -66,7 +66,7 @@ public class Basics extends PApplet {
 
   public void keyPressed() {
     if (key == ' ')
-      scene.track();
+      scene.updateTag();
     if (key == 'f')
       scene.flip();
   }

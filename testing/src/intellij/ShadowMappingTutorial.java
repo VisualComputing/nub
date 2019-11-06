@@ -160,7 +160,7 @@ public class ShadowMappingTutorial extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.cast();
+    scene.tag();
   }
 
   public void mouseDragged() {

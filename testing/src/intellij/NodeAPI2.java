@@ -350,7 +350,7 @@ public class NodeAPI2 extends PApplet {
   @Override
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      scene.track();
+      scene.updateTag();
     else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         scene.focus();

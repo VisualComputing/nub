@@ -75,7 +75,7 @@ public class Flock extends PApplet {
   // highlighting and 'third-person' interaction
   public void mouseMoved(MouseEvent event) {
     // 1. highlighting
-    scene.cast("mouseMoved", mouseX, mouseY);
+    scene.tag("mouseMoved", mouseX, mouseY);
     // 2. 'third-person interaction
     if (scene.eye().reference() != null)
       // press shift to move the mouse without looking around
@@ -90,7 +90,7 @@ public class Flock extends PApplet {
 
   // picks up a boid avatar, may be null
   public void mouseClicked() {
-    scene.cast("mouseClicked", mouseX, mouseY);
+    scene.tag("mouseClicked", mouseX, mouseY);
   }
 
   // Sets current avatar as the eye reference and interpolate the eye to it

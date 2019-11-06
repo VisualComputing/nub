@@ -96,7 +96,7 @@ import java.util.Map;
  * will draw the interpolated path too.
  * <h1>Human Interface Devices</h1>
  * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device</a>
- * is the Processing mouse, see {@link #track()}, {@link #cast()}, {@link #spin()}, {@link #translate()}
+ * is the Processing mouse, see {@link #updateTag()}, {@link #tag()}, {@link #spin()}, {@link #translate()}
  * {@link #scale(float)}, etc. To set up another device refer to the {@link Graph} documentation.
  *
  * @see Graph
@@ -809,19 +809,19 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code return super.track(mouse(), nodeArray)}.
    *
-   * @see Graph#track(int, int, Node[])
+   * @see Graph#updateTag(int, int, Node[])
    */
-  public Node track(Node[] nodeArray) {
-    return track(mouseX(), mouseY(), nodeArray);
+  public Node updateTag(Node[] nodeArray) {
+    return updateTag(mouseX(), mouseY(), nodeArray);
   }
 
   /**
    * Same as {@code return super.track(mouse(), nodeList)}.
    *
-   * @see Graph#track(int, int, List< Node >)
+   * @see Graph#updateTag(int, int, List< Node >)
    */
-  public Node track(List<Node> nodeList) {
-    return track(mouseX(), mouseY(), nodeList);
+  public Node updateTag(List<Node> nodeList) {
+    return updateTag(mouseX(), mouseY(), nodeList);
   }
 
   /**
@@ -2915,45 +2915,45 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code return track(tag, mouse())}.
    *
-   * @see #track(String, int, int)
+   * @see #updateTag(String, int, int)
    * @see #mouseX()
    * @see #mouseY()
    */
-  public Node track(String tag) {
-    return track(tag, mouseX(), mouseY());
+  public Node updateTag(String tag) {
+    return updateTag(tag, mouseX(), mouseY());
   }
 
   /**
    * Same as {@code return track(mouse())}.
    *
-   * @see #track(int, int)
+   * @see #updateTag(int, int)
    * @see #mouseX()
    * @see #mouseY()
    */
-  public Node track() {
-    return super.track(mouseX(), mouseY());
+  public Node updateTag() {
+    return super.updateTag(mouseX(), mouseY());
   }
 
   /**
    * Same as {@code cast(tag, mouse())}.
    *
-   * @see Graph#cast(String, int, int)
+   * @see Graph#tag(String, int, int)
    * @see #mouseX()
    * @see #mouseY()
    */
-  public void cast(String tag) {
-    cast(tag, mouseX(), mouseY());
+  public void tag(String tag) {
+    tag(tag, mouseX(), mouseY());
   }
 
   /**
    * Same as {@code cast(mouse())}.
    *
-   * @see #cast(int, int)
+   * @see #tag(int, int)
    * @see #mouseX()
    * @see #mouseY()
    */
-  public void cast() {
-    cast(mouseX(), mouseY());
+  public void tag() {
+    tag(mouseX(), mouseY());
   }
 
   /**
