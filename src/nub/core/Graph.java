@@ -11,6 +11,7 @@
 package nub.core;
 
 import nub.ik.solver.Solver;
+import nub.ik.solver.geometric.TRIKTree;
 import nub.ik.solver.geometric.TreeSolver;
 import nub.primitives.*;
 import nub.timing.Task;
@@ -171,7 +172,8 @@ public class Graph {
   protected long _lookAroundCount;
 
   // 6. IKinematics solvers
-  protected List<TreeSolver> _solvers;
+  protected boolean _useTRIK = false; //TODO : remove athis flag and solve only with TREE when it is finished.
+  protected List<Solver> _solvers;
   protected HashMap<Solver, Task> _solverTasks;
 
   /**
@@ -234,7 +236,7 @@ public class Graph {
     setHeight(height);
     cacheProjectionViewInverse(false);
     _seeds = new ArrayList<Node>();
-    _solvers = new ArrayList<TreeSolver>();
+    _solvers = new ArrayList<Solver>();
     _solverTasks = new HashMap<Solver, Task>();
     _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
@@ -2364,42 +2366,63 @@ public class Graph {
     return _lastNonEyeUpdate;
   }
 
+
+  /**
+   * Choose between FABRIK or TRIK to solve a given chain
+   */
+  public void enableTRIK(boolean trik){
+    _useTRIK = trik;
+  }
+
   /**
    * Return registered solvers
    */
-  public List<TreeSolver> treeSolvers() {
+  public List<Solver> treeSolvers() {
     return _solvers;
   }
 
   /**
    * Registers the given chain to solve IK.
    */
-  public TreeSolver registerTreeSolver(Node node) {
-    for (TreeSolver solver : _solvers)
+  public Solver registerTreeSolver(Node node) {
+    for (Solver solver : _solvers) {
+      Node head = null;
+      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
+      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
+      else return null;
       //If Head is Contained in any structure do nothing
-      if (!((isReachable(solver.head()) && isReachable(node)) ? Node.path(solver.head(), node) : new ArrayList<Node>()).isEmpty())
+      if (!((isReachable(head) && isReachable(node)) ? Node.path(head, node) : new ArrayList<Node>()).isEmpty())
         return null;
-      TreeSolver solver = new TreeSolver(node);
-      _solvers.add(solver);
-      //Add task
-      Task task = new Task(_timingHandler) {
-        @Override
-        public void execute() {
-          solver.solve();
-        }
-      };
-      task.run(40);
-      _solverTasks.put(solver, task);
-      return solver;
+    }
+
+    Solver solver;
+
+    if(_useTRIK) solver = new TRIKTree(node);
+    else solver = new TreeSolver(node);
+    _solvers.add(solver);
+    //Add task
+    Task task = new Task(_timingHandler) {
+      @Override
+      public void execute() {
+        solver.solve();
+      }
+    };
+    task.run(40);
+    _solverTasks.put(solver, task);
+    return solver;
   }
 
   /**
    * Unregisters the IK Solver with the given Frame as branchRoot
    */
   public boolean unregisterTreeSolver(Node node) {
-    TreeSolver toRemove = null;
-    for (TreeSolver solver : _solvers) {
-      if (solver.head() == node) {
+    Solver toRemove = null;
+    for (Solver solver : _solvers) {
+      Node head = null;
+      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
+      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
+      else return false;
+      if (head == node) {
         toRemove = solver;
         break;
       }
@@ -2412,9 +2435,14 @@ public class Graph {
   /**
    * Gets the IK Solver with associated with branchRoot frame
    */
-  public TreeSolver treeSolver(Node node) {
-    for (TreeSolver solver : _solvers) {
-      if (solver.head() == node) {
+  public Solver treeSolver(Node node) {
+    for (Solver solver : _solvers) {
+      Node head = null;
+      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
+      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
+      else return null;
+
+      if (head == node) {
         return solver;
       }
     }
@@ -2422,8 +2450,9 @@ public class Graph {
   }
 
   public boolean addIKTarget(Node endEffector, Node target) {
-    for (TreeSolver solver : _solvers) {
-      if (solver.addTarget(endEffector, target)) return true;
+    for (Solver solver : _solvers) {
+      if (solver instanceof TreeSolver && ((TreeSolver)solver).addTarget(endEffector, target)) return true;
+      if (solver instanceof TRIKTree && ((TRIKTree)solver).addTarget(endEffector, target)) return true;
     }
     return false;
   }
