@@ -5,6 +5,8 @@ import nub.core.Graph;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
+import nub.ik.solver.Solver;
+import nub.ik.solver.geometric.TRIKTree;
 import nub.ik.solver.geometric.TreeSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -57,6 +59,7 @@ public class SkeletonBuilder extends PApplet{
         //canvas1 = createGraphics(w, h, renderer);
         //canvas1 = this.g;
         scene = new Scene(this);
+        scene.enableTRIK(true);
         focus = scene;
         if(scene.is3D())scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(800);
@@ -118,9 +121,9 @@ public class SkeletonBuilder extends PApplet{
         }
         scene.endHUD();
         */
-        if(debug) {
+        if(debug && solver instanceof TreeSolver) {
             pushStyle();
-            for (ArrayList<Vector> list : solver.aux_p) {
+            for (ArrayList<Vector> list : ((TreeSolver)solver).aux_p) {
                 Vector prev = null;
                 for (Vector v : list) {
                     pushMatrix();
@@ -136,7 +139,7 @@ public class SkeletonBuilder extends PApplet{
                 }
             }
 
-            for (ArrayList<Vector> list : solver.aux_prev) {
+            for (ArrayList<Vector> list : ((TreeSolver)solver).aux_prev) {
                 Vector prev = null;
                 for (Vector v : list) {
                     pushMatrix();
@@ -377,16 +380,16 @@ public class SkeletonBuilder extends PApplet{
 
         if(key == 'o' || key == 'O'){
             keepDirections = !keepDirections;
-            for(TreeSolver solver : scene.treeSolvers()){
-                solver.setKeepDirection(keepDirections);
+            for(Solver solver : scene.treeSolvers()){
+                if(solver instanceof TreeSolver) ((TreeSolver)solver).setKeepDirection(keepDirections);
             }
             System.out.println("Keep directions : " + (keepDirections ? "Enabled" : "Disabled"));
         }
 
         if(key == 'p' || key == 'P'){
             fixTwisting = !fixTwisting;
-            for(TreeSolver solver : scene.treeSolvers()){
-                solver.setFixTwisting(fixTwisting);
+            for(Solver solver : scene.treeSolvers()){
+                if(solver instanceof TreeSolver) ((TreeSolver)solver).setFixTwisting(fixTwisting);
             }
         }
     }
@@ -424,7 +427,7 @@ public class SkeletonBuilder extends PApplet{
 
     }
 
-    TreeSolver solver;
+    Solver solver;
     public void addTreeSolver(){
         if(scene.trackedNode() == null) return;
         if(debug) {
@@ -437,8 +440,10 @@ public class SkeletonBuilder extends PApplet{
             }
         }
         solver.setMaxIterations(50);
-        solver.setFixTwisting(fixTwisting);
-        solver.setKeepDirection(keepDirections);
+        if(solver instanceof TreeSolver){
+            ((TreeSolver)solver).setFixTwisting(fixTwisting);
+            ((TreeSolver)solver).setKeepDirection(keepDirections);
+        }
 
         //add target
         //get leaf nodes
@@ -449,7 +454,9 @@ public class SkeletonBuilder extends PApplet{
             Target target = new Target(scene, ((Joint) scene.trackedNode()).radius(), endEffector);
             target.setReference(((Joint) scene.trackedNode()).reference());
             //scene.addIKTarget(endEffector, target);
-            solver.addTarget(endEffector, target);
+            if(solver instanceof TreeSolver) ((TreeSolver)solver).addTarget(endEffector, target);
+            if(solver instanceof TRIKTree) ((TRIKTree)solver).addTarget(endEffector, target);
+
             targets.add(target);
         }
     }

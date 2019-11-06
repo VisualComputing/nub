@@ -8,6 +8,7 @@ import nub.ik.solver.geometric.TRIKTree;
 import nub.ik.visual.Joint;
 import nub.primitives.Vector;
 import nub.processing.Scene;
+import nub.processing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -19,6 +20,7 @@ public class TRIKTREETest extends PApplet{
     Scene scene;
     int branches = 2, num = 4, depth = 2;
     List<Target> targets = new ArrayList<>();
+    boolean enableSolver = true;
     TRIKTree trik;
 
     public void settings(){
@@ -26,7 +28,7 @@ public class TRIKTREETest extends PApplet{
     }
 
     public void setup(){
-        TRIK._debug = true;
+        //TRIK._debug = true;
         Joint.axes = true;
         //Setting the scene
         scene = new Scene(this);
@@ -44,6 +46,16 @@ public class TRIKTREETest extends PApplet{
         //Add end effectors
         generateEFF(trik, root);
 
+        TimingTask solverTask = new TimingTask(scene) {
+            @Override
+            public void execute() {
+                //a solver perform an iteration when solve method is called
+                if(enableSolver){
+                    trik.solve();
+                }
+            }
+        };
+        solverTask.run(40); //Execute the solverTask each 40 ms
 
     }
 
@@ -162,8 +174,14 @@ public class TRIKTREETest extends PApplet{
 
     public void keyPressed(){
         if(key == 'A' || key == 'a'){
+            enableSolver = false;
             trik.solve();
         }
+
+        if(key == 'S' || key == 's'){
+            enableSolver = !enableSolver;
+        }
+
     }
 
 

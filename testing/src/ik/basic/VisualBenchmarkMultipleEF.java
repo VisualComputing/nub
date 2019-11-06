@@ -59,6 +59,7 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         //solver._timesPerFrame = 30.f;
 
 
+        scene.enableTRIK(true);
         scene.registerTreeSolver(structures.get(0).get(0));
         for(Node f : targets.get(0).keySet()){
             //solver.setTarget(f, targets.get(0).get(f));

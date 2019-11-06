@@ -6,6 +6,7 @@ import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
 import nub.ik.solver.Solver;
+import nub.ik.solver.geometric.TRIKTree;
 import nub.ik.solver.geometric.TreeSolver;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
@@ -21,7 +22,7 @@ import java.util.List;
 public class Multiple_Test2 extends PApplet {
     Scene scene;
     List<Target> targets = new ArrayList<>();
-    TreeSolver s;
+    TRIKTree s;
 
     public void settings(){
         size(500,500,P3D);
@@ -38,7 +39,7 @@ public class Multiple_Test2 extends PApplet {
         Node root = generateStructure(scene);
 
         //Add IK
-        s = new TreeSolver(root);
+        s = new TRIKTree(root);
         //Add end effectors
         generateEFF(scene, s, root);
 
@@ -51,7 +52,7 @@ public class Multiple_Test2 extends PApplet {
         s.solve();
     }
 
-    public void generateEFF(Scene scene, TreeSolver s, Node root){
+    public void generateEFF(Scene scene, TRIKTree s, Node root){
         if(root == null);
         if(root.children() == null || root.children().isEmpty()){
             root.enableTracking(false);

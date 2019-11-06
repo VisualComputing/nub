@@ -60,6 +60,7 @@ public class Rex extends PApplet {
         }
 
         //4.2 relate a skeleton with an IK Solver
+        scene.enableTRIK(true);
         Solver solver = scene.registerTreeSolver(root);
         //Update params
         solver.setMaxError(1f);
