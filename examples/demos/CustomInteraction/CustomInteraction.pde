@@ -44,7 +44,7 @@ void setup() {
         Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
         scene.beginHUD(pg);
         Vector position = scene.screenLocation(position());
-        pg.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
+        pg.fill(isTagged() ? 0 : 255, isTagged() ? 255 : 0, isTagged() ? 0 : 255);
         pg.textFont(font36);
         pg.text(_id, position.x(), position.y());
         scene.endHUD(pg);
@@ -93,9 +93,9 @@ void draw() {
 void keyPressed() {
   int value = Character.getNumericValue(key);
   if (value >= 0 && value < 10)
-    scene.setTrackedNode("key", shapes[value]);
+    scene.tag("key", shapes[value]);
   if (key == ' ')
-    scene.resetTrackedNode("key");
+    scene.retag("key");
   if (key == CODED)
     if (keyCode == UP)
       scene.translate("key", 0, -10);

@@ -42,9 +42,9 @@ void setup() {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();
-        if (scene.trackedNode("light") == this) {
+        if (scene.node("light") == this) {
           Scene.drawAxes(pg, 150);
-          pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
+          pg.fill(0, isTagged() ? 255 : 0, 255, 120);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         } else {
           if (pg == shadowMap)
@@ -57,15 +57,6 @@ void setup() {
           pg.box(80);
         }
         pg.popStyle();
-      }
-      @Override
-      public void interact(Object... gesture) {
-        if (gesture.length == 1)
-          if (gesture[0] instanceof Integer)
-            if (zFar + (Integer) gesture[0] > zNear) {
-              zFar += (Integer) gesture[0];
-              depthShader.set("far", zFar);
-            }
       }
     };
     shapes[i].setPickingThreshold(0);
@@ -80,8 +71,8 @@ void setup() {
   depthShader.set("far", zFar);
   shadowMap.shader(depthShader);
 
-  scene.setTrackedNode("light", shapes[(int) random(0, shapes.length - 1)]);
-  scene.trackedNode("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.trackedNode("light").position()));
+  scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
+  scene.node("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.node("light").position()));
 }
 
 void draw() {
@@ -89,10 +80,10 @@ void draw() {
   // 1. Fill in and display front-buffer
   scene.render();
   // 2. Fill in shadow map using the light point of view
-  if (scene.trackedNode("light") != null) {
+  if (scene.node("light") != null) {
     shadowMap.beginDraw();
     shadowMap.background(140, 160, 125);
-    scene.render(shadowMap, shadowMapType, scene.trackedNode("light"), zNear, zFar);
+    scene.render(shadowMap, shadowMapType, scene.node("light"), zNear, zFar);
     shadowMap.endDraw();
     // 3. Display shadow map
     scene.beginHUD();
@@ -119,9 +110,8 @@ void mouseDragged() {
 
 void mouseWheel(MouseEvent event) {
   if (event.isShiftDown())
-    // application control of the light: setting the light zFar plane
-    // is implemented as a custom behavior by node.interact()
-    scene.interact("light", event.getCount() * 20);
+    if (scene.node("light") != null)
+      depthShader.set("far", zFar += event.getCount() * 20);
   else
     scene.scale(event.getCount() * 20);
 }

@@ -27,7 +27,7 @@ class Boid extends TimingTask {
         pg.fill(color(0, 255, 0, 125));
 
         // highlight boids under the mouse
-        if (scene.trackedNode("mouseMoved") == this) {
+        if (scene.node("mouseMoved") == this) {
           pg.stroke(color(0, 0, 255));
           pg.fill(color(0, 0, 255));
         }

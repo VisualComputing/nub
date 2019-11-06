@@ -3535,6 +3535,8 @@ public class Graph {
    * @see #scale(String, float)
    */
   public void scale(Node node, float delta) {
+    if (node == null)
+      return;
     float factor = 1 + Math.abs(delta) / (float) (isEye(node) ? -height() : height());
     node.scale(delta >= 0 ? factor : 1 / factor);
   }

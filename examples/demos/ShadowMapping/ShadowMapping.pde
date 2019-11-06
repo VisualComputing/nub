@@ -108,13 +108,13 @@ void setup() {
       pg.box(360, 5, 360);
     }
   };
-  floor.disableTracking();
+  floor.disableTagging();
   light = new Node(scene) {
     @Override
     public void graphics(PGraphics pg) {
       pg.pushStyle();
       if (debug) {
-        pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255);
+        pg.fill(0, isTagged() ? 255 : 0, 255);
         Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
       } else {
         pg.fill(0, 255, 255);
@@ -130,7 +130,7 @@ void setup() {
   animation = new TimingTask(scene) {
     @Override
     public void execute() {
-      if (!scene.isTrackedNode(light)) {
+      if (!scene.isTagged(light)) {
         float lightAngle = frameCount * 0.002;
         light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
       }

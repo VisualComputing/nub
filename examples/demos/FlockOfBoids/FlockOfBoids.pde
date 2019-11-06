@@ -59,7 +59,7 @@ void draw() {
   walls();
   scene.render();
   // uncomment to asynchronously update boid avatar. See mouseClicked()
-  // updateAvatar(scene.trackedNode("mouseClicked"));
+  // updateAvatar(scene.node("mouseClicked"));
 }
 
 void walls() {
@@ -115,9 +115,9 @@ void mouseClicked() {
   updateAvatar(scene.track("mouseClicked", mouseX, mouseY));
   // which is the same as these two lines:
   // scene.track("mouseClicked", mouseX, mouseY);
-  // updateAvatar(scene.trackedNode("mouseClicked"));
+  // updateAvatar(scene.node("mouseClicked"));
   // 2. Asynchronously
-  // which requires updateAvatar(scene.trackedNode("mouseClicked")) to be called within draw()
+  // which requires updateAvatar(scene.node("mouseClicked")) to be called within draw()
   // scene.cast("mouseClicked", mouseX, mouseY);
 }
 

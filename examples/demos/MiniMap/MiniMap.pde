@@ -1,12 +1,12 @@
 /**
  * Mini Map
  * by Jean Pierre Charalambos.
- * 
+ *
  * This example illustrates how to use off-screen rendering to build
  * a mini-map of the main Scene where all objects are interactive.
  * Note that the minimap displays the projection of the scene onto
  * the near plane in 3D.
- * 
+ *
  * Press ' ' to toggle the minimap display.
  * Press 'i' to toggle the interactivity of the minimap scene eye.
  * Press 'f' to show the entire scene or minimap.
@@ -41,6 +41,7 @@ void setup() {
   // eye only should belong only to the scene
   // so set a detached 'node' instance as the eye
   scene.setEye(new Node());
+  scene.tag(scene.eye());
   scene.setRadius(1000);
   rectMode(CENTER);
   scene.fit(1);
@@ -92,10 +93,14 @@ void keyPressed() {
     displayMinimap = !displayMinimap;
   if (key == 'i') {
     interactiveEye = !interactiveEye;
-    if (interactiveEye)
-      minimap.setTrackedNode(sceneEye);
-    else
-      minimap.resetTrackedNode();
+    if (interactiveEye) {
+      scene.tag(scene.eye());
+      minimap.tag(sceneEye);
+    }
+    else {
+      minimap.untag(sceneEye);
+      scene.untag(scene.eye());
+    }
   }
   if (key == 'f')
     focus.fit(1);
@@ -104,7 +109,8 @@ void keyPressed() {
 }
 
 void mouseMoved() {
-  if (!interactiveEye || focus == scene)
+  //if (!interactiveEye || focus == scene)
+  if (!interactiveEye)
     focus.cast();
 }
 
@@ -158,7 +164,7 @@ void draw() {
     minimap.drawAxes();
     minimap.render();
     // draw scene eye
-    minimap.context().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 255, 125);
+    minimap.context().fill(sceneEye.isTagged(minimap) ? 255 : 25, sceneEye.isTagged(minimap) ? 0 : 255, 255, 125);
     minimap.context().strokeWeight(2);
     minimap.context().stroke(0, 0, 255);
     minimap.drawFrustum(scene);
