@@ -286,6 +286,10 @@ public class TRIK extends Solver {
     }
 
     //TODO : remove this methods
+    public List<? extends Node> chain(){
+        return _original;
+    }
+
     public List<Node> copyChain(){
         return _chain;
     }
