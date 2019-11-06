@@ -5,6 +5,9 @@ import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /*******************************************************************************
  * This is an adaptation of qcprot.c for fruther information look at https://theobald.brandeis.edu/qcp/
  *
@@ -97,27 +100,27 @@ import nub.primitives.Vector;
 
 
 public class QCP {
-    static float InnerProduct(float[] A, Vector[] coords1, Vector[] coords2, float[] weight){
+    static float InnerProduct(float[] A, List<Vector> coords1, List<Vector> coords2, List<Float> weight){
         float          x1, x2, y1, y2, z1, z2;
         int             i;
         float          G1 = 0.0f, G2 = 0.0f;
-        int len = coords1.length;
+        int len = coords1.size();
 
         A[0] = A[1] = A[2] = A[3] = A[4] = A[5] = A[6] = A[7] = A[8] = 0.0f;
 
         if (weight != null){
             for (i = 0; i < len; ++i){
-                x1 = weight[i] * coords1[i].x();
-                y1 = weight[i] * coords1[i].y();
-                z1 = weight[i] * coords1[i].z();
+                x1 = weight.get(i) * coords1.get(i).x();
+                y1 = weight.get(i) * coords1.get(i).y();
+                z1 = weight.get(i) * coords1.get(i).z();
 
-                G1 += x1 * coords1[i].x() + y1 * coords1[i].y() + z1 * coords1[i].z();
+                G1 += x1 * coords1.get(i).x() + y1 * coords1.get(i).y() + z1 * coords1.get(i).z();
 
-                x2 = coords2[i].x();
-                y2 = coords2[i].y();
-                z2 = coords2[i].z();
+                x2 = coords2.get(i).x();
+                y2 = coords2.get(i).y();
+                z2 = coords2.get(i).z();
 
-                G2 += weight[i] * (x2 * x2 + y2 * y2 + z2 * z2);
+                G2 += weight.get(i) * (x2 * x2 + y2 * y2 + z2 * z2);
 
                 A[0] +=  (x1 * x2);
                 A[1] +=  (x1 * y2);
@@ -134,15 +137,15 @@ public class QCP {
         }
         else {
             for (i = 0; i < len; ++i) {
-                x1 = coords1[i].x();
-                y1 = coords1[i].y();
-                z1 = coords1[i].z();
+                x1 = coords1.get(i).x();
+                y1 = coords1.get(i).y();
+                z1 = coords1.get(i).z();
 
                 G1 += x1 * x1 + y1 * y1 + z1 * z1;
 
-                x2 = coords2[i].x();
-                y2 = coords2[i].y();
-                z2 = coords2[i].z();
+                x2 = coords2.get(i).x();
+                y2 = coords2.get(i).y();
+                z2 = coords2.get(i).z();
 
                 G2 += (x2 * x2 + y2 * y2 + z2 * z2);
 
@@ -337,8 +340,8 @@ public class QCP {
         return (1);
     }
 
-    static Vector CalculateCentroid(Vector[] coords, float[] weight){
-        int             i, len = coords.length;
+    static Vector CalculateCentroid(List<Vector> coords, List<Float> weight){
+        int             i, len = coords.size();
         float          xsum, ysum, zsum, wsum;
         xsum = ysum = zsum = 0.0f;
         if (weight != null)
@@ -346,11 +349,10 @@ public class QCP {
             wsum = 0.0f;
             for (i = 0; i < len; ++i)
             {
-                xsum += weight[i] * coords[i].x();
-                ysum += weight[i] * coords[i].y();
-                zsum += weight[i] * coords[i].z();
-
-                wsum += weight[i];
+                xsum += weight.get(i) * coords.get(i).x();
+                ysum += weight.get(i) * coords.get(i).y();
+                zsum += weight.get(i) * coords.get(i).z();
+                wsum += weight.get(i);
             }
 
             xsum /= wsum;
@@ -361,9 +363,9 @@ public class QCP {
         {
             for (i = 0; i < len; ++i)
             {
-                xsum += coords[i].x();
-                ysum += coords[i].y();
-                zsum += coords[i].z();
+                xsum += coords.get(i).x();
+                ysum += coords.get(i).y();
+                zsum += coords.get(i).z();
             }
 
             xsum /= len;
@@ -374,41 +376,57 @@ public class QCP {
         return new Vector(xsum, ysum, zsum);
     }
 
-    static Vector[] CenterCoords(Vector[] coords, Vector centroid) {
-        int             i, len = coords.length;
-        Vector[] center_coords = new Vector[coords.length];
+    static Vector[] CenterCoords(List<Vector> coords, Vector centroid) {
+        int             i, len = coords.size();
+        Vector[] center_coords = new Vector[coords.size()];
 
         for (i = 0; i < len; ++i)
         {
-            center_coords[i] = new Vector((float)(coords[i].x() - centroid.x()), (float)(coords[i].y() - centroid.y()), (float)(coords[i].z() - centroid.z()));
+            center_coords[i] = new Vector(coords.get(i).x() - centroid.x(), coords.get(i).y() - centroid.y(), coords.get(i).z() - centroid.z());
         }
         return center_coords;
     }
 
+    //Do not consider coords that are quite near to the origin
+    static void filter(List<Vector> coords1, List<Vector> coords2, List<Float> weights){
+        for(int i = coords1.size() - 1; i >= 0; i--){
+            if(coords1.get(i).magnitude() < 0.1) {
+                coords1.remove(i);
+                coords2.remove(i);
+                if(weights != null) weights.remove(i);
+            }
+        }
+    }
+
     /* Superposition coords2 onto coords1 -- in other words, coords2 is rotated, coords1 is held fixed */
-    static Pair<Quaternion, Vector> CalcRMSDRotationalMatrix(Vector[] coords1, Vector[] coords2, float[] weight)
+    static Quaternion CalcRMSDRotationalMatrix(List<Vector> coords1, List<Vector> coords2, List<Float> weight)
     {
         int i;
         float[] A = new float[9];
         float wsum;
 
         /* center the structures -- if precentered you can omit this step */
-        Vector centroid1 = CalculateCentroid(coords1, weight);
-        Vector centroid2 = CalculateCentroid(coords2, weight);
+        //HERE WE DON'T CENTER THE COORDINATES CAUSE THEY'RE ALREADY IN A COMMON FRAME
+        //Vector centroid1 = CalculateCentroid(coords1, weight);
+        //Vector centroid2 = CalculateCentroid(coords2, weight);
+        //coords1_centered = CenterCoords(coords1, centroid1);
+        //coords2_centered = CenterCoords(coords2, centroid2);
 
-        Vector[] coords1_centered = CenterCoords(coords1, centroid1);
-        Vector[] coords2_centered = CenterCoords(coords2, centroid2);
+        List<Vector> coords1_centered = new ArrayList<>(coords1);
+        List<Vector> coords2_centered = new ArrayList<>(coords2);
+        List<Float> filteredWeights = weight == null ? null : new ArrayList<>(weight);
+        filter(coords1_centered, coords2_centered, filteredWeights);
 
-        if (weight == null)
+        if (filteredWeights == null)
         {
-            wsum = coords1_centered.length;
+            wsum = coords1_centered.size();
         }
         else
         {
             wsum = 0.0f;
-            for (i = 0; i < coords1_centered.length; ++i)
+            for (i = 0; i < coords1_centered.size(); ++i)
             {
-                wsum += weight[i];
+                wsum += weight.get(i);
             }
         }
 
@@ -420,17 +438,14 @@ public class QCP {
         /* calculate the RMSD & rotational matrix */
         FastCalcRMSDAndRotation(rot, A, E0, wsum, -1);
 
-        Vector x = new Vector((float) rot[0], (float) rot[1], (float) rot[2]);
-        Vector y = new Vector((float) rot[3], (float) rot[4], (float) rot[5]);
-        Vector z = new Vector((float) rot[6], (float) rot[7], (float) rot[8]);
+        Vector x = new Vector((float) rot[0], (float) rot[3], (float) rot[6]);
+        Vector y = new Vector((float) rot[1], (float) rot[4], (float) rot[7]);
+        Vector z = new Vector((float) rot[2], (float) rot[5], (float) rot[8]);
 
         //Rotation
         Quaternion q = new Quaternion();
         q.fromRotatedBasis(x,y,z);
-        //Translation
-        Vector t = Vector.subtract(centroid1, q.rotate(centroid2));
-
-        return new Pair<Quaternion, Vector>(q,t);
+        return q;
     }
 
 

@@ -1,6 +1,5 @@
 package nub.ik.solver.geometric;
 
-import javafx.util.Pair;
 import nub.core.Node;
 import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
@@ -105,9 +104,8 @@ public class TRIKTree extends Solver {
 
         int childrenModified = 0;
         TRIK solver = treeNode._solver;
-        int c = 0;
-        Vector[] current_coords = new Vector[treeNode._children.size()];
-        Vector[] desired_coords = new Vector[treeNode._children.size()];
+        List<Vector> current_coords = new ArrayList<Vector>();
+        List<Vector> desired_coords = new ArrayList<Vector>();
         for(TreeNode child : treeNode._children()){
             if( _solve(child)){
                 childrenModified++;
@@ -115,32 +113,31 @@ public class TRIKTree extends Solver {
                 Vector eff = solver._original.get(solver._original.size() - 1).location(child._solver._original.get(child._solver._original.size() - 1));
                 Vector t = solver._original.get(solver._original.size() - 1).location(child._solver._target);
                 Vector diff = Vector.subtract(t, eff);
-                current_coords[c] = o;
+                current_coords.add(o);
                 //current_coords[c] = Vector.subtract(current_coords[c],o);
-                desired_coords[c] = Vector.add(o,diff);
+                desired_coords.add(Vector.add(o,diff));
                 //desired_coords[c] = Vector.subtract(local_t,o);
             }
-            c++;
         }
 
         if(childrenModified <= 0) return false;
 
         //in case a children was modified and the node is not a leaf
-        Pair<Quaternion, Vector> transformation = QCP.CalcRMSDRotationalMatrix(desired_coords, current_coords, null);
+        Quaternion rotation = QCP.CalcRMSDRotationalMatrix(desired_coords, current_coords, null);
+        solver._original.get(solver._original.size() - 1).rotate(rotation);
         Node target = new Node();
-        target.setPosition(solver._original.get(solver._original.size() - 1).worldLocation(transformation.getValue()));
-        target.setOrientation(Quaternion.compose(solver._original.get(solver._original.size() - 1).orientation(), transformation.getKey()));
-        solver.setTarget(target);
         //solve ik for current chain
-        if(solver._chain.size() < 2){//If the solver has only a node we require to update manually
-            for(int i = 0; i < current_coords.length; i++){
-                System.out.println("curr " + current_coords[i] + " des " + desired_coords[i] + " cur rot : " + transformation.getKey().rotate(current_coords[i]) + " other r " + transformation.getKey().inverse().rotate(current_coords[i]));
+        if(solver._chain.size() >= 2){//If the solver has only a node we require to update manually
+            //Set the target position
+            Vector translation = new Vector();
+            for(int i = 0; i < current_coords.size(); i++){
+                Vector o = rotation.rotate(current_coords.get(i));
+                translation.add(Vector.subtract(desired_coords.get(i), o)); //TODO: consider weights
             }
+            translation.multiply(1f/current_coords.size());
+            target.setPosition(solver._original.get(solver._original.size() - 1).worldLocation(translation));
 
-            System.out.println("Quat : " + transformation.getKey().axis() + " a " + transformation.getKey().angle());
-
-            solver._original.get(solver._original.size() - 1).rotate(transformation.getKey().inverse());
-        } else {
+            solver.setTarget(target);
             solver.solve(); //Perform a given number of iterations
         }
         return true;
@@ -201,6 +198,10 @@ public class TRIKTree extends Solver {
     @Override
     public void setTarget(Node endEffector, Node target) {
         addTarget(endEffector, target);
+    }
+
+    public Node head() {
+        return (Node) _root._solver()._original.get(0);
     }
 
 
