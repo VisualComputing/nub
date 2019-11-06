@@ -2309,17 +2309,6 @@ public class Node {
   }
 
   /**
-   * Same as {@code return !isDetached() && isTagged(graph())}. Use it if the node is
-   * attached to a {@link #graph()}. Use {@link #isTagged(Graph)} if the node {@link #isDetached()}.
-   *
-   * @see #isDetached()
-   * @see #isTagged(Graph)
-   */
-  public boolean isTagged() {
-    return !isDetached() && isTagged(graph());
-  }
-
-  /**
    * Returns {@code true} if the {@code node} has been tagged by the {@code graph} at least once
    * and {@code false} otherwise.
    *

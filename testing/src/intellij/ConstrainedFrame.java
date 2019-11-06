@@ -57,7 +57,7 @@ public class ConstrainedFrame extends PApplet {
     pushMatrix();
     scene.applyTransformation(iNode);
     scene.drawAxes(40);
-    fill(iNode.isTagged() ? 255 : 0, 0, 255);
+    fill(iNode.isTagged(scene) ? 255 : 0, 0, 255);
     scene.drawTorusSolenoid();
     popMatrix();
     fill(0, 0, 255);

@@ -905,6 +905,10 @@ public class Graph {
     if (eye == null || _eye == eye)
       return;
     //TODO experimental
+    if (isTagged(eye)) {
+      untag(eye);
+      System.out.println("Warning: node was untaged since it was set as the eye");
+    }
     prune(_eye);
     _eye = eye;
     if (_interpolator == null)
@@ -3043,7 +3047,6 @@ public class Graph {
    * Same as {@code return hasTag(null, node)}.
    *
    * @see #hasTag(String, Node)
-   * @see Node#isTagged()
    */
   public boolean hasNullTag(Node node) {
     return hasTag(null, node);
@@ -3057,7 +3060,7 @@ public class Graph {
    * @see #updateTag(String, int, int)
    * @see #removeTag(String)
    * @see #tag(String, Node)
-   * @see Node#isTagged()
+   * @see Node#isTagged(Graph)
    */
   public boolean hasTag(String tag, Node node) {
     return node(tag) == node;
