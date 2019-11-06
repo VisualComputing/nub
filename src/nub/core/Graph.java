@@ -231,8 +231,6 @@ public class Graph {
     _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
     setEye(new Node(this));
-    // interactivity defaults to the eye:
-    tag(eye());
     setType(type);
     if (is3D())
       setFOV((float) Math.PI / 3);
@@ -2375,8 +2373,7 @@ public class Graph {
 
   /**
    * Tags (with {@code tag} which may be {@code null}) the node in {@code nodeArray} picked with ray-casting
-   * at pixel {@code x, y} and returns it (see {@link #node(String)}). Tags the {@link #eye()} if no node is
-   * found under the pixel and if tagging is enabled for the {@code eye} (see {@link Node#isTaggingEnabled()}).
+   * at pixel {@code x, y} and returns it (see {@link #node(String)}).
    * <p>
    * Use this version of the method instead of {@link #track(String, int, int)} when dealing with
    * detached nodes.
@@ -2397,16 +2394,11 @@ public class Graph {
    */
   public Node track(String tag, int x, int y, Node[] nodeArray) {
     removeTag(tag);
-    for (Node node : nodeArray) {
-      if (node.isTaggingEnabled()) {
-        if (!isTagValid(tag) && (node == eye()))
-          tag(tag, eye());
-        else if (tracks(node, x, y)) {
-          tag(tag, node);
-          break;
-        }
+    for (Node node : nodeArray)
+      if (tracks(node, x, y)) {
+        tag(tag, node);
+        break;
       }
-    }
     return node(tag);
   }
 
@@ -2426,16 +2418,11 @@ public class Graph {
    */
   public Node track(String tag, int x, int y, List<Node> nodeList) {
     removeTag(tag);
-    for (Node node : nodeList) {
-      if (node.isTaggingEnabled()) {
-        if (!isTagValid(tag) && (node == eye()))
-          tag(tag, eye());
-        else if (tracks(node, x, y)) {
-          tag(tag, node);
-          break;
-        }
+    for (Node node : nodeList)
+      if (tracks(node, x, y)) {
+        tag(tag, node);
+        break;
       }
-    }
     return node(tag);
   }
 
@@ -2472,10 +2459,7 @@ public class Graph {
    * @see #cast(String, int, int)
    */
   public Node track(String tag, int x, int y) {
-    if (eye().isTaggingEnabled() && eye().isAttached(this))
-      tag(tag, eye());
-    else
-      removeTag(tag);
+    removeTag(tag);
     for (Node node : _leadingNodes())
       _track(tag, node, x, y);
     return node(tag);
@@ -2485,12 +2469,12 @@ public class Graph {
    * Use internally by {@link #track(String, int, int)}.
    */
   protected void _track(String tag, Node node, int x, int y) {
-    if ((node(tag) == null || node(tag) == eye()) && node.isTaggingEnabled())
+    if (node(tag) == null && node.isTaggingEnabled())
       if (tracks(node, x, y)) {
         tag(tag, node);
         return;
       }
-    if (!node.isCulled() && (node(tag) == null || node(tag) == eye()))
+    if (!node.isCulled() && node(tag) == null)
       for (Node child : node.children())
         _track(tag, child, x, y);
   }
@@ -2948,10 +2932,7 @@ public class Graph {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        if (eye().isTaggingEnabled() && eye().isAttached(this))
-          tag(ray._tag, eye());
-        else
-          removeTag(ray._tag);
+        removeTag(ray._tag);
         if (_tracks(node, ray._pixelX, ray._pixelY, projection)) {
           tag(ray._tag, node);
           it.remove();
@@ -2968,10 +2949,7 @@ public class Graph {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        if (eye().isTaggingEnabled() && eye().isAttached(this))
-          tag(ray._tag, eye());
-        else
-          removeTag(ray._tag);
+        removeTag(ray._tag);
         if (_tracks(node, ray._pixelX, ray._pixelY)) {
           tag(ray._tag, node);
           it.remove();
@@ -3003,6 +2981,10 @@ public class Graph {
   public void tag(String tag, Node node) {
     if (node == null) {
       System.out.println("Warning. Cannot tag a null node!");
+      return;
+    }
+    if (node == eye()) {
+      System.out.println("Warning. Cannot tag the eye!");
       return;
     }
     if (!node.isTaggingEnabled()) {
