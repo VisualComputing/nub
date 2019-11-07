@@ -2957,34 +2957,57 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code translate(mouseDX(), mouseDY())}.
+   * Same as {@code super.translate(mouseDX(), mouseDY())}.
    *
    * @see #translate(float, float)
-   * @see #mouseDX()
-   * @see #mouseDY()
    */
   public void translate() {
-    translate(mouseDX(), mouseDY());
+    super.translate(mouseDX(), mouseDY());
   }
 
   /**
-   * Same as {@code translate(node(tag))}.
+   * Same as {@code super.translate(tag, mouseDX(), mouseDY())}.
    *
-   * @see #translate(Node)
+   * @see #translate(String, float, float)
    */
   public void translate(String tag) {
-    translate(node(tag));
+    super.translate(tag, mouseDX(), mouseDY());
   }
 
   /**
-   * Same as {@code translate(mouseDX(), mouseDY(), node)}.
+   * Same as {@code super.translateTag(tag, mouseDX(), mouseDY())}.
    *
-   * @see Graph#translate(Node, float, float)
-   * @see #mouseDX()
-   * @see #mouseDY()
+   * @see #translateTag(String, float, float)
    */
-  public void translate(Node node) {
-    translate(node, mouseDX(), mouseDY());
+  public void translateTag(String tag) {
+    super.translateTag(tag, mouseDX(), mouseDY());
+  }
+
+  /**
+   * Same as {@code super.translate(mouseDX(), mouseDY())}.
+   *
+   * @see #translate(float, float)
+   */
+  public void translateTag() {
+    super.translate(mouseDX(), mouseDY());
+  }
+
+  /**
+   * Same as {@code super.translateNode(node, mouseDX(), mouseDY())}.
+   *
+   * @see #translateNode(Node, float, float)
+   */
+  public void translateNode(Node node) {
+    super.translateNode(node, mouseDX(), mouseDY());
+  }
+
+  /**
+   * Same as {@code super.translateEye(mouseDX(), mouseDY())}.
+   *
+   * @see #translateEye(float, float)
+   */
+  public void translateEye() {
+    super.translateEye(mouseDX(), mouseDY());
   }
 
   /**

@@ -50,7 +50,7 @@ import java.util.List;
  * {@link #location(Vector, Node)}, are provided for convenience.
  * <h1>3. Interactivity</h1>
  * Several methods taking a {@link Node} parameter provide interactivity to nodes, such as
- * {@link #translate(Node, float, float, float)}, {@link #rotate(Node, float, float, float)}
+ * {@link #translate(float, float, float)}, {@link #rotate(Node, float, float, float)}
  * and {@link #scale(Node, float)}.
  * <p>
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
@@ -3333,22 +3333,16 @@ public class Graph {
    * Same as {@code align(null)}.
    *
    * @see #align(String)
-   * @see #alignTag(String)
-   * @see #alignEye()
-   * @see #alignTag()
    */
   public void align() {
     align(null);
   }
 
   /**
-   * Calls {@code #alignTag(tag)} if {@code node(tag) != null} and {@code #alignEye()} otherwise.
+   * Calls {@code alignTag(tag)} if {@code node(tag) != null} and {@code alignEye()} otherwise.
    *
-   * @see #node(String)
    * @see #alignTag(String)
    * @see #alignEye()
-   * @see #alignTag()
-   * @see #align()
    */
   public void align(String tag) {
     if (node(tag) == null)
@@ -3361,36 +3355,31 @@ public class Graph {
    * Same as {@code alignTag(null)}.
    *
    * @see #alignTag(String)
-   * @see #alignEye()
-   * @see #align(String)
-   * @see #align()
    */
   public void alignTag() {
     alignTag(null);
   }
 
   /**
-   * Aligns the tagged node (see {@link #node(String)}) with the {@link #eye()}.
+   * Same as {@code alignNode(node(tag))}.
    *
-   * @param tag of the node to align
-   * @see #align(String)
-   * @see #alignEye()
-   * @see #alignTag()
-   * @see #align()
+   * @see #alignNode(Node)
+   * @see #node(String)
    */
   public void alignTag(String tag) {
-    if (node(tag) != null)
-      node(tag).align(eye());
+    alignNode(node(tag));
+  }
+
+  /**
+   * Aligns the node with the {@link #eye()}.
+   */
+  public void alignNode(Node node) {
+    if (node != null)
+      node.align(eye());
   }
 
   /**
    * Aligns the {@link #eye()} with the world.
-   *
-   * @see #node(String)
-   * @see #alignTag(String)
-   * @see #align(String)
-   * @see #alignTag()
-   * @see #align()
    */
   public void alignEye() {
     eye().align(true);
@@ -3411,13 +3400,10 @@ public class Graph {
   }
 
   /**
-   * Calls {@code #focusTag(tag)} if {@code node(tag) != null} and {@code #focusEye()} otherwise.
+   * Calls {@code focusTag(tag)} if {@code node(tag) != null} and {@code focusEye()} otherwise.
    *
-   * @see #node(String)
-   * @see #focusTag(String)
    * @see #focusEye()
-   * @see #focusTag()
-   * @see #focus()
+   * @see #focusTag(String)
    */
   public void focus(String tag) {
     if (node(tag) == null)
@@ -3430,36 +3416,31 @@ public class Graph {
    * Same as {@code focusTag(null)}.
    *
    * @see #focusTag(String)
-   * @see #focusEye()
-   * @see #focus(String)
-   * @see #focus()
    */
   public void focusTag() {
     focusTag(null);
   }
 
   /**
-   * Focuses the tagged node (see {@link #node(String)}) with the {@link #eye()}.
+   * Same as {@code focusNode(node(tag))}.
    *
-   * @param tag of the node to focus
-   * @see #focus(String)
-   * @see #focusEye()
-   * @see #focusTag()
-   * @see #focus()
+   * @see #focusNode(Node)
+   * @see #node(String)
    */
   public void focusTag(String tag) {
-    if (node(tag) != null)
-      node(tag).projectOnLine(eye().position(), eye().zAxis(false));
+    focusNode(node(tag));
   }
 
   /**
-   * Focuses the {@link #eye()} with the world.
-   *
-   * @see #node(String)
-   * @see #focusTag(String)
-   * @see #focus(String)
-   * @see #focusTag()
-   * @see #focus()
+   * Focuses the node with the {@link #eye()}.
+   */
+  public void focusNode(Node node) {
+    if (node != null)
+      node.projectOnLine(eye().position(), eye().zAxis(false));
+  }
+
+  /**
+   * Focuses the {@link #eye()} to the world.
    */
   public void focusEye() {
     eye().projectOnLine(center(), viewDirection());
@@ -3468,23 +3449,12 @@ public class Graph {
   // 3. Translate
 
   /**
-   * Same as {@code translate(null, dx, dy)}.
+   * Same as {@code translate(dx, dy, 0)}.
    *
-   * @see #translate(String, float, float)
+   * @see #translate(float, float, float)
    */
   public void translate(float dx, float dy) {
-    translate(node(null), dx, dy);
-  }
-
-  /**
-   * Same as {@code translate(dx, dy, 0, defaultNode(tag))}.
-   *
-   * @see #translate(Node, float, float)
-   * @see #translate(Node, float, float, float)
-   * @see #translate(String, float, float, float)
-   */
-  public void translate(String tag, float dx, float dy) {
-    translate(node(tag), dx, dy, 0);
+    translate(dx, dy, 0);
   }
 
   /**
@@ -3493,84 +3463,144 @@ public class Graph {
    * @see #translate(String, float, float, float)
    */
   public void translate(float dx, float dy, float dz) {
-    translate(node(null), dx, dy, dz);
+    translate(null, dx, dy, dz);
   }
 
   /**
-   * Same as {@code translate(dx, dy, dz, defaultNode(tag))}.
+   * Same as {@code translate(tag, dx, dy, 0)}.
    *
-   * @see #translate(Node, float, float)
-   * @see #translate(String, float, float)
-   * @see #translate(Node, float, float, float)
+   * @see #translate(String, float, float, float)
+   */
+  public void translate(String tag, float dx, float dy) {
+    translate(tag, dx, dy, 0);
+  }
+
+  /**
+   * Calls {@code translateTag(tag, dx, dy, dz)} if {@code node(tag) != null} and {@code translateEye(dx, dy, dz)} otherwise.
+   *
+   * @see #translateTag(String, float, float, float)
+   * @see #translateEye(float, float, float)
    */
   public void translate(String tag, float dx, float dy, float dz) {
-    translate(node(tag), dx, dy, dz);
+    if (node(tag) == null)
+      translateEye(dx, dy, dz);
+    else
+      translateTag(tag, dx, dy, dz);
   }
 
   /**
-   * Same as {@code translate(dx, dy, 0, node)}.
+   * Same as {@code translateTag(null, dx, dy)}.
    *
-   * @see #translate(String, float, float, float)
-   * @see #translate(String, float, float)
-   * @see #translate(Node, float, float, float)
+   * @see #translateTag(String, float, float)
    */
-  public void translate(Node node, float dx, float dy) {
-    translate(node, dx, dy, 0);
+  public void translateTag(float dx, float dy) {
+    translateTag(null, dx, dy);
   }
 
   /**
-   * Translates the {@code node} according to {@code dx}, {@code dy} and {@code dz}. The {@code dx} and {@code dy}
-   * coordinates are expressed in screen space, and the {@code dz} coordinate is given in world units.
-   * The translated node would be kept exactly under a pointer if such a device were used to translate it.
+   * Same as {@code translateTag(null, dx, dy, dz)}.
    *
-   * @see #translate(Node, float, float)
-   * @see #translate(String, float, float)
-   * @see #translate(String, float, float, float)
+   * @see #translateTag(String, float, float, float)
    */
-  public void translate(Node node, float dx, float dy, float dz) {
+  public void translateTag(float dx, float dy, float dz) {
+    translateTag(null, dx, dy, dz);
+  }
+
+  /**
+   * Same as {@code translateNode(node(tag), dx, dy)}.
+   *
+   * @see #translateNode(Node, float, float)
+   */
+  public void translateTag(String tag, float dx, float dy) {
+    translateNode(node(tag), dx, dy);
+  }
+
+  /**
+   * Same as {@code translateNode(node(tag), dx, dy, dz)}.
+   *
+   * @see #translateNode(Node, float, float, float)
+   */
+  public void translateTag(String tag, float dx, float dy, float dz) {
+    translateNode(node(tag), dx, dy, dz);
+  }
+
+  /**
+   * Same as {@code translateNode(node, dx, dy, 0)}.
+   *
+   * @see #translateNode(Node, float, float, float)
+   */
+  public void translateNode(Node node, float dx, float dy) {
+    translateNode(node, dx, dy, 0);
+  }
+
+  /**
+   * Translates the node.
+   *
+   * @param dx screen space delta-x units
+   * @param dy screen space delta-y units
+   * @param dz world space delta-z units
+   */
+  public void translateNode(Node node, float dx, float dy, float dz) {
     if (node == null)
       return;
-    node.translate(_translate(node, dx, dy, dz));
-  }
-
-  /**
-   * Same as {@code return _translate(dx, dy, dz, Math.min(width(), height()), node)}.
-   *
-   * @see #_translate(Node, float, float, float, int)
-   */
-  protected Vector _translate(Node node, float dx, float dy, float dz) {
-    return _translate(node, dx, dy, dz, Math.min(width(), height()));
-  }
-
-  /**
-   * Interactive translation low-level implementation. Converts {@code dx} and {@code dy} defined in screen space to
-   * {@link Node#reference()} (or world coordinates if the node reference is null).
-   * <p>
-   * The projection onto the screen of the returned vector exactly match the screen {@code (dx, dy)} vector displacement
-   * (e.g., the translated node would be kept exactly under a pointer if such a device were used to translate it).
-   * The z-coordinate is mapped from [0..{@code zMax}] to the [0..2*{@link #radius()}}] range.
-   */
-  protected Vector _translate(Node node, float dx, float dy, float dz, int zMax) {
     if (is2D() && dz != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
     }
-    dx = isEye(node) ? -dx : dx;
-    dy = isRightHanded() ^ isEye(node) ? -dy : dy;
-    dz = isEye(node) ? dz : -dz;
+    dy = isRightHanded() ? -dy : dy;
+    dz = -dz;
     // Scale to fit the screen relative vector displacement
     if (type() == Type.PERSPECTIVE) {
       float k = (float) Math.tan(fov() / 2.0f) * Math.abs(
-          eye().location(isEye(node) ? anchor() : node.position())._vector[2] * eye().magnitude());
+          eye().location(node.position())._vector[2] * eye().magnitude());
       //TODO check me weird to find height instead of width working (may it has to do with fov?)
       dx *= 2.0 * k / (height() * eye().magnitude());
       dy *= 2.0 * k / (height() * eye().magnitude());
     }
     // this expresses the dz coordinate in world units:
     //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
-    Vector eyeVector = new Vector(dx, dy, dz * 2 * radius() / zMax);
-    return node.reference() == null ? eye().worldDisplacement(eyeVector) : node.reference().displacement(eyeVector, eye());
+    Vector eyeVector = new Vector(dx, dy, dz * 2 * radius() / Math.min(width(), height()));
+    node.translate(node.reference() == null ? eye().worldDisplacement(eyeVector) : node.reference().displacement(eyeVector, eye()));
   }
+
+  /**
+   * Same as {@code translateEye(dx, dy, 0)}.
+   *
+   * @see #translateEye(float, float, float)
+   */
+  public void translateEye(float dx, float dy) {
+    translateEye(dx, dy, 0);
+  }
+
+  /**
+   * Translates the {@link #eye()}.
+   *
+   * @param dx screen space delta-x units
+   * @param dy screen space delta-y units
+   * @param dz world space delta-z units
+   */
+  public void translateEye(float dx, float dy, float dz) {
+    if (is2D() && dz != 0) {
+      System.out.println("Warning: graph is 2D. Z-translation reset");
+      dz = 0;
+    }
+    dx = -dx;
+    dy = !isRightHanded() ? -dy : dy;
+    // Scale to fit the screen relative vector displacement
+    if (type() == Type.PERSPECTIVE) {
+      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(
+          eye().location(anchor())._vector[2] * eye().magnitude());
+      //TODO check me weird to find height instead of width working (may it has to do with fov?)
+      dx *= 2.0 * k / (height() * eye().magnitude());
+      dy *= 2.0 * k / (height() * eye().magnitude());
+    }
+    // this expresses the dz coordinate in world units:
+    //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
+    Vector eyeVector = new Vector(dx, dy, dz * 2 * radius() / Math.min(width(), height()));
+    _eye.translate(eye().reference() == null ? eye().worldDisplacement(eyeVector) : eye().reference().displacement(eyeVector, eye()));
+  }
+
+  //
 
   /**
    * Same as {@code scale(null, delta)}.
@@ -3807,11 +3837,11 @@ public class Graph {
   /**
    * Same as {@code translate(0, 0, delta, eye()); }.
    *
-   * @see #translate(Node, float, float, float)
+   * @see #translateEye(float, float, float)
    */
   public void moveForward(float delta) {
     float d1 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
-    translate(eye(), 0, 0, delta);
+    translateEye(0, 0, delta);
     float d2 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
     if (type() == Type.ORTHOGRAPHIC)
       if (d2 / d1 > 0 && d1 != 0)
