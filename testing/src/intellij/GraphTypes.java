@@ -138,7 +138,7 @@ public class GraphTypes extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.align();
+        focus.alignTag();
   }
 
   void draw(PGraphics graphics) {

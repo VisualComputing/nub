@@ -112,7 +112,7 @@ public class ShiftViewers extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.align();
+        focus.alignTag();
   }
 
   public void draw() {

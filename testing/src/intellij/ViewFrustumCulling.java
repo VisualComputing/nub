@@ -87,7 +87,7 @@ public class ViewFrustumCulling extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.align();
+        focus.alignTag();
   }
 
   public void keyPressed() {

@@ -369,7 +369,7 @@ public class NodeAPI3 extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.align();
+        scene.alignTag();
   }
 
   public class InteractiveNode extends Node {

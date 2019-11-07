@@ -3123,72 +3123,6 @@ public class Graph {
     _tags.remove(tag);
   }
 
-  /**
-   * Same as {@code align(null)}.
-   *
-   * @see #align(String)
-   */
-  public void align() {
-    align(null);
-  }
-
-  /**
-   * Same as {@code align(defaultNode(tag))}.
-   *
-   * @see #alignWith(Node)
-   */
-  public void align(String tag) {
-    alignWith(node(tag));
-  }
-
-  /**
-   * If {@code node} is {@link #isEye(Node)} aligns the {@link #eye()} with the world.
-   * Otherwise aligns the {@code node} with the {@link #eye()}. {@code node} should be
-   * non-null.
-   * <p>
-   * Wrapper method for {@link Node#align(boolean, float, Node)}.
-   *
-   * @see #isEye(Node)
-   */
-  public void alignWith(Node node) {
-    if (node == null)
-      return;
-    if (isEye(node))
-      node.align(true);
-    else
-      node.align(eye());
-  }
-
-  /**
-   * Same as {@code focus(null)}.
-   *
-   * @see #focus(String)
-   */
-  public void focus() {
-    focus(null);
-  }
-
-  /**
-   * Same as {@code focusWith(defaultNode(tag))}.
-   *
-   * @see #focusWith(Node)
-   */
-  public void focus(String tag) {
-    focusWith(node(tag));
-  }
-
-  /**
-   * Centers the node into the graph.
-   */
-  public void focusWith(Node node) {
-    if (node == null)
-      return;
-    if (isEye(node))
-      node.projectOnLine(center(), viewDirection());
-    else
-      node.projectOnLine(eye().position(), eye().zAxis(false));
-  }
-
   // Screen to node conversion
 
   /**
@@ -3392,6 +3326,146 @@ public class Graph {
 
   // Gesture physical interface is quite nice!
   // It always maps physical (screen) space geom data respect to the eye
+
+  // 1. Align
+
+  /**
+   * Same as {@code align(null)}.
+   *
+   * @see #align(String)
+   * @see #alignTag(String)
+   * @see #alignEye()
+   * @see #alignTag()
+   */
+  public void align() {
+    align(null);
+  }
+
+  /**
+   * Calls {@code #alignTag(tag)} if {@code node(tag) != null} and {@code #alignEye()} otherwise.
+   *
+   * @see #node(String)
+   * @see #alignTag(String)
+   * @see #alignEye()
+   * @see #alignTag()
+   * @see #align()
+   */
+  public void align(String tag) {
+    if (node(tag) == null)
+      alignEye();
+    else
+      alignTag(tag);
+  }
+
+  /**
+   * Same as {@code alignTag(null)}.
+   *
+   * @see #alignTag(String)
+   * @see #alignEye()
+   * @see #align(String)
+   * @see #align()
+   */
+  public void alignTag() {
+    alignTag(null);
+  }
+
+  /**
+   * Aligns the tagged node (see {@link #node(String)}) with the {@link #eye()}.
+   *
+   * @param tag of the node to align
+   * @see #align(String)
+   * @see #alignEye()
+   * @see #alignTag()
+   * @see #align()
+   */
+  public void alignTag(String tag) {
+    if (node(tag) != null)
+      node(tag).align(eye());
+  }
+
+  /**
+   * Aligns the {@link #eye()} with the world.
+   *
+   * @see #node(String)
+   * @see #alignTag(String)
+   * @see #align(String)
+   * @see #alignTag()
+   * @see #align()
+   */
+  public void alignEye() {
+    eye().align(true);
+  }
+
+  // 2. Focus
+
+  /**
+   * Same as {@code focus(null)}.
+   *
+   * @see #focus(String)
+   * @see #focusTag(String)
+   * @see #focusEye()
+   * @see #focusTag()
+   */
+  public void focus() {
+    focus(null);
+  }
+
+  /**
+   * Calls {@code #focusTag(tag)} if {@code node(tag) != null} and {@code #focusEye()} otherwise.
+   *
+   * @see #node(String)
+   * @see #focusTag(String)
+   * @see #focusEye()
+   * @see #focusTag()
+   * @see #focus()
+   */
+  public void focus(String tag) {
+    if (node(tag) == null)
+      focusEye();
+    else
+      focusTag(tag);
+  }
+
+  /**
+   * Same as {@code focusTag(null)}.
+   *
+   * @see #focusTag(String)
+   * @see #focusEye()
+   * @see #focus(String)
+   * @see #focus()
+   */
+  public void focusTag() {
+    focusTag(null);
+  }
+
+  /**
+   * Focuses the tagged node (see {@link #node(String)}) with the {@link #eye()}.
+   *
+   * @param tag of the node to focus
+   * @see #focus(String)
+   * @see #focusEye()
+   * @see #focusTag()
+   * @see #focus()
+   */
+  public void focusTag(String tag) {
+    if (node(tag) != null)
+      node(tag).projectOnLine(eye().position(), eye().zAxis(false));
+  }
+
+  /**
+   * Focuses the {@link #eye()} with the world.
+   *
+   * @see #node(String)
+   * @see #focusTag(String)
+   * @see #focus(String)
+   * @see #focusTag()
+   * @see #focus()
+   */
+  public void focusEye() {
+    eye().projectOnLine(center(), viewDirection());
+  }
+
+  // 3. Translate
 
   /**
    * Same as {@code translate(null, dx, dy)}.

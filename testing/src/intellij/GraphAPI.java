@@ -122,7 +122,7 @@ public class GraphAPI extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.align();
+        scene.alignTag();
   }
 
   public static void main(String[] args) {

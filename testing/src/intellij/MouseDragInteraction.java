@@ -129,7 +129,7 @@ public class MouseDragInteraction extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.align();
+        scene.alignTag();
   }
 
   PShape shape() {
