@@ -2443,8 +2443,8 @@ public class Graph {
 
   /**
    * Tags (with {@code tag} which may be {@code null}) the node in {@link #nodes()} picked with ray-casting at pixel
-   * {@code x, y} and returns it (see {@link #node(String)}). Tags the {@link #eye()} if no node is found
-   * under the pixel and if tagging is enabled for the {@code eye} (see {@link Node#isTaggingEnabled()}).
+   * {@code x, y} and returns it (see {@link #node(String)}). May return {@code null} if no node is intersected by
+   * the ray. Not that the {@link #eye()} is never tagged.
    * <p>
    * Use this version of the method instead of {@link #updateTag(String, int, int, Node[])} when dealing with
    * attached nodes to the graph.
@@ -2459,7 +2459,6 @@ public class Graph {
    * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #tag(String, int, int)
    * @see #tag(String, int, int)
    */
   public Node updateTag(String tag, int x, int y) {
@@ -2541,10 +2540,13 @@ public class Graph {
   }
 
   /**
-   * Tags (with {@code tag} which may be {@code null}) the node in {@code nodeArray} picked with
-   * ray-casting at pixel {@code x, y}. The tagged node (see {@link #node(String)}) would available
-   * after the next call {@link #render()}. Tags the {@link #eye()} if no node is found under the
-   * pixel and if tagging is enabled for the {@code eye} (see {@link Node#isTaggingEnabled()}).
+   * Same as {@link #updateTag(String, int, int)} but doesn't return immediately the tagged node.
+   * The algorithm schedules an updated of the node to be tagged for the next traversal and hence
+   * should be always be used in conjunction with {@link #render()}.
+   * <p>
+   * The tagged node (see {@link #node(String)}) would be available after the next call to
+   * {@link #render()}. It may be {@code null} if no node is intersected by the ray. Not that
+   * the {@link #eye()} is never tagged.
    * <p>
    * This method is optimal since it tags the nodes at traversal time. Prefer this method over
    * {@link #updateTag(String, int, int)} when dealing with several tags.
@@ -2973,8 +2975,9 @@ public class Graph {
 
   /**
    * Tags the {@code node} (with {@code tag} which may be {@code null})
-   * (see {@link #node(String)}). Call {@link #updateTag(String, int, int)}
-   * or {@link #tag(String, int, int)} to tag the node with ray casting.
+   * (see {@link #node(String)}). Tagging the {@link #eye()} is not allowed.
+   * Call {@link #updateTag(String, int, int)} or
+   * {@link #tag(String, int, int)} to tag the node with ray casting.
    *
    * @see #tracks(Node, int, int)
    * @see #updateTag(String, int, int)
