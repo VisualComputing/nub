@@ -51,7 +51,7 @@ import java.util.List;
  * <h1>3. Interactivity</h1>
  * Several methods taking a {@link Node} parameter provide interactivity to nodes, such as
  * {@link #translate(float, float, float)}, {@link #rotate(Node, float, float, float)}
- * and {@link #scale(Node, float)}.
+ * and {@link #scale(float)}.
  * <p>
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
  * take a node parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
@@ -69,7 +69,7 @@ import java.util.List;
  * <ol>
  * <li>The interactivity methods are implemented in terms of the ones defined previously
  * by simply passing the tagged node (see {@link #node(String)}) to them (e.g.,{@link #scale(String, float)}
- * calls {@link #scale(Node, float)} passing the tagged node).</li>
+ * calls {@link #scale(String, float)} passing the tagged node).</li>
  * <li>Many interactive methods support the {@code null} tag (e.g., {@link #scale(float delta)} simply
  * calls {@code scale(null, delta)}).</li>
  * <li>To tag the node to be tracked using ray-casting call {@link #updateTag(String, int, int, Node[])}
@@ -3372,6 +3372,8 @@ public class Graph {
 
   /**
    * Aligns the node with the {@link #eye()}.
+   *
+   * @see #alignEye()
    */
   public void alignNode(Node node) {
     if (node != null)
@@ -3380,6 +3382,8 @@ public class Graph {
 
   /**
    * Aligns the {@link #eye()} with the world.
+   *
+   * @see #alignNode(Node)
    */
   public void alignEye() {
     eye().align(true);
@@ -3433,6 +3437,8 @@ public class Graph {
 
   /**
    * Focuses the node with the {@link #eye()}.
+   *
+   * @see #focusEye()
    */
   public void focusNode(Node node) {
     if (node != null)
@@ -3441,12 +3447,78 @@ public class Graph {
 
   /**
    * Focuses the {@link #eye()} to the world.
+   *
+   * @see #focusNode(Node)
    */
   public void focusEye() {
     eye().projectOnLine(center(), viewDirection());
   }
 
-  // 3. Translate
+  // 3. Scale
+
+  /**
+   * Same as {@code scale(null, delta)}.
+   *
+   * @see #scale(String, float)
+   */
+  public void scale(float delta) {
+    scale(null, delta);
+  }
+
+  /**
+   * Calls {@code scaleTag(tag, delta)} if {@code node(tag) != null} and {@code scaleEye(delta)} otherwise.
+   *
+   * @see #scaleEye(float)
+   * @see #scaleTag(String, float)
+   */
+  public void scale(String tag, float delta) {
+    if (node(tag) == null)
+      scaleEye(delta);
+    else
+      scaleTag(tag, delta);
+  }
+
+  /**
+   * Same as {@code scaleTag(null, delta)}.
+   *
+   * @see #scaleTag(String, float)
+   */
+  public void scaleTag(float delta) {
+    scaleTag(null, delta);
+  }
+
+  /**
+   * Same as {@code scaleNode(node(tag), delta)}.
+   *
+   * @see #scaleNode(Node, float)
+   */
+  public void scaleTag(String tag, float delta) {
+    scaleNode(node(tag), delta);
+  }
+
+  /**
+   * Scales the {@code node} according to {@code delta}.
+   *
+   * @see #scaleEye(float)
+   */
+  public void scaleNode(Node node, float delta) {
+    if (node == null)
+      return;
+    float factor = 1 + Math.abs(delta) / height();
+    node.scale(delta >= 0 ? factor : 1 / factor);
+  }
+
+  /**
+   * Scales the {@link #eye()}, i.e., modifies {@link #fov()}.
+   *
+   * @see #scaleNode(Node, float)
+   */
+  public void scaleEye(float delta) {
+    float factor = 1 + Math.abs(delta) / (float) -height();
+    eye().scale(delta >= 0 ? factor : 1 / factor);
+  }
+
+  // 4. Translate
 
   /**
    * Same as {@code translate(dx, dy, 0)}.
@@ -3598,39 +3670,6 @@ public class Graph {
     //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
     Vector eyeVector = new Vector(dx, dy, dz * 2 * radius() / Math.min(width(), height()));
     _eye.translate(eye().reference() == null ? eye().worldDisplacement(eyeVector) : eye().reference().displacement(eyeVector, eye()));
-  }
-
-  //
-
-  /**
-   * Same as {@code scale(null, delta)}.
-   *
-   * @see #scale(String, float)
-   */
-  public void scale(float delta) {
-    scale(node(null), delta);
-  }
-
-  /**
-   * Same as {@code scale(delta, defaultNode(tag))}.
-   *
-   * @see #scale(Node, float)
-   */
-  public void scale(String tag, float delta) {
-    scale(node(tag), delta);
-  }
-
-  /**
-   * Scales the {@code node} according to {@code delta}. Note that if {@code node} is the {@link #eye()}
-   * this call simply changes the {@link #fov()}.
-   *
-   * @see #scale(String, float)
-   */
-  public void scale(Node node, float delta) {
-    if (node == null)
-      return;
-    float factor = 1 + Math.abs(delta) / (float) (isEye(node) ? -height() : height());
-    node.scale(delta >= 0 ? factor : 1 / factor);
   }
 
   /**
