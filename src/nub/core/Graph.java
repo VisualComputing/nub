@@ -3350,7 +3350,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code alignTag(null)}.
+   * Same as {@code return alignTag(null)}.
    *
    * @see #alignTag(String)
    */
@@ -3359,7 +3359,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code alignNode(node(tag))}.
+   * Same as {@code alignNode(node(tag))}. Returns {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #alignNode(Node)
    * @see #node(String)
@@ -3426,7 +3426,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code focusNode(node(tag))}.
+   * Same as {@code return focusNode(node(tag))}. Returns {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #focusNode(Node)
    * @see #node(String)
@@ -3490,7 +3490,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code scaleNode(node(tag), delta)}.
+   * Same as {@code scaleNode(node(tag), delta)}. Returns {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #scaleNode(Node, float)
    */
@@ -3592,7 +3592,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translateNode(node(tag), dx, dy, dz)}.
+   * Same as {@code translateNode(node(tag), dx, dy, dz)}. Returns {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #translateNode(Node, float, float, float)
    */
@@ -3682,19 +3682,42 @@ public class Graph {
 
   // 5. Rotate
 
+  /**
+   * Same as {@code rotate(null, roll, pitch, yaw)}.
+   *
+   * @see #rotate(float, float, float)
+   */
   public void rotate(float roll, float pitch, float yaw) {
     rotate(null, roll, pitch, yaw);
   }
 
+  /**
+   * Same as {@code if (!rotateTag(tag, roll, pitch, yaw)) rotateEye(roll, pitch, yaw)}.
+   *
+   * @see #rotateTag(String, float, float, float)
+   * @see #rotateEye(float, float, float)
+   */
   public void rotate(String tag, float roll, float pitch, float yaw) {
     if (!rotateTag(tag, roll, pitch, yaw))
       rotateEye(roll, pitch, yaw);
   }
 
+  /**
+   * Same as {@code return rotateTag(null, roll, pitch, yaw)}.
+   *
+   * @see #rotateTag(String, float, float, float)
+   */
   public boolean rotateTag(float roll, float pitch, float yaw) {
     return rotateTag(null, roll, pitch, yaw);
   }
 
+  /**
+   * Same as {@code rotateNode(node(tag), roll, pitch, yaw)}. Returns
+   * {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #node(String)
+   * @see #rotateNode(Node, float, float, float)
+   */
   public boolean rotateTag(String tag, float roll, float pitch, float yaw) {
     if (node(tag) != null) {
       rotateNode(node(tag), roll, pitch, yaw);
@@ -3703,6 +3726,12 @@ public class Graph {
     return false;
   }
 
+  /**
+   * Rotate the {@code node} around the world x-y-z axes
+   * according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.
+   *
+   * @see #rotateEye(float, float, float)
+   */
   public void rotateNode(Node node, float roll, float pitch, float yaw) {
     if (node == null)
       return;
@@ -3722,6 +3751,12 @@ public class Graph {
     node.rotate(quaternion);
   }
 
+  /**
+   * Rotate the {@link #eye()} around its world x-y-z axes according
+   * to {@code roll}, {@code pitch} and {@code yaw} radians, resp.
+   *
+   * @see #rotateNode(Node, float, float, float)
+   */
   public void rotateEye(float roll, float pitch, float yaw) {
     if (is2D() && (roll != 0 || pitch != 0)) {
       roll = 0;
@@ -3735,35 +3770,79 @@ public class Graph {
 
   // 6. Spin
 
+  /**
+   * Same as {@code spin(point1X, point1Y, point2X, point2Y, 1)}.
+   *
+   * @see #spin(int, int, int, int, float)
+   */
   public void spin(int point1X, int point1Y, int point2X, int point2Y) {
     spin(point1X, point1Y, point2X, point2Y, 1);
   }
 
+  /**
+   * Same as {@code spin(null, point1X, point1Y, point2X, point2Y, sensitivity)}.
+   *
+   * @see #spin(String, int, int, int, int, float)
+   */
   public void spin(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     spin(null, point1X, point1Y, point2X, point2Y, sensitivity);
   }
 
+  /**
+   * Same as {@code spin(tag, point1X, point1Y, point2X, point2Y, 1)}.
+   *
+   * @see #spin(String, int, int, int, int, float)
+   */
   public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y) {
     spin(tag, point1X, point1Y, point2X, point2Y, 1);
   }
 
+  /**
+   * Same as {@code if (!spinTag(tag, point1X, point1Y, point2X, point2Y, sensitivity))
+   * spinEye(point1X, point1Y, point2X, point2Y, sensitivity)}
+   *
+   * @see #spinTag(String, int, int, int, int, float)
+   * @see #spinEye(int, int, int, int, float)
+   */
   public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     if (!spinTag(tag, point1X, point1Y, point2X, point2Y, sensitivity))
       spinEye(point1X, point1Y, point2X, point2Y, sensitivity);
   }
 
+  /**
+   * Same as {@code return spinTag(point1X, point1Y, point2X, point2Y, 1)}.
+   *
+   * @see #spinTag(int, int, int, int, float)
+   */
   public boolean spinTag(int point1X, int point1Y, int point2X, int point2Y) {
     return spinTag(point1X, point1Y, point2X, point2Y, 1);
   }
 
+  /**
+   * Same as {@code return spinTag(null, point1X, point1Y, point2X, point2Y, sensitivity)}.
+   *
+   * @see #spinTag(String, int, int, int, int, float)
+   */
   public boolean spinTag(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     return spinTag(null, point1X, point1Y, point2X, point2Y, sensitivity);
   }
 
+  /**
+   * Same as {@code return spinTag(tag, point1X, point1Y, point2X, point2Y, 1)}.
+   *
+   * @see #spinTag(String, int, int, int, int, float)
+   */
   public boolean spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y) {
     return spinTag(tag, point1X, point1Y, point2X, point2Y, 1);
   }
 
+  /**
+   * Same as {@code spinNode(node(tag), point1X, point1Y, point2X, point2Y, sensitivity)}. Returns
+   * {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #node(String)
+   * @see #spinNode(Node, int, int, int, int, float)
+   */
   public boolean spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     if (node(tag) != null) {
       spinNode(node(tag), point1X, point1Y, point2X, point2Y, sensitivity);
@@ -3772,10 +3851,25 @@ public class Graph {
     return false;
   }
 
+  /**
+   * Same as {@code spinNode(node, point1X, point1Y, point2X, point2Y, 1)}.
+   *
+   * @see #spinNode(Node, int, int, int, int, float)
+   */
   public void spinNode(Node node, int point1X, int point1Y, int point2X, int point2Y) {
     spinNode(node, point1X, point1Y, point2X, point2Y, 1);
   }
 
+  /**
+   * Rotates the {@code node} using an arcball interface, from points {@code (point1X, point1Y)} to
+   * {@code (point2X, point2Y)} pixel positions. The {@code sensitivity} controls the gesture strength.
+   * The center of the rotation is the screen projected node origin (see {@link Node#position()}).
+   * <p>
+   * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
+   * three-dimensional orientation using a mouse.
+   *
+   * @see #spinEye(int, int, int, int, float)
+   */
   public void spinNode(Node node, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     if (node == null)
       return;
@@ -3799,10 +3893,25 @@ public class Graph {
     node.rotate(new Quaternion(vector, -quaternion.angle()));
   }
 
+  /**
+   * Same as {@code spinEye(point1X, point1Y, point2X, point2Y, 1)}.
+   *
+   * @see #spinEye(int, int, int, int, float)
+   */
   public void spinEye(int point1X, int point1Y, int point2X, int point2Y) {
     spinEye(point1X, point1Y, point2X, point2Y, 1);
   }
 
+  /**
+   * Rotates the {@link #eye()} using an arcball interface, from points {@code (point1X, point1Y)} to
+   * {@code (point2X, point2Y)} pixel positions. The {@code sensitivity} controls the gesture strength.
+   * The center of the rotation is the screen projected graph {@link #anchor()}.
+   * <p>
+   * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
+   * three-dimensional orientation using a mouse.
+   *
+   * @see #spinNode(Node, int, int, int, int, float)
+   */
   public void spinEye(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     Vector center = screenLocation(anchor());
     int centerX = (int) center.x();
@@ -3822,8 +3931,6 @@ public class Graph {
     eye()._orbit(new Quaternion(axis, angle), anchor());
   }
 
-  //
-
   /**
    * Returns "pseudo-_distance" from (x,y) to ball of radius size. For a point inside the
    * ball, it is proportional to the euclidean distance to the ball. For a point outside
@@ -3837,7 +3944,6 @@ public class Graph {
     float size = 1.0f;
     float size2 = size * size;
     float size_limit = size2 * 0.5f;
-
     float d = x * x + y * y;
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
   }
@@ -3847,7 +3953,9 @@ public class Graph {
   // 7. moveForward
 
   /**
-   * Same as {@code translate(0, 0, delta, eye()); }.
+   * Same as {@code translate(0, 0, delta, eye())}. Rescales the {@link #eye()}
+   * if the graph type is {@link Type#ORTHOGRAPHIC} so that nearby objects
+   * appear bigger when moving towards them.
    *
    * @see #translateEye(float, float, float)
    */
