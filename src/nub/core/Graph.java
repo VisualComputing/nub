@@ -2531,7 +2531,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code cast(null, x, y)}.
+   * Same as {@code tag(null, x, y)}.
    *
    * @see #tag(String, int, int)
    */

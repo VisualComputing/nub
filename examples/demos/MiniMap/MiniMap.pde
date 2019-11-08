@@ -19,7 +19,6 @@ import nub.processing.*;
 
 Scene scene, minimap, focus;
 Node[] models;
-Node sceneEye;
 boolean displayMinimap = true;
 // whilst scene is either on-screen or not, the minimap is always off-screen
 // test both cases here:
@@ -41,7 +40,6 @@ void setup() {
   // eye only should belong only to the scene
   // so set a detached 'node' instance as the eye
   scene.setEye(new Node());
-  scene.tag(scene.eye());
   scene.setRadius(1000);
   rectMode(CENTER);
   scene.fit(1);
@@ -78,8 +76,6 @@ void setup() {
   if (renderer == P3D)
     minimap.togglePerspective();
   minimap.fit(1);
-  // detached node
-  sceneEye = new Node();
 }
 
 PShape shape() {
@@ -93,14 +89,10 @@ void keyPressed() {
     displayMinimap = !displayMinimap;
   if (key == 'i') {
     interactiveEye = !interactiveEye;
-    if (interactiveEye) {
-      scene.tag(scene.eye());
-      minimap.tag(sceneEye);
-    }
-    else {
-      minimap.untag(sceneEye);
-      scene.untag(scene.eye());
-    }
+    if (interactiveEye)
+      minimap.tag(scene.eye());
+    else
+      minimap.untag(scene.eye());
   }
   if (key == 'f')
     focus.fit(1);
@@ -109,16 +101,15 @@ void keyPressed() {
 }
 
 void mouseMoved() {
-  //if (!interactiveEye || focus == scene)
-  if (!interactiveEye)
-    focus.cast();
+  if (!interactiveEye || focus == scene)
+    focus.mouseTag();
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    focus.spin();
+    focus.mouseSpin();
   else if (mouseButton == RIGHT)
-    focus.translate();
+    focus.mouseTranslate();
   else
     focus.scale(focus.mouseDX());
 }
@@ -140,8 +131,6 @@ void mouseClicked(MouseEvent event) {
 
 void draw() {
   focus = displayMinimap ? (mouseX > w / 2 && mouseY > h / 2) ? minimap : scene : scene;
-  if (interactiveEye)
-    Node.sync(scene.eye(), sceneEye);
   background(75, 25, 15);
   if (scene.isOffscreen()) {
     scene.beginDraw();
@@ -164,7 +153,8 @@ void draw() {
     minimap.drawAxes();
     minimap.render();
     // draw scene eye
-    minimap.context().fill(sceneEye.isTagged(minimap) ? 255 : 25, sceneEye.isTagged(minimap) ? 0 : 255, 255, 125);
+    //minimap.context().fill(sceneEye.isTagged(minimap) ? 255 : 25, sceneEye.isTagged(minimap) ? 0 : 255, 255, 125);
+    minimap.context().fill(minimap.isTagged(scene.eye()) ? 255 : 25, minimap.isTagged(scene.eye()) ? 0 : 255, 255, 125);
     minimap.context().strokeWeight(2);
     minimap.context().stroke(0, 0, 255);
     minimap.drawFrustum(scene);

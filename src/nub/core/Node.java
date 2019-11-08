@@ -103,11 +103,6 @@ import java.util.List;
  * Picking a node is done according to a {@link #pickingThreshold()}. When a node is tagged
  * it will be highlighted (scaled) according to a {@link #highlighting()} magnitude.
  * See also {@link #enableTagging(boolean)}.
- * <h2>Syncing</h2>
- * Two nodes can be synced together ({@link #sync(Node, Node)}), meaning that they will
- * share their global parameters (position, orientation and magnitude) taken the one
- * that has been most recently updated. Syncing can be useful to share nodes
- * among different off-screen canvases.
  */
 public class Node {
   /**
@@ -524,39 +519,6 @@ public class Node {
    */
   public long lastUpdate() {
     return _lastUpdate;
-  }
-
-  // SYNC
-
-  /**
-   * Same as {@code sync(this, other)}.
-   *
-   * @see #sync(Node, Node)
-   */
-  public void sync(Node node) {
-    sync(this, node);
-  }
-
-  /**
-   * If {@code node1} has been more recently updated than {@code node2}, calls
-   * {@code node2.set(node1)}, otherwise calls {@code node1.set(node2)}.
-   * Does nothing if both objects were updated at the same time.
-   * <p>
-   * This method syncs only the global geometry attributes ({@link #position()},
-   * {@link #orientation()} and {@link #magnitude()}) among the two nodes. The
-   * {@link #reference()} and {@link #constraint()} (if any) of each node are kept
-   * separately.
-   *
-   * @see #set(Node)
-   */
-  public static void sync(Node node1, Node node2) {
-    if (node1 == null || node2 == null)
-      return;
-    if (node1.lastUpdate() == node2.lastUpdate())
-      return;
-    Node source = (node1.lastUpdate() > node2.lastUpdate()) ? node1 : node2;
-    Node target = (node1.lastUpdate() > node2.lastUpdate()) ? node2 : node1;
-    target.set(source);
   }
 
   /**
