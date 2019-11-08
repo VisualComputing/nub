@@ -2975,21 +2975,21 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code super.translateTag(tag, mouseDX(), mouseDY())}.
+   * Same as {@code return super.translateTag(tag, mouseDX(), mouseDY())}.
    *
    * @see #translateTag(String, float, float)
    */
-  public void translateTag(String tag) {
-    super.translateTag(tag, mouseDX(), mouseDY());
+  public boolean translateTag(String tag) {
+    return super.translateTag(tag, mouseDX(), mouseDY());
   }
 
   /**
-   * Same as {@code super.translate(mouseDX(), mouseDY())}.
+   * Same as {@code return super.translate(mouseDX(), mouseDY())}.
    *
    * @see #translate(float, float)
    */
-  public void translateTag() {
-    super.translate(mouseDX(), mouseDY());
+  public boolean translateTag() {
+    return super.translateTag(mouseDX(), mouseDY());
   }
 
   /**
@@ -3010,25 +3010,21 @@ public class Scene extends Graph implements PConstants {
     super.translateEye(mouseDX(), mouseDY());
   }
 
-  //
-
   public void spin() {
     spin(null);
   }
 
   public void spin(String tag) {
-    if (node(tag) == null)
+    if (!spinTag(tag))
       spinEye();
-    else
-      spinTag(tag);
   }
 
-  public void spinTag() {
-    super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY());
+  public boolean spinTag() {
+    return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
-  public void spinTag(String tag) {
-    super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY());
+  public boolean spinTag(String tag) {
+    return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
   public void spinNode(Node node) {
@@ -3073,22 +3069,4 @@ public class Scene extends Graph implements PConstants {
   public void rotateCAD(Vector up) {
     rotateCAD(mouseRADX(), mouseRADY(), up);
   }
-
-  /*
-  public void screenRotate() {
-    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY));
-  }
-
-  public void screenRotate(float sensitivity) {
-    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity);
-  }
-
-  public void screenRotate(Node node) {
-    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), node);
-  }
-
-  public void screenRotate(float sensitivity, Node node) {
-    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity, node);
-  }
-  */
 }

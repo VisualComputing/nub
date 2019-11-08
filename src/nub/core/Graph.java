@@ -3345,10 +3345,8 @@ public class Graph {
    * @see #alignEye()
    */
   public void align(String tag) {
-    if (node(tag) == null)
+    if (!alignTag(tag))
       alignEye();
-    else
-      alignTag(tag);
   }
 
   /**
@@ -3356,8 +3354,8 @@ public class Graph {
    *
    * @see #alignTag(String)
    */
-  public void alignTag() {
-    alignTag(null);
+  public boolean alignTag() {
+    return alignTag(null);
   }
 
   /**
@@ -3366,8 +3364,12 @@ public class Graph {
    * @see #alignNode(Node)
    * @see #node(String)
    */
-  public void alignTag(String tag) {
-    alignNode(node(tag));
+  public boolean alignTag(String tag) {
+    if (node(tag) != null) {
+      alignNode(node(tag));
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -3410,10 +3412,8 @@ public class Graph {
    * @see #focusTag(String)
    */
   public void focus(String tag) {
-    if (node(tag) == null)
+    if (!focusTag(tag))
       focusEye();
-    else
-      focusTag(tag);
   }
 
   /**
@@ -3421,8 +3421,8 @@ public class Graph {
    *
    * @see #focusTag(String)
    */
-  public void focusTag() {
-    focusTag(null);
+  public boolean focusTag() {
+    return focusTag(null);
   }
 
   /**
@@ -3431,8 +3431,12 @@ public class Graph {
    * @see #focusNode(Node)
    * @see #node(String)
    */
-  public void focusTag(String tag) {
-    focusNode(node(tag));
+  public boolean focusTag(String tag) {
+    if (node(tag) != null) {
+      focusNode(node(tag));
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -3472,10 +3476,8 @@ public class Graph {
    * @see #scaleTag(String, float)
    */
   public void scale(String tag, float delta) {
-    if (node(tag) == null)
+    if (!scaleTag(tag, delta))
       scaleEye(delta);
-    else
-      scaleTag(tag, delta);
   }
 
   /**
@@ -3483,8 +3485,8 @@ public class Graph {
    *
    * @see #scaleTag(String, float)
    */
-  public void scaleTag(float delta) {
-    scaleTag(null, delta);
+  public boolean scaleTag(float delta) {
+    return scaleTag(null, delta);
   }
 
   /**
@@ -3492,8 +3494,12 @@ public class Graph {
    *
    * @see #scaleNode(Node, float)
    */
-  public void scaleTag(String tag, float delta) {
-    scaleNode(node(tag), delta);
+  public boolean scaleTag(String tag, float delta) {
+    if (node(tag) != null) {
+      scaleNode(node(tag), delta);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -3554,10 +3560,8 @@ public class Graph {
    * @see #translateEye(float, float, float)
    */
   public void translate(String tag, float dx, float dy, float dz) {
-    if (node(tag) == null)
+    if (!translateTag(tag, dx, dy, dz))
       translateEye(dx, dy, dz);
-    else
-      translateTag(tag, dx, dy, dz);
   }
 
   /**
@@ -3565,8 +3569,8 @@ public class Graph {
    *
    * @see #translateTag(String, float, float)
    */
-  public void translateTag(float dx, float dy) {
-    translateTag(null, dx, dy);
+  public boolean translateTag(float dx, float dy) {
+    return translateTag(null, dx, dy);
   }
 
   /**
@@ -3574,8 +3578,8 @@ public class Graph {
    *
    * @see #translateTag(String, float, float, float)
    */
-  public void translateTag(float dx, float dy, float dz) {
-    translateTag(null, dx, dy, dz);
+  public boolean translateTag(float dx, float dy, float dz) {
+    return translateTag(null, dx, dy, dz);
   }
 
   /**
@@ -3583,8 +3587,8 @@ public class Graph {
    *
    * @see #translateNode(Node, float, float)
    */
-  public void translateTag(String tag, float dx, float dy) {
-    translateNode(node(tag), dx, dy);
+  public boolean translateTag(String tag, float dx, float dy) {
+    return translateTag(tag, dx, dy, 0);
   }
 
   /**
@@ -3592,8 +3596,12 @@ public class Graph {
    *
    * @see #translateNode(Node, float, float, float)
    */
-  public void translateTag(String tag, float dx, float dy, float dz) {
-    translateNode(node(tag), dx, dy, dz);
+  public boolean translateTag(String tag, float dx, float dy, float dz) {
+    if (node(tag) != null) {
+      translateNode(node(tag), dx, dy, dz);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -3672,25 +3680,27 @@ public class Graph {
     _eye.translate(eye().reference() == null ? eye().worldDisplacement(eyeVector) : eye().reference().displacement(eyeVector, eye()));
   }
 
-  //
+  // 5. Rotate
 
   public void rotate(float roll, float pitch, float yaw) {
     rotate(null, roll, pitch, yaw);
   }
 
   public void rotate(String tag, float roll, float pitch, float yaw) {
-    if (node(tag) == null)
+    if (!rotateTag(tag, roll, pitch, yaw))
       rotateEye(roll, pitch, yaw);
-    else
-      rotateTag(tag, roll, pitch, yaw);
   }
 
-  public void rotateTag(float roll, float pitch, float yaw) {
-    rotateTag(null, roll, pitch, yaw);
+  public boolean rotateTag(float roll, float pitch, float yaw) {
+    return rotateTag(null, roll, pitch, yaw);
   }
 
-  public void rotateTag(String tag, float roll, float pitch, float yaw) {
-    rotateNode(node(tag), roll, pitch, yaw);
+  public boolean rotateTag(String tag, float roll, float pitch, float yaw) {
+    if (node(tag) != null) {
+      rotateNode(node(tag), roll, pitch, yaw);
+      return true;
+    }
+    return false;
   }
 
   public void rotateNode(Node node, float roll, float pitch, float yaw) {
@@ -3723,7 +3733,7 @@ public class Graph {
     eye()._orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor());
   }
 
-  //
+  // 6. Spin
 
   public void spin(int point1X, int point1Y, int point2X, int point2Y) {
     spin(point1X, point1Y, point2X, point2Y, 1);
@@ -3738,26 +3748,28 @@ public class Graph {
   }
 
   public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
-    if (node(tag) == null)
+    if (!spinTag(tag, point1X, point1Y, point2X, point2Y, sensitivity))
       spinEye(point1X, point1Y, point2X, point2Y, sensitivity);
-    else
+  }
+
+  public boolean spinTag(int point1X, int point1Y, int point2X, int point2Y) {
+    return spinTag(point1X, point1Y, point2X, point2Y, 1);
+  }
+
+  public boolean spinTag(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    return spinTag(null, point1X, point1Y, point2X, point2Y, sensitivity);
+  }
+
+  public boolean spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y) {
+    return spinTag(tag, point1X, point1Y, point2X, point2Y, 1);
+  }
+
+  public boolean spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    if (node(tag) != null) {
       spinNode(node(tag), point1X, point1Y, point2X, point2Y, sensitivity);
-  }
-
-  public void spinTag(int point1X, int point1Y, int point2X, int point2Y) {
-    spinTag(point1X, point1Y, point2X, point2Y, 1);
-  }
-
-  public void spinTag(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
-    spinTag(null, point1X, point1Y, point2X, point2Y, sensitivity);
-  }
-
-  public void spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y) {
-    spinTag(tag, point1X, point1Y, point2X, point2Y, 1);
-  }
-
-  public void spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
-    spinNode(node(tag), point1X, point1Y, point2X, point2Y, sensitivity);
+      return true;
+    }
+    return false;
   }
 
   public void spinNode(Node node, int point1X, int point1Y, int point2X, int point2Y) {
@@ -3805,6 +3817,8 @@ public class Graph {
     Vector axis = p2.cross(p1);
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
+    //same as:
+    //eye().orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
     eye()._orbit(new Quaternion(axis, angle), anchor());
   }
 
@@ -3830,6 +3844,8 @@ public class Graph {
 
   // only 3d eye
 
+  // 7. moveForward
+
   /**
    * Same as {@code translate(0, 0, delta, eye()); }.
    *
@@ -3843,6 +3859,8 @@ public class Graph {
       if (d2 / d1 > 0 && d1 != 0)
         eye().scale(d2 / d1);
   }
+
+  // 8. lookAround
 
   /**
    * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
@@ -3866,33 +3884,7 @@ public class Graph {
     eye().rotate(quaternion);
   }
 
-  //Replace previous call with the following two to preserve the upVector param.
-  /*
-  protected Quaternion _lookAround(float deltaX, float deltaY, float sensitivity) {
-    if (is2D()) {
-      System.out.println("Warning: lookAround is only available in 3D");
-      return new Quaternion();
-    }
-    if(frameCount() > _lookAroundCount) {
-      _upVector = eye().yAxis();
-      _lookAroundCount = this.frameCount();
-    }
-    _lookAroundCount++;
-    return _lookAround(deltaX, deltaY, _upVector, sensitivity);
-  }
-
-  protected Quaternion _lookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
-    if (is2D()) {
-      System.out.println("Warning: lookAround is only available in 3D");
-      return new Quaternion();
-    }
-    deltaX *= -sensitivity;
-    deltaY *= sensitivity;
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
-    Quaternion rotY = new Quaternion(eye().displacement(upVector), deltaX);
-    return Quaternion.multiply(rotY, rotX);
-  }
-  // */
+  // 9. rotateCAD
 
   /**
    * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0))}.
@@ -3924,117 +3916,7 @@ public class Graph {
       quaternion = Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
     }
     //same as:
-    //node.orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
+    //eye().orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
     eye()._orbit(quaternion, anchor());
   }
-
-  /*
-  // nice interactivity examples: spinning (spin + timer), moveForward, moveBackward, spinX/Y/Z
-  // screenRotate/Translate.
-
-  public void zoom(float delta) {
-    zoom(null, delta);
-  }
-
-  public void zoom(String tag, float delta) {
-    zoom(delta, defaultNode(tag));
-  }
-
-  public void zoom(float delta, Node node) {
-    translate(0, 0, delta, node);
-  }
-
-  public void spin(int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY) {
-    spin(point1, point2, center, defaultNode());
-  }
-
-  public void spin(int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY, Node node) {
-    if (node == null)
-      return;
-    spin(_spin(point1, point2, center, 1, node), node);
-  }
-
-  public void spin(int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY, float sensitivity) {
-    spin(point1, point2, center, sensitivity, defaultNode());
-  }
-
-  public void spin(int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY, float sensitivity, Node node) {
-    if (node == null)
-      return;
-    spin(_spin(point1, point2, center, sensitivity, node), node);
-  }
-
-  public void spinX(float roll) {
-    spinX(roll, 1);
-  }
-
-  public void spinX(float roll, float sensitivity) {
-    spin(_rotate(roll, 0, 0, sensitivity, eye()), eye());
-  }
-
-  public void spinY(float pitch) {
-    spinY(pitch, 1);
-  }
-
-  public void spinY(float pitch, float sensitivity) {
-    spin(_rotate(0, pitch, 0, sensitivity, eye()), eye());
-  }
-
-  public void spinZ(float yaw) {
-    spinZ(yaw, 1);
-  }
-
-  public void spinZ(float yaw, float sensitivity) {
-    spin(_rotate(0, 0, yaw, sensitivity, eye()), eye());
-  }
-
-  scene.spinX(event.getCount(), 20*PI / width); can be emulated through either:
-  1. scene.eye().rotate(new Quaternion(event.getCount() * 20*PI / width,0,0), scene.anchor()); or,
-  2. scene.eye().rotate(new Quaternion(new Vector(1,0,0), event.getCount() * 20*PI / width), scene.anchor());
-
-  // Overkill 2: simply accomplish these with constraints
-  public void screenRotate(int point1X, int point1Y, int point2X, int point2Y) {
-    screenRotate(point1, point2, 1);
-  }
-
-  public void screenRotate(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
-    screenRotate(point1, point2, sensitivity, eye());
-  }
-
-  public void screenRotate(int point1X, int point1Y, int point2X, int point2Y, Node node) {
-    screenRotate(point1, point2, 1, node);
-  }
-
-  public void screenRotate(int point1X, int point1Y, int point2X, int point2Y, float sensitivity, Node node) {
-    spin(_spin2(point1, point2, sensitivity, node), node);
-  }
-
-  protected Quaternion _spin2(int point1X, int point1Y, int point2X, int point2Y, float sensitivity, Node node) {
-    Quaternion quaternion;
-    Vector vector;
-    float x = point2.x();
-    float y = point2.y();
-    float prevX = point1.x();
-    float prevY = point1.y();
-    float angle;
-    if (isEye(node)) {
-      vector = screenLocation(anchor());
-      angle = (float) Math.atan2(y - vector._vector[1], x - vector._vector[0]) - (float) Math
-          .atan2(prevY - vector._vector[1], prevX - vector._vector[0]);
-      if (isLeftHanded())
-        angle = -angle;
-      quaternion = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
-    } else {
-      vector = screenLocation(node.position());
-      float prev_angle = (float) Math.atan2(prevY - vector._vector[1], prevX - vector._vector[0]);
-      angle = (float) Math.atan2(y - vector._vector[1], x - vector._vector[0]);
-      Vector axis = node.displacement(eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
-      if (isRightHanded())
-        quaternion = new Quaternion(axis, angle - prev_angle);
-      else
-        quaternion = new Quaternion(axis, prev_angle - angle);
-    }
-    return quaternion;
-  }
-  */
 }
