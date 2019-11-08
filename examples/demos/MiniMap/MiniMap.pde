@@ -153,7 +153,6 @@ void draw() {
     minimap.drawAxes();
     minimap.render();
     // draw scene eye
-    //minimap.context().fill(sceneEye.isTagged(minimap) ? 255 : 25, sceneEye.isTagged(minimap) ? 0 : 255, 255, 125);
     minimap.context().fill(minimap.isTagged(scene.eye()) ? 255 : 25, minimap.isTagged(scene.eye()) ? 0 : 255, 255, 125);
     minimap.context().strokeWeight(2);
     minimap.context().stroke(0, 0, 255);
