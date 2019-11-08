@@ -59,7 +59,7 @@ public class BasicInterpolation extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.mouseUpdateTag();
+    scene.updateMouseTag();
   }
 
   public void mouseDragged() {

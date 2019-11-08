@@ -92,7 +92,7 @@ public class Interpolation extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseUpdateTag();
+    scene.updateMouseTag();
   }
 
   public void mouseDragged() {

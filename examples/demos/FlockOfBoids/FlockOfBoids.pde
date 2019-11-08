@@ -126,10 +126,10 @@ void mouseDragged() {
   if (scene.eye().reference() == null)
     if (mouseButton == LEFT)
       // same as: scene.spin(scene.eye());
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
       // same as: scene.translate(scene.eye());
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(mouseX - pmouseX);
 }

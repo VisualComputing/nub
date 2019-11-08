@@ -3096,7 +3096,7 @@ public class Graph {
   }
 
   /**
-   * Removes the {@code node} tag.
+   * Removes all tags pointing to the {@code node}.
    */
   public void untag(Node node) {
     _tags.entrySet().removeIf(entry -> (node == entry.getValue()));

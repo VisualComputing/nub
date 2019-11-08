@@ -68,9 +68,9 @@ void draw() {
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    focus.spin();
+    focus.mouseSpin();
   else if (mouseButton == RIGHT)
-    focus.translate();
+    focus.mouseTranslate();
   else
     focus.scale(focus.mouseDX());
 }

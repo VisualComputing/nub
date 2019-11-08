@@ -96,7 +96,7 @@ import java.util.Map;
  * will draw the interpolated path too.
  * <h1>Human Interface Devices</h1>
  * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device</a>
- * is the Processing mouse, see {@link #mouseUpdateTag()}, {@link #mouseTag()}, {@link #mouseSpin()}, {@link #mouseTranslate()}
+ * is the Processing mouse, see {@link #updateMouseTag()}, {@link #mouseTag()}, {@link #mouseSpin()}, {@link #mouseTranslate()}
  * {@link #scale(float)}, etc. To set up another device refer to the {@link Graph} documentation.
  *
  * @see Graph
@@ -2919,7 +2919,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseX()
    * @see #mouseY()
    */
-  public Node mouseUpdateTag(String tag) {
+  public Node updateMouseTag(String tag) {
     return super.updateTag(tag, mouseX(), mouseY());
   }
 
@@ -2930,7 +2930,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseX()
    * @see #mouseY()
    */
-  public Node mouseUpdateTag() {
+  public Node updateMouseTag() {
     return super.updateTag(mouseX(), mouseY());
   }
 

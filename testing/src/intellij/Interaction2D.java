@@ -109,7 +109,7 @@ public class Interaction2D extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.mouseUpdateTag();
+    scene.updateMouseTag();
   }
 
   public void mousePressed() {
