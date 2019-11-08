@@ -29,7 +29,22 @@ public class TRIK extends Solver {
     protected int _lockTimes = 0, _lockTimesCriteria = 4;
 
 
+    //Error attributes TODO: Refine
+    protected boolean  _enableTwist = true;
+    protected boolean _smooth = false; //smooth tries to reduce the movement done by each joint, such that the distance from initial one is reduced
+    protected float _smoothAngle = (float) Math.toRadians(10);
+    protected float _maxLength = 0;
+
+    public void smooth(boolean value){
+        _smooth = value;
+    }
+
+
     public static boolean _debug = false; //TODO : REMOVE!
+
+    public void enableTwistHeuristics(boolean enable){
+        _enableTwist = enable;
+    }
 
     public void enableDirection(boolean direction){
         _direction = direction;
@@ -80,10 +95,10 @@ public class TRIK extends Solver {
             //for(int i = 1; i < _chain.size(); i++) {
             int i = _stepCounter - 1;
             if(_lookAhead > 0 && i < _chain.size() - 1){
-                Quaternion delta = _lookAhead(_chain, _auxiliary_chain, _target, _direction, _enableWeight, _explore, mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>());
+                Quaternion delta = _lookAhead(_chain, _auxiliary_chain, _target, _direction, _enableWeight, _explore, _enableTwist, _smooth, _smoothAngle, mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>(),0);
                 _chain.get(i - 1).rotate(delta);
             } else {
-                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(15), (float) Math.toRadians(15), _enableWeight, _direction);
+                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(15), (float) Math.toRadians(15), _enableWeight, _direction, _enableTwist, _smooth, _smoothAngle);
             }
         } else{
             _current = _error(_chain);
@@ -120,10 +135,11 @@ public class TRIK extends Solver {
         //Step 3. Choose best local action
         for(int i = 1; i < _chain.size(); i++) {
             if(_lookAhead > 0 && i < _chain.size() - 1){
-                Quaternion delta = _lookAhead(_chain, _auxiliary_chain, _target, _direction, _enableWeight, _explore, mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>());
+                Quaternion delta = _lookAhead(_chain, _auxiliary_chain, _target, _direction, _enableWeight, _explore, _enableTwist, _smooth, _smoothAngle, mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>(), 0);
                 _chain.get(i - 1).rotate(delta);
             } else {
-                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(15), (float) Math.toRadians(15), _enableWeight, _direction);
+                //TODO: Use Twisting only when truly required
+                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(15), (float) Math.toRadians(15), _enableWeight, _direction, _enableTwist, _smooth, _smoothAngle);
             }
         }
         //Obtain current error
@@ -236,25 +252,27 @@ public class TRIK extends Solver {
         _lockTimes = 0;
         _explore = false;
 
+        //find maxLength
+        for(int i = 0; i < _original.size() - 1; i++){
+            _maxLength += Vector.distance(_original.get(i).position(), _original.get(i + 1).position());
+        }
+
         if(_singleStep) _stepCounter = 0;
 
     }
 
+
     protected float _error(List<? extends Node> chain){
-        //TODO : Error must be defined as a weighted average between orientational error and translational error
-        float distToTarget = Vector.distance(chain.get(chain.size() - 1).position(), _target.position());
-        float distToGTargets = 0;
-        for(int i = 0; i < chain.size(); i++){
-            //dist of node to gtarget
-            for(GTarget gTarget : _gTargets){
-                if(gTarget._influence.get(_chain.get(i)) != null) {
-                    float dist = Vector.distance(chain.get(i).position(), gTarget._node.position());
-                    dist *= gTarget._influence.get(_chain.get(i)); //Low value compared with main error
-                    distToGTargets +=1f/dist;
-                }
-            }
+        float error = Vector.distance(chain.get(chain.size() - 1).position(), _target.position());
+        float length = Vector.distance(chain.get(chain.size() - 1).position(), chain.get(0).position());
+        if(_direction){
+            error *= (float) (Math.PI / Math.sqrt(_maxLength * length));
+            //Add orientational error
+            float orientationalError = Quaternion.dot(chain.get(chain.size() - 1).orientation(), _target.orientation());
+            //error is the weighted sum
+            error = 0.7f * error + 0.3f * orientationalError;
         }
-        return distToTarget + distToGTargets;
+        return error;
     }
 
     @Override
@@ -308,7 +326,7 @@ public class TRIK extends Solver {
 
     protected int _lookAhead = 0;
 
-    protected List<Quaternion> _findActions(List<Node> chain, List<Node> auxiliary_chain, Node target, boolean direction, boolean enableWeight, int i, boolean choose, boolean explore){
+    protected List<Quaternion> _findActions(List<Node> chain, List<Node> auxiliary_chain, Node target, boolean direction, boolean enableWeight, boolean enableTwist, int i, boolean choose, boolean explore, boolean smooth, float smoothAngle){
         List<Quaternion> actions = new ArrayList<Quaternion>();
         Node j_i = chain.get(i);
         Node j_i1 = chain.get(i + 1);
@@ -318,23 +336,36 @@ public class TRIK extends Solver {
         Quaternion original = j_i.rotation().get();
         Quaternion q1 = null;
         if(Math.random() < 0.8){
-            applySwingTwist(j_i, j_i1, j_i1_hat, eff, target, (float) Math.toRadians(20), (float) Math.toRadians(20), enableWeight, direction); //Apply swing twist
+            applySwingTwist(j_i, j_i1, j_i1_hat, eff, target, (float) Math.toRadians(15), (float) Math.toRadians(15), enableWeight, direction, enableTwist, smooth, smoothAngle); //Apply swing twist
             q1 = Quaternion.compose(original.inverse(), j_i.rotation());
             j_i.setRotation(original);
         } else{
             q1 = _findLocalRotation(j_i1, j_i1_hat, enableWeight); //Apply just swing
+            if(smooth) q1 = _clampRotation(q1, smoothAngle);
         }
         actions.add(q1);
 
         if(choose){
-            Quaternion q2 = _findCCDTwist(j_i, j_i1, eff, target, (float) Math.toRadians(40));
+            if(enableTwist) {
+                Quaternion t1 = _findCCDTwist(j_i, j_i1, eff, target, (float) Math.toRadians(40));
+                Quaternion t2 = new Quaternion(j_i1.translation(), (float) Math.toRadians(Math.random() * 90 - 45));
+                if(smooth){
+                    t1 = _clampRotation(t1, smoothAngle);
+                    t2 = _clampRotation(t2, smoothAngle);
+                }
+                actions.add(t1);
+                actions.add(t2);
+            }
+
             Quaternion q3 = new Quaternion(j_i1.translation().orthogonalVector(), (float) Math.toRadians(Math.random() * 90 - 45));
             Quaternion q4 = new Quaternion(Vector.cross(j_i1.translation(), j_i1.translation().orthogonalVector(), null), (float) Math.toRadians(Math.random() * 90 - 45));
-            Quaternion q5 = new Quaternion(j_i1.translation(), (float) Math.toRadians(Math.random() * 90 - 45));
-            actions.add(q2);
+            if(smooth){
+                q3 = _clampRotation(q3, smoothAngle);
+                q4 = _clampRotation(q4, smoothAngle);
+            }
+
             actions.add(q3);
             actions.add(q4);
-            actions.add(q5);
         }
 
         //Explore when the chain has reach a dead lock status
@@ -374,23 +405,14 @@ public class TRIK extends Solver {
     //Mode: 0 - Look ahead is used only to apply correction
     //Mode: 1 - First iteration of look ahead choose action
     //Mode: 2 - choose at each step
-    protected Quaternion _lookAhead(List<Node> chain, List<Node> auxiliary_chain, Node target, boolean direction, boolean enableWeight, boolean explore, LookAheadMode mode, int from, int times, int depth, Quaternion initial, List<Pair<Quaternion, Float>> actions){
+    protected Quaternion _lookAhead(List<Node> chain, List<Node> auxiliary_chain, Node target, boolean direction, boolean enableWeight, boolean explore, boolean enableTwist, boolean smooth, float smoothAngle, LookAheadMode mode, int from, int times, int depth, Quaternion initial, List<Pair<Quaternion, Float>> actions, float movement){
         if(times < 0) return null;
         if(depth == times){
-            //Given configuration until now try to help the algorithm in a future
-            //alpha w.r.t last
-            Quaternion alpha = _findLocalRotation(chain.get(from + times),  auxiliary_chain.get(from + times), enableWeight);
-            //get alpha w.r.t from
-            Quaternion fromToLast = Quaternion.compose(chain.get(from).rotation().inverse(), chain.get(from + times).rotation());
-            //Quaternion alpha_hat = Quaternion.compose(fromToLast, alpha);
-            //TODO : Damp the rotation
-            //alpha_hat.compose(fromToLast.inverse());
-            //alpha_hat = Quaternion.slerp(new Quaternion(), alpha_hat, 0.25f);
-            //alpha_hat = new Quaternion();
             //calculate error
-            float e1 = Vector.distance(chain.get(chain.size() - 1).position(), target.position());
-            float e2 = Vector.distance(chain.get(from + times).position(), auxiliary_chain.get(from + times).position());
-
+            float e1 = _error(chain);
+            //float e2 = Vector.distance(chain.get(from + times).position(), auxiliary_chain.get(from + times).position());
+            float e2 = movement * (float) (Math.PI / Math.sqrt(_maxLength * Vector.distance(chain.get(chain.size() - 1).position(), target.position()))); //quantity of movement
+            if(_debug) System.out.println("e1 : " + e1 + " e2: " + e2 + "e_tot" + (e1 + e2 * 0.5f) + "mov " + movement);
             Pair<Quaternion, Float> action = new Pair<Quaternion, Float>(initial, e1 + e2 * 0.5f);
             actions.add(action);
             return null;
@@ -398,18 +420,18 @@ public class TRIK extends Solver {
 
         //System.out.println("    ----> on depth " + depth);
         if(depth == 0 || mode == LookAheadMode.CHOOSE_ALL){ //Visit each action (expand the tree)
-            for (Quaternion rotation : _findActions(chain, auxiliary_chain, target, direction, enableWeight, from + depth, true, depth == 0 && explore)){
+            for (Quaternion rotation : _findActions(chain, auxiliary_chain, target, direction, enableWeight, enableTwist, from + depth, true, depth == 0 && explore, smooth, smoothAngle)){
                 if(depth == 0) initial = rotation;
                 //System.out.println("    ----> Rot " + rotation.axis() + rotation.angle());
                 Node j_i = chain.get(from + depth);
                 Quaternion prev = j_i.rotation().get(); //Keep rotation
                 j_i.rotate(rotation); //Apply action
-                _lookAhead(chain, auxiliary_chain, target, direction, enableWeight, explore, mode, from, times, depth + 1, initial, actions); //look ahead
+                _lookAhead(chain, auxiliary_chain, target, direction, enableWeight, explore, enableTwist, smooth, smoothAngle, mode, from, times, depth + 1, initial, actions, movement + rotation.angle()); //look ahead
                 j_i.setRotation(prev.get()); //Undo action
             }
         } else{
             //Expand only the most promising action
-            List<Quaternion> rotations = _findActions(chain, auxiliary_chain, target, direction, enableWeight,from + depth, true, false);
+            List<Quaternion> rotations = _findActions(chain, auxiliary_chain, target, direction, enableWeight, enableTwist,from + depth, true, false, smooth, smoothAngle);
             Quaternion best = null;
             float error = 10e10f;
             Node j_i = chain.get(from + depth);
@@ -425,7 +447,7 @@ public class TRIK extends Solver {
             }
             if(depth == 0) initial = best;
             j_i.rotate(best); //Apply action
-            _lookAhead(chain, auxiliary_chain, target, direction, enableWeight, explore, mode, from, times, depth + 1, initial, actions); //look ahead
+            _lookAhead(chain, auxiliary_chain, target, direction, enableWeight, explore, enableTwist, smooth, smoothAngle, mode, from, times, depth + 1, initial, actions, movement + best.angle()); //look ahead
             j_i.setRotation(prev.get()); //Undo action
         }
 
@@ -441,9 +463,11 @@ public class TRIK extends Solver {
                     b = i - 1;
                 }
             }
-            if(_debug) System.out.println("BEST action : " + b);
-            if(_debug) System.out.println("-----------");
-            if(_debug) System.out.println("-----------");
+            if(_debug){
+                System.out.println("BEST action : " + b);
+                System.out.println("-----------");
+                System.out.println("-----------");
+            }
             return best.getKey();
         }
         return null;
@@ -821,11 +845,24 @@ public class TRIK extends Solver {
         return twist;
     }
 
-    protected static void applySwingTwist(Node j_i, Node j_i1, Node j_i1_hat, Node eff, Node target, float maxT1, float maxT2, boolean enableWeight, boolean direction){
-        j_i.rotate(_findLocalRotation(j_i1, j_i1_hat, enableWeight)); //Apply swing
-        j_i.rotate(_findTwist(j_i, j_i1, eff, target, maxT1, maxT2, direction)); //Apply twist
+    protected static void applySwingTwist(Node j_i, Node j_i1, Node j_i1_hat, Node eff, Node target, float maxT1, float maxT2, boolean enableWeight, boolean direction, boolean enableTwist, boolean smooth, float smoothAngle){
+        Quaternion q1 = _findLocalRotation(j_i1, j_i1_hat, enableWeight);
+        if(smooth) q1 = _clampRotation(q1, smoothAngle);
+        j_i.rotate(q1); //Apply local rotation
+        if(enableTwist) {
+            Quaternion q2;
+            if(smooth) q2 = _findTwist(j_i, j_i1, eff, target, smoothAngle, smoothAngle, direction);
+            else q2 = _findTwist(j_i, j_i1, eff, target, maxT1, maxT2, direction);
+            j_i.rotate(q2); //Apply twist rotation
+        }
     }
 
-
+    protected static Quaternion _clampRotation(Quaternion rotation, float maxAngle){
+        float angle = rotation.angle();
+        if(Math.abs(angle) > maxAngle ){
+            rotation = new Quaternion(rotation.axis(), (Math.signum(angle) * maxAngle));
+        }
+        return rotation;
+    }
 
 }
