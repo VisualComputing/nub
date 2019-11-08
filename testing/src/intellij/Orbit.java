@@ -80,7 +80,7 @@ public class Orbit extends PApplet {
       else
         scene.spin();
     } else if (mouseButton == RIGHT)
-      scene.spin(scene.eye());
+      scene.spinEye();
     //scene.translate();
     //scene.mousePan();
   }

@@ -3010,39 +3010,33 @@ public class Scene extends Graph implements PConstants {
     super.translateEye(mouseDX(), mouseDY());
   }
 
-  /**
-   * Same as {@code spin(pmouse(), mouse())}.
-   *
-   * @see #spin(int, int, int, int)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
-   */
+  //
+
   public void spin() {
-    spin(pmouseX(), pmouseY(), mouseX(), mouseY());
+    spin(null);
   }
 
-  /**
-   * Same as {@code spin(node(tag)}.
-   *
-   * @see #spin(Node)
-   */
   public void spin(String tag) {
-    spin(node(tag));
+    if (node(tag) == null)
+      spinEye();
+    else
+      spinTag(tag);
   }
 
-  /**
-   * Same as {@code spin(pmouse(), mouse(), node)}.
-   *
-   * @see Graph#spin(Node, int, int, int, int)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
-   */
-  public void spin(Node node) {
-    spin(node, pmouseX(), pmouseY(), mouseX(), mouseY());
+  public void spinTag() {
+    super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY());
+  }
+
+  public void spinTag(String tag) {
+    super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY());
+  }
+
+  public void spinNode(Node node) {
+    super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY());
+  }
+
+  public void spinEye() {
+    super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
   // only eye

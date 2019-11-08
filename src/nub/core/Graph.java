@@ -3725,94 +3725,51 @@ public class Graph {
 
   //
 
-  /**
-   * Same as {@code spin(null, tail, head)}.
-   *
-   * @see #spin(String, int, int, int, int)
-   */
   public void spin(int point1X, int point1Y, int point2X, int point2Y) {
-    spin(node(null), point1X, point1Y, point2X, point2Y);
+    spin(point1X, point1Y, point2X, point2Y, 1);
   }
 
-  /**
-   * Same as {@code spin(tail, head, defaultNode(tag))}.
-   *
-   * @see #spin(Node, int, int, int, int, float)
-   * @see #spin(Node, int, int, int, int)
-   * @see #spin(String, int, int, int, int, float)
-   */
-  public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y) {
-    spin(node(tag), point1X, point1Y, point2X, point2Y);
-  }
-
-  /**
-   * Same as {@code spin(tail, head, 1, node)}.
-   *
-   * @see #spin(Node, int, int, int, int, float)
-   * @see #spin(String, int, int, int, int)
-   * @see #spin(String, int, int, int, int, float)
-   */
-  public void spin(Node node, int point1X, int point1Y, int point2X, int point2Y) {
-    spin(node, point1X, point1Y, point2X, point2Y, 1);
-  }
-
-  /**
-   * Same as {@code spin(null, tail, head, sensitivity)}.
-   *
-   * @see #spin(String, int, int, int, int, float)
-   */
   public void spin(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
-    spin(node(null), point1X, point1Y, point2X, point2Y, sensitivity);
+    spin(null, point1X, point1Y, point2X, point2Y, sensitivity);
   }
 
-  /**
-   * Same as {@code spin(tail, head, sensitivity, defaultNode(tag))}.
-   *
-   * @see #spin(Node, int, int, int, int, float)
-   * @see #spin(String, int, int, int, int)
-   * @see #spin(Node, int, int, int, int)
-   */
+  public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y) {
+    spin(tag, point1X, point1Y, point2X, point2Y, 1);
+  }
+
   public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
-    spin(node(tag), point1X, point1Y, point2X, point2Y, sensitivity);
+    if (node(tag) == null)
+      spinEye(point1X, point1Y, point2X, point2Y, sensitivity);
+    else
+      spinNode(node(tag), point1X, point1Y, point2X, point2Y, sensitivity);
   }
 
-  /**
-   * Rotates the {@code node} using an arcball interface, from {@code tail} to {@code head} pixel positions. The
-   * {@code sensitivity} controls the gesture strength. The center of the rotation is the graph {@link #anchor()}
-   * if the node is the {@link #eye()}, or the node origin (see {@link Node#position()}) otherwise.
-   * <p>
-   * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying three-dimensional
-   * orientation using a mouse.
-   * <p>
-   * Override this class an call {@link #_spin(Node, int, int, int, int, int, int, float)} if you want to define a different
-   * rotation center (rare).
-   *
-   * @see #spin(String, int, int, int, int)
-   * @see #spin(Node, int, int, int, int)
-   * @see #spin(String, int, int, int, int, float)
-   * @see #rotate(float, float, float)
-   */
-  public void spin(Node node, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+  public void spinTag(int point1X, int point1Y, int point2X, int point2Y) {
+    spinTag(point1X, point1Y, point2X, point2Y, 1);
+  }
+
+  public void spinTag(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    spinTag(null, point1X, point1Y, point2X, point2Y, sensitivity);
+  }
+
+  public void spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y) {
+    spinTag(tag, point1X, point1Y, point2X, point2Y, 1);
+  }
+
+  public void spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    spinNode(node(tag), point1X, point1Y, point2X, point2Y, sensitivity);
+  }
+
+  public void spinNode(Node node, int point1X, int point1Y, int point2X, int point2Y) {
+    spinNode(node, point1X, point1Y, point2X, point2Y, 1);
+  }
+
+  public void spinNode(Node node, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     if (node == null)
       return;
-    spin(node, _spin(node, point1X, point1Y, point2X, point2Y, sensitivity));
-  }
-
-  /**
-   * Same as {@code return _spin(point1, point2, center, sensitivity, node)} where {@code center} is {@link #anchor()}
-   * if the node is the {@link #eye()} or {@link Node#position()} otherwise.
-   */
-  protected Quaternion _spin(Node node, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
-    Vector vector = screenLocation(isEye(node) ? anchor() : node.position());
-    return _spin(node, point1X, point1Y, point2X, point2Y, (int)vector.x(), (int)vector.y(), sensitivity);
-  }
-
-  /**
-   * Computes the classical arcball quaternion. Refer to Shoemake 92 paper: Arcball: a user interface for specifying
-   * three-dimensional orientation using a mouse.
-   */
-  protected Quaternion _spin(Node node, int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY, float sensitivity) {
-    // Points on the deformed ball
+    Vector center = screenLocation(node.position());
+    int centerX = (int) center.x();
+    int centerY = (int) center.y();
     float px = sensitivity * (point1X - centerX) / width();
     float py = sensitivity * (isLeftHanded() ? (point1Y - centerY) : (centerY - point1Y)) / height();
     float dx = sensitivity * (point2X - centerX) / width();
@@ -3824,14 +3781,34 @@ public class Graph {
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
     Quaternion quaternion = new Quaternion(axis, angle);
-    if (!isEye(node)) {
-      Vector vector = quaternion.axis();
-      vector = eye().orientation().rotate(vector);
-      vector = node.displacement(vector);
-      quaternion = new Quaternion(vector, -quaternion.angle());
-    }
-    return quaternion;
+    Vector vector = quaternion.axis();
+    vector = eye().orientation().rotate(vector);
+    vector = node.displacement(vector);
+    node.rotate(new Quaternion(vector, -quaternion.angle()));
   }
+
+  public void spinEye(int point1X, int point1Y, int point2X, int point2Y) {
+    spinEye(point1X, point1Y, point2X, point2Y, 1);
+  }
+
+  public void spinEye(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    Vector center = screenLocation(anchor());
+    int centerX = (int) center.x();
+    int centerY = (int) center.y();
+    float px = sensitivity * (point1X - centerX) / width();
+    float py = sensitivity * (isLeftHanded() ? (point1Y - centerY) : (centerY - point1Y)) / height();
+    float dx = sensitivity * (point2X - centerX) / width();
+    float dy = sensitivity * (isLeftHanded() ? (point2Y - centerY) : (centerY - point2Y)) / height();
+    Vector p1 = new Vector(px, py, _projectOnBall(px, py));
+    Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
+    // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
+    Vector axis = p2.cross(p1);
+    // 2D is an ad-hoc
+    float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
+    eye()._orbit(new Quaternion(axis, angle), anchor());
+  }
+
+  //
 
   /**
    * Returns "pseudo-_distance" from (x,y) to ball of radius size. For a point inside the
@@ -3849,19 +3826,6 @@ public class Graph {
 
     float d = x * x + y * y;
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
-  }
-
-  /**
-   * Rotates the node using {@code quaternion} around its {@link Node#position()} (non-eye nodes)
-   * or around the {@link Graph#anchor()} when the {@code node} is the {@link Graph#eye()}.
-   */
-  public void spin(Node node, Quaternion quaternion) {
-    if (isEye(node))
-      //same as:
-      //node.orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
-      node._orbit(quaternion, anchor());
-    else
-      node.rotate(quaternion);
   }
 
   // only 3d eye
@@ -3885,25 +3849,21 @@ public class Graph {
    * expressed in radians.
    */
   public void lookAround(float deltaX, float deltaY) {
-    eye().rotate(_lookAround(deltaX, deltaY));
-  }
-
-  /**
-   * Look around without moving the eye while preserving its {@link Node#yAxis()} when the action began.
-   */
-  protected Quaternion _lookAround(float deltaX, float deltaY) {
+    Quaternion quaternion;
     if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
-      return new Quaternion();
+      quaternion = new Quaternion();
+    } else {
+      if (frameCount() > _lookAroundCount) {
+        _upVector = eye().yAxis();
+        _lookAroundCount = this.frameCount();
+      }
+      _lookAroundCount++;
+      Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
+      Quaternion rotY = new Quaternion(eye().displacement(_upVector), -deltaX);
+      quaternion = Quaternion.multiply(rotY, rotX);
     }
-    if (frameCount() > _lookAroundCount) {
-      _upVector = eye().yAxis();
-      _lookAroundCount = this.frameCount();
-    }
-    _lookAroundCount++;
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
-    Quaternion rotY = new Quaternion(eye().displacement(_upVector), -deltaX);
-    return Quaternion.multiply(rotY, rotX);
+    eye().rotate(quaternion);
   }
 
   //Replace previous call with the following two to preserve the upVector param.
@@ -3955,19 +3915,17 @@ public class Graph {
    * @see #rotateCAD(float, float)
    */
   public void rotateCAD(float roll, float pitch, Vector upVector) {
-    spin(eye(), _rotateCAD(roll, pitch, upVector));
-  }
-
-  /**
-   * Computes and returns the quaternion used by {@link #rotateCAD(float, float, Vector)}.
-   */
-  protected Quaternion _rotateCAD(float roll, float pitch, Vector upVector) {
+    Quaternion quaternion;
     if (is2D()) {
       System.out.println("Warning: rotateCAD is only available in 3D");
-      return new Quaternion();
+      quaternion = new Quaternion();
+    } else {
+      Vector eyeUp = eye().displacement(upVector);
+      quaternion = Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
     }
-    Vector eyeUp = eye().displacement(upVector);
-    return Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
+    //same as:
+    //node.orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
+    eye()._orbit(quaternion, anchor());
   }
 
   /*

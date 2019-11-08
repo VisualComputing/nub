@@ -47,7 +47,7 @@ public class FlockOld extends PApplet {
   public void mouseDragged() {
     if (scene.eye().reference() == null)
       if (mouseButton == LEFT)
-        scene.spin(scene.eye());
+        scene.spinEye();
       else if (mouseButton == RIGHT)
         scene.translate();
       else
