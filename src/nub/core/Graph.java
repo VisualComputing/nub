@@ -50,7 +50,7 @@ import java.util.List;
  * {@link #location(Vector, Node)}, are provided for convenience.
  * <h1>3. Interactivity</h1>
  * Several methods taking a {@link Node} parameter provide interactivity to nodes, such as
- * {@link #translate(float, float, float)}, {@link #rotate(Node, float, float, float)}
+ * {@link #translate(float, float, float)}, {@link #rotate(float, float, float)}
  * and {@link #scale(float)}.
  * <p>
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
@@ -3672,46 +3672,30 @@ public class Graph {
     _eye.translate(eye().reference() == null ? eye().worldDisplacement(eyeVector) : eye().reference().displacement(eyeVector, eye()));
   }
 
-  /**
-   * Same as {@code rotate(null, roll, pitch, yaw)}.
-   *
-   * @see #rotate(String, float, float, float)
-   */
+  //
+
   public void rotate(float roll, float pitch, float yaw) {
-    rotate(node(null), roll, pitch, yaw);
+    rotate(null, roll, pitch, yaw);
   }
 
-  /**
-   * Rotates the tagged default-node (see {@link #node(String)}) roll, pitch and yaw radians around screen
-   * space x, y and z axes, respectively.
-   *
-   * @see #rotate(Node, float, float, float)
-   */
   public void rotate(String tag, float roll, float pitch, float yaw) {
-    rotate(node(tag), roll, pitch, yaw);
+    if (node(tag) == null)
+      rotateEye(roll, pitch, yaw);
+    else
+      rotateTag(tag, roll, pitch, yaw);
   }
 
-  /**
-   * Rotates the {@code node} {@code roll}, {@code pitch} and {@code yaw} radians relative to the screen space
-   * x, y and z axes, respectively. The center of the rotation is the graph {@link #anchor()} if the node is the
-   * {@link #eye()}, or the node origin (see {@link Node#position()}) otherwise.
-   * <p>
-   * To rotate an eye node around its origin and local axes simply call:
-   * {@code eye().rotate(new Quaternion(roll, pitch, yaw))}.
-   *
-   * @see #rotate(String, float, float, float)
-   * @see #spin(Node, int, int, int, int, float)
-   */
-  public void rotate(Node node, float roll, float pitch, float yaw) {
+  public void rotateTag(float roll, float pitch, float yaw) {
+    rotateTag(null, roll, pitch, yaw);
+  }
+
+  public void rotateTag(String tag, float roll, float pitch, float yaw) {
+    rotateNode(node(tag), roll, pitch, yaw);
+  }
+
+  public void rotateNode(Node node, float roll, float pitch, float yaw) {
     if (node == null)
       return;
-    spin(node, _rotate(node, roll, pitch, yaw));
-  }
-
-  /**
-   * Low-level roll-pitch and yaw rotation. Axes are physical, i.e., screen space.
-   */
-  protected Quaternion _rotate(Node node, float roll, float pitch, float yaw) {
     if (is2D() && (roll != 0 || pitch != 0)) {
       roll = 0;
       pitch = 0;
@@ -3719,18 +3703,27 @@ public class Graph {
     }
     // don't really need to differentiate among the two cases, but the eye can be speeded up
     Quaternion quaternion = new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
-    if (isEye(node))
-      return quaternion;
-    else {
-      Vector vector = new Vector(-quaternion.x(), -quaternion.y(), -quaternion.z());
-      vector = eye().orientation().rotate(vector);
-      vector = node.displacement(vector);
-      quaternion.setX(vector.x());
-      quaternion.setY(vector.y());
-      quaternion.setZ(vector.z());
-      return quaternion;
-    }
+    Vector vector = new Vector(-quaternion.x(), -quaternion.y(), -quaternion.z());
+    vector = eye().orientation().rotate(vector);
+    vector = node.displacement(vector);
+    quaternion.setX(vector.x());
+    quaternion.setY(vector.y());
+    quaternion.setZ(vector.z());
+    node.rotate(quaternion);
   }
+
+  public void rotateEye(float roll, float pitch, float yaw) {
+    if (is2D() && (roll != 0 || pitch != 0)) {
+      roll = 0;
+      pitch = 0;
+      System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
+    }
+    //same as:
+    //eye().orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
+    eye()._orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor());
+  }
+
+  //
 
   /**
    * Same as {@code spin(null, tail, head)}.
@@ -3797,7 +3790,7 @@ public class Graph {
    * @see #spin(String, int, int, int, int)
    * @see #spin(Node, int, int, int, int)
    * @see #spin(String, int, int, int, int, float)
-   * @see #rotate(Node, float, float, float)
+   * @see #rotate(float, float, float)
    */
   public void spin(Node node, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     if (node == null)
