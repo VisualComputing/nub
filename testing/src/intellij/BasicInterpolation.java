@@ -59,16 +59,16 @@ public class BasicInterpolation extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.updateTag();
+    scene.mouseUpdateTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
       //scene.lookAround(upVector);
       //scene.mouseCAD();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
       //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);

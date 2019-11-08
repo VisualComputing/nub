@@ -118,15 +118,15 @@ public class DOF extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.tag();
+    scene.mouseTag();
   }
 
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(scene.mouseDX());
   }

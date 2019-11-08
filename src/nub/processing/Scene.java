@@ -96,7 +96,7 @@ import java.util.Map;
  * will draw the interpolated path too.
  * <h1>Human Interface Devices</h1>
  * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device</a>
- * is the Processing mouse, see {@link #updateTag()}, {@link #tag()}, {@link #spin()}, {@link #translate()}
+ * is the Processing mouse, see {@link #mouseUpdateTag()}, {@link #mouseTag()}, {@link #mouseSpin()}, {@link #mouseTranslate()}
  * {@link #scale(float)}, etc. To set up another device refer to the {@link Graph} documentation.
  *
  * @see Graph
@@ -2913,55 +2913,57 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return track(tag, mouse())}.
+   * Same as {@code return super.updateTag(tag, mouseX(), mouseY())}.
    *
    * @see #updateTag(String, int, int)
    * @see #mouseX()
    * @see #mouseY()
    */
-  public Node updateTag(String tag) {
-    return updateTag(tag, mouseX(), mouseY());
+  public Node mouseUpdateTag(String tag) {
+    return super.updateTag(tag, mouseX(), mouseY());
   }
 
   /**
-   * Same as {@code return track(mouse())}.
+   * Same as {@code return super.updateTag(mouseX(), mouseY())}.
    *
    * @see #updateTag(int, int)
    * @see #mouseX()
    * @see #mouseY()
    */
-  public Node updateTag() {
+  public Node mouseUpdateTag() {
     return super.updateTag(mouseX(), mouseY());
   }
 
   /**
-   * Same as {@code cast(tag, mouse())}.
+   * Same as {@code super.tag(tag, mouseX(), mouseY())}.
    *
    * @see Graph#tag(String, int, int)
    * @see #mouseX()
    * @see #mouseY()
    */
-  public void tag(String tag) {
-    tag(tag, mouseX(), mouseY());
+  public void mouseTag(String tag) {
+    super.tag(tag, mouseX(), mouseY());
   }
 
   /**
-   * Same as {@code cast(mouse())}.
+   * Same as {@code super.tag(mouseX(), mouseY())}.
    *
    * @see #tag(int, int)
    * @see #mouseX()
    * @see #mouseY()
    */
-  public void tag() {
-    tag(mouseX(), mouseY());
+  public void mouseTag() {
+    super.tag(mouseX(), mouseY());
   }
 
   /**
    * Same as {@code super.translate(mouseDX(), mouseDY())}.
    *
    * @see #translate(float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
    */
-  public void translate() {
+  public void mouseTranslate() {
     super.translate(mouseDX(), mouseDY());
   }
 
@@ -2969,8 +2971,10 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code super.translate(tag, mouseDX(), mouseDY())}.
    *
    * @see #translate(String, float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
    */
-  public void translate(String tag) {
+  public void mouseTranslate(String tag) {
     super.translate(tag, mouseDX(), mouseDY());
   }
 
@@ -2978,8 +2982,10 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code return super.translateTag(tag, mouseDX(), mouseDY())}.
    *
    * @see #translateTag(String, float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
    */
-  public boolean translateTag(String tag) {
+  public boolean mouseTranslateTag(String tag) {
     return super.translateTag(tag, mouseDX(), mouseDY());
   }
 
@@ -2987,8 +2993,10 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code return super.translate(mouseDX(), mouseDY())}.
    *
    * @see #translate(float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
    */
-  public boolean translateTag() {
+  public boolean mouseTranslateTag() {
     return super.translateTag(mouseDX(), mouseDY());
   }
 
@@ -2996,8 +3004,10 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code super.translateNode(node, mouseDX(), mouseDY())}.
    *
    * @see #translateNode(Node, float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
    */
-  public void translateNode(Node node) {
+  public void mouseTranslateNode(Node node) {
     super.translateNode(node, mouseDX(), mouseDY());
   }
 
@@ -3005,68 +3015,117 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code super.translateEye(mouseDX(), mouseDY())}.
    *
    * @see #translateEye(float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
    */
-  public void translateEye() {
+  public void mouseTranslateEye() {
     super.translateEye(mouseDX(), mouseDY());
   }
 
-  public void spin() {
-    spin(null);
+  /**
+   * Same as {@code mouseSpin(null)}.
+   *
+   * @see #mouseSpin(String)
+   */
+  public void mouseSpin() {
+    mouseSpin(null);
   }
 
-  public void spin(String tag) {
-    if (!spinTag(tag))
-      spinEye();
+  /**
+   * Same as {@code if (!mouseSpinTag(tag)) mouseSpinEye()}.
+   *
+   * @see #mouseSpinTag(String)
+   * @see #mouseSpinEye()
+   */
+  public void mouseSpin(String tag) {
+    if (!mouseSpinTag(tag))
+      mouseSpinEye();
   }
 
-  public boolean spinTag() {
+  /**
+   * Same as {@code return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   *
+   * @see #spinTag(int, int, int, int)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public boolean mouseSpinTag() {
     return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
-  public boolean spinTag(String tag) {
+  /**
+   * Same as {@code return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   *
+   * @see #spinTag(String, int, int, int, int)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public boolean mouseSpinTag(String tag) {
     return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
-  public void spinNode(Node node) {
+  /**
+   * Same as {code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   *
+   * @see #spinNode(Node, int, int, int, int)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public void mouseSpinNode(Node node) {
     super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
-  public void spinEye() {
+  /**
+   * Same as {code super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   *
+   * @see #spinEye(int, int, int, int)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public void mouseSpinEye() {
     super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
   // only eye
 
   /**
-   * Same as {@code lookAround(mouseRADX(), mouseRADY())}.
+   * Same as {@code super.lookAround(mouseRADX(), mouseRADY())}.
    *
    * @see #lookAround(float, float)
    * @see #mouseRADX()
    * @see #mouseRADY()
    */
-  public void lookAround() {
-    lookAround(mouseRADX(), mouseRADY());
+  public void mouseLookAround() {
+    super.lookAround(mouseRADX(), mouseRADY());
   }
 
   /**
-   * Same as {@code rotateCAD(mouseRADX(), mouseRADY())}.
+   * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY())}.
    *
    * @see #rotateCAD(float, float)
    * @see #mouseRADX()
    * @see #mouseRADY()
    */
-  public void rotateCAD() {
-    rotateCAD(mouseRADX(), mouseRADY());
+  public void mouseRotateCAD() {
+    super.rotateCAD(mouseRADX(), mouseRADY());
   }
 
   /**
-   * Same as {@code rotateCAD(mouseRADX(), mouseRADY(), up)}.
+   * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY(), up)}.
    *
    * @see #rotateCAD(float, float, Vector)
    * @see #mouseRADX()
    * @see #mouseRADY()
    */
-  public void rotateCAD(Vector up) {
-    rotateCAD(mouseRADX(), mouseRADY(), up);
+  public void mouseRotateCAD(Vector up) {
+    super.rotateCAD(mouseRADX(), mouseRADY(), up);
   }
 }

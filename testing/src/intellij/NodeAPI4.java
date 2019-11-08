@@ -353,9 +353,9 @@ public class NodeAPI4 extends PApplet {
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(mouseX - pmouseX);
   }

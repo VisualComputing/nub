@@ -66,11 +66,11 @@ public class MouseMoveInteraction extends PApplet {
 
   public void mouseMoved(MouseEvent event) {
     if (event.isShiftDown())
-      scene.translate();
+      scene.mouseTranslate();
     else if (lookAround && scene.node() == null)
-      scene.lookAround();
+      scene.mouseLookAround();
     else
-      scene.spin();
+      scene.mouseSpin();
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -81,7 +81,7 @@ public class MouseMoveInteraction extends PApplet {
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
       //scene.track();
-      scene.tag();
+      scene.mouseTag();
     else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         scene.focus();

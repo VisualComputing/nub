@@ -47,9 +47,9 @@ public class FlockOld extends PApplet {
   public void mouseDragged() {
     if (scene.eye().reference() == null)
       if (mouseButton == LEFT)
-        scene.spinEye();
+        scene.mouseSpinEye();
       else if (mouseButton == RIGHT)
-        scene.translate();
+        scene.mouseTranslate();
       else
         scene.scaleEye(mouseX - pmouseX);
     //scene.scale(mouseX - pmouseX);
@@ -60,7 +60,7 @@ public class FlockOld extends PApplet {
     if (scene.eye().reference() != null)
       // press shift to move the mouse without looking around
       if (!event.isShiftDown())
-        scene.lookAround();
+        scene.mouseLookAround();
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -70,7 +70,7 @@ public class FlockOld extends PApplet {
 
   public void mouseClicked(MouseEvent event) {
     // picks up a boid avatar, may be null
-    avatar = scene.updateTag();
+    avatar = scene.mouseUpdateTag();
     if (avatar != null)
       thirdPerson();
     else if (scene.eye().reference() != null)

@@ -56,9 +56,9 @@ public class AdaptivePrecision1 extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spinNode(defaultShape());
+      scene.mouseSpinNode(defaultShape());
     else if (mouseButton == RIGHT)
-      scene.translateNode(defaultShape());
+      scene.mouseTranslateNode(defaultShape());
     else
       scene.scaleNode(defaultShape(), mouseX - pmouseX);
   }

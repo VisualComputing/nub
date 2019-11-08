@@ -78,9 +78,9 @@ public class Orbit extends PApplet {
         //shape2.orbit(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
         shape2.orbit(axis, (mouseX - pmouseX) * PI / width);
       else
-        scene.spin();
+        scene.mouseSpin();
     } else if (mouseButton == RIGHT)
-      scene.spinEye();
+      scene.mouseSpinEye();
     //scene.translate();
     //scene.mousePan();
   }

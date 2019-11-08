@@ -63,10 +63,10 @@ public class Flock extends PApplet {
     if (scene.eye().reference() == null)
       if (mouseButton == LEFT)
         // same as: scene.spin(scene.eye());
-        scene.spin();
+        scene.mouseSpin();
       else if (mouseButton == RIGHT)
         // same as: scene.translate(scene.eye());
-        scene.translate();
+        scene.mouseTranslate();
       else
         // same as: scene.zoom(mouseX - pmouseX, scene.eye());
         scene.moveForward(mouseX - pmouseX);
@@ -80,7 +80,7 @@ public class Flock extends PApplet {
     if (scene.eye().reference() != null)
       // press shift to move the mouse without looking around
       if (!event.isShiftDown())
-        scene.lookAround();
+        scene.mouseLookAround();
   }
 
   public void mouseWheel(MouseEvent event) {

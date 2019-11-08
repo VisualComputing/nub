@@ -130,14 +130,14 @@ public class ShadowMappingVBO extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.tag();
+    scene.mouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(mouseX - pmouseX);
   }

@@ -92,14 +92,14 @@ public class Interpolation extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.updateTag();
+    scene.mouseUpdateTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.scale(mouseX - pmouseX);
   }

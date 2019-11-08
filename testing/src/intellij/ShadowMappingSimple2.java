@@ -175,9 +175,9 @@ public class ShadowMappingSimple2 extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      mainScene.spin();
+      mainScene.mouseSpin();
     else if (mouseButton == RIGHT)
-      mainScene.translate();
+      mainScene.mouseTranslate();
     else
       mainScene.moveForward(mouseX - pmouseX);
   }
