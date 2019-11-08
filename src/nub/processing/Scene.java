@@ -2384,7 +2384,7 @@ public class Scene extends Graph implements PConstants {
    * {@link #drawCross(float, float, float)} centered at the projected node origin.
    * If node is a Node instance the length of the cross is the node
    * {@link Node#pickingThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If node a Node instance and it is {@link #hasNullTag(Node)} it also applies
+   * If node a Node instance and it is {@link #hasTag(Node)} it also applies
    * a stroke highlight.
    *
    * @see #drawSquaredBullsEye(Node, float)
@@ -2470,7 +2470,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawSquaredBullsEye(float, float, float)} centered at the projected node origin.
    * The length of the target is the node {@link Node#pickingThreshold()}.
-   * If node {@link #hasNullTag(Node)} it also applies a stroke highlight.
+   * If node {@link #hasTag(Node)} it also applies a stroke highlight.
    *
    * @see #drawSquaredBullsEye(Node, float)
    * @see #drawCircledBullsEye(Node)
@@ -2566,7 +2566,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawCircledBullsEye(float, float, float)} centered at the projected node origin.
    * The length of the target is the node {@link Node#pickingThreshold()}.
-   * If node {@link #hasNullTag(Node)} it also applies a stroke highlight.
+   * If node {@link #hasTag(Node)} it also applies a stroke highlight.
    *
    * @see #drawSquaredBullsEye(Node, float)
    * @see #drawCircledBullsEye(Node)

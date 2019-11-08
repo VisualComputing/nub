@@ -2313,7 +2313,7 @@ public class Node {
    * and {@code false} otherwise.
    *
    * @see Graph#hasTag(String, Node)
-   * @see Graph#hasNullTag(Node)
+   * @see Graph#hasTag(Node)
    */
   public boolean isTagged(Graph graph) {
     return graph.isTagged(this);

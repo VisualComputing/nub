@@ -85,7 +85,7 @@ public class GraphTypes extends PApplet {
     }
     if (key == 'e')
       if (auxScene.node() == boxNode)
-        auxScene.removeNullTag();
+        auxScene.removeTag();
       else
         auxScene.tag(boxNode);
     if (key == '+')

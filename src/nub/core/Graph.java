@@ -3030,7 +3030,7 @@ public class Graph {
    *
    * @see #isTagValid(String)
    */
-  public boolean isNullTagValid() {
+  public boolean isTagValid() {
     return isTagValid(null);
   }
 
@@ -3051,7 +3051,7 @@ public class Graph {
    *
    * @see #hasTag(String, Node)
    */
-  public boolean hasNullTag(Node node) {
+  public boolean hasTag(Node node) {
     return hasTag(null, node);
   }
 
@@ -3105,7 +3105,7 @@ public class Graph {
    *
    * @see #removeTag(String)
    */
-  public void removeNullTag() {
+  public void removeTag() {
     removeTag(null);
   }
 

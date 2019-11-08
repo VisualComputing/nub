@@ -93,7 +93,7 @@ public class MiniMap extends PApplet {
       if (interactiveEye)
         minimap.tag(sceneEye);
       else
-        minimap.removeNullTag();
+        minimap.removeTag();
     }
     if (key == 'f')
       focus.fit(1);

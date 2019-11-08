@@ -64,7 +64,7 @@ public class Orbit extends PApplet {
 
   public void keyPressed() {
     if (key == 'i')
-      scene.tag(scene.hasNullTag(shape1) ? shape2 : shape1);
+      scene.tag(scene.hasTag(shape1) ? shape2 : shape1);
     if (key == 'f')
       scene.flip();
   }
