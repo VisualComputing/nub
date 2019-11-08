@@ -1,9 +1,9 @@
 /**
  * SceneBuffers.
  * by Jean Pierre Charalambos.
- * 
+ *
  * This example displays the scene front and back buffers.
- * 
+ *
  * The front buffer is filled with some scene objects.
  * The back buffer is used to pick them.
  */
@@ -68,7 +68,7 @@ void mouseWheel(MouseEvent event) {
   if (scene.is3D())
     scene.moveForward(event.getCount() * 20);
   else
-    scene.scale(scene.eye(), event.getCount() * 20);
+    scene.scaleEye(event.getCount() * 20);
 }
 
 PShape caja() {

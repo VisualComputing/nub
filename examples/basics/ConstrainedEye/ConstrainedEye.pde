@@ -31,10 +31,9 @@ void setup() {
   scene = new Scene(this);
   scene.setRadius(400);
   scene.fit(1);
-
   constraints[0] = new WorldConstraint();
   // Note that an EyeConstraint(eye) would produce the same results:
-  // An EyeConstraint is a LocalConstraint when applied to the camera node !
+  // An EyeConstraint is a LocalConstraint when applied to the eye node!
   constraints[1] = new LocalConstraint();
   transDir = 0;
   rotDir = 0;
@@ -68,7 +67,7 @@ void mouseWheel(MouseEvent event) {
   if (scene.is3D())
     scene.moveForward(event.getCount() * 20);
   else
-    scene.scale(scene.eye(), event.getCount() * 20);
+    scene.scaleEye(event.getCount() * 20);
 }
 
 void keyPressed() {
@@ -87,7 +86,6 @@ void keyPressed() {
   if (key == 'r' || key == 'R') {
     constraints[activeConstraint].setRotationConstraintType(nextRotationConstraintType(constraints[activeConstraint].rotationConstraintType()));
   }
-
   Vector dir = new Vector(0, 0, 0);
   switch (transDir) {
   case 0:
@@ -100,9 +98,7 @@ void keyPressed() {
     dir.setZ(1);
     break;
   }
-
   constraints[activeConstraint].setTranslationConstraintDirection(dir);
-
   dir.set(0, 0, 0);
   switch (rotDir) {
   case 0:
@@ -163,12 +159,10 @@ static AxisPlaneConstraint.Type nextRotationConstraintType(AxisPlaneConstraint.T
 void changeConstraint() {
   int previous = activeConstraint;
   activeConstraint = (activeConstraint + 1) % 2;
-
   constraints[activeConstraint].setTranslationConstraintType(constraints[previous].translationConstraintType());
   constraints[activeConstraint].setTranslationConstraintDirection(constraints[previous].translationConstraintDirection());
   constraints[activeConstraint].setRotationConstraintType(constraints[previous].rotationConstraintType());
   constraints[activeConstraint].setRotationConstraintDirection(constraints[previous].rotationConstraintDirection());
-
   scene.eye().setConstraint(constraints[activeConstraint]);
 }
 

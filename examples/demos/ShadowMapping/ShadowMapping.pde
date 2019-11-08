@@ -114,7 +114,7 @@ void setup() {
     public void graphics(PGraphics pg) {
       pg.pushStyle();
       if (debug) {
-        pg.fill(0, isTagged() ? 255 : 0, 255);
+        pg.fill(0, isTagged(scene) ? 255 : 0, 255);
         Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
       } else {
         pg.fill(0, 255, 255);

@@ -66,17 +66,14 @@ void walls() {
   pushStyle();
   noFill();
   stroke(255, 255, 0);
-
   line(0, 0, 0, 0, flockHeight, 0);
   line(0, 0, flockDepth, 0, flockHeight, flockDepth);
   line(0, 0, 0, flockWidth, 0, 0);
   line(0, 0, flockDepth, flockWidth, 0, flockDepth);
-
   line(flockWidth, 0, 0, flockWidth, flockHeight, 0);
   line(flockWidth, 0, flockDepth, flockWidth, flockHeight, flockDepth);
   line(0, flockHeight, 0, flockWidth, flockHeight, 0);
   line(0, flockHeight, flockDepth, flockWidth, flockHeight, flockDepth);
-
   line(0, 0, 0, 0, 0, flockDepth);
   line(0, flockHeight, 0, 0, flockHeight, flockDepth);
   line(flockWidth, 0, 0, flockWidth, 0, flockDepth);
@@ -112,13 +109,13 @@ void resetEye() {
 void mouseClicked() {
   // two options to update the boid avatar:
   // 1. Synchronously
-  updateAvatar(scene.track("mouseClicked", mouseX, mouseY));
+  updateAvatar(scene.updateMouseTag("mouseClicked"));
   // which is the same as these two lines:
-  // scene.track("mouseClicked", mouseX, mouseY);
+  // scene.updateMouseTag("mouseClicked");
   // updateAvatar(scene.node("mouseClicked"));
   // 2. Asynchronously
   // which requires updateAvatar(scene.node("mouseClicked")) to be called within draw()
-  // scene.cast("mouseClicked", mouseX, mouseY);
+  // scene.mouseTag("mouseClicked");
 }
 
 // 'first-person' interaction
@@ -137,12 +134,12 @@ void mouseDragged() {
 // highlighting and 'third-person' interaction
 void mouseMoved(MouseEvent event) {
   // 1. highlighting
-  scene.cast("mouseMoved", mouseX, mouseY);
+  scene.mouseTag("mouseMoved");
   // 2. third-person interaction
   if (scene.eye().reference() != null)
     // press shift to move the mouse without looking around
     if (!event.isShiftDown())
-      scene.lookAround();
+      scene.mouseLookAround();
 }
 
 void mouseWheel(MouseEvent event) {

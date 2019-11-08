@@ -14,7 +14,6 @@ import nub.core.constraint.*;
 import nub.processing.*;
 
 Scene scene;
-boolean mouseTracking = true;
 PFont myFont;
 int transDir;
 int rotDir;
@@ -48,7 +47,7 @@ void setup() {
     @Override
     public void graphics(PGraphics pg) {
       Scene.drawAxes(pg, 40);
-      pg.fill(isTagged() ? 255 : 0, 0, 255);
+      pg.fill(isTagged(scene) ? 255 : 0, 0, 255);
       Scene.drawTorusSolenoid(pg);
     }
   };
@@ -68,15 +67,19 @@ void draw() {
 }
 
 void mouseMoved() {
-  if (mouseTracking)
+  if (!scene.isTagValid("key"))
     scene.mouseTag();
 }
 
 void mouseDragged() {
-  if (mouseButton == LEFT)
-    scene.mouseSpin();
-  else if (mouseButton == RIGHT)
-    scene.mouseTranslate();
+  if (mouseButton == LEFT) {
+    if(!scene.mouseSpinTag("key"))
+      scene.mouseSpinEye();
+  }
+  else if (mouseButton == RIGHT) {
+    if(!scene.mouseTranslateTag("key"))
+      scene.mouseTranslateEye();
+  }
   else
     scene.scale(mouseX - pmouseX);
 }
@@ -85,17 +88,15 @@ void mouseWheel(MouseEvent event) {
   if (scene.is3D())
     scene.moveForward(event.getCount() * 20);
   else
-    scene.scale(scene.eye(), event.getCount() * 20);
+    scene.scaleEye(event.getCount() * 20);
 }
 
 void keyPressed() {
   if (key == 'i')
-    if (scene.isTagged(iNode)) {
-      scene.untag(iNode);
-      mouseTracking = true;
+    if (scene.hasTag("key", iNode)) {
+      scene.removeTag("key");
     } else {
-      scene.tag(iNode);
-      mouseTracking = false;
+      scene.tag("key", iNode);
     }
   if (key == 'b' || key == 'B') {
     rotDir = (rotDir + 1) % 3;

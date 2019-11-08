@@ -44,7 +44,7 @@ void setup() {
         pg.pushStyle();
         if (scene.node("light") == this) {
           Scene.drawAxes(pg, 150);
-          pg.fill(0, isTagged() ? 255 : 0, 255, 120);
+          pg.fill(0, isTagged(scene) ? 255 : 0, 255, 120);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         } else {
           if (pg == shadowMap)
@@ -94,7 +94,7 @@ void draw() {
 
 void mouseMoved(MouseEvent event) {
   if (event.isShiftDown())
-    scene.cast("light");
+    scene.mouseTag("light");
   else
     scene.mouseTag();
 }
