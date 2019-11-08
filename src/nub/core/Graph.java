@@ -378,9 +378,11 @@ public class Graph {
       System.out.println("Warning: setFOV() is meaningless in 2D. Use eye().setMagnitude() instead");
       return;
     }
-    eye().setMagnitude(type() == Type.PERSPECTIVE ?
+    float magnitude = type() == Type.PERSPECTIVE ?
         (float) Math.tan(fov / 2) :
-        (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / width());
+        (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / width();
+    if (magnitude > 0)
+      eye().setMagnitude(magnitude);
   }
 
   /**
