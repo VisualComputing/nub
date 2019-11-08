@@ -108,7 +108,7 @@ public class Interpolation extends PApplet {
     if (scene.is3D())
       scene.moveForward(event.getCount() * 20);
     else
-      scene.scale(scene.eye(), event.getCount() * 20);
+      scene.scaleEye(event.getCount() * 20);
   }
 
   public void keyPressed() {
