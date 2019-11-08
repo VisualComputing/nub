@@ -56,6 +56,7 @@ public class LoadMesh2 extends PApplet {
 
         //5. Adding IK behavior
         //Register an IK Solver
+        scene.enableTRIK(true);
         solver = scene.registerTreeSolver(model.root());
         //Update params
         solver.setMaxError(1f);

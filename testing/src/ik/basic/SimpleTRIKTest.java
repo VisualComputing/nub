@@ -38,8 +38,8 @@ public class SimpleTRIKTest extends PApplet {
 
     public void setup() {
         Joint.axes = true;
-        TRIK._debug = true;
-        TRIK._singleStep = true;
+        //TRIK._debug = true;
+        //TRIK._singleStep = true;
 
         //Setting the scene
         scene = new Scene(this);
@@ -51,8 +51,8 @@ public class SimpleTRIKTest extends PApplet {
         color = color(random(255), random(255), random(255));
         skeleton_trik = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), color, -1, 0);
 
-        Util.generateConstraints(skeleton_fabrik, Util.ConstraintType.CONE_ELLIPSE, 0, scene.is3D());
-        Util.generateConstraints(skeleton_trik, Util.ConstraintType.CONE_ELLIPSE, 0, scene.is3D());
+        Util.generateConstraints(skeleton_fabrik, Util.ConstraintType.CONE_CIRCLE, -1, scene.is3D());
+        Util.generateConstraints(skeleton_trik, Util.ConstraintType.CONE_CIRCLE, -1, scene.is3D());
 
         //skeleton_trik = createSkeleton(Vector.multiply(scene.rightVector(), -scene.radius()/2f));
         // skeleton_fabrik  = createSkeleton(Vector.multiply(scene.rightVector(), scene.radius()/2f));
@@ -110,6 +110,8 @@ public class SimpleTRIKTest extends PApplet {
                 TRIK trik = new TRIK(skeleton);
                 trik.enableWeight(true);
                 trik.setLookAhead(3);
+                trik.enableTwistHeuristics(true);
+                //trik.penalizeTwisting(true);
                 solver = trik;
                 break;
             }
@@ -123,13 +125,15 @@ public class SimpleTRIKTest extends PApplet {
         }
         //Optionally you could modify the following parameters of the Solver:
         //Maximum distance between end effector and target, If is below maxError, then we stop executing IK solver (Default value is 0.01)
-        solver.setMaxError(1);
+        //solver.setMaxError(1);
         //Number of iterations to perform in order to reach the target (Default value is 50)
-        solver.setMaxIterations(2000);
+        if(TRIK._singleStep) solver.setMaxIterations(200);
+        else solver.setMaxIterations(6);
         //Times a solver will iterate on a single Frame (Default value is 5)
-        solver.setTimesPerFrame(1);
+        if(!TRIK._debug) solver.setTimesPerFrame(6);
+        else solver.setTimesPerFrame(1);
         //Minimum distance between previous and current solution to consider that Solver converges (Default value is 0.01)
-        solver.setMinDistance(0.5f);
+        //solver.setMinDistance(0.5f);
         //4. relate targets with end effectors
         solver.setTarget(endEffector, target);
         //5. Create a Timing Task such that the solver executes each amount of time

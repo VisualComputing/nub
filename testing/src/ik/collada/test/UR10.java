@@ -2,6 +2,7 @@ package ik.collada.test;
 
 import ik.basic.Util;
 import nub.ik.loader.collada.URDFLoader;
+import nub.ik.solver.geometric.TRIK;
 import nub.ik.visual.Joint;
 import ik.interactive.Target;
 import nub.core.Graph;
@@ -104,12 +105,13 @@ public class UR10 extends PApplet {
 
 
         if(!ccd) {
+            solver = new TRIK( branch);
+            ((TRIK) solver).setLookAhead(2);
+        } else{
             solver = new ChainSolver( branch);
             ((ChainSolver) solver).setKeepDirection(true);
             ((ChainSolver) solver).setFixTwisting(true);
             ((ChainSolver) solver).explore(false);
-        } else{
-            solver = new CCDSolver( branch);
         }
 
         solver.setTimesPerFrame(debug ? 1 : 10);
@@ -147,7 +149,7 @@ public class UR10 extends PApplet {
         Util.printInfo(scene, solver, base);
         scene.endHUD();
 
-        if(debug){
+        if(debug && solver instanceof ChainSolver){
             hint(DISABLE_DEPTH_TEST);
             ChainSolver s = (ChainSolver) solver;
             /*if(s.iterationsHistory() != null && !s.iterationsHistory().isEmpty() && show[0]) {

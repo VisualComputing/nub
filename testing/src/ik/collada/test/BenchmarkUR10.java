@@ -2,6 +2,7 @@ package ik.collada.test;
 
 import ik.basic.Util;
 import nub.ik.loader.collada.URDFLoader;
+import nub.ik.solver.geometric.TRIK;
 import nub.ik.visual.Joint;
 import ik.interactive.Target;
 import nub.core.Graph;
@@ -30,12 +31,12 @@ public class BenchmarkUR10 extends PApplet {
     Scene scene;
     String path = "/testing/data/dae/";
     String dae = "ur10_joint_limited_robot.dae";
-    Model[] models = new Model[4];
-    String solvers_type[] = {"FABRIK", "BIOIK", "CCD", "NUMERICAL"};
+    Model[] models = new Model[5];
+    String solvers_type[] = {"FABRIK", "BIOIK", "CCD", "NUMERICAL", "TRIK"};
     List<Solver> solvers = new ArrayList<>();
     List<Vector> positions = new ArrayList<>();
     List<Target> targets = new ArrayList<>();
-    int[] enable = {0,1,2};
+    int[] enable = {0,1,2,3,4};
 
 
     public void settings() {
@@ -116,6 +117,12 @@ public class BenchmarkUR10 extends PApplet {
                     solver = new SDLSSolver( branch);
                     break;
                 }
+                case "TRIK":{
+                    solver = new TRIK( branch);
+                    ((TRIK) solver).setLookAhead(2);
+                    ((TRIK) solver).enableWeight(true);
+                    break;
+                }
                 default:{
                     solver = new ChainSolver( branch);
                     ((ChainSolver)solver).setKeepDirection(true);
@@ -124,8 +131,8 @@ public class BenchmarkUR10 extends PApplet {
                 }
             }
 
-            solver.setTimesPerFrame(10);
-            solver.setMaxIterations(50);
+            solver.setTimesPerFrame(4);
+            solver.setMaxIterations(10);
             solver.setMaxError(scene.radius() * 0.01f); solver.setMinDistance(scene.radius() * 0.01f);
             solver.setTarget(branch.get(branch.size() - 1), target);
             target.setPosition(branch.get(branch.size() - 1).position().get());

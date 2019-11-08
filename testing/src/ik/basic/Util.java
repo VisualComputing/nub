@@ -85,12 +85,14 @@ public class Util {
             case TRIK_V3:{
                 TRIK solver = new TRIK(structure);
                 solver.setLookAhead(4);
+                solver.enableWeight(true);
                 return solver;
             }
             case TRIK_V4:{
                 TRIK solver = new TRIK(structure);
                 solver.setLookAhead(4);
                 solver.enableWeight(true);
+                solver.smooth(true);
                 return solver;
             }
             default: return null;

@@ -54,10 +54,16 @@ public class GTargetsTest extends PApplet {
         trik1.enableDirection(true);
         trik2.enableDirection(true);
         trik3.enableDirection(true);
+        //trik1.enableTwistHeuristics(false);
+        //trik2.enableTwistHeuristics(false);
+        //trik3.enableTwistHeuristics(false);
+
         trik2.enableWeight(true);
         trik3.enableWeight(true);
-        //trik2.setLookAhead(1);
-        trik3.setLookAhead(5);
+        trik2.setLookAhead(3);
+        trik3.setLookAhead(3);
+        trik3.smooth(true);
+
         //Define Text Properties
         textAlign(CENTER);
         textSize(24);
@@ -112,7 +118,7 @@ public class GTargetsTest extends PApplet {
         //Number of iterations to perform in order to reach the target (Default value is 50)
         solver.setMaxIterations(10);
         //Times a solver will iterate on a single Frame (Default value is 5)
-        solver.setTimesPerFrame(TRIK._debug ? 1 : 5);
+        solver.setTimesPerFrame(TRIK._debug ? 1 : 10);
         //Minimum distance between previous and current solution to consider that Solver converges (Default value is 0.01)
         solver.setMinDistance(5f);
         //4. relate targets with end effectors

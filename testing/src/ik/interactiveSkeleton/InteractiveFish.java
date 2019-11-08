@@ -5,9 +5,11 @@ import nub.core.Node;
 import nub.core.Graph;
 import nub.core.Interpolator;
 import nub.ik.solver.Solver;
+import nub.ik.solver.geometric.TRIK;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.ik.visual.Joint;
+import nub.processing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -38,6 +40,7 @@ public class InteractiveFish extends PApplet {
     }
 
     public void setup() {
+        Joint.axes = true;
         //1. Create and set the scene
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
@@ -59,9 +62,13 @@ public class InteractiveFish extends PApplet {
         Node endEffector = skeleton.get(skeleton.size()- 1);
 
         //4.2 relate a skeleton with an IK Solver
-        Solver solver = scene.registerTreeSolver(root);
+        TRIK solver = new TRIK(skeleton);
         //Update params
-        solver.setMaxError(1f);
+        solver.enableTwistHeuristics(false);
+        //solver.smooth(true);
+        solver.setTimesPerFrame(2);
+        solver.setMaxIterations(2);
+        //solver.setMaxError(1f);
 
         //4.3 Create target(s) to relate with End Effector(s)
         target = createTarget(targetRadius);
@@ -71,10 +78,21 @@ public class InteractiveFish extends PApplet {
         target.setPosition(endEffector.position());
 
         //4.4 Relate target(s) with end effector(s)
-        scene.addIKTarget(endEffector, target);
+        //scene.addIKTarget(endEffector, target);
+        solver.setTarget(target);
 
         //Generates a default Path that target must follow
         targetInterpolator = setupTargetInterpolator(target);
+
+        TimingTask solverTask = new TimingTask(scene) {
+            @Override
+            public void execute() {
+                //a solver perform an iteration when solve method is called
+                solver.solve();
+            }
+        };
+        solverTask.run(40); //Execute the solverTask each 40 ms
+
     }
 
     public Node createTarget(float radius){
@@ -122,7 +140,7 @@ public class InteractiveFish extends PApplet {
     public Interpolator setupTargetInterpolator(Node target) {
         Interpolator targetInterpolator = new Interpolator(target);
         targetInterpolator.setLoop();
-        targetInterpolator.setSpeed(5.2f);
+        targetInterpolator.setSpeed(3.2f);
         // Create an initial path
         int nbKeyFrames = 10;
         float step = 2.0f * PI / (nbKeyFrames - 1);
