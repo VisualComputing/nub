@@ -80,7 +80,7 @@ void draw() {
   // 1. Fill in and display front-buffer
   scene.render();
   // 2. Fill in shadow map using the light point of view
-  if (scene.node("light") != null) {
+  if (scene.isTagValid("light")) {
     shadowMap.beginDraw();
     shadowMap.background(140, 160, 125);
     scene.render(shadowMap, shadowMapType, scene.node("light"), zNear, zFar);
@@ -109,9 +109,8 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  if (event.isShiftDown())
-    if (scene.node("light") != null)
-      depthShader.set("far", zFar += event.getCount() * 20);
+  if (event.isShiftDown() && scene.isTagValid("light"))
+    depthShader.set("far", zFar += event.getCount() * 20);
   else
     scene.scale(event.getCount() * 20);
 }

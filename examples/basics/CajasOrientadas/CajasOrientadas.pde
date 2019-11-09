@@ -92,10 +92,10 @@ void keyPressed() {
   if (key == 'S')
     scene.fit();
   if (key == 'u')
-    if (scene.node("keyboard") == null)
-      scene.tag("keyboard", esfera);
-    else
+    if (scene.isTagValid("keyboard"))
       scene.removeTag("keyboard");
+    else
+      scene.tag("keyboard", esfera);
   if (key == CODED)
     if (keyCode == UP)
       scene.translate("keyboard", 0, -10);

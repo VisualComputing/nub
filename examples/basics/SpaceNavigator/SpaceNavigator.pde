@@ -59,7 +59,7 @@ void draw() {
 void spaceNavigatorPicking() {
   float x = map(snXPos.getValue(), -0.8, 0.8, 0, width);
   float y = map(snYPos.getValue(), -0.8, 0.8, 0, height);
-  // update the space navigator tracked node:
+  // update the space navigator tagged node:
   scene.tag("SPCNAV", int(x), int(y));
   // draw picking visual hint
   pushStyle();
