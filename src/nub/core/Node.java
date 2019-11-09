@@ -2285,10 +2285,10 @@ public class Node {
    * Parse {@code gesture} params. Useful to implement the node as an for application control.
    * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
    */
-  public void interactNode(Object... gesture) {
+  public void interact(Object... gesture) {
   }
 
-  public void interactEye(Object... gesture) {
+  public void interactAsEye(Object... gesture) {
   }
 
   /**

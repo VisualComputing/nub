@@ -3331,8 +3331,8 @@ public class Graph {
 
   // 0. Patterns
 
-  public void interact() {
-    interact(null);
+  public void interact(Object... gesture) {
+    interact(null, gesture);
   }
 
   public void interact(String tag, Object... gesture) {
@@ -3354,11 +3354,11 @@ public class Graph {
 
   public void interactNode(Node node, Object... gesture) {
     if (node != null)
-      node.interactNode(gesture);
+      node.interact(gesture);
   }
 
   public void interactEye(Object... gesture) {
-    eye().interactEye(gesture);
+    eye().interactAsEye(gesture);
   }
 
   // 1. Align
