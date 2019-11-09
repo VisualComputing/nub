@@ -44,7 +44,7 @@ void setup() {
         Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
         scene.beginHUD(pg);
         Vector position = scene.screenLocation(position());
-        pg.fill(isTagged() ? 0 : 255, isTagged() ? 255 : 0, isTagged() ? 0 : 255);
+        pg.fill(isTagged(scene) ? 0 : 255, isTagged(scene) ? 255 : 0, isTagged(scene) ? 0 : 255);
         pg.textFont(font36);
         pg.text(_id, position.x(), position.y());
         scene.endHUD(pg);
@@ -52,7 +52,7 @@ void setup() {
       }
 
       @Override
-      public void interact(Object... gesture) {
+      public void interactNode(Object... gesture) {
         if (gesture.length == 0)
           _color = randomColor();
         if (gesture.length == 1)
@@ -95,34 +95,34 @@ void keyPressed() {
   if (value >= 0 && value < 10)
     scene.tag("key", shapes[value]);
   if (key == ' ')
-    scene.retag("key");
+    scene.removeTag("key");
   if (key == CODED)
     if (keyCode == UP)
       scene.translate("key", 0, -10);
     else if (keyCode == DOWN)
       scene.translate("key", 0, 10);
     else if (keyCode == LEFT)
-      scene.interact("key", "menos");
+      scene.interactTag("key", "menos");
     else if (keyCode == RIGHT)
-      scene.interact("key", "mas");
+      scene.interactTag("key", "mas");
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.spin("key");
+    scene.mouseSpin("key");
   else if (mouseButton == CENTER)
     scene.scale("key", scene.mouseDX());
   else
-    scene.translate("key");
+    scene.mouseTranslate("key");
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.interact("key", event.getCount());
+  scene.interactTag("key", event.getCount());
 }
 
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1)
-    scene.interact("key");
+    scene.interactTag("key");
   if (event.getCount() == 2)
-    scene.cast("key");
+    scene.mouseTag("key");
 }

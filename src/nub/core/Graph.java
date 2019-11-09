@@ -3329,6 +3329,38 @@ public class Graph {
   // Gesture physical interface is quite nice!
   // It always maps physical (screen) space geom data respect to the eye
 
+  // 0. Patterns
+
+  public void interact() {
+    interact(null);
+  }
+
+  public void interact(String tag, Object... gesture) {
+    if (!interactTag(tag, gesture))
+      interactEye(gesture);
+  }
+
+  public boolean interactTag(Object... gesture) {
+    return interactTag(null, gesture);
+  }
+
+  public boolean interactTag(String tag, Object... gesture) {
+    if (node(tag) != null) {
+      interactNode(node(tag), gesture);
+      return true;
+    }
+    return false;
+  }
+
+  public void interactNode(Node node, Object... gesture) {
+    if (node != null)
+      node.interactNode(gesture);
+  }
+
+  public void interactEye(Object... gesture) {
+    eye().interactEye(gesture);
+  }
+
   // 1. Align
 
   /**
