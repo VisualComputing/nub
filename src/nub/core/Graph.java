@@ -3677,26 +3677,8 @@ public class Graph {
    * @param dz world space delta-z units
    */
   public void translateNode(Node node, float dx, float dy, float dz) {
-    if (node == null)
-      return;
-    if (is2D() && dz != 0) {
-      System.out.println("Warning: graph is 2D. Z-translation reset");
-      dz = 0;
-    }
-    dy = isRightHanded() ? -dy : dy;
-    dz = -dz;
-    // Scale to fit the screen relative vector displacement
-    if (type() == Type.PERSPECTIVE) {
-      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(
-          eye().location(node.position())._vector[2] * eye().magnitude());
-      //TODO check me weird to find height instead of width working (may it has to do with fov?)
-      dx *= 2.0 * k / (height() * eye().magnitude());
-      dy *= 2.0 * k / (height() * eye().magnitude());
-    }
-    // this expresses the dz coordinate in world units:
-    //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
-    Vector eyeVector = new Vector(dx, dy, dz * 2 * radius() / Math.min(width(), height()));
-    node.translate(node.reference() == null ? eye().worldDisplacement(eyeVector) : node.reference().displacement(eyeVector, eye()));
+    Vector vector = displacement(new Vector(dx, dy, dz), node);
+    node.translate(node.reference() == null ? node.worldDisplacement(vector) : node.reference().displacement(vector, node));
   }
 
   /**
@@ -3716,24 +3698,51 @@ public class Graph {
    * @param dz world space delta-z units
    */
   public void translateEye(float dx, float dy, float dz) {
+    Node node = eye().get();
+    node.setPosition(anchor());
+    Vector vector = displacement(new Vector(dx, dy, dz), node);
+    // TODO test right-handed
+    vector.multiply(-1);
+    eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()));
+  }
+
+  public Vector displacement(Vector vector) {
+    return this.displacement(vector, null);
+  }
+
+  public Vector displacement(Vector vector, Node node) {
+    // this expresses the dz coordinate in world units:
+    // float zMax = 1 / eye().magnitude();
+    // float zMax = Math.min(width(), height());
+    float zMax = 2 * radius() / Math.min(width(), height());
+    float dx = vector.x();
+    float dy = isRightHanded() ? -vector.y() : vector.y();
+    float dz = -vector.z();
     if (is2D() && dz != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
     }
-    dx = -dx;
-    dy = !isRightHanded() ? -dy : dy;
     // Scale to fit the screen relative vector displacement
     if (type() == Type.PERSPECTIVE) {
-      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(
-          eye().location(anchor())._vector[2] * eye().magnitude());
+      Vector position = node == null ? new Vector() : node.position();
+      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
       //TODO check me weird to find height instead of width working (may it has to do with fov?)
       dx *= 2.0 * k / (height() * eye().magnitude());
       dy *= 2.0 * k / (height() * eye().magnitude());
     }
     // this expresses the dz coordinate in world units:
     //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
-    Vector eyeVector = new Vector(dx, dy, dz * 2 * radius() / Math.min(width(), height()));
-    _eye.translate(eye().reference() == null ? eye().worldDisplacement(eyeVector) : eye().reference().displacement(eyeVector, eye()));
+    Vector eyeVector = new Vector(dx, dy, dz * zMax);
+    return node == null ? eye().worldDisplacement(eyeVector) : node.displacement(eyeVector, eye());
+  }
+
+  public Vector screenDisplacement(Vector vector) {
+    return screenDisplacement(vector, null);
+  }
+
+  // TODO implement me!
+  public Vector screenDisplacement(Vector vector, Node node) {
+    return new Vector();
   }
 
   // 5. Rotate

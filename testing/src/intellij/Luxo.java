@@ -34,6 +34,7 @@ public class Luxo extends PApplet {
     background(255);
     lights();
 
+    scene.drawAxes();
     //draw the lamp
     scene.render();
 
