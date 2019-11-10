@@ -1,5 +1,6 @@
 package intellij;
 
+import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -71,11 +72,13 @@ public class CustomEyeInteraction extends PApplet {
     scene.rotateEye(-snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
   }
 
+  float computeAngle(float dx) {
+    return dx * (float) Math.PI / scene.width();
+  }
+
   // aka google earth navigation
   void googleEarth() {
-    /*
     // 1. Relate the eye reference frame:
-    Vector trns = new Vector();
     Vector pos = scene.eye().position();
     Quaternion o = scene.eye().orientation();
     Node oldRef = scene.eye().reference();
@@ -87,24 +90,20 @@ public class CustomEyeInteraction extends PApplet {
     scene.eye().setPosition(pos);
     scene.eye().setOrientation(o);
     // 2. Translate the refFrame along its Z-axis:
-    float deltaZ = event.dz();
-    trns = new Vector(0, deltaZ, 0);
-    screenToEye(trns);
-    float pmag = trns.magnitude();
-    translate(0, 0, (deltaZ > 0) ? -pmag : pmag);
+    scene.eye().translate(0, 0, -10 * snZPos.getValue());
     // 3. Rotate the refFrame around its X-axis -> translate forward-backward
     // the frame on the sphere surface
-    float deltaY = computeAngle(event.dy());
+    float deltaY = computeAngle(10 * snYPos.getValue());
     rFrame.rotate(new Quaternion(new Vector(1, 0, 0), scene.isRightHanded() ? deltaY : -deltaY));
     // 4. Rotate the refFrame around its Y-axis -> translate left-right the
     // frame on the sphere surface
-    float deltaX = computeAngle(event.dx());
+    float deltaX = computeAngle(10 * snXPos.getValue());
     rFrame.rotate(new Quaternion(new Vector(0, 1, 0), deltaX));
     // 5. Rotate the refFrame around its Z-axis -> look around
-    float rZ = computeAngle(event.drz());
-    rFrame.rotate(new Quat(new Vec(0, 0, 1), scene.isRightHanded() ? -rZ : rZ));
+    float rZ = computeAngle(snZRot.getValue() * 20);
+    rFrame.rotate(new Quaternion(new Vector(0, 0, 1), scene.isRightHanded() ? -rZ : rZ));
     // 6. Rotate the frame around x-axis -> move head up and down :P
-    float rX = computeAngle(event.drx());
+    float rX = computeAngle(snXRot.getValue() * 20);
     Quaternion q = new Quaternion(new Vector(1, 0, 0), scene.isRightHanded() ? rX : -rX);
     scene.eye().rotate(q);
     // 7. Unrelate the frame and restore state:
@@ -114,7 +113,6 @@ public class CustomEyeInteraction extends PApplet {
     scene.prune(rFrame);
     scene.eye().setPosition(pos);
     scene.eye().setOrientation(o);
-    // */
   }
 
   public void mouseDragged() {
