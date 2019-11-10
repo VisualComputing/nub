@@ -3711,6 +3711,7 @@ public class Graph {
     return this.displacement(vector, null);
   }
 
+  // TODO test node = eye
   public Vector displacement(Vector vector, Node node) {
     // this expresses the dz coordinate in world units:
     // float zMax = 1 / eye().magnitude();
