@@ -3706,6 +3706,7 @@ public class Graph {
     eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()));
   }
 
+  // TODO test null
   public Vector displacement(Vector vector) {
     return this.displacement(vector, null);
   }
