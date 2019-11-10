@@ -1703,6 +1703,24 @@ public class Graph {
   }
 
   /**
+   * Same as {@code lookAt(anchor())}.
+   *
+   * @see #lookAt(Vector)
+   * @see #anchor()
+   */
+  public void lookAtAnchor() {
+    lookAt(anchor());
+  }
+
+  /**
+   * @see #lookAt(Vector)
+   * @see #center()
+   */
+  public void lookAtCenter() {
+    lookAt(center());
+  }
+
+  /**
    * 2D eyes simply call {@code node().setPosition(target.x(), target.y())}. 3D
    * eyes set {@link Node#orientation()}, so that it looks at point {@code target} defined
    * in the world coordinate system (The eye {@link Node#position()} is not modified.
@@ -3151,7 +3169,7 @@ public class Graph {
 
   /**
    * Converts {@code vector} location from {@code node} to screen.
-   * Use {@code location(vector, node)} to perform the inverse transformation.
+   * Use {@link #location(Vector, Node)} to perform the inverse transformation.
    * <p>
    * The x and y coordinates of the returned vector are expressed in screen coordinates,
    * (0,0) being the upper left corner of the window. The z coordinate ranges between 0
@@ -3331,6 +3349,7 @@ public class Graph {
 
   // 0. Patterns
 
+  /*
   public void interact(Object... gesture) {
     interact(null, gesture);
   }
@@ -3339,6 +3358,7 @@ public class Graph {
     if (!interactTag(tag, gesture))
       interactEye(gesture);
   }
+   */
 
   public boolean interactTag(Object... gesture) {
     return interactTag(null, gesture);
@@ -3357,9 +3377,11 @@ public class Graph {
       node.interact(gesture);
   }
 
+  /*
   public void interactEye(Object... gesture) {
     eye().interactAsEye(gesture);
   }
+   */
 
   // 1. Align
 

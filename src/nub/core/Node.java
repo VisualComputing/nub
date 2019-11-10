@@ -2288,8 +2288,10 @@ public class Node {
   public void interact(Object... gesture) {
   }
 
+  /*
   public void interactAsEye(Object... gesture) {
   }
+   */
 
   /**
    * This method is called on each node of the graph hierarchy by the {@link Graph#render()}
