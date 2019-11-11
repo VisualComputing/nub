@@ -3701,30 +3701,17 @@ public class Graph {
     Node node = eye().get();
     node.setPosition(anchor());
     Vector vector = displacement(new Vector(dx, dy, dz), node);
-    // TODO test right-handed
     vector.multiply(-1);
     eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()));
   }
 
-  // TODO test null
   public Vector displacement(Vector vector) {
     return this.displacement(vector, null);
   }
 
-  // TODO test node = eye
-  // TODO test 2D
   public Vector displacement(Vector vector, Node node) {
-    // this expresses the dz coordinate in world units:
-    // float zMax = 1 / eye().magnitude();
-    // float zMax = Math.min(width(), height());
-    float zMax = 2 * radius() / Math.min(width(), height());
     float dx = vector.x();
     float dy = isRightHanded() ? -vector.y() : vector.y();
-    float dz = -vector.z();
-    if (is2D() && dz != 0) {
-      System.out.println("Warning: graph is 2D. Z-translation reset");
-      dz = 0;
-    }
     // Scale to fit the screen relative vector displacement
     if (type() == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.position();
@@ -3733,9 +3720,17 @@ public class Graph {
       dx *= 2.0 * k / (height() * eye().magnitude());
       dy *= 2.0 * k / (height() * eye().magnitude());
     }
-    // this expresses the dz coordinate in world units:
-    //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
-    Vector eyeVector = new Vector(dx, dy, dz * zMax);
+    float dz = -vector.z();
+    if (is2D() && dz != 0) {
+      System.out.println("Warning: graph is 2D. Z-translation reset");
+      dz = 0;
+    } else {
+      float zScreenMax = Math.max(width(), height());
+      // dz *= 2 * radius() / zScreenMax yields z in world-space
+      // multiply (the z world coordinate) by 1 / eye().magnitude() yields z in eye-space.
+      dz *= 2 * radius() / (zScreenMax * eye().magnitude());
+    }
+    Vector eyeVector = new Vector(dx, dy, dz);
     return node == null ? eye().worldDisplacement(eyeVector) : node.displacement(eyeVector, eye());
   }
 

@@ -11,7 +11,7 @@ public class SceneBuffers extends PApplet {
   Node[] shapes;
 
   //Choose one of P3D for a 3D scene or P2D for a 2D one.
-  String renderer = P3D;
+  String renderer = P2D;
   int w = 1000;
   int h = 1000;
 
