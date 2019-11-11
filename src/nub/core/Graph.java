@@ -3267,6 +3267,8 @@ public class Graph {
    * <p>
    * {@link #screenLocation(Vector, Node)} performs the inverse transformation.
    * <p>
+   * {@link #screenDisplacement(Vector, Node)} converts displacements instead of locations.
+   * <p>
    * This method only uses the intrinsic eye parameters (view and projection matrices),
    * {@link #width()} and {@link #height()}). You can hence define a virtual eye and use
    * this method to compute un-projections out of a classical rendering context.
@@ -3276,6 +3278,7 @@ public class Graph {
    * to speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
    *
    * @see #screenLocation(Vector, Node)
+   * @see #screenDisplacement(Vector, Node)
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
@@ -3341,6 +3344,95 @@ public class Graph {
     objCoordinate[2] = out[2];
 
     return true;
+  }
+
+  /**
+   * Same as {@code return displacement(vector, null)}.
+   *
+   * @see #displacement(Vector, Node)
+   * @see #location(Vector, Node)
+   */
+  public Vector displacement(Vector vector) {
+    return this.displacement(vector, null);
+  }
+
+  /**
+   * Converts {@code vector} displacement given in physical space to the {@code node} coordinate system.
+   * The physical space coordinate system is centered at the bounding box of {@link #width()} *
+   * {@link #height()} * {@code max(width(), height())} dimensions. This space defines the place where
+   * user gestures takes place, e.g., {@link #translateNode(Node, float, float, float)}.
+   * <p>
+   * {@link #screenDisplacement(Vector, Node)} performs the inverse transformation.
+   * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
+   *
+   * @see #displacement(Vector, Node)
+   * @see #screenLocation(Vector, Node)
+   * @see #translateNode(Node, float, float, float)
+   * @see #translateEye(float, float, float)
+   */
+  public Vector displacement(Vector vector, Node node) {
+    float dx = vector.x();
+    float dy = isRightHanded() ? -vector.y() : vector.y();
+    // Scale to fit the screen relative vector displacement
+    if (type() == Type.PERSPECTIVE) {
+      Vector position = node == null ? new Vector() : node.position();
+      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
+      //TODO check me weird to find height instead of width working (may it has to do with fov?)
+      dx *= 2.0 * k / (height() * eye().magnitude());
+      dy *= 2.0 * k / (height() * eye().magnitude());
+    }
+    float dz = -vector.z();
+    if (is2D() && dz != 0) {
+      System.out.println("Warning: graph is 2D. Z-translation reset");
+      dz = 0;
+    } else {
+      float zScreenMax = Math.max(width(), height());
+      // dz *= 2 * radius() / zScreenMax yields z in world-space
+      // multiply (the z world coordinate) by 1 / eye().magnitude() yields z in eye-space.
+      dz *= 2 * radius() / (zScreenMax * eye().magnitude());
+    }
+    Vector eyeVector = new Vector(dx, dy, dz);
+    return node == null ? eye().worldDisplacement(eyeVector) : node.displacement(eyeVector, eye());
+  }
+
+  /**
+   * Same as {@code return screenDisplacement(vector, null)}.
+   *
+   * @see #screenDisplacement(Vector, Node)
+   * @see #screenLocation(Node)
+   */
+  public Vector screenDisplacement(Vector vector) {
+    return screenDisplacement(vector, null);
+  }
+
+  /**
+   * Converts the {@code node} {@code vector} displacement to physical space.
+   * {@link #displacement(Vector, Node)} performs the inverse transformation.
+   * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
+   *
+   * @see #displacement(Vector, Node)
+   * @see #screenLocation(Vector, Node)
+   */
+  public Vector screenDisplacement(Vector vector, Node node) {
+    Vector eyeVector = eye().displacement(vector, node);
+    float dx = eyeVector.x();
+    float dy = isRightHanded() ? -eyeVector.y() : eyeVector.y();
+    if (type() == Type.PERSPECTIVE) {
+      Vector position = node == null ? new Vector() : node.position();
+      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
+      //TODO check me weird to find height instead of width working (may it has to do with fov?)
+      dx /= 2.0 * k / (height() * eye().magnitude());
+      dy /= 2.0 * k / (height() * eye().magnitude());
+    }
+    float dz = -eyeVector.z();
+    if (is2D() && dz != 0) {
+      System.out.println("Warning: graph is 2D. Z-translation reset");
+      dz = 0;
+    } else {
+      float zScreenMax = Math.max(width(), height());
+      dz /= 2 * radius() / (zScreenMax * eye().magnitude());
+    }
+    return new Vector(dx, dy, dz);
   }
 
   // Gesture physical interface is quite nice!
@@ -3671,9 +3763,10 @@ public class Graph {
   /**
    * Translates the node.
    *
+   * @see #displacement(Vector, Node)
    * @param dx screen space delta-x units
    * @param dy screen space delta-y units
-   * @param dz world space delta-z units
+   * @param dz screen space delta-z units
    */
   public void translateNode(Node node, float dx, float dy, float dz) {
     Vector vector = displacement(new Vector(dx, dy, dz), node);
@@ -3692,6 +3785,7 @@ public class Graph {
   /**
    * Translates the {@link #eye()}.
    *
+   * @see #displacement(Vector, Node)
    * @param dx screen space delta-x units
    * @param dy screen space delta-y units
    * @param dz world space delta-z units
@@ -3702,62 +3796,6 @@ public class Graph {
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     vector.multiply(-1);
     eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()));
-  }
-
-  public Vector displacement(Vector vector) {
-    return this.displacement(vector, null);
-  }
-
-  public Vector displacement(Vector vector, Node node) {
-    float dx = vector.x();
-    float dy = isRightHanded() ? -vector.y() : vector.y();
-    // Scale to fit the screen relative vector displacement
-    if (type() == Type.PERSPECTIVE) {
-      Vector position = node == null ? new Vector() : node.position();
-      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
-      //TODO check me weird to find height instead of width working (may it has to do with fov?)
-      dx *= 2.0 * k / (height() * eye().magnitude());
-      dy *= 2.0 * k / (height() * eye().magnitude());
-    }
-    float dz = -vector.z();
-    if (is2D() && dz != 0) {
-      System.out.println("Warning: graph is 2D. Z-translation reset");
-      dz = 0;
-    } else {
-      float zScreenMax = Math.max(width(), height());
-      // dz *= 2 * radius() / zScreenMax yields z in world-space
-      // multiply (the z world coordinate) by 1 / eye().magnitude() yields z in eye-space.
-      dz *= 2 * radius() / (zScreenMax * eye().magnitude());
-    }
-    Vector eyeVector = new Vector(dx, dy, dz);
-    return node == null ? eye().worldDisplacement(eyeVector) : node.displacement(eyeVector, eye());
-  }
-
-  public Vector screenDisplacement(Vector vector) {
-    return screenDisplacement(vector, null);
-  }
-
-  // TODO implement me!
-  public Vector screenDisplacement(Vector vector, Node node) {
-    Vector eyeVector = eye().displacement(vector, node);
-    float dx = eyeVector.x();
-    float dy = isRightHanded() ? -eyeVector.y() : eyeVector.y();
-    if (type() == Type.PERSPECTIVE) {
-      Vector position = node == null ? new Vector() : node.position();
-      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
-      //TODO check me weird to find height instead of width working (may it has to do with fov?)
-      dx /= 2.0 * k / (height() * eye().magnitude());
-      dy /= 2.0 * k / (height() * eye().magnitude());
-    }
-    float dz = -eyeVector.z();
-    if (is2D() && dz != 0) {
-      System.out.println("Warning: graph is 2D. Z-translation reset");
-      dz = 0;
-    } else {
-      float zScreenMax = Math.max(width(), height());
-      dz /= 2 * radius() / (zScreenMax * eye().magnitude());
-    }
-    return new Vector(dx, dy, dz);
   }
 
   // 5. Rotate
