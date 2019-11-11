@@ -1341,25 +1341,24 @@ public class Graph {
    * Returns the ratio of graph (units) to pixel at {@code position}.
    * <p>
    * A line of {@code n * graphToPixelRatio()} graph units, located at {@code position} in
-   * the world coordinates system, will be projected with a length of {@code n} pixels on
+   * the world coordinate system, will be projected with a length of {@code n} pixels on
    * screen.
    * <p>
    * Use this method to scale objects so that they have a constant pixel size on screen.
    * The following code will draw a 20 pixel line, starting at {@link #center()} and
-   * always directed along the screen vertical direction:
+   * always directed along the screen vertical direction ({@link #upVector()}):
    * <p>
    * {@code beginShape(LINES);}<br>
-   * {@code vertex(sceneCenter().x, sceneCenter().y, sceneCenter().z);}<br>
-   * {@code Vector v = Vector.add(sceneCenter(), Vector.mult(upVector(), 20 * graphToPixelRatio(sceneCenter())));}
+   * {@code vertex(scene.center().x(), scene.center().y(), scene.center().z());}<br>
+   * {@code Vector v = Vector.add(scene.center(), Vector.multiply(scene.upVector(), 20 * scene.graphToPixelRatio(scene.center())));}
    * <br>
-   * {@code vertex(v.x, v.y, v.z);}<br>
+   * {@code vertex(v.x(), v.y(), v.z());}<br>
    * {@code endShape();}<br>
    */
   public float graphToPixelRatio(Vector position) {
     switch (type()) {
       case PERSPECTIVE:
-        return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math
-            .tan(fov() / 2.0f) / height();
+        return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math.tan(fov() / 2.0f) / height();
       case TWO_D:
       case ORTHOGRAPHIC:
         return eye().magnitude();
@@ -3740,7 +3739,25 @@ public class Graph {
 
   // TODO implement me!
   public Vector screenDisplacement(Vector vector, Node node) {
-    return new Vector();
+    Vector eyeVector = eye().displacement(vector, node);
+    float dx = eyeVector.x();
+    float dy = isRightHanded() ? -eyeVector.y() : eyeVector.y();
+    if (type() == Type.PERSPECTIVE) {
+      Vector position = node == null ? new Vector() : node.position();
+      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
+      //TODO check me weird to find height instead of width working (may it has to do with fov?)
+      dx /= 2.0 * k / (height() * eye().magnitude());
+      dy /= 2.0 * k / (height() * eye().magnitude());
+    }
+    float dz = -eyeVector.z();
+    if (is2D() && dz != 0) {
+      System.out.println("Warning: graph is 2D. Z-translation reset");
+      dz = 0;
+    } else {
+      float zScreenMax = Math.max(width(), height());
+      dz /= 2 * radius() / (zScreenMax * eye().magnitude());
+    }
+    return new Vector(dx, dy, dz);
   }
 
   // 5. Rotate

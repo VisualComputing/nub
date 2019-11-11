@@ -117,12 +117,10 @@ public class ViewingVolume extends PApplet {
     if (key == '2')
       scene2.fitFOV();
     if (key == 'p') {
-      //println(Vector.distance(scene1.eye().position(), scene1.anchor()));
-      Vector v = new Vector(0, 0, max(w, h / 2));
-      Vector d = scene1.displacement(v);
-      println("eye magnitude: " + scene1.eye().magnitude() + " d: " + d.magnitude() + " 2*radius: " + 2 * scene1.radius());
-      Vector e = new Vector(random(-50, 50), random(-50, 50), random(-50, 50));
-      println("random vector : " + e.toString() + " displacement(e, eye): " + scene1.displacement(e, scene1.eye()).toString());
+      Vector r = new Vector(random(-50, 50), random(-50, 50), random(-50, 50));
+      Vector d = scene1.displacement(r);
+      Vector s = scene1.screenDisplacement(d);
+      println("random vector : " + r.toString() + " displacement(r): " + d + " screenDisplacement(d): " + s);
     }
   }
 
