@@ -3881,8 +3881,6 @@ public class Graph {
       pitch = 0;
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
-    //same as:
-    //eye().orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
     eye()._orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor());
   }
 
@@ -4045,7 +4043,7 @@ public class Graph {
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
     //same as:
-    //eye().orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
+    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle));
     eye()._orbit(new Quaternion(axis, angle), anchor());
   }
 
@@ -4142,7 +4140,7 @@ public class Graph {
       quaternion = Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
     }
     //same as:
-    //eye().orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
+    //eye().orbit(new Quaternion(eye().worldDisplacement(quaternion.axis()), quaternion.angle()));
     eye()._orbit(quaternion, anchor());
   }
 }

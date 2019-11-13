@@ -1112,7 +1112,7 @@ public class Node {
   /**
    * Rotates the node by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
    * passes through {@code point}. The {@code quaternion} {@link Quaternion#axis()} is
-   * defined in the node coordinate system, while {@code point} is defined in the world
+   * defined in this node coordinate system, while {@code point} is defined in the world
    * coordinate system).
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to

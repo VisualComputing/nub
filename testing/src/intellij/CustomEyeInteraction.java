@@ -23,8 +23,13 @@ public class CustomEyeInteraction extends PApplet {
   Scene scene;
   boolean keyMode;
 
+  // size
+  int w = 1240;
+  int h = 840;
+  float step = 5 * TWO_PI / w;
+
   public void settings() {
-    size(1240, 840, P3D);
+    size(w, h, P3D);
   }
 
   public void setup() {
@@ -45,19 +50,17 @@ public class CustomEyeInteraction extends PApplet {
     texturedSphere(globeRadius, texmap);
   }
 
-  float computeAngle(float dx) {
-    return dx * (float) Math.PI / scene.width();
-  }
+  // eye().orbit(axis, angle) requires the axis to be defined in the world coordinate system:
 
-  Vector worldXAxis() {
+  Vector xAxis() {
     return scene.eye().worldDisplacement(new Vector(1, 0, 0));
   }
 
-  Vector worldYAxis() {
+  Vector yAxis() {
     return scene.eye().worldDisplacement(new Vector(0, 1, 0));
   }
 
-  Vector worldZAxis() {
+  Vector zAxis() {
     return scene.eye().worldDisplacement(new Vector(0, 0, 1));
   }
 
@@ -99,13 +102,12 @@ public class CustomEyeInteraction extends PApplet {
         scene.eye().setPosition(t);
         //We need to line up the eye up vector along the anchor and the camera position:
         scene.setUpVector(Vector.subtract(scene.eye().position(), scene.anchor()));
-        //The rest is just to make the scene appear in front of us. We could have just used
-        //the space navigator itself to make that happen too.
+        //The rest is just to make the scene appear in front of us.
         scene.eye().rotate(new Quaternion(a, 0, 0));
         // */
       } else {
-        scene.lookAtCenter();
         scene.fit(1);
+        scene.lookAtCenter();
       }
     }
     if (keyMode) {
@@ -119,34 +121,38 @@ public class CustomEyeInteraction extends PApplet {
           case UP:
             if (event.isShiftDown())
               // Rotate the eye around its X-axis -> move head up and down
-              scene.eye().rotate(new Vector(1, 0, 0), computeAngle(-20));
+              scene.eye().rotate(new Vector(1, 0, 0), -step);
             else
-              // Orbit the eye around the world origin along the world X-axis -> translate forward-backward
-              scene.eye().orbit(new Quaternion(worldXAxis(), computeAngle(20)));
+              // Orbit the eye around its X-axis -> translate forward-backward
+              scene.eye().orbit(xAxis(), step);
             break;
           case DOWN:
             if (event.isShiftDown())
               // Rotate the eye around its X-axis -> move head up and down
-              scene.eye().rotate(new Vector(1, 0, 0), computeAngle(20));
+              scene.eye().rotate(new Vector(1, 0, 0), step);
             else
-              // Orbit the eye around the world origin along the world X-axis -> translate forward-backward
-              scene.eye().orbit(new Quaternion(worldXAxis(), computeAngle(-20)));
+              // Orbit the eye around its X-axis -> translate forward-backward
+              scene.eye().orbit(xAxis(), -step);
             break;
           case LEFT:
+            // /*
             if (event.isShiftDown())
-              // Orbit the eye around the world origin along the world Z-axis -> look around
-              scene.eye().orbit(new Quaternion(worldZAxis(), computeAngle(-20)));
+              // Orbit the eye around its Z-axis -> look around
+              scene.eye().orbit(zAxis(), -step);
             else
-              // Orbit the eye around the world origin along the world Y-axis -> translate left-right
-              scene.eye().orbit(new Quaternion(worldYAxis(), computeAngle(-10)));
+              // */
+              // Orbit the eye around its Y-axis -> translate left-right
+              scene.eye().orbit(yAxis(), -step);
             break;
           case RIGHT:
+            // /*
             if (event.isShiftDown())
-              // Orbit the eye around the world origin along the world Z-axis -> look around
-              scene.eye().orbit(new Quaternion(worldZAxis(), computeAngle(20)));
+              // Orbit the eye around its Z-axis -> look around
+              scene.eye().orbit(zAxis(), step);
             else
-              // Orbit the eye around the world origin along the world Y-axis -> translate left-right
-              scene.eye().orbit(new Quaternion(worldYAxis(), computeAngle(10)));
+              // */
+              // Orbit the eye around its Y-axis -> translate left-right
+              scene.eye().orbit(yAxis(), step);
             break;
         }
       }
