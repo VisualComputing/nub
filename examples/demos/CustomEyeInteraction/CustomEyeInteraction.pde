@@ -1,3 +1,10 @@
+/**
+ * Custom Eye Interaction.
+ * by Jean Pierre Charalambos.
+ *
+ * This example illustrates how to customize the eye behavior.
+ */
+
 import nub.primitives.*;
 import nub.processing.*;
 

@@ -3470,7 +3470,7 @@ public class Graph {
 
   /*
   public void interactEye(Object... gesture) {
-    eye().interactAsEye(gesture);
+
   }
    */
 

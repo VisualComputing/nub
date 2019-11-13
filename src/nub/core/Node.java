@@ -2288,11 +2288,6 @@ public class Node {
   public void interact(Object... gesture) {
   }
 
-  /*
-  public void interactAsEye(Object... gesture) {
-  }
-   */
-
   /**
    * This method is called on each node of the graph hierarchy by the {@link Graph#render()}
    * algorithm to visit it. Default implementation is empty, i.e., it is meant to be implemented
