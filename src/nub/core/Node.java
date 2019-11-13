@@ -1175,7 +1175,7 @@ public class Node {
    * Rotates this node around {@code node} (which may be null for the world coordinate system)
    * according to {@code quaternion}.
    * <p>
-   * The {@code quaternion} axes (see {@link Quaternion#axis()}) is defined in the {@code node}
+   * The {@code quaternion} axis (see {@link Quaternion#axis()}) is defined in the {@code node}
    * coordinate system.
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to

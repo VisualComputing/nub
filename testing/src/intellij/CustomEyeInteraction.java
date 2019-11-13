@@ -1,6 +1,5 @@
 package intellij;
 
-import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -22,6 +21,7 @@ public class CustomEyeInteraction extends PApplet {
 
   // nub stuff:
   Scene scene;
+  boolean keyMode;
 
   public void settings() {
     size(1240, 840, P3D);
@@ -49,25 +49,38 @@ public class CustomEyeInteraction extends PApplet {
     return dx * (float) Math.PI / scene.width();
   }
 
+  Vector worldXAxis() {
+    return scene.eye().worldDisplacement(new Vector(1, 0, 0));
+  }
+
+  Vector worldYAxis() {
+    return scene.eye().worldDisplacement(new Vector(0, 1, 0));
+  }
+
+  Vector worldZAxis() {
+    return scene.eye().worldDisplacement(new Vector(0, 0, 1));
+  }
+
   public void mouseDragged() {
-    if (scene.eye().reference() == null) {
-      if (mouseButton == LEFT)
-        scene.mouseSpinEye();
-      else if (mouseButton == RIGHT)
-        scene.mouseTranslateEye();
-      else
-        scene.scaleEye(scene.mouseDX());
-    }
+    if (keyMode)
+      return;
+    if (mouseButton == LEFT)
+      scene.mouseSpinEye();
+    else if (mouseButton == RIGHT)
+      scene.mouseTranslateEye();
+    else
+      scene.scaleEye(scene.mouseDX());
   }
 
   public void mouseWheel(MouseEvent event) {
-    if (scene.eye().reference() == null)
+    if (keyMode)
       scene.moveForward(event.getCount() * 20);
   }
 
   public void keyPressed(KeyEvent event) {
     if (key == ' ') {
-      if (scene.eye().reference() == null) {
+      keyMode = !keyMode;
+      if (keyMode) {
         /*
         //Node cachedEye = scene.eye().get();
         //Node eye = new Node(scene);
@@ -90,21 +103,12 @@ public class CustomEyeInteraction extends PApplet {
         //the space navigator itself to make that happen too.
         scene.eye().rotate(new Quaternion(a, 0, 0));
         // */
-        Vector pos = scene.eye().position();
-        Quaternion o = scene.eye().orientation();
-        scene.eye().setReference(new Node(scene));
-        scene.eye().reference().setPosition(scene.anchor());
-        scene.eye().reference().setZAxis(Vector.subtract(pos, scene.anchor()));
-        scene.eye().reference().setXAxis(scene.eye().xAxis());
-        scene.eye().setPosition(pos);
-        scene.eye().setOrientation(o);
       } else {
-        scene.eye().resetReference();
         scene.lookAtCenter();
         scene.fit(1);
       }
     }
-    if (scene.eye().reference() != null) {
+    if (keyMode) {
       // Translate the eye along its reference Z-axis
       if (key == 'u')
         scene.eye().translate(0, 0, 10);
@@ -115,34 +119,34 @@ public class CustomEyeInteraction extends PApplet {
           case UP:
             if (event.isShiftDown())
               // Rotate the eye around its X-axis -> move head up and down
-              scene.eye().rotate(new Quaternion(new Vector(1, 0, 0), computeAngle(-20)));
+              scene.eye().rotate(new Vector(1, 0, 0), computeAngle(-20));
             else
-              // Rotate the eye reference around its X-axis -> translate forward-backward
-              scene.eye().reference().rotate(new Quaternion(new Vector(1, 0, 0), computeAngle(20)));
+              // Orbit the eye around the world origin along the world X-axis -> translate forward-backward
+              scene.eye().orbit(new Quaternion(worldXAxis(), computeAngle(20)));
             break;
           case DOWN:
             if (event.isShiftDown())
               // Rotate the eye around its X-axis -> move head up and down
-              scene.eye().rotate(new Quaternion(new Vector(1, 0, 0), computeAngle(20)));
+              scene.eye().rotate(new Vector(1, 0, 0), computeAngle(20));
             else
-              // Rotate the eye reference around its X-axis -> translate forward-backward
-              scene.eye().reference().rotate(new Quaternion(new Vector(1, 0, 0), computeAngle(-20)));
+              // Orbit the eye around the world origin along the world X-axis -> translate forward-backward
+              scene.eye().orbit(new Quaternion(worldXAxis(), computeAngle(-20)));
             break;
           case LEFT:
             if (event.isShiftDown())
-              // Rotate the eye reference around its Z-axis -> look around
-              scene.eye().reference().rotate(new Quaternion(new Vector(0, 0, 1), computeAngle(-20)));
+              // Orbit the eye around the world origin along the world Z-axis -> look around
+              scene.eye().orbit(new Quaternion(worldZAxis(), computeAngle(-20)));
             else
-              // Rotate the eye reference around its Y-axis -> translate left-right
-              scene.eye().reference().rotate(new Quaternion(new Vector(0, 1, 0), computeAngle(-10)));
+              // Orbit the eye around the world origin along the world Y-axis -> translate left-right
+              scene.eye().orbit(new Quaternion(worldYAxis(), computeAngle(-10)));
             break;
           case RIGHT:
             if (event.isShiftDown())
-              // Rotate the eye reference around its Z-axis -> look around
-              scene.eye().reference().rotate(new Quaternion(new Vector(0, 0, 1), computeAngle(20)));
+              // Orbit the eye around the world origin along the world Z-axis -> look around
+              scene.eye().orbit(new Quaternion(worldZAxis(), computeAngle(20)));
             else
-              // Rotate the eye reference around its Y-axis -> translate left-right
-              scene.eye().reference().rotate(new Quaternion(new Vector(0, 1, 0), computeAngle(10)));
+              // Orbit the eye around the world origin along the world Y-axis -> translate left-right
+              scene.eye().orbit(new Quaternion(worldYAxis(), computeAngle(10)));
             break;
         }
       }
