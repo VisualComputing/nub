@@ -4,12 +4,26 @@ import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
+import org.gamecontrolplus.ControlButton;
+import org.gamecontrolplus.ControlDevice;
+import org.gamecontrolplus.ControlIO;
+import org.gamecontrolplus.ControlSlider;
 import processing.core.PApplet;
 import processing.core.PImage;
-import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
-public class CustomEyeInteraction extends PApplet {
+public class GoogleSpaceNavigator extends PApplet {
+  ControlIO control;
+  ControlDevice device; // my SpaceNavigator
+  ControlSlider snXPos; // Positions
+  ControlSlider snYPos;
+  ControlSlider snZPos;
+  ControlSlider snXRot; // Rotations
+  ControlSlider snYRot;
+  ControlSlider snZRot;
+  ControlButton button1; // Buttons
+  ControlButton button2;
+
   // scene
   PImage texmap;
   float globeRadius = 400;
@@ -22,12 +36,14 @@ public class CustomEyeInteraction extends PApplet {
 
   // nub stuff:
   Scene scene;
+  boolean defaultMode = true;
 
   public void settings() {
     size(1240, 840, P3D);
   }
 
   public void setup() {
+    openSpaceNavigator();
     texmap = loadImage("/home/pierre/IdeaProjects/nub/testing/data/globe/world32k.jpg");
     initializeSphere(sDetail);
     scene = new Scene(this);
@@ -38,49 +54,87 @@ public class CustomEyeInteraction extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
+    //
     //lights();
     fill(200);
     noStroke();
     textureMode(IMAGE);
     texturedSphere(globeRadius, texmap);
+    //
+    if (defaultMode)
+      spaceNavigatorInteraction();
+    else
+      googleEarth();
+  }
+
+  void spaceNavigatorInteraction() {
+    scene.translateEye(10 * snXPos.getValue(), 10 * snYPos.getValue(), 10 * snZPos.getValue());
+    scene.rotateEye(-snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
   }
 
   float computeAngle(float dx) {
     return dx * (float) Math.PI / scene.width();
   }
 
+  // aka google earth navigation
+  void googleEarth() {
+    // 1. Relate the eye reference frame:
+    Vector pos = scene.eye().position();
+    Quaternion o = scene.eye().orientation();
+    Node oldRef = scene.eye().reference();
+    Node rFrame = new Node(scene);
+    rFrame.setPosition(scene.anchor());
+    rFrame.setZAxis(Vector.subtract(pos, scene.anchor()));
+    rFrame.setXAxis(scene.eye().xAxis());
+    scene.eye().setReference(rFrame);
+    scene.eye().setPosition(pos);
+    scene.eye().setOrientation(o);
+    // 2. Translate the refFrame along its Z-axis:
+    scene.eye().translate(0, 0, -10 * snZPos.getValue());
+    // 3. Rotate the refFrame around its X-axis -> translate forward-backward
+    // the frame on the sphere surface
+    float deltaY = computeAngle(10 * snYPos.getValue());
+    rFrame.rotate(new Quaternion(new Vector(1, 0, 0), scene.isRightHanded() ? deltaY : -deltaY));
+    // 4. Rotate the refFrame around its Y-axis -> translate left-right the
+    // frame on the sphere surface
+    float deltaX = computeAngle(10 * snXPos.getValue());
+    rFrame.rotate(new Quaternion(new Vector(0, 1, 0), deltaX));
+    // 5. Rotate the refFrame around its Z-axis -> look around
+    float rZ = computeAngle(snZRot.getValue() * 20);
+    rFrame.rotate(new Quaternion(new Vector(0, 0, 1), scene.isRightHanded() ? -rZ : rZ));
+    // 6. Rotate the frame around x-axis -> move head up and down :P
+    float rX = computeAngle(snXRot.getValue() * 20);
+    Quaternion q = new Quaternion(new Vector(1, 0, 0), scene.isRightHanded() ? rX : -rX);
+    scene.eye().rotate(q);
+    // 7. Unrelate the frame and restore state:
+    pos = scene.eye().position();
+    o = scene.eye().orientation();
+    scene.eye().setReference(oldRef);
+    scene.prune(rFrame);
+    scene.eye().setPosition(pos);
+    scene.eye().setOrientation(o);
+  }
+
   public void mouseDragged() {
-    if (scene.eye().reference() == null) {
-      if (mouseButton == LEFT)
-        scene.mouseSpinEye();
-      else if (mouseButton == RIGHT)
-        scene.mouseTranslateEye();
-      else
-        scene.scaleEye(scene.mouseDX());
-    }
+    if (mouseButton == LEFT)
+      scene.mouseSpinEye();
+    else if (mouseButton == RIGHT)
+      scene.mouseTranslateEye();
+    else
+      scene.scaleEye(scene.mouseDX());
   }
 
   public void mouseWheel(MouseEvent event) {
-    if (scene.eye().reference() == null)
-      scene.moveForward(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 20);
   }
 
-  public void keyPressed(KeyEvent event) {
+  public void keyPressed() {
     if (key == ' ') {
-      if (scene.eye().reference() == null) {
-        /*
-        //Node cachedEye = scene.eye().get();
-        //Node eye = new Node(scene);
-        //scene.setEye(eye);
-        Node node = new Node();
-        Vector t = new Vector(0, 0, 0.7f * globeRadius);
-        float a = TWO_PI - 2;
-        node.setPosition(t);
-        //node.setYAxis(Vector.subtract(node.position(), scene.anchor()));
-        //node.rotate(new Quaternion(a, 0, 0));
-        scene.fit(node, 1);
-        // */
-        // /*
+      defaultMode = !defaultMode;
+      if (defaultMode) {
+        scene.lookAtCenter();
+        scene.fit(1);
+      } else {
         Vector t = new Vector(0, 0, 0.7f * globeRadius);
         float a = TWO_PI - 2;
         scene.eye().setPosition(t);
@@ -89,62 +143,6 @@ public class CustomEyeInteraction extends PApplet {
         //The rest is just to make the scene appear in front of us. We could have just used
         //the space navigator itself to make that happen too.
         scene.eye().rotate(new Quaternion(a, 0, 0));
-        // */
-        Vector pos = scene.eye().position();
-        Quaternion o = scene.eye().orientation();
-        scene.eye().setReference(new Node(scene));
-        scene.eye().reference().setPosition(scene.anchor());
-        scene.eye().reference().setZAxis(Vector.subtract(pos, scene.anchor()));
-        scene.eye().reference().setXAxis(scene.eye().xAxis());
-        scene.eye().setPosition(pos);
-        scene.eye().setOrientation(o);
-      } else {
-        scene.eye().resetReference();
-        scene.lookAtCenter();
-        scene.fit(1);
-      }
-    }
-    if (scene.eye().reference() != null) {
-      // Translate the eye along its reference Z-axis
-      if (key == 'u')
-        scene.eye().translate(0, 0, 10);
-      if (key == 'd')
-        scene.eye().translate(0, 0, -10);
-      if (key == CODED) {
-        switch (keyCode) {
-          case UP:
-            if (event.isShiftDown())
-              // Rotate the eye around its X-axis -> move head up and down
-              scene.eye().rotate(new Quaternion(new Vector(1, 0, 0), computeAngle(-20)));
-            else
-              // Rotate the eye reference around its X-axis -> translate forward-backward
-              scene.eye().reference().rotate(new Quaternion(new Vector(1, 0, 0), computeAngle(20)));
-            break;
-          case DOWN:
-            if (event.isShiftDown())
-              // Rotate the eye around its X-axis -> move head up and down
-              scene.eye().rotate(new Quaternion(new Vector(1, 0, 0), computeAngle(20)));
-            else
-              // Rotate the eye reference around its X-axis -> translate forward-backward
-              scene.eye().reference().rotate(new Quaternion(new Vector(1, 0, 0), computeAngle(-20)));
-            break;
-          case LEFT:
-            if (event.isShiftDown())
-              // Rotate the eye reference around its Z-axis -> look around
-              scene.eye().reference().rotate(new Quaternion(new Vector(0, 0, 1), computeAngle(-20)));
-            else
-              // Rotate the eye reference around its Y-axis -> translate left-right
-              scene.eye().reference().rotate(new Quaternion(new Vector(0, 1, 0), computeAngle(-10)));
-            break;
-          case RIGHT:
-            if (event.isShiftDown())
-              // Rotate the eye reference around its Z-axis -> look around
-              scene.eye().reference().rotate(new Quaternion(new Vector(0, 0, 1), computeAngle(20)));
-            else
-              // Rotate the eye reference around its Y-axis -> translate left-right
-              scene.eye().reference().rotate(new Quaternion(new Vector(0, 1, 0), computeAngle(10)));
-            break;
-        }
       }
     }
   }
@@ -240,7 +238,30 @@ public class CustomEyeInteraction extends PApplet {
     endShape();
   }
 
+  void openSpaceNavigator() {
+    println(System.getProperty("os.name"));
+    control = ControlIO.getInstance(this);
+    String os = System.getProperty("os.name").toLowerCase();
+    if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0)
+      device = control.getDevice("3Dconnexion SpaceNavigator");// magic name for linux
+    else
+      device = control.getDevice("SpaceNavigator");//magic name, for windows
+    if (device == null) {
+      println("No suitable device configured");
+      System.exit(-1); // End the program NOW!
+    }
+    //device.setTolerance(5);
+    snXPos = device.getSlider(0);
+    snYPos = device.getSlider(1);
+    snZPos = device.getSlider(2);
+    snXRot = device.getSlider(3);
+    snYRot = device.getSlider(4);
+    snZRot = device.getSlider(5);
+    //button1 = device.getButton(0);
+    //button2 = device.getButton(1);
+  }
+
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.CustomEyeInteraction"});
+    PApplet.main(new String[]{"intellij.GoogleSpaceNavigator"});
   }
 }
