@@ -1,5 +1,5 @@
 /**
- * ConstrainedNode.
+ * Constrained Node.
  * by Jean Pierre Charalambos.
  *
  * This example illustrates how to add constraints to your nodes

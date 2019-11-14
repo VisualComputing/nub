@@ -1,5 +1,5 @@
 /**
- * PostEffects.
+ * Post Effects.
  * by Ivan Castellanos and Jean Pierre Charalambos.
  *
  * This example is an adaption of Neil Mendoza great openFrameworks

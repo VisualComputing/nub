@@ -43,41 +43,52 @@ import java.util.List;
  * {@link #prune(Node)}, {@link #isReachable(Node)}, {@link #branch(Node)}, and {@link #clear()}.
  * <h2>2.1. Eye handling</h2>
  * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
- * (see {@link #setEye(Node)}). Several node wrapper functions to handle the eye, such as
+ * (see {@link #setEye(Node)}). Several functions handle the eye, such as
  * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFOV()},
- * {@link #fov()}, {@link #fit()}, {@link #screenLocation(Vector, Node)} and
- * {@link #location(Vector, Node)}, are provided for convenience.
+ * {@link #fov()}, {@link #fit()}.
+ * <h2>2.1. Transformations</h2>
+ * The graph acts as interface between the physical space, from where user gesture data is
+ * gathered, and the {@code nodes}. To transform points from/to physical space to/from node space
+ * use {@link #location(Vector, Node)} and {@link #screenLocation(Vector, Node)}.
+ * To transform vectors from/to physical space to/from node space
+ * use {@link #displacement(Vector, Node)} and {@link #screenDisplacement(Vector, Node)}.
  * <h1>3. Interactivity</h1>
- * Several methods taking a {@link Node} parameter provide interactivity to nodes, such as
- * {@link #translate(float, float, float)}, {@link #rotate(float, float, float)}
- * and {@link #scale(float)}.
+ * Several methods taking to both nodes (in {@link #nodes()}) and the {@link #eye()}, such as
+ * {@link #translateNode(Node, float, float, float)}, {@link #rotateNode(Node, float, float, float)},
+ * {@link #scaleNode(Node, float)} and {@link #spinNode(Node, int, int, int, int)}.
  * <p>
- * Some interactivity methods are only available for the {@link #eye()} and hence they don't
- * take a node parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
+ * Note that some interactivity methods are only available for the {@link #eye()} such as
+ * {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
  * <p>
  * To check if a given node would be picked with a ray casted at a given screen position
  * use {@link #tracks(Node, int, int)}. Refer to {@link Node#pickingThreshold()} (and
  * {@link Node#setPickingThreshold(float)}) for the different node picking policies.
- * <h1>4. Human Interface Devices</h1>
- * Setting up a <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device</a>
- * is a tag-based two step process: 1. Tag the node to be tracked using an arbitrary name (which
- * may be {@code null}) for it (see {@link #tag(String, Node)}); and, 2. Call any interactivity
- * method that take a {@code tag} string param (such as {@link #translate(String, float, float, float)},
- * {@link #rotate(String, float, float, float)} or {@link #scale(String, float)}) following the name
- * convention you defined in 1. Observations:
+ * <h1>4. Picking and interaction</h1>
+ * Picking a node to interact with it is a tag-based two step process:
+ * <ol>
+ * <li>Tag the node using an arbitrary name (which may be {@code null}) for it (refer to
+ * {@link #tag(String, Node)}) or using ray-casting: {@link #updateTag(String, int, int, Node[])}
+ * (detached or attached nodes), {@link #updateTag(String, int, int)} (only attached nodes) or
+ * {@link #tag(String, int, int)} (only for attached nodes too). While {@link #updateTag(String, int, int, Node[])}
+ * and {@link #updateTag(String, int, int)} update the tagged node synchronously (i.e., they return the
+ * tagged node immediately), {@link #tag(String, int, int)} updates it asynchronously (i.e., it
+ * optimally updates the tagged node during the next call to the {@link #render()} algorithm); and, </li>
+ * <li> Call any interactivity method that take a {@code tag} string param (such as
+ * {@link #translateTag(String, float, float, float)}, {@link #scaleTag(String, float)},
+ * {@link #rotateTag(String, float, float, float)} or {@link #spinTag(String, int, int, int, int)})
+ * following the name convention you defined in 1.</li>
+ * Observations:
  * <ol>
  * <li>The interactivity methods are implemented in terms of the ones defined previously
- * by simply passing the tagged node (see {@link #node(String)}) to them (e.g.,{@link #scale(String, float)}
- * calls {@link #scale(String, float)} passing the tagged node).</li>
- * <li>Many interactive methods support the {@code null} tag (e.g., {@link #scale(float delta)} simply
- * calls {@code scale(null, delta)}).</li>
- * <li>To tag the node to be tracked using ray-casting call {@link #updateTag(String, int, int, Node[])}
- * (detached or attached nodes), {@link #updateTag(String, int, int)} (only attached nodes) or
- * {@link #tag(String, int, int)} (only for attached nodes too). While {@link #updateTag(String, int, int, Node[])} and
- * {@link #updateTag(String, int, int)} update the tagged node synchronously (i.e., they return the tagged node
- * immediately), {@link #tag(String, int, int)} updates it asynchronously (i.e., it
- * optimally updates the tagged node during the next call to the {@link #render()} algorithm).</li>
+ * by simply passing the tagged node (see {@link #node(String)}) to them (e.g.,
+ * {@link #scaleTag(String, float)} calls {@link #scale(String, float)} passing the tagged node).</li>
+ * <li>The stringless versions of the tagged interactivity methods support the {@code null} tag
+ * (e.g., {@link #scaleTag(float delta)} simply calls {@code scaleTag(null, delta)}).</li>
+ * <li>Customize node behaviors by overridden {@link Node#interact(Object...)}
+ * and then invoke them by either calling: {@link #interactTag(Object...)},
+ * {@link #interactTag(String, Object...)} or {@link #interactNode(Node, Object...)}.
+ * </li>
  * </ol>
  * <h1>5. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
@@ -3451,10 +3462,22 @@ public class Graph {
   }
    */
 
+  /**
+   * Same as {@code return interactTag(null, gesture)}.
+   *
+   * @see #interactTag(String, Object...)
+   */
   public boolean interactTag(Object... gesture) {
     return interactTag(null, gesture);
   }
 
+  /**
+   * If {@code node(tag)} is non-null (see {@link #node(String)}) calls
+   * {@code interactNode(node(tag), gesture)} and returns {@code true}, otherwise
+   * {@code false}.
+   *
+   * @see #interactNode(Node, Object...)
+   */
   public boolean interactTag(String tag, Object... gesture) {
     if (node(tag) != null) {
       interactNode(node(tag), gesture);
@@ -3463,6 +3486,13 @@ public class Graph {
     return false;
   }
 
+  /**
+   * If {@code node} is non-null and different than the {@link #eye()} call
+   * {@code node.interact(gesture)} which should be overridden to customize the node behavior
+   * from the gesture data.
+   *
+   * @see Node#interact(Object...)
+   */
   public void interactNode(Node node, Object... gesture) {
     if (node == null || node == eye()) {
       System.out.println("Warning: interactNode requires a non-null node different than the eye. Nothing done");
@@ -3523,7 +3553,7 @@ public class Graph {
   }
 
   /**
-   * Aligns the node with the {@link #eye()}.
+   * Aligns the node (which should be different than the {@link #eye()}) with the {@link #eye()}.
    *
    * @see #alignEye()
    */
@@ -3593,7 +3623,7 @@ public class Graph {
   }
 
   /**
-   * Focuses the node with the {@link #eye()}.
+   * Focuses the node (which should be different than the {@link #eye()}) with the {@link #eye()}.
    *
    * @see #focusEye()
    */
@@ -3659,7 +3689,7 @@ public class Graph {
   }
 
   /**
-   * Scales the {@code node} according to {@code delta}.
+   * Scales the {@code node} (which should be different than the {@link #eye()}) according to {@code delta}.
    *
    * @see #scaleEye(float)
    */
@@ -3772,7 +3802,7 @@ public class Graph {
   }
 
   /**
-   * Translates the node.
+   * Translates the node (which should be different than the {@link #eye()}).
    *
    * @see #displacement(Vector, Node)
    * @param dx screen space delta-x units
@@ -3860,8 +3890,8 @@ public class Graph {
   }
 
   /**
-   * Rotate the {@code node} around the world x-y-z axes
-   * according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.
+   * Rotate the {@code node} (which should be different than the {@link #eye()}) around the
+   * world x-y-z axes according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.
    *
    * @see #rotateEye(float, float, float)
    */
@@ -3994,9 +4024,10 @@ public class Graph {
   }
 
   /**
-   * Rotates the {@code node} using an arcball interface, from points {@code (point1X, point1Y)} to
-   * {@code (point2X, point2Y)} pixel positions. The {@code sensitivity} controls the gesture strength.
-   * The center of the rotation is the screen projected node origin (see {@link Node#position()}).
+   * Rotates the {@code node} (which should be different than the {@link #eye()}) using an arcball
+   * interface, from points {@code (point1X, point1Y)} to {@code (point2X, point2Y)} pixel positions.
+   * The {@code sensitivity} controls the gesture strength. The center of the rotation is the screen
+   * projected node origin (see {@link Node#position()}).
    * <p>
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
    * three-dimensional orientation using a mouse.

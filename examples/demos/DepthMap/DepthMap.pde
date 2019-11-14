@@ -1,5 +1,5 @@
 /**
- * DepthMap.
+ * Depth Map.
  * by Jean Pierre Charalambos.
  *
  * This example shows how to generate and display a depth map from a light point-of-view.

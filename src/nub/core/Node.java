@@ -67,8 +67,8 @@ import java.util.List;
  * {@code popMatrix();} <br>
  * <p>
  * Use {@link #view()} and {@link #projection(Graph.Type, float, float, float, float, boolean)}
- * when rendering the scene from the node point-of-view. Note these methods are used by the
- * graph when a node is set as its eye, see {@link Graph#preDraw()}.
+ * when rendering the scene from the node point-of-view. Note that these methods are used by
+ * the graph when a node is set as its eye, see {@link Graph#preDraw()}.
  * <p>
  * To transform a point from one node to another use {@link #location(Vector, Node)} and
  * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
@@ -103,6 +103,13 @@ import java.util.List;
  * Picking a node is done according to a {@link #pickingThreshold()}. When a node is tagged
  * it will be highlighted (scaled) according to a {@link #highlighting()} magnitude.
  * See also {@link #enableTagging(boolean)}.
+ * <h2>Custom behavior</h2>
+ * Implementing a custom behavior for node is a two step process:
+ * <ul>
+ * <li>Parse user gesture data by overriding {@link #interact(Object...)}.</li>
+ * <li>Send gesture data to the node by calling {@link Graph#interactNode(Node, Object...)},
+ * {@link Graph#interactTag(String, Object...)} or {@link Graph#interactTag(Object...)}.</li>
+ * </ul>
  */
 public class Node {
   /**
@@ -2282,7 +2289,7 @@ public class Node {
   }
 
   /**
-   * Parse {@code gesture} params. Useful to implement the node as an for application control.
+   * Parse {@code gesture} params. Useful to customize the node behavior.
    * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
    */
   public void interact(Object... gesture) {

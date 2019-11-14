@@ -3,6 +3,22 @@
  * by Jean Pierre Charalambos.
  *
  * This example illustrates how to customize the eye behavior.
+ *
+ * The implemented key actions control the eye using the node api:
+ * while the node.rotate* methods locally rotate the eye respect
+ * to its position, the node.orbit methods emulate translations on
+ * the globe by rotating the eye around a world axis that should
+ * passed through the world origin.
+ *
+ * Press ' ' to toggle the eye mode from mouse to key.
+ *
+ * The eye key mode has the following bindings:
+ *
+ * 'u' and 'd': translate the eye along its Z-axis.
+ * UP and DOWN arrows: translate the eye forward-backward
+ * LEFT and RIGHT arrows: translate the eye left-right
+ * UP and DOWN + SHIFT: rotate the eye up and down
+ * LEFT and RIGHT arrows + SHIFT: to look around
  */
 
 import nub.primitives.*;
@@ -68,34 +84,19 @@ void keyPressed(KeyEvent event) {
   if (key == ' ') {
     keyMode = !keyMode;
     if (keyMode) {
-      /*
-      //Node cachedEye = scene.eye().get();
-      //Node eye = new Node(scene);
-      //scene.setEye(eye);
-      Node node = new Node();
-      Vector t = new Vector(0, 0, 0.7f * globeRadius);
-      float a = TWO_PI - 2;
-      node.setPosition(t);
-      //node.setYAxis(Vector.subtract(node.position(), scene.anchor()));
-      //node.rotate(new Quaternion(a, 0, 0));
-      scene.fit(node, 1);
-      // */
-      // /*
       Vector t = new Vector(0, 0, 0.7f * globeRadius);
       float a = TWO_PI - 2;
       scene.eye().setPosition(t);
-      //We need to line up the eye up vector along the anchor and the camera position:
+      // We need to line up the eye up vector along the anchor and the camera position:
       scene.setUpVector(Vector.subtract(scene.eye().position(), scene.anchor()));
-      //The rest is just to make the scene appear in front of us.
+      // The rest is just to make the scene appear in front of us.
       scene.eye().rotate(new Quaternion(a, 0, 0));
-      // */
     } else {
       scene.fit(1);
       scene.lookAtCenter();
     }
   }
   if (keyMode) {
-    // Translate the eye along its reference Z-axis
     if (key == 'u')
       scene.eye().translate(0, 0, 10);
     if (key == 'd')
@@ -104,46 +105,32 @@ void keyPressed(KeyEvent event) {
       switch (keyCode) {
       case UP:
         if (event.isShiftDown())
-          // Rotate the eye around its X-axis -> move head up and down
           scene.eye().rotate(new Vector(1, 0, 0), -step);
         else
-          // Orbit the eye around its X-axis -> translate forward-backward
           scene.eye().orbit(xAxis(), step);
         break;
       case DOWN:
         if (event.isShiftDown())
-          // Rotate the eye around its X-axis -> move head up and down
           scene.eye().rotate(new Vector(1, 0, 0), step);
         else
-          // Orbit the eye around its X-axis -> translate forward-backward
           scene.eye().orbit(xAxis(), -step);
         break;
       case LEFT:
-        // /*
         if (event.isShiftDown())
-          // Orbit the eye around its Z-axis -> look around
           scene.eye().orbit(zAxis(), -step);
         else
-          // */
-          // Orbit the eye around its Y-axis -> translate left-right
           scene.eye().orbit(yAxis(), -step);
         break;
       case RIGHT:
-        // /*
         if (event.isShiftDown())
-          // Orbit the eye around its Z-axis -> look around
           scene.eye().orbit(zAxis(), step);
         else
-          // */
-          // Orbit the eye around its Y-axis -> translate left-right
           scene.eye().orbit(yAxis(), step);
         break;
       }
     }
   }
 }
-
-// eye().orbit(axis, angle) requires the axis to be defined in the world coordinate system:
 
 Vector xAxis() {
   return scene.eye().worldDisplacement(new Vector(1, 0, 0));
