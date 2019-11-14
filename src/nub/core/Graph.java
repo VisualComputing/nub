@@ -3464,8 +3464,11 @@ public class Graph {
   }
 
   public void interactNode(Node node, Object... gesture) {
-    if (node != null)
-      node.interact(gesture);
+    if (node == null || node == eye()) {
+      System.out.println("Warning: interactNode requires a non-null node different than the eye. Nothing done");
+      return;
+    }
+    node.interact(gesture);
   }
 
   /*
@@ -3525,8 +3528,11 @@ public class Graph {
    * @see #alignEye()
    */
   public void alignNode(Node node) {
-    if (node != null)
-      node.align(eye());
+    if (node == null || node == eye()) {
+      System.out.println("Warning: alignNode requires a non-null node different than the eye. Nothing done");
+      return;
+    }
+    node.align(eye());
   }
 
   /**
@@ -3592,8 +3598,11 @@ public class Graph {
    * @see #focusEye()
    */
   public void focusNode(Node node) {
-    if (node != null)
-      node.projectOnLine(eye().position(), eye().zAxis(false));
+    if (node == null || node == eye()) {
+      System.out.println("Warning: focusNode requires a non-null node different than the eye. Nothing done");
+      return;
+    }
+    node.projectOnLine(eye().position(), eye().zAxis(false));
   }
 
   /**
@@ -3655,8 +3664,10 @@ public class Graph {
    * @see #scaleEye(float)
    */
   public void scaleNode(Node node, float delta) {
-    if (node == null)
+    if (node == null || node == eye()) {
+      System.out.println("Warning: scaleNode requires a non-null node different than the eye. Nothing done");
       return;
+    }
     float factor = 1 + Math.abs(delta) / height();
     node.scale(delta >= 0 ? factor : 1 / factor);
   }
@@ -3769,6 +3780,10 @@ public class Graph {
    * @param dz screen space delta-z units
    */
   public void translateNode(Node node, float dx, float dy, float dz) {
+    if (node == null || node == eye()) {
+      System.out.println("Warning: translateNode requires a non-null node different than the eye. Nothing done");
+      return;
+    }
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     node.translate(node.reference() == null ? node.worldDisplacement(vector) : node.reference().displacement(vector, node));
   }
@@ -3851,8 +3866,10 @@ public class Graph {
    * @see #rotateEye(float, float, float)
    */
   public void rotateNode(Node node, float roll, float pitch, float yaw) {
-    if (node == null)
+    if (node == null || node == eye()) {
+      System.out.println("Warning: rotateNode requires a non-null node different than the eye. Nothing done");
       return;
+    }
     if (is2D() && (roll != 0 || pitch != 0)) {
       roll = 0;
       pitch = 0;
@@ -3987,8 +4004,10 @@ public class Graph {
    * @see #spinEye(int, int, int, int, float)
    */
   public void spinNode(Node node, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
-    if (node == null)
+    if (node == null || node == eye()) {
+      System.out.println("Warning: spinNode requires a non-null node different than the eye. Nothing done");
       return;
+    }
     Vector center = screenLocation(node.position());
     int centerX = (int) center.x();
     int centerY = (int) center.y();

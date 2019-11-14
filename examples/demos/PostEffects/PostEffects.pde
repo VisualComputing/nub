@@ -18,7 +18,6 @@ PShader noiseShader, kaleidoShader, raysShader, pixelShader, edgeShader, depthSh
 PGraphics drawGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, depthPGraphics, horizontalGraphics;
 Scene scene;
 boolean bdepth, brays, bpixel, bedge, bkaleido, bnoise, bhorizontal;
-int startTime;
 Node[] models;
 PFont font;
 
