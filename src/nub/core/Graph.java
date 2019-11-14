@@ -78,6 +78,7 @@ import java.util.List;
  * {@link #translateTag(String, float, float, float)}, {@link #scaleTag(String, float)},
  * {@link #rotateTag(String, float, float, float)} or {@link #spinTag(String, int, int, int, int)})
  * following the name convention you defined in 1.</li>
+ * </ol>
  * Observations:
  * <ol>
  * <li>The interactivity methods are implemented in terms of the ones defined previously
