@@ -11,16 +11,15 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class TRIK extends Solver {
     protected List<? extends Node> _original;
-    protected List<Node> _auxiliary_chain, _chain, _dead_lock_chain; //TODO: CHECK REFERENCE NODE
-    protected Node _target;
+    protected List<Node> _auxiliary_chain, _chain;
+    protected List<NodeInfo> _original_info, _auxiliary_chain_info, _chain_info; //Keep position / orientation information
+    protected Node _target, _worldTarget;
     protected Node _previousTarget;
+
     protected boolean _direction = false;
     //Steady state algorithm
     protected float _current = 10e10f, _best = 10e10f;
@@ -41,9 +40,16 @@ public class TRIK extends Solver {
 
 
     public static boolean _debug = false; //TODO : REMOVE!
+    protected Random _random = new Random(0); //TODO : REMOVE!
+    protected float _weightRatio = 5f, _weightRatioNear = 1.2f; //how many times is position more important than orientation
+    protected float _weightThreshold = 0.1f; //change error measurement when the chain is near the target
 
     public void enableTwistHeuristics(boolean enable){
         _enableTwist = enable;
+    }
+
+    public boolean direction(){
+        return _direction;
     }
 
     public void enableDirection(boolean direction){
@@ -64,16 +70,22 @@ public class TRIK extends Solver {
         if(_debug && _original.get(0).graph() instanceof Scene) {
             this._chain = FABRIKSolver._copy(chain, null, (Scene) _original.get(0).graph());
             this._auxiliary_chain = FABRIKSolver._copy(chain, null, (Scene) _original.get(0).graph(), false);
-            this._dead_lock_chain = FABRIKSolver._copy(chain);
         }
         else {
             this._chain = FABRIKSolver._copy(chain);
             this._auxiliary_chain = FABRIKSolver._copy(chain, false);
-            this._dead_lock_chain = FABRIKSolver._copy(chain);
         }
+
+        //create info list
+        _original_info = createInfoList(_original, true);
+        _chain_info = createInfoList(_chain, true);
+        _auxiliary_chain_info = createInfoList(_auxiliary_chain, true);
+
         this._target = target;
         this._previousTarget =
                 target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
+
+        this._worldTarget = target == null ? new Node() : new Node(_target.position(), _target.orientation(), 1);
     }
 
     //TODO : remove this
@@ -81,27 +93,36 @@ public class TRIK extends Solver {
     public int _stepCounter = 0;
 
     protected boolean _iterateStepByStep() {
+        int last = _auxiliary_chain_info.size() - 1;
         System.out.println("On step " + _stepCounter);
         if(_stepCounter == 0) {
             if (_target == null) return true; //As no target is specified there is no need to solve IK
             _current = 10e10f; //Keep the current error
             //Step 1. make a deep copy of _chain state into _auxiliary_chain
-            _copyChainState(_original, _chain);
+            //_copyChainState(_original, _chain);
             _copyChainState(_chain, _auxiliary_chain);
         } else if(_stepCounter == 1) {
             //Step 2. Translate the auxiliary chain to the target position
-            _alignToTarget(_auxiliary_chain.get(0), _auxiliary_chain.get(_auxiliary_chain.size() - 1), _target);
+            //2.1 Update auxiliary root and eff cache
+            _auxiliary_chain_info.get(0).setCache(_chain_info.get(0).positionCache(), _chain_info.get(0).orientationCache());
+            _auxiliary_chain_info.get(last).setCache(_chain_info.get(last).positionCache(), _chain_info.get(last).orientationCache());
+            //2.2 Do alignment
+            _alignToTarget(_auxiliary_chain_info.get(0), _auxiliary_chain_info.get(last), _worldTarget);
+            //2.3 Update auxiliary cache
+            updateCache(_auxiliary_chain_info);
         } else if(_stepCounter - 1 < _chain.size()){
             //for(int i = 1; i < _chain.size(); i++) {
             int i = _stepCounter - 1;
             if(_lookAhead > 0 && i < _chain.size() - 1){
-                Quaternion delta = _lookAhead(_chain, _auxiliary_chain, _target, _direction, _enableWeight, _explore, _enableTwist, _smooth, _smoothAngle, mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>(),0);
-                _chain.get(i - 1).rotate(delta);
+                Quaternion delta = _lookAhead(_chain_info, _auxiliary_chain_info, _worldTarget, _direction, _enableWeight, _explore, _enableTwist, _smooth, _smoothAngle, mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>(),0);
+                _chain_info.get(i - 1).rotateAndUpdateCache(delta, false, _chain_info.get(last));
             } else {
-                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(15), (float) Math.toRadians(15), _enableWeight, _direction, _enableTwist, _smooth, _smoothAngle);
+                applySwingTwist(_chain_info.get(i - 1), _chain_info.get(i), _auxiliary_chain_info.get(i), _chain_info.get(last), _worldTarget, (float) Math.toRadians(15), (float) Math.toRadians(15), _enableWeight, _direction, _enableTwist, _smooth, _smoothAngle);
             }
+            //update next joint cache based on current one
+            _chain_info.get(i).updateCacheUsingReference();
         } else{
-            _current = _error(_chain);
+            _current = _error(_chain_info.get(last), _worldTarget, _weightRatio, 1);
             _update();
             _stepCounter = -1;
         }
@@ -115,35 +136,54 @@ public class TRIK extends Solver {
         if(_singleStep) return _iterateStepByStep();
         //As no target is specified there is no need to solve IK
         if (_target == null) return true;
+        int last = _auxiliary_chain_info.size() - 1;
         _explore = false; //Explore only when required
-
         //in case the error is not converging
         if(_lockTimes > _lockTimesCriteria) {
             //enable exploration
-            System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<Locked!!! " + _iterations);
+            //System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<Locked!!! " + _iterations);
             _explore = true;
             _lockTimes = 0;
         }
 
         _current = 10e10f; //Keep the current error
-
         //Step 1. make a deep copy of _chain state into _auxiliary_chain
-        _copyChainState(_original, _chain);
-        _copyChainState(_chain, _auxiliary_chain);
+        _copyChainState(_chain, _auxiliary_chain); //TODO change order of this and next
+        //_copyChainState(_original, _chain);
         //Step 2. Translate the auxiliary chain to the target position
-        _alignToTarget(_auxiliary_chain.get(0), _auxiliary_chain.get(_auxiliary_chain.size() - 1), _target);
+        //2.1 Update auxiliary root and eff cache
+        _auxiliary_chain_info.get(0).setCache(_chain_info.get(0).positionCache(), _chain_info.get(0).orientationCache());
+        _auxiliary_chain_info.get(last).setCache(_chain_info.get(last).positionCache(), _chain_info.get(last).orientationCache());
+        //2.2 Do alignment
+        _alignToTarget(_auxiliary_chain_info.get(0), _auxiliary_chain_info.get(last), _worldTarget);
+        //2.3 Update auxiliary cache
+        updateCache(_auxiliary_chain_info);
         //Step 3. Choose best local action
         for(int i = 1; i < _chain.size(); i++) {
             if(_lookAhead > 0 && i < _chain.size() - 1){
-                Quaternion delta = _lookAhead(_chain, _auxiliary_chain, _target, _direction, _enableWeight, _explore, _enableTwist, _smooth, _smoothAngle, mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>(), 0);
-                _chain.get(i - 1).rotate(delta);
+                int la = _lookAhead;
+                boolean explore = _explore;
+                boolean smooth = _smooth;
+                if(i == 1){
+                    //la = Math.max(_chain.size(), _lookAhead); //Do more exploration on first action
+                    //smooth = true;
+                    explore = true;
+                }
+                Quaternion delta = _lookAhead(_chain_info, _auxiliary_chain_info, _worldTarget, _direction, _enableWeight, explore, _enableTwist, smooth, _smoothAngle, mode,i - 1, Math.min(la, _chain.size() - i), 0, null, new ArrayList<>(), 0);
+                _chain_info.get(i - 1).rotateAndUpdateCache(delta, false, _chain_info.get(last));
             } else {
                 //TODO: Use Twisting only when truly required
-                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(15), (float) Math.toRadians(15), _enableWeight, _direction, _enableTwist, _smooth, _smoothAngle);
+                applySwingTwist(_chain_info.get(i - 1), _chain_info.get(i), _auxiliary_chain_info.get(i), _chain_info.get(_chain.size() - 1), _worldTarget, (float) Math.toRadians(15), (float) Math.toRadians(15), _enableWeight, _direction, _enableTwist, _smooth, _smoothAngle);
             }
+            //update next joint cache based on current one
+            _chain_info.get(i).updateCacheUsingReference();
         }
         //Obtain current error
-        _current = _error(_chain);
+        if(_debug) System.out.println("Current error: ");
+        //measure the error depending on position error
+        _current = _error(_chain_info.get(last), _worldTarget, _weightRatio, 1);
+        if(_debug) System.out.println("Current :" + _current + "Best error: " + _best);
+
         if(_current >= _best){
             _lockTimes++;
         }
@@ -237,15 +277,23 @@ public class TRIK extends Solver {
             messageEvent.addAttribute("message", "Updating chain");
         }
         _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
-        for(GTarget gTarget : _gTargets){
-            gTarget._prev = gTarget._node.position().get();
-        }
-
+        //Copy original state into chain
         _copyChainState(_original, _chain);
+        //Update cache
+        updateCache(_original_info);
+        copyCache(_original_info, _chain_info);
+
+
         _iterations = 0;
+        //Set values of worldTarget and worldEndEffector
+        _worldTarget.setRotation( _target.orientation().get());
+        _worldTarget.setPosition(_target.position().get());
 
         if (_target != null) {
-            _best = _error(_original);
+            if(_debug)System.out.println("On Reset ------------");
+            _best = _error(_original_info.get(_original_info.size() - 1), _worldTarget);
+            if(_debug)System.out.println("          best " + _best);
+
         } else {
             _best = 10e10f;
         }
@@ -254,30 +302,71 @@ public class TRIK extends Solver {
 
         //find maxLength
         for(int i = 0; i < _original.size() - 1; i++){
-            _maxLength += Vector.distance(_original.get(i).position(), _original.get(i + 1).position());
+            _maxLength += Vector.distance(_original_info.get(i).positionCache(), _original_info.get(i + 1).positionCache());
         }
 
         if(_singleStep) _stepCounter = 0;
 
     }
 
+    public float positionError(){
+        return _positionError(_original.get(_original.size() - 1).position(), _target.position());
+    }
 
-    protected float _error(List<? extends Node> chain){
-        float error = Vector.distance(chain.get(chain.size() - 1).position(), _target.position());
-        float length = Vector.distance(chain.get(chain.size() - 1).position(), chain.get(0).position());
+    protected float _positionError(Vector eff, Vector target){
+        return Vector.distance(eff,target);
+    }
+
+    public float orientationError(){
+        return _orientationError(_original.get(_original.size() - 1).orientation(), _target.orientation(), true);
+    }
+
+    protected float _orientationError(Quaternion eff, Quaternion target, boolean degrees){
+        float dot = (float) Math.pow(Quaternion.dot(eff, target), 2);
+        if(degrees) return (float) Math.toDegrees(Math.acos(2 * dot - 1));
+        return (1 - dot);
+    }
+
+    protected float _error(Vector effPosition, Vector targetPosition, Quaternion effRotation, Quaternion targetRotation){
+        float error = _positionError(effPosition, targetPosition);
         if(_direction){
-            error *= (float) (Math.PI / Math.sqrt(_maxLength * length));
-            //Add orientational error
-            float orientationalError = Quaternion.dot(chain.get(chain.size() - 1).orientation(), _target.orientation());
+            //float length = Vector.distance(chain.get(chain.size() - 1).position(), chain.get(0).position());
+            float w1 = error <= _weightThreshold ? _weightRatioNear : _weightRatio;
+            error *= error / _maxLength;
+            //Add orientation error
+            float orientationError = _orientationError(effRotation, targetRotation, false);
+            if(_debug) System.out.println("error " + error + " ori" + orientationError);
             //error is the weighted sum
-            error = 0.7f * error + 0.3f * orientationalError;
+            error = w1 * error +  orientationError;
+        }
+        return error;
+    }
+
+    protected float _error(NodeInfo eff, Node target, float w1, float w2){
+        return _error(eff.positionCache(), target.position(), eff.orientationCache(), target.orientation(), w1, w2);
+    }
+
+    protected float _error(NodeInfo eff, Node target){
+        return _error(eff.positionCache(), target.position(), eff.orientationCache(), target.orientation());
+    }
+
+    protected float _error(Vector effPosition, Vector targetPosition, Quaternion effRotation, Quaternion targetRotation, float w1, float w2){
+        float error = _positionError(effPosition, targetPosition);
+        if(_direction){
+            //float length = Vector.distance(chain.get(chain.size() - 1).position(), chain.get(0).position());
+            error *= (float) (error / _maxLength);
+            //Add orientation error
+            float orientationError = _orientationError(effRotation, targetRotation, false);
+            if(_debug) System.out.println("error " + error + " ori" + orientationError);
+            //error is the weighted sum
+            error = w1 * error +  w2 * orientationError;
         }
         return error;
     }
 
     @Override
     public float error() {
-        return _error(_original);
+        return _error(_original_info.get(_original_info.size() - 1), _worldTarget);
     }
 
     @Override
@@ -326,39 +415,55 @@ public class TRIK extends Solver {
 
     protected int _lookAhead = 0;
 
-    protected List<Quaternion> _findActions(List<Node> chain, List<Node> auxiliary_chain, Node target, boolean direction, boolean enableWeight, boolean enableTwist, int i, boolean choose, boolean explore, boolean smooth, float smoothAngle){
+    protected List<Quaternion> _findActions(List<NodeInfo> chain, List<NodeInfo> auxiliary_chain, Node target, boolean direction, boolean enableWeight, boolean enableTwist, int i, boolean choose, boolean explore, boolean smooth, float smoothAngle){
         List<Quaternion> actions = new ArrayList<Quaternion>();
-        Node j_i = chain.get(i);
-        Node j_i1 = chain.get(i + 1);
-        Node j_i1_hat = auxiliary_chain.get(i + 1);
-        Node eff = chain.get(chain.size() - 1);
+        NodeInfo j_i = chain.get(i);
+        NodeInfo j_i1 = chain.get(i + 1);
+        NodeInfo j_i1_hat = auxiliary_chain.get(i + 1);
+        NodeInfo eff = chain.get(chain.size() - 1);
         //Swing twist action
-        Quaternion original = j_i.rotation().get();
         Quaternion q1 = null;
         if(Math.random() < 0.8){
+            //Keep previous state
+            Quaternion j_i_rotation = j_i.node().rotation().get();
+            Quaternion j_i_orientationCache = j_i.orientationCache().get();
+            Vector j_i_positionCache = j_i.positionCache().get();
+            Quaternion eff_orientationCache = eff.orientationCache().get();
+            Vector eff_positionCache = eff.positionCache().get();
             applySwingTwist(j_i, j_i1, j_i1_hat, eff, target, (float) Math.toRadians(15), (float) Math.toRadians(15), enableWeight, direction, enableTwist, smooth, smoothAngle); //Apply swing twist
-            q1 = Quaternion.compose(original.inverse(), j_i.rotation());
-            j_i.setRotation(original);
+            q1 = Quaternion.compose(j_i_rotation.inverse(), j_i.node().rotation());
+            q1.normalize();
+            //Undo changes
+            j_i.node().setRotation(j_i_rotation.get());
+            j_i.setCache(j_i_positionCache, j_i_orientationCache);
+            eff.setCache(eff_positionCache, eff_orientationCache);
+
+            //Undo changes
+            Constraint constraint = j_i.node().constraint();
+            j_i.node().setConstraint(null);
+            j_i.node().setRotation(j_i_rotation.get());
+            j_i.node().setConstraint(constraint);
+            j_i.setCache(j_i_positionCache, j_i_orientationCache);
+            eff.setCache(eff_positionCache.get(), eff_orientationCache.get());
         } else{
             q1 = _findLocalRotation(j_i1, j_i1_hat, enableWeight); //Apply just swing
             if(smooth) q1 = _clampRotation(q1, smoothAngle);
         }
         actions.add(q1);
 
-        if(choose){
-            if(enableTwist) {
-                Quaternion t1 = _findCCDTwist(j_i, j_i1, eff, target, (float) Math.toRadians(40));
-                Quaternion t2 = new Quaternion(j_i1.translation(), (float) Math.toRadians(Math.random() * 90 - 45));
-                if(smooth){
-                    t1 = _clampRotation(t1, smoothAngle);
-                    t2 = _clampRotation(t2, smoothAngle);
-                }
-                actions.add(t1);
-                actions.add(t2);
-            }
+        if(direction){
+            Quaternion q = _findLocalRotationDirection(j_i, eff, target);
+            if(smooth) q = _clampRotation(q1, smoothAngle);
+            actions.add(q);
+        }
 
-            Quaternion q3 = new Quaternion(j_i1.translation().orthogonalVector(), (float) Math.toRadians(Math.random() * 90 - 45));
-            Quaternion q4 = new Quaternion(Vector.cross(j_i1.translation(), j_i1.translation().orthogonalVector(), null), (float) Math.toRadians(Math.random() * 90 - 45));
+        if(choose){
+            Vector basis1 = j_i1.node().translation().orthogonalVector();
+            Vector basis2 = Vector.cross(j_i1.node().translation(), basis1, null);
+
+            Quaternion q3 = new Quaternion(basis1, (float) Math.toRadians(Math.random() * 90 - 45));
+            Quaternion q4 = new Quaternion(basis2, (float) Math.toRadians(Math.random() * 90 - 45));
+
             if(smooth){
                 q3 = _clampRotation(q3, smoothAngle);
                 q4 = _clampRotation(q4, smoothAngle);
@@ -366,11 +471,27 @@ public class TRIK extends Solver {
 
             actions.add(q3);
             actions.add(q4);
+            actions.add(q3.inverse());
+            actions.add(q4.inverse());
+
+            if(enableTwist) {
+                Quaternion t1 = _findCCDTwist(j_i, j_i1, eff, target, (float) Math.toRadians(40));
+                Quaternion t2 = new Quaternion(j_i1.node().translation(), (float) Math.toRadians(Math.random() * 90 - 45));
+                if(smooth){
+                    t1 = _clampRotation(t1, smoothAngle);
+                    t2 = _clampRotation(t2, smoothAngle);
+                }
+                actions.add(t1);
+                actions.add(t2);
+                actions.add(t1.inverse());
+                actions.add(t2.inverse());
+
+            }
         }
 
         //Explore when the chain has reach a dead lock status
         if(explore){
-            if(j_i.constraint() == null || ! (j_i.constraint() instanceof Hinge)) {
+            if(j_i.node().constraint() == null || ! (j_i.node().constraint() instanceof Hinge)) {
                 Vector x = new Vector(1, 0, 0);
                 Vector y = new Vector(0, 1, 0);
                 Vector z = new Vector(0, 0, 1);
@@ -381,17 +502,17 @@ public class TRIK extends Solver {
                 }
             }
             else{
-                Quaternion delta = Quaternion.compose(((Hinge)j_i.constraint()).idleRotation(), j_i.rotation().inverse());
-                delta.compose(((Hinge)j_i.constraint()).restRotation());
+                Quaternion delta = Quaternion.compose(((Hinge)j_i.node().constraint()).idleRotation(), j_i.node().rotation().inverse());
+                delta.compose(((Hinge)j_i.node().constraint()).restRotation());
                 Vector axis = delta.multiply(new Vector(0,0,1));
 
-                float max = ((Hinge)j_i.constraint()).maxAngle(), min = ((Hinge)j_i.constraint()).minAngle();
+                float max = ((Hinge)j_i.node().constraint()).maxAngle(), min = ((Hinge)j_i.node().constraint()).minAngle();
 
                 for (int c = 0; c < 15; c++) {
                     Quaternion q = null;
                     if (c % 2 == 0) q = new Quaternion(axis, (float) Math.toRadians(Math.random() * Math.min(Math.toDegrees(max), 45)));
                     else q = new Quaternion(axis, (float) -Math.toRadians(Math.random() * Math.min(Math.toDegrees(min), 45)));
-                    actions.add(Quaternion.compose(j_i.rotation().inverse(), q));
+                    actions.add(Quaternion.compose(j_i.node().rotation().inverse(), q));
                 }
             }
 
@@ -405,50 +526,153 @@ public class TRIK extends Solver {
     //Mode: 0 - Look ahead is used only to apply correction
     //Mode: 1 - First iteration of look ahead choose action
     //Mode: 2 - choose at each step
-    protected Quaternion _lookAhead(List<Node> chain, List<Node> auxiliary_chain, Node target, boolean direction, boolean enableWeight, boolean explore, boolean enableTwist, boolean smooth, float smoothAngle, LookAheadMode mode, int from, int times, int depth, Quaternion initial, List<Pair<Quaternion, Float>> actions, float movement){
+    protected Quaternion _lookAhead(List<NodeInfo> chain, List<NodeInfo> auxiliary_chain, Node target, boolean direction, boolean enableWeight, boolean explore, boolean enableTwist, boolean smooth, float smoothAngle, LookAheadMode mode, int from, int times, int depth, Quaternion initial, List<Pair<Quaternion, Float>> actions, float movement){
         if(times < 0) return null;
+        int last = chain.size() - 1;
         if(depth == times){
             //calculate error
-            float e1 = _error(chain);
+            float e1;
+
+            Vector d1 = Vector.subtract(chain.get(last).positionCache(), chain.get(0).positionCache());
+            Vector d2 = Vector.subtract(target.position(), chain.get(0).positionCache());
+
+            if(_debug){
+                System.out.println("On joint : " + from);
+                System.out.println("Eff position : " + chain.get(last).positionCache() + chain.get(last).node().position());
+                System.out.println("d1 : " + d1 + " d2 : " + d2);
+            }
+
+            if(d1.magnitude() > d2.magnitude()){ //TODO: CHANGE THIS BY SPHERICAL DIST
+                float w = _random.nextFloat();
+                e1 = _error(chain.get(last), target, 1- w, w); //don't care
+            } else{
+                if(_debug){
+                    System.out.println("Unreacheable ");
+                    System.out.println("       d to eff" + d1.magnitude());
+                    System.out.println("       d to target" + d2.magnitude());
+                }
+                e1 = _error(chain.get(last), target); //prefer position over rotation
+            }
+
             //float e2 = Vector.distance(chain.get(from + times).position(), auxiliary_chain.get(from + times).position());
-            float e2 = movement * (float) (Math.PI / Math.sqrt(_maxLength * Vector.distance(chain.get(chain.size() - 1).position(), target.position()))); //quantity of movement
-            if(_debug) System.out.println("e1 : " + e1 + " e2: " + e2 + "e_tot" + (e1 + e2 * 0.5f) + "mov " + movement);
-            Pair<Quaternion, Float> action = new Pair<Quaternion, Float>(initial, e1 + e2 * 0.5f);
+            //float e2 = movement;// * (float) (Math.PI / Math.sqrt(_maxLength * Vector.distance(chain.get(chain.size() - 1).position(), target.position()))); //quantity of movement
+            float e2 = 0;
+            if(_debug) System.out.println("e1 : " + Math.toDegrees(e1) + " e2: " + Math.toDegrees(e2) + "e_tot" +Math.toDegrees(e1 + e2 * 0.1f)  + "mov " + Math.toDegrees(movement));
+            Pair<Quaternion, Float> action = new Pair<Quaternion, Float>(initial, e1 + e2 * 0.1f);
             actions.add(action);
             return null;
         }
 
         //System.out.println("    ----> on depth " + depth);
         if(depth == 0 || mode == LookAheadMode.CHOOSE_ALL){ //Visit each action (expand the tree)
-            for (Quaternion rotation : _findActions(chain, auxiliary_chain, target, direction, enableWeight, enableTwist, from + depth, true, depth == 0 && explore, smooth, smoothAngle)){
-                if(depth == 0) initial = rotation;
+            for (Quaternion quaternion : _findActions(chain, auxiliary_chain, target, direction, enableWeight, enableTwist, from + depth, true, depth == 0 && explore, smooth, smoothAngle)){
                 //System.out.println("    ----> Rot " + rotation.axis() + rotation.angle());
-                Node j_i = chain.get(from + depth);
-                Quaternion prev = j_i.rotation().get(); //Keep rotation
-                j_i.rotate(rotation); //Apply action
+                NodeInfo j_i = chain.get(from + depth);
+                //constraint rotation
+                Constraint constraint = j_i.node().constraint();
+                Quaternion rotation = constraint == null ? quaternion : j_i.node().constraint().constrainRotation(quaternion, j_i.node());
+                if(depth == 0) initial = rotation;
+
+                //Keep previous state
+                Quaternion j_i_rotation = j_i.node().rotation().get();
+                Quaternion j_i_orientationCache = j_i.orientationCache().get();
+                Vector j_i_positionCache = j_i.positionCache().get();
+                Quaternion eff_orientationCache = chain.get(last).orientationCache().get();
+                Vector eff_positionCache = chain.get(last).positionCache().get();
+                j_i.rotateAndUpdateCache(rotation, false, chain.get(last)); //Apply action
+                //update next joint cache based on current one
+                chain.get(from + depth + 1).updateCacheUsingReference();
+                //Apply changes to end effector
                 _lookAhead(chain, auxiliary_chain, target, direction, enableWeight, explore, enableTwist, smooth, smoothAngle, mode, from, times, depth + 1, initial, actions, movement + rotation.angle()); //look ahead
-                j_i.setRotation(prev.get()); //Undo action
+                //Undo changes
+                j_i.node().setConstraint(null);
+                j_i.node().setRotation(j_i_rotation.get());
+                j_i.node().setConstraint(constraint);
+                j_i.setCache(j_i_positionCache, j_i_orientationCache);
+                chain.get(from + depth + 1).updateCacheUsingReference();
+                chain.get(last).setCache(eff_positionCache.get(), eff_orientationCache.get());
             }
         } else{
             //Expand only the most promising action
             List<Quaternion> rotations = _findActions(chain, auxiliary_chain, target, direction, enableWeight, enableTwist,from + depth, true, false, smooth, smoothAngle);
-            Quaternion best = null;
+            Quaternion best = null, prevBest = null;
             float error = 10e10f;
-            Node j_i = chain.get(from + depth);
-            Quaternion prev = j_i.rotation().get(); //Keep rotation
-            for (Quaternion rotation : rotations) {
-                j_i.rotate(rotation); //Apply action
-                float e = Vector.distance(chain.get(chain.size() - 1).position(), target.position());
-                if(e < error){
+            NodeInfo j_i = chain.get(from + depth);
+            //Keep previous state
+            Quaternion j_i_rotation = j_i.node().rotation().get();
+            Quaternion j_i_orientationCache = j_i.orientationCache().get();
+            Vector j_i_positionCache = j_i.positionCache().get();
+            Quaternion eff_orientationCache = chain.get(last).orientationCache().get();
+            Vector eff_positionCache = chain.get(last).positionCache().get();
+
+            //constraint rotation
+            Constraint constraint = j_i.node().constraint();
+
+            for (Quaternion quaternion : rotations) {
+                Quaternion rotation = constraint == null ? quaternion : j_i.node().constraint().constrainRotation(quaternion, j_i.node());
+                j_i.rotateAndUpdateCache(rotation, false, chain.get(last)); //Apply action
+                float e;
+                Vector d1 = Vector.subtract(chain.get(last).positionCache(), chain.get(0).positionCache());
+                Vector d2 = Vector.subtract(target.position(), chain.get(0).positionCache());
+                if(d1.magnitude() > d2.magnitude()){ //TODO: CHANGE THIS BY SPHERICAL DIST
+                    float w = _random.nextFloat();
+                    e = _error(chain.get(last), target, 1 - w, w); //don't care
+                } else {
+                    e = _error(chain.get(last), target); //prefer position over rotation
+                }
+
+                if (e < error) {
                     error = e;
+                    prevBest = best == null ? rotation : best;
                     best = rotation;
                 }
-                j_i.setRotation(prev.get()); //Undo action
+                //Undo changes
+                j_i.node().setConstraint(null);
+                j_i.node().setRotation(j_i_rotation.get());
+                j_i.node().setConstraint(constraint);
+                j_i.setCache(j_i_positionCache.get(), j_i_orientationCache.get());
+                chain.get(from + depth + 1).updateCacheUsingReference();
+                chain.get(last).setCache(eff_positionCache.get(), eff_orientationCache.get());
             }
+
+
             if(depth == 0) initial = best;
-            j_i.rotate(best); //Apply action
+            j_i.rotateAndUpdateCache(best, false, chain.get(last)); //Apply action
+            chain.get(from + depth + 1).updateCacheUsingReference(); //update next joint cache based on current one
             _lookAhead(chain, auxiliary_chain, target, direction, enableWeight, explore, enableTwist, smooth, smoothAngle, mode, from, times, depth + 1, initial, actions, movement + best.angle()); //look ahead
-            j_i.setRotation(prev.get()); //Undo action
+            //Undo changes
+            j_i.node().setConstraint(null);
+            j_i.node().setRotation(j_i_rotation.get());
+            j_i.node().setConstraint(constraint);
+            j_i.setCache(j_i_positionCache, j_i_orientationCache);
+            chain.get(from + depth + 1).updateCacheUsingReference();
+            chain.get(last).setCache(eff_positionCache, eff_orientationCache);
+
+            //Do a kind of beam search when uncertainty is high (we consider that 20% of initial joints have uncertainty)
+            if(from + depth <= Math.ceil(0.2f * chain.size()) || _iterations == 0){
+
+                j_i.rotateAndUpdateCache(prevBest, false, chain.get(last)); //Apply action
+                chain.get(from + depth + 1).updateCacheUsingReference(); //update next joint cache based on current one
+                _lookAhead(chain, auxiliary_chain, target, direction, enableWeight, explore, enableTwist, smooth, smoothAngle, mode, from, times, depth + 1, initial, actions, movement + best.angle()); //look ahead
+                //Undo changes
+                j_i.node().setConstraint(null);
+                j_i.node().setRotation(j_i_rotation.get());
+                j_i.node().setConstraint(constraint);
+                j_i.setCache(j_i_positionCache.get(), j_i_orientationCache.get());
+                chain.get(from + depth + 1).updateCacheUsingReference();
+                chain.get(last).setCache(eff_positionCache.get(), eff_orientationCache.get());
+
+                j_i.rotateAndUpdateCache(rotations.get(_random.nextInt(rotations.size())), false, chain.get(last)); //Apply action
+                chain.get(from + depth + 1).updateCacheUsingReference(); //update next joint cache based on current one
+                _lookAhead(chain, auxiliary_chain, target, direction, enableWeight, explore, enableTwist, smooth, smoothAngle, mode, from, times, depth + 1, initial, actions, movement + best.angle()); //look ahead
+                //Undo changes
+                j_i.node().setConstraint(null);
+                j_i.node().setRotation(j_i_rotation.get());
+                j_i.node().setConstraint(constraint);
+                j_i.setCache(j_i_positionCache.get(), j_i_orientationCache.get());
+                chain.get(from + depth + 1).updateCacheUsingReference();
+                chain.get(last).setCache(eff_positionCache.get(), eff_orientationCache.get());
+            }
         }
 
         if(depth == 0){
@@ -456,7 +680,7 @@ public class TRIK extends Solver {
             if(_debug) System.out.println("----Actions---");
             int i = 0, b = 0;
             for(Pair<Quaternion, Float> action : actions){
-                if(_debug) System.out.println("Action a " + i++ + "   " + action.getKey().axis() + action.getKey().angle() + " err " + action.getValue());
+                if(_debug) System.out.println("Action a " + i++ + "   " + action.getKey().axis() + action.getKey().angle() + " err " + Math.toDegrees(action.getValue()));
                 //pick the action with the best value
                 if(action.getValue() < best.getValue()){
                     best = action;
@@ -482,44 +706,12 @@ public class TRIK extends Solver {
 
     //TODO : Move this!
     //TODO : Fix error measure
-    protected float avg_bone_length;
-
-    List<GTarget> _gTargets = new ArrayList<GTarget>();
-
+    protected float _avg_bone_length;
     protected void _calculateAverageLength(){
         for(int i = 1; i < _original.size(); i++){
-            avg_bone_length += _original.get(i).translation().magnitude() * _original.get(i).magnitude();
+            _avg_bone_length += _original.get(i).translation().magnitude() * _original.get(i).magnitude();
         }
-        avg_bone_length /= _original.size();
-    }
-
-    public void addGTarget(Node target, float g){
-        GTarget gTarget = new GTarget(target, g);
-        //calculate force that must be applied to each joint
-        _gTargets.add(gTarget);
-    }
-
-    class GTarget{
-        protected float _g;
-        protected Vector _prev;
-        protected Node _node;
-        protected HashMap<Node, Float> _influence;
-
-        public GTarget(Node node, float g){
-            this._node = node;
-            this._g = g;
-            _influence = new HashMap<Node, Float>();
-        }
-
-        public Vector pointVector(Node node, Vector next){
-            //1. Find the Direction between this target and the given Node
-            Vector vector = Vector.subtract(node.location(_node), next);
-            float mag = vector.magnitude();
-            //2. scale the vector
-            vector.multiply(_g / mag);
-            _influence.put(node, _g / mag);
-            return vector;
-        }
+        _avg_bone_length /= _original.size();
     }
 
     protected Quaternion _twistToChangeBoundary(Node j_i, Node j_i1, Node j_i2, Node j_i2_hat, int detail){
@@ -594,7 +786,7 @@ public class TRIK extends Solver {
     }
 
 
-    protected void _fixDeadLock(){
+    /*protected void _fixDeadLock(){
         //System.out.println("Fixing");
         //Step 1. make a deep copy of _chain state into _auxiliary_chain
         _copyChainState(_original, _dead_lock_chain);
@@ -628,37 +820,29 @@ public class TRIK extends Solver {
                 return;
             }
         }
-    }
-
-
-    //TODO : REFINE
-
-    /*
-    Spread:
-
-
-
-     */
-
-    //HERE ARE DEFINED THE AUXILIARY CLASSES
-
-
-
+    }*/
 
     //HERE ARE DEFINED THE TWIST/SWING ACTIONS
     protected void _copyChainState(List<? extends Node> origin, List<? extends Node> dest){
         //Copy the content of the origin chain into dest
-        if(dest.get(0).reference() != null && origin.get(0).reference() != null){ //TODO: CHECK THIS!
-            Constraint constraint = dest.get(0).reference().constraint();
-            dest.get(0).reference().setConstraint(null);
-            dest.get(0).reference().set(origin.get(0).reference());
-            dest.get(0).reference().setConstraint(constraint);
+        Node refDest = dest.get(0).reference();
+        if(refDest != null){ //TODO: CHECK THIS!
+            Constraint constraint = refDest.constraint();
+            refDest.setConstraint(null);
+            refDest.set(origin.get(0).reference());
+            refDest.setConstraint(constraint);
         }
 
-        for(int i = 0; i < origin.size(); i++){
+        for(int i = 0; i < origin.size(); i++) {
+            Node node = origin.get(i);
             Constraint constraint = dest.get(i).constraint();
+            Quaternion rotation = node.rotation().get();
+            Vector translation = node.translation().get();
+
             dest.get(i).setConstraint(null);
-            dest.get(i).set(origin.get(i));
+            dest.get(i).setRotation(rotation);
+            dest.get(i).setTranslation(translation);
+            dest.get(i).setScaling(node.scaling());
             dest.get(i).setConstraint(constraint);
         }
 
@@ -680,15 +864,14 @@ public class TRIK extends Solver {
         }
     }
 
-    protected void _translateToTarget(Node root, Node eff, Node target){
+    protected void _translateToTarget(NodeInfo root, NodeInfo eff, Node target){
         //Find the distance from EFF current position and Target
-        Vector diff = Vector.subtract(target.position(), eff.position());
+        Vector diff = Vector.subtract(target.position(), eff.positionCache());
+        //express diff w.r.t root reference
+        Quaternion ref = Quaternion.compose(root.orientationCache(), root.node().rotation().inverse());
+        diff = ref.inverseRotate(diff);
         //Move the root accordingly (disable constraints)
-        Constraint constraint = root.constraint();
-        root.setConstraint(null);
-        //root.translate(diff);
-        root.setPosition(Vector.add(root.position(), diff)); //TODO: CHECK THIS!
-        root.setConstraint(constraint); // enable constraint
+        root.translateAndUpdateCache(diff, false);
 
         if(_enableMediator) {
             InterestingEvent ev = mediator().addEventStartingAfterLast("TRANSLATE ROOT", "NodeTranslation", 1, 1);
@@ -702,25 +885,16 @@ public class TRIK extends Solver {
         }
     }
 
-    protected void _alignToTarget(Node root, Node eff, Node target){
+    protected void _alignToTarget(NodeInfo root, NodeInfo eff, Node target){ //root has to be updated
         if(_direction) {
-            Quaternion delta = Quaternion.multiply(target.orientation(), eff.orientation().inverse());
+            Quaternion delta = Quaternion.compose(root.orientationCache().inverse(), target.orientation());
+            delta.compose(eff.orientationCache().inverse());
+            delta.compose(root.orientationCache());
             //clamp delta to a max of 20 degrees
             float angle = delta.angle();
             angle = Math.abs(angle) > Math.toRadians(20) ? (float) (Math.signum(angle) * Math.toRadians(20)) : angle;
-
-
             delta = new Quaternion(delta.axis(), angle);
-            //Apply rotation to root
-            Quaternion initial = root.rotation().get();
-            root.setOrientation(Quaternion.compose(delta, root.orientation()));
-            if(_enableMediator) {
-                InterestingEvent event = mediator().addEventStartingAfterLast("ROOT ROTATION", "NodeRotation", 1, 1); //Create the event
-                event.addAttribute("node", root); //Add the convenient attributes
-                event.addAttribute("rotation", Quaternion.compose(initial.inverse(), root.rotation()));
-                InterestingEvent event6 = mediator().addEventStartingWithLast("ROTATION MESSAGE", "Message", 0, 1); //Create the event
-                event6.addAttribute("message", "Rotate to align target direction"); //Add the convenient attributes
-            }
+            root.rotateAndUpdateCache(delta, false, eff);
         }
         //Move root such that eff is in the same position as target position
         _translateToTarget(root, eff, target);
@@ -735,54 +909,42 @@ public class TRIK extends Solver {
         return (float) Math.pow(1.5, -d_i);
     }
 
-    protected static Quaternion _findLocalRotation(Node j_i1, Node j_i1_hat, boolean enableWeight){
-        Node j_i = j_i1.reference(); //must have a parent
+    //IMPORTANT: THE FOLLOWING METHODS USE THE CACHE POSITION/ORIENTATION IT IS AND ASSUME THAT THEY ARE UPDATE
+    protected static Quaternion _findLocalRotation(NodeInfo j_i1, NodeInfo j_i1_hat, boolean enableWeight){
+        NodeInfo j_i = j_i1.reference(); //must have a parent
         //Define how much rotate j_i in order to align j_i1 with j_i1_hat
-        Vector p = j_i1.translation();
+        Vector p = j_i1.node().translation();
         //Find j_i1_hat w.r.t j_i
-        Vector q = j_i.location(j_i1_hat);
-        //Find vector desired to accomplish secondary target
-        /*Vector secondary = _calculateGTargetDirection(j_i, j_i1);
-        if (secondary != null) {
-            //Find weighted average
-            secondary.normalize();
-            q.normalize();
-            float targetWeight = 0.8f;
-            q = Vector.add(Vector.multiply(q, targetWeight), Vector.multiply(secondary, 1 - targetWeight));
-            q.normalize();
-            av.add(new Pair<>(j_i.worldLocation(Vector.multiply(q, 50)),j_i.position()));
-        }*/
+        Vector q = j_i.locationWithCache(j_i1_hat);
         //Apply desired rotation removing twist component
         Quaternion delta = new Quaternion(p, q);
         float weight = 1;
         if(enableWeight) {
-            weight = _calculateWeight(j_i1.translation().magnitude(), j_i.location(j_i1_hat).magnitude());
+            weight = _calculateWeight(p.magnitude(), q.magnitude());
             if(_singleStep)System.out.println("weight : " + weight);
             delta = new Quaternion(delta.axis(), delta.angle() * weight);
         }
         return delta;
     }
 
-    protected Vector _calculateGTargetDirection(Node j_i, Node j_i1){
-        if(_gTargets == null || _gTargets.isEmpty()) return null;
-        Vector secondaryDirection = new Vector();
-        for(GTarget gTarget : _gTargets){
-            Vector v = gTarget.pointVector(j_i, j_i1.translation());
-            if(v != null) secondaryDirection.add(v);
-        }
-        secondaryDirection.multiply(1f/_gTargets.size());
-        return secondaryDirection;
+    protected static Quaternion _findLocalRotationDirection(NodeInfo j_i, NodeInfo endEffector, Node target){
+        //delta = O_i_inv * O_t * (O_i_inv * O_eff)^-1
+        Quaternion delta = j_i.orientationCache().inverse();
+        delta.compose(target.orientation());
+        delta.compose(endEffector.orientationCache().inverse());
+        delta.compose(j_i.orientationCache());
+        return delta;
     }
 
-
-    protected static Quaternion _findTwisting(Node j_i, Node j_i1, Node eff, Node target, float maxAngle){ //Math.toRadians(15)
+    protected static Quaternion _findTwisting(NodeInfo j_i, NodeInfo j_i1, NodeInfo endEffector, Node target, float maxAngle){ //Math.toRadians(15)
         //Find twist that approach EFF to its desired orientation
-        Quaternion O_i_inv = j_i.rotation().inverse();
         //q_delta = O_i_inv * O_t * (O_i_inv * O_eff)^-1
-        Quaternion delta = Quaternion.compose(O_i_inv, target.orientation());
-        delta.compose(Quaternion.compose(O_i_inv, eff.orientation()));
+        Quaternion delta = j_i.orientationCache().inverse();
+        delta.compose(target.orientation());
+        delta.compose(endEffector.orientationCache().inverse());
+        delta.compose(j_i.orientationCache());
         //get the twist component of the given quaternion
-        Vector tw = j_i1.translation(); // w.r.t j_i
+        Vector tw = j_i1.node().translation(); // w.r.t j_i
         //if delta is too short then avoid this operation
         if (Math.abs(delta.angle()) < Math.toRadians(5)) {
             return new Quaternion(tw, 0);
@@ -802,11 +964,11 @@ public class TRIK extends Solver {
     }
 
     //Try to approach to target final position by means of twisting
-    protected static Quaternion _findCCDTwist(Node j_i, Node j_i1, Node eff, Node target, float maxAngle){ //(float) Math.toRadians(20)
-        Vector j_i_to_target = j_i.location(target);
-        Vector j_i_to_eff = j_i.location(eff);
+    protected static Quaternion _findCCDTwist(NodeInfo j_i, NodeInfo j_i1, NodeInfo eff, Node target, float maxAngle){ //(float) Math.toRadians(20)
+        Vector j_i_to_target = j_i.locationWithCache(target.position());
+        Vector j_i_to_eff = j_i.locationWithCache(eff);
         Vector j_i_to_eff_proj, j_i_to_target_proj;
-        Vector tw = j_i1.translation(); // w.r.t j_i
+        Vector tw = j_i1.node().translation(); // w.r.t j_i
         //Project the given vectors in the plane given by twist axis
         try {
             j_i_to_target_proj = Vector.projectVectorOnPlane(j_i_to_target, tw);
@@ -830,12 +992,12 @@ public class TRIK extends Solver {
     }
 
 
-    protected static Quaternion _findTwist(Node j_i, Node j_i1, Node eff, Node target, float maxT1, float maxT2, boolean direction){
+    protected static Quaternion _findTwist(NodeInfo j_i, NodeInfo j_i1, NodeInfo endEffector, Node target, float maxT1, float maxT2, boolean direction){
         //Step 3. Apply twisting to help reach desired rotation
         Quaternion t1, t2, twist;
-        t1 = t2 = _findCCDTwist(j_i, j_i1, eff, target, maxT1);
+        t1 = t2 = _findCCDTwist(j_i, j_i1, endEffector, target, maxT1);
         if(direction){
-            t2 = _findTwisting(j_i, j_i1, eff, target, maxT2);
+            t2 = _findTwisting(j_i, j_i1, endEffector, target, maxT2);
         }
         if(t1.axis().dot(t2.axis()) < 0){
             twist = new Quaternion(t1.axis(), 0.5f * t1.angle() - 0.5f * t2.angle());
@@ -845,15 +1007,15 @@ public class TRIK extends Solver {
         return twist;
     }
 
-    protected static void applySwingTwist(Node j_i, Node j_i1, Node j_i1_hat, Node eff, Node target, float maxT1, float maxT2, boolean enableWeight, boolean direction, boolean enableTwist, boolean smooth, float smoothAngle){
+    protected static void applySwingTwist(NodeInfo j_i, NodeInfo j_i1, NodeInfo j_i1_hat, NodeInfo endEffector, Node target, float maxT1, float maxT2, boolean enableWeight, boolean direction, boolean enableTwist, boolean smooth, float smoothAngle){
         Quaternion q1 = _findLocalRotation(j_i1, j_i1_hat, enableWeight);
         if(smooth) q1 = _clampRotation(q1, smoothAngle);
-        j_i.rotate(q1); //Apply local rotation
+        j_i.rotateAndUpdateCache(q1, true, endEffector); //Apply local rotation
         if(enableTwist) {
             Quaternion q2;
-            if(smooth) q2 = _findTwist(j_i, j_i1, eff, target, smoothAngle, smoothAngle, direction);
-            else q2 = _findTwist(j_i, j_i1, eff, target, maxT1, maxT2, direction);
-            j_i.rotate(q2); //Apply twist rotation
+            if(smooth) q2 = _findTwist(j_i, j_i1, endEffector, target, smoothAngle, smoothAngle, direction);
+            else q2 = _findTwist(j_i, j_i1, endEffector, target, maxT1, maxT2, direction);
+            j_i.rotateAndUpdateCache(q2, true, endEffector); //Apply twist rotation
         }
     }
 
@@ -863,6 +1025,187 @@ public class TRIK extends Solver {
             rotation = new Quaternion(rotation.axis(), (Math.signum(angle) * maxAngle));
         }
         return rotation;
+    }
+
+    //THIS CLASS IS USED IN ORDER TO AVOID REDUNDANT WORK
+    //TODO: Move this class and refine
+    protected class NodeInfo{
+        NodeInfo _reference;
+        Node _node;
+        Quaternion _orientationCache;
+        Vector _positionCache;
+
+        protected NodeInfo(NodeInfo ref, Node node){
+            this._reference = ref;
+            this._node = node;
+        }
+
+        protected void setPositionCache(Vector position){
+            _positionCache = position.get();
+        }
+
+        protected void setOrientationCache(Quaternion orientation){
+            _orientationCache = orientation.get();
+        }
+
+        protected void setCache(Vector position, Quaternion orientation){
+            setPositionCache(position);
+            setOrientationCache(orientation);
+        }
+
+        protected Node node(){
+            return _node;
+        }
+
+        protected NodeInfo reference(){
+            return _reference;
+        }
+
+        protected Quaternion orientationCache(){
+            return _orientationCache;
+        }
+
+        protected Vector positionCache(){
+            return _positionCache;
+        }
+
+        protected void setOrientationWithCache(Quaternion orientation){
+            if(_node.constraint() == null) {
+                Quaternion delta = Quaternion.compose(_orientationCache.inverse(), orientation);
+                _orientationCache = orientation;
+                _node.rotate(delta);
+            } else{
+                Quaternion delta = _node.constraint().constrainRotation(Quaternion.compose(_orientationCache.inverse(), orientation), _node);
+                _orientationCache.compose(delta);
+                Constraint constraint = _node.constraint();
+                _node.setConstraint(null);
+                _node.rotate(delta);
+                _node.setConstraint(constraint);
+            }
+        }
+
+        protected void setPositionWithCache(Vector position){
+            Vector translation = Vector.subtract(position, _positionCache);
+            //diff w.r.t ref
+            if(_reference != null){
+                translation = _reference._orientationCache.inverseRotate(translation);
+            }
+            if(_node.constraint() == null) {
+                _positionCache = position;
+                _node.translate(translation);
+            } else{
+                translation = _node.constraint().constrainTranslation(translation, _node);
+                _positionCache.add(translation);
+                Constraint constraint = _node.constraint();
+                _node.setConstraint(null);
+                _node.translate(translation);
+                _node.setConstraint(constraint);
+            }
+        }
+
+        protected Vector locationWithCache(Vector worldVector){
+            Vector translation = Vector.subtract(worldVector, _positionCache);
+            return _orientationCache.inverseRotate(translation);
+        }
+
+        protected Vector locationWithCache(NodeInfo node){
+            return locationWithCache(node.positionCache());
+        }
+
+        /*
+        * NOTE : This update the cache taking into account only the current action, if parents were modified, the cache
+        * must be updated explicitly.
+        * */
+
+        //Translate the node by delta and update the orientation/position of the remaining nodes
+        protected void translateAndUpdateCache(Vector delta, boolean useConstraint, NodeInfo... nodeInfoList){
+            Constraint constraint = _node.constraint();
+            if(useConstraint && constraint != null) delta = constraint.constrainTranslation(delta, _node);
+            Quaternion ref = Quaternion.compose(_orientationCache, _node.rotation().inverse());
+            ref.normalize();
+            Vector t = ref.rotate(delta); //w.r.t world
+            _node.setConstraint(null);
+            _node.translate(delta);
+            _node.setConstraint(constraint);
+            _positionCache.add(t);
+            if(nodeInfoList.length > 0) {
+                for (NodeInfo other : nodeInfoList) {
+                    other._positionCache.add(t);
+                }
+            }
+        }
+
+
+        //Rotate the node by delta and update the orientation/position of the remaining nodes
+        protected void rotateAndUpdateCache(Quaternion delta, boolean useConstraint, NodeInfo... nodeInfoList){
+            Constraint constraint = _node.constraint();
+            if(useConstraint && constraint != null) delta = constraint.constrainRotation(delta, _node);
+
+            _node.setConstraint(null);
+            Quaternion orientation = Quaternion.compose(_orientationCache, delta);
+            orientation.normalize(); // Prevents numerical drift
+            if(nodeInfoList.length > 0) {
+                Quaternion q = Quaternion.compose(orientation, _orientationCache.inverse());
+                q.normalize();
+                for (NodeInfo other : nodeInfoList) {
+                    Quaternion o = Quaternion.compose(q, other.orientationCache());
+                    o.normalize();
+                    other.setOrientationCache(o);
+                    Vector p = Vector.subtract(other.positionCache(), _positionCache);
+                    other.setPositionCache(Vector.add(_positionCache, q.rotate(p)));
+                }
+            }
+            _node.rotate(delta);
+            _node.setConstraint(constraint);
+            _orientationCache = orientation;
+        }
+
+        //Updates cache assuming that reference contains an updated cache
+        protected void updateCacheUsingReference(){
+            _orientationCache = Quaternion.compose(reference().orientationCache(), node().rotation());
+            _orientationCache.normalize();
+            _positionCache = Vector.add(reference().positionCache(), reference().orientationCache().rotate(node().translation()));
+        }
+    }
+
+    protected List<NodeInfo> createInfoList(List<? extends Node> nodeList, boolean updateCache){
+        List<NodeInfo> infoList = new ArrayList<NodeInfo>();
+        NodeInfo ref = null;
+        Quaternion orientation = nodeList.get(0).reference() != null && updateCache ? nodeList.get(0).reference().orientation() : new Quaternion();
+        Vector position = nodeList.get(0).reference() != null && updateCache ? nodeList.get(0).reference().position() : new Vector();
+        for(Node node : nodeList){
+            NodeInfo nodeInfo = new NodeInfo(ref, node);
+            infoList.add(nodeInfo);
+            ref = nodeInfo;
+            //update cache
+            if(updateCache) {
+                position.add(orientation.rotate(node.translation()));
+                orientation.compose(node.rotation());
+                orientation.normalize();
+                nodeInfo.setCache(position.get(), orientation.get());
+            }
+        }
+        return infoList;
+    }
+
+    protected void updateCache(List<NodeInfo> nodeInfoList){
+        Quaternion orientation = nodeInfoList.get(0).node().reference() != null ? nodeInfoList.get(0).node().reference().orientation() : new Quaternion();
+        orientation.normalize();
+        Vector position = nodeInfoList.get(0).node().reference() != null ? nodeInfoList.get(0).node().reference().position() : new Vector();
+        for(NodeInfo nodeInfo : nodeInfoList){
+            Node node = nodeInfo.node();
+            position.add(orientation.rotate(node.translation()));
+            orientation.compose(node.rotation());
+            orientation.normalize();
+            nodeInfo.setCache(position.get(), orientation.get());
+        }
+    }
+
+    protected void copyCache(List<NodeInfo> origin, List<NodeInfo> dest){
+        for(int i = 0; i < origin.size(); i++){
+            dest.get(i).setPositionCache(origin.get(i).positionCache());
+            dest.get(i).setOrientationCache(origin.get(i).orientationCache());
+        }
     }
 
 }
