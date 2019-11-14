@@ -41,51 +41,55 @@ import java.util.List;
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
  * {@link #prune(Node)}, {@link #isReachable(Node)}, {@link #branch(Node)}, and {@link #clear()}.
- * <h2>2.1. Eye handling</h2>
+ * <h2>The eye</h2>
  * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
  * (see {@link #setEye(Node)}). Several functions handle the eye, such as
  * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFOV()},
- * {@link #fov()}, {@link #fit()}.
+ * {@link #fov()}, {@link #fit()}, {@link #lookAround(float, float)}, {@link #rotateCAD(float, float)},
+ * {@link #moveForward(float)}, {@link #translateEye(float, float, float)},
+ * {@link #rotateEye(float, float, float)} and {@link #scaleEye(float)}.
  * <h2>2.1. Transformations</h2>
  * The graph acts as interface between the physical space, from where user gesture data is
  * gathered, and the {@code nodes}. To transform points from/to physical space to/from node space
  * use {@link #location(Vector, Node)} and {@link #screenLocation(Vector, Node)}.
  * To transform vectors from/to physical space to/from node space
  * use {@link #displacement(Vector, Node)} and {@link #screenDisplacement(Vector, Node)}.
- * <h1>3. Interactivity</h1>
- * Several methods taking to both nodes (in {@link #nodes()}) and the {@link #eye()}, such as
- * {@link #translateNode(Node, float, float, float)}, {@link #rotateNode(Node, float, float, float)},
- * {@link #scaleNode(Node, float)} and {@link #spinNode(Node, int, int, int, int)}.
- * <p>
- * Note that some interactivity methods are only available for the {@link #eye()} such as
- * {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
- * <p>
- * To check if a given node would be picked with a ray casted at a given screen position
- * use {@link #tracks(Node, int, int)}. Refer to {@link Node#pickingThreshold()} (and
- * {@link Node#setPickingThreshold(float)}) for the different node picking policies.
  * <h1>4. Picking and interaction</h1>
- * Picking a node to interact with it is a tag-based two step process:
+ * Picking a node to interact with it is a two-step process:
  * <ol>
- * <li>Tag the node using an arbitrary name (which may be {@code null}) for it (refer to
- * {@link #tag(String, Node)}) or using ray-casting: {@link #updateTag(String, int, int, Node[])}
+ * <li>Tag the node using an arbitrary name (which may be {@code null}) either with
+ * {@link #tag(String, Node)}) or ray-casting: {@link #updateTag(String, int, int, Node[])}
  * (detached or attached nodes), {@link #updateTag(String, int, int)} (only attached nodes) or
- * {@link #tag(String, int, int)} (only for attached nodes too). While {@link #updateTag(String, int, int, Node[])}
- * and {@link #updateTag(String, int, int)} update the tagged node synchronously (i.e., they return the
- * tagged node immediately), {@link #tag(String, int, int)} updates it asynchronously (i.e., it
- * optimally updates the tagged node during the next call to the {@link #render()} algorithm); and, </li>
- * <li> Call any interactivity method that take a {@code tag} string param (such as
- * {@link #translateTag(String, float, float, float)}, {@link #scaleTag(String, float)},
- * {@link #rotateTag(String, float, float, float)} or {@link #spinTag(String, int, int, int, int)})
- * following the name convention you defined in 1.</li>
+ * {@link #tag(String, int, int)} (only for attached nodes too). While
+ * {@link #updateTag(String, int, int, Node[])} and {@link #updateTag(String, int, int)} update the
+ * tagged node synchronously (i.e., they return the tagged node immediately),
+ * {@link #tag(String, int, int)} updates it asynchronously (i.e., it optimally updates the tagged
+ * node during the next call to the {@link #render()} algorithm); and, </li>
+ * <li>Interact with your tagged nodes by calling any of the following methods: {@link #alignTag(String)},
+ * {@link #focusTag(String)}, {@link #translateTag(String, float, float, float)},
+ * {@link #rotateTag(String, float, float, float)}, {@link #scaleTag(String, float)},
+ * or {@link #spinTag(String, int, int, int, int)}).
+ * </li>
  * </ol>
  * Observations:
  * <ol>
- * <li>The interactivity methods are implemented in terms of the ones defined previously
- * by simply passing the tagged node (see {@link #node(String)}) to them (e.g.,
- * {@link #scaleTag(String, float)} calls {@link #scale(String, float)} passing the tagged node).</li>
- * <li>The stringless versions of the tagged interactivity methods support the {@code null} tag
- * (e.g., {@link #scaleTag(float delta)} simply calls {@code scaleTag(null, delta)}).</li>
+ * <li>Refer to {@link Node#pickingThreshold()} (and {@link Node#setPickingThreshold(float)}) for the different
+ * ray-casting node picking policies.</li>
+ * <li>To check if a given node would be picked with a ray casted at a given screen position,
+ * call {@link #tracks(Node, int, int)}.</li>
+ * <li>To interact with the node that is referred with the {@code null} tag, call any of the following methods:
+ * {@link #alignTag()}, {@link #focusTag()}, {@link #translateTag(float, float, float)},
+ * {@link #rotateTag(float, float, float)}, {@link #scaleTag(float)} and
+ * {@link #spinTag(int, int, int, int)}), allow </li>
+ * <li>To directly interact with a given node, call any of the following methods: {@link #alignNode(Node)},
+ * {@link #focusNode(Node)}, {@link #translateNode(Node, float, float, float)},
+ * {@link #rotateNode(Node, float, float, float)},
+ * {@link #scaleNode(Node, float)} and {@link #spinNode(Node, int, int, int, int)}).</li>
+ * <li>To either interact with the node referred with a given tag or the eye, when that tag is not in use,
+ * call any of the following methods: {@link #align(String)}, {@link #focus(String)},
+ * {@link #translate(String, float, float, float)}, {@link #rotate(String, float, float, float)},
+ * {@link #scale(String, float)} and {@link #spin(String, int, int, int, int)}.</li>
  * <li>Customize node behaviors by overridden {@link Node#interact(Object...)}
  * and then invoke them by either calling: {@link #interactTag(Object...)},
  * {@link #interactTag(String, Object...)} or {@link #interactNode(Node, Object...)}.
