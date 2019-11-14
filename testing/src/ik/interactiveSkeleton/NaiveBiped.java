@@ -186,6 +186,7 @@ public class NaiveBiped extends PApplet {
                 ((TRIK)solver).setTarget(target);
                 ((TRIK)solver).setLookAhead(2);
                 ((TRIK)solver).enableWeight(true);
+                ((TRIK)solver).smooth(true);
                 break;
             }
 
@@ -196,8 +197,8 @@ public class NaiveBiped extends PApplet {
 
         //solver.setMaxError(0f);
         if (!debug){
-            solver.setTimesPerFrame(4);
-            solver.setMaxIterations(4);
+            solver.setTimesPerFrame(3);
+            solver.setMaxIterations(3);
         }
         else{
             solver.setTimesPerFrame(1);

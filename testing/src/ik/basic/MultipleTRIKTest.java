@@ -19,7 +19,7 @@ import java.util.List;
  * Created by sebchaparr on 01/06/19.
  */
 
-public class GTargetsTest extends PApplet {
+public class MultipleTRIKTest extends PApplet {
     Scene scene;
     //Set the scene as P3D or P2D
     String renderer = P3D;
@@ -58,7 +58,7 @@ public class GTargetsTest extends PApplet {
         //trik2.enableTwistHeuristics(false);
         //trik3.enableTwistHeuristics(false);
 
-        trik2.enableWeight(true);
+        //trik2.enableWeight(true);
         trik3.enableWeight(true);
         trik2.setLookAhead(3);
         trik3.setLookAhead(3);
@@ -107,20 +107,15 @@ public class GTargetsTest extends PApplet {
         //3. Relate the structure with a Solver. In this example we instantiate a solver
         TRIK solver = new TRIK(skeleton);
 
-        for(int i = 0; i < gTargets; i++) {
-            Node gTarget = createTarget(scene, jointRadius * 1.5f, color(0,255,255));
-            gTarget.setPosition(Vector.add(skeleton.get(i).position(), new Vector(- length, length * 3)));
-            //solver.addGTarget(gTarget, 0.25f);
-        }
         //Optionally you could modify the following parameters of the Solver:
         //Maximum distance between end effector and target, If is below maxError, then we stop executing IK solver (Default value is 0.01)
-        solver.setMaxError(0.0001f);
+        //solver.setMaxError(0.0001f);
         //Number of iterations to perform in order to reach the target (Default value is 50)
         solver.setMaxIterations(10);
         //Times a solver will iterate on a single Frame (Default value is 5)
         solver.setTimesPerFrame(TRIK._debug ? 1 : 10);
         //Minimum distance between previous and current solution to consider that Solver converges (Default value is 0.01)
-        solver.setMinDistance(5f);
+        //solver.setMinDistance(5f);
         //4. relate targets with end effectors
         solver.setTarget(endEffector, target);
         //5. Create a Timing Task such that the solver executes each amount of time
@@ -231,6 +226,6 @@ public class GTargetsTest extends PApplet {
     }
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.basic.GTargetsTest"});
+        PApplet.main(new String[]{"ik.basic.MultipleTRIKTest"});
     }
 }

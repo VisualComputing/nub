@@ -87,10 +87,10 @@ public class VisualBenchmark extends PApplet {
             Solver solver = Util.createSolver(solversType[i], structures.get(i));
             solvers.add(solver);
             //6. Define solver parameters
-            solvers.get(i).setMaxError(0.001f);
-            solvers.get(i).setTimesPerFrame(5);
-            solvers.get(i).setMaxIterations(5);
-            solvers.get(i).setMinDistance(0.001f);
+            //solvers.get(i).setMaxError(0.001f);
+            solvers.get(i).setTimesPerFrame(10);
+            solvers.get(i).setMaxIterations(10);
+            //solvers.get(i).setMinDistance(0.001f);
             //7. Set targets
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
@@ -162,7 +162,7 @@ public class VisualBenchmark extends PApplet {
 
     public Node generateRandomReachablePosition(List<? extends Node> original, boolean is3D){
         ArrayList<? extends Node> chain = Util.copy(original);
-        for(int i = 0; i < chain.size(); i++){
+        for(int i = 0; i < chain.size() - 1; i++){
             if(is3D)
                 chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
             else
@@ -178,8 +178,10 @@ public class VisualBenchmark extends PApplet {
         if(key == 's' || key == 'S'){
             Node f = generateRandomReachablePosition(structures.get(0), scene.is3D());
             Vector delta = Vector.subtract(f.position(), targets.get(0).position());
-            for(Node target : targets)
+            for(Node target : targets) {
                 target.setPosition(Vector.add(target.position(), delta));
+                target.setOrientation(f.orientation());
+            }
         }
         if(key == 'd' || key == 'D'){
             for(List<Node> structure : structures) {

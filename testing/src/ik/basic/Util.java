@@ -80,19 +80,22 @@ public class Util {
             case TRIK_V2:{
                 TRIK solver = new TRIK(structure);
                 solver.enableWeight(true);
+                //solver.enableDirection(true);
                 return solver;
             }
             case TRIK_V3:{
                 TRIK solver = new TRIK(structure);
                 solver.setLookAhead(4);
                 solver.enableWeight(true);
+                solver.enableDirection(true);
                 return solver;
             }
             case TRIK_V4:{
                 TRIK solver = new TRIK(structure);
-                solver.setLookAhead(4);
+                solver.setLookAhead(3);
                 solver.enableWeight(true);
                 solver.smooth(true);
+                //solver.enableDirection(true);
                 return solver;
             }
             default: return null;
@@ -301,7 +304,11 @@ public class Util {
         }
         if(solver instanceof TRIK){
             String heuristics = "";
-            pg.text("TRIK" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            TRIK  trik = (TRIK) solver;
+            String error = "\n Error (pos): " + String.format( "%.3f", trik.positionError());
+            if(trik.direction()) error += "\n Error (or): " + String.format( "%.3f", trik.orientationError());
+
+            pg.text("TRIK" +  error  + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
 
         pg.popStyle();
