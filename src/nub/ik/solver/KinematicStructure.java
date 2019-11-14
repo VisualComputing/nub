@@ -231,6 +231,13 @@ public class KinematicStructure {
         KinematicStructure structure = new KinematicStructure();
         List<KNode> kchain = new ArrayList<KNode>();
         HashMap<Node, KNode> map = new HashMap<Node, KNode>();
+
+        Node reference = chain.get(0).reference();
+        if (reference != null) {
+            KNode kNode = new KNode(structure, new Node(reference.position().get(), reference.orientation().get(), reference.scaling()));
+            map.put(reference, kNode);
+        }
+
         for(Node node : chain){
             KNode knode = new KNode(structure, node);
             KNode ref = map.get(node.reference());
