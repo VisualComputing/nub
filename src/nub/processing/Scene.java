@@ -94,14 +94,24 @@ import java.util.Map;
  * </pre>
  * while {@link #render()} will draw the animated node(s), {@link #drawPath(Interpolator, int)}
  * will draw the interpolated path too.
- * <h1>Human Interface Devices</h1>
- * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device</a>
- * is the Processing mouse, see {@link #updateMouseTag()}, {@link #mouseTag()}, {@link #mouseSpin()}, {@link #mouseTranslate()}
- * {@link #scale(float)}, etc. To set up another device refer to the {@link Graph} documentation.
+ * <h1>Picking and interaction</h1>
+ * Refer to the {@link Graph} documentation for details about how picking and interaction works
+ * in nub.
+ * <p>
+ * The scene just provides additional methods to pick and interact with the mouse that wrap the
+ * {@link PApplet#pmouseX} and {@link PApplet#pmouseY} Processing variables and thus simplify
+ * the method signatures provide by the {@link Graph} counterparts. Refer to the method signatures
+ * beginning with {@code mouse*}, such as: {@link #mouseTag(String)} and {@link #mouseTag()} for
+ * node tagging; {@link #mouseTranslate()}, {@link #mouseTranslate(String)},
+ * {@link #mouseTranslateTag(String)} and {@link #mouseTranslateEye()} for translation;
+ * {@link #mouseSpin()} ()}, {@link #mouseSpin(String)}, {@link #mouseSpinTag(String)} and
+ * {@link #mouseSpinEye()} for spinning; {@link #mouseLookAround()} and {@link #mouseRotateCAD()}
+ * for eye look-around and rotate-cad, to name a few.
  *
  * @see Graph
  * @see Node
  * @see Interpolator
+ * @see TimingTask
  */
 public class Scene extends Graph implements PConstants {
   public static String prettyVersion = "0.3.0";
