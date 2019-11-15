@@ -4124,7 +4124,7 @@ public class Graph {
   // 7. moveForward
 
   /**
-   * Same as {@code translate(0, 0, delta, eye())}. Rescales the {@link #eye()}
+   * Same as {@code translate(0, 0, delta)}. Also rescales the {@link #eye()}
    * if the graph type is {@link Type#ORTHOGRAPHIC} so that nearby objects
    * appear bigger when moving towards them.
    *

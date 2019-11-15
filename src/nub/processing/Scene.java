@@ -3032,7 +3032,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code if (!mouseSpinTag(tag)) mouseSpinEye()}.
+   * Same as {@code if (mouseSpinTag(tag) == false) mouseSpinEye()}.
    *
    * @see #mouseSpinTag(String)
    * @see #mouseSpinEye()
@@ -3069,7 +3069,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   * Same as {@code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY())}.
    *
    * @see #spinNode(Node, int, int, int, int)
    * @see #pmouseX()
@@ -3082,7 +3082,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {code super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   * Same as {@code super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY())}.
    *
    * @see #spinEye(int, int, int, int)
    * @see #pmouseX()
