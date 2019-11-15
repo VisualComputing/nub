@@ -104,7 +104,7 @@ import java.util.Map;
  * beginning with {@code mouse*}, such as: {@link #mouseTag(String)} and {@link #mouseTag()} for
  * node tagging; {@link #mouseTranslate()}, {@link #mouseTranslate(String)},
  * {@link #mouseTranslateTag(String)} and {@link #mouseTranslateEye()} for translation;
- * {@link #mouseSpin()} ()}, {@link #mouseSpin(String)}, {@link #mouseSpinTag(String)} and
+ * {@link #mouseSpin()}, {@link #mouseSpin(String)}, {@link #mouseSpinTag(String)} and
  * {@link #mouseSpinEye()} for spinning; {@link #mouseLookAround()} and {@link #mouseRotateCAD()}
  * for eye look-around and rotate-cad, to name a few.
  *
