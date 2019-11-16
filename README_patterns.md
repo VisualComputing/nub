@@ -6,11 +6,9 @@
 - [Description](#description)
 - [Scene](#scene)
 - [Nodes](#nodes)
-  - [Node features](#node-features)
-    - [_Scene topology flexibility_](#_scene-topology-flexibility_)
-    - [Default eye()](#default-eye)
-    - [Node _shapes_,](#node-_shapes_)
-    - [Space _transformations](#space-_transformations)
+    - [Shapes](#shapes)
+    - [Space transformations](#space-transformations)
+    - [Localization](#localization)
 - [Rendering](#rendering)
     - [Drawing functionality](#drawing-functionality)
 - [Interactivity](#interactivity)
@@ -170,7 +168,7 @@ Another scene's eye (different than this one) can be drawn with [drawEye(Graph)]
 
 The scene has several methods to position and orient the _eye_ node, such as: [lookAt(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#lookAt-nub.primitives.Vector-), [setFov(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setFOV-float-), [setViewDirection(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setViewDirection-nub.primitives.Vector-), [setUpVector(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setUpVector-nub.primitives.Vector-), [fit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#fit--) and [fit(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#fit-nub.core.Node-), among others.
 
-The following _eye_ interaction methods are particularly suited for hardware devices with several degrees-of-freedom: [scaleEye(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleEye-float-), [translateEye(float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateEye-float-float-float-), [rotateEye(float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateEye-float-float-float-), [spinEye(int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinEye-int-int-int-int-), [lookAround(float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#lookAround-float-float-) and [rotateCAD(float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateCAD-float-float-). Methods such as: [mouseTranslateEye()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTranslateEye--), [mouseSpinEye()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseSpinEye--) and [mouseLookAround()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseLookAround--), are implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to some of the above ones, and hence their simpler method signatures. The following code snippets show some of them in action:
+The following _eye_ interaction methods are particularly suited for hardware devices having several degrees-of-freedom: [scaleEye(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleEye-float-), [translateEye(float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateEye-float-float-float-), [rotateEye(float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateEye-float-float-float-), [spinEye(int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinEye-int-int-int-int-), [lookAround(float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#lookAround-float-float-) and [rotateCAD(float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateCAD-float-float-). Methods such as: [mouseTranslateEye()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTranslateEye--), [mouseSpinEye()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseSpinEye--) and [mouseLookAround()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseLookAround--), are implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to some of the above ones, and hence their simpler method signatures. The following are some mouse examples:
 
 ```processing
 // define a mouse-dragged eye interaction
@@ -210,96 +208,20 @@ void mouseWheel(MouseEvent event) {
 Picking a node to interact with it is a two-step process:
 
 1. Tag the node using an arbitrary name (which may be `null`) either with [tag(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-nub.core.Node-) or ray-casting: [updateTag(String, int, int, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-nub.core.Node:A-) (detached or attached nodes), [updateTag(String, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-) (only attached nodes) or [tag(String, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-java.lang.String-int-int-) (only for attached nodes too). While ```updateTag(String, int, int, Node[])``` and ```updateTag(String, int, int)``` update the tagged node synchronously (i.e., they return the tagged node immediately), ```tag(String, int, int)``` updates it asynchronously (i.e., it optimally updates the tagged node during the next call to the ```render()``` algorithm); and,
-2. Interact with your tagged nodes by calling any of the following methods: [alignTag(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignTag-java.lang.String-), [focusTag(String)](), [translateTag(String, float, float, float)](), [rotateTag(String, float, float, float)](), [scaleTag(String, float)](), or [spinTag(String, int, int, int, int)]().
+2. Interact with your _tagged_ nodes by calling any of the following methods: [alignTag(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignTag-java.lang.String-), [focusTag(String)](), [translateTag(String, float, float, float)](), [rotateTag(String, float, float, float)](), [scaleTag(String, float)](), or [spinTag(String, int, int, int, int)]().
 
+Observations:
 
-
- * Observations:
- * <ol>
- * <li>Refer to {@link Node#pickingThreshold()} (and {@link Node#setPickingThreshold(float)}) for the different
- * ray-casting node picking policies.</li>
- * <li>To check if a given node would be picked with a ray casted at a given screen position,
- * call {@link #tracks(Node, int, int)}.</li>
- * <li>To interact with the node that is referred with the {@code null} tag, call any of the following methods:
- * {@link #alignTag()}, {@link #focusTag()}, {@link #translateTag(float, float, float)},
- * {@link #rotateTag(float, float, float)}, {@link #scaleTag(float)} and
- * {@link #spinTag(int, int, int, int)}), allow </li>
- * <li>To directly interact with a given node, call any of the following methods: {@link #alignNode(Node)},
- * {@link #focusNode(Node)}, {@link #translateNode(Node, float, float, float)},
- * {@link #rotateNode(Node, float, float, float)},
- * {@link #scaleNode(Node, float)} and {@link #spinNode(Node, int, int, int, int)}).</li>
- * <li>To either interact with the node referred with a given tag or the eye, when that tag is not in use,
- * call any of the following methods: {@link #align(String)}, {@link #focus(String)},
- * {@link #translate(String, float, float, float)}, {@link #rotate(String, float, float, float)},
- * {@link #scale(String, float)} and {@link #spin(String, int, int, int, int)}.</li>
- * <li>Customize node behaviors by overridden {@link Node#interact(Object...)}
- * and then invoke them by either calling: {@link #interactTag(Object...)},
- * {@link #interactTag(String, Object...)} or {@link #interactNode(Node, Object...)}.
-
-The following code snippets
-
-```processing
-  scene.tag("key", node);
-```
-
-the "key" is an arbitrary tag (which may be `null`, see below) the scene uses to track the node. To retrieve the node by its tag, use:
-
-```processing
-  scene.node("key");// will return node
-```
-
-Ray casting picking also employs tags. To synchronously pick a node at pixel `(x, y)` call:
-
-```processing
-  scene.updateTag("pixel", x, y);
-```
-
-and the `scene.trackedNode("pixel")` will be returned immediately. To pick the node optimally, albeit asynchronously, call:
-
-```processing
-  scene.cast("pixel", x, y);
-```
-
-and the `scene.tag("pixel")` will be available after the next call to the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm.
-
-You may also define a *default* picking metaphor by calling the simpler versions of the above methods, which simply use the `null` tag:
-
-```processing
-  // Pick a node with the null tag
-  scene.tag(node);
-  // same as:
-  // scene.tag(null, node)
-  // Retrieve the node tagged with null
-  scene.node();// will return node
-  // same as:
-  // scene.node(null)
-```
-
-### Node interaction
-
-A node interaction is give by the scene command:
-
-```processing
-  scene.interact(node, ...gesture);
-```
-
-which is the same as:
-
-```processing
-  // default implementation is empty
-  node.interact(gesture);
-```
-
-where `gesture` data is encoded as a [varargs](https://docs.oracle.com/javase/8/docs/technotes/guides/language/varargs.html) of type `Object`. 
-
-Note that whilst scene method [interact(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interact-nub.core.Node-java.lang.Object...-) parses user gesture data, the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) implements the actual response to it. The scene provides several implementations of the above pattern, such as the following:
-
+1. Refer to [pickingThreshold()]() [setPickingThreshold(float)]() for the different ray-casting node picking policies.
+2. To check if a given node would be picked with a ray casted at a given screen position, call [tracks(Node, int, int)]().
+3. To interact with the node that is referred with the ```null``` tag, call any of the following methods: [alignTag()](), [focusTag()](), [translateTag(float, float, float)](), [rotateTag(float, float, float)], [scaleTag(float)]()and [spinTag(int, int, int, int)]()).
+4. To directly interact with a given node, call any of the following methods: [alignNode(Node)](), [focusNode(Node)](), [translateNode(Node, float, float, float)](), [rotateNode(Node, float, float, float)](), [scaleNode(Node, float)]() and [spinNode(Node, int, int, int, int)]().
+5. To either interact with the node referred with a given tag or the eye, when that tag is not in use, call any of the following methods: [align(String)](), [focus(String)](), [translate(String, float, float, float)](), [rotate(String, float, float, float)](), [scale(String, float)]() and [spin(String, int, int, int, int)]().
+6. Customize node behaviors by overridden the node method [interact(Object...)]() and then invoke them by either calling: [interactTag(Object...)](), [interactTag(String, Object...)]() or [interactNode(Node, Object...)]().
 
 ## Timing
 
 ### Timing tasks
-
-
 
 ### Interpolators
 
