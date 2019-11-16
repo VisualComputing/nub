@@ -88,11 +88,11 @@ import java.util.Map;
  * {@code
  * void draw() {
  *   scene.render();
- *   scene.drawPath(interpolator, 5);
+ *   scene.drawCatmullRom(interpolator, 5);
  * }
  * }
  * </pre>
- * while {@link #render()} will draw the animated node(s), {@link #drawPath(Interpolator, int)}
+ * while {@link #render()} will draw the animated node(s), {@link #drawCatmullRom(Interpolator, int)}
  * will draw the interpolated path too.
  * <h1>Picking and interaction</h1>
  * Refer to the {@link Graph} documentation for details about how picking and interaction works
@@ -1234,30 +1234,30 @@ public class Scene extends Graph implements PConstants {
   // DRAWING
 
   /**
-   * Convenience function that simply calls {@code drawPath(interpolator, isEye(interpolator.node()) ? 3 : 5, 6, radius())}.
+   * Convenience function that simply calls {@code drawCatmullRom(interpolator, isEye(interpolator.node()) ? 3 : 5, 6, radius())}.
    *
-   * @see #drawPath(Interpolator, int, int, float)
+   * @see #drawCatmullRom(Interpolator, int, int, float)
    */
-  public void drawPath(Interpolator interpolator) {
-    drawPath(interpolator, isEye(interpolator.node()) ? 3 : 5, 6, radius());
+  public void drawCatmullRom(Interpolator interpolator) {
+    drawCatmullRom(interpolator, isEye(interpolator.node()) ? 3 : 5, 6, radius());
   }
 
   /**
-   * Convenience function that simply calls {@code drawPath(interpolator, mask, 6, radius())}
+   * Convenience function that simply calls {@code drawCatmullRom(interpolator, mask, 6, radius())}
    *
-   * @see #drawPath(Interpolator, int, int, float)
+   * @see #drawCatmullRom(Interpolator, int, int, float)
    */
-  public void drawPath(Interpolator interpolator, int mask) {
-    drawPath(interpolator, mask, 6, radius());
+  public void drawCatmullRom(Interpolator interpolator, int mask) {
+    drawCatmullRom(interpolator, mask, 6, radius());
   }
 
   /**
-   * Convenience function that simply calls {@code drawPath(interpolator, mask, count, radius())}.
+   * Convenience function that simply calls {@code drawCatmullRom(interpolator, mask, count, radius())}.
    *
-   * @see #drawPath(Interpolator, int, int, float)
+   * @see #drawCatmullRom(Interpolator, int, int, float)
    */
-  public void drawPath(Interpolator interpolator, int mask, int steps) {
-    drawPath(interpolator, mask, steps, radius());
+  public void drawCatmullRom(Interpolator interpolator, int mask, int steps) {
+    drawCatmullRom(interpolator, mask, steps, radius());
   }
 
   /**
@@ -1267,9 +1267,9 @@ public class Scene extends Graph implements PConstants {
    * drawn. If ( (mask &amp; 2) != 0 ), an eye representation is regularly drawn and if
    * ( (mask &amp; 4) != 0 ), oriented axes are regularly drawn. Examples:
    * <p>
-   * {@code drawPath(1); // Simply draws the interpolation path} <br>
-   * {@code drawPath(3); // Draws path and eyes} <br>
-   * {@code drawPath(5); // Draws path and axes} <br>
+   * {@code drawCatmullRom(1); // Simply draws the interpolation path} <br>
+   * {@code drawCatmullRom(3); // Draws path and eyes} <br>
+   * {@code drawCatmullRom(5); // Draws path and axes} <br>
    * <p>
    * In the case where the eye or axes are drawn, {@code steps} controls the number of
    * objects (axes or eyes) drawn between two successive keyframes. When
@@ -1280,7 +1280,7 @@ public class Scene extends Graph implements PConstants {
    * {@code scale} controls the scaling of the eye and axes drawing. A value of
    * {@link #radius()} should give good results.
    */
-  public void drawPath(Interpolator interpolator, int mask, int steps, float scale) {
+  public void drawCatmullRom(Interpolator interpolator, int mask, int steps, float scale) {
     context().pushStyle();
     if (mask != 0) {
       int nbSteps = 30;

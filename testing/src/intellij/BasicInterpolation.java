@@ -45,7 +45,7 @@ public class BasicInterpolation extends PApplet {
 
     pushStyle();
     stroke(255);
-    scene.drawPath(interpolator, 5);
+    scene.drawCatmullRom(interpolator, 5);
     popStyle();
 
     pushStyle();

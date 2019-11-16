@@ -69,18 +69,18 @@ void draw() {
   scene.render();
   pushStyle();
   stroke(255);
-  // same as:scene.drawPath(interpolator, 5);
-  scene.drawPath(interpolator);
+  // same as:scene.drawCatmullRom(interpolator, 5);
+  scene.drawCatmullRom(interpolator);
   popStyle();
   if (showEyePath) {
     pushStyle();
     fill(255, 0, 0);
     stroke(0, 255, 0);
     // same as:
-    // scene.drawPath(eyeInterpolator1, 3);
-    // scene.drawPath(eyeInterpolator2, 3);
-    scene.drawPath(eyeInterpolator1);
-    scene.drawPath(eyeInterpolator2);
+    // scene.drawCatmullRom(eyeInterpolator1, 3);
+    // scene.drawCatmullRom(eyeInterpolator2, 3);
+    scene.drawCatmullRom(eyeInterpolator1);
+    scene.drawCatmullRom(eyeInterpolator2);
     popStyle();
   }
 }
