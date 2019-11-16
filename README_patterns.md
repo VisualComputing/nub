@@ -14,7 +14,6 @@
 - [Interactivity](#interactivity)
   - [Eye interaction](#eye-interaction)
   - [Node picking and interaction](#node-picking-and-interaction)
-  - [Node interaction](#node-interaction)
 - [Timing](#timing)
   - [Timing tasks](#timing-tasks)
   - [Interpolators](#interpolators)
