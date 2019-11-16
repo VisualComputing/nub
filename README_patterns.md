@@ -79,12 +79,13 @@ To setup the scene hierarchy of _attached_ nodes, i.e., nodes belonging to the s
 Scene scene;
 Node n1, n2, n3;
 void setup() {
+  // the scene object creates a default eye node
   scene = new Scene(this);
   // To attach a leading-node (those whose parent is the world, such as n1)
   // the scene parameter is passed to the Node constructor:
   n1 = new Node(scene);
   // whereas for the remaining nodes we pass any constructor taking a
-  // reference node paramater, such as Node(Node referenceNode)
+  // reference node parameter, such as Node(Node referenceNode)
   n2 = new Node(n1) {
     // immediate mode rendering procedure
     // defines n2 visual representation
@@ -99,24 +100,13 @@ void setup() {
 }
 ```
 
-### Node features
+Note that the hierarchy of nodes may be modified with [setReference(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setReference-frames.core.Node-) and the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) set from an arbitrary node instance with [setEye(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setEye-frames.core.Node-). Calling [setConstraint(Constrain)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setConstraint-frames.core.constraint.Constraint-) will apply a [Constraint](https://visualcomputing.github.io/nub-javadocs/nub/core/constraint/Constraint.html) to a node to limit its motion.
 
-Some of the main features of the [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) object are:
+#### Shapes
 
-#### _Scene topology flexibility_
+Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure (see [graphics(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#graphics-processing.core.PGraphics-)) or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see [shape(PShape)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#shape-processing.core.PShape-)). Shapes can be picked precisely using their projection onto the screen, see [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--). Note that even the _eye_ can have a shape which may be useful to depict the viewer in first person camera style.
 
-which may be set (even at run time) with [setReference(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setReference-frames.core.Node-).
-
-
-#### Default [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--)
-
-instantiated and handled by he `Scene`.
-
-#### Node _shapes_,
-
-which can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure (see [graphics(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#graphics-processing.core.PGraphics-)) or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see [shape(PShape)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#shape-processing.core.PShape-)). Shapes can be picked precisely using their projection onto the screen, see [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--). Note that even the _eye_ can have a shape which may be useful to depict the viewer in first person camera style.
-
-#### Space _transformations
+#### Space transformations
 
 The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space and nodes (including the world):
 
@@ -134,10 +124,16 @@ The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Nod
 | Node to (this) Node  | ```location(Vector, Node)```       | ```displacement(Vector, Node)```       |
 | World to Node        | ```location(Vector)```             | ```displacement(Vector)```             |
 | Node to World        | ```worldLocation(Vector)```        | ```worldDisplacement(Vector)```        |
+  
+#### Localization
 
-   
-1. _Constraints_ which limit node motions. Set them with [setConstraint(Constrain)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setConstraint-frames.core.constraint.Constraint-).
-2. _Node localization_ which may be achieved globally with [setPosition(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPosition-frames.primitives.Vector-), [setOrientation(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setOrientation-frames.primitives.Quaternion-), and [setMagnitude(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setMagnitude-float-); or locally with [setTranslation(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setTranslation-frames.primitives.Vector-), [translate(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#translate-frames.primitives.Vector-), [setRotation(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setRotation-frames.primitives.Quaternion-), [rotate(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#rotate-frames.primitives.Quaternion-), [setScaling(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setScaling-float-) and [scale(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#scale-float-), locally localize a node instance.
+A node [position](), [orientation]() and [scaling]() may be set with the following methods:
+
+| Node localization | Position                     | Orientation                      | Magnitude                 |
+|-------------------|----------------------------- |----------------------------------|---------------------------|
+| Globally          | ```setPosition(Vector)```    | ```setOrientation(Quaternion)``` | ```setMagnitude(float)``` |
+| Locally           | ```setTranslation(Vector)``` | ```setRotation(Quaternion)```    | ```setScaling(float)```   |
+| Incrementally     | ```translate(Vector)```      | ```rotate(Quaternion)```         | ```scale(float)```        |
 
 ## Rendering
 
