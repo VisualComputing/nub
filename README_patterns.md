@@ -1,4 +1,4 @@
-<!-- omit in toc -->nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
+nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 **Table of Contents**
@@ -6,12 +6,12 @@
 - [Description](#description)
 - [Scene](#scene)
 - [Nodes](#nodes)
+  - [Node features](#node-features)
 - [Rendering](#rendering)
     - [Drawing functionality](#drawing-functionality)
 - [Interactivity](#interactivity)
   - [Eye interaction](#eye-interaction)
   - [Node picking and interaction](#node-picking-and-interaction)
-    - [Ray casting](#ray-casting)
   - [Node interaction](#node-interaction)
 - [Timing](#timing)
   - [Timing tasks](#timing-tasks)
@@ -95,12 +95,14 @@ void setup() {
 }
 ```
 
-Some advantages of using _attached_ nodes are:
+### Node features
+
+Some of the main features _attached_ nodes are:
 
 1. _Scene topology flexibility_, which may be set (even at run time) with [setReference(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setReference-frames.core.Node-).
 2. _Eye_ node instantiation, which is done by the different [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) constructors. To set the eye from an arbitrary [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance call [setEye(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setEye-frames.core.Node-), and to retrieve it call [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--).
 3. Node _shapes_, which can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure (see [graphics(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#graphics-processing.core.PGraphics-)) or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see [shape(PShape)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#shape-processing.core.PShape-)). Shapes can be picked precisely using their projection onto the screen, see [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--). Note that even the _eye_ can have a shape which may be useful to depict the viewer in first person camera style.
-3. _Transformations among coordinate systems_
+4. _Transformations among coordinate systems_
    1. Between screen space and node instances:
       * While the [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) method [location(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#location-frames.primitives.Vector-frames.core.Node-) transforms screen coordinates to the node, [screenLocation(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Node-) (or the simpler version [screenLocation(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#screenLocation-nub.core.Node-)) performs the inverse transformation (i.e., it transforms node coordinates to screen space).
       * While the [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) method [location(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#location-nub.primitives.Vector-) transforms screen coordinates to the world, [screenLocation(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#screenLocation-nub.primitives.Vector-) performs the inverse transformation (i.e., it transforms world coordinates to screen space).
@@ -110,8 +112,8 @@ Some advantages of using _attached_ nodes are:
         * The [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods [location(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#location-frames.primitives.Vector-frames.core.Node-) (or the simpler version [location(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#location-nub.core.Node-)) and [displacement(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#displacement-frames.primitives.Vector-frames.core.Node-) transforms coordinates and vectors (resp.) from other node instances.
          * The [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods [location(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#location-nub.primitives.Vector-) and [displacement(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#displacement-nub.primitives.Vector-) transforms world coordinates and vectors (resp.) to the node.
          * The [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods [worldLocation(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#worldLocation-frames.primitives.Vector-) and [worldDisplacement(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#worldDisplacement-frames.primitives.Vector-) transforms node coordinates and vectors (resp.) to the world.
-4. _Constraints_ which limit node motions. Set them with [setConstraint(Constrain)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setConstraint-frames.core.constraint.Constraint-).
-5. _Node localization_ which may be achieved globally with [setPosition(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPosition-frames.primitives.Vector-), [setOrientation(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setOrientation-frames.primitives.Quaternion-), and [setMagnitude(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setMagnitude-float-); or locally with [setTranslation(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setTranslation-frames.primitives.Vector-), [translate(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#translate-frames.primitives.Vector-), [setRotation(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setRotation-frames.primitives.Quaternion-), [rotate(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#rotate-frames.primitives.Quaternion-), [setScaling(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setScaling-float-) and [scale(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#scale-float-), locally localize a node instance.
+5. _Constraints_ which limit node motions. Set them with [setConstraint(Constrain)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setConstraint-frames.core.constraint.Constraint-).
+6. _Node localization_ which may be achieved globally with [setPosition(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPosition-frames.primitives.Vector-), [setOrientation(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setOrientation-frames.primitives.Quaternion-), and [setMagnitude(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setMagnitude-float-); or locally with [setTranslation(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setTranslation-frames.primitives.Vector-), [translate(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#translate-frames.primitives.Vector-), [setRotation(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setRotation-frames.primitives.Quaternion-), [rotate(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#rotate-frames.primitives.Quaternion-), [setScaling(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setScaling-float-) and [scale(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#scale-float-), locally localize a node instance.
 
 ## Rendering
 
@@ -190,8 +192,6 @@ Picking a node to interact with it is a two-step process:
 1. Tag the node using an arbitrary name (which may be `null`) either with [tag(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-nub.core.Node-) or ray-casting: [updateTag(String, int, int, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-nub.core.Node:A-) (detached or attached nodes), [updateTag(String, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-) (only attached nodes) or [tag(String, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-java.lang.String-int-int-) (only for attached nodes too). While ```updateTag(String, int, int, Node[])``` and ```updateTag(String, int, int)``` update the tagged node synchronously (i.e., they return the tagged node immediately), ```tag(String, int, int)``` updates it asynchronously (i.e., it optimally updates the tagged node during the next call to the ```render()``` algorithm); and,
 2. Interact with your tagged nodes by calling any of the following methods: [alignTag(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignTag-java.lang.String-), [focusTag(String)](), [translateTag(String, float, float, float)](), [rotateTag(String, float, float, float)](), [scaleTag(String, float)](), or [spinTag(String, int, int, int, int)]().
 
-For example:
-
 
 
  * Observations:
@@ -216,37 +216,22 @@ For example:
  * and then invoke them by either calling: {@link #interactTag(Object...)},
  * {@link #interactTag(String, Object...)} or {@link #interactNode(Node, Object...)}.
 
-Picking in _nub_ is done by tagging the node(s) that is(are) to be tracked:
+The following code snippets
 
 ```processing
-  scene.setTrackedNode("key", node);
+  scene.tag("key", node);
 ```
 
 the "key" is an arbitrary tag (which may be `null`, see below) the scene uses to track the node. To retrieve the node by its tag, use:
 
 ```processing
-  scene.trackedNode("key");// will return node
+  scene.node("key");// will return node
 ```
-
-You may also define a *default* picking metaphor by calling the simpler versions of the above methods, which simply use the `null` tag:
-
-```processing
-  // Pick a node with the null tag
-  scene.setTrackedNode(node);
-  // same as:
-  // scene.setTrackedNode(null, node)
-  // Retrieve the node tagged with null
-  scene.trackedNode();// will return node
-  // same as:
-  // scene.trackedNode(null)
-```
-
-#### Ray casting
 
 Ray casting picking also employs tags. To synchronously pick a node at pixel `(x, y)` call:
 
 ```processing
-  scene.track("pixel", x, y);
+  scene.updateTag("pixel", x, y);
 ```
 
 and the `scene.trackedNode("pixel")` will be returned immediately. To pick the node optimally, albeit asynchronously, call:
@@ -255,7 +240,20 @@ and the `scene.trackedNode("pixel")` will be returned immediately. To pick the n
   scene.cast("pixel", x, y);
 ```
 
-and the `scene.trackedNode("pixel")` will be available after the next call to the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm.
+and the `scene.tag("pixel")` will be available after the next call to the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm.
+
+You may also define a *default* picking metaphor by calling the simpler versions of the above methods, which simply use the `null` tag:
+
+```processing
+  // Pick a node with the null tag
+  scene.tag(node);
+  // same as:
+  // scene.tag(null, node)
+  // Retrieve the node tagged with null
+  scene.node();// will return node
+  // same as:
+  // scene.node(null)
+```
 
 ### Node interaction
 
@@ -308,11 +306,11 @@ which will create a random interpolator path containing [4..10] key-frames. The 
 ...
 void draw() {
   scene.render();
-  scene.drawPath(interpolator);
+  scene.drawCatmullRom(interpolator);
 }
 ```
 
-while [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) will draw the animated shape(s) [drawPath(Interpolator)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawPath-frames.core.Interpolator-) will draw the interpolated path too. See the [Interpolators](https://github.com/VisualComputing/nub/tree/master/examples/basics/Interpolators) example.
+while [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) will draw the animated shape(s) [drawCatmullRom(Interpolator)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCatmullRom-nub.core.Interpolator-) will draw the interpolated path too. See the [Interpolators](https://github.com/VisualComputing/nub/tree/master/examples/basics/Interpolators) example.
 
 
 
