@@ -105,10 +105,10 @@ Some of the main features of the [Node](https://visualcomputing.github.io/nub-ja
 4. _Transformations among coordinate systems_
    Between screen space and node instances:
 
-   | Space transformation | Points                                                                                                                                                            | Vectors                                                                                                                                                             |
-|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Screen to Node       | [ location(Vector, Node) ] ( https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#location-frames.primitives.Vector-frames.core.Node- )             | [ displacement(Vector, Node) ] ( https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#displacement-nub.primitives.Vector-nub.core.Node- )             |
-| Node to Screen       | [ screenLocation(Vector, Node) ] ( https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Node- ) | [ screenDisplacement(Vector, Node) ] ( https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#screenDisplacement-nub.primitives.Vector-nub.core.Node- ) |
+  | Space transformation | Points                       | Vectors                          |
+  |----------------------|------------------------------|----------------------------------|
+  | Screen to Node       | location(Vector, Node)       | displacement(Vector, Node)       |
+  | Node to Screen       | screenLocation(Vector, Node) | screenDisplacement(Vector, Node) |
 
 
       * While the [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) method [location(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#location-frames.primitives.Vector-frames.core.Node-) transforms screen coordinates to the node, [screenLocation(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Node-) (or the simpler version [screenLocation(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#screenLocation-nub.core.Node-)) performs the inverse transformation (i.e., it transforms node coordinates to screen space).
