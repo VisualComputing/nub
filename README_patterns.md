@@ -97,10 +97,10 @@ void setup() {
 
 ### Node features
 
-Some of the main features _attached_ nodes are:
+Some of the main features of the [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) object are:
 
 1. _Scene topology flexibility_, which may be set (even at run time) with [setReference(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setReference-frames.core.Node-).
-2. _Eye_ node instantiation, which is done by the different [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) constructors. To set the eye from an arbitrary [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance call [setEye(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setEye-frames.core.Node-), and to retrieve it call [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--).
+2. Default [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) instantiated and handled by he `Scene`.
 3. Node _shapes_, which can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure (see [graphics(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#graphics-processing.core.PGraphics-)) or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see [shape(PShape)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#shape-processing.core.PShape-)). Shapes can be picked precisely using their projection onto the screen, see [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--). Note that even the _eye_ can have a shape which may be useful to depict the viewer in first person camera style.
 4. _Transformations among coordinate systems_
    1. Between screen space and node instances:
