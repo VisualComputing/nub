@@ -3237,6 +3237,7 @@ public class Graph {
     viewport[2] = width();
     viewport[3] = -height();
 
+    // NDC!
     out[0] /= out[3];
     out[1] /= out[3];
     out[2] /= out[3];

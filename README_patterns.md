@@ -1,4 +1,4 @@
-nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
+<!-- omit in toc -->nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 **Table of Contents**
@@ -13,13 +13,14 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
     - [Drawing functionality](#drawing-functionality)
 - [Interactivity](#interactivity)
   - [Eye interaction](#eye-interaction)
-  - [Node picking and interaction](#node-picking-and-interaction)
+    - [Nodes](#nodes-1)
+  - [Node tagging](#node-tagging)
 - [Timing](#timing)
   - [Timing tasks](#timing-tasks)
   - [Interpolators](#interpolators)
 - [Installation](#installation)
 - [Contributors](#contributors)
-
+- 
 ## Description
 
 [nub](http://visualcomputing.github.io/Transformations/#/6) is a simple, expressive, language-agnostic, and extensible [(2D/3D) scene graph](https://en.wikipedia.org/wiki/Scene_graph) featuring interaction, visualization and animation frameworks and supporting advanced (onscreen/offscreen) rendering techniques, such as [view frustum culling](http://cgvr.informatik.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html).
@@ -105,7 +106,7 @@ Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Im
 
 #### Space transformations
 
-The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space and nodes (including the world):
+The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (where user interaction takes place) and nodes (including the world):
 
 | Space transformation | Points                             | Vectors                                |
 |----------------------|------------------------------------|----------------------------------------|
@@ -124,12 +125,12 @@ The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Nod
   
 #### Localization
 
-A node [position](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#position--), [orientation](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#orientation--) and [scaling](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#scaling--) may be set with the following methods:
+A node [position](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#position--), [orientation](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#orientation--) and [magnitude]() may be set with the following methods:
 
 | Node localization | Position                     | Orientation                      | Magnitude                 |
 |-------------------|----------------------------- |----------------------------------|---------------------------|
 | Globally          | ```setPosition(Vector)```    | ```setOrientation(Quaternion)``` | ```setMagnitude(float)``` |
-| Locally           | ```setTranslation(Vector)``` | ```setRotation(Quaternion)```    | ```setScaling(float)```   |
+| Locally (respect to refence)           | ```setTranslation(Vector)``` | ```setRotation(Quaternion)```    | ```setScaling(float)```   |
 | Incrementally     | ```translate(Vector)```      | ```rotate(Quaternion)```         | ```scale(float)```        |
 
 ## Rendering
@@ -163,7 +164,7 @@ Another scene's eye (different than this one) can be drawn with [drawEye(Graph)]
 
 ## Interactivity
 
-### Eye interaction
+### Eye
 
 The scene has several methods to position and orient the _eye_ node, such as: [lookAt(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#lookAt-nub.primitives.Vector-), [setFov(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setFOV-float-), [setViewDirection(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setViewDirection-nub.primitives.Vector-), [setUpVector(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setUpVector-nub.primitives.Vector-), [fit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#fit--) and [fit(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#fit-nub.core.Node-), among others.
 
@@ -206,9 +207,29 @@ void mouseWheel(MouseEvent event) {
 
 The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples/basics/SpaceNavigator) and [CustomEyeInteraction](https://github.com/VisualComputing/nub/tree/master/examples/demos/CustomEyeInteraction) examples illustrate how to set up other hardware such as a keyboard or a [space-navigator](https://en.wikipedia.org/wiki/3Dconnexion).
 
-### Node picking and interaction
+### Nodes
 
-Picking a node to interact with it is a two-step process:
+To directly interact with a given node, call any of the following methods: [alignNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignNode-nub.core.Node-), [focusNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#focusNode-nub.core.Node-), [translateNode(Node, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateNode-nub.core.Node-float-float-float-), [rotateNode(Node, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateNode-nub.core.Node-float-float-float-), [scaleNode(Node, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleNode-nub.core.Node-float-) and [spinNode(Node, int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinNode-nub.core.Node-int-int-int-int-). The methods [mouseTranslateNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTranslateNode-nub.core.Node-) and [mouseSpinNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseSpinNode-nub.core.Node-) , are implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to some of the above methods, and hence their simpler signatures. 
+
+Mouse examples:
+
+```processing
+public void mouseDragged() {
+  // spin n1
+  if (mouseButton == LEFT)
+    scene.spinNode(n1);
+  // translate n3
+  else if (mouseButton == RIGHT)
+    scene.translateNode(n3);
+  // scale n2
+  else
+    scene.scaleNode(n2, scene.mouseDX());
+}
+```
+
+### Picking
+
+Picking a node (which should be different than the scene eye) to interact with it is a two-step process:
 
 1. Tag the node using an arbitrary name (which may be `null`) either with [tag(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-nub.core.Node-) or ray-casting: [updateTag(String, int, int, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-nub.core.Node:A-) (detached or attached nodes), [updateTag(String, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-) (only attached nodes) or [tag(String, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-java.lang.String-int-int-) (only for attached nodes too). While ```updateTag(String, int, int, Node[])``` and ```updateTag(String, int, int)``` update the tagged node synchronously (i.e., they return the tagged node immediately), ```tag(String, int, int)``` updates it asynchronously (i.e., it optimally updates the tagged node during the next call to the ```render()``` algorithm); and,
 2. Interact with your _tagged_ nodes by calling any of the following methods: [alignTag(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignTag-java.lang.String-), [focusTag(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#focusTag-java.lang.String-), [translateTag(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateTag-java.lang.String-float-float-float-), [rotateTag(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateTag-java.lang.String-float-float-float-), [scaleTag(String, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleTag-java.lang.String-float-), or [spinTag(String, int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinTag-java.lang.String-int-int-int-int-).
@@ -218,9 +239,10 @@ Observations:
 1. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
 2. To check if a given node would be picked with a ray casted at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-).
 3. To interact with the node that is referred with the ```null``` tag, call any of the following methods: [alignTag()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignTag--), [focusTag()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#focusTag--), [translateTag(float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateTag-float-float-float-), [rotateTag(float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateTag-float-float-float-), [scaleTag(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleTag-float-) and [spinTag(int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinTag-int-int-int-int-).
-4. To directly interact with a given node, call any of the following methods: [alignNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignNode-nub.core.Node-), [focusNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#focusNode-nub.core.Node-), [translateNode(Node, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateNode-nub.core.Node-float-float-float-), [rotateNode(Node, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateNode-nub.core.Node-float-float-float-), [scaleNode(Node, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleNode-nub.core.Node-float-) and [spinNode(Node, int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinNode-nub.core.Node-int-int-int-int-).
-5. To either interact with the node referred with a given tag or the eye, when that tag is not in use, call any of the following methods: [align(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#align-java.lang.String-), [focus(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#focus-java.lang.String-), [translate(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translate-java.lang.String-float-float-float-), [rotate(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotate-java.lang.String-float-float-float-), [scale(String, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scale-java.lang.String-float-) and [spin(String, int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spin-java.lang.String-int-int-int-int-).
-6. Customize node behaviors by overridden the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) and then invoke them by either calling: [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-). See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
+4. To either interact with the node referred with a given tag or the eye, when that tag is not in use, call any of the following methods: [align(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#align-java.lang.String-), [focus(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#focus-java.lang.String-), [translate(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translate-java.lang.String-float-float-float-), [rotate(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotate-java.lang.String-float-float-float-), [scale(String, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scale-java.lang.String-float-) and [spin(String, int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spin-java.lang.String-int-int-int-int-).
+5. Customize node behaviors by overridden the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) and then invoke them by either calling: [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-). See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
+
+MOUSE here
 
 ## Timing
 
