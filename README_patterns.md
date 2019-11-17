@@ -12,15 +12,15 @@
 - [Rendering](#rendering)
     - [Drawing functionality](#drawing-functionality)
 - [Interactivity](#interactivity)
-  - [Eye interaction](#eye-interaction)
-    - [Nodes](#nodes-1)
-  - [Node tagging](#node-tagging)
+  - [Eye](#eye)
+  - [Nodes](#nodes-1)
+  - [Picking](#picking)
 - [Timing](#timing)
   - [Timing tasks](#timing-tasks)
   - [Interpolators](#interpolators)
 - [Installation](#installation)
 - [Contributors](#contributors)
-- 
+
 ## Description
 
 [nub](http://visualcomputing.github.io/Transformations/#/6) is a simple, expressive, language-agnostic, and extensible [(2D/3D) scene graph](https://en.wikipedia.org/wiki/Scene_graph) featuring interaction, visualization and animation frameworks and supporting advanced (onscreen/offscreen) rendering techniques, such as [view frustum culling](http://cgvr.informatik.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html).
