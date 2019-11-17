@@ -3374,9 +3374,9 @@ public class Graph {
   }
 
   /**
-   * Converts {@code vector} displacement given in physical space to the {@code node} coordinate system.
-   * The physical space coordinate system is centered at the bounding box of {@link #width()} *
-   * {@link #height()} * {@code max(width(), height())} dimensions. This space defines the place where
+   * Converts {@code vector} displacement given in screen space to the {@code node} coordinate system.
+   * The screen space coordinate system is centered at the bounding box of {@link #width()} *
+   * {@link #height()} * 1} dimensions. The screen space defines the place where
    * user gestures takes place, e.g., {@link #translateNode(Node, float, float, float)}.
    * <p>
    * {@link #screenDisplacement(Vector, Node)} performs the inverse transformation.
@@ -3398,15 +3398,15 @@ public class Graph {
       dx *= 2.0 * k / (height() * eye().magnitude());
       dy *= 2.0 * k / (height() * eye().magnitude());
     }
-    float dz = -vector.z();
+    float dz = vector.z();
     if (is2D() && dz != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
     } else {
-      float zScreenMax = Math.max(width(), height());
-      // dz *= 2 * radius() / zScreenMax yields z in world-space
-      // multiply (the z world coordinate) by 1 / eye().magnitude() yields z in eye-space.
-      dz *= 2 * radius() / (zScreenMax * eye().magnitude());
+      //float zScreenMax = Math.max(width(), height());
+      //dz *= 2 * radius() / (zScreenMax * eye().magnitude());
+      //TODO check sign a bit more
+      dz *= (zNear() - zFar()) / eye().magnitude();
     }
     Vector eyeVector = new Vector(dx, dy, dz);
     return node == null ? eye().worldDisplacement(eyeVector) : node.displacement(eyeVector, eye());
@@ -3423,7 +3423,7 @@ public class Graph {
   }
 
   /**
-   * Converts the {@code node} {@code vector} displacement to physical space.
+   * Converts the {@code node} {@code vector} displacement to screen space.
    * {@link #displacement(Vector, Node)} performs the inverse transformation.
    * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
    *
@@ -3441,13 +3441,16 @@ public class Graph {
       dx /= 2.0 * k / (height() * eye().magnitude());
       dy /= 2.0 * k / (height() * eye().magnitude());
     }
-    float dz = -eyeVector.z();
+    float dz = eyeVector.z();
+    System.out.println(dz);
     if (is2D() && dz != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
     } else {
-      float zScreenMax = Math.max(width(), height());
-      dz /= 2 * radius() / (zScreenMax * eye().magnitude());
+      //float zScreenMax = Math.max(width(), height());
+      //dz /= 2 * radius() / (zScreenMax * eye().magnitude());
+      // TODO check sign a bit more
+      dz /= (zNear() - zFar()) / eye().magnitude();
     }
     return new Vector(dx, dy, dz);
   }
@@ -3839,7 +3842,7 @@ public class Graph {
    * @see #displacement(Vector, Node)
    * @param dx screen space delta-x units
    * @param dy screen space delta-y units
-   * @param dz world space delta-z units
+   * @param dz screen space delta-z units
    */
   public void translateEye(float dx, float dy, float dz) {
     Node node = eye().get();

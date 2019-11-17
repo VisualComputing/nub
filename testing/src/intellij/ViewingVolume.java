@@ -44,7 +44,7 @@ public class ViewingVolume extends PApplet {
     background(255);
     scene1.beginDraw();
     canvas1.background(125);
-    //scene1.drawAxes(canvas1);
+    scene1.drawAxes(canvas1);
     canvas1.noStroke();
     canvas1.fill(255, 255, 0, 125);
     canvas1.sphere(scene1.radius());
@@ -89,7 +89,9 @@ public class ViewingVolume extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     //focus.scale(event.getCount() * 20);
-    focus.moveForward(event.getCount() * 20);
+    //println(event.getCount());
+    //focus.moveForward(((float)event.getCount()) / 0.1f);
+    focus.moveForward(event.getCount() / 50);
   }
 
   public void mouseClicked(MouseEvent event) {
@@ -117,10 +119,17 @@ public class ViewingVolume extends PApplet {
     if (key == '2')
       scene2.fitFOV();
     if (key == 'p') {
-      Vector r = new Vector(random(-50, 50), random(-50, 50), random(-50, 50));
+      Vector r = new Vector(random(0, width), random(0, height), random(0, 1));
       Vector d = scene1.displacement(r);
       Vector s = scene1.screenDisplacement(d);
       println("random vector : " + r.toString() + " displacement(r): " + d + " screenDisplacement(d): " + s);
+      Vector n = new Vector(0, 0, scene1.zFar() - scene1.zNear());
+      Vector o = scene1.screenDisplacement(n);
+      println("vector n : " + n.toString() + " screenDisplacement(n): " + o);
+
+      Vector t = new Vector(0, 0, -600);
+      Vector u = scene1.screenDisplacement(t, scene1.eye());
+      println("vector t : " + t.toString() + " screenDisplacement(t): " + u);
     }
   }
 
