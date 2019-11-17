@@ -3173,7 +3173,7 @@ public class Graph {
 
   /**
    * Converts {@code vector} location from world to screen space.
-   * Same as {@code return screenLocation(src, null)}.
+   * Same as {@code return screenLocation(vector, null)}.
    *
    * @see #screenLocation(Node)
    * @see #screenLocation(Vector, Node)
@@ -3183,7 +3183,7 @@ public class Graph {
   }
 
   /**
-   * Converts {@code vector} location from {@code node} to screen.
+   * Converts {@code vector} location from {@code node} to screen space.
    * Use {@link #location(Vector, Node)} to perform the inverse transformation.
    * <p>
    * The x and y coordinates of the returned vector are expressed in screen coordinates,
@@ -3197,28 +3197,91 @@ public class Graph {
    */
   public Vector screenLocation(Vector vector, Node node) {
     float[] xyz = new float[3];
-
     if (node != null) {
       Vector tmp = node.worldLocation(vector);
       _screenLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
     } else
       _screenLocation(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
-
     return new Vector(xyz[0], xyz[1], xyz[2]);
   }
 
   // cached version
   protected boolean _screenLocation(float objx, float objy, float objz, float[] windowCoordinate) {
-    Matrix projectionViewMatrix = projectionView();
+    float[] out = new float[3];
+    if (_ndcLocation(objx, objy, objz, out)) {
+      int[] viewport = new int[4];
+      viewport[0] = 0;
+      viewport[1] = height();
+      viewport[2] = width();
+      viewport[3] = -height();
+      // Map x, y and z to range 0-1
+      out[0] = out[0] * 0.5f + 0.5f;
+      out[1] = out[1] * 0.5f + 0.5f;
+      out[2] = out[2] * 0.5f + 0.5f;
+      // Map x,y to viewport
+      out[0] = out[0] * viewport[2] + viewport[0];
+      out[1] = out[1] * viewport[3] + viewport[1];
+      windowCoordinate[0] = out[0];
+      windowCoordinate[1] = out[1];
+      windowCoordinate[2] = out[2];
+      return true;
+    }
+    return false;
+  }
 
+  /**
+   * Converts the {@code node} origin location to normalized device coordinates (NDC) space.
+   * Same as {@code return ndcLocation(new Vector(), node)}.
+   *
+   * @see #ndcLocation(Vector)
+   * @see #ndcLocation(Vector, Node)
+   */
+  public Vector ndcLocation(Node node) {
+    return ndcLocation(new Vector(), node);
+  }
+
+  /**
+   * Converts {@code vector} location from world to normalized device coordinates (NDC) space.
+   * Same as {@code return ndcLocation(vector, null)}.
+   *
+   * @see #ndcLocation(Node)
+   * @see #ndcLocation(Vector, Node)
+   */
+  public Vector ndcLocation(Vector vector) {
+    return ndcLocation(vector, null);
+  }
+
+  /**
+   * Converts {@code vector} location from {@code node} to normalized device coordinates (NDC) space.
+   * // TODO pending inverse
+   * Use {@link #location(Vector, Node)} to perform the inverse transformation.
+   * <p>
+   * The x, y and z coordinates of the returned vector are expressed in the range [-1..1].
+   *
+   * @see #screenLocation(Node)
+   * @see #screenLocation(Vector)
+   * @see #location(Vector, Node)
+   * @see #location(Vector)
+   */
+  public Vector ndcLocation(Vector vector, Node node) {
+    float[] xyz = new float[3];
+    if (node != null) {
+      Vector tmp = node.worldLocation(vector);
+      _ndcLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
+    } else
+      _ndcLocation(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
+    return new Vector(xyz[0], xyz[1], xyz[2]);
+  }
+
+  // cached version
+  protected boolean _ndcLocation(float objx, float objy, float objz, float[] ndcCoordinate) {
+    Matrix projectionViewMatrix = projectionView();
     float[] in = new float[4];
     float[] out = new float[4];
-
     in[0] = objx;
     in[1] = objy;
     in[2] = objz;
     in[3] = 1.0f;
-
     out[0] = projectionViewMatrix._matrix[0] * in[0] + projectionViewMatrix._matrix[4] * in[1] + projectionViewMatrix._matrix[8] * in[2]
         + projectionViewMatrix._matrix[12] * in[3];
     out[1] = projectionViewMatrix._matrix[1] * in[0] + projectionViewMatrix._matrix[5] * in[1] + projectionViewMatrix._matrix[9] * in[2]
@@ -3227,34 +3290,14 @@ public class Graph {
         + projectionViewMatrix._matrix[14] * in[3];
     out[3] = projectionViewMatrix._matrix[3] * in[0] + projectionViewMatrix._matrix[7] * in[1] + projectionViewMatrix._matrix[11] * in[2]
         + projectionViewMatrix._matrix[15] * in[3];
-
     if (out[3] == 0.0)
       return false;
-
-    int[] viewport = new int[4];
-    viewport[0] = 0;
-    viewport[1] = height();
-    viewport[2] = width();
-    viewport[3] = -height();
-
-    // NDC!
     out[0] /= out[3];
     out[1] /= out[3];
     out[2] /= out[3];
-
-    // Map x, y and z to range 0-1
-    out[0] = out[0] * 0.5f + 0.5f;
-    out[1] = out[1] * 0.5f + 0.5f;
-    out[2] = out[2] * 0.5f + 0.5f;
-
-    // Map x,y to viewport
-    out[0] = out[0] * viewport[2] + viewport[0];
-    out[1] = out[1] * viewport[3] + viewport[1];
-
-    windowCoordinate[0] = out[0];
-    windowCoordinate[1] = out[1];
-    windowCoordinate[2] = out[2];
-
+    ndcCoordinate[0] = out[0];
+    ndcCoordinate[1] = out[1];
+    ndcCoordinate[2] = out[2];
     return true;
   }
 
@@ -3324,42 +3367,33 @@ public class Graph {
       projectionViewInverseMatrix = Matrix.multiply(projection(), view());
       projectionViewInverseMatrix.invert();
     }
-
     int[] viewport = new int[4];
     viewport[0] = 0;
     viewport[1] = height();
     viewport[2] = width();
     viewport[3] = -height();
-
     float[] in = new float[4];
     float[] out = new float[4];
-
     in[0] = winx;
     in[1] = winy;
     in[2] = winz;
     in[3] = 1.0f;
-
     /* Map x and y from window coordinates */
     in[0] = (in[0] - viewport[0]) / viewport[2];
     in[1] = (in[1] - viewport[1]) / viewport[3];
-
     /* Map to range -1 to 1 */
     in[0] = in[0] * 2 - 1;
     in[1] = in[1] * 2 - 1;
     in[2] = in[2] * 2 - 1;
-
     projectionViewInverseMatrix.multiply(in, out);
     if (out[3] == 0)
       return false;
-
     out[0] /= out[3];
     out[1] /= out[3];
     out[2] /= out[3];
-
     objCoordinate[0] = out[0];
     objCoordinate[1] = out[1];
     objCoordinate[2] = out[2];
-
     return true;
   }
 
