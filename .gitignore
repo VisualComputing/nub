@@ -1,3 +1,5 @@
+.vscode
+build
 distribution
 bin/
 tmp/
@@ -6,5 +8,4 @@ node_modules/
 data/config.json
 **/.idea/workspace.xml
 **/.idea/tasks.xml
-.vscode
 examples/**/config.json
