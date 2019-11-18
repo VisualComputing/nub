@@ -10,6 +10,7 @@ import processing.event.MouseEvent;
 public class ViewingVolume extends PApplet {
   Scene scene1, scene2, focus;
   PGraphics canvas1, canvas2;
+  Vector point;
 
   //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
@@ -36,6 +37,8 @@ public class ViewingVolume extends PApplet {
     scene2.setType(Graph.Type.ORTHOGRAPHIC);
     scene2.setRadius(600);
     scene2.fit();
+
+    point = new Vector(50,50,50);
   }
 
   @Override
@@ -45,9 +48,15 @@ public class ViewingVolume extends PApplet {
     scene1.beginDraw();
     canvas1.background(125);
     scene1.drawAxes(canvas1);
-    canvas1.noStroke();
-    canvas1.fill(255, 255, 0, 125);
-    canvas1.sphere(scene1.radius());
+
+    ///*
+    //canvas1.noStroke();
+    //canvas1.fill(255, 255, 0, 125);
+    canvas1.strokeWeight(20);
+    canvas1.stroke(255, 255, 0);
+    canvas1.point(point.x(),point.y(), point.z());
+    //canvas1.sphere(scene1.radius());
+    // */
     scene1.endDraw();
     scene1.display();
 
@@ -130,6 +139,20 @@ public class ViewingVolume extends PApplet {
       Vector t = new Vector(0, 0, -600);
       Vector u = scene1.screenDisplacement(t, scene1.eye());
       println("vector t : " + t.toString() + " screenDisplacement(t): " + u);
+    }
+    if(key == 'n') {
+      //Vector r = Vector.multiply(Vector.random(), scene1.radius());
+      Vector r = point;
+      Vector s = scene1.screenLocation(r);
+      Vector s2 = scene1.screenLocation2(r);
+      Vector t = scene1.ndcLocation(r);
+      Vector u = scene1.ndcToScreenLocation(t);
+      Vector v = scene1.screenToNdcLocation(s2);
+      println("screenLocation: " + s.toString());
+      println("screenLocation2: " + s2.toString());
+      println("ndcLocation: " + t.toString());
+      println("ndcToScreenLocation: " + u.toString());
+      println("screenToNdcLocation: " + v.toString());
     }
   }
 
