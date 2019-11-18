@@ -15,4 +15,5 @@ out/
 # code-oss + processing
 examples/**/.vscode
 # nub config
+data/config.json
 examples/**/config.json
