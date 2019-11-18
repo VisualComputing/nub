@@ -1,11 +1,18 @@
-.vscode
+# ant + build
 build
 distribution
 bin/
 tmp/
 out/
-node_modules/
-data/config.json
+# idea config
 **/.idea/workspace.xml
 **/.idea/tasks.xml
+# code-oss + eclipse
+.lib/
+.settings/
+.project
+.classpath
+# code-oss + processing
+examples/**/.vscode
+# nub config
 examples/**/config.json
