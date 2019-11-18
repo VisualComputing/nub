@@ -3161,6 +3161,41 @@ public class Graph {
   // Screen to node conversion
 
   /**
+   * Remap of {@code value} between two ranges. Used to convert locations between Screen and NDC.
+   */
+  protected static float _map(float value, float start1, float stop1, float start2, float stop2) {
+    return start2 + (value - start1) * (stop2 - start2) / (stop1 - start1);
+  }
+
+  /**
+   * Converts {@code vector} location from normalized device coordinates (NDC) to screen space.
+   * {@link #screenToNdcLocation(Vector)} performs the inverse transformation.
+   * {@link #ndcToScreenDisplacement(Vector)} transforms vector displacements instead of locations.
+   *
+   * @see #screenToNdcLocation(Vector)
+   * @see #ndcToScreenDisplacement(Vector)
+   */
+  public Vector ndcToScreenLocation(Vector vector) {
+    return new Vector(_map(vector.x(), -1, 1, 0, width()),
+        _map(vector.y(), -1, 1, 0, height()),
+        _map(vector.z(), -1, 1, 0, 1));
+  }
+
+  /**
+   * Converts {@code vector} location from screen space to normalized device coordinates (NDC).
+   * {@link #ndcToScreenLocation(Vector)} performs the inverse transformation.
+   * {@link #screenToNdcDisplacement(Vector)} transforms vector displacements instead of locations.
+   *
+   * @see #ndcToScreenLocation(Vector)
+   * @see #screenToNdcDisplacement(Vector)
+   */
+  public Vector screenToNdcLocation(Vector vector) {
+    return new Vector(_map(vector.x(), 0, width(), -1, 1),
+        _map(vector.y(), 0, height(), -1, 1),
+        _map(vector.z(), 0, 1, -1, 1));
+  }
+
+  /**
    * Converts the {@code node} origin location to screen space.
    * Same as {@code return screenLocation(new Vector(), node)}.
    *
@@ -3173,7 +3208,7 @@ public class Graph {
 
   /**
    * Converts {@code vector} location from world to screen space.
-   * Same as {@code return screenLocation(vector, null)}.
+   * Same as {@code return screenLocation(src, null)}.
    *
    * @see #screenLocation(Node)
    * @see #screenLocation(Vector, Node)
@@ -3183,7 +3218,7 @@ public class Graph {
   }
 
   /**
-   * Converts {@code vector} location from {@code node} to screen space.
+   * Converts {@code vector} location from {@code node} to screen.
    * Use {@link #location(Vector, Node)} to perform the inverse transformation.
    * <p>
    * The x and y coordinates of the returned vector are expressed in screen coordinates,
@@ -3207,74 +3242,6 @@ public class Graph {
 
   // cached version
   protected boolean _screenLocation(float objx, float objy, float objz, float[] windowCoordinate) {
-    float[] out = new float[3];
-    if (_ndcLocation(objx, objy, objz, out)) {
-      int[] viewport = new int[4];
-      viewport[0] = 0;
-      viewport[1] = height();
-      viewport[2] = width();
-      viewport[3] = -height();
-      // Map x, y and z to range 0-1
-      out[0] = out[0] * 0.5f + 0.5f;
-      out[1] = out[1] * 0.5f + 0.5f;
-      out[2] = out[2] * 0.5f + 0.5f;
-      // Map x,y to viewport
-      out[0] = out[0] * viewport[2] + viewport[0];
-      out[1] = out[1] * viewport[3] + viewport[1];
-      windowCoordinate[0] = out[0];
-      windowCoordinate[1] = out[1];
-      windowCoordinate[2] = out[2];
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Converts the {@code node} origin location to normalized device coordinates (NDC) space.
-   * Same as {@code return ndcLocation(new Vector(), node)}.
-   *
-   * @see #ndcLocation(Vector)
-   * @see #ndcLocation(Vector, Node)
-   */
-  public Vector ndcLocation(Node node) {
-    return ndcLocation(new Vector(), node);
-  }
-
-  /**
-   * Converts {@code vector} location from world to normalized device coordinates (NDC) space.
-   * Same as {@code return ndcLocation(vector, null)}.
-   *
-   * @see #ndcLocation(Node)
-   * @see #ndcLocation(Vector, Node)
-   */
-  public Vector ndcLocation(Vector vector) {
-    return ndcLocation(vector, null);
-  }
-
-  /**
-   * Converts {@code vector} location from {@code node} to normalized device coordinates (NDC) space.
-   * // TODO pending inverse
-   * Use {@link #location(Vector, Node)} to perform the inverse transformation.
-   * <p>
-   * The x, y and z coordinates of the returned vector are expressed in the range [-1..1].
-   *
-   * @see #screenLocation(Node)
-   * @see #screenLocation(Vector)
-   * @see #location(Vector, Node)
-   * @see #location(Vector)
-   */
-  public Vector ndcLocation(Vector vector, Node node) {
-    float[] xyz = new float[3];
-    if (node != null) {
-      Vector tmp = node.worldLocation(vector);
-      _ndcLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
-    } else
-      _ndcLocation(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
-    return new Vector(xyz[0], xyz[1], xyz[2]);
-  }
-
-  // cached version
-  protected boolean _ndcLocation(float objx, float objy, float objz, float[] ndcCoordinate) {
     Matrix projectionViewMatrix = projectionView();
     float[] in = new float[4];
     float[] out = new float[4];
@@ -3292,12 +3259,25 @@ public class Graph {
         + projectionViewMatrix._matrix[15] * in[3];
     if (out[3] == 0.0)
       return false;
+    int[] viewport = new int[4];
+    viewport[0] = 0;
+    viewport[1] = height();
+    viewport[2] = width();
+    viewport[3] = -height();
+    // ndc, but y is inverted
     out[0] /= out[3];
     out[1] /= out[3];
     out[2] /= out[3];
-    ndcCoordinate[0] = out[0];
-    ndcCoordinate[1] = out[1];
-    ndcCoordinate[2] = out[2];
+    // Map x, y and z to range 0-1
+    out[0] = out[0] * 0.5f + 0.5f;
+    out[1] = out[1] * 0.5f + 0.5f;
+    out[2] = out[2] * 0.5f + 0.5f;
+    // Map x,y to viewport
+    out[0] = out[0] * viewport[2] + viewport[0];
+    out[1] = out[1] * viewport[3] + viewport[1];
+    windowCoordinate[0] = out[0];
+    windowCoordinate[1] = out[1];
+    windowCoordinate[2] = out[2];
     return true;
   }
 
@@ -3398,6 +3378,30 @@ public class Graph {
   }
 
   /**
+   * Converts {@code vector} displacement from normalized device coordinates (NDC) to screen space.
+   * {@link #screenToNdcDisplacement(Vector)} performs the inverse transformation.
+   * {@link #ndcToScreenLocation(Vector)} transforms locations instead of vector displacements.
+   *
+   * @see #screenToNdcDisplacement(Vector)
+   * @see #ndcToScreenLocation(Vector)
+   */
+  public Vector ndcToScreenDisplacement(Vector vector) {
+    return new Vector(width() * vector.x() / 2, height() * vector.y() / 2, vector.z() / 2);
+  }
+
+  /**
+   * Converts {@code vector} displacement from screen space to normalized device coordinates (NDC).
+   * {@link #ndcToScreenDisplacement(Vector)} performs the inverse transformation.
+   * {@link #screenToNdcLocation(Vector)} transforms locations instead of vector displacements.
+   *
+   * @see #ndcToScreenDisplacement(Vector)
+   * @see #screenToNdcLocation(Vector)
+   */
+  public Vector screenToNdcDisplacement(Vector vector) {
+    return new Vector(2 * vector.x() / width(), 2 * vector.y() / height(), 2 * vector.z());
+  }
+
+  /**
    * Same as {@code return displacement(vector, null)}.
    *
    * @see #displacement(Vector, Node)
@@ -3476,7 +3480,6 @@ public class Graph {
       dy /= 2.0 * k / (height() * eye().magnitude());
     }
     float dz = eyeVector.z();
-    System.out.println(dz);
     if (is2D() && dz != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
@@ -3562,7 +3565,7 @@ public class Graph {
   }
 
   /**
-   * Calls {@code alignTag(tag)} if {@code node(tag) != null} and {@code alignEye()} otherwise.
+   * Calls {@code alignTag(tag)} if {@code node(tag)} is non-null and {@code alignEye()} otherwise.
    *
    * @see #alignTag(String)
    * @see #alignEye()
@@ -3632,7 +3635,7 @@ public class Graph {
   }
 
   /**
-   * Calls {@code focusTag(tag)} if {@code node(tag) != null} and {@code focusEye()} otherwise.
+   * Calls {@code focusTag(tag)} if {@code node(tag)} is non-null and {@code focusEye()} otherwise.
    *
    * @see #focusEye()
    * @see #focusTag(String)
@@ -3699,7 +3702,7 @@ public class Graph {
   }
 
   /**
-   * Calls {@code scaleTag(tag, delta)} if {@code node(tag) != null} and {@code scaleEye(delta)} otherwise.
+   * Calls {@code scaleTag(tag, delta)} if {@code node(tag)} is non-null and {@code scaleEye(delta)} otherwise.
    *
    * @see #scaleEye(float)
    * @see #scaleTag(String, float)
@@ -3785,7 +3788,7 @@ public class Graph {
   }
 
   /**
-   * Calls {@code translateTag(tag, dx, dy, dz)} if {@code node(tag) != null} and {@code translateEye(dx, dy, dz)} otherwise.
+   * Calls {@code translateTag(tag, dx, dy, dz)} if {@code node(tag)} is non-null and {@code translateEye(dx, dy, dz)} otherwise.
    *
    * @see #translateTag(String, float, float, float)
    * @see #translateEye(float, float, float)
@@ -3898,7 +3901,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code if (!rotateTag(tag, roll, pitch, yaw)) rotateEye(roll, pitch, yaw)}.
+   * Calls {@code rotateTag(tag, roll, pitch, yaw)} if {@code node(tag)} is non-null and {@code rotateEye(roll, pitch, yaw)} otherwise.
    *
    * @see #rotateTag(String, float, float, float)
    * @see #rotateEye(float, float, float)

@@ -3042,7 +3042,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code if (mouseSpinTag(tag) == false) mouseSpinEye()}.
+   * Calls {@code mouseSpinTag(tag)} if {@code node(tag)} is non-null and {@code mouseSpinEye()} otherwise.
    *
    * @see #mouseSpinTag(String)
    * @see #mouseSpinEye()

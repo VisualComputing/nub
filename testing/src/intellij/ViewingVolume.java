@@ -50,12 +50,12 @@ public class ViewingVolume extends PApplet {
     scene1.drawAxes(canvas1);
 
     ///*
-    //canvas1.noStroke();
-    //canvas1.fill(255, 255, 0, 125);
-    canvas1.strokeWeight(20);
-    canvas1.stroke(255, 255, 0);
-    canvas1.point(point.x(),point.y(), point.z());
-    //canvas1.sphere(scene1.radius());
+    canvas1.noStroke();
+    canvas1.fill(255, 255, 0, 125);
+    //canvas1.strokeWeight(20);
+    //canvas1.stroke(255, 255, 0);
+    //canvas1.point(point.x(),point.y(), point.z());
+    canvas1.sphere(scene1.radius());
     // */
     scene1.endDraw();
     scene1.display();
@@ -141,18 +141,21 @@ public class ViewingVolume extends PApplet {
       println("vector t : " + t.toString() + " screenDisplacement(t): " + u);
     }
     if(key == 'n') {
-      //Vector r = Vector.multiply(Vector.random(), scene1.radius());
-      Vector r = point;
+      Vector r = Vector.multiply(Vector.random(), scene1.radius());
+      //Vector r = point;
       Vector s = scene1.screenLocation(r);
-      Vector s2 = scene1.screenLocation2(r);
-      Vector t = scene1.ndcLocation(r);
+      Vector t = scene1.screenToNdcLocation(s);
       Vector u = scene1.ndcToScreenLocation(t);
-      Vector v = scene1.screenToNdcLocation(s2);
       println("screenLocation: " + s.toString());
-      println("screenLocation2: " + s2.toString());
-      println("ndcLocation: " + t.toString());
-      println("ndcToScreenLocation: " + u.toString());
-      println("screenToNdcLocation: " + v.toString());
+      println("screenToNdcLocation: " + t.toString());
+      println("screenLocation: " + u.toString());
+
+      Vector a = scene1.screenDisplacement(r);
+      Vector b = scene1.screenToNdcDisplacement(a);
+      Vector c = scene1.ndcToScreenDisplacement(b);
+      println("screenDisplacement: " + a.toString());
+      println("screenToNdcDisplacement: " + b.toString());
+      println("screenDisplacement: " + c.toString());
     }
   }
 
