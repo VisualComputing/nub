@@ -231,7 +231,13 @@ public void mouseDragged() {
 
 Picking a node (which should be different than the scene eye) to interact with it is a two-step process:
 
-1. Tag the node using an arbitrary name (which may be `null`) either with [tag(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-nub.core.Node-) or ray-casting: [updateTag(String, int, int, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-nub.core.Node:A-) (detached or attached nodes), [updateTag(String, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-) (only attached nodes) or [tag(String, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-java.lang.String-int-int-) (only for attached nodes too). While ```updateTag(String, int, int, Node[])``` and ```updateTag(String, int, int)``` update the tagged node synchronously (i.e., they return the tagged node immediately), ```tag(String, int, int)``` updates it asynchronously (i.e., it optimally updates the tagged node during the next call to the ```render()``` algorithm). Mouse counterparts of some of the above method implementations are [mouseUpdateTag(String, Node[])]()
+1. Tag the node using an arbitrary name (which may be `null`) either with [tag(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-nub.core.Node-) or ray-casting: 
+   | Ray casting | Synchronously<sup>1</sup>         | Asynchronously<sup>2</sup>  |
+   |-------------|-----------------------------------|-----------------------------|
+   | Generic     | ```updateTag(String, int, int)``` | ```tag(String, int, int)``` |
+   | Mouse       | ```updateMouseTag(String)```      | ```mouseTag(String)```      |
+   1. The tagged node (which maybe `null`) is returned immediately
+   2. The tagged node is optimally updated during the next call to the ```render()``` algorithm
 2. Interact with your _tagged_ nodes by calling any of the following methods: [alignTag(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignTag-java.lang.String-), [focusTag(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#focusTag-java.lang.String-), [translateTag(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateTag-java.lang.String-float-float-float-), [rotateTag(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateTag-java.lang.String-float-float-float-), [scaleTag(String, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleTag-java.lang.String-float-), or [spinTag(String, int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinTag-java.lang.String-int-int-int-int-).
 
 Observations:
