@@ -231,7 +231,8 @@ public void mouseDragged() {
 
 Picking a node (which should be different than the scene eye) to interact with it is a two-step process:
 
-1. Tag the node using an arbitrary name (which may be `null`) either with [tag(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-nub.core.Node-) or ray-casting: 
+1. Tag the node using an arbitrary name (which may be `null`) either with [tag(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-nub.core.Node-) or ray-casting:
+   
    | Ray casting | Synchronously                     | Asynchronously              |
    |-------------|-----------------------------------|-----------------------------|
    | Generic     | ```updateTag(String, int, int)``` | ```tag(String, int, int)``` |
