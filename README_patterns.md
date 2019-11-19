@@ -233,27 +233,27 @@ Picking a node (which should be different than the scene eye) to interact with i
 
 1. Tag the node using an arbitrary name (which may be `null`) either with [tag(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-nub.core.Node-) or ray-casting:
    
-  | Ray casting | Synchronously :small_blue_diamond: | Asynchronously :small_orange_diamond: |
-  |-------------|------------------------------------|---------------------------------------|
-  | Generic     | ```updateTag(String, int, int)```  | ```tag(String, int, int)```           |
-  | Mouse       | ```updateMouseTag(String)```       | ```mouseTag(String)```                |
+   | Ray casting | Synchronously :small_blue_diamond: | Asynchronously :small_orange_diamond: |
+   |-------------|------------------------------------|---------------------------------------|
+   | Generic     | ```updateTag(String, int, int)```  | ```tag(String, int, int)```           |
+   | Mouse       | ```updateMouseTag(String)```       | ```mouseTag(String)```                |
    
-  :small_blue_diamond: The tagged node is returned immediately
-  :small_orange_diamond: The tagged is returned during the next call to the ```render()``` algorithm
+   :small_blue_diamond: The tagged node is returned immediately
+   :small_orange_diamond: The tagged is returned during the next call to the ```render()``` algorithm
    
 2. Interact with your _tagged_ nodes using one of the actions according to one of the following patterns:
    1. Tagged node:
    2. Node tagged with the `null` tag:
    3. Tagged node or `eye`:
    
-  | Action    | Tagged nodes                                    | `null` tag                              | Tagged node or `eye`                         |
-  |-----------|-------------------------------------------------|-----------------------------------------|----------------------------------------------|
-  | Align     | ```alignTag(String)```                          | ```alignTag()```                        | ```align(String)```                          |
-  | Focus     | ```focusTag(String)```                          | ```focusTag()```                        | ```focus(String)```                          |
-  | Translate | ```translateTag(String, float, float, float)``` | ```translateTag(float, float, float)``` | ```translate(String, float, float, float)``` |
-  | Rotate    | ```rotateTag(String, float, float, float)```    | ```rotateTag(float, float, float)```    | ```rotate(String, float, float, float)```    |
-  | Scale     | ```scaleTag(String, float)```                   | ```scaleTag(float)```                   | ```scale(String, float)```                   |
-  | Spin      | ```spinTag(String, int, int, int, int)```       | ```spinTag(int, int, int, int)```       | ```spin(String, int, int, int, int)```       |
+   | Action    | Tagged nodes                                    | `null` tag                              | Tagged node or `eye`                         |
+   |-----------|-------------------------------------------------|-----------------------------------------|----------------------------------------------|
+   | Align     | ```alignTag(String)```                          | ```alignTag()```                        | ```align(String)```                          |
+   | Focus     | ```focusTag(String)```                          | ```focusTag()```                        | ```focus(String)```                          |
+   | Translate | ```translateTag(String, float, float, float)``` | ```translateTag(float, float, float)``` | ```translate(String, float, float, float)``` |
+   | Rotate    | ```rotateTag(String, float, float, float)```    | ```rotateTag(float, float, float)```    | ```rotate(String, float, float, float)```    |
+   | Scale     | ```scaleTag(String, float)```                   | ```scaleTag(float)```                   | ```scale(String, float)```                   |
+   | Spin      | ```spinTag(String, int, int, int, int)```       | ```spinTag(int, int, int, int)```       | ```spin(String, int, int, int, int)```       |
 
 3. by calling any of the following methods: [alignTag(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignTag-java.lang.String-), [focusTag(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#focusTag-java.lang.String-), [translateTag(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateTag-java.lang.String-float-float-float-), [rotateTag(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateTag-java.lang.String-float-float-float-), [scaleTag(String, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleTag-java.lang.String-float-), or [spinTag(String, int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinTag-java.lang.String-int-int-int-int-).
 
