@@ -2923,6 +2923,28 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code return super.tracks(node, mouseX(), mouseY())}.
+   *
+   * @see #tracks(Node, int, int)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public boolean mouseTracks(Node node) {
+    return super.tracks(node, mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code return super.updateTag(tag, mouseX(), mouseY(), nodes)}.
+   *
+   * @see #updateTag(int, int, Node[])
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public Node updateMouseTag(String tag, Node[] nodes) {
+    return super.updateTag(tag, mouseX(), mouseY(), nodes);
+  }
+
+  /**
    * Same as {@code return super.updateTag(tag, mouseX(), mouseY())}.
    *
    * @see #updateTag(String, int, int)
