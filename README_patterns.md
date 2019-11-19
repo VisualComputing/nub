@@ -168,7 +168,21 @@ Another scene's eye (different than this one) can be drawn with [drawEye(Graph)]
 
 The scene has several methods to position and orient the _eye_ node, such as: [lookAt(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#lookAt-nub.primitives.Vector-), [setFov(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setFOV-float-), [setViewDirection(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setViewDirection-nub.primitives.Vector-), [setUpVector(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setUpVector-nub.primitives.Vector-), [fit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#fit--) and [fit(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#fit-nub.core.Node-), among others.
 
-The following _eye_ interaction methods are particularly suited for hardware devices having several degrees-of-freedom: [scaleEye(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleEye-float-), [translateEye(float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateEye-float-float-float-), [rotateEye(float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateEye-float-float-float-), [spinEye(int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinEye-int-int-int-int-), [lookAround(float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#lookAround-float-float-) and [rotateCAD(float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateCAD-float-float-). Methods such as: [mouseTranslateEye()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTranslateEye--), [mouseSpinEye()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseSpinEye--) and [mouseLookAround()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseLookAround--), are implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to some of the above methods, and hence their simpler signatures.
+The following scene methods implement _eye_ motion actions particularly suited for input devices, possibly having several degrees-of-freedom:
+
+| Action       | Generic input device                    | Mouse                     |
+|--------------|-----------------------------------------|---------------------------|
+| Align        | ```alignEye()```                        | n.a.                      |
+| Focus        | ```focusEye()```                        | n.a.                      |
+| Translate    | ```translateEye(float, float, float)``` | ```mouseTranslateEye()``` |
+| Rotate       | ```rotateEye(float, float, float)```    | n.a.                      |
+| Scale        | ```scaleEye(float)```                   | n.a.                      |
+| Spin         | ```spinEye(int, int, int, int)```       | ```mouseSpinEye()```      |
+| Move forward | ```moveForward(float)```                | n.a.                      |
+| Rotate CAD   | ```rotateCAD(float, float)```           | ```mouseRotateCAD()```    |
+| Look around  | ```lookAround(float, float)```          | ```mouseLookAround()```   |
+
+Note that the mouse actions are implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` as parameters to their relative generic methods, and hence their simpler signatures.
 
 Mouse examples:
 
