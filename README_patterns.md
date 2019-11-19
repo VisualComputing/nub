@@ -6,9 +6,9 @@
 - [Description](#description)
 - [Scene](#scene)
 - [Nodes](#nodes)
+    - [Localization](#localization)
     - [Shapes](#shapes)
     - [Space transformations](#space-transformations)
-    - [Localization](#localization)
 - [Rendering](#rendering)
     - [Drawing functionality](#drawing-functionality)
 - [Interactivity](#interactivity)
@@ -100,6 +100,16 @@ void setup() {
 
 Note that the hierarchy of nodes may be modified with [setReference(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setReference-frames.core.Node-) and the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) set from an arbitrary node instance with [setEye(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setEye-frames.core.Node-). Calling [setConstraint(Constrain)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setConstraint-frames.core.constraint.Constraint-) will apply a [Constraint](https://visualcomputing.github.io/nub-javadocs/nub/core/constraint/Constraint.html) to a node to limit its motion.
 
+#### Localization
+
+A node [position](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#position--), [orientation](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#orientation--) and [magnitude]() may be set with the following methods:
+
+| Node localization | Position                     | Orientation                      | Magnitude                 |
+|-------------------|----------------------------- |----------------------------------|---------------------------|
+| Globally          | ```setPosition(Vector)```    | ```setOrientation(Quaternion)``` | ```setMagnitude(float)``` |
+| Locally           | ```setTranslation(Vector)``` | ```setRotation(Quaternion)```    | ```setScaling(float)```   |
+| Incrementally     | ```translate(Vector)```      | ```rotate(Quaternion)```         | ```scale(float)```        |
+
 #### Shapes
 
 Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure (see [graphics(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#graphics-processing.core.PGraphics-)) or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see [shape(PShape)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#shape-processing.core.PShape-)). Shapes can be picked precisely using their projection onto the screen, see [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--). Note that even the _eye_ can have a shape which may be useful to depict the viewer in first person camera style.
@@ -122,16 +132,6 @@ The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Nod
 | Node to (this) Node  | ```location(Vector, Node)```       | ```displacement(Vector, Node)```       |
 | World to Node        | ```location(Vector)```             | ```displacement(Vector)```             |
 | Node to World        | ```worldLocation(Vector)```        | ```worldDisplacement(Vector)```        |
-  
-#### Localization
-
-A node [position](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#position--), [orientation](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#orientation--) and [magnitude]() may be set with the following methods:
-
-| Node localization | Position                     | Orientation                      | Magnitude                 |
-|-------------------|----------------------------- |----------------------------------|---------------------------|
-| Globally          | ```setPosition(Vector)```    | ```setOrientation(Quaternion)``` | ```setMagnitude(float)``` |
-| Locally           | ```setTranslation(Vector)``` | ```setRotation(Quaternion)```    | ```setScaling(float)```   |
-| Incrementally     | ```translate(Vector)```      | ```rotate(Quaternion)```         | ```scale(float)```        |
 
 ## Rendering
 
@@ -223,7 +223,7 @@ The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples
 
 ### Nodes
 
-To directly interact with a given node, call any of the following methods: [alignNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignNode-nub.core.Node-), [focusNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#focusNode-nub.core.Node-), [translateNode(Node, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateNode-nub.core.Node-float-float-float-), [rotateNode(Node, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateNode-nub.core.Node-float-float-float-), [scaleNode(Node, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleNode-nub.core.Node-float-) and [spinNode(Node, int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinNode-nub.core.Node-int-int-int-int-). The methods [mouseTranslateNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTranslateNode-nub.core.Node-) and [mouseSpinNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseSpinNode-nub.core.Node-) , are implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to some of the above methods, and hence their simpler signatures. 
+To directly interact with a given node, call any of the following scene methods: [alignNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignNode-nub.core.Node-), [focusNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#focusNode-nub.core.Node-), [translateNode(Node, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateNode-nub.core.Node-float-float-float-), [rotateNode(Node, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateNode-nub.core.Node-float-float-float-), [scaleNode(Node, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleNode-nub.core.Node-float-) and [spinNode(Node, int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinNode-nub.core.Node-int-int-int-int-). The methods [mouseTranslateNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTranslateNode-nub.core.Node-) and [mouseSpinNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseSpinNode-nub.core.Node-) , are implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to some of the above methods, and hence their simpler signatures. 
 
 Mouse examples:
 
