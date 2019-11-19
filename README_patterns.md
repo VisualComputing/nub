@@ -233,7 +233,7 @@ Picking a node (which should be different than the scene eye) to interact with i
 
 1. Tag the node using an arbitrary name (which may be `null`) either with [tag(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-nub.core.Node-) or ray-casting:
    
-   | Ray casting | Synchronously                     | Asynchronously              |
+   | Ray casting | Synchronously :small_orange_diamond: | Asynchronously :small_blue_diamond: |
    |-------------|-----------------------------------|-----------------------------|
    | Generic     | ```updateTag(String, int, int)``` | ```tag(String, int, int)``` |
    | Mouse       | ```updateMouseTag(String)```      | ```mouseTag(String)```      |
