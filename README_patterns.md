@@ -237,6 +237,7 @@ Picking a node (which should be different than the scene eye) to interact with i
    |-------------|------------------------------------|---------------------------------------|
    | Generic     | ```updateTag(String, int, int)```  | ```tag(String, int, int)```           |
    | Mouse       | ```updateMouseTag(String)```       | ```mouseTag(String)```                |
+   
    :small_blue_diamond: The tagged node is returned immediately
    :small_orange_diamond: The tagged is optimally returned during the next call to the ```render()``` algorithm
    
