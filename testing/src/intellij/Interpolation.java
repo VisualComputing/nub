@@ -75,7 +75,7 @@ public class Interpolation extends PApplet {
     for (Node node : interpolator.keyFrames().values()) {
       pushMatrix();
       scene.applyTransformation(node);
-      scene.drawAxes(scene.tracks(node) ? 40 : 20);
+      scene.drawAxes(scene.mouseTracks(node) ? 40 : 20);
       popMatrix();
     }
     if (showEyePath) {

@@ -816,35 +816,6 @@ public class Scene extends Graph implements PConstants {
     return jsonRot;
   }
 
-  /**
-   * Same as {@code return super.track(mouse(), nodeArray)}.
-   *
-   * @see Graph#updateTag(int, int, Node[])
-   */
-  public Node updateTag(Node[] nodeArray) {
-    return updateTag(mouseX(), mouseY(), nodeArray);
-  }
-
-  /**
-   * Same as {@code return super.track(mouse(), nodeList)}.
-   *
-   * @see Graph#updateTag(int, int, List< Node >)
-   */
-  public Node updateTag(List<Node> nodeList) {
-    return updateTag(mouseX(), mouseY(), nodeList);
-  }
-
-  /**
-   * Same as {@code return track(mouse(), node)}.
-   *
-   * @see #mouseX()
-   * @see #mouseY()
-   * @see Graph#tracks(Node, int, int)
-   */
-  public boolean tracks(Node node) {
-    return tracks(node, mouseX(), mouseY());
-  }
-
   @Override
   protected boolean _tracks(Node node, int x, int y) {
     if (node == null || isEye(node))
@@ -2931,6 +2902,37 @@ public class Scene extends Graph implements PConstants {
    */
   public boolean mouseTracks(Node node) {
     return super.tracks(node, mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code return super.updateTag(mouseX(), mouseY(), nodeList)}.
+   *
+   * @see Graph#updateTag(int, int, List< Node >)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public Node updateMouseTag(List<Node> nodeList) {
+    return super.updateTag(mouseX(), mouseY(), nodeList);
+  }
+
+  /**
+   * Same as {@code return super.track(mouse(), nodeList)}.
+   *
+   * @see Graph#updateTag(String, int, int, List< Node >)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public Node updateMouseTag(String tag, List<Node> nodeList) {
+    return super.updateTag(tag, mouseX(), mouseY(), nodeList);
+  }
+
+  /**
+   * Same as {@code return super.track(mouse(), nodeArray)}.
+   *
+   * @see Graph#updateTag(int, int, Node[])
+   */
+  public Node updateMouseTag(Node[] nodeArray) {
+    return super.updateTag(mouseX(), mouseY(), nodeArray);
   }
 
   /**
