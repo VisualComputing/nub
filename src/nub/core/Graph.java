@@ -50,10 +50,10 @@ import java.util.List;
  * {@link #moveForward(float)}, {@link #translateEye(float, float, float)},
  * {@link #rotateEye(float, float, float)} and {@link #scaleEye(float)}.
  * <h2>2.1. Transformations</h2>
- * The graph acts as interface between the physical space, from where user gesture data is
- * gathered, and the {@code nodes}. To transform points from/to physical space to/from node space
- * use {@link #location(Vector, Node)} and {@link #screenLocation(Vector, Node)}.
- * To transform vectors from/to physical space to/from node space
+ * The graph acts as interface between screen space (a box of {@link #width()} * {@link #height()} * 1
+ * dimensions), from where user gesture data is gathered, and the {@code nodes}. To transform points
+ * from/to screen space to/from node space use {@link #location(Vector, Node)} and
+ * {@link #screenLocation(Vector, Node)}. To transform vectors from/to screen space to/from node space
  * use {@link #displacement(Vector, Node)} and {@link #screenDisplacement(Vector, Node)}.
  * <h1>4. Picking and interaction</h1>
  * Picking a node to interact with it is a two-step process:
@@ -3432,7 +3432,6 @@ public class Graph {
     if (type() == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.position();
       float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
-      //TODO check me weird to find height instead of width working (may it has to do with fov?)
       dx *= 2.0 * k / (height() * eye().magnitude());
       dy *= 2.0 * k / (height() * eye().magnitude());
     }
@@ -3441,9 +3440,6 @@ public class Graph {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
     } else {
-      //float zScreenMax = Math.max(width(), height());
-      //dz *= 2 * radius() / (zScreenMax * eye().magnitude());
-      //TODO check sign a bit more
       dz *= (zNear() - zFar()) / eye().magnitude();
     }
     Vector eyeVector = new Vector(dx, dy, dz);
@@ -3475,7 +3471,6 @@ public class Graph {
     if (type() == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.position();
       float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
-      //TODO check me weird to find height instead of width working (may it has to do with fov?)
       dx /= 2.0 * k / (height() * eye().magnitude());
       dy /= 2.0 * k / (height() * eye().magnitude());
     }
@@ -3484,16 +3479,14 @@ public class Graph {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
     } else {
-      //float zScreenMax = Math.max(width(), height());
-      //dz /= 2 * radius() / (zScreenMax * eye().magnitude());
-      // TODO check sign a bit more
+      // sign is inverted
       dz /= (zNear() - zFar()) / eye().magnitude();
     }
     return new Vector(dx, dy, dz);
   }
 
-  // Gesture physical interface is quite nice!
-  // It always maps physical (screen) space geom data respect to the eye
+  // Gesture screen space interface is quite nice!
+  // It always maps screen space geom data respect to the eye
 
   // 0. Patterns
 
@@ -3851,9 +3844,9 @@ public class Graph {
    * Translates the node (which should be different than the {@link #eye()}).
    *
    * @see #displacement(Vector, Node)
-   * @param dx screen space delta-x units
-   * @param dy screen space delta-y units
-   * @param dz screen space delta-z units
+   * @param dx screen space delta-x units in [0..width()]
+   * @param dy screen space delta-y units in [0..height()]
+   * @param dz screen space delta-z units in [0..1]
    */
   public void translateNode(Node node, float dx, float dy, float dz) {
     if (node == null || node == eye()) {
@@ -3877,9 +3870,9 @@ public class Graph {
    * Translates the {@link #eye()}.
    *
    * @see #displacement(Vector, Node)
-   * @param dx screen space delta-x units
-   * @param dy screen space delta-y units
-   * @param dz screen space delta-z units
+   * @param dx screen space delta-x units in [0..width()]
+   * @param dy screen space delta-y units in [0..height()]
+   * @param dz screen space delta-z units in [0..1]
    */
   public void translateEye(float dx, float dy, float dz) {
     Node node = eye().get();
@@ -4165,7 +4158,7 @@ public class Graph {
   // 7. moveForward
 
   /**
-   * Same as {@code translate(0, 0, delta)}. Also rescales the {@link #eye()}
+   * Same as {@code translateEye(0, 0, delta / (zNear() - zFar()))}. Also rescales the {@link #eye()}
    * if the graph type is {@link Type#ORTHOGRAPHIC} so that nearby objects
    * appear bigger when moving towards them.
    *
@@ -4173,7 +4166,8 @@ public class Graph {
    */
   public void moveForward(float delta) {
     float d1 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
-    translateEye(0, 0, delta);
+    // we negate z which targets the Processing mouse wheel
+    translateEye(0, 0, delta / (zNear() - zFar()));
     float d2 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
     if (type() == Type.ORTHOGRAPHIC)
       if (d2 / d1 > 0 && d1 != 0)

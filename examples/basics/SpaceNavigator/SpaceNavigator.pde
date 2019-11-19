@@ -70,7 +70,9 @@ void spaceNavigatorPicking() {
 }
 
 void spaceNavigatorInteraction() {
-  scene.translate("SPCNAV", 10 * snXPos.getValue(), 10 * snYPos.getValue(), 10 * snZPos.getValue());
+  // translate(x, y, z) expects params in screen-space
+  // which has dimensions width * height * 1
+  scene.translate("SPCNAV", 20 * snXPos.getValue(), 20 * snYPos.getValue(), snZPos.getValue() / 50);
   scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
 }
 
