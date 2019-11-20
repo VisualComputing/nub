@@ -259,13 +259,13 @@ Picking a node (which should be different than the scene eye) to interact with i
    | Generic     | ```updateTag(String, int, int)```  | ```tag(String, int, int)```           |
    | Mouse       | ```updateMouseTag(String)```       | ```mouseTag(String)```                |
    
-   :small_blue_diamond: The tagged node is returned immediately
-   :small_orange_diamond: The tagged is returned during the next call to the ```render()``` algorithm
+   :small_blue_diamond: The tagged node (see [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-)) is returned immediately
+   :small_orange_diamond: The tagged node is returned during the next call to the ```render()``` algorithm
    
 2. Interact with your _tagged_ nodes using one of the following patterns:
    
-   1. **Tagged node**: `interactTag(tag, gesture...) interactNode(node(tag))` which uses [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-) to pass the node parameter to `interactNode(String` which is the pattern implemented by the [node](#nodes-1) methods above. 
-   2. **Tagged node or `eye`**: `interact(String, Object...) if (!interactTag(String, Object...)) interactEye(Object....)` i.e., To either interact with the node referred with a given tag or the eye, when that tag is not in use.
+ 1. **Tagged node**: `interactTag(tag, gesture...) interactNode(node(tag))` which uses [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-) to pass the node parameter to `interactNode(String` which is the pattern implemented by the [node](#nodes-1) methods above. 
+ 2. **Tagged node or `eye`**: `interact(String, Object...) if (!interactTag(String, Object...)) interactEye(Object....)` i.e., To either interact with the node referred with a given tag or the eye, when that tag is not in use.
    
    Generic actions:
 
