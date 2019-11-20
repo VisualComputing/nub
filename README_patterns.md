@@ -116,7 +116,7 @@ Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Im
 
 #### Space transformations
 
-The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions, where user interaction takes place) and nodes (including the world):
+The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions, where user interaction takes place) and nodes (including the world, i.e., the `null` node):
 
 | Space transformation | Points                            | Vectors                                |
 |----------------------|-----------------------------------|----------------------------------------|
