@@ -11,7 +11,7 @@
 package nub.core;
 
 import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.TRIKTree;
+import nub.ik.solver.geometric.trik.TRIKTree;
 import nub.ik.solver.geometric.TreeSolver;
 import nub.primitives.*;
 import nub.timing.Task;
