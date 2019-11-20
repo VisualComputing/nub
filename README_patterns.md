@@ -258,13 +258,6 @@ Picking a node (which should be different than the scene eye) to interact with i
    |-------------|------------------------------------|---------------------------------------|
    | Generic     | ```updateTag(String, int, int)```  | ```tag(String, int, int)```           |
    | Mouse       | ```updateMouseTag(String)```       | ```mouseTag(String)```                |
-
-   null tag delegate methods:
-
-   | Ray casting | Synchronously :small_blue_diamond: | Asynchronously :small_orange_diamond: |
-   |-------------|------------------------------------|---------------------------------------|
-   | Generic     | ```updateTag(int, int)```          | ```tag(int, int)```                   |
-   | Mouse       | ```updateMouseTag()```             | ```mouseTag()```                      |
    
    :small_blue_diamond: The tagged node is returned immediately
    :small_orange_diamond: The tagged is returned during the next call to the ```render()``` algorithm
@@ -286,17 +279,6 @@ Picking a node (which should be different than the scene eye) to interact with i
    | Scale     | ```scaleTag(String, float)```                   | ```scale(String, float)```                   |
    | Spin      | ```spinTag(String, int, int, int, int)```       | ```spin(String, int, int, int, int)```       |
 
-   null tag delegate methods:
-
-   | Action    | Tagged nodes                            | Tagged node or `eye`                 |
-   |-----------|-----------------------------------------|--------------------------------------|
-   | Align     | ```alignTag()```                        | ```align()```                        |
-   | Focus     | ```focusTag()```                        | ```focus()```                        |
-   | Translate | ```translateTag(float, float, float)``` | ```translate(float, float, float)``` |
-   | Rotate    | ```rotateTag(float, float, float)```    | ```rotate(float, float, float)```    |
-   | Scale     | ```scaleTag(float)```                   | ```scale(float)```                   |
-   | Spin      | ```spinTag(int, int, int, int)```       | ```spin(int, int, int, int)```       |
-
    Mouse actions:
 
    | Action    | Tagged nodes                    | Tagged node or `eye`         |
@@ -304,18 +286,12 @@ Picking a node (which should be different than the scene eye) to interact with i
    | Translate | ```mouseTranslateTag(String)``` | ```mouseTranslate(String)``` |
    | Spin      | ```mouseSpinTag(String)```      | ```mouseSpin(String)```      |
 
-   null tag delegate methods:
-
-   | Action    | Tagged nodes              | Tagged node or `eye`   |
-   |-----------|---------------------------|------------------------|
-   | Translate | ```mouseTranslateTag()``` | ```mouseTranslate()``` |
-   | Spin      | ```mouseSpinTag()```      | ```mouseSpin()```      |
-
 Observations:
 
-1. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
-2. To check if a given node would be picked with a ray casted at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-) or [mouseTracks(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTracks-nub.core.Node-).
-3. Customize node behaviors by overridden the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) and then invoke them by either calling: [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-). See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
+1. TODO null tag delegate methods -> omit String parameter. Examples: 
+2. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
+3. To check if a given node would be picked with a ray casted at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-) or [mouseTracks(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTracks-nub.core.Node-).
+4. Customize node behaviors by overridden the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) and then invoke them by either calling: [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-). See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
 
 Mouse examples:
 
