@@ -262,14 +262,14 @@ Picking a node (which should be different than the scene eye) to interact with i
    :small_blue_diamond: The tagged node is returned immediately
    :small_orange_diamond: The tagged is returned during the next call to the ```render()``` algorithm
    
-2. Interact with your _tagged_ nodes using one of the actions according to one of the following patterns:
+2. Interact with your _tagged_ nodes using one of the following patterns:
    
-   1. Tagged node:
-   2. Tagged node or `eye`: To either interact with the node referred with a given tag or the eye, when that tag is not in use
+   1. **Tagged node**: `interactTag(String, Object...)` which uses [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-) to pass the node parameter to `interactNode(String` which is the pattern implemented by the [node](#nodes-1) methods above. 
+   2. **Tagged node or `eye`**: `interact(String, Object...) if (!interactTag(String, Object...)) interactEye(Object....)` i.e., To either interact with the node referred with a given tag or the eye, when that tag is not in use.
    
    Generic actions:
 
-   | Action    | Tagged nodes                                    | Tagged node or `eye`                         |
+   | Action    | Tagged node                                     | Tagged node or `eye`                         |
    |-----------|-------------------------------------------------|----------------------------------------------|
    | Align     | ```alignTag(String)```                          | ```align(String)```                          |
    | Focus     | ```focusTag(String)```                          | ```focus(String)```                          |
@@ -290,7 +290,7 @@ Observations:
 1. TODO (which may be `null`) null tag delegate methods -> omit String parameter. Examples: 
 2. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
 3. To check if a given node would be picked with a ray casted at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-) or [mouseTracks(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTracks-nub.core.Node-).
-4. Customize node behaviors by overridden the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) and then invoke them by either calling: [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-). See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
+4. Customize node behaviors by overridden the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) and then invoke them by either calling: [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-). See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
 
 Mouse examples:
 
