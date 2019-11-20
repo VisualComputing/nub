@@ -161,7 +161,7 @@ class Boid {
         pApplet.fill(pApplet.color(0, 255, 0, 125));
 
         // highlight boids under the mouse
-        if (scene.trackedNode("mouseMoved") == frame) {
+        if (scene.node("mouseMoved") == frame) {
             pApplet.stroke(pApplet.color(0, 0, 255));
             pApplet.fill(pApplet.color(0, 0, 255));
         }

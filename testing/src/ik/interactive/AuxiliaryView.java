@@ -2,7 +2,6 @@ package ik.interactive;
 
 import nub.core.Node;
 import nub.core.Graph;
-import nub.primitives.Point;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PGraphics;
@@ -80,8 +79,8 @@ public class AuxiliaryView{
         _colorBackground = color;
     }
 
-    public Point cursorLocation(float x, float y){
-        return new Point((x - _x)*(1.f*_scene.width()/_width), (y - _y)*(1.f*_scene.height()/_height));
+    public Vector cursorLocation(float x, float y){
+        return new Vector((x - _x)*(1.f*_scene.width()/_width), (y - _y)*(1.f*_scene.height()/_height));
     }
 
     public boolean focus(float x, float y){

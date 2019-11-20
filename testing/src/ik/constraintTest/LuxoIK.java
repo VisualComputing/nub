@@ -33,7 +33,7 @@ public class LuxoIK extends PApplet {
         public void graphics(PGraphics pGraphics) {
             switch (mode) {
                 case 1:
-                    pGraphics.fill(isTracked() ? 255 : 0, 0, 255);
+                    pGraphics.fill(isTagged(scene) ? 255 : 0, 0, 255);
                     drawCone(pGraphics, 0, 3, 15, 15, 30);
                     drawCone(pGraphics, 3, 5, 15, 13, 30);
                     drawCone(pGraphics, 5, 7, 13, 1, 30);
@@ -52,7 +52,7 @@ public class LuxoIK extends PApplet {
                     pGraphics.translate(2, 0, 0);
                     break;
                 case 3:
-                    pGraphics.fill(0, 255, isTracked() ? 0 : 255);
+                    pGraphics.fill(0, 255, isTagged(scene) ? 0 : 255);
                     drawCone(pGraphics, -2, 6, 4, 4, 30);
                     drawCone(pGraphics, 6, 15, 4, 17, 30);
                     drawCone(pGraphics, 15, 17, 17, 17, 30);
@@ -189,14 +189,14 @@ public class LuxoIK extends PApplet {
     }
 
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT)
-            scene.spin();
+            scene.mouseSpin();
         else if (mouseButton == RIGHT)
-            scene.translate();
+            scene.mouseTranslate();
         else
             scene.scale(mouseX - pmouseX);
     }

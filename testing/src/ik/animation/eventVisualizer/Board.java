@@ -31,7 +31,7 @@ public class Board extends Node {
 
     public Board(Scene scene, int rows, int cols){
         super(scene);
-        enableTracking(false);
+        enableTagging(false);
         _rows = rows;
         _cols = cols;
 

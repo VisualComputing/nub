@@ -141,7 +141,7 @@ public class UR10 extends PApplet {
         scene.beginHUD();
         for (String s : model.skeleton().keySet()) {
             Node n = model.skeleton().get(s);
-            if(n.isCulled() || !n.isTrackingEnabled() || debug) continue;
+            if(n.isCulled() || !n.isTaggingEnabled() || debug) continue;
             Vector sc = scene.screenLocation(new Vector(), n);
             text(s, sc.x(), sc.y());
         }
@@ -189,14 +189,14 @@ public class UR10 extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(scene.mouseDX());
         }

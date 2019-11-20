@@ -89,7 +89,7 @@ public class SkeletonBuilder extends PApplet{
         //scene.drawAxes();
         scene.render();
         for(Target target : targets){
-            if(showPath)scene.drawPath(target._interpolator, 5);
+            if(showPath)scene.drawCatmullRom(target._interpolator, 5);
             if(showLast) {
                 pushStyle();
                 colorMode(HSB);
@@ -159,7 +159,7 @@ public class SkeletonBuilder extends PApplet{
 
         if(fitCurve != null)
             if(fitCurve._interpolator != null)
-                scene.drawPath(fitCurve._interpolator, 5);
+                scene.drawCatmullRom(fitCurve._interpolator, 5);
 
         scene.beginHUD();
         if(fitCurve != null) fitCurve.drawCurves(scene.context());
@@ -201,18 +201,18 @@ public class SkeletonBuilder extends PApplet{
     @Override
     public void mouseMoved() {
         if(!mousePressed) {
-            focus.cast();
+            focus.mouseTag();
         }
     }
 
     public void mouseDragged(MouseEvent event) {
         if (mouseButton == RIGHT && event.isControlDown()) {
-            Vector vector = new Vector(focus.mouse().x(), focus.mouse().y());
-            if(focus.trackedNode() != null)
-                if(focus.trackedNode() instanceof  InteractiveJoint)
-                    focus.trackedNode().interact("OnAdding", focus, vector);
+            Vector vector = new Vector(focus.mouseX(), focus.mouseY());
+            if(focus.node() != null)
+                if(focus.node() instanceof  InteractiveJoint)
+                    focus.node().interact("OnAdding", focus, vector);
                 else
-                    focus.trackedNode().interact("OnAdding", vector);
+                    focus.node().interact("OnAdding", vector);
         } else if (mouseButton == LEFT) {
             if(event.isControlDown() && fitCurve != null ){
                 if(fitCurve.started()) {
@@ -220,15 +220,15 @@ public class SkeletonBuilder extends PApplet{
                     fitCurve.fitCurve();
                 }
             } else {
-                focus.spin(focus.pmouse(), focus.mouse());
+                focus.spin(focus.pmouseX(), focus.pmouseY(), focus.mouseX(), focus.mouseY());
             }
         } else if (mouseButton == RIGHT) {
-            focus.translate(focus.mouse().x() - focus.pmouse().x(), focus.mouse().y() - focus.pmouse().y());
+            focus.translate(focus.mouseX() - focus.pmouseX(), focus.mouseY() - focus.pmouseY());
             Target.multipleTranslate();
         } else if (mouseButton == CENTER){
             focus.scale(focus.mouseDX());
-        } else if(focus.trackedNode() != null)
-            focus.trackedNode().interact("Reset");
+        } else if(focus.node() != null)
+            focus.node().interact("Reset");
         //PANEL
         //else {
             //panel._scene.defaultFrame().interact();
@@ -237,7 +237,7 @@ public class SkeletonBuilder extends PApplet{
         //if(focus == scene && !Target.selectedTargets().contains(focus.trackedFrame())){
         //    Target.clearSelectedTargets();
         //}
-        if(!Target.selectedTargets().contains(focus.trackedNode())){
+        if(!Target.selectedTargets().contains(focus.node())){
             Target.clearSelectedTargets();
         }
     }
@@ -266,17 +266,17 @@ public class SkeletonBuilder extends PApplet{
         //mouse = scene.location(mouse);
         //mouse = Vector.projectVectorOnPlane(mouse, scene.viewDirection());
         //mouse.add(scene.defaultFrame().position());
-        Vector vector = new Vector(focus.mouse().x(), focus.mouse().y());
-        if(focus.trackedNode() != null)
-            if(focus.trackedNode() instanceof  InteractiveJoint)
-                focus.trackedNode().interact("Add", scene, focus, vector);
+        Vector vector = new Vector(focus.mouseX(), focus.mouseY());
+        if(focus.node() != null)
+            if(focus.node() instanceof  InteractiveJoint)
+                focus.node().interact("Add", scene, focus, vector);
             //else focus.trackedFrame().interact("Add", vector, false);
             else{
                 if(fitCurve != null){
                     fitCurve.setStarted(false);
                     fitCurve.getCatmullRomCurve(scene, 0);
-                    fitCurve._interpolator.start();
-                    focus.trackedNode().interact("AddCurve", fitCurve);
+                    fitCurve._interpolator.run();
+                    focus.node().interact("AddCurve", fitCurve);
                 }
             }
         fitCurve = null;
@@ -292,14 +292,14 @@ public class SkeletonBuilder extends PApplet{
             if (event.getCount() == 1) {
                 //panel.setFrame(scene.trackedFrame());
                 if(event.isControlDown()){
-                    if(focus.trackedNode() != null)
-                        focus.trackedNode().interact("KeepSelected");
+                    if(focus.node() != null)
+                        focus.node().interact("KeepSelected");
                 }
             }
             else if (event.getCount() == 2) {
                 if (event.isShiftDown())
-                    if(scene.trackedNode() != null)
-                        scene.trackedNode().interact("Remove");
+                    if(scene.node() != null)
+                        scene.node().interact("Remove");
                 else
                     focus.focus();
             }
@@ -318,10 +318,10 @@ public class SkeletonBuilder extends PApplet{
             addTreeSolver();
         }
         if(key == 'C' || key == 'c'){
-            addConstraint(focus.trackedNode(), false);
+            addConstraint(focus.node(), false);
         }
         if(key == 'H' || key == 'h'){
-            addConstraint(focus.trackedNode(), true);
+            addConstraint(focus.node(), true);
         }
 
         if(key == 'S' || key == 's'){
@@ -345,12 +345,12 @@ public class SkeletonBuilder extends PApplet{
             System.out.println("maxAngle : " + degrees(maxAngle));
         }
         if(key == 'i' || key == 'I'){
-            printTree(scene.trackedNode(), "");
+            printTree(scene.node(), "");
         }
 
         if(key==' '){
             for(Target target : targets){
-                target._interpolator.start();
+                target._interpolator.run();
             }
         }
         if(key == '1'){
@@ -374,7 +374,7 @@ public class SkeletonBuilder extends PApplet{
 
         if(key == 'r' || key == 'R'){
             for(Target target : targets){
-                target._interpolator.setLoop(!target._interpolator.loop());
+                target._interpolator.enableRecurrence(!target._interpolator.isRecurrent());
             }
         }
 
@@ -429,13 +429,13 @@ public class SkeletonBuilder extends PApplet{
 
     Solver solver;
     public void addTreeSolver(){
-        if(scene.trackedNode() == null) return;
+        if(scene.node() == null) return;
         if(debug) {
-            solver = new TreeSolver(scene.trackedNode());
+            solver = new TreeSolver(scene.node());
             solver.setTimesPerFrame(1f);
         } else {
-            if(scene.trackedNode() != null) {
-                solver = scene.registerTreeSolver(scene.trackedNode());
+            if(scene.node() != null) {
+                solver = scene.registerTreeSolver(scene.node());
                 solver.setTimesPerFrame(1f); //TODO : Allow more times
             }
         }
@@ -448,11 +448,11 @@ public class SkeletonBuilder extends PApplet{
         //add target
         //get leaf nodes
         ArrayList<Node> endEffectors = new ArrayList<Node>();
-        findEndEffectors(focus.trackedNode(), endEffectors);
+        findEndEffectors(focus.node(), endEffectors);
         for(Node endEffector : endEffectors) {
             endEffector.setPickingThreshold(0.00001f);
-            Target target = new Target(scene, ((Joint) scene.trackedNode()).radius(), endEffector);
-            target.setReference(((Joint) scene.trackedNode()).reference());
+            Target target = new Target(scene, ((Joint) scene.node()).radius(), endEffector);
+            target.setReference(((Joint) scene.node()).reference());
             //scene.addIKTarget(endEffector, target);
             if(solver instanceof TreeSolver) ((TreeSolver)solver).addTarget(endEffector, target);
             if(solver instanceof TRIKTree) ((TRIKTree)solver).addTarget(endEffector, target);

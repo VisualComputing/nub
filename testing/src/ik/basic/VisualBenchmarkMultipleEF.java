@@ -105,7 +105,7 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
             @Override
             public void visit() {
                 scene.drawAxes(targetRadius * 2);
-                if(scene.trackedNode() == this){
+                if(scene.node() == this){
                     redBall.setFill(color(0,255,0));
                 }else{
                     redBall.setFill(color(255,0,0));
@@ -230,14 +230,14 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(scene.mouseDX());
         }

@@ -69,8 +69,8 @@ public class RegisterIK extends PApplet {
         skeleton[6] = createJoint(scene,skeleton[4], new Vector(length, length), jointRadius, true);
 
         //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
-        skeleton[5].enableTracking(false);
-        skeleton[6].enableTracking(false);
+        skeleton[5].enableTagging(false);
+        skeleton[6].enableTagging(false);
 
         //2. Lets create two Targets (a bit bigger than a Joint structure)
         Node leftTarget = createTarget(scene, jointRadius * 1.1f);
@@ -177,14 +177,14 @@ public class RegisterIK extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(mouseX - pmouseX);
         }

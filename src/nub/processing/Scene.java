@@ -21,6 +21,11 @@ import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
+import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.Hinge;
+import nub.core.constraint.PlanarPolygon;
+import nub.core.constraint.SphericalPolygon;
+
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -2798,6 +2803,67 @@ public class Scene extends Graph implements PConstants {
     pGraphics.endShape();
   }
 
+
+  /**
+   * Draws a cone onto {@code pGraphics} centered at {@code (0,0)} where
+   * {@code vertices} represents a polygon on XY Plane and with {@code height} as height.
+   *
+   * @param pGraphics
+   * @param height
+   * @param vertices
+   */
+  public void drawCone(PGraphics pGraphics, float height, float scaling, List<Vector> vertices) {
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    pGraphics.vertex(0, 0, 0);
+    for (Vector v : vertices) {
+      pGraphics.vertex(scaling * v.x(), scaling * v.y(), height);
+    }
+    if (!vertices.isEmpty()) pGraphics.vertex(scaling * vertices.get(0).x(), scaling * vertices.get(0).y(), height);
+    pGraphics.endShape();
+  }
+
+  /**
+   * Draws a truncated cone onto {@code pGraphics} along the positive {@code z} axis,
+   * with its base centered at {@code (x,y)}, {@code height}, and radii {@code radius1}
+   * and {@code radius2} (basis and height respectively).
+   */
+  public static void drawCone(PGraphics pGraphics, int detail, float x, float y, float height, float left_radius, float up_radius, float right_radius, float down_radius) {
+    if (!(pGraphics instanceof PGraphics3D))
+      return;
+    pGraphics.pushStyle();
+    detail = detail % 4 != 0 ? detail + (4 - detail % 4) : detail;
+    detail = Math.min(16, detail);
+
+    float unitConeX[] = new float[detail + 1];
+    float unitConeY[] = new float[detail + 1];
+
+    int d = detail / 4;
+
+    for (int i = 0; i <= d; i++) {
+      float a1 = (PApplet.PI * i) / (2.f * d);
+      unitConeX[i] = right_radius * (float) Math.cos(a1);
+      unitConeY[i] = up_radius * (float) Math.sin(a1);
+      unitConeX[i + d] = left_radius * (float) Math.cos(a1 + PApplet.HALF_PI);
+      unitConeY[i + d] = up_radius * (float) Math.sin(a1 + PApplet.HALF_PI);
+      unitConeX[i + 2 * d] = left_radius * (float) Math.cos(a1 + PApplet.PI);
+      unitConeY[i + 2 * d] = down_radius * (float) Math.sin(a1 + PApplet.PI);
+      unitConeX[i + 3 * d] = right_radius * (float) Math.cos(a1 + 3 * PApplet.PI / 2);
+      unitConeY[i + 3 * d] = down_radius * (float) Math.sin(a1 + 3 * PApplet.PI / 2);
+    }
+
+    pGraphics.pushMatrix();
+    pGraphics.translate(x, y);
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    vertex(pGraphics, 0, 0, 0);
+    for (int i = 0; i <= detail; i++) {
+      vertex(pGraphics, unitConeX[i], unitConeY[i], height);
+    }
+    pGraphics.endShape();
+    pGraphics.popMatrix();
+    pGraphics.popStyle();
+  }
+
+
   /**
    * Draws an Arc onto {@code pGraphics} centered at {@code (0,0)} on the XY Plane
    * {@code minAngle} and {@code maxAngle} represents the Arc's width.
@@ -3162,4 +3228,101 @@ public class Scene extends Graph implements PConstants {
   public void mouseRotateCAD(Vector up) {
     super.rotateCAD(mouseRADX(), mouseRADY(), up);
   }
+
+  // methods to draw constraints
+  /**
+   * Same as {@code drawConstraint(frontBuffer(), frame)}.
+   *
+   * @see #drawConstraint(PGraphics, Node)
+   */
+  public void drawConstraint(Node node) {
+    //Makes no sense to draw constraint on BackBuffer unless the user make it explicit
+    drawConstraint(context(), node);
+  }
+
+  /**
+   * Draws the frame constraint if it's non-null.
+   *
+   * @see Node#constraint()
+   * @see nub.core.constraint.Constraint
+   */
+  public void drawConstraint(PGraphics pGraphics, Node node) {
+    drawConstraint(pGraphics, node, 0.5f);
+  }
+
+  /**
+   * Draws the frame constraint if it's non-null.
+   *
+   * @see Node#constraint()
+   * @see nub.core.constraint.Constraint
+   */
+  public void drawConstraint(PGraphics pGraphics, Node node, float factor) {
+    if (node == null) return;
+    if (node.constraint() == null) return;
+    // TODO test
+    if (!node.isAttached(this)) return;
+    float boneLength = 0;
+    if (!node.children().isEmpty()) {
+      for (Node child : node.children())
+        boneLength += child.translation().magnitude();
+      boneLength = boneLength / (1.f * node.children().size());
+    } else
+      boneLength = node.translation().magnitude();
+    if (boneLength == 0) return;
+
+    pGraphics.pushMatrix();
+    pGraphics.pushStyle();
+    pGraphics.noStroke();
+
+    pGraphics.fill(62, 203, 55, 150);
+    Node reference = new Node();
+    reference.setTranslation(new Vector());
+    reference.setRotation(node.rotation().inverse());
+
+    if (node.constraint() instanceof BallAndSocket) {
+      BallAndSocket constraint = (BallAndSocket) node.constraint();
+      reference.rotate(((BallAndSocket) node.constraint()).orientation());
+      applyTransformation(pGraphics, reference);
+      float width = boneLength * factor;
+      float max = Math.max(Math.max(Math.max(constraint.up(), constraint.down()), constraint.left()), constraint.right());
+      //Max value will define max radius length
+      float height = (float) (width / Math.tan(max));
+      if (height > boneLength * factor) height = width;
+      //drawAxes(pGraphics,height*1.2f);
+      //get all radius
+      float up_r = (float) Math.abs((height * Math.tan(constraint.up())));
+      float down_r = (float) Math.abs((height * Math.tan(constraint.down())));
+      float left_r = (float) Math.abs((height * Math.tan(constraint.left())));
+      float right_r = (float) Math.abs((height * Math.tan(constraint.right())));
+      drawCone(pGraphics, 20, 0, 0, height, left_r, up_r, right_r, down_r);
+    } else if (node.constraint() instanceof PlanarPolygon) {
+      reference.rotate(((PlanarPolygon) node.constraint()).orientation());
+      applyTransformation(pGraphics, reference);
+      float w_d = boneLength * factor;
+      float w_c = (float) Math.abs((Math.tan(((PlanarPolygon) node.constraint()).angle())));
+      float height = w_d / w_c;
+      if (height > boneLength * factor) height = w_d;
+      //drawAxes(pGraphics,height*1.2f);
+      drawCone(pGraphics, height, height, ((PlanarPolygon) node.constraint()).vertices());
+    } else if (node.constraint() instanceof SphericalPolygon) {
+      //TODO : Fix as Planar Polygon
+      reference.rotate(((SphericalPolygon) node.constraint()).restRotation());
+      applyTransformation(pGraphics, reference);
+      //drawAxes(pGraphics,5);
+      drawCone(pGraphics, ((SphericalPolygon) node.constraint()).vertices(), boneLength);
+    } else if (node.constraint() instanceof Hinge) {
+      //TODO: Only works well if child lies on Axis Plane
+      Hinge constraint = (Hinge) node.constraint();
+      if (node.children().size() == 1) {
+        reference.rotate(constraint.orientation());
+        reference.rotate(new Quaternion(new Vector(1, 0, 0), new Vector(0, 1, 0)));
+        applyTransformation(pGraphics, reference);
+        drawArc(pGraphics, boneLength * factor, -constraint.minAngle(), constraint.maxAngle(), 10);
+      }
+    }
+    pGraphics.popMatrix();
+    pGraphics.popStyle();
+  }
+
+
 }

@@ -117,7 +117,7 @@ public class Util {
             @Override
             public void visit() {
                 scene.drawAxes(targetRadius * 2);
-                if(scene.trackedNode() == this){
+                if(scene.node() == this){
                     shape.setFill(pg.color(0,255,0));
                 }else{
                     shape.setFill(pg.color(255,0,0));

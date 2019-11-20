@@ -139,14 +139,14 @@ public class Puppet extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(mouseX - pmouseX);
         }
@@ -165,11 +165,11 @@ public class Puppet extends PApplet {
     }
 
     public void keyPressed(){
-        Node f = scene.trackedNode();
+        Node f = scene.node();
         if(f == null) return;
         Hinge c = f.constraint() instanceof Hinge ? (Hinge) f.constraint() : null;
         if(c == null) return;
-        scene.trackedNode().rotate(new Quaternion( c.orientation().rotate(new Vector(0,0,1)), radians(5)));
+        scene.node().rotate(new Quaternion( c.orientation().rotate(new Vector(0,0,1)), radians(5)));
 
     }
 

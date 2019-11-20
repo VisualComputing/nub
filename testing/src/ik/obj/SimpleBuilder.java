@@ -75,31 +75,31 @@ public class SimpleBuilder extends PApplet{
 
     //mouse events
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged(MouseEvent event) {
         if (mouseButton == RIGHT && event.isControlDown()) {
-            Vector vector = new Vector(scene.mouse().x(), scene.mouse().y());
-            if(scene.trackedNode() != null)
-                if(scene.trackedNode() instanceof  InteractiveJoint)
-                    scene.trackedNode().interact("OnAdding", scene, vector);
+            Vector vector = new Vector(scene.mouseX(), scene.mouseY());
+            if(scene.node() != null)
+                if(scene.node() instanceof  InteractiveJoint)
+                    scene.node().interact("OnAdding", scene, vector);
                 else
-                    scene.trackedNode().interact("OnAdding", vector);
+                    scene.node().interact("OnAdding", vector);
         } else if (mouseButton == LEFT) {
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else if (mouseButton == CENTER){
             scene.scale(scene.mouseDX());
         }
     }
 
     public void mouseReleased(MouseEvent event){
-        Vector vector = new Vector(scene.mouse().x(), scene.mouse().y());
-        if(scene.trackedNode() != null)
-            if(scene.trackedNode() instanceof  InteractiveJoint)
-                scene.trackedNode().interact("Add", scene, scene, vector);
+        Vector vector = new Vector(scene.mouseX(), scene.mouseY());
+        if(scene.node() != null)
+            if(scene.node() instanceof  InteractiveJoint)
+                scene.node().interact("Add", scene, scene, vector);
     }
 
     public void mouseWheel(MouseEvent event) {
@@ -110,8 +110,8 @@ public class SimpleBuilder extends PApplet{
         if (event.getCount() == 2) {
             if (event.getButton() == LEFT) {
                 if (event.isShiftDown())
-                    if(scene.trackedNode() != null)
-                        scene.trackedNode().interact("Remove");
+                    if(scene.node() != null)
+                        scene.node().interact("Remove");
                     else
                         scene.focus();
             }
@@ -127,13 +127,13 @@ public class SimpleBuilder extends PApplet{
             initial.setRoot(true);
             initial.setPickingThreshold(-0.01f);
         }else if(key == 'P' || key == 'p'){
-                printJoints(scene.trackedNode(), "reference", 1);
+                printJoints(scene.node(), "reference", 1);
         }else if(key == 'A' || key == 'a'){
             Joint.axes = !Joint.axes;
         }else if(key == 'E' || key == 'e'){
-            if(scene.trackedNode() != null){
-                scene.trackedNode().setTranslation(new Vector());
-                scene.trackedNode().enableTracking(false);
+            if(scene.node() != null){
+                scene.node().setTranslation(new Vector());
+                scene.node().enableTagging(false);
             }
         }
     }

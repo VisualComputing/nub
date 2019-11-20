@@ -2,7 +2,6 @@ package ik.interactive;
 
 import nub.core.Node;
 import nub.core.Graph;
-import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -41,7 +40,7 @@ public class AuxiliaryViews extends PApplet {
             public void graphics(PGraphics pg) {
                 pg.pushStyle();
                 Scene.drawAxes(pg, 150);
-                pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
+                pg.fill(isTagged(scene)? 255 : 25, isTagged(scene) ? 0 : 255, 255);
                 //Scene.drawEye(pg, views.get(0)._pGraphics, views.get(0)._type, this, views.get(0)._zNear, views.get(0)._zFar);
                 pg.popStyle();
             }
@@ -90,24 +89,24 @@ public class AuxiliaryViews extends PApplet {
     }
 
 
-    public Point cursorLocation(float x , float y){
+    public Vector cursorLocation(float x , float y){
         for(AuxiliaryView view : views) {
             //check bounds
             if (view.focus(x, y)) return view.cursorLocation(x, y);
         }
-        return new Point(x, y);
+        return new Vector(x, y);
     }
 
 
     public void mouseMoved() {
-        Point point = cursorLocation(mouseX, mouseY);
-        scene.cast(point);
+        Vector point = cursorLocation(mouseX, mouseY);
+        scene.tag((int)point.x(), (int)point.y());
     }
 
     public void mouseDragged() {
         AuxiliaryView current = currentView(mouseX, mouseY);
-        Point previous = current == null ? new Point(pmouseX, pmouseY) : current.cursorLocation(pmouseX, pmouseY);
-        Point point = current == null ? new Point(mouseX, mouseY) : current.cursorLocation(mouseX, mouseY);
+        Vector previous = current == null ? new Vector(pmouseX, pmouseY) : current.cursorLocation(pmouseX, pmouseY);
+        Vector point = current == null ? new Vector(mouseX, mouseY) : current.cursorLocation(mouseX, mouseY);
         Node eye = scene.eye();
         Graph.Type type = scene.type();
         if(current != null){
@@ -115,7 +114,7 @@ public class AuxiliaryViews extends PApplet {
             scene.setType(current.type());
         }
         if (mouseButton == LEFT)
-            scene.spin(previous, point);
+            scene.spin((int)previous.x(), (int)previous.y(), (int)point.x(), (int)point.y());
         else if (mouseButton == RIGHT)
             scene.translate(point.x() - previous.x(), point.y() - previous.y());
         else

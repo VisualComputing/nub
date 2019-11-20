@@ -27,7 +27,7 @@ public class Flock extends PApplet {
     PShape pshape;
     Node objShape;
 
-    int initBoidNum = 80, numFlocks = 10; // amount of boids to start the program with
+    int initBoidNum = 50, numFlocks = 10; // amount of boids to start the program with
     static ArrayList<ArrayList<Boid>> flocks = new ArrayList<>();
     static Node avatar;
     static boolean animate = true;
@@ -67,7 +67,7 @@ public class Flock extends PApplet {
 
     public void updateAvatar() {
         // boid is the one picked with a 'mouseClicked'
-        Node boid = scene.trackedNode("mouseClicked");
+        Node boid = scene.node("mouseClicked");
         if (boid != avatar) {
             avatar = boid;
             if (avatar != null)
@@ -82,10 +82,10 @@ public class Flock extends PApplet {
         if (scene.eye().reference() == null)
             if (mouseButton == LEFT)
                 // same as: scene.spin(scene.eye());
-                scene.spin();
+                scene.mouseSpin();
             else if (mouseButton == RIGHT)
                 // same as: scene.translate(scene.eye());
-                scene.translate();
+                scene.mouseTranslate();
             else
                 // same as: scene.zoom(mouseX - pmouseX, scene.eye());
                 scene.scale(mouseX - pmouseX);
@@ -94,12 +94,12 @@ public class Flock extends PApplet {
     // highlighting and 'third-person' interaction
     public void mouseMoved(MouseEvent event) {
         // 1. highlighting
-        scene.cast("mouseMoved", mouseX, mouseY);
+        scene.tag("mouseMoved", mouseX, mouseY);
         // 2. 'third-person interaction
         if (scene.eye().reference() != null)
             // press shift to move the mouse without looking around
             if (!event.isShiftDown())
-                scene.lookAround();
+                scene.mouseLookAround();
     }
 
     public void mouseWheel(MouseEvent event) {
@@ -109,7 +109,7 @@ public class Flock extends PApplet {
 
     // picks up a boid avatar, may be null
     public void mouseClicked() {
-        scene.cast("mouseClicked", mouseX, mouseY);
+        scene.tag("mouseClicked", mouseX, mouseY);
     }
 
     // Sets current avatar as the eye reference and interpolate the eye to it
@@ -223,7 +223,7 @@ public class Flock extends PApplet {
 
     public Interpolator setupTargetInterpolator(Node reference, Node target) {
         Interpolator targetInterpolator = new Interpolator(target);
-        targetInterpolator.setLoop();
+        targetInterpolator.enableRecurrence();
         targetInterpolator.setSpeed(8.2f);
         // Create an initial path
         int nbKeyFrames = 10;
@@ -234,7 +234,7 @@ public class Flock extends PApplet {
             iFrame.setTranslation(new Vector(140 * sin(step * i), target.translation().y(), target.translation().z()));
             targetInterpolator.addKeyFrame(iFrame);
         }
-        targetInterpolator.start();
+        targetInterpolator.run();
         return targetInterpolator;
     }
 

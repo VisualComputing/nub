@@ -45,7 +45,7 @@ public class SimpleSkeleton extends PApplet {
         target.setPosition(9.889991f, -38.6116f);
 
         //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
-        skeleton.get(6).enableTracking(false);
+        skeleton.get(6).enableTagging(false);
 
         //Locate the Targets on same spot of the end effectors
         //rightTarget.setPosition(skeleton[6].position());
@@ -92,14 +92,14 @@ public class SimpleSkeleton extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(mouseX - pmouseX);
         }

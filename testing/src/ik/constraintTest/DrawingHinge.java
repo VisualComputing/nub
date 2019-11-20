@@ -157,7 +157,7 @@ public class DrawingHinge  extends PApplet {
         public void graphics(PGraphics pg) {
             pg.pushStyle();
             //Draw base according to each radius
-            pg.fill(_color, graph().trackedNode() == this ? 255 : 100);
+            pg.fill(_color, graph().node() == this ? 255 : 100);
             pg.noStroke();
             drawArc(pg, graph().radius()*0.7f, -_min , _max, 30);
             //draw semi-axe
@@ -422,25 +422,25 @@ public class DrawingHinge  extends PApplet {
         Scene prev = focus;
         focus = mouseX < w / 2 ? sceneConstraint : sceneTheta;
         if(prev != focus && prev != null){
-            prev.defaultNode().interact("Clear");
-            focus.defaultNode().interact("Clear");
+            prev.node().interact("Clear");
+            focus.node().interact("Clear");
         }
 
     }
 
     public void mouseMoved() {
-        focus.cast();
+        focus.mouseTag();
     }
 
     public void mouseDragged() {
         if(focus == sceneTheta) {
-            focus.defaultNode().interact("OnScaling", new Vector(focus.mouse().x(), focus.mouse().y()));
+            focus.node().interact("OnScaling", new Vector(focus.mouseX(), focus.mouseY()));
             return;
         }
         if (mouseButton == LEFT)
-            focus.spin();
+            focus.mouseSpin();
         else if (mouseButton == RIGHT){
-            focus.translate();
+            focus.mouseTranslate();
         }
         else
             focus.moveForward(mouseX - pmouseX);
@@ -448,7 +448,7 @@ public class DrawingHinge  extends PApplet {
 
     public void mouseReleased(){
         if(focus == sceneTheta) {
-            focus.defaultNode().interact("Scale");
+            focus.node().interact("Scale");
             return;
         }
     }

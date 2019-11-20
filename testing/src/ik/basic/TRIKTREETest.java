@@ -66,7 +66,7 @@ public class TRIKTREETest extends PApplet{
     public void generateEFF(TRIKTree solver, Node root){
         if(root == null);
         if(root.children() == null || root.children().isEmpty()){
-            root.enableTracking(false);
+            root.enableTagging(false);
             Target target = new Target(scene, 6);
             target.setPosition(root.position().get());
             solver.addTarget(root, target);
@@ -128,24 +128,24 @@ public class TRIKTREETest extends PApplet{
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged(MouseEvent event) {
         if (mouseButton == RIGHT && event.isControlDown()) {
-            Vector vector = new Vector(scene.mouse().x(), scene.mouse().y());
-            if(scene.trackedNode() != null)
-                scene.trackedNode().interact("OnAdding", vector);
+            Vector vector = new Vector(scene.mouseX(), scene.mouseY());
+            if(scene.node() != null)
+                scene.node().interact("OnAdding", vector);
         } else if (mouseButton == LEFT) {
-            scene.spin(scene.pmouse(), scene.mouse());
+            scene.spin(scene.pmouseX(), scene.pmouseY(), scene.mouseX(), scene.mouseY());
         } else if (mouseButton == RIGHT) {
-            scene.translate(scene.mouse().x() - scene.pmouse().x(), scene.mouse().y() - scene.pmouse().y());
+            scene.translate(scene.mouseX() - scene.pmouseX(), scene.mouseY() - scene.pmouseY());
             Target.multipleTranslate();
         } else if (mouseButton == CENTER){
             scene.scale(scene.mouseDX());
-        } else if(scene.trackedNode() != null)
-            scene.trackedNode().interact("Reset");
-        if(!Target.selectedTargets().contains(scene.trackedNode())){
+        } else if(scene.node() != null)
+            scene.node().interact("Reset");
+        if(!Target.selectedTargets().contains(scene.node())){
             Target.clearSelectedTargets();
         }
 
@@ -159,8 +159,8 @@ public class TRIKTREETest extends PApplet{
         if (event.getCount() == 1) {
             if (event.getButton() == LEFT) {
                 if(event.isControlDown()){
-                    if(scene.trackedNode() != null)
-                        scene.trackedNode().interact("KeepSelected");
+                    if(scene.node() != null)
+                        scene.node().interact("KeepSelected");
                 }
             }
 

@@ -72,7 +72,7 @@ public class ConstrainedIK extends PApplet {
         skeleton.add(node3);
         skeleton.add(node4);
         //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
-        node4.enableTracking(false);
+        node4.enableTagging(false);
 
         //---------------------------------------------------
         //Apply constraints
@@ -273,14 +273,14 @@ public class ConstrainedIK extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(mouseX - pmouseX);
         }

@@ -219,14 +219,14 @@ public class SimpleTRIKAnim extends PApplet {
 
     @Override
     public void mouseMoved() {
-        focus.cast();
+        focus.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            focus.spin();
+            focus.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            focus.translate();
+            focus.mouseTranslate();
         } else {
             focus.scale(mouseX - pmouseX);
         }

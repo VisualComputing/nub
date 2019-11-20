@@ -42,7 +42,7 @@ public class Rex extends PApplet {
         //2. Define the Skeleton
         //2.1 Define a reference node to the skeleton and the mesh
         reference = new Node(scene);
-        reference.enableTracking(false); //disable interaction
+        reference.enableTagging(false); //disable interaction
         //2.2 Use SimpleBuilder example (or a Modelling Sw if desired) and locate each Joint accordingly to mesh
         //2.3 Create the Joints based on 2.2.
         List<Node> skeleton = buildSkeleton(reference);
@@ -86,14 +86,14 @@ public class Rex extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(mouseX - pmouseX);
         }
@@ -112,11 +112,11 @@ public class Rex extends PApplet {
     }
 
     public void keyPressed(){
-        Node f = scene.trackedNode();
+        Node f = scene.node();
         if(f == null) return;
         Hinge c = f.constraint() instanceof Hinge ? (Hinge) f.constraint() : null;
         if(c == null) return;
-        scene.trackedNode().rotate(new Quaternion( c.orientation().rotate(new Vector(0,0,1)), radians(5)));
+        scene.node().rotate(new Quaternion( c.orientation().rotate(new Vector(0,0,1)), radians(5)));
     }
 
     //Skeleton is founded by interacting with SimpleBuilder

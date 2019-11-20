@@ -40,8 +40,8 @@ public class Slot extends Node {
     @Override
     public void graphics(PGraphics pg) {
         pg.pushStyle();
-        pg.stroke(graph().trackedNode() == this ? _colorHighLight : _colorLine);
-        pg.strokeWeight(graph().trackedNode() == this ? 3 : 1);
+        pg.stroke(graph().node() == this ? _colorHighLight : _colorLine);
+        pg.strokeWeight(graph().node() == this ? 3 : 1);
         pg.line(0,0, _endPoint.x(), _endPoint.y());
         pg.fill(_color);
         pg.ellipse(0,0,_cell._board._pointDiameter, _cell._board._pointDiameter);

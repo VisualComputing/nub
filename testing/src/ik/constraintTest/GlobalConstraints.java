@@ -235,17 +235,17 @@ public class GlobalConstraints extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            if(targets.contains(scene.trackedNode())){
-                for(Node target : targets) scene.translate(target);
+            if(targets.contains(scene.node())){
+                for(Node target : targets) scene.translateNode(target, scene.mouseDX(), scene.mouseDY());
             }else{
-                scene.translate();
+                scene.mouseTranslate();
             }
         } else {
             scene.scale(scene.mouseDX());

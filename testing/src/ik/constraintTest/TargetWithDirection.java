@@ -99,18 +99,18 @@ public class TargetWithDirection  extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            if(scene.trackedNode() instanceof Arrow){
-                Vector vector = new Vector(scene.mouse().x(), scene.mouse().y());
-                ((Arrow) scene.trackedNode()).applyReferenceRotation(vector);
+            if(scene.node() instanceof Arrow){
+                Vector vector = new Vector(scene.mouseX(), scene.mouseY());
+                ((Arrow) scene.node()).applyReferenceRotation(vector);
             }else {
-                scene.translate();
+                scene.mouseTranslate();
             }
         } else {
             scene.scale(scene.mouseDX());

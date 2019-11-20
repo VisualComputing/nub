@@ -174,14 +174,14 @@ public class LoadMesh extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(scene.mouseDX());
         }
@@ -224,8 +224,8 @@ public class LoadMesh extends PApplet {
             skinning.disablePaintMode();
         }
         if(key == ' '){
-            if(scene.trackedNode() != null)
-                scene.trackedNode().enableTracking(false);
+            if(scene.node() != null)
+                scene.node().enableTagging(false);
         }
     }
 

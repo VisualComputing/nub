@@ -187,6 +187,11 @@ public class Graph {
   Vector _upVector;
   protected long _lookAroundCount;
 
+  // 6. IKinematics solvers
+  protected boolean _useTRIK = false; //TODO : remove this flag and solve only with TRIK when it is finished.
+  protected List<Solver> _solvers;
+  protected HashMap<Solver, Task> _solverTasks;
+
   /**
    * Enumerates the different visibility states an object may have respect to the eye
    * boundary.
@@ -4239,5 +4244,124 @@ public class Graph {
     //same as:
     //eye().orbit(new Quaternion(eye().worldDisplacement(quaternion.axis()), quaternion.angle()));
     eye()._orbit(quaternion, anchor());
+  }
+
+  //IK SOLVERS
+  /**
+   * Choose between FABRIK or TRIK to solve a given chain
+   */
+  public void enableTRIK(boolean trik){
+    _useTRIK = trik;
+  }
+
+  /**
+   * Return registered solvers
+   */
+  public List<Solver> treeSolvers() {
+    return _solvers;
+  }
+
+  /**
+   * Registers the given chain to solve IK.
+   */
+  public Solver registerTreeSolver(Node node) {
+    for (Solver solver : _solvers) {
+      Node head = null;
+      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
+      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
+      else return null;
+      //If Head is Contained in any structure do nothing
+      if (!((isReachable(head) && isReachable(node)) ? Node.path(head, node) : new ArrayList<Node>()).isEmpty())
+        return null;
+    }
+
+    Solver solver;
+
+    if(_useTRIK) solver = new TRIKTree(node);
+    else solver = new TreeSolver(node);
+    _solvers.add(solver);
+    //Add task
+    Task task = new Task(_timingHandler) {
+      @Override
+      public void execute() {
+        solver.solve();
+      }
+    };
+    task.run(40);
+    _solverTasks.put(solver, task);
+    return solver;
+  }
+
+  /**
+   * Unregisters the IK Solver with the given Frame as branchRoot
+   */
+  public boolean unregisterTreeSolver(Node node) {
+    Solver toRemove = null;
+    for (Solver solver : _solvers) {
+      Node head = null;
+      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
+      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
+      else return false;
+      if (head == node) {
+        toRemove = solver;
+        break;
+      }
+    }
+    //Remove task
+    unregisterTask(_solverTasks.get(toRemove));
+    return _solvers.remove(toRemove);
+  }
+
+  /**
+   * Gets the IK Solver with associated with branchRoot frame
+   */
+  public Solver treeSolver(Node node) {
+    for (Solver solver : _solvers) {
+      Node head = null;
+      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
+      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
+      else return null;
+
+      if (head == node) {
+        return solver;
+      }
+    }
+    return null;
+  }
+
+  public boolean addIKTarget(Node endEffector, Node target) {
+    for (Solver solver : _solvers) {
+      if (solver instanceof TreeSolver && ((TreeSolver)solver).addTarget(endEffector, target)) return true;
+      if (solver instanceof TRIKTree && ((TRIKTree)solver).addTarget(endEffector, target)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Same as {@code executeIKSolver(_solver, 40)}.
+   *
+   * @see #executeSolver(Solver, long)
+   */
+  public void executeSolver(Solver solver) {
+    executeSolver(solver, 40);
+  }
+
+  /**
+   * Only meaningful for non-registered solvers. Solver should be different than
+   * {@link TreeSolver}.
+   *
+   * @see #registerTreeSolver(Node)
+   * @see #unregisterTreeSolver(Node)
+   */
+  public void executeSolver(Solver solver, long period) {
+    //Add task
+    Task task = new Task(_timingHandler) {
+      @Override
+      public void execute() {
+        solver.solve();
+      }
+    };
+    task.run(period);
+    _solverTasks.put(solver, task);
   }
 }

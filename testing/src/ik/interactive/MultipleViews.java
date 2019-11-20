@@ -1,7 +1,7 @@
 package ik.interactive;
 
 import nub.core.Node;
-import nub.primitives.Point;
+import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PGraphics;
 
@@ -41,7 +41,7 @@ public class MultipleViews {
         return _defaultView;
     }
 
-    public Point cursorLocation(float x , float y){
+    public Vector cursorLocation(float x , float y){
         return  _currentView.cursorLocation(x,y);
     }
 

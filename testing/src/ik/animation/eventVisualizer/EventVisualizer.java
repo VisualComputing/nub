@@ -82,28 +82,28 @@ public class EventVisualizer extends PApplet {
     }
 
     public void mouseMoved(){
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged(){
-        if(scene.trackedNode() instanceof Slot){
-            scene.trackedNode().interact("OnMovement", new Vector(scene.mouse().x(), scene.mouse().y()));
+        if(scene.node() instanceof Slot){
+            scene.node().interact("OnMovement", new Vector(scene.mouseX(), scene.mouseY()));
         } else {
-            scene.translate();
+            scene.mouseTranslate();
         }
     }
 
     public void mouseReleased(){
-        if(scene.trackedNode() instanceof EventCell){
+        if(scene.node() instanceof EventCell){
             //we must align the event to the closest row / col
-            ((EventCell) scene.trackedNode()).applyMovement();
-        } else if(scene.trackedNode() instanceof Slot){
-            scene.trackedNode().interact("OnFinishedMovement", new Vector(scene.mouse().x(), scene.mouse().y()));
+            ((EventCell) scene.node()).applyMovement();
+        } else if(scene.node() instanceof Slot){
+            scene.node().interact("OnFinishedMovement", new Vector(scene.mouseX(), scene.mouseY()));
         }
     }
 
     public void mouseWheel(MouseEvent event) {
-        if(scene.trackedNode() == null) scene.scale(event.getCount() * 50);
+        if(scene.node() == null) scene.scale(event.getCount() * 50);
     }
 
     public static void main(String[] args) {

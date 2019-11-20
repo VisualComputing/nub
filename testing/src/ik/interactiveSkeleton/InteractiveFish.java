@@ -91,7 +91,6 @@ public class InteractiveFish extends PApplet {
             }
         };
         solverTask.run(40); //Execute the solverTask each 40 ms
-
     }
 
     public Node createTarget(float radius){
@@ -138,7 +137,7 @@ public class InteractiveFish extends PApplet {
 
     public Interpolator setupTargetInterpolator(Node target) {
         Interpolator targetInterpolator = new Interpolator(target);
-        targetInterpolator.setLoop();
+        targetInterpolator.enableRecurrence();
         targetInterpolator.setSpeed(3.2f);
         // Create an initial path
         int nbKeyFrames = 10;
@@ -149,7 +148,7 @@ public class InteractiveFish extends PApplet {
             iFrame.setTranslation(new Vector(100 * sin(step * i), target.translation().y(), target.translation().z()));
             targetInterpolator.addKeyFrame(iFrame);
         }
-        targetInterpolator.start();
+        targetInterpolator.run();
         return targetInterpolator;
     }
 
@@ -161,14 +160,14 @@ public class InteractiveFish extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(scene.mouseDX());
         }

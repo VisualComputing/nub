@@ -186,7 +186,7 @@ public class InteractiveSpider extends PApplet {
         public Interpolator legPath(Node target, float amplitude, boolean invert) {
             Scene scene = (Scene) (shape.graph());
             Interpolator targetInterpolator = new Interpolator(target);
-            targetInterpolator.setLoop();
+            targetInterpolator.enableRecurrence();
             targetInterpolator.setSpeed(8.2f);
             // Create an initial path
             int nbKeyFrames = 8;
@@ -204,19 +204,19 @@ public class InteractiveSpider extends PApplet {
                 targetInterpolator.addKeyFrame(iFrame);
             }
 
-            targetInterpolator.start();
+            targetInterpolator.run();
             return targetInterpolator;
         }
 
         public void stop(){
             for(int i = 0; i < interpolator.length; i++){
-                interpolator[i].stop();
+                interpolator[i].task().stop();
             }
         }
 
         public void start(){
             for(int i = 0; i < interpolator.length; i++){
-                interpolator[i].start();
+                interpolator[i].execute();
             }
         }
 
@@ -408,14 +408,14 @@ public class InteractiveSpider extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(scene.mouseDX());
         }

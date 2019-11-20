@@ -44,7 +44,7 @@ public class Eagle extends PApplet {
         //2. Define the Skeleton
         //2.1 Define a reference node to the skeleton and the mesh
         reference = new Node(scene);
-        reference.enableTracking(false); //disable interaction
+        reference.enableTagging(false); //disable interaction
         //2.2 Use SimpleBuilder example (or a Modelling Sw if desired) and locate each Joint accordingly to mesh
         //2.3 Create the Joints based on 2.2.
         List<Node> skeleton = buildSkeleton(reference);
@@ -120,14 +120,14 @@ public class Eagle extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(mouseX - pmouseX);
         }
@@ -186,7 +186,7 @@ public class Eagle extends PApplet {
         Joint dummy;
         dummy = new Joint(scene, scene.radius() * 0.01f);
         dummy.setReference(j1);
-        dummy.enableTracking(false);
+        dummy.enableTagging(false);
 
         Joint j2 = new Joint(scene, scene.radius() * 0.01f);
         j2.setPickingThreshold(-0.01f);
@@ -200,7 +200,7 @@ public class Eagle extends PApplet {
 
         dummy = new Joint(scene, scene.radius() * 0.01f);
         dummy.setReference(j1);
-        dummy.enableTracking(false);
+        dummy.enableTagging(false);
         Joint j4 = new Joint(scene, scene.radius() * 0.01f);
         j4.setPickingThreshold(-0.01f);
         j4.setReference(dummy);
@@ -212,7 +212,7 @@ public class Eagle extends PApplet {
 
         dummy = new Joint(scene, scene.radius() * 0.01f);
         dummy.setReference(j1);
-        dummy.enableTracking(false);
+        dummy.enableTagging(false);
         Joint j6 = new Joint(scene, scene.radius() * 0.01f);
         j6.setPickingThreshold(-0.01f);
         j6.setReference(dummy);
@@ -228,7 +228,7 @@ public class Eagle extends PApplet {
 
         dummy = new Joint(scene, scene.radius() * 0.01f);
         dummy.setReference(j1);
-        dummy.enableTracking(false);
+        dummy.enableTagging(false);
         Joint j9 = new Joint(scene, scene.radius() * 0.01f);
         j9.setPickingThreshold(-0.01f);
         j9.setReference(dummy);
@@ -244,7 +244,7 @@ public class Eagle extends PApplet {
 
         dummy = new Joint(scene, scene.radius() * 0.01f);
         dummy.setReference(j1);
-        dummy.enableTracking(false);
+        dummy.enableTagging(false);
         Joint j12 = new Joint(scene, scene.radius() * 0.01f);
         j12.setPickingThreshold(-0.01f);
         j12.setReference(dummy);

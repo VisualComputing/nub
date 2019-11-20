@@ -64,7 +64,7 @@ public class Target extends Node {
 
     public ArrayList<Vector> last(){ return _last; }
     public void drawPath(){
-        ((Scene) _graph).drawPath(_interpolator, 5);
+        ((Scene) _graph).drawCatmullRom(_interpolator, 5);
     }
 
     @Override
@@ -107,8 +107,8 @@ public class Target extends Node {
 
     public static void multipleTranslate(){
         for(Target target : _selectedTargets){
-            if(target.graph().defaultNode() != target)
-                ((Scene)target.graph()).translate(target);
+            if(target.graph().node() != target)
+                ((Scene)target.graph()).translateNode(target, ((Scene) target.graph()).mouseDX(), ((Scene) target.graph()).mouseDY());
         }
     }
 

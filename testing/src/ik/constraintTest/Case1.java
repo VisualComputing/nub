@@ -201,17 +201,17 @@ public class Case1 extends PApplet {
 
     @Override
     public void mouseMoved() {
-        focus.cast();
+        focus.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            focus.spin();
+            focus.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            if(targets.contains(focus.trackedNode())){
-                for(Node t : targets) focus.translate(t);
+            if(targets.contains(focus.node())){
+                for(Node t : targets) focus.translateNode(t, focus.mouseDX(), focus.mouseDY());
             } else {
-                focus.translate();
+                focus.mouseTranslate();
             }
         } else {
             focus.scale(mouseX - pmouseX);

@@ -781,7 +781,7 @@ public abstract class FABRIKSolver extends Solver {
         ref = new Node(scene);
         ref.setPosition(reference.position().get());
         ref.setOrientation(reference.orientation().get());
-        ref.enableTracking(false);
+        ref.enableTagging(false);
       }
     }
 

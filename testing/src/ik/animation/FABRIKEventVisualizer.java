@@ -151,28 +151,28 @@ public class FABRIKEventVisualizer extends PApplet {
 
 
     public void mouseMoved(){
-        eventScene.cast();
+        eventScene.mouseTag();
     }
 
     public void mouseDragged(){
-        if(eventScene.trackedNode() instanceof Slot){
-            eventScene.trackedNode().interact("OnMovement", new Vector(eventScene.mouse().x(), eventScene.mouse().y()));
+        if(eventScene.node() instanceof Slot){
+            eventScene.node().interact("OnMovement", new Vector(eventScene.mouseX(), eventScene.mouseY()));
         } else {
-            eventScene.translate();
+            eventScene.mouseTranslate();
         }
     }
 
     public void mouseReleased(){
-        if(eventScene.trackedNode() instanceof EventCell){
+        if(eventScene.node() instanceof EventCell){
             //we must align the event to the closest row / col
-            ((EventCell) eventScene.trackedNode()).applyMovement();
-        } else if(eventScene.trackedNode() instanceof Slot){
-            eventScene.trackedNode().interact("OnFinishedMovement", new Vector(eventScene.mouse().x(), eventScene.mouse().y()));
+            ((EventCell) eventScene.node()).applyMovement();
+        } else if(eventScene.node() instanceof Slot){
+            eventScene.node().interact("OnFinishedMovement", new Vector(eventScene.mouseX(), eventScene.mouseY()));
         }
     }
 
     public void mouseWheel(MouseEvent event) {
-        if(eventScene.trackedNode() == null) eventScene.scale(event.getCount() * 50);
+        if(eventScene.node() == null) eventScene.scale(event.getCount() * 50);
     }
 
 

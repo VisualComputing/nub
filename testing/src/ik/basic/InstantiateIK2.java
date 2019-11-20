@@ -169,7 +169,7 @@ public class InstantiateIK2 extends PApplet {
         Node endEffector = createJoint(scene,skeleton.get(4), new Vector(0, length), jointRadius, true);
         skeleton.add(endEffector);
         //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
-        endEffector.enableTracking(false);
+        endEffector.enableTagging(false);
 
         return skeleton;
     }
@@ -228,14 +228,14 @@ public class InstantiateIK2 extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(mouseX - pmouseX);
         }

@@ -78,8 +78,8 @@ public class SimpleCone  extends PApplet {
     Node n = null;
     float d = 5;
     public void keyPressed(){
-        if(scene.trackedNode() != null) {
-            n =  scene.trackedNode();
+        if(scene.node() != null) {
+            n =  scene.node();
             if(n != null) {
                 if (key == 'A' || key == 'a') {
                     d += 1;
@@ -104,14 +104,14 @@ public class SimpleCone  extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            scene.mouseTranslate();
         } else {
             scene.scale(scene.mouseDX());
         }

@@ -90,7 +90,7 @@ public class Slider {
             }
             @Override
             public void interact(Object... objects){
-                _scene.translate();
+                _scene.mouseTranslate();
                 pointerInteract(objects);
             }
         };
