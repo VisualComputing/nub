@@ -275,9 +275,9 @@ public void mouseDragged() {
 void keyPressed() {
   if (key == CODED)
     if(keyCode == UP)
-      scene.translateNode(esfera, 0, 10);
+      scene.translateNode(n2, 0, 10);
     if(keyCode == DOWN)
-      scene.translateNode(esfera, 0, -10);
+      scene.translateNode(n2, 0, -10);
 }
 ```
 
@@ -363,7 +363,7 @@ void mouseMoved() {
   scene.mouseSpinTag();
 }
 
-// interact with mouse-moved
+// interact with key-pressed
 void keyPressed() {
   // focus picked node with two clicks
   scene.focusTag("key");
