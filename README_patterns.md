@@ -259,7 +259,7 @@ Picking a node (which should be different than the scene eye) to interact with i
    | Generic     | ```updateTag(String, int, int)```  | ```tag(String, int, int)```           |
    | Mouse       | ```updateMouseTag(String)```       | ```mouseTag(String)```                |
 
-null tag delegate methods:
+   null tag delegate methods:
 
    | Ray casting | Synchronously :small_blue_diamond: | Asynchronously :small_orange_diamond: |
    |-------------|------------------------------------|---------------------------------------|
