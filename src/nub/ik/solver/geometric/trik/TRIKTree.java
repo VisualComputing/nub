@@ -1,4 +1,4 @@
-package nub.ik.solver.geometric;
+package nub.ik.solver.geometric.trik;
 
 import nub.core.Node;
 import nub.ik.solver.Solver;

@@ -1,4 +1,4 @@
-package nub.ik.solver.geometric;
+package nub.ik.solver.geometric.trik;
 
 import javafx.util.Pair;
 import nub.primitives.Matrix;

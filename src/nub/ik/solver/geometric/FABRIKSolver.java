@@ -755,11 +755,11 @@ public abstract class FABRIKSolver extends Solver {
     return copy;
   }
 
-  protected static List<Node> _copy(List<? extends Node> chain){
+  public static List<Node> _copy(List<? extends Node> chain){
     return _copy(chain, true);
   }
 
-  protected static List<Node> _copy(List<? extends Node> chain, boolean copy_constraints) {
+  public static List<Node> _copy(List<? extends Node> chain, boolean copy_constraints) {
     Node reference = chain.get(0).reference();
     if (reference != null) {
       reference = new Node(reference.position().get(), reference.orientation().get(), 1);
@@ -768,11 +768,11 @@ public abstract class FABRIKSolver extends Solver {
   }
 
   /*TODO: remove this! (debug purposes)*/
-  protected static List<Node> _copy(List<? extends Node> chain, Node reference, Scene scene) {
+  public static List<Node> _copy(List<? extends Node> chain, Node reference, Scene scene) {
     return _copy(chain, reference, scene, true);
   }
 
-  protected static List<Node> _copy(List<? extends Node> chain, Node reference, Scene scene, boolean copy_constraints) {
+  public static List<Node> _copy(List<? extends Node> chain, Node reference, Scene scene, boolean copy_constraints) {
     Node ref = reference;
     List<Node> copy = new ArrayList<Node>();
     if(ref == null){
