@@ -370,12 +370,25 @@ void keyPressed() {
 }
 ```
 
-```processing
-```
-
 ## Timing
 
 ### Timing tasks
+
+[Timing tasks](https://visualcomputing.github.io/nub-javadocs/nub/processing/TimingTask.html) are (non)recurrent, (non)concurrent (see [isRecurrent()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#isRecurrent--) and [isConcurrent()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#isConcurrent--) resp.) callbacks defined by overridden [execute()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#execute--). For example:
+
+```processing
+void setup() {
+  TimingTask spinningTask = new TimingTask(scene) {
+    @Override
+    public void execute() {
+      scene.eye().orbit(new Vector(0, 1, 0), PI / 100);
+    }
+  };
+  spinningTask.run();
+}
+```
+
+will run the timing at 25Hz (which is its default [frequency()]()).
 
 ### Interpolators
 
