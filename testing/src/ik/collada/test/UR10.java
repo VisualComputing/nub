@@ -2,13 +2,12 @@ package ik.collada.test;
 
 import ik.basic.Util;
 import nub.ik.loader.collada.URDFLoader;
-import nub.ik.solver.geometric.TRIK;
+import nub.ik.solver.geometric.trik.TRIK;
 import nub.ik.visual.Joint;
 import ik.interactive.Target;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.Hinge;
-import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.FABRIKSolver;
 import nub.ik.solver.Solver;

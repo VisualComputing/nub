@@ -3,7 +3,7 @@ package ik.basic;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.TRIK;
+import nub.ik.solver.geometric.trik.TRIK;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -42,7 +42,7 @@ public class SimpleTRIKTest extends PApplet {
     public void setup() {
         Joint.axes = true;
         TRIK._debug = true;
-        TRIK._singleStep = true;
+        TRIK._singleStep = false;
 
         //Setting the scene
         scene = new Scene(this);
@@ -58,7 +58,7 @@ public class SimpleTRIKTest extends PApplet {
 
         //Util.generateConstraints(skeleton_fabrik, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
         Util.generateConstraints(skeleton_trik, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
-        //Util.generateConstraints(idle_sk, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
+        Util.generateConstraints(idle_sk, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
 
         //skeleton_trik = createSkeleton(Vector.multiply(scene.rightVector(), -scene.radius()/2f));
         // skeleton_fabrik  = createSkeleton(Vector.multiply(scene.rightVector(), scene.radius()/2f));
@@ -136,9 +136,9 @@ public class SimpleTRIKTest extends PApplet {
         //solver.setMaxError(1);
         //Number of iterations to perform in order to reach the target (Default value is 50)
         if(TRIK._singleStep) solver.setMaxIterations(500);
-        else solver.setMaxIterations(20);
+        else solver.setMaxIterations(8);
         //Times a solver will iterate on a single Frame (Default value is 5)
-        if(!TRIK._debug) solver.setTimesPerFrame(20);
+        if(!TRIK._debug) solver.setTimesPerFrame(8);
         else solver.setTimesPerFrame(1);
         //Minimum distance between previous and current solution to consider that Solver converges (Default value is 0.01)
         //solver.setMinDistance(0.5f);
@@ -237,6 +237,14 @@ public class SimpleTRIKTest extends PApplet {
     }
 
     public void keyPressed(){
+        if(key == '1'){
+            ((TRIK)trik).enableDirection(!((TRIK)trik).direction());
+        }
+
+        if(key == 'Q'){
+            TRIK._singleStep = !TRIK._singleStep;
+        }
+
         if(key == 'A' || key == 'a'){
             enableSolver = false;
             trik.solve();
@@ -248,6 +256,7 @@ public class SimpleTRIKTest extends PApplet {
         }
 
         if(key == 'R' || key == 'r'){
+            generateRandomReachablePosition(idle_sk, scene.is3D());
             Node f = generateRandomReachablePosition(idle_sk, scene.is3D());
             Vector delta = Vector.subtract(f.position(), targets.get(0).position());
             for(Node target : targets) {
@@ -261,9 +270,9 @@ public class SimpleTRIKTest extends PApplet {
     public Node generateRandomReachablePosition(List<? extends Node> chain, boolean is3D){
         for(int i = 0; i < chain.size() - 1; i++){
             if(is3D)
-                chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
+                chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextFloat()*2*PI)));
             else
-                chain.get(i).rotate(new Quaternion(new Vector(0,0,1), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
+                chain.get(i).rotate(new Quaternion(new Vector(0,0,1), (float)(random.nextFloat()*2*PI)));
         }
         return chain.get(chain.size()-1);
     }

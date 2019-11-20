@@ -8,7 +8,7 @@ import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.BioIk;
-import nub.ik.solver.geometric.TRIK;
+import nub.ik.solver.geometric.trik.TRIK;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;

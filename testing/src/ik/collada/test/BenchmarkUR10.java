@@ -2,7 +2,7 @@ package ik.collada.test;
 
 import ik.basic.Util;
 import nub.ik.loader.collada.URDFLoader;
-import nub.ik.solver.geometric.TRIK;
+import nub.ik.solver.geometric.trik.TRIK;
 import nub.ik.visual.Joint;
 import ik.interactive.Target;
 import nub.core.Graph;

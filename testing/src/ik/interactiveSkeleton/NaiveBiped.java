@@ -7,7 +7,7 @@ import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.*;
 import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.BioIk;
-import nub.ik.solver.geometric.TRIK;
+import nub.ik.solver.geometric.trik.TRIK;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -64,7 +64,7 @@ public class NaiveBiped extends PApplet {
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
         }
-        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.TRIK, 0 , 40);
+        //createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.TRIK, 0 , 40);
         //createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.MYSOLVER);
 
     }
@@ -198,7 +198,8 @@ public class NaiveBiped extends PApplet {
         //solver.setMaxError(0f);
         if (!debug){
             solver.setTimesPerFrame(3);
-            solver.setMaxIterations(3);
+            solver.setMaxIterations(10);
+            solver.setMaxError(0.5f);
         }
         else{
             solver.setTimesPerFrame(1);

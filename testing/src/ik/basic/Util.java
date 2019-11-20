@@ -13,7 +13,7 @@ import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.evolutionary.GASolver;
 import nub.ik.solver.evolutionary.HillClimbingSolver;
 import nub.ik.solver.geometric.MySolver;
-import nub.ik.solver.geometric.TRIK;
+import nub.ik.solver.geometric.trik.TRIK;
 import nub.ik.solver.numerical.PseudoInverseSolver;
 import nub.ik.solver.numerical.SDLSSolver;
 import nub.ik.solver.numerical.TransposeSolver;
@@ -80,22 +80,22 @@ public class Util {
             case TRIK_V2:{
                 TRIK solver = new TRIK(structure);
                 solver.enableWeight(true);
-                //solver.enableDirection(true);
+                solver.enableDirection(true);
                 return solver;
             }
             case TRIK_V3:{
                 TRIK solver = new TRIK(structure);
-                solver.setLookAhead(4);
+                solver.setLookAhead(5);
                 solver.enableWeight(true);
                 solver.enableDirection(true);
                 return solver;
             }
             case TRIK_V4:{
                 TRIK solver = new TRIK(structure);
-                solver.setLookAhead(3);
+                solver.setLookAhead(5);
                 solver.enableWeight(true);
                 solver.smooth(true);
-                //solver.enableDirection(true);
+                solver.enableDirection(true);
                 return solver;
             }
             default: return null;
@@ -306,7 +306,10 @@ public class Util {
             String heuristics = "";
             TRIK  trik = (TRIK) solver;
             String error = "\n Error (pos): " + String.format( "%.3f", trik.positionError());
-            if(trik.direction()) error += "\n Error (or): " + String.format( "%.3f", trik.orientationError());
+            if(trik.direction()){
+                error += "\n Error (or): " + String.format( "%.3f", trik.orientationError());
+            }
+            error += "\n Avg actions : " + String.format( "%.3f", trik._average_actions);
 
             pg.text("TRIK" +  error  + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }

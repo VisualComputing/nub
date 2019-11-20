@@ -9,7 +9,7 @@ import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.MySolver;
-import nub.ik.solver.geometric.TRIK;
+import nub.ik.solver.geometric.trik.TRIK;
 import nub.ik.visual.Joint;
 import nub.primitives.Vector;
 import nub.processing.Scene;

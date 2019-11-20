@@ -1,12 +1,12 @@
 package ik.basic;
 
-import javafx.util.Pair;
 import nub.core.Node;
 import nub.core.Graph;
+import nub.core.constraint.Constraint;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.FABRIKSolver;
 import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.TRIK;
+import nub.ik.solver.geometric.trik.TRIK;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -38,7 +38,7 @@ public class VisualBenchmark extends PApplet {
     int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
 
 
-    Util.SolverType solversType [] = {Util.SolverType.HGSA, Util.SolverType.FABRIK, Util.SolverType.FABRIK_H1_H2, Util.SolverType.TRIK_V1,
+    Util.SolverType solversType [] = {Util.SolverType.TRIK_V1, Util.SolverType.FABRIK, Util.SolverType.FABRIK_H1_H2, Util.SolverType.TRIK_V1,
             Util.SolverType.TRIK_V2, Util.SolverType.TRIK_V3, Util.SolverType.TRIK_V4}; //Place Here Solvers that you want to compare
 
     ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
@@ -52,6 +52,7 @@ public class VisualBenchmark extends PApplet {
     }
 
     public void setup() {
+        TRIK._debug = true;
         Joint.axes = true;
         scene = new Scene(this);
         if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
@@ -88,8 +89,8 @@ public class VisualBenchmark extends PApplet {
             solvers.add(solver);
             //6. Define solver parameters
             //solvers.get(i).setMaxError(0.001f);
-            solvers.get(i).setTimesPerFrame(10);
-            solvers.get(i).setMaxIterations(10);
+            solvers.get(i).setTimesPerFrame(1);
+            solvers.get(i).setMaxIterations(40);
             //solvers.get(i).setMinDistance(0.001f);
             //7. Set targets
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
@@ -160,13 +161,15 @@ public class VisualBenchmark extends PApplet {
         scene.endHUD();
     }
 
-    public Node generateRandomReachablePosition(List<? extends Node> original, boolean is3D){
-        ArrayList<? extends Node> chain = Util.copy(original);
+    public Node generateRandomReachablePosition(List<? extends Node> chain, boolean is3D){
         for(int i = 0; i < chain.size() - 1; i++){
-            if(is3D)
-                chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
+            if(is3D) {
+                chain.get(i).rotate(new Quaternion(new Vector(0,0,1), random.nextFloat() * 2 * PI));
+                chain.get(i).rotate(new Quaternion(new Vector(0,1,0), random.nextFloat() * 2* PI));
+                chain.get(i).rotate(new Quaternion(new Vector(1,0,0), random.nextFloat() * 2 * PI));
+            }
             else
-                chain.get(i).rotate(new Quaternion(new Vector(0,0,1), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
+                chain.get(i).rotate(new Quaternion(new Vector(0,0,1), (float)(random.nextFloat()*PI)));
         }
         return chain.get(chain.size()-1);
     }

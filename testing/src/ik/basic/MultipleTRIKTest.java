@@ -2,7 +2,7 @@ package ik.basic;
 
 import nub.core.Graph;
 import nub.core.Node;
-import nub.ik.solver.geometric.TRIK;
+import nub.ik.solver.geometric.trik.TRIK;
 import nub.ik.visual.Joint;
 import nub.primitives.Vector;
 import nub.processing.Scene;
