@@ -182,9 +182,7 @@ The following scene methods implement _eye_ motion actions particularly suited f
 | Rotate CAD   | ```rotateCAD(float, float)```           | ```mouseRotateCAD()```    |
 | Look around  | ```lookAround(float, float)```          | ```mouseLookAround()```   |
 
-Note that the mouse actions follows the [delegation pattern](https://en.wikipedia.org/wiki/Delegation_pattern), simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` as parameters to their relative delegates (the generic input device method counterparts), and hence their simpler signatures.
-
-Mouse examples:
+Note that the mouse actions follows the [delegation pattern](https://en.wikipedia.org/wiki/Delegation_pattern), simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` as parameters to their relative delegates (the generic input device method counterparts), and hence their simpler signatures. Mouse examples:
 
 ```processing
 // define a mouse-dragged eye interaction
@@ -225,18 +223,16 @@ The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples
 
 To directly interact with a given node, call any of the following scene methods:
 
-| Action       | Generic input device                           | Mouse                      |
-|--------------|------------------------------------------------|----------------------------|
-| Align        | ```alignNode(Node)```                          | n.a.                       |
-| Focus        | ```focusNode(Node)```                          | n.a.                       |
-| Translate    | ```translateNode(Node, float, float, float)``` | ```mouseTranslateNode()``` |
-| Rotate       | ```rotateNode(Node, float, float, float)```    | n.a.                       |
-| Scale        | ```scaleNode(Node, float)```                   | n.a.                       |
-| Spin         | ```spinNode(Node, int, int, int, int)```       | ```mouseSpinNode()```      |
+| Action       | Generic input device                           | Mouse                          |
+|--------------|------------------------------------------------|--------------------------------|
+| Align        | ```alignNode(Node)```                          | n.a.                           |
+| Focus        | ```focusNode(Node)```                          | n.a.                           |
+| Translate    | ```translateNode(Node, float, float, float)``` | ```mouseTranslateNode(Node)``` |
+| Rotate       | ```rotateNode(Node, float, float, float)```    | n.a.                           |
+| Scale        | ```scaleNode(Node, float)```                   | n.a.                           |
+| Spin         | ```spinNode(Node, int, int, int, int)```       | ```mouseSpinNode(Node)```      |
 
-Note that the mouse actions are implemented using the _delegation pattern_, as it has been done with the [eye](#eye) actions above.
-
-Mouse examples:
+Note that the mouse actions are implemented using the _delegation pattern_, as it has been done previously with the [eye](#eye). Mouse examples:
 
 ```processing
 public void mouseDragged() {
@@ -262,6 +258,13 @@ Picking a node (which should be different than the scene eye) to interact with i
    |-------------|------------------------------------|---------------------------------------|
    | Generic     | ```updateTag(String, int, int)```  | ```tag(String, int, int)```           |
    | Mouse       | ```updateMouseTag(String)```       | ```mouseTag(String)```                |
+
+null tag delegate methods:
+
+   | Ray casting | Synchronously :small_blue_diamond: | Asynchronously :small_orange_diamond: |
+   |-------------|------------------------------------|---------------------------------------|
+   | Generic     | ```updateTag(int, int)```          | ```tag(int, int)```                   |
+   | Mouse       | ```updateMouseTag()```             | ```mouseTag()```                      |
    
    :small_blue_diamond: The tagged node is returned immediately
    :small_orange_diamond: The tagged is returned during the next call to the ```render()``` algorithm
@@ -274,21 +277,39 @@ Picking a node (which should be different than the scene eye) to interact with i
    
    Generic actions:
 
-   | Action    | Tagged nodes                                    | `null` tag                              | Tagged node or `eye`                         |
-   |-----------|-------------------------------------------------|-----------------------------------------|----------------------------------------------|
-   | Align     | ```alignTag(String)```                          | ```alignTag()```                        | ```align(String)```                          |
-   | Focus     | ```focusTag(String)```                          | ```focusTag()```                        | ```focus(String)```                          |
-   | Translate | ```translateTag(String, float, float, float)``` | ```translateTag(float, float, float)``` | ```translate(String, float, float, float)``` |
-   | Rotate    | ```rotateTag(String, float, float, float)```    | ```rotateTag(float, float, float)```    | ```rotate(String, float, float, float)```    |
-   | Scale     | ```scaleTag(String, float)```                   | ```scaleTag(float)```                   | ```scale(String, float)```                   |
-   | Spin      | ```spinTag(String, int, int, int, int)```       | ```spinTag(int, int, int, int)```       | ```spin(String, int, int, int, int)```       |
+   | Action    | Tagged nodes                                    | Tagged node or `eye`                         |
+   |-----------|-------------------------------------------------|----------------------------------------------|
+   | Align     | ```alignTag(String)```                          | ```align(String)```                          |
+   | Focus     | ```focusTag(String)```                          | ```focus(String)```                          |
+   | Translate | ```translateTag(String, float, float, float)``` | ```translate(String, float, float, float)``` |
+   | Rotate    | ```rotateTag(String, float, float, float)```    | ```rotate(String, float, float, float)```    |
+   | Scale     | ```scaleTag(String, float)```                   | ```scale(String, float)```                   |
+   | Spin      | ```spinTag(String, int, int, int, int)```       | ```spin(String, int, int, int, int)```       |
+
+   null tag delegate methods:
+
+   | Action    | Tagged nodes                            | Tagged node or `eye`                 |
+   |-----------|-----------------------------------------|--------------------------------------|
+   | Align     | ```alignTag()```                        | ```align()```                        |
+   | Focus     | ```focusTag()```                        | ```focus()```                        |
+   | Translate | ```translateTag(float, float, float)``` | ```translate(float, float, float)``` |
+   | Rotate    | ```rotateTag(float, float, float)```    | ```rotate(float, float, float)```    |
+   | Scale     | ```scaleTag(float)```                   | ```scale(float)```                   |
+   | Spin      | ```spinTag(int, int, int, int)```       | ```spin(int, int, int, int)```       |
 
    Mouse actions:
 
-   | Action    | Tagged nodes                    | `null` tag                | Tagged node or `eye`         |
-   |-----------|---------------------------------|---------------------------|------------------------------|
-   | Translate | ```mouseTranslateTag(String)``` | ```mouseTranslateTag()``` | ```mouseTranslate(String)``` |
-   | Spin      | ```mouseSpinTag(String)```      | ```mouseSpinTag()```      | ```mouseSpin(String)```      |
+   | Action    | Tagged nodes                    | Tagged node or `eye`         |
+   |-----------|---------------------------------|------------------------------|
+   | Translate | ```mouseTranslateTag(String)``` | ```mouseTranslate(String)``` |
+   | Spin      | ```mouseSpinTag(String)```      | ```mouseSpin(String)```      |
+
+   null tag delegate methods:
+
+   | Action    | Tagged nodes              | Tagged node or `eye`   |
+   |-----------|---------------------------|------------------------|
+   | Translate | ```mouseTranslateTag()``` | ```mouseTranslate()``` |
+   | Spin      | ```mouseSpinTag()```      | ```mouseSpin()```      |
 
 Observations:
 
