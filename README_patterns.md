@@ -390,7 +390,7 @@ void setup() {
 }
 ```
 
-will run the timing at 25Hz (which is its default [frequency()]()).
+will run the timing-task at 25Hz (which is its default [frequency()]()).
 
 ### Interpolators
 
