@@ -29,7 +29,7 @@ void settings() {
 void setup() {
   // declare and build the octree hierarchy
   Vector p = new Vector(100, 70, 130);
-  root = new OctreeNode(p, Vector.multiply(p, -1.0f));
+  root = new OctreeNode(p, Vector.multiply(p, -1));
   root.buildBoxHierarchy(4);
 
   scene1 = new Scene(this, P3D, w, h /2);
@@ -68,9 +68,9 @@ void draw() {
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    focus.spin();
+    focus.mouseSpin();
   else if (mouseButton == RIGHT)
-    focus.translate();
+    focus.mouseTranslate();
   else
     focus.scale(focus.mouseDX());
 }

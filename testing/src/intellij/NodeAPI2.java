@@ -325,19 +325,19 @@ public class NodeAPI2 extends PApplet {
     if (event.isControlDown())
       return;
     if (event.isShiftDown())
-      scene.translate();
-    else if (scene.trackedNode() == null)
-      scene.lookAround();
+      scene.mouseTranslate();
+    else if (scene.node() == null)
+      scene.mouseLookAround();
     else
-      scene.spin();
+      scene.mouseSpin();
   }
 
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(mouseX - pmouseX);
   }
@@ -350,12 +350,12 @@ public class NodeAPI2 extends PApplet {
   @Override
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      scene.track();
+      scene.updateMouseTag();
     else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.align();
+        scene.alignTag();
   }
 
   public class InteractiveNode extends Node {

@@ -2,7 +2,7 @@ public class Box extends Node {
   float _w, _h, _d;
   int _color;
 
-  public Box(Scene scene, int tint, float w, float h, float d) {
+  public Box(int tint, float w, float h, float d) {
     super(scene);
     _color = tint;
     _w = w;
@@ -21,7 +21,7 @@ public class Box extends Node {
     if (drawAxes)
       Scene.drawAxes(pg, PApplet.max(_w, _h, _d) * 1.3);
     pg.noStroke();
-    pg.fill(isTracked() ? color(255, 0, 0) : _color);
+    pg.fill(isTagged(scene) ? color(255, 0, 0) : _color);
     pg.box(_w, _h, _d);
     pg.stroke(255);
     if (bullseye)

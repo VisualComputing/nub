@@ -3,7 +3,6 @@ package intellij;
 import nub.core.Graph;
 import nub.core.MatrixHandler;
 import nub.core.Node;
-import nub.primitives.Point;
 import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
@@ -36,7 +35,7 @@ public class PassiveTransformations extends PApplet {
         @Override
         public void visit() {
           pushStyle();
-          fill(isTracked() ? 0 : 255, 0, 255);
+          fill(isTagged(graph) ? 0 : 255, 0, 255);
           box(5);
           popStyle();
         }
@@ -56,12 +55,12 @@ public class PassiveTransformations extends PApplet {
   }
 
   public void mouseMoved() {
-    graph.track(mouseX, mouseY, nodes);
+    graph.updateTag(mouseX, mouseY, nodes);
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      graph.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
+      graph.spin(pmouseX, pmouseY, mouseX, mouseY);
     else if (mouseButton == RIGHT)
       graph.translate(mouseX - pmouseX, mouseY - pmouseY);
     else

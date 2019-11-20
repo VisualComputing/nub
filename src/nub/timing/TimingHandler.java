@@ -46,7 +46,7 @@ public class TimingHandler {
     _updateFrameRate();
     for (Task task : _taskPool)
       if (!task.isConcurrent())
-        task._execute(frameRate());
+        task._execute();
   }
 
   /**
@@ -70,7 +70,10 @@ public class TimingHandler {
    * Unregisters the task.
    */
   public void unregisterTask(Task task) {
-    _taskPool.remove(task);
+    if (isTaskRegistered(task)) {
+      task.stop();
+      _taskPool.remove(task);
+    }
   }
 
   /**

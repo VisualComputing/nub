@@ -8,7 +8,7 @@ import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
-public class ApplicationControl2 extends PApplet {
+public class CustomNodeInteraction extends PApplet {
   Scene scene;
   Node[] shapes;
   PFont font36;
@@ -16,10 +16,6 @@ public class ApplicationControl2 extends PApplet {
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
-
-  public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.ApplicationControl2"});
-  }
 
   public void settings() {
     size(1240, 840, renderer);
@@ -31,8 +27,7 @@ public class ApplicationControl2 extends PApplet {
     shapes = new Node[10];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(scene) {
-        int id = totalShapes++;
-        int _faces = randomFaces(), _color = randomColor();
+        int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
 
         @Override
         public void graphics(PGraphics pg) {
@@ -41,9 +36,9 @@ public class ApplicationControl2 extends PApplet {
           Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
           scene.beginHUD(pg);
           Vector position = scene.screenLocation(position());
-          pg.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
+          pg.fill(isTagged(scene) ? 0 : 255, isTagged(scene) ? 255 : 0, isTagged(scene) ? 0 : 255);
           pg.textFont(font36);
-          pg.text(id, position.x(), position.y());
+          pg.text(_id, position.x(), position.y());
           scene.endHUD(pg);
           pg.popStyle();
         }
@@ -66,6 +61,8 @@ public class ApplicationControl2 extends PApplet {
             }
         }
       };
+      // set picking precision to the pixels of the node projection
+      shapes[i].setPickingThreshold(0);
       shapes[i].randomize();
     }
     font36 = loadFont("FreeSans-36.vlw");
@@ -85,48 +82,44 @@ public class ApplicationControl2 extends PApplet {
     scene.render();
   }
 
-  void control(String hid, Object... gesture) {
-    control(scene.defaultNode(hid), gesture);
-  }
-
-  void control(Node node, Object... gesture) {
-    node.interact(gesture);
-  }
-
   public void keyPressed() {
     int value = Character.getNumericValue(key);
     if (value >= 0 && value < 10)
-      scene.setTrackedNode("hid", shapes[value]);
+      scene.tag("key", shapes[value]);
     if (key == ' ')
-      scene.resetTrackedNode("hid");
+      scene.removeTag("key");
     if (key == CODED)
       if (keyCode == UP)
-        scene.translate("hid", 0, -10);
+        scene.translate("key", 0, -10);
       else if (keyCode == DOWN)
-        scene.translate("hid", 0, 10);
+        scene.translate("key", 0, 10);
       else if (keyCode == LEFT)
-        control("hid", "menos");
+        scene.interactTag("key", "menos");
       else if (keyCode == RIGHT)
-        control("hid", "mas");
+        scene.interactTag("key", "mas");
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin("hid", scene.pmouse(), scene.mouse());
+      scene.mouseSpin("key");
     else if (mouseButton == CENTER)
-      scene.translate("hid", scene.mouseDX(), scene.mouseDY());
+      scene.scale("key", scene.mouseDX());
     else
-      control("hid");
+      scene.mouseTranslate("key");
   }
 
   public void mouseWheel(MouseEvent event) {
-    control("hid", event.getCount());
+    scene.interactTag("key", event.getCount());
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      control("hid");
+      scene.interactTag("key");
     if (event.getCount() == 2)
-      scene.cast("hid", scene.mouse());
+      scene.mouseTag("key");
+  }
+
+  public static void main(String[] args) {
+    PApplet.main(new String[]{"intellij.CustomNodeInteraction"});
   }
 }

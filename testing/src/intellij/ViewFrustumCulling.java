@@ -69,9 +69,9 @@ public class ViewFrustumCulling extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.spin();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.translate();
+      focus.mouseTranslate();
     else
       //focus.zoom(mouseX - pmouseX);
       focus.scale(mouseX - pmouseX);
@@ -87,7 +87,7 @@ public class ViewFrustumCulling extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.align();
+        focus.alignTag();
   }
 
   public void keyPressed() {

@@ -63,12 +63,10 @@ public class TaskTesting extends PApplet {
     };
     interpolator = new Interpolator(shape);
     //interpolator.setLoop();
-    interpolator.enableConcurrence();
-    interpolator.setPeriod(1);
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(scene.randomNode());
-    interpolator.start();
+    interpolator.run();
 
     //frameRate(100);
     task = new TimingTask(scene) {
@@ -95,19 +93,19 @@ public class TaskTesting extends PApplet {
       }
     };
     task2.enableRecurrence();
-    task2.run(3000);
+    //task2.run(3000);
 
     task3 = new TimingTask(scene) {
       @Override
       public void execute() {
-        println("one timer parallel");
+        println("recurrent timer parallel");
       }
     };
-    task3.enableRecurrence();
+    task3.enableRecurrence(false);
     task3.enableConcurrence();
-    task3.run(3000);
+    task3.run(2000);
 
-    println("Total steps (according to formula): " + (interpolator.duration() * 1000) / (interpolator.period() * interpolator.speed()));
+    //println("Total steps (according to formula): " + (interpolator.duration() * 1000) / (interpolator.period() * interpolator.speed()));
     //*/
   }
 
@@ -123,14 +121,14 @@ public class TaskTesting extends PApplet {
 
     pushStyle();
     stroke(255);
-    // same as:scene.drawPath(interpolator, 5);
-    scene.drawPath(interpolator);
+    // same as:scene.drawCatmullRom(interpolator, 5);
+    scene.drawCatmullRom(interpolator);
     popStyle();
 
-    for (Node node : interpolator.keyFrames()) {
+    for (Node node : interpolator.keyFrames().values()) {
       pushMatrix();
       scene.applyTransformation(node);
-      scene.drawAxes(scene.tracks(node) ? 40 : 20);
+      scene.drawAxes(scene.mouseTracks(node) ? 40 : 20);
       popMatrix();
     }
     if (showEyePath) {
@@ -138,23 +136,23 @@ public class TaskTesting extends PApplet {
       fill(255, 0, 0);
       stroke(0, 255, 0);
       // same as:
-      // scene.drawPath(eyeInterpolator1, 3);
-      // scene.drawPath(eyeInterpolator2, 3);
-      scene.drawPath(eyeInterpolator1);
-      scene.drawPath(eyeInterpolator2);
+      // scene.drawCatmullRom(eyeInterpolator1, 3);
+      // scene.drawCatmullRom(eyeInterpolator2, 3);
+      scene.drawCatmullRom(eyeInterpolator1);
+      scene.drawCatmullRom(eyeInterpolator2);
       popStyle();
     }
   }
 
   public void mouseMoved() {
-    scene.track();
+    scene.updateMouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.scale(mouseX - pmouseX);
   }
@@ -163,34 +161,47 @@ public class TaskTesting extends PApplet {
     if (scene.is3D())
       scene.moveForward(event.getCount() * 20);
     else
-      scene.scale(event.getCount() * 20, scene.eye());
+      scene.scaleEye(event.getCount() * 20);
   }
 
   public void keyPressed() {
     if (key == ' ')
       showEyePath = !showEyePath;
 
+    if (key == 't')
+      task3.toggle();
+
+    if (key == 'q')
+      if (task3.isActive())
+        println("task3 is active");
+      else
+        println("task3 is NOT active");
+
     if (key == '1')
       eyeInterpolator1.addKeyFrame();
     if (key == 'a')
       eyeInterpolator1.toggle();
     if (key == 'b')
-      eyeInterpolator1.purge();
+      eyeInterpolator1.clear();
 
     if (key == '2')
       eyeInterpolator2.addKeyFrame();
     if (key == 'c')
       eyeInterpolator2.toggle();
     if (key == 'd')
-      eyeInterpolator2.purge();
+      eyeInterpolator2.clear();
 
     if (key == '-' || key == '+') {
       if (key == '-')
         speed -= 0.25f;
       else
         speed += 0.25f;
-      interpolator.start(speed);
+      interpolator.run(speed);
     }
+
+    if (key == 'n')
+      //if(((TimingTask)task3)._timer == null)
+      println("null");
 
     if (key == 's')
       scene.fit(1);
@@ -199,9 +210,6 @@ public class TaskTesting extends PApplet {
 
     if (key == 'g')
       interpolator.toggle();
-
-    if (key == 'i')
-      interpolator.enableConcurrence();
 
     if (key == 'j') {
       task2.enableRecurrence();

@@ -21,7 +21,7 @@ public class CajasOrientadas extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.setRadius(200);
-    scene.togglePerspective();
+    //scene.togglePerspective();
     scene.fit();
     esfera = new Sphere();
     esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
@@ -32,7 +32,7 @@ public class CajasOrientadas extends PApplet {
       cajas[i] = new Box();
 
     scene.fit(1);
-    scene.setTrackedNode("keyboard", esfera.iNode);
+    scene.tag("keyboard", esfera.iNode);
   }
 
   public void draw() {
@@ -44,14 +44,14 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.cast();
+    scene.mouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.scale(mouseX - pmouseX);
   }
@@ -79,10 +79,10 @@ public class CajasOrientadas extends PApplet {
     if (key == 'S')
       scene.fit();
     if (key == 'u')
-      if (scene.trackedNode("keyboard") == null)
-        scene.setTrackedNode("keyboard", esfera.iNode);
+      if (scene.node("keyboard") == null)
+        scene.tag("keyboard", esfera.iNode);
       else
-        scene.resetTrackedNode("keyboard");
+        scene.removeTag("keyboard");
     if (key == CODED)
       if (keyCode == UP)
         scene.translate("keyboard", 0, -10);
@@ -110,7 +110,7 @@ public class CajasOrientadas extends PApplet {
           if (drawAxes)
             Scene.drawAxes(pg, PApplet.max(w, h, d) * 1.3f);
           pg.noStroke();
-          if (isTracked())
+          if (isTagged(scene))
             pg.fill(255, 0, 0);
           else
             pg.fill(getColor());
@@ -186,7 +186,7 @@ public class CajasOrientadas extends PApplet {
             //DrawingUtils.drawAxes(parent, radius()*1.3f);
             Scene.drawAxes(pg, radius() * 1.3f);
           pg.noStroke();
-          if (iNode.isTracked()) {
+          if (iNode.isTagged(scene)) {
             pg.fill(255, 0, 0);
             pg.sphere(radius() * 1.2f);
           } else {

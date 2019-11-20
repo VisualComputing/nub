@@ -11,7 +11,7 @@ public class SceneBuffers extends PApplet {
   Node[] shapes;
 
   //Choose one of P3D for a 3D scene or P2D for a 2D one.
-  String renderer = P3D;
+  String renderer = P2D;
   int w = 1000;
   int h = 1000;
 
@@ -45,14 +45,14 @@ public class SceneBuffers extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.cast();
+    scene.mouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.scale(mouseX - pmouseX);
   }
@@ -61,7 +61,7 @@ public class SceneBuffers extends PApplet {
     if (scene.is3D())
       scene.moveForward(event.getCount() * 20);
     else
-      scene.scale(event.getCount() * 20, scene.eye());
+      scene.scaleEye(event.getCount() * 20);
   }
 
   PShape caja() {

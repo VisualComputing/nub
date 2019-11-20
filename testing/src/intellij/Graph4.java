@@ -3,7 +3,6 @@ package intellij;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Matrix;
-import nub.primitives.Point;
 import processing.core.PApplet;
 import processing.core.PMatrix3D;
 import processing.event.MouseEvent;
@@ -44,7 +43,7 @@ public class Graph4 extends PApplet {
         @Override
         public void visit() {
           pushStyle();
-          fill(isTracked(graph) ? 0 : 255, 0, 255);
+          fill(isTagged(graph) ? 0 : 255, 0, 255);
           box(5);
           popStyle();
         }
@@ -62,12 +61,12 @@ public class Graph4 extends PApplet {
   }
 
   public void mouseMoved() {
-    graph.track(mouseX, mouseY, nodes);
+    graph.updateTag(mouseX, mouseY, nodes);
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      graph.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
+      graph.spin(pmouseX, pmouseY, mouseX, mouseY);
     else if (mouseButton == RIGHT)
       graph.translate(mouseX - pmouseX, mouseY - pmouseY);
     else

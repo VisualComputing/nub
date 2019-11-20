@@ -19,6 +19,11 @@ package nub.timing;
  * execution thread) should be implemented by derived classes, i.e., this
  * class just implements the task sequential api.
  * <p>
+ * A task runs (see {@link #run(long)}) at a certain {@link #period()}
+ * which define the interval duration between two consecutive executions
+ * (see also {@link #frequency()}). Do not use the task for drawing
+ * since it will not necessarily run every frame.
+ * <p>
  * Call {@link TimingHandler#unregisterTask(Task)} to cancel the task.
  */
 abstract public class Task {
@@ -43,20 +48,24 @@ abstract public class Task {
 
   /**
    * Callback method which should be implemented by derived classes.
+   * <p>
+   * The task will be executed (see {@link #run(long)}) at a certain
+   * {@link #period()}. Do not implement this method for drawing
+   * since it will not necessarily be executed every frame.
    */
   abstract public void execute();
 
   /**
    * Executes the callback method defined by the {@link #execute()}.
    *
-   * <b>Note:</b> You should not call this method since it's done by the timing handler
+   * <b>Note:</b> This method is called by the timing handler
    * (see {@link nub.timing.TimingHandler#handle()}).
    */
-  protected boolean _execute(float frameRate) {
+  protected boolean _execute() {
     boolean result = false;
     if (_active) {
       long elapsedTime = System.currentTimeMillis() - _startTime;
-      float timePerFrame = (1 / frameRate) * 1000;
+      float timePerFrame = (1 / _timingHandler.frameRate()) * 1000;
       long threshold = _counter * _period;
       if (threshold >= elapsedTime) {
         long diff = elapsedTime + (long) timePerFrame - threshold;
@@ -141,6 +150,16 @@ abstract public class Task {
   }
 
   /**
+   * Same as {@code setPeriod(period() + delta)}.
+   *
+   * @see #setPeriod(long)
+   * @see #setFrequency(float)
+   */
+  public void increasePeriod(long delta) {
+    setPeriod(period() + delta);
+  }
+
+  /**
    * Defines the task {@link #period()} in milliseconds.
    *
    * @see #period()
@@ -153,10 +172,10 @@ abstract public class Task {
     }
     _period = period;
     float target = frequency();
-    if (!isConcurrent() && _timingHandler.frameRate() < target) {
+    if (_timingHandler.frameRate() < target) {
       System.out.println("Warning: Your task period of " + period + " ms requires at least a " + target + " Hz frameRate, " +
           "but currently it just achieves " + _timingHandler.frameRate() + " Hz." + '\n' + "Either set a period of at least "
-          + 1000 / _timingHandler.frameRate() + " ms or call toggleConcurrence() to execute the task concurrently.");
+          + 1000 / _timingHandler.frameRate() + " ms or call enableConcurrence() to execute the task concurrently.");
     }
   }
 
@@ -235,7 +254,7 @@ abstract public class Task {
    * @see #isConcurrent()
    */
   public boolean isRecurrent() {
-    return !_recurrence;
+    return _recurrence;
   }
 
   /**
@@ -263,8 +282,8 @@ abstract public class Task {
   }
 
   /**
-   * Enables or (disables) the task recurrence according to {@code enable}.
-   * Task recurrence should be implemented by derived classes.
+   * Enables or (disables) the task concurrence according to {@code enable}.
+   * Task concurrence should be implemented by derived classes.
    *
    * @see #isConcurrent()
    * @see #enableConcurrence()
@@ -280,7 +299,7 @@ abstract public class Task {
    * Returns {@code true} if the task is concurrent, i.e., if it runs in parallel, and
    * {@code false} otherwise.
    * <p>
-   * Task recurrence should be implemented by derived classes.
+   * Task concurrence should be implemented by derived classes.
    *
    * @see #enableConcurrence(boolean)
    * @see #isRecurrent()

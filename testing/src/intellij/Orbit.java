@@ -49,7 +49,7 @@ public class Orbit extends PApplet {
     shape2.setShape(shape());
     shape2.translate(275, 275, 275);
 
-    scene.setTrackedNode(shape2);
+    scene.tag(shape2);
     axis = Vector.random();
     axis.multiply(scene.radius() / 3);
   }
@@ -64,23 +64,23 @@ public class Orbit extends PApplet {
 
   public void keyPressed() {
     if (key == 'i')
-      scene.setTrackedNode(scene.isTrackedNode(shape1) ? shape2 : shape1);
+      scene.tag(scene.hasTag(shape1) ? shape2 : shape1);
     if (key == 'f')
       scene.flip();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT) {
-      if (shape2.isTracked())
+      if (shape2.isTagged(scene))
         //shape2.rotate((mouseX-pmouseX)* PI / width, 0, 0, shape1);
         //shape2.rotateAround(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
         //shape2.rotateAround(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
         //shape2.orbit(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
         shape2.orbit(axis, (mouseX - pmouseX) * PI / width);
       else
-        scene.spin();
+        scene.mouseSpin();
     } else if (mouseButton == RIGHT)
-      scene.spin(scene.eye());
+      scene.mouseSpinEye();
     //scene.translate();
     //scene.mousePan();
   }

@@ -133,7 +133,7 @@ public class ShadowMappingSimple3 extends PApplet {
       public void graphics(PGraphics pg) {
         pg.pushStyle();
         if (debug) {
-          pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
+          pg.fill(0, scene.hasTag(this) ? 255 : 0, 255, 120);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         }
         Scene.drawAxes(pg, 300);
@@ -200,9 +200,9 @@ public class ShadowMappingSimple3 extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(mouseX - pmouseX);
   }

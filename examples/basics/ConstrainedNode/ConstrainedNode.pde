@@ -1,5 +1,5 @@
 /**
- * ConstrainedNode.
+ * Constrained Node.
  * by Jean Pierre Charalambos.
  *
  * This example illustrates how to add constraints to your nodes
@@ -14,7 +14,6 @@ import nub.core.constraint.*;
 import nub.processing.*;
 
 Scene scene;
-boolean mouseTracking = true;
 PFont myFont;
 int transDir;
 int rotDir;
@@ -48,7 +47,7 @@ void setup() {
     @Override
     public void graphics(PGraphics pg) {
       Scene.drawAxes(pg, 40);
-      pg.fill(isTracked() ? 255 : 0, 0, 255);
+      pg.fill(isTagged(scene) ? 255 : 0, 0, 255);
       Scene.drawTorusSolenoid(pg);
     }
   };
@@ -68,15 +67,19 @@ void draw() {
 }
 
 void mouseMoved() {
-  if (mouseTracking)
-    scene.cast();
+  if (!scene.isTagValid("key"))
+    scene.mouseTag();
 }
 
 void mouseDragged() {
-  if (mouseButton == LEFT)
-    scene.spin();
-  else if (mouseButton == RIGHT)
-    scene.translate();
+  if (mouseButton == LEFT) {
+    if(!scene.mouseSpinTag("key"))
+      scene.mouseSpin();
+  }
+  else if (mouseButton == RIGHT) {
+    if(!scene.mouseTranslateTag("key"))
+      scene.mouseTranslate();
+  }
   else
     scene.scale(mouseX - pmouseX);
 }
@@ -85,17 +88,15 @@ void mouseWheel(MouseEvent event) {
   if (scene.is3D())
     scene.moveForward(event.getCount() * 20);
   else
-    scene.scale(event.getCount() * 20, scene.eye());
+    scene.scaleEye(event.getCount() * 20);
 }
 
 void keyPressed() {
   if (key == 'i')
-    if (scene.isTrackedNode(iNode)) {
-      scene.resetTrackedNode();
-      mouseTracking = true;
+    if (scene.hasTag("key", iNode)) {
+      scene.removeTag("key");
     } else {
-      scene.setTrackedNode(iNode);
-      mouseTracking = false;
+      scene.tag("key", iNode);
     }
   if (key == 'b' || key == 'B') {
     rotDir = (rotDir + 1) % 3;
@@ -117,30 +118,30 @@ void keyPressed() {
       .rotationConstraintType()));
   }
 
-  Vector dir = new Vector(0.0f, 0.0f, 0.0f);
+  Vector dir = new Vector(0, 0, 0);
   switch (transDir) {
   case 0:
-    dir.setX(1.0f);
+    dir.setX(1);
     break;
   case 1:
-    dir.setY(1.0f);
+    dir.setY(1);
     break;
   case 2:
-    dir.setZ(1.0f);
+    dir.setZ(1);
     break;
   }
   constraints[activeConstraint].setTranslationConstraintDirection(dir);
 
-  dir.set(0.0f, 0.0f, 0.0f);
+  dir.set(0, 0, 0);
   switch (rotDir) {
   case 0:
-    dir.setX(1.0f);
+    dir.setX(1);
     break;
   case 1:
-    dir.setY(1.0f);
+    dir.setY(1);
     break;
   case 2:
-    dir.setZ(1.0f);
+    dir.setZ(1);
     break;
   }
   constraints[activeConstraint].setRotationConstraintDirection(dir);
@@ -269,12 +270,12 @@ void displayDir(int dir, int x, int y, char c) {
 void displayText() {
   text("TRANSLATION :", 350, height - 30);
   displayDir(transDir, (350 + 105), height - 30, 'D');
-  displayType(constraints[activeConstraint].translationConstraintType(), 
+  displayType(constraints[activeConstraint].translationConstraintType(),
     350, height - 60, 'T');
 
   text("ROTATION :", width - 120, height - 30);
   displayDir(rotDir, width - 40, height - 30, 'B');
-  displayType(constraints[activeConstraint].rotationConstraintType(), 
+  displayType(constraints[activeConstraint].rotationConstraintType(),
     width - 120, height - 60, 'R');
 
   switch (activeConstraint) {

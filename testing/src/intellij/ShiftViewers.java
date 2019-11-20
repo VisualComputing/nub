@@ -88,15 +88,15 @@ public class ShiftViewers extends PApplet {
 
   @Override
   public void mouseMoved() {
-    focus.cast();
+    focus.mouseTag();
   }
 
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.spin();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.translate();
+      focus.mouseTranslate();
     else
       focus.moveForward(focus.mouseDX());
   }
@@ -112,7 +112,7 @@ public class ShiftViewers extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.align();
+        focus.alignTag();
   }
 
   public void draw() {

@@ -56,11 +56,11 @@ public class Interpolation extends PApplet {
       }
     };
     interpolator = new Interpolator(shape);
-    interpolator.setLoop();
+    interpolator.enableRecurrence();
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
-      interpolator.addKeyFrame(scene.randomNode());
-    interpolator.start();
+      interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+    interpolator.run();
   }
 
   public void draw() {
@@ -69,14 +69,13 @@ public class Interpolation extends PApplet {
 
     pushStyle();
     stroke(255);
-    // same as:scene.drawPath(interpolator, 5);
-    scene.drawPath(interpolator);
+    // same as:scene.drawCatmullRom(interpolator, 5);
+    scene.drawCatmullRom(interpolator);
     popStyle();
-
-    for (Node node : interpolator.keyFrames()) {
+    for (Node node : interpolator.keyFrames().values()) {
       pushMatrix();
       scene.applyTransformation(node);
-      scene.drawAxes(scene.tracks(node) ? 40 : 20);
+      scene.drawAxes(scene.mouseTracks(node) ? 40 : 20);
       popMatrix();
     }
     if (showEyePath) {
@@ -84,23 +83,23 @@ public class Interpolation extends PApplet {
       fill(255, 0, 0);
       stroke(0, 255, 0);
       // same as:
-      // scene.drawPath(eyeInterpolator1, 3);
-      // scene.drawPath(eyeInterpolator2, 3);
-      scene.drawPath(eyeInterpolator1);
-      scene.drawPath(eyeInterpolator2);
+      // scene.drawCatmullRom(eyeInterpolator1, 3);
+      // scene.drawCatmullRom(eyeInterpolator2, 3);
+      scene.drawCatmullRom(eyeInterpolator1);
+      scene.drawCatmullRom(eyeInterpolator2);
       popStyle();
     }
   }
 
   public void mouseMoved() {
-    scene.track();
+    scene.updateMouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.scale(mouseX - pmouseX);
   }
@@ -109,7 +108,7 @@ public class Interpolation extends PApplet {
     if (scene.is3D())
       scene.moveForward(event.getCount() * 20);
     else
-      scene.scale(event.getCount() * 20, scene.eye());
+      scene.scaleEye(event.getCount() * 20);
   }
 
   public void keyPressed() {
@@ -121,21 +120,21 @@ public class Interpolation extends PApplet {
     if (key == 'a')
       eyeInterpolator1.toggle();
     if (key == 'b')
-      eyeInterpolator1.purge();
+      eyeInterpolator1.clear();
 
     if (key == '2')
       eyeInterpolator2.addKeyFrame();
     if (key == 'c')
       eyeInterpolator2.toggle();
     if (key == 'd')
-      eyeInterpolator2.purge();
+      eyeInterpolator2.clear();
 
     if (key == '-' || key == '+') {
       if (key == '-')
         speed -= 0.25f;
       else
         speed += 0.25f;
-      interpolator.start(speed);
+      interpolator.run(speed);
     }
 
     if (key == 's')

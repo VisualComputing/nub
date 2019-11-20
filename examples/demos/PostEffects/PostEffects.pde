@@ -1,5 +1,5 @@
 /**
- * PostEffects.
+ * Post Effects.
  * by Ivan Castellanos and Jean Pierre Charalambos.
  *
  * This example is an adaption of Neil Mendoza great openFrameworks
@@ -18,7 +18,6 @@ PShader noiseShader, kaleidoShader, raysShader, pixelShader, edgeShader, depthSh
 PGraphics drawGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, depthPGraphics, horizontalGraphics;
 Scene scene;
 boolean bdepth, brays, bpixel, bedge, bkaleido, bnoise, bhorizontal;
-int startTime;
 Node[] models;
 PFont font;
 
@@ -188,14 +187,14 @@ void keyPressed() {
 }
 
 void mouseMoved() {
-  scene.cast();
+  scene.mouseTag();
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.spin();
+    scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.translate();
+    scene.mouseTranslate();
   else
     scene.moveForward(scene.mouseDX());
 }

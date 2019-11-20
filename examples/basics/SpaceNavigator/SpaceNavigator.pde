@@ -57,10 +57,10 @@ void draw() {
 }
 
 void spaceNavigatorPicking() {
-  float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
-  float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
-  // update the space navigator tracked node:
-  scene.cast("SPCNAV", x, y);
+  float x = map(snXPos.getValue(), -0.8, 0.8, 0, width);
+  float y = map(snYPos.getValue(), -0.8, 0.8, 0, height);
+  // update the space navigator tagged node:
+  scene.tag("SPCNAV", int(x), int(y));
   // draw picking visual hint
   pushStyle();
   strokeWeight(3);
@@ -70,19 +70,21 @@ void spaceNavigatorPicking() {
 }
 
 void spaceNavigatorInteraction() {
-  scene.translate("SPCNAV", 10 * snXPos.getValue(), 10 * snYPos.getValue(), 10 * snZPos.getValue());
+  // translate(x, y, z) expects params in screen-space
+  // which has dimensions width * height * 1
+  scene.translate("SPCNAV", 20 * snXPos.getValue(), 20 * snYPos.getValue(), snZPos.getValue() / 50);
   scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
 }
 
 void mouseMoved() {
-  scene.cast();
+  scene.mouseTag();
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.spin();
+    scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.translate();
+    scene.mouseTranslate();
   else
     scene.scale(scene.mouseDX());
 }
@@ -108,7 +110,7 @@ void openSpaceNavigator() {
     println("No suitable device configured");
     System.exit(-1); // End the program NOW!
   }
-  //device.setTolerance(5.00f);
+  //device.setTolerance(5);
   snXPos = device.getSlider(0);
   snYPos = device.getSlider(1);
   snZPos = device.getSlider(2);

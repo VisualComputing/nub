@@ -1,12 +1,12 @@
 /**
  * Mini Map
  * by Jean Pierre Charalambos.
- * 
+ *
  * This example illustrates how to use off-screen rendering to build
  * a mini-map of the main Scene where all objects are interactive.
  * Note that the minimap displays the projection of the scene onto
  * the near plane in 3D.
- * 
+ *
  * Press ' ' to toggle the minimap display.
  * Press 'i' to toggle the interactivity of the minimap scene eye.
  * Press 'f' to show the entire scene or minimap.
@@ -19,7 +19,6 @@ import nub.processing.*;
 
 Scene scene, minimap, focus;
 Node[] models;
-Node sceneEye;
 boolean displayMinimap = true;
 // whilst scene is either on-screen or not, the minimap is always off-screen
 // test both cases here:
@@ -77,8 +76,6 @@ void setup() {
   if (renderer == P3D)
     minimap.togglePerspective();
   minimap.fit(1);
-  // detached node
-  sceneEye = new Node();
 }
 
 PShape shape() {
@@ -93,9 +90,9 @@ void keyPressed() {
   if (key == 'i') {
     interactiveEye = !interactiveEye;
     if (interactiveEye)
-      minimap.setTrackedNode(sceneEye);
+      minimap.tag(scene.eye());
     else
-      minimap.resetTrackedNode();
+      minimap.untag(scene.eye());
   }
   if (key == 'f')
     focus.fit(1);
@@ -105,14 +102,14 @@ void keyPressed() {
 
 void mouseMoved() {
   if (!interactiveEye || focus == scene)
-    focus.cast();
+    focus.mouseTag();
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    focus.spin();
+    focus.mouseSpin();
   else if (mouseButton == RIGHT)
-    focus.translate();
+    focus.mouseTranslate();
   else
     focus.scale(focus.mouseDX());
 }
@@ -134,8 +131,6 @@ void mouseClicked(MouseEvent event) {
 
 void draw() {
   focus = displayMinimap ? (mouseX > w / 2 && mouseY > h / 2) ? minimap : scene : scene;
-  if (interactiveEye)
-    Node.sync(scene.eye(), sceneEye);
   background(75, 25, 15);
   if (scene.isOffscreen()) {
     scene.beginDraw();
@@ -158,7 +153,7 @@ void draw() {
     minimap.drawAxes();
     minimap.render();
     // draw scene eye
-    minimap.context().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 255, 125);
+    minimap.context().fill(minimap.isTagged(scene.eye()) ? 255 : 25, minimap.isTagged(scene.eye()) ? 0 : 255, 255, 125);
     minimap.context().strokeWeight(2);
     minimap.context().stroke(0, 0, 255);
     minimap.drawFrustum(scene);

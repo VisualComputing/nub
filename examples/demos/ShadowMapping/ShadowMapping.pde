@@ -25,10 +25,10 @@ PShader shadowShader;
 PGraphics shadowMap;
 float fov = THIRD_PI;
 Matrix biasMatrix = new Matrix(
-  0.5f, 0.0f, 0.0f, 0.0f,
-  0.0f, 0.5f, 0.0f, 0.0f,
-  0.0f, 0.0f, 0.5f, 0.0f,
-  0.5f, 0.5f, 0.5f, 1.0f
+  0.5,   0,   0, 0,
+    0, 0.5,   0, 0,
+    0,   0, 0.5, 0,
+  0.5, 0.5, 0.5, 1
   );
 boolean debug;
 Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
@@ -50,7 +50,7 @@ void setup() {
     @Override
     public void graphics(PGraphics pg) {
       if (!isCulled()) {
-        float offset = -frameCount * 0.01f;
+        float offset = -frameCount * 0.01;
         pg.fill(0xffff5500);
         for (int z = -5; z < 6; ++z)
           for (int x = -5; x < 6; ++x) {
@@ -67,7 +67,7 @@ void setup() {
     @Override
     public void graphics(PGraphics pg) {
       if (!isCulled()) {
-        float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
+        float angle = -frameCount * 0.0015, rotation = TWO_PI / 20;
         pg.fill(0xffff5500);
         for (int n = 0; n < 20; ++n, angle += rotation) {
           pg.pushMatrix();
@@ -86,7 +86,7 @@ void setup() {
     @Override
     public void graphics(PGraphics pg) {
       if (!isCulled()) {
-        float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
+        float angle = -frameCount * 0.0015, rotation = TWO_PI / 20;
         pg.fill(0xffff5500);
         for (int n = 0; n < 20; ++n, angle += rotation) {
           pg.pushMatrix();
@@ -108,30 +108,30 @@ void setup() {
       pg.box(360, 5, 360);
     }
   };
-  floor.disableTracking();
+  floor.disableTagging();
   light = new Node(scene) {
     @Override
     public void graphics(PGraphics pg) {
       pg.pushStyle();
       if (debug) {
-        pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255);
+        pg.fill(0, isTagged(scene) ? 255 : 0, 255);
         Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
       } else {
         pg.fill(0, 255, 255);
-        Scene.drawCone(pg, 150f, 60f, 240f);
+        Scene.drawCone(pg, 150.0, 60.0, 240.0);
       }
       Scene.drawAxes(pg, 300);
       pg.pushStyle();
     }
   };
   light.setPickingThreshold(0);
-  light.setMagnitude(400f / 2048f);
+  light.setMagnitude(0.195);
 
   animation = new TimingTask(scene) {
     @Override
     public void execute() {
-      if (!scene.isTrackedNode(light)) {
-        float lightAngle = frameCount * 0.002f;
+      if (!scene.isTagged(light)) {
+        float lightAngle = frameCount * 0.002;
         light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
       }
       light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
@@ -181,7 +181,7 @@ void keyPressed() {
     landscape3.cull(key != '3');
   } else if (key == ' ') {
     shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
-    light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
+    light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 0.195 : tan(fov / 2));
   } else if (key == 'd') {
     debug = !debug;
     if (debug)
@@ -192,14 +192,14 @@ void keyPressed() {
 }
 
 void mouseMoved() {
-  scene.cast();
+  scene.mouseTag();
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.spin();
+    scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.translate();
+    scene.mouseTranslate();
   else
     scene.moveForward(mouseX - pmouseX);
 }

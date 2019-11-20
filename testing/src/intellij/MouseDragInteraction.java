@@ -92,7 +92,7 @@ public class MouseDragInteraction extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast();
+    scene.mouseTag();
     //scene.track();
   }
 
@@ -100,18 +100,18 @@ public class MouseDragInteraction extends PApplet {
     if (mouseButton == LEFT)
       if (cad) {
         //scene.mouseCAD(randomVector);
-        scene.rotateCAD(randomVector);
+        scene.mouseRotateCAD(randomVector);
       } else if (lookAround) {
         //scene.lookAround();
-        scene.lookAround();
+        scene.mouseLookAround();
       } else {
         //scene.spin();
-        scene.spin();
+        scene.mouseSpin();
       }
     else if (mouseButton == RIGHT) {
       //scene.translate();
       //scene.translate(scene.mouseDX(), scene.mouseDY(), scene.defaultNode());
-      scene.translate();
+      scene.mouseTranslate();
     } else {
       //scene.mouseZoom(mouseX - pmouseX);
       //scene.zoom(scene.mouseDX(), scene.defaultNode());
@@ -129,7 +129,7 @@ public class MouseDragInteraction extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.align();
+        scene.alignTag();
   }
 
   PShape shape() {

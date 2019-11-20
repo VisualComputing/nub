@@ -10,12 +10,16 @@
 
 package nub.core;
 
+import nub.primitives.Matrix;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.timing.Task;
+import nub.timing.TimingHandler;
+
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.trik.TRIKTree;
 import nub.ik.solver.geometric.TreeSolver;
-import nub.primitives.*;
-import nub.timing.Task;
-import nub.timing.TimingHandler;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,48 +46,59 @@ import java.util.List;
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
  * {@link #prune(Node)}, {@link #isReachable(Node)}, {@link #branch(Node)}, and {@link #clear()}.
- * <h2>2.1. Eye handling</h2>
+ * <h2>The eye</h2>
  * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
- * (see {@link #setEye(Node)}). Several node wrapper functions to handle the eye, such as
+ * (see {@link #setEye(Node)}). Several functions handle the eye, such as
  * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFOV()},
- * {@link #fov()}, {@link #fit()}, {@link #screenLocation(Vector, Node)} and
- * {@link #location(Vector, Node)}, are provided for convenience.
- * <h1>3. Interactivity</h1>
- * Several methods taking a {@link Node} parameter provide interactivity to nodes, such as
- * {@link #translate(float, float, float, Node)}, {@link #rotate(float, float, float, Node)}
- * and {@link #scale(float, Node)}.
- * <p>
- * Some interactivity methods are only available for the {@link #eye()} and hence they don't
- * take a node parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
- * <p>
- * Call {@link #control(Node, Object...)} to send arbitrary gesture data to the node. Note that
- * {@link Node#interact(Object...)} should be overridden to implement the node custom behavior.
- * <p>
- * To check if a given node would be picked with a ray casted at a given screen position
- * use {@link #tracks(float, float, Node)}. Refer to {@link Node#pickingThreshold()} (and
- * {@link Node#setPickingThreshold(float)}) for the different node picking policies.
- * <h1>4. Human Interface Devices</h1>
- * Setting up a <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
- * is a two step process: 1. Define an {@code hid} tracked-node instance, using an arbitrary name for it
- * (see {@link #setTrackedNode(String, Node)}); and, 2. Call any interactivity method that take an {@code hid}
- * param (such as {@link #translate(String, float, float, float)}, {@link #rotate(String, float, float, float)}
- * or {@link #scale(String, float)}) following the name convention you defined in 1. Observations:
+ * {@link #fov()}, {@link #fit()}, {@link #lookAround(float, float)}, {@link #rotateCAD(float, float)},
+ * {@link #moveForward(float)}, {@link #translateEye(float, float, float)},
+ * {@link #rotateEye(float, float, float)} and {@link #scaleEye(float)}.
+ * <h2>2.1. Transformations</h2>
+ * The graph acts as interface between screen space (a box of {@link #width()} * {@link #height()} * 1
+ * dimensions), from where user gesture data is gathered, and the {@code nodes}. To transform points
+ * from/to screen space to/from node space use {@link #location(Vector, Node)} and
+ * {@link #screenLocation(Vector, Node)}. To transform vectors from/to screen space to/from node space
+ * use {@link #displacement(Vector, Node)} and {@link #screenDisplacement(Vector, Node)}.
+ * <h1>4. Picking and interaction</h1>
+ * Picking a node to interact with it is a two-step process:
  * <ol>
- * <li>An {@code hid} tracked-node (see {@link #trackedNode(String)}) defines in turn an {@code hid} default-node
- * (see {@link #defaultNode(String)}) which simply returns the tracked-node or the {@link #eye()} when the
- * {@code hid} tracked-node is {@code null}.</li>
- * <li>The {@code hid} interactivity methods are implemented in terms of the ones defined previously
- * by simply passing the {@code hid} {@link #defaultNode(String)} to them (e.g.,
- * {@link #scale(String, float)} calls {@link #scale(float, Node)} passing the {@code hid} default-node).</li>
- * <li>The default {@code hid} is defined with a {@code null} String parameter (e.g.,
- * {@link #scale(float delta)} simply calls {@code scale(null, delta)}).</li>
- * <li>To update an {@code hid} tracked-node using ray-casting call {@link #track(String, Point, Node[])}
- * (detached or attached nodes), {@link #track(String, Point)} (only attached nodes) or
- * {@link #cast(String, Point)} (only for attached nodes too). While {@link #track(String, Point, Node[])} and
- * {@link #track(String, Point)} update the {@code hid} tracked-node synchronously (i.e., they return the
- * {@code hid} tracked-node immediately), {@link #cast(String, Point)} updates it asynchronously (i.e., it
- * optimally updates the {@code hid} tracked-node during the next call to the {@link #render()} algorithm).</li>
+ * <li>Tag the node using an arbitrary name (which may be {@code null}) either with
+ * {@link #tag(String, Node)}) or ray-casting: {@link #updateTag(String, int, int, Node[])}
+ * (detached or attached nodes), {@link #updateTag(String, int, int)} (only attached nodes) or
+ * {@link #tag(String, int, int)} (only for attached nodes too). While
+ * {@link #updateTag(String, int, int, Node[])} and {@link #updateTag(String, int, int)} update the
+ * tagged node synchronously (i.e., they return the tagged node immediately),
+ * {@link #tag(String, int, int)} updates it asynchronously (i.e., it optimally updates the tagged
+ * node during the next call to the {@link #render()} algorithm); and, </li>
+ * <li>Interact with your tagged nodes by calling any of the following methods: {@link #alignTag(String)},
+ * {@link #focusTag(String)}, {@link #translateTag(String, float, float, float)},
+ * {@link #rotateTag(String, float, float, float)}, {@link #scaleTag(String, float)},
+ * or {@link #spinTag(String, int, int, int, int)}).
+ * </li>
+ * </ol>
+ * Observations:
+ * <ol>
+ * <li>Refer to {@link Node#pickingThreshold()} (and {@link Node#setPickingThreshold(float)}) for the different
+ * ray-casting node picking policies.</li>
+ * <li>To check if a given node would be picked with a ray casted at a given screen position,
+ * call {@link #tracks(Node, int, int)}.</li>
+ * <li>To interact with the node that is referred with the {@code null} tag, call any of the following methods:
+ * {@link #alignTag()}, {@link #focusTag()}, {@link #translateTag(float, float, float)},
+ * {@link #rotateTag(float, float, float)}, {@link #scaleTag(float)} and
+ * {@link #spinTag(int, int, int, int)}), allow </li>
+ * <li>To directly interact with a given node, call any of the following methods: {@link #alignNode(Node)},
+ * {@link #focusNode(Node)}, {@link #translateNode(Node, float, float, float)},
+ * {@link #rotateNode(Node, float, float, float)},
+ * {@link #scaleNode(Node, float)} and {@link #spinNode(Node, int, int, int, int)}).</li>
+ * <li>To either interact with the node referred with a given tag or the eye, when that tag is not in use,
+ * call any of the following methods: {@link #align(String)}, {@link #focus(String)},
+ * {@link #translate(String, float, float, float)}, {@link #rotate(String, float, float, float)},
+ * {@link #scale(String, float)} and {@link #spin(String, int, int, int, int)}.</li>
+ * <li>Customize node behaviors by overridden {@link Node#interact(Object...)}
+ * and then invoke them by either calling: {@link #interactTag(Object...)},
+ * {@link #interactTag(String, Object...)} or {@link #interactNode(Node, Object...)}.
+ * </li>
  * </ol>
  * <h1>5. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
@@ -91,7 +106,7 @@ import java.util.List;
  * are provided for convenience.
  * <p>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
- * such as {@link #fit(float)}, {@link #fit(Rectangle)}, {@link #fit(Node)} and {@link #fit(Node, float)}.
+ * such as {@link #fit(float)}, {@link #fit(int, int, int, int)}, {@link #fit(Node)} and {@link #fit(Node, float)}.
  * Refer to the {@link Interpolator} documentation for details.
  * <h1>6. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
@@ -120,7 +135,7 @@ import java.util.List;
  */
 public class Graph {
   // offscreen
-  protected Point _upperLeftCorner;
+  protected int _upperLeftCornerX, _upperLeftCornerY;
   protected boolean _offscreen;
 
   // 0. Contexts
@@ -150,17 +165,18 @@ public class Graph {
 
   // 3. Handlers
   protected class Ray {
-    public String _hid;
-    public Point _pixel;
+    public String _tag;
+    public int _pixelX, _pixelY;
 
-    Ray(String hid, Point pixel) {
-      _hid = hid;
-      _pixel = pixel;
+    Ray(String tag, int x, int y) {
+      _tag = tag;
+      _pixelX = x;
+      _pixelY = y;
     }
   }
 
   protected TimingHandler _timingHandler;
-  protected HashMap<String, Node> _agents;
+  protected HashMap<String, Node> _tags;
   protected ArrayList<Ray> _rays;
 
   // 4. Graph
@@ -170,11 +186,6 @@ public class Graph {
   // 5. Interaction methods
   Vector _upVector;
   protected long _lookAroundCount;
-
-  // 6. IKinematics solvers
-  protected boolean _useTRIK = false; //TODO : remove athis flag and solve only with TREE when it is finished.
-  protected List<Solver> _solvers;
-  protected HashMap<Solver, Task> _solverTasks;
 
   /**
    * Enumerates the different visibility states an object may have respect to the eye
@@ -234,6 +245,8 @@ public class Graph {
     setMatrixHandler(matrixHandler(_fb));
     setWidth(width);
     setHeight(height);
+    _tags = new HashMap<String, Node>();
+    _rays = new ArrayList<Ray>();
     cacheProjectionViewInverse(false);
     _seeds = new ArrayList<Node>();
     _solvers = new ArrayList<Solver>();
@@ -245,8 +258,6 @@ public class Graph {
     if (is3D())
       setFOV((float) Math.PI / 3);
     fit();
-    _agents = new HashMap<String, Node>();
-    _rays = new ArrayList<Ray>();
     setRightHanded();
     enableBoundaryEquations(false);
     setZNearCoefficient(0.005f);
@@ -390,9 +401,11 @@ public class Graph {
       System.out.println("Warning: setFOV() is meaningless in 2D. Use eye().setMagnitude() instead");
       return;
     }
-    eye().setMagnitude(type() == Type.PERSPECTIVE ?
+    float magnitude = type() == Type.PERSPECTIVE ?
         (float) Math.tan(fov / 2) :
-        (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / width());
+        (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / width();
+    if (magnitude > 0)
+      eye().setMagnitude(magnitude);
   }
 
   /**
@@ -819,7 +832,7 @@ public class Graph {
     return new Task(this.timingHandler()) {
       @Override
       public void execute() {
-        interpolator.update();
+        interpolator.execute();
       }
     };
   }
@@ -917,6 +930,10 @@ public class Graph {
     if (eye == null || _eye == eye)
       return;
     //TODO experimental
+    if (isTagged(eye)) {
+      untag(eye);
+      System.out.println("Warning: node was untaged since it was set as the eye");
+    }
     prune(_eye);
     _eye = eye;
     if (_interpolator == null)
@@ -1347,25 +1364,24 @@ public class Graph {
    * Returns the ratio of graph (units) to pixel at {@code position}.
    * <p>
    * A line of {@code n * graphToPixelRatio()} graph units, located at {@code position} in
-   * the world coordinates system, will be projected with a length of {@code n} pixels on
+   * the world coordinate system, will be projected with a length of {@code n} pixels on
    * screen.
    * <p>
    * Use this method to scale objects so that they have a constant pixel size on screen.
    * The following code will draw a 20 pixel line, starting at {@link #center()} and
-   * always directed along the screen vertical direction:
+   * always directed along the screen vertical direction ({@link #upVector()}):
    * <p>
    * {@code beginShape(LINES);}<br>
-   * {@code vertex(sceneCenter().x, sceneCenter().y, sceneCenter().z);}<br>
-   * {@code Vector v = Vector.add(sceneCenter(), Vector.mult(upVector(), 20 * graphToPixelRatio(sceneCenter())));}
+   * {@code vertex(scene.center().x(), scene.center().y(), scene.center().z());}<br>
+   * {@code Vector v = Vector.add(scene.center(), Vector.multiply(scene.upVector(), 20 * scene.graphToPixelRatio(scene.center())));}
    * <br>
-   * {@code vertex(v.x, v.y, v.z);}<br>
+   * {@code vertex(v.x(), v.y(), v.z());}<br>
    * {@code endShape();}<br>
    */
   public float graphToPixelRatio(Vector position) {
     switch (type()) {
       case PERSPECTIVE:
-        return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math
-            .tan(fov() / 2.0f) / height();
+        return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math.tan(fov() / 2.0f) / height();
       case TWO_D:
       case ORTHOGRAPHIC:
         return eye().magnitude();
@@ -1709,6 +1725,24 @@ public class Graph {
   }
 
   /**
+   * Same as {@code lookAt(anchor())}.
+   *
+   * @see #lookAt(Vector)
+   * @see #anchor()
+   */
+  public void lookAtAnchor() {
+    lookAt(anchor());
+  }
+
+  /**
+   * @see #lookAt(Vector)
+   * @see #center()
+   */
+  public void lookAtCenter() {
+    lookAt(center());
+  }
+
+  /**
    * 2D eyes simply call {@code node().setPosition(target.x(), target.y())}. 3D
    * eyes set {@link Node#orientation()}, so that it looks at point {@code target} defined
    * in the world coordinate system (The eye {@link Node#position()} is not modified.
@@ -1755,7 +1789,7 @@ public class Graph {
 
   /**
    * Returns the {@link #eye()} {@link Interpolator} used by {@link #fit(float)},
-   * {@link #fit(Rectangle)}, {@link #fit(Node)}, etc.
+   * {@link #fit(int, int, int, int)}, {@link #fit(Node)}, etc.
    */
   public Interpolator interpolator() {
     return _interpolator;
@@ -1767,9 +1801,9 @@ public class Graph {
    * @see #fit(Node, float)
    * @see #fit(Vector, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit(float)
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit()
    * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
@@ -1787,9 +1821,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Vector, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit(float)
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit()
    * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
@@ -1800,11 +1834,11 @@ public class Graph {
     if (duration <= 0)
       eye().set(node);
     else {
-      _interpolator.stop();
-      _interpolator.purge();
+      _interpolator.reset();
+      _interpolator.clear();
       _interpolator.addKeyFrame(eye().detach());
       _interpolator.addKeyFrame(node.detach(), duration);
-      _interpolator.start();
+      _interpolator.run();
     }
   }
 
@@ -1817,9 +1851,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit(float)
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
    * @see #fitFOV()
@@ -1839,9 +1873,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -1864,9 +1898,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -1875,15 +1909,15 @@ public class Graph {
     if (duration <= 0)
       fit(center, radius);
     else {
-      _interpolator.stop();
-      _interpolator.purge();
+      _interpolator.reset();
+      _interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
       fit(center, radius);
       _interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.start();
+      _interpolator.run();
     }
   }
 
@@ -1896,9 +1930,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -1942,24 +1976,24 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    */
   public void fitFOV(float duration) {
     if (duration <= 0)
       fitFOV();
     else {
-      _interpolator.stop();
-      _interpolator.purge();
+      _interpolator.reset();
+      _interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
       fitFOV();
       _interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.start();
+      _interpolator.run();
     }
   }
 
@@ -1981,9 +2015,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    */
   public void fitFOV() {
@@ -2010,9 +2044,9 @@ public class Graph {
    * @see #fit(Vector, float, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -2021,15 +2055,15 @@ public class Graph {
     if (duration <= 0)
       fit(corner1, corner2);
     else {
-      _interpolator.stop();
-      _interpolator.purge();
+      _interpolator.reset();
+      _interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
       fit(corner1, corner2);
       _interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.start();
+      _interpolator.run();
     }
   }
 
@@ -2042,9 +2076,9 @@ public class Graph {
    * @see #fit(Vector, float, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -2067,7 +2101,7 @@ public class Graph {
    * {@link #center()}) that is used to define the 3D rectangle that is eventually
    * fitted.
    *
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(float)
@@ -2079,25 +2113,26 @@ public class Graph {
    * @see #fitFOV()
    * @see #fitFOV(float)
    */
-  public void fit(Rectangle rectangle, float duration) {
+  public void fit(int x, int y, int width, int height, float duration) {
     if (duration <= 0)
-      fit(rectangle);
+      fit(x, y, width, height);
     else {
-      _interpolator.stop();
-      _interpolator.purge();
+      _interpolator.reset();
+      _interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
-      fit(rectangle);
+      fit(x, y, width, height);
       _interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.start();
+      _interpolator.run();
     }
   }
 
   /**
-   * Moves the eye so that the rectangular screen region defined by {@code rectangle}
-   * (pixel units, with origin in the upper left corner) fits the screen.
+   * Moves the eye so that the rectangular screen region defined by
+   * {@code x, y, width, height} (pixel units, with origin in the upper left corner)
+   * fits the screen.
    * <p>
    * In 3D the eye is translated (its {@link Node#orientation()} is unchanged) so that
    * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
@@ -2105,7 +2140,7 @@ public class Graph {
    * to the {@link #viewDirection()} and passing through the {@link #center()}) that
    * is used to define the 3D rectangle that is eventually fitted.
    *
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit(Vector, Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(float)
@@ -2116,36 +2151,41 @@ public class Graph {
    * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
+   * @param x coordinate of the rectangle
+   * @param y coordinate of the rectangle
+   * @param width width of the rectangle
+   * @param height height of the rectangle
    */
-  public void fit(Rectangle rectangle) {
+  public void fit(int x, int y, int width, int height) {
+    int centerX = (int) ((float) x + (float) width / 2);
+    int centerY = (int) ((float) y + (float) height / 2);
     //ad-hoc
     if (is2D()) {
-      float rectRatio = (float) rectangle.width() / (float) rectangle.height();
+      float rectRatio = (float) width / (float) height;
       if (aspectRatio() < 1.0f) {
         if (aspectRatio() < rectRatio)
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+          eye().setMagnitude(eye().magnitude() * (float) width / (float) width());
         else
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+          eye().setMagnitude(eye().magnitude() * (float) height / (float) height());
       } else {
         if (aspectRatio() < rectRatio)
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+          eye().setMagnitude(eye().magnitude() * (float) width / (float) width());
         else
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+          eye().setMagnitude(eye().magnitude() * (float) height / (float) height());
       }
-      lookAt(location(new Vector(rectangle.centerX(), rectangle.centerY(), 0)));
+      lookAt(location(new Vector(centerX, centerY, 0)));
       return;
     }
 
     Vector vd = viewDirection();
     float distToPlane = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
-    Point center = new Point((int) rectangle.centerX(), (int) rectangle.centerY());
     Vector orig = new Vector();
     Vector dir = new Vector();
-    convertClickToLine(center, orig, dir);
+    convertPixelToLine(centerX, centerY, orig, dir);
     Vector newCenter = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    convertClickToLine(new Point(rectangle.x(), center.y()), orig, dir);
+    convertPixelToLine(x, centerY, orig, dir);
     Vector pointX = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    convertClickToLine(new Point(center.x(), rectangle.y()), orig, dir);
+    convertPixelToLine(centerX, y, orig, dir);
     Vector pointY = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
     float distance = 0.0f;
     float distX, distY;
@@ -2176,18 +2216,16 @@ public class Graph {
    * <p>
    * This method is useful for analytical intersection in a selection method.
    */
-  public void convertClickToLine(Point pixel, Vector origin, Vector direction) {
-    Point pixelCopy = new Point(pixel.x(), pixel.y());
-
+  public void convertPixelToLine(int x, int y, Vector origin, Vector direction) {
     // left-handed coordinate system correction
     if (isLeftHanded())
-      pixelCopy.setY(height() - pixel.y());
+      y = height() - y;
 
     switch (type()) {
       case PERSPECTIVE:
         origin.set(eye().position());
-        direction.set(new Vector(((2.0f * pixelCopy.x() / width()) - 1.0f) * eye().magnitude() * aspectRatio(),
-            ((2.0f * (height() - pixelCopy.y()) / height()) - 1.0f) * eye().magnitude(),
+        direction.set(new Vector(((2.0f * x / width()) - 1.0f) * eye().magnitude() * aspectRatio(),
+            ((2.0f * (height() - y) / height()) - 1.0f) * eye().magnitude(),
             -1.0f));
         direction.set(Vector.subtract(eye().worldLocation(direction), origin));
         direction.normalize();
@@ -2197,8 +2235,8 @@ public class Graph {
       case ORTHOGRAPHIC: {
         float wh0 = eye().magnitude() * width() / 2;
         float wh1 = eye().magnitude() * height() / 2;
-        origin.set(new Vector((2.0f * pixelCopy.x() / width() - 1.0f) * wh0,
-            -(2.0f * pixelCopy.y() / height() - 1.0f) * wh1,
+        origin.set(new Vector((2.0f * x / width() - 1.0f) * wh0,
+            -(2.0f * y / height() - 1.0f) * wh1,
             0.0f));
         origin.set(eye().worldLocation(origin));
         direction.set(viewDirection());
@@ -2359,130 +2397,11 @@ public class Graph {
   }
 
   /**
-   * @return last node a local eye parameter (different than the Node) was updated.
+   * @return last frame when a local eye parameter (different than the {@link #eye()}) was updated.
    * @see #lastUpdate()
    */
   protected long _lastNonEyeUpdate() {
     return _lastNonEyeUpdate;
-  }
-
-
-  /**
-   * Choose between FABRIK or TRIK to solve a given chain
-   */
-  public void enableTRIK(boolean trik){
-    _useTRIK = trik;
-  }
-
-  /**
-   * Return registered solvers
-   */
-  public List<Solver> treeSolvers() {
-    return _solvers;
-  }
-
-  /**
-   * Registers the given chain to solve IK.
-   */
-  public Solver registerTreeSolver(Node node) {
-    for (Solver solver : _solvers) {
-      Node head = null;
-      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
-      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
-      else return null;
-      //If Head is Contained in any structure do nothing
-      if (!((isReachable(head) && isReachable(node)) ? Node.path(head, node) : new ArrayList<Node>()).isEmpty())
-        return null;
-    }
-
-    Solver solver;
-
-    if(_useTRIK) solver = new TRIKTree(node);
-    else solver = new TreeSolver(node);
-    _solvers.add(solver);
-    //Add task
-    Task task = new Task(_timingHandler) {
-      @Override
-      public void execute() {
-        solver.solve();
-      }
-    };
-    task.run(40);
-    _solverTasks.put(solver, task);
-    return solver;
-  }
-
-  /**
-   * Unregisters the IK Solver with the given Frame as branchRoot
-   */
-  public boolean unregisterTreeSolver(Node node) {
-    Solver toRemove = null;
-    for (Solver solver : _solvers) {
-      Node head = null;
-      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
-      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
-      else return false;
-      if (head == node) {
-        toRemove = solver;
-        break;
-      }
-    }
-    //Remove task
-    unregisterTask(_solverTasks.get(toRemove));
-    return _solvers.remove(toRemove);
-  }
-
-  /**
-   * Gets the IK Solver with associated with branchRoot frame
-   */
-  public Solver treeSolver(Node node) {
-    for (Solver solver : _solvers) {
-      Node head = null;
-      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
-      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
-      else return null;
-
-      if (head == node) {
-        return solver;
-      }
-    }
-    return null;
-  }
-
-  public boolean addIKTarget(Node endEffector, Node target) {
-    for (Solver solver : _solvers) {
-      if (solver instanceof TreeSolver && ((TreeSolver)solver).addTarget(endEffector, target)) return true;
-      if (solver instanceof TRIKTree && ((TRIKTree)solver).addTarget(endEffector, target)) return true;
-    }
-    return false;
-  }
-
-  /**
-   * Same as {@code executeIKSolver(_solver, 40)}.
-   *
-   * @see #executeSolver(Solver, long)
-   */
-  public void executeSolver(Solver solver) {
-    executeSolver(solver, 40);
-  }
-
-  /**
-   * Only meaningful for non-registered solvers. Solver should be different than
-   * {@link TreeSolver}.
-   *
-   * @see #registerTreeSolver(Node)
-   * @see #unregisterTreeSolver(Node)
-   */
-  public void executeSolver(Solver solver, long period) {
-    //Add task
-    Task task = new Task(_timingHandler) {
-      @Override
-      public void execute() {
-        solver.solve();
-      }
-    };
-    task.run(period);
-    _solverTasks.put(solver, task);
   }
 
   // traversal
@@ -2490,209 +2409,138 @@ public class Graph {
   // detached nodes
 
   /**
-   * Same as {@code return track(null, pixel, nodeArray)}.
-   *
-   * @see #track(String, float, float, Node[])
-   */
-  public Node track(Point pixel, Node[] nodeArray) {
-    return track(null, pixel, nodeArray);
-  }
-
-  /**
-   * Same as {@code return track(hid, pixel.x(), pixel.y(), nodeArray)}.
-   *
-   * @see #track(String, float, float, Node[])
-   */
-  public Node track(String hid, Point pixel, Node[] nodeArray) {
-    return track(hid, pixel.x(), pixel.y(), nodeArray);
-  }
-
-  /**
    * Same as {@code return track(null, x, y, nodeArray)}.
    *
-   * @see #track(String, float, float, Node[])
+   * @see #updateTag(String, int, int, Node[])
    */
-  public Node track(float x, float y, Node[] nodeArray) {
-    return track(null, x, y, nodeArray);
+  public Node updateTag(int x, int y, Node[] nodeArray) {
+    return updateTag(null, x, y, nodeArray);
   }
 
   /**
-   * Updates the {@code hid} device tracked-node from the {@code nodeArray} and returns it.
+   * Tags (with {@code tag} which may be {@code null}) the node in {@code nodeArray} picked with ray-casting
+   * at pixel {@code x, y} and returns it (see {@link #node(String)}).
    * <p>
-   * To set the {@link #trackedNode(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #tracks(float, float, Node)}). If no node is found under the pixel, it returns {@code null}.
-   * <p>
-   * Use this version of the method instead of {@link #track(String, float, float)} when dealing with
+   * Use this version of the method instead of {@link #updateTag(String, int, int)} when dealing with
    * detached nodes.
    *
-   * @see #track(String, float, float)
-   * @see #track(String, float, float, List)
+   * @see #updateTag(String, int, int)
+   * @see #updateTag(String, int, int, List)
    * @see #render()
-   * @see #trackedNode(String)
-   * @see #resetTrackedNode(String)
-   * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
-   * @see #setTrackedNode(String, Node)
-   * @see #isTrackedNode(String, Node)
-   * @see Node#enableTracking(boolean)
+   * @see #node(String)
+   * @see #removeTag(String)
+   * @see #tracks(Node, int, int)
+   * @see #tag(String, Node)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(String, Point)
-   * @see #cast(String, float, float)
+   * @see #tag(String, int, int)
+   * @see #tag(String, int, int)
    */
-  public Node track(String hid, float x, float y, Node[] nodeArray) {
-    resetTrackedNode(hid);
+  public Node updateTag(String tag, int x, int y, Node[] nodeArray) {
+    removeTag(tag);
     for (Node node : nodeArray)
-      if (tracks(x, y, node)) {
-        setTrackedNode(hid, node);
+      if (tracks(node, x, y)) {
+        tag(tag, node);
         break;
       }
-    return trackedNode(hid);
-  }
-
-  /**
-   * Same as {@code return track(null, pixel, nodeList)}.
-   *
-   * @see #track(String, float, float, List)
-   */
-  public Node track(Point pixel, List<Node> nodeList) {
-    return track(null, pixel, nodeList);
-  }
-
-  /**
-   * Same as {@code return track(hid, pixel.x(), pixel.y(), nodeList)}.
-   *
-   * @see #track(String, float, float, List)
-   */
-  public Node track(String hid, Point pixel, List<Node> nodeList) {
-    return track(hid, pixel.x(), pixel.y(), nodeList);
+    return node(tag);
   }
 
   /**
    * Same as {@code return track(null, x, y, nodeList)}.
    *
-   * @see #track(String, float, float, List)
+   * @see #updateTag(String, int, int, List)
    */
-  public Node track(float x, float y, List<Node> nodeList) {
-    return track(null, x, y, nodeList);
+  public Node updateTag(int x, int y, List<Node> nodeList) {
+    return updateTag(null, x, y, nodeList);
   }
 
   /**
-   * Same as {@link #track(String, float, float, Node[])} but using a node list instead of an array.
+   * Same as {@link #updateTag(String, int, int, Node[])} but using a node list instead of an array.
    *
-   * @see #track(String, float, float, Node[])
+   * @see #updateTag(String, int, int, Node[])
    */
-  public Node track(String hid, float x, float y, List<Node> nodeList) {
-    resetTrackedNode(hid);
+  public Node updateTag(String tag, int x, int y, List<Node> nodeList) {
+    removeTag(tag);
     for (Node node : nodeList)
-      if (tracks(x, y, node)) {
-        setTrackedNode(hid, node);
+      if (tracks(node, x, y)) {
+        tag(tag, node);
         break;
       }
-    return trackedNode(hid);
+    return node(tag);
   }
 
   // attached nodes
 
   /**
-   * Same as {@code return track(null, pixel.x(), pixel.y())}.
-   *
-   * @see #track(String, Point)
-   */
-  public Node track(Point pixel) {
-    return track(null, pixel.x(), pixel.y());
-  }
-
-  /**
    * Same as {@code return track(null, x, y)}.
    *
-   * @see #track(String, float, float)
+   * @see #updateTag(String, int, int)
    */
-  public Node track(float x, float y) {
-    return track(null, x, y);
+  public Node updateTag(int x, int y) {
+    return updateTag(null, x, y);
   }
 
   /**
-   * Same as {@code return track(hid, pixel.x(), pixel.y())}.
-   *
-   * @see #track(String, float, float)
-   */
-  public Node track(String hid, Point pixel) {
-    return track(hid, pixel.x(), pixel.y());
-  }
-
-  /**
-   * Updates the {@code hid} device tracked-node and returns it.
+   * Tags (with {@code tag} which may be {@code null}) the node in {@link #nodes()} picked with ray-casting at pixel
+   * {@code x, y} and returns it (see {@link #node(String)}). May return {@code null} if no node is intersected by
+   * the ray. Not that the {@link #eye()} is never tagged.
    * <p>
-   * To set the {@link #trackedNode(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #tracks(float, float, Node)}). If no node is found under the pixel, it returns {@code null}.
-   * <p>
-   * Use this version of the method instead of {@link #track(String, float, float, Node[])} when dealing with
+   * Use this version of the method instead of {@link #updateTag(String, int, int, Node[])} when dealing with
    * attached nodes to the graph.
    *
-   * @see #track(String, float, float, Node[])
+   * @see #updateTag(String, int, int, Node[])
    * @see #render()
-   * @see #trackedNode(String)
-   * @see #resetTrackedNode(String)
-   * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
-   * @see #setTrackedNode(String, Node)
-   * @see #isTrackedNode(String, Node)
-   * @see Node#enableTracking(boolean)
+   * @see #node(String)
+   * @see #removeTag(String)
+   * @see #tracks(Node, int, int)
+   * @see #tag(String, Node)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(String, Point)
-   * @see #cast(String, float, float)
+   * @see #tag(String, int, int)
    */
-  public Node track(String hid, float x, float y) {
-    resetTrackedNode(hid);
+  public Node updateTag(String tag, int x, int y) {
+    removeTag(tag);
     for (Node node : _leadingNodes())
-      _track(hid, node, x, y);
-    return trackedNode(hid);
+      _track(tag, node, x, y);
+    return node(tag);
   }
 
   /**
-   * Use internally by {@link #track(String, float, float)}.
+   * Use internally by {@link #updateTag(String, int, int)}.
    */
-  protected void _track(String hid, Node node, float x, float y) {
-    if (trackedNode(hid) == null && node.isTrackingEnabled())
-      if (tracks(x, y, node)) {
-        setTrackedNode(hid, node);
+  protected void _track(String tag, Node node, int x, int y) {
+    if (node(tag) == null && node.isTaggingEnabled())
+      if (tracks(node, x, y)) {
+        tag(tag, node);
         return;
       }
-    if (!node.isCulled() && trackedNode(hid) == null)
+    if (!node.isCulled() && node(tag) == null)
       for (Node child : node.children())
-        _track(hid, child, x, y);
-  }
-
-  /**
-   * Same as {tracks(pixel.x(), pixel.y(), node)}.
-   *
-   * @see #tracks(float, float, Node)
-   */
-  public boolean tracks(Point pixel, Node node) {
-    return tracks(pixel.x(), pixel.y(), node);
+        _track(tag, child, x, y);
   }
 
   /**
    * Casts a ray at pixel position {@code (x, y)} and returns {@code true} if the ray picks the {@code node} and
    * {@code false} otherwise. The node is picked according to the {@link Node#pickingThreshold()}.
    *
-   * @see #trackedNode(String)
-   * @see #resetTrackedNode(String)
-   * @see #defaultNode(String)
-   * @see #track(String, float, float)
-   * @see #setTrackedNode(String, Node)
-   * @see #isTrackedNode(String, Node)
-   * @see Node#enableTracking(boolean)
+   * @see #node(String)
+   * @see #removeTag(String)
+   * @see #tag(String, Node)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
    */
-  public boolean tracks(float x, float y, Node node) {
+  public boolean tracks(Node node, int x, int y) {
     if (node.pickingThreshold() == 0 && _bb != null)
-      return _tracks(x, y, node);
+      return _tracks(node, x, y);
     else
-      return _tracks(x, y, screenLocation(node.position()), node);
+      return _tracks(node, x, y, screenLocation(node.position()));
   }
 
   /**
@@ -2702,77 +2550,62 @@ public class Graph {
    * compares the color of a back-buffer at {@code (x,y)} against the {@link Node#id()}.
    * Returns true if both colors are the same, and false otherwise.
    * <p>
-   * This method should be overridden. Default implementation symply return {@code false}.
+   * This method should be overridden. Default implementation simply return {@code false}.
    *
    * @see Node#setPickingThreshold(float)
    */
-  protected boolean _tracks(float x, float y, Node node) {
+  protected boolean _tracks(Node node, int x, int y) {
     return false;
   }
 
   /**
-   * Cached version of {@link #tracks(float, float, Node)}.
+   * Cached version of {@link #tracks(Node, int, int)}.
    */
-  protected boolean _tracks(float x, float y, Vector projection, Node node) {
+  protected boolean _tracks(Node node, int x, int y, Vector projection) {
     if (node == null || isEye(node))
       return false;
-    if (!node.isTrackingEnabled())
+    if (!node.isTaggingEnabled())
       return false;
     float threshold = Math.abs(node.pickingThreshold()) < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position())
         : node.pickingThreshold() / 2;
     return threshold > 0 ? ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold)) :
-        Point.distance(x, y, projection._vector[0], projection._vector[1]) < -threshold;
+        (float) Math.sqrt((float) Math.pow((projection._vector[0] - x), 2.0) + (float) Math.pow((projection._vector[1] - y), 2.0)) < -threshold;
   }
 
   /**
-   * Same as {@code cast(null, new Point(x, y))}.
+   * Same as {@code tag(null, x, y)}.
    *
-   * @see #cast(String, Point)
+   * @see #tag(String, int, int)
    */
-  public void cast(float x, float y) {
-    cast(null, new Point(x, y));
+  public void tag(int x, int y) {
+    tag(null, x, y);
   }
 
   /**
-   * Same as {@code cast(hid, new Point(x, y))}.
-   *
-   * @see #cast(String, Point)
-   */
-  public void cast(String hid, float x, float y) {
-    cast(hid, new Point(x, y));
-  }
-
-  /**
-   * Same as {@code cast(null, pixel)}.
-   *
-   * @see #cast(String, float, float)
-   */
-  public void cast(Point pixel) {
-    cast(null, pixel);
-  }
-
-  /**
-   * Same as {@link #track(String, Point)} but doesn't return immediately the {@code hid} device tracked-node.
-   * The algorithm schedules an updated of the {@code hid} tracked-node for the next traversal and hence should be
-   * always be used in conjunction with {@link #render()}.
+   * Same as {@link #updateTag(String, int, int)} but doesn't return immediately the tagged node.
+   * The algorithm schedules an updated of the node to be tagged for the next traversal and hence
+   * should be always be used in conjunction with {@link #render()}.
    * <p>
-   * This method is optimal since it updates the {@code hid} tracked-node at traversal time. Prefer this method over
-   * {@link #track(String, Point)} when dealing with several {@code hids}.
+   * The tagged node (see {@link #node(String)}) would be available after the next call to
+   * {@link #render()}. It may be {@code null} if no node is intersected by the ray. Not that
+   * the {@link #eye()} is never tagged.
+   * <p>
+   * This method is optimal since it tags the nodes at traversal time. Prefer this method over
+   * {@link #updateTag(String, int, int)} when dealing with several tags.
    *
    * @see #render()
-   * @see #trackedNode(String)
-   * @see #resetTrackedNode(String)
-   * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
-   * @see #setTrackedNode(String, Node)
-   * @see #isTrackedNode(String, Node)
-   * @see Node#enableTracking(boolean)
+   * @see #node(String)
+   * @see #removeTag(String)
+   * @see #tracks(Node, int, int)
+   * @see #tag(String, Node)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(String, float, float)
+   * @see #tag(int, int)
    */
-  public void cast(String hid, Point pixel) {
-    _rays.add(new Ray(hid, pixel));
+  public void tag(String tag, int x, int y) {
+    _rays.add(new Ray(tag, x, y));
   }
 
   // Off-screen
@@ -3142,16 +2975,14 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (node.isTrackingEnabled() && !_rays.isEmpty() && node.pickingThreshold() != 0) {
+    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingThreshold() != 0) {
       Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        resetTrackedNode(ray._hid);
-        // Condition is overkill. Use it only in place of resetTrackedNode
-        //if (!isTracking(ray._hid))
-        if (_tracks(ray._pixel.x(), ray._pixel.y(), projection, node)) {
-          setTrackedNode(ray._hid, node);
+        removeTag(ray._tag);
+        if (_tracks(node, ray._pixelX, ray._pixelY, projection)) {
+          tag(ray._tag, node);
           it.remove();
         }
       }
@@ -3162,15 +2993,13 @@ public class Graph {
    * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
-    if (node.isTrackingEnabled() && !_rays.isEmpty() && node.pickingThreshold() == 0 && _bb != null) {
+    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingThreshold() == 0 && _bb != null) {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        resetTrackedNode(ray._hid);
-        // Condition is overkill. Use it only in place of resetTrackedNode
-        //if (!isTracking(ray._hid))
-        if (_tracks(ray._pixel.x(), ray._pixel.y(), node)) {
-          setTrackedNode(ray._hid, node);
+        removeTag(ray._tag);
+        if (_tracks(node, ray._pixelX, ray._pixelY)) {
+          tag(ray._tag, node);
           it.remove();
         }
       }
@@ -3178,234 +3007,200 @@ public class Graph {
   }
 
   /**
-   * Same as {@code setTrackedNode(null, node)}.
+   * Same as {@code tag(null, node)}.
    *
-   * @see #setTrackedNode(String, Node)
+   * @see #tag(String, Node)
    */
-  public void setTrackedNode(Node node) {
-    setTrackedNode(null, node);
+  public void tag(Node node) {
+    tag(null, node);
   }
 
   /**
-   * Sets the {@code hid} tracked-node (see {@link #trackedNode(String)}). Call this function if you want to set the
-   * tracked node manually and {@link #track(String, Point)} or {@link #cast(String, Point)} to set it automatically
-   * using ray casting.
+   * Tags the {@code node} (with {@code tag} which may be {@code null})
+   * (see {@link #node(String)}). Tagging the {@link #eye()} is not allowed.
+   * Call {@link #updateTag(String, int, int)} or
+   * {@link #tag(String, int, int)} to tag the node with ray casting.
    *
-   * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
-   * @see #track(String, float, float)
-   * @see #resetTrackedNode(String)
-   * @see #isTrackedNode(String, Node)
-   * @see Node#enableTracking(boolean)
+   * @see #tracks(Node, int, int)
+   * @see #updateTag(String, int, int)
+   * @see #removeTag(String)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
    */
-  public void setTrackedNode(String hid, Node node) {
+  public void tag(String tag, Node node) {
     if (node == null) {
-      System.out.println("Warning. Cannot track a null node!");
+      System.out.println("Warning. Cannot tag a null node!");
       return;
     }
-    if (!node.isTrackingEnabled()) {
-      System.out.println("Warning. Node cannot be tracked! Enable tracking on the node first by call node.enableTracking(true)");
+    if (node == eye()) {
+      System.out.println("Warning. Cannot tag the eye!");
       return;
     }
-    _agents.put(hid, node);
+    if (!node.isTaggingEnabled()) {
+      System.out.println("Warning. Node cannot be tagged! Enable tagging on the node first by call node.enableTagging(true)");
+      return;
+    }
+    _tags.put(tag, node);
   }
 
   /**
-   * Same as {@code return trackedNode(null)}.
+   * Same as {@code return node(null)}.
    *
-   * @see #trackedNode(String)
+   * @see #node(String)
    */
-  public Node trackedNode() {
-    return trackedNode(null);
+  public Node node() {
+    return node(null);
   }
 
   /**
-   * Returns the current {@code hid} tracked node which is usually set by ray casting (see
-   * {@link #track(String, float, float)}). May return {@code null}. Reset it with {@link #resetTrackedNode(String)}.
+   * Returns the node tagged with {@code tag} (which may be {@code null}) which is usually set by
+   * ray casting (see {@link #updateTag(String, int, int)}). May return {@code null}. Reset it with
+   * {@link #removeTag(String)}.
    *
-   * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
-   * @see #track(String, float, float)
-   * @see #resetTrackedNode(String)
-   * @see #isTrackedNode(String, Node)
-   * @see #setTrackedNode(String, Node)
+   * @see #tracks(Node, int, int)
+   * @see #updateTag(String, int, int)
+   * @see #removeTag(String)
+   * @see #hasTag(String, Node)
+   * @see #tag(String, Node)
    */
-  public Node trackedNode(String hid) {
-    return _agents.get(hid);
+  public Node node(String tag) {
+    return _tags.get(tag);
   }
 
   /**
-   * Same as {@code isTracking(null)}.
+   * Same as {@code isTagValid(null)}.
    *
-   * @see #isTracking(String)
+   * @see #isTagValid(String)
    */
-  public boolean isTracking() {
-    return isTracking(null);
+  public boolean isTagValid() {
+    return isTagValid(null);
   }
 
   /**
-   * Returns {@code true} if the {@code hid} has a non-null tracked node and {@code false} otherwise.
+   * Returns {@code true} if some node is tagged with {@code tag} (which may be {code null})
+   * and {@code false} otherwise.
    */
-  public boolean isTracking(String hid) {
-    return _agents.containsKey(hid);
+  public boolean isTagValid(String tag) {
+    return _tags.containsKey(tag);
+  }
+
+  public boolean isTagged(Node node) {
+    return _tags.containsValue(node);
   }
 
   /**
-   * Same as {@code return isTrackedNode(null, node)}.
+   * Same as {@code return hasTag(null, node)}.
    *
-   * @see #isTrackedNode(String, Node)
-   * @see Node#isTracked()
+   * @see #hasTag(String, Node)
    */
-  public boolean isTrackedNode(Node node) {
-    return isTrackedNode(null, node);
+  public boolean hasTag(Node node) {
+    return hasTag(null, node);
   }
 
   /**
-   * Returns {@code true} if {@code node} is the current {@code hid} {@link #trackedNode(String)} and {@code false} otherwise.
+   * Returns {@code true} if {@code node(tag)} (see {@link #node(String)})
+   * returns {@code node} and {@code false} otherwise.
    *
-   * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
-   * @see #track(String, float, float)
-   * @see #resetTrackedNode(String)
-   * @see #setTrackedNode(String, Node)
-   * @see Node#isTracked()
+   * @see #tracks(Node, int, int)
+   * @see #updateTag(String, int, int)
+   * @see #removeTag(String)
+   * @see #tag(String, Node)
+   * @see Node#isTagged(Graph)
    */
-  public boolean isTrackedNode(String hid, Node node) {
-    return trackedNode(hid) == node;
+  public boolean hasTag(String tag, Node node) {
+    return node(tag) == node;
   }
 
   /**
-   * Resets all HID's {@link #trackedNode(String)}.
+   * Removes all tags {@link #node(String)}.
    *
-   * @see #trackedNode(String)
-   * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
-   * @see #track(String, float, float)
-   * @see #setTrackedNode(String, Node)
-   * @see #isTrackedNode(String, Node)
+   * @see #node(String)
+   * @see #tracks(Node, int, int)
+   * @see #updateTag(String, int, int)
+   * @see #tag(String, Node)
+   * @see #hasTag(String, Node)
    */
-  public void resetTracking() {
-    _agents.clear();
+  public void clearTags() {
+    _tags.clear();
   }
 
   /**
-   * Same as {@code resetTrackedNode(null)}.
+   * Disables tagging the node. Calls {@code unTag(node)} and then {@code node.disableTagging()}.
    *
-   * @see #resetTrackedNode(String)
+   * @see #untag(Node)
+   * @see Node#disableTagging()
    */
-  public void resetTrackedNode() {
-    resetTrackedNode(null);
+  public void disableTagging(Node node) {
+    untag(node);
+    node.disableTagging();
   }
 
   /**
-   * Resets the current {@code hid} {@link #trackedNode(String)} so that a call to {@link #isTracking(String)}
-   * will return {@code false}. Note that {@link #track(String, float, float)} will reset the tracked node automatically.
+   * Removes all tags pointing to the {@code node}.
+   */
+  public void untag(Node node) {
+    _tags.entrySet().removeIf(entry -> (node == entry.getValue()));
+  }
+
+  /**
+   * Same as {@code removeTag(null)}.
    *
-   * @see #trackedNode(String)
-   * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
-   * @see #track(String, float, float)
-   * @see #setTrackedNode(String, Node)
-   * @see #isTrackedNode(String, Node)
+   * @see #removeTag(String)
    */
-  public void resetTrackedNode(String hid) {
-    _agents.remove(hid);
+  public void removeTag() {
+    removeTag(null);
   }
 
   /**
-   * Same as {@code return defaultNode(null)}.
+   * Removes the {@code tag} so that a call to {@link #isTagValid(String)}
+   * will return {@code false}.
    *
-   * @see #defaultNode(String)
+   * @see #node(String)
+   * @see #tracks(Node, int, int)
+   * @see #updateTag(String, int, int)
+   * @see #tag(String, Node)
+   * @see #hasTag(String, Node)
    */
-  public Node defaultNode() {
-    return defaultNode(null);
-  }
-
-  /**
-   * Returns the {@code hid} default-node. Used by methods dealing with interactivity that don't take a node
-   * param. Same as {@code return trackedNode(hid) == null ? eye() : trackedNode(hid)}. Never returns {@code null}.
-   *
-   * @see #trackedNode(String)
-   * @see #resetTrackedNode(String)
-   * @see #tracks(float, float, Node)
-   * @see #track(String, float, float)
-   * @see #setTrackedNode(String, Node)
-   * @see #isTrackedNode(String, Node)
-   */
-  public Node defaultNode(String hid) {
-    return trackedNode(hid) == null ? eye() : trackedNode(hid);
-  }
-
-  /**
-   * Same as {@code align(null)}.
-   *
-   * @see #align(String)
-   */
-  public void align() {
-    align(null);
-  }
-
-  /**
-   * Same as {@code align(defaultNode(hid))}.
-   *
-   * @see #alignWith(Node)
-   * @see #defaultNode(String)
-   */
-  public void align(String hid) {
-    alignWith(defaultNode(hid));
-  }
-
-  /**
-   * If {@code node} is {@link #isEye(Node)} aligns the {@link #eye()} with the world.
-   * Otherwise aligns the {@code node} with the {@link #eye()}. {@code node} should be
-   * non-null.
-   * <p>
-   * Wrapper method for {@link Node#align(boolean, float, Node)}.
-   *
-   * @see #isEye(Node)
-   * @see #defaultNode(String)
-   */
-  public void alignWith(Node node) {
-    if (node == null)
-      throw new RuntimeException("align(node) requires a non-null node param");
-    if (isEye(node))
-      node.align(true);
-    else
-      node.align(eye());
-  }
-
-  /**
-   * Same as {@code focus(null)}.
-   *
-   * @see #focus(String)
-   */
-  public void focus() {
-    focus(null);
-  }
-
-  /**
-   * Same as {@code focus(defaultNode())}.
-   *
-   * @see #focusWith(Node)
-   * @see #defaultNode(String)
-   */
-  public void focus(String hid) {
-    focusWith(defaultNode(hid));
-  }
-
-  /**
-   * Centers the node into the graph.
-   */
-  public void focusWith(Node node) {
-    if (node == null)
-      throw new RuntimeException("focus(node) requires a non-null node param");
-    if (isEye(node))
-      node.projectOnLine(center(), viewDirection());
-    else
-      node.projectOnLine(eye().position(), eye().zAxis(false));
+  public void removeTag(String tag) {
+    _tags.remove(tag);
   }
 
   // Screen to node conversion
+
+  /**
+   * Remap of {@code value} between two ranges. Used to convert locations between Screen and NDC.
+   */
+  protected static float _map(float value, float start1, float stop1, float start2, float stop2) {
+    return start2 + (value - start1) * (stop2 - start2) / (stop1 - start1);
+  }
+
+  /**
+   * Converts {@code vector} location from normalized device coordinates (NDC) to screen space.
+   * {@link #screenToNdcLocation(Vector)} performs the inverse transformation.
+   * {@link #ndcToScreenDisplacement(Vector)} transforms vector displacements instead of locations.
+   *
+   * @see #screenToNdcLocation(Vector)
+   * @see #ndcToScreenDisplacement(Vector)
+   */
+  public Vector ndcToScreenLocation(Vector vector) {
+    return new Vector(_map(vector.x(), -1, 1, 0, width()),
+        _map(vector.y(), -1, 1, 0, height()),
+        _map(vector.z(), -1, 1, 0, 1));
+  }
+
+  /**
+   * Converts {@code vector} location from screen space to normalized device coordinates (NDC).
+   * {@link #ndcToScreenLocation(Vector)} performs the inverse transformation.
+   * {@link #screenToNdcDisplacement(Vector)} transforms vector displacements instead of locations.
+   *
+   * @see #ndcToScreenLocation(Vector)
+   * @see #screenToNdcDisplacement(Vector)
+   */
+  public Vector screenToNdcLocation(Vector vector) {
+    return new Vector(_map(vector.x(), 0, width(), -1, 1),
+        _map(vector.y(), 0, height(), -1, 1),
+        _map(vector.z(), 0, 1, -1, 1));
+  }
 
   /**
    * Converts the {@code node} origin location to screen space.
@@ -3431,7 +3226,7 @@ public class Graph {
 
   /**
    * Converts {@code vector} location from {@code node} to screen.
-   * Use {@code location(vector, node)} to perform the inverse transformation.
+   * Use {@link #location(Vector, Node)} to perform the inverse transformation.
    * <p>
    * The x and y coordinates of the returned vector are expressed in screen coordinates,
    * (0,0) being the upper left corner of the window. The z coordinate ranges between 0
@@ -3444,28 +3239,23 @@ public class Graph {
    */
   public Vector screenLocation(Vector vector, Node node) {
     float[] xyz = new float[3];
-
     if (node != null) {
       Vector tmp = node.worldLocation(vector);
       _screenLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
     } else
       _screenLocation(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
-
     return new Vector(xyz[0], xyz[1], xyz[2]);
   }
 
   // cached version
   protected boolean _screenLocation(float objx, float objy, float objz, float[] windowCoordinate) {
     Matrix projectionViewMatrix = projectionView();
-
     float[] in = new float[4];
     float[] out = new float[4];
-
     in[0] = objx;
     in[1] = objy;
     in[2] = objz;
     in[3] = 1.0f;
-
     out[0] = projectionViewMatrix._matrix[0] * in[0] + projectionViewMatrix._matrix[4] * in[1] + projectionViewMatrix._matrix[8] * in[2]
         + projectionViewMatrix._matrix[12] * in[3];
     out[1] = projectionViewMatrix._matrix[1] * in[0] + projectionViewMatrix._matrix[5] * in[1] + projectionViewMatrix._matrix[9] * in[2]
@@ -3474,33 +3264,27 @@ public class Graph {
         + projectionViewMatrix._matrix[14] * in[3];
     out[3] = projectionViewMatrix._matrix[3] * in[0] + projectionViewMatrix._matrix[7] * in[1] + projectionViewMatrix._matrix[11] * in[2]
         + projectionViewMatrix._matrix[15] * in[3];
-
     if (out[3] == 0.0)
       return false;
-
     int[] viewport = new int[4];
     viewport[0] = 0;
     viewport[1] = height();
     viewport[2] = width();
     viewport[3] = -height();
-
+    // ndc, but y is inverted
     out[0] /= out[3];
     out[1] /= out[3];
     out[2] /= out[3];
-
     // Map x, y and z to range 0-1
     out[0] = out[0] * 0.5f + 0.5f;
     out[1] = out[1] * 0.5f + 0.5f;
     out[2] = out[2] * 0.5f + 0.5f;
-
     // Map x,y to viewport
     out[0] = out[0] * viewport[2] + viewport[0];
     out[1] = out[1] * viewport[3] + viewport[1];
-
     windowCoordinate[0] = out[0];
     windowCoordinate[1] = out[1];
     windowCoordinate[2] = out[2];
-
     return true;
   }
 
@@ -3530,6 +3314,8 @@ public class Graph {
    * <p>
    * {@link #screenLocation(Vector, Node)} performs the inverse transformation.
    * <p>
+   * {@link #screenDisplacement(Vector, Node)} converts displacements instead of locations.
+   * <p>
    * This method only uses the intrinsic eye parameters (view and projection matrices),
    * {@link #width()} and {@link #height()}). You can hence define a virtual eye and use
    * this method to compute un-projections out of a classical rendering context.
@@ -3539,6 +3325,7 @@ public class Graph {
    * to speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
    *
    * @see #screenLocation(Vector, Node)
+   * @see #screenDisplacement(Vector, Node)
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
@@ -3567,67 +3354,419 @@ public class Graph {
       projectionViewInverseMatrix = Matrix.multiply(projection(), view());
       projectionViewInverseMatrix.invert();
     }
-
     int[] viewport = new int[4];
     viewport[0] = 0;
     viewport[1] = height();
     viewport[2] = width();
     viewport[3] = -height();
-
     float[] in = new float[4];
     float[] out = new float[4];
-
     in[0] = winx;
     in[1] = winy;
     in[2] = winz;
     in[3] = 1.0f;
-
     /* Map x and y from window coordinates */
     in[0] = (in[0] - viewport[0]) / viewport[2];
     in[1] = (in[1] - viewport[1]) / viewport[3];
-
     /* Map to range -1 to 1 */
     in[0] = in[0] * 2 - 1;
     in[1] = in[1] * 2 - 1;
     in[2] = in[2] * 2 - 1;
-
     projectionViewInverseMatrix.multiply(in, out);
     if (out[3] == 0)
       return false;
-
     out[0] /= out[3];
     out[1] /= out[3];
     out[2] /= out[3];
-
     objCoordinate[0] = out[0];
     objCoordinate[1] = out[1];
     objCoordinate[2] = out[2];
-
     return true;
   }
 
-  // Gesture physical interface is quite nice!
-  // It always maps physical (screen) space geom data respect to the eye
-
   /**
-   * Same as {@code translate(null, dx, dy)}.
+   * Converts {@code vector} displacement from normalized device coordinates (NDC) to screen space.
+   * {@link #screenToNdcDisplacement(Vector)} performs the inverse transformation.
+   * {@link #ndcToScreenLocation(Vector)} transforms locations instead of vector displacements.
    *
-   * @see #translate(String, float, float)
+   * @see #screenToNdcDisplacement(Vector)
+   * @see #ndcToScreenLocation(Vector)
    */
-  public void translate(float dx, float dy) {
-    translate(null, dx, dy);
+  public Vector ndcToScreenDisplacement(Vector vector) {
+    return new Vector(width() * vector.x() / 2, height() * vector.y() / 2, vector.z() / 2);
   }
 
   /**
-   * Same as {@code translate(dx, dy, 0, defaultNode(hid))}.
+   * Converts {@code vector} displacement from screen space to normalized device coordinates (NDC).
+   * {@link #ndcToScreenDisplacement(Vector)} performs the inverse transformation.
+   * {@link #screenToNdcLocation(Vector)} transforms locations instead of vector displacements.
    *
-   * @see #translate(float, float, Node)
-   * @see #translate(float, float, float, Node)
-   * @see #translate(String, float, float, float)
-   * @see #defaultNode(String)
+   * @see #ndcToScreenDisplacement(Vector)
+   * @see #screenToNdcLocation(Vector)
    */
-  public void translate(String hid, float dx, float dy) {
-    translate(dx, dy, 0, defaultNode(hid));
+  public Vector screenToNdcDisplacement(Vector vector) {
+    return new Vector(2 * vector.x() / width(), 2 * vector.y() / height(), 2 * vector.z());
+  }
+
+  /**
+   * Same as {@code return displacement(vector, null)}.
+   *
+   * @see #displacement(Vector, Node)
+   * @see #location(Vector, Node)
+   */
+  public Vector displacement(Vector vector) {
+    return this.displacement(vector, null);
+  }
+
+  /**
+   * Converts {@code vector} displacement given in screen space to the {@code node} coordinate system.
+   * The screen space coordinate system is centered at the bounding box of {@link #width()} *
+   * {@link #height()} * 1} dimensions. The screen space defines the place where
+   * user gestures takes place, e.g., {@link #translateNode(Node, float, float, float)}.
+   * <p>
+   * {@link #screenDisplacement(Vector, Node)} performs the inverse transformation.
+   * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
+   *
+   * @see #displacement(Vector, Node)
+   * @see #screenLocation(Vector, Node)
+   * @see #translateNode(Node, float, float, float)
+   * @see #translateEye(float, float, float)
+   */
+  public Vector displacement(Vector vector, Node node) {
+    float dx = vector.x();
+    float dy = isRightHanded() ? -vector.y() : vector.y();
+    // Scale to fit the screen relative vector displacement
+    if (type() == Type.PERSPECTIVE) {
+      Vector position = node == null ? new Vector() : node.position();
+      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
+      dx *= 2.0 * k / (height() * eye().magnitude());
+      dy *= 2.0 * k / (height() * eye().magnitude());
+    }
+    float dz = vector.z();
+    if (is2D() && dz != 0) {
+      System.out.println("Warning: graph is 2D. Z-translation reset");
+      dz = 0;
+    } else {
+      dz *= (zNear() - zFar()) / eye().magnitude();
+    }
+    Vector eyeVector = new Vector(dx, dy, dz);
+    return node == null ? eye().worldDisplacement(eyeVector) : node.displacement(eyeVector, eye());
+  }
+
+  /**
+   * Same as {@code return screenDisplacement(vector, null)}.
+   *
+   * @see #screenDisplacement(Vector, Node)
+   * @see #screenLocation(Node)
+   */
+  public Vector screenDisplacement(Vector vector) {
+    return screenDisplacement(vector, null);
+  }
+
+  /**
+   * Converts the {@code node} {@code vector} displacement to screen space.
+   * {@link #displacement(Vector, Node)} performs the inverse transformation.
+   * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
+   *
+   * @see #displacement(Vector, Node)
+   * @see #screenLocation(Vector, Node)
+   */
+  public Vector screenDisplacement(Vector vector, Node node) {
+    Vector eyeVector = eye().displacement(vector, node);
+    float dx = eyeVector.x();
+    float dy = isRightHanded() ? -eyeVector.y() : eyeVector.y();
+    if (type() == Type.PERSPECTIVE) {
+      Vector position = node == null ? new Vector() : node.position();
+      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
+      dx /= 2.0 * k / (height() * eye().magnitude());
+      dy /= 2.0 * k / (height() * eye().magnitude());
+    }
+    float dz = eyeVector.z();
+    if (is2D() && dz != 0) {
+      System.out.println("Warning: graph is 2D. Z-translation reset");
+      dz = 0;
+    } else {
+      // sign is inverted
+      dz /= (zNear() - zFar()) / eye().magnitude();
+    }
+    return new Vector(dx, dy, dz);
+  }
+
+  // Gesture screen space interface is quite nice!
+  // It always maps screen space geom data respect to the eye
+
+  // 0. Patterns
+
+  /*
+  public void interact(Object... gesture) {
+    interact(null, gesture);
+  }
+
+  public void interact(String tag, Object... gesture) {
+    if (!interactTag(tag, gesture))
+      interactEye(gesture);
+  }
+   */
+
+  /**
+   * Same as {@code return interactTag(null, gesture)}.
+   *
+   * @see #interactTag(String, Object...)
+   */
+  public boolean interactTag(Object... gesture) {
+    return interactTag(null, gesture);
+  }
+
+  /**
+   * If {@code node(tag)} is non-null (see {@link #node(String)}) calls
+   * {@code interactNode(node(tag), gesture)} and returns {@code true}, otherwise
+   * {@code false}.
+   *
+   * @see #interactNode(Node, Object...)
+   */
+  public boolean interactTag(String tag, Object... gesture) {
+    if (node(tag) != null) {
+      interactNode(node(tag), gesture);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * If {@code node} is non-null and different than the {@link #eye()} call
+   * {@code node.interact(gesture)} which should be overridden to customize the node behavior
+   * from the gesture data.
+   *
+   * @see Node#interact(Object...)
+   */
+  public void interactNode(Node node, Object... gesture) {
+    if (node == null || node == eye()) {
+      System.out.println("Warning: interactNode requires a non-null node different than the eye. Nothing done");
+      return;
+    }
+    node.interact(gesture);
+  }
+
+  /*
+  public void interactEye(Object... gesture) {
+
+  }
+   */
+
+  // 1. Align
+
+  /**
+   * Same as {@code align(null)}.
+   *
+   * @see #align(String)
+   */
+  public void align() {
+    align(null);
+  }
+
+  /**
+   * Calls {@code alignTag(tag)} if {@code node(tag)} is non-null and {@code alignEye()} otherwise.
+   *
+   * @see #alignTag(String)
+   * @see #alignEye()
+   */
+  public void align(String tag) {
+    if (!alignTag(tag))
+      alignEye();
+  }
+
+  /**
+   * Same as {@code return alignTag(null)}.
+   *
+   * @see #alignTag(String)
+   */
+  public boolean alignTag() {
+    return alignTag(null);
+  }
+
+  /**
+   * Same as {@code alignNode(node(tag))}. Returns {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #alignNode(Node)
+   * @see #node(String)
+   */
+  public boolean alignTag(String tag) {
+    if (node(tag) != null) {
+      alignNode(node(tag));
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Aligns the node (which should be different than the {@link #eye()}) with the {@link #eye()}.
+   *
+   * @see #alignEye()
+   */
+  public void alignNode(Node node) {
+    if (node == null || node == eye()) {
+      System.out.println("Warning: alignNode requires a non-null node different than the eye. Nothing done");
+      return;
+    }
+    node.align(eye());
+  }
+
+  /**
+   * Aligns the {@link #eye()} with the world.
+   *
+   * @see #alignNode(Node)
+   */
+  public void alignEye() {
+    eye().align(true);
+  }
+
+  // 2. Focus
+
+  /**
+   * Same as {@code focus(null)}.
+   *
+   * @see #focus(String)
+   * @see #focusTag(String)
+   * @see #focusEye()
+   * @see #focusTag()
+   */
+  public void focus() {
+    focus(null);
+  }
+
+  /**
+   * Calls {@code focusTag(tag)} if {@code node(tag)} is non-null and {@code focusEye()} otherwise.
+   *
+   * @see #focusEye()
+   * @see #focusTag(String)
+   */
+  public void focus(String tag) {
+    if (!focusTag(tag))
+      focusEye();
+  }
+
+  /**
+   * Same as {@code focusTag(null)}.
+   *
+   * @see #focusTag(String)
+   */
+  public boolean focusTag() {
+    return focusTag(null);
+  }
+
+  /**
+   * Same as {@code return focusNode(node(tag))}. Returns {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #focusNode(Node)
+   * @see #node(String)
+   */
+  public boolean focusTag(String tag) {
+    if (node(tag) != null) {
+      focusNode(node(tag));
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Focuses the node (which should be different than the {@link #eye()}) with the {@link #eye()}.
+   *
+   * @see #focusEye()
+   */
+  public void focusNode(Node node) {
+    if (node == null || node == eye()) {
+      System.out.println("Warning: focusNode requires a non-null node different than the eye. Nothing done");
+      return;
+    }
+    node.projectOnLine(eye().position(), eye().zAxis(false));
+  }
+
+  /**
+   * Focuses the {@link #eye()} to the world.
+   *
+   * @see #focusNode(Node)
+   */
+  public void focusEye() {
+    eye().projectOnLine(center(), viewDirection());
+  }
+
+  // 3. Scale
+
+  /**
+   * Same as {@code scale(null, delta)}.
+   *
+   * @see #scale(String, float)
+   */
+  public void scale(float delta) {
+    scale(null, delta);
+  }
+
+  /**
+   * Calls {@code scaleTag(tag, delta)} if {@code node(tag)} is non-null and {@code scaleEye(delta)} otherwise.
+   *
+   * @see #scaleEye(float)
+   * @see #scaleTag(String, float)
+   */
+  public void scale(String tag, float delta) {
+    if (!scaleTag(tag, delta))
+      scaleEye(delta);
+  }
+
+  /**
+   * Same as {@code scaleTag(null, delta)}.
+   *
+   * @see #scaleTag(String, float)
+   */
+  public boolean scaleTag(float delta) {
+    return scaleTag(null, delta);
+  }
+
+  /**
+   * Same as {@code scaleNode(node(tag), delta)}. Returns {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #scaleNode(Node, float)
+   */
+  public boolean scaleTag(String tag, float delta) {
+    if (node(tag) != null) {
+      scaleNode(node(tag), delta);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Scales the {@code node} (which should be different than the {@link #eye()}) according to {@code delta}.
+   *
+   * @see #scaleEye(float)
+   */
+  public void scaleNode(Node node, float delta) {
+    if (node == null || node == eye()) {
+      System.out.println("Warning: scaleNode requires a non-null node different than the eye. Nothing done");
+      return;
+    }
+    float factor = 1 + Math.abs(delta) / height();
+    node.scale(delta >= 0 ? factor : 1 / factor);
+  }
+
+  /**
+   * Scales the {@link #eye()}, i.e., modifies {@link #fov()}.
+   *
+   * @see #scaleNode(Node, float)
+   */
+  public void scaleEye(float delta) {
+    float factor = 1 + Math.abs(delta) / (float) -height();
+    eye().scale(delta >= 0 ? factor : 1 / factor);
+  }
+
+  // 4. Translate
+
+  /**
+   * Same as {@code translate(dx, dy, 0)}.
+   *
+   * @see #translate(float, float, float)
+   */
+  public void translate(float dx, float dy) {
+    translate(dx, dy, 0);
   }
 
   /**
@@ -3640,154 +3779,173 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translate(dx, dy, dz, defaultNode(hid))}.
-   *
-   * @see #translate(float, float, Node)
-   * @see #translate(String, float, float)
-   * @see #translate(float, float, float, Node)
-   * @see #defaultNode(String)
-   */
-  public void translate(String hid, float dx, float dy, float dz) {
-    translate(dx, dy, dz, defaultNode(hid));
-  }
-
-  /**
-   * Same as {@code translate(dx, dy, 0, node)}.
+   * Same as {@code translate(tag, dx, dy, 0)}.
    *
    * @see #translate(String, float, float, float)
-   * @see #translate(String, float, float)
-   * @see #translate(float, float, float, Node)
-   * @see #defaultNode(String)
    */
-  public void translate(float dx, float dy, Node node) {
-    translate(dx, dy, 0, node);
+  public void translate(String tag, float dx, float dy) {
+    translate(tag, dx, dy, 0);
   }
 
   /**
-   * Translates the {@code node} according to {@code dx}, {@code dy} and {@code dz}. The {@code dx} and {@code dy}
-   * coordinates are expressed in screen space, and the {@code dz} coordinate is given in world units.
-   * The translated node would be kept exactly under a pointer if such a device were used to translate it.
+   * Calls {@code translateTag(tag, dx, dy, dz)} if {@code node(tag)} is non-null and {@code translateEye(dx, dy, dz)} otherwise.
    *
-   * @see #translate(float, float, Node)
-   * @see #translate(String, float, float)
-   * @see #translate(String, float, float, float)
-   * @see #defaultNode(String)
+   * @see #translateTag(String, float, float, float)
+   * @see #translateEye(float, float, float)
    */
-  public void translate(float dx, float dy, float dz, Node node) {
-    if (node == null)
-      throw new RuntimeException("translate(vector, node) requires a non-null node param");
-    node.translate(_translate(dx, dy, dz, node));
+  public void translate(String tag, float dx, float dy, float dz) {
+    if (!translateTag(tag, dx, dy, dz))
+      translateEye(dx, dy, dz);
   }
 
   /**
-   * Same as {@code return _translate(dx, dy, dz, Math.min(width(), height()), node)}.
+   * Same as {@code translateTag(null, dx, dy)}.
    *
-   * @see #_translate(float, float, float, int, Node)
+   * @see #translateTag(String, float, float)
    */
-  protected Vector _translate(float dx, float dy, float dz, Node node) {
-    return _translate(dx, dy, dz, Math.min(width(), height()), node);
+  public boolean translateTag(float dx, float dy) {
+    return translateTag(null, dx, dy);
   }
 
   /**
-   * Interactive translation low-level implementation. Converts {@code dx} and {@code dy} defined in screen space to
-   * {@link Node#reference()} (or world coordinates if the node reference is null).
-   * <p>
-   * The projection onto the screen of the returned vector exactly match the screen {@code (dx, dy)} vector displacement
-   * (e.g., the translated node would be kept exactly under a pointer if such a device were used to translate it).
-   * The z-coordinate is mapped from [0..{@code zMax}] to the [0..2*{@link #radius()}}] range.
+   * Same as {@code translateTag(null, dx, dy, dz)}.
+   *
+   * @see #translateTag(String, float, float, float)
    */
-  protected Vector _translate(float dx, float dy, float dz, int zMax, Node node) {
-    if (is2D() && dz != 0) {
-      System.out.println("Warning: graph is 2D. Z-translation reset");
-      dz = 0;
+  public boolean translateTag(float dx, float dy, float dz) {
+    return translateTag(null, dx, dy, dz);
+  }
+
+  /**
+   * Same as {@code translateNode(node(tag), dx, dy)}.
+   *
+   * @see #translateNode(Node, float, float)
+   */
+  public boolean translateTag(String tag, float dx, float dy) {
+    return translateTag(tag, dx, dy, 0);
+  }
+
+  /**
+   * Same as {@code translateNode(node(tag), dx, dy, dz)}. Returns {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #translateNode(Node, float, float, float)
+   */
+  public boolean translateTag(String tag, float dx, float dy, float dz) {
+    if (node(tag) != null) {
+      translateNode(node(tag), dx, dy, dz);
+      return true;
     }
-    dx = isEye(node) ? -dx : dx;
-    dy = isRightHanded() ^ isEye(node) ? -dy : dy;
-    dz = isEye(node) ? dz : -dz;
-    // Scale to fit the screen relative vector displacement
-    if (type() == Type.PERSPECTIVE) {
-      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(
-          eye().location(isEye(node) ? anchor() : node.position())._vector[2] * eye().magnitude());
-      //TODO check me weird to find height instead of width working (may it has to do with fov?)
-      dx *= 2.0 * k / (height() * eye().magnitude());
-      dy *= 2.0 * k / (height() * eye().magnitude());
+    return false;
+  }
+
+  /**
+   * Same as {@code translateNode(node, dx, dy, 0)}.
+   *
+   * @see #translateNode(Node, float, float, float)
+   */
+  public void translateNode(Node node, float dx, float dy) {
+    translateNode(node, dx, dy, 0);
+  }
+
+  /**
+   * Translates the node (which should be different than the {@link #eye()}).
+   *
+   * @see #displacement(Vector, Node)
+   * @param dx screen space delta-x units in [0..width()]
+   * @param dy screen space delta-y units in [0..height()]
+   * @param dz screen space delta-z units in [0..1]
+   */
+  public void translateNode(Node node, float dx, float dy, float dz) {
+    if (node == null || node == eye()) {
+      System.out.println("Warning: translateNode requires a non-null node different than the eye. Nothing done");
+      return;
     }
-    // this expresses the dz coordinate in world units:
-    //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
-    Vector eyeVector = new Vector(dx, dy, dz * 2 * radius() / zMax);
-    return node.reference() == null ? eye().worldDisplacement(eyeVector) : node.reference().displacement(eyeVector, eye());
+    Vector vector = displacement(new Vector(dx, dy, dz), node);
+    node.translate(node.reference() == null ? node.worldDisplacement(vector) : node.reference().displacement(vector, node));
   }
 
   /**
-   * Same as {@code scale(null, delta)}.
+   * Same as {@code translateEye(dx, dy, 0)}.
    *
-   * @see #scale(String, float)
+   * @see #translateEye(float, float, float)
    */
-  public void scale(float delta) {
-    scale(null, delta);
+  public void translateEye(float dx, float dy) {
+    translateEye(dx, dy, 0);
   }
 
   /**
-   * Same as {@code scale(delta, defaultNode(hid))}.
+   * Translates the {@link #eye()}.
    *
-   * @see #scale(float, Node)
-   * @see #defaultNode(String)
+   * @see #displacement(Vector, Node)
+   * @param dx screen space delta-x units in [0..width()]
+   * @param dy screen space delta-y units in [0..height()]
+   * @param dz screen space delta-z units in [0..1]
    */
-  public void scale(String hid, float delta) {
-    scale(delta, defaultNode(hid));
+  public void translateEye(float dx, float dy, float dz) {
+    Node node = eye().get();
+    node.setPosition(anchor());
+    Vector vector = displacement(new Vector(dx, dy, dz), node);
+    vector.multiply(-1);
+    eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()));
   }
 
-  /**
-   * Scales the {@code node} according to {@code delta}. Note that if {@code node} is the {@link #eye()}
-   * this call simply changes the {@link #fov()}.
-   *
-   * @see #scale(String, float)
-   */
-  public void scale(float delta, Node node) {
-    float factor = 1 + Math.abs(delta) / (float) (isEye(node) ? -height() : height());
-    node.scale(delta >= 0 ? factor : 1 / factor);
-  }
+  // 5. Rotate
 
   /**
    * Same as {@code rotate(null, roll, pitch, yaw)}.
    *
-   * @see #rotate(String, float, float, float)
+   * @see #rotate(float, float, float)
    */
   public void rotate(float roll, float pitch, float yaw) {
     rotate(null, roll, pitch, yaw);
   }
 
   /**
-   * Rotates the {@code hid} default-node (see {@link #defaultNode(String)}) roll, pitch and yaw radians around screen
-   * space x, y and z axes, respectively.
+   * Calls {@code rotateTag(tag, roll, pitch, yaw)} if {@code node(tag)} is non-null and {@code rotateEye(roll, pitch, yaw)} otherwise.
    *
-   * @see #rotate(float, float, float, Node)
+   * @see #rotateTag(String, float, float, float)
+   * @see #rotateEye(float, float, float)
    */
-  public void rotate(String hid, float roll, float pitch, float yaw) {
-    rotate(roll, pitch, yaw, defaultNode(hid));
+  public void rotate(String tag, float roll, float pitch, float yaw) {
+    if (!rotateTag(tag, roll, pitch, yaw))
+      rotateEye(roll, pitch, yaw);
   }
 
   /**
-   * Rotates the {@code node} {@code roll}, {@code pitch} and {@code yaw} radians relative to the screen space
-   * x, y and z axes, respectively. The center of the rotation is the graph {@link #anchor()} if the node is the
-   * {@link #eye()}, or the node origin (see {@link Node#position()}) otherwise.
-   * <p>
-   * To rotate an eye node around its origin and local axes simply call:
-   * {@code eye().rotate(new Quaternion(roll, pitch, yaw))}.
+   * Same as {@code return rotateTag(null, roll, pitch, yaw)}.
    *
-   * @see #rotate(String, float, float, float)
-   * @see #spin(Point, Point, float, Node)
+   * @see #rotateTag(String, float, float, float)
    */
-  public void rotate(float roll, float pitch, float yaw, Node node) {
-    if (node == null)
-      throw new RuntimeException("rotate(roll, pitch, yaw, node) requires a non-null node param");
-    spin(_rotate(roll, pitch, yaw, node), node);
+  public boolean rotateTag(float roll, float pitch, float yaw) {
+    return rotateTag(null, roll, pitch, yaw);
   }
 
   /**
-   * Low-level roll-pitch and yaw rotation. Axes are physical, i.e., screen space.
+   * Same as {@code rotateNode(node(tag), roll, pitch, yaw)}. Returns
+   * {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #node(String)
+   * @see #rotateNode(Node, float, float, float)
    */
-  protected Quaternion _rotate(float roll, float pitch, float yaw, Node node) {
+  public boolean rotateTag(String tag, float roll, float pitch, float yaw) {
+    if (node(tag) != null) {
+      rotateNode(node(tag), roll, pitch, yaw);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Rotate the {@code node} (which should be different than the {@link #eye()}) around the
+   * world x-y-z axes according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.
+   *
+   * @see #rotateEye(float, float, float)
+   */
+  public void rotateNode(Node node, float roll, float pitch, float yaw) {
+    if (node == null || node == eye()) {
+      System.out.println("Warning: rotateNode requires a non-null node different than the eye. Nothing done");
+      return;
+    }
     if (is2D() && (roll != 0 || pitch != 0)) {
       roll = 0;
       pitch = 0;
@@ -3795,119 +3953,145 @@ public class Graph {
     }
     // don't really need to differentiate among the two cases, but the eye can be speeded up
     Quaternion quaternion = new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
-    if (isEye(node))
-      return quaternion;
-    else {
-      Vector vector = new Vector(-quaternion.x(), -quaternion.y(), -quaternion.z());
-      vector = eye().orientation().rotate(vector);
-      vector = node.displacement(vector);
-      quaternion.setX(vector.x());
-      quaternion.setY(vector.y());
-      quaternion.setZ(vector.z());
-      return quaternion;
+    Vector vector = new Vector(-quaternion.x(), -quaternion.y(), -quaternion.z());
+    vector = eye().orientation().rotate(vector);
+    vector = node.displacement(vector);
+    quaternion.setX(vector.x());
+    quaternion.setY(vector.y());
+    quaternion.setZ(vector.z());
+    node.rotate(quaternion);
+  }
+
+  /**
+   * Rotate the {@link #eye()} around its world x-y-z axes according
+   * to {@code roll}, {@code pitch} and {@code yaw} radians, resp.
+   *
+   * @see #rotateNode(Node, float, float, float)
+   */
+  public void rotateEye(float roll, float pitch, float yaw) {
+    if (is2D() && (roll != 0 || pitch != 0)) {
+      roll = 0;
+      pitch = 0;
+      System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
+    eye()._orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor());
   }
 
+  // 6. Spin
+
   /**
-   * Same as {@code spin(null, tail, head)}.
+   * Same as {@code spin(point1X, point1Y, point2X, point2Y, 1)}.
    *
-   * @see #spin(String, Point, Point)
+   * @see #spin(int, int, int, int, float)
    */
-  public void spin(Point tail, Point head) {
-    spin(null, tail, head);
+  public void spin(int point1X, int point1Y, int point2X, int point2Y) {
+    spin(point1X, point1Y, point2X, point2Y, 1);
   }
 
   /**
-   * Same as {@code spin(tail, head, defaultNode(hid))}.
+   * Same as {@code spin(null, point1X, point1Y, point2X, point2Y, sensitivity)}.
    *
-   * @see #spin(Point, Point, float, Node)
-   * @see #spin(Point, Point, Node)
-   * @see #spin(String, Point, Point, float)
+   * @see #spin(String, int, int, int, int, float)
    */
-  public void spin(String hid, Point tail, Point head) {
-    spin(tail, head, defaultNode(hid));
+  public void spin(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    spin(null, point1X, point1Y, point2X, point2Y, sensitivity);
   }
 
   /**
-   * Same as {@code spin(tail, head, 1, node)}.
+   * Same as {@code spin(tag, point1X, point1Y, point2X, point2Y, 1)}.
    *
-   * @see #spin(Point, Point, float, Node)
-   * @see #spin(String, Point, Point)
-   * @see #spin(String, Point, Point, float)
+   * @see #spin(String, int, int, int, int, float)
    */
-  public void spin(Point tail, Point head, Node node) {
-    spin(tail, head, 1, node);
+  public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y) {
+    spin(tag, point1X, point1Y, point2X, point2Y, 1);
   }
 
   /**
-   * Same as {@code spin(null, tail, head, sensitivity)}.
+   * Same as {@code if (!spinTag(tag, point1X, point1Y, point2X, point2Y, sensitivity))
+   * spinEye(point1X, point1Y, point2X, point2Y, sensitivity)}
    *
-   * @see #spin(String, Point, Point, float)
+   * @see #spinTag(String, int, int, int, int, float)
+   * @see #spinEye(int, int, int, int, float)
    */
-  public void spin(Point tail, Point head, float sensitivity) {
-    spin(null, tail, head, sensitivity);
+  public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    if (!spinTag(tag, point1X, point1Y, point2X, point2Y, sensitivity))
+      spinEye(point1X, point1Y, point2X, point2Y, sensitivity);
   }
 
   /**
-   * Same as {@code spin(tail, head, sensitivity, defaultNode(hid))}.
+   * Same as {@code return spinTag(point1X, point1Y, point2X, point2Y, 1)}.
    *
-   * @see #spin(Point, Point, float, Node)
-   * @see #spin(String, Point, Point)
-   * @see #spin(Point, Point, Node)
-   * @see #defaultNode(String)
+   * @see #spinTag(int, int, int, int, float)
    */
-  public void spin(String hid, Point tail, Point head, float sensitivity) {
-    spin(tail, head, sensitivity, defaultNode(hid));
+  public boolean spinTag(int point1X, int point1Y, int point2X, int point2Y) {
+    return spinTag(point1X, point1Y, point2X, point2Y, 1);
   }
 
   /**
-   * Rotates the {@code node} using an arcball interface, from {@code tail} to {@code head} pixel positions. The
-   * {@code sensitivity} controls the gesture strength. The center of the rotation is the graph {@link #anchor()}
-   * if the node is the {@link #eye()}, or the node origin (see {@link Node#position()}) otherwise.
+   * Same as {@code return spinTag(null, point1X, point1Y, point2X, point2Y, sensitivity)}.
+   *
+   * @see #spinTag(String, int, int, int, int, float)
+   */
+  public boolean spinTag(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    return spinTag(null, point1X, point1Y, point2X, point2Y, sensitivity);
+  }
+
+  /**
+   * Same as {@code return spinTag(tag, point1X, point1Y, point2X, point2Y, 1)}.
+   *
+   * @see #spinTag(String, int, int, int, int, float)
+   */
+  public boolean spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y) {
+    return spinTag(tag, point1X, point1Y, point2X, point2Y, 1);
+  }
+
+  /**
+   * Same as {@code spinNode(node(tag), point1X, point1Y, point2X, point2Y, sensitivity)}. Returns
+   * {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #node(String)
+   * @see #spinNode(Node, int, int, int, int, float)
+   */
+  public boolean spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    if (node(tag) != null) {
+      spinNode(node(tag), point1X, point1Y, point2X, point2Y, sensitivity);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Same as {@code spinNode(node, point1X, point1Y, point2X, point2Y, 1)}.
+   *
+   * @see #spinNode(Node, int, int, int, int, float)
+   */
+  public void spinNode(Node node, int point1X, int point1Y, int point2X, int point2Y) {
+    spinNode(node, point1X, point1Y, point2X, point2Y, 1);
+  }
+
+  /**
+   * Rotates the {@code node} (which should be different than the {@link #eye()}) using an arcball
+   * interface, from points {@code (point1X, point1Y)} to {@code (point2X, point2Y)} pixel positions.
+   * The {@code sensitivity} controls the gesture strength. The center of the rotation is the screen
+   * projected node origin (see {@link Node#position()}).
    * <p>
-   * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying three-dimensional
-   * orientation using a mouse.
-   * <p>
-   * Override this class an call {@link #_spin(Point, Point, Point, float, Node)} if you want to define a different
-   * rotation center (rare).
-   *
-   * @see #spin(String, Point, Point)
-   * @see #spin(Point, Point, Node)
-   * @see #spin(String, Point, Point, float)
-   * @see #rotate(float, float, float, Node)
-   */
-  public void spin(Point tail, Point head, float sensitivity, Node node) {
-    if (node == null)
-      throw new RuntimeException("spin(point1, point2, sensitivity, node) requires a non-null node param");
-    spin(_spin(tail, head, sensitivity, node), node);
-  }
-
-  /**
-   * Same as {@code return _spin(point1, point2, center, sensitivity, node)} where {@code center} is {@link #anchor()}
-   * if the node is the {@link #eye()} or {@link Node#position()} otherwise.
-   */
-  protected Quaternion _spin(Point point1, Point point2, float sensitivity, Node node) {
-    Vector vector = screenLocation(isEye(node) ? anchor() : node.position());
-    Point center = new Point(vector.x(), vector.y());
-    return _spin(point1, point2, center, sensitivity, node);
-  }
-
-  /**
-   * Computes the classical arcball quaternion. Refer to Shoemake 92 paper: Arcball: a user interface for specifying
+   * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
    * three-dimensional orientation using a mouse.
+   *
+   * @see #spinEye(int, int, int, int, float)
    */
-  protected Quaternion _spin(Point point1, Point point2, Point center, float sensitivity, Node node) {
-    float cx = center.x();
-    float cy = center.y();
-    float x = point2.x();
-    float y = point2.y();
-    float prevX = point1.x();
-    float prevY = point1.y();
-    // Points on the deformed ball
-    float px = sensitivity * ((int) prevX - cx) / width();
-    float py = sensitivity * (isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / height();
-    float dx = sensitivity * (x - cx) / width();
-    float dy = sensitivity * (isLeftHanded() ? (y - cy) : (cy - y)) / height();
+  public void spinNode(Node node, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    if (node == null || node == eye()) {
+      System.out.println("Warning: spinNode requires a non-null node different than the eye. Nothing done");
+      return;
+    }
+    Vector center = screenLocation(node.position());
+    int centerX = (int) center.x();
+    int centerY = (int) center.y();
+    float px = sensitivity * (point1X - centerX) / width();
+    float py = sensitivity * (isLeftHanded() ? (point1Y - centerY) : (centerY - point1Y)) / height();
+    float dx = sensitivity * (point2X - centerX) / width();
+    float dy = sensitivity * (isLeftHanded() ? (point2Y - centerY) : (centerY - point2Y)) / height();
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
@@ -3915,13 +4099,48 @@ public class Graph {
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
     Quaternion quaternion = new Quaternion(axis, angle);
-    if (!isEye(node)) {
-      Vector vector = quaternion.axis();
-      vector = eye().orientation().rotate(vector);
-      vector = node.displacement(vector);
-      quaternion = new Quaternion(vector, -quaternion.angle());
-    }
-    return quaternion;
+    Vector vector = quaternion.axis();
+    vector = eye().orientation().rotate(vector);
+    vector = node.displacement(vector);
+    node.rotate(new Quaternion(vector, -quaternion.angle()));
+  }
+
+  /**
+   * Same as {@code spinEye(point1X, point1Y, point2X, point2Y, 1)}.
+   *
+   * @see #spinEye(int, int, int, int, float)
+   */
+  public void spinEye(int point1X, int point1Y, int point2X, int point2Y) {
+    spinEye(point1X, point1Y, point2X, point2Y, 1);
+  }
+
+  /**
+   * Rotates the {@link #eye()} using an arcball interface, from points {@code (point1X, point1Y)} to
+   * {@code (point2X, point2Y)} pixel positions. The {@code sensitivity} controls the gesture strength.
+   * The center of the rotation is the screen projected graph {@link #anchor()}.
+   * <p>
+   * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
+   * three-dimensional orientation using a mouse.
+   *
+   * @see #spinNode(Node, int, int, int, int, float)
+   */
+  public void spinEye(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    Vector center = screenLocation(anchor());
+    int centerX = (int) center.x();
+    int centerY = (int) center.y();
+    float px = sensitivity * (point1X - centerX) / width();
+    float py = sensitivity * (isLeftHanded() ? (point1Y - centerY) : (centerY - point1Y)) / height();
+    float dx = sensitivity * (point2X - centerX) / width();
+    float dy = sensitivity * (isLeftHanded() ? (point2Y - centerY) : (centerY - point2Y)) / height();
+    Vector p1 = new Vector(px, py, _projectOnBall(px, py));
+    Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
+    // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
+    Vector axis = p2.cross(p1);
+    // 2D is an ad-hoc
+    float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
+    //same as:
+    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle));
+    eye()._orbit(new Quaternion(axis, angle), anchor());
   }
 
   /**
@@ -3937,93 +4156,56 @@ public class Graph {
     float size = 1.0f;
     float size2 = size * size;
     float size_limit = size2 * 0.5f;
-
     float d = x * x + y * y;
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
   }
 
-  /**
-   * Rotates the node using {@code quaternion} around its {@link Node#position()} (non-eye nodes)
-   * or around the {@link Graph#anchor()} when the {@code node} is the {@link Graph#eye()}.
-   */
-  public void spin(Quaternion quaternion, Node node) {
-    if (isEye(node))
-      //same as:
-      //node.orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
-      node._orbit(quaternion, anchor());
-    else
-      node.rotate(quaternion);
-  }
-
   // only 3d eye
 
+  // 7. moveForward
+
   /**
-   * Same as {@code translate(0, 0, delta, eye()); }.
+   * Same as {@code translateEye(0, 0, delta / (zNear() - zFar()))}. Also rescales the {@link #eye()}
+   * if the graph type is {@link Type#ORTHOGRAPHIC} so that nearby objects
+   * appear bigger when moving towards them.
    *
-   * @see #translate(float, float, float, Node)
+   * @see #translateEye(float, float, float)
    */
   public void moveForward(float delta) {
     float d1 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
-    translate(0, 0, delta, eye());
+    // we negate z which targets the Processing mouse wheel
+    translateEye(0, 0, delta / (zNear() - zFar()));
     float d2 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
     if (type() == Type.ORTHOGRAPHIC)
       if (d2 / d1 > 0 && d1 != 0)
         eye().scale(d2 / d1);
   }
 
+  // 8. lookAround
+
   /**
    * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
    * expressed in radians.
    */
   public void lookAround(float deltaX, float deltaY) {
-    eye().rotate(_lookAround(deltaX, deltaY));
-  }
-
-  /**
-   * Look around without moving the eye while preserving its {@link Node#yAxis()} when the action began.
-   */
-  protected Quaternion _lookAround(float deltaX, float deltaY) {
+    Quaternion quaternion;
     if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
-      return new Quaternion();
+      quaternion = new Quaternion();
+    } else {
+      if (frameCount() > _lookAroundCount) {
+        _upVector = eye().yAxis();
+        _lookAroundCount = this.frameCount();
+      }
+      _lookAroundCount++;
+      Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
+      Quaternion rotY = new Quaternion(eye().displacement(_upVector), -deltaX);
+      quaternion = Quaternion.multiply(rotY, rotX);
     }
-    if (frameCount() > _lookAroundCount) {
-      _upVector = eye().yAxis();
-      _lookAroundCount = this.frameCount();
-    }
-    _lookAroundCount++;
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
-    Quaternion rotY = new Quaternion(eye().displacement(_upVector), -deltaX);
-    return Quaternion.multiply(rotY, rotX);
+    eye().rotate(quaternion);
   }
 
-  //Replace previous call with the following two to preserve the upVector param.
-  /*
-  protected Quaternion _lookAround(float deltaX, float deltaY, float sensitivity) {
-    if (is2D()) {
-      System.out.println("Warning: lookAround is only available in 3D");
-      return new Quaternion();
-    }
-    if(frameCount() > _lookAroundCount) {
-      _upVector = eye().yAxis();
-      _lookAroundCount = this.frameCount();
-    }
-    _lookAroundCount++;
-    return _lookAround(deltaX, deltaY, _upVector, sensitivity);
-  }
-
-  protected Quaternion _lookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
-    if (is2D()) {
-      System.out.println("Warning: lookAround is only available in 3D");
-      return new Quaternion();
-    }
-    deltaX *= -sensitivity;
-    deltaY *= sensitivity;
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
-    Quaternion rotY = new Quaternion(eye().displacement(upVector), deltaX);
-    return Quaternion.multiply(rotY, rotX);
-  }
-  // */
+  // 9. rotateCAD
 
   /**
    * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0))}.
@@ -4046,161 +4228,16 @@ public class Graph {
    * @see #rotateCAD(float, float)
    */
   public void rotateCAD(float roll, float pitch, Vector upVector) {
-    spin(_rotateCAD(roll, pitch, upVector), eye());
-  }
-
-  /**
-   * Computes and returns the quaternion used by {@link #rotateCAD(float, float, Vector)}.
-   */
-  protected Quaternion _rotateCAD(float roll, float pitch, Vector upVector) {
+    Quaternion quaternion;
     if (is2D()) {
       System.out.println("Warning: rotateCAD is only available in 3D");
-      return new Quaternion();
-    }
-    Vector eyeUp = eye().displacement(upVector);
-    return Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
-  }
-
-  /**
-   * Same as {@code control(defaultNode(), gesture)}. This method implements application control with
-   * the {@link #defaultNode()} which requires overriding {@link Node#interact(Object...)}.
-   *
-   * @see #defaultNode()
-   * @see #control(Node, Object...)
-   */
-  public void defaultHIDControl(Object... gesture) {
-    control(defaultNode(), gesture);
-  }
-
-  /**
-   * Same as {@code control(defaultNode(hid), gesture)}. This method implements application control with
-   * the {@link #defaultNode(String)} which requires overriding {@link Node#interact(Object...)}.
-   *
-   * @see #defaultNode(String)
-   * @see #control(Node, Object...)
-   */
-  public void control(String hid, Object... gesture) {
-    control(defaultNode(hid), gesture);
-  }
-
-  /**
-   * Same as {@code node.interact(gesture)}.
-   *
-   * @see #defaultHIDControl(Object...)
-   * @see #control(String, Object...)
-   * @see Node#interact(Object...)
-   */
-  public void control(Node node, Object... gesture) {
-    node.interact(gesture);
-  }
-
-  /*
-  // nice interactivity examples: spinning (spin + timer), moveForward, moveBackward, spinX/Y/Z
-  // screenRotate/Translate.
-
-  public void zoom(float delta) {
-    zoom(null, delta);
-  }
-
-  public void zoom(String hid, float delta) {
-    zoom(delta, defaultNode(hid));
-  }
-
-  public void zoom(float delta, Node node) {
-    translate(0, 0, delta, node);
-  }
-
-  public void spin(Point point1, Point point2, Point center) {
-    spin(point1, point2, center, defaultNode());
-  }
-
-  public void spin(Point point1, Point point2, Point center, Node node) {
-    if (node == null)
-      throw new RuntimeException("spin(point1, point2, center, node) requires a non-null node param");
-    spin(_spin(point1, point2, center, 1, node), node);
-  }
-
-  public void spin(Point point1, Point point2, Point center, float sensitivity) {
-    spin(point1, point2, center, sensitivity, defaultNode());
-  }
-
-  public void spin(Point point1, Point point2, Point center, float sensitivity, Node node) {
-    if (node == null)
-      throw new RuntimeException("spin(point1, point2, center, sensitivity, node) requires a non-null node param");
-    spin(_spin(point1, point2, center, sensitivity, node), node);
-  }
-
-  public void spinX(float roll) {
-    spinX(roll, 1);
-  }
-
-  public void spinX(float roll, float sensitivity) {
-    spin(_rotate(roll, 0, 0, sensitivity, eye()), eye());
-  }
-
-  public void spinY(float pitch) {
-    spinY(pitch, 1);
-  }
-
-  public void spinY(float pitch, float sensitivity) {
-    spin(_rotate(0, pitch, 0, sensitivity, eye()), eye());
-  }
-
-  public void spinZ(float yaw) {
-    spinZ(yaw, 1);
-  }
-
-  public void spinZ(float yaw, float sensitivity) {
-    spin(_rotate(0, 0, yaw, sensitivity, eye()), eye());
-  }
-
-  scene.spinX(event.getCount(), 20*PI / width); can be emulated through either:
-  1. scene.eye().rotate(new Quaternion(event.getCount() * 20*PI / width,0,0), scene.anchor()); or,
-  2. scene.eye().rotate(new Quaternion(new Vector(1,0,0), event.getCount() * 20*PI / width), scene.anchor());
-
-  // Overkill 2: simply accomplish these with constraints
-  public void screenRotate(Point point1, Point point2) {
-    screenRotate(point1, point2, 1);
-  }
-
-  public void screenRotate(Point point1, Point point2, float sensitivity) {
-    screenRotate(point1, point2, sensitivity, eye());
-  }
-
-  public void screenRotate(Point point1, Point point2, Node node) {
-    screenRotate(point1, point2, 1, node);
-  }
-
-  public void screenRotate(Point point1, Point point2, float sensitivity, Node node) {
-    spin(_spin2(point1, point2, sensitivity, node), node);
-  }
-
-  protected Quaternion _spin2(Point point1, Point point2, float sensitivity, Node node) {
-    Quaternion quaternion;
-    Vector vector;
-    float x = point2.x();
-    float y = point2.y();
-    float prevX = point1.x();
-    float prevY = point1.y();
-    float angle;
-    if (isEye(node)) {
-      vector = screenLocation(anchor());
-      angle = (float) Math.atan2(y - vector._vector[1], x - vector._vector[0]) - (float) Math
-          .atan2(prevY - vector._vector[1], prevX - vector._vector[0]);
-      if (isLeftHanded())
-        angle = -angle;
-      quaternion = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
+      quaternion = new Quaternion();
     } else {
-      vector = screenLocation(node.position());
-      float prev_angle = (float) Math.atan2(prevY - vector._vector[1], prevX - vector._vector[0]);
-      angle = (float) Math.atan2(y - vector._vector[1], x - vector._vector[0]);
-      Vector axis = node.displacement(eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
-      if (isRightHanded())
-        quaternion = new Quaternion(axis, angle - prev_angle);
-      else
-        quaternion = new Quaternion(axis, prev_angle - angle);
+      Vector eyeUp = eye().displacement(upVector);
+      quaternion = Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
     }
-    return quaternion;
+    //same as:
+    //eye().orbit(new Quaternion(eye().worldDisplacement(quaternion.axis()), quaternion.angle()));
+    eye()._orbit(quaternion, anchor());
   }
-  */
 }

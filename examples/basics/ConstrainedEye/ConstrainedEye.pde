@@ -1,5 +1,5 @@
 /**
- * ConstrainedEye.
+ * Constrained Eye.
  * by Jean Pierre Charalambos.
  *
  * This example illustrates how to add constraints to your eye
@@ -31,10 +31,9 @@ void setup() {
   scene = new Scene(this);
   scene.setRadius(400);
   scene.fit(1);
-
   constraints[0] = new WorldConstraint();
   // Note that an EyeConstraint(eye) would produce the same results:
-  // An EyeConstraint is a LocalConstraint when applied to the camera node !
+  // An EyeConstraint is a LocalConstraint when applied to the eye node!
   constraints[1] = new LocalConstraint();
   transDir = 0;
   rotDir = 0;
@@ -57,18 +56,18 @@ void draw() {
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.spin();
+    scene.mouseSpinEye();
   else if (mouseButton == RIGHT)
-    scene.translate();
+    scene.mouseTranslateEye();
   else
-    scene.scale(mouseX - pmouseX);
+    scene.scaleEye(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
   if (scene.is3D())
     scene.moveForward(event.getCount() * 20);
   else
-    scene.scale(event.getCount() * 20, scene.eye());
+    scene.scaleEye(event.getCount() * 20);
 }
 
 void keyPressed() {
@@ -87,32 +86,29 @@ void keyPressed() {
   if (key == 'r' || key == 'R') {
     constraints[activeConstraint].setRotationConstraintType(nextRotationConstraintType(constraints[activeConstraint].rotationConstraintType()));
   }
-
-  Vector dir = new Vector(0.0f, 0.0f, 0.0f);
+  Vector dir = new Vector(0, 0, 0);
   switch (transDir) {
   case 0:
-    dir.setX(1.0f);
+    dir.setX(1);
     break;
   case 1:
-    dir.setY(1.0f);
+    dir.setY(1);
     break;
   case 2:
-    dir.setZ(1.0f);
+    dir.setZ(1);
     break;
   }
-
   constraints[activeConstraint].setTranslationConstraintDirection(dir);
-
-  dir.set(0.0f, 0.0f, 0.0f);
+  dir.set(0, 0, 0);
   switch (rotDir) {
   case 0:
-    dir.setX(1.0f);
+    dir.setX(1);
     break;
   case 1:
-    dir.setY(1.0f);
+    dir.setY(1);
     break;
   case 2:
-    dir.setZ(1.0f);
+    dir.setZ(1);
     break;
   }
   constraints[activeConstraint].setRotationConstraintDirection(dir);
@@ -163,12 +159,10 @@ static AxisPlaneConstraint.Type nextRotationConstraintType(AxisPlaneConstraint.T
 void changeConstraint() {
   int previous = activeConstraint;
   activeConstraint = (activeConstraint + 1) % 2;
-
   constraints[activeConstraint].setTranslationConstraintType(constraints[previous].translationConstraintType());
   constraints[activeConstraint].setTranslationConstraintDirection(constraints[previous].translationConstraintDirection());
   constraints[activeConstraint].setRotationConstraintType(constraints[previous].rotationConstraintType());
   constraints[activeConstraint].setRotationConstraintDirection(constraints[previous].rotationConstraintDirection());
-
   scene.eye().setConstraint(constraints[activeConstraint]);
 }
 

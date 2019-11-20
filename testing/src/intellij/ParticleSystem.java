@@ -11,7 +11,8 @@ import processing.event.MouseEvent;
 public class ParticleSystem extends PApplet {
   Scene scene;
   int nbPart;
-  Particle[] particle;
+  Particle[] particles;
+  boolean concurrence;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
@@ -23,9 +24,9 @@ public class ParticleSystem extends PApplet {
   public void setup() {
     scene = new Scene(this);
     nbPart = 2000;
-    particle = new Particle[nbPart];
-    for (int i = 0; i < particle.length; i++)
-      particle[i] = new Particle(scene);
+    particles = new Particle[nbPart];
+    for (int i = 0; i < particles.length; i++)
+      particles[i] = new Particle(scene);
   }
 
   public void draw() {
@@ -34,14 +35,14 @@ public class ParticleSystem extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.track();
+    scene.updateMouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.scale(mouseX - pmouseX);
   }
@@ -50,23 +51,23 @@ public class ParticleSystem extends PApplet {
     if (scene.is3D())
       scene.moveForward(event.getCount() * 20);
     else
-      scene.scale(event.getCount() * 20, scene.eye());
+      scene.scaleEye(event.getCount() * 20);
   }
 
   public void keyPressed() {
-    if (key == '+')
-      for (int i = 0; i < particle.length; i++)
-        particle[i].task.setPeriod(particle[i].task.period() - 2);
-    if (key == '-')
-      for (int i = 0; i < particle.length; i++)
-        particle[i].task.setPeriod(particle[i].task.period() + 2);
-    //particle[i].toggle();
-    if (key == ' ')
-      for (int i = 0; i < particle.length; i++)
-        if (particle[i].task.isActive())
-          particle[i].task.stop();
-        else
-          particle[i].task.run(60);
+    for (Particle particle : particles) {
+      if (key == '+')
+        particle.decrementPeriod();
+      if (key == '-')
+        particle.incrementPeriod();
+      if (key == ' ')
+        particle.toggle();
+      if (key == 'e')
+        particle.enableConcurrence(true);
+      if (key == 'd')
+        particle.enableConcurrence(false);
+    }
+    println((!particles[0].task.isConcurrent() ? "Non-concurrent " : "Concurrent ") + "system. Particle period: " + particles[0].period());
   }
 
   public static void main(String[] args) {
@@ -86,7 +87,6 @@ public class ParticleSystem extends PApplet {
       speed = new PVector();
       pos = new PVector();
       init();
-      //task = new Task() {
       task = new TimingTask(scene) {
         @Override
         public void execute() {
@@ -100,8 +100,31 @@ public class ParticleSystem extends PApplet {
             init();
         }
       };
-      task.enableConcurrence();
-      task.run(100);
+      task.run();
+    }
+
+    long period() {
+      return task.period();
+    }
+
+    void incrementPeriod() {
+      task.setPeriod(task.period() + 2);
+    }
+
+    void decrementPeriod() {
+      task.setPeriod(task.period() - 2);
+    }
+
+    void toggle() {
+      task.toggle();
+    }
+
+    void enableConcurrence(boolean enable) {
+      task.enableConcurrence(enable);
+    }
+
+    boolean isConcurrent() {
+      return task.isConcurrent();
     }
 
     @Override

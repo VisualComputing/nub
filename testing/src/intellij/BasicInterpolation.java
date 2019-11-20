@@ -33,11 +33,11 @@ public class BasicInterpolation extends PApplet {
     scene.fit(1);
 
     interpolator = new Interpolator(scene);
-    interpolator.setLoop();
+    interpolator.enableRecurrence();
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(Node.random(scene));
-    interpolator.start();
+    interpolator.run();
   }
 
   public void draw() {
@@ -45,7 +45,7 @@ public class BasicInterpolation extends PApplet {
 
     pushStyle();
     stroke(255);
-    scene.drawPath(interpolator, 5);
+    scene.drawCatmullRom(interpolator, 5);
     popStyle();
 
     pushStyle();
@@ -59,16 +59,16 @@ public class BasicInterpolation extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.track();
+    scene.updateMouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
       //scene.lookAround(upVector);
       //scene.mouseCAD();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
       //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);
@@ -86,7 +86,7 @@ public class BasicInterpolation extends PApplet {
         speed -= 0.25f;
       else
         speed += 0.25f;
-      interpolator.start(speed);
+      interpolator.run(speed);
     }
 
     if (key == 's')

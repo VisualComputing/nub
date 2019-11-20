@@ -54,7 +54,7 @@ public class Basics extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.spin();
+    scene.mouseSpin();
   }
 
   PShape shape() {
@@ -66,7 +66,7 @@ public class Basics extends PApplet {
 
   public void keyPressed() {
     if (key == ' ')
-      scene.track();
+      scene.updateMouseTag();
     if (key == 'f')
       scene.flip();
   }

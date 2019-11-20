@@ -17,12 +17,7 @@ import nub.core.Graph;
 import nub.core.Interpolator;
 import nub.core.MatrixHandler;
 import nub.core.Node;
-import nub.core.constraint.BallAndSocket;
-import nub.core.constraint.Hinge;
-import nub.core.constraint.PlanarPolygon;
-import nub.core.constraint.SphericalPolygon;
 import nub.primitives.Matrix;
-import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
@@ -37,6 +32,7 @@ import processing.opengl.PShader;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing mouse-driven {@link Graph}.
@@ -92,24 +88,34 @@ import java.util.List;
  * {@code
  * void draw() {
  *   scene.render();
- *   scene.drawPath(interpolator, 5);
+ *   scene.drawCatmullRom(interpolator, 5);
  * }
  * }
  * </pre>
- * while {@link #render()} will draw the animated node(s), {@link #drawPath(Interpolator, int)}
+ * while {@link #render()} will draw the animated node(s), {@link #drawCatmullRom(Interpolator, int)}
  * will draw the interpolated path too.
- * <h1>Human Interface Devices</h1>
- * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
- * is the Processing mouse, see {@link #track()}, {@link #cast()}, {@link #spin()}, {@link #translate()}
- * {@link #scale(float)}, etc. To set up another {@code hid} refer to the {@link Graph} documentation.
+ * <h1>Picking and interaction</h1>
+ * Refer to the {@link Graph} documentation for details about how picking and interaction works
+ * in nub.
+ * <p>
+ * The scene just provides additional methods to pick and interact with the mouse that wrap the
+ * {@link PApplet#pmouseX} and {@link PApplet#pmouseY} Processing variables and thus simplify
+ * the method signatures provide by the {@link Graph} counterparts. Refer to the method signatures
+ * beginning with {@code mouse*}, such as: {@link #mouseTag(String)} and {@link #mouseTag()} for
+ * node tagging; {@link #mouseTranslate()}, {@link #mouseTranslate(String)},
+ * {@link #mouseTranslateTag(String)} and {@link #mouseTranslateEye()} for translation;
+ * {@link #mouseSpin()}, {@link #mouseSpin(String)}, {@link #mouseSpinTag(String)} and
+ * {@link #mouseSpinEye()} for spinning; {@link #mouseLookAround()} and {@link #mouseRotateCAD()}
+ * for eye look-around and rotate-cad, to name a few.
  *
  * @see Graph
  * @see Node
  * @see Interpolator
+ * @see TimingTask
  */
 public class Scene extends Graph implements PConstants {
-  public static String prettyVersion = "0.2.0";
-  public static String version = "2";
+  public static String prettyVersion = "0.3.0";
+  public static String version = "3";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
@@ -216,7 +222,8 @@ public class Scene extends Graph implements PConstants {
     // 1. P5 objects
     _parent = pApplet;
     _offscreen = pGraphics != pApplet.g;
-    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
+    _upperLeftCornerX = _offscreen ? x : 0;
+    _upperLeftCornerY = _offscreen ? y : 0;
     // 2. Back buffer
     _bb = (context() instanceof processing.opengl.PGraphicsOpenGL) ?
         pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D) :
@@ -245,7 +252,7 @@ public class Scene extends Graph implements PConstants {
     return new TimingTask(this) {
       @Override
       public void execute() {
-        interpolator.update();
+        interpolator.execute();
       }
     };
   }
@@ -351,15 +358,6 @@ public class Scene extends Graph implements PConstants {
   // OPENGL
 
   /**
-   * Same as {@code return setCenterFromPixel(new Point(x, y))}.
-   *
-   * @see #setCenterFromPixel(Point)
-   */
-  public boolean setCenterFromPixel(float x, float y) {
-    return setCenterFromPixel(new Point(x, y));
-  }
-
-  /**
    * The {@link #center()} is set to the point located under {@code pixel} on screen.
    * <p>
    * 2D windows always returns true.
@@ -367,8 +365,8 @@ public class Scene extends Graph implements PConstants {
    * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
    * {@code false} if none was found (in this case no {@link #center()} is set).
    */
-  public boolean setCenterFromPixel(Point pixel) {
-    Vector pup = pointUnderPixel(pixel);
+  public boolean setCenterFromPixel(int pixelX, int pixelY) {
+    Vector pup = pointUnderPixel(pixelX, pixelY);
     if (pup != null) {
       setCenter(pup);
       return true;
@@ -378,16 +376,16 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Returns the depth (z-value) of the object under the {@code pixel}. Used by
-   * {@link #pointUnderPixel(Point)}.
+   * {@link #pointUnderPixel(int, int)}.
    * <p>
    * The z-value ranges in [0..1] (near and far plane respectively). In 3D note that this
    * value is not a linear interpolation between {@link #zNear()} and {@link #zFar()}:
    * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z')} where {@code z'} is
    * the distance from the point you project to the eye, along the {@link #viewDirection()}.
    *
-   * @see #pointUnderPixel(Point)
+   * @see #pointUnderPixel(int, int)
    */
-  public float pixelDepth(Point pixel) {
+  public float pixelDepth(int pixelX, int pixelY) {
     PGraphicsOpenGL pggl;
     if (context() instanceof PGraphicsOpenGL)
       pggl = (PGraphicsOpenGL) context();
@@ -395,7 +393,7 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
     float[] depth = new float[1];
     PGL pgl = pggl.beginPGL();
-    pgl.readPixels(pixel.x(), (height() - pixel.y()), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
+    pgl.readPixels(pixelX, (height() - pixelY), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
         FloatBuffer.wrap(depth));
     pggl.endPGL();
     return depth[0];
@@ -405,28 +403,10 @@ public class Scene extends Graph implements PConstants {
    * Returns the world coordinates of the 3D point located at {@code pixel} (x,y) on
    * screen. May be null if no object is under pixel.
    */
-  public Vector pointUnderPixel(Point pixel) {
-    float depth = pixelDepth(pixel);
-    Vector point = location(new Vector(pixel.x(), pixel.y(), depth));
+  public Vector pointUnderPixel(int pixelX, int pixelY) {
+    float depth = pixelDepth(pixelX, pixelY);
+    Vector point = location(new Vector(pixelX, pixelY, depth));
     return (depth < 1.0f) ? point : null;
-  }
-
-  /**
-   * Same as {@code return pointUnderPixel(new Point(x, y))}.
-   *
-   * @see #pointUnderPixel(Point)
-   */
-  public Vector pointUnderPixel(float x, float y) {
-    return pointUnderPixel(new Point(x, y));
-  }
-
-  /**
-   * Same as {@code return pixelDepth(new Point(x, y))}.
-   *
-   * @see #pixelDepth(Point)
-   */
-  public float pixelDepth(float x, float y) {
-    return pixelDepth(new Point(x, y));
   }
 
   /**
@@ -464,23 +444,13 @@ public class Scene extends Graph implements PConstants {
   // 3. Drawing methods
 
   /**
-   * Convenience function that simply calls:
-   * {@code return setAnchorFromPixel(new Point(x, y))}.
-   *
-   * @see #setAnchorFromPixel(Point)
-   */
-  public boolean setAnchorFromPixel(float x, float y) {
-    return setAnchorFromPixel(new Point(x, y));
-  }
-
-  /**
    * The {@link #anchor()} is set to the point located under {@code pixel} on screen.
    * <p>
    * Returns {@code true} if a point was found under {@code pixel} and
    * {@code false} if none was found (in this case no {@link #anchor()} is set).
    */
-  public boolean setAnchorFromPixel(Point pixel) {
-    Vector pup = pointUnderPixel(pixel);
+  public boolean setAnchorFromPixel(int pixelX, int pixelY) {
+    Vector pup = pointUnderPixel(pixelX, pixelY);
     if (pup != null) {
       setAnchor(pup);
       // new animation
@@ -617,7 +587,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void display(PGraphics pgraphics) {
     if (isOffscreen())
-      pApplet().image(pgraphics, _upperLeftCorner.x(), _upperLeftCorner.y());
+      pApplet().image(pgraphics, _upperLeftCornerX, _upperLeftCornerY);
   }
 
   /**
@@ -771,11 +741,22 @@ public class Scene extends Graph implements PConstants {
    */
   protected JSONArray _toJSONArray(Interpolator interpolator) {
     JSONArray jsonKeyFrames = new JSONArray();
+    // TODO needs testing
+    int i = 0;
+    for (Map.Entry<Float, Node> entry : interpolator.keyFrames().entrySet()) {
+      JSONObject jsonKeyFrame = _toJSONObject(entry.getValue());
+      jsonKeyFrame.setFloat("time", entry.getKey());
+      jsonKeyFrames.setJSONObject(i, jsonKeyFrame);
+      i++;
+    }
+    /*
+    // it previously was
     for (int i = 0; i < interpolator.size(); i++) {
       JSONObject jsonKeyFrame = _toJSONObject(interpolator.keyFrame(i));
-      jsonKeyFrame.setFloat("time", interpolator.time(i));
+      jsonKeyFrame.setFloat("time", interpolator.timeBluf(i));
       jsonKeyFrames.setJSONObject(i, jsonKeyFrame);
     }
+    */
     return jsonKeyFrames;
   }
 
@@ -835,42 +816,13 @@ public class Scene extends Graph implements PConstants {
     return jsonRot;
   }
 
-  /**
-   * Same as {@code return super.track(mouse(), nodeArray)}.
-   *
-   * @see Graph#track(Point, Node[])
-   */
-  public Node track(Node[] nodeArray) {
-    return track(mouse(), nodeArray);
-  }
-
-  /**
-   * Same as {@code return super.track(mouse(), nodeList)}.
-   *
-   * @see Graph#track(Point, List< Node >)
-   */
-  public Node track(List<Node> nodeList) {
-    return track(mouse(), nodeList);
-  }
-
-  /**
-   * Same as {@code return track(mouse(), node)}.
-   *
-   * @see #mouse()
-   * @see #tracks(Point, Node)
-   * @see #tracks(float, float, Node)
-   */
-  public boolean tracks(Node node) {
-    return tracks(mouse(), node);
-  }
-
   @Override
-  protected boolean _tracks(float x, float y, Node node) {
+  protected boolean _tracks(Node node, int x, int y) {
     if (node == null || isEye(node))
       return false;
-    if (!node.isTrackingEnabled())
+    if (!node.isTaggingEnabled())
       return false;
-    int index = (int) y * width() + (int) x;
+    int index = y * width() + x;
     if (_backBuffer().pixels != null)
       if ((0 <= index) && (index < _backBuffer().pixels.length))
         return _backBuffer().pixels[index] == node.colorID();
@@ -883,7 +835,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushStyle();
     pGraphics.pushMatrix();
 
-    if (node.isTracked())
+    if (isTagged(node))
       pGraphics.scale(1 + node.highlighting());
 
     if (node.shape() != null)
@@ -893,7 +845,7 @@ public class Scene extends Graph implements PConstants {
     else
       node.graphics(pGraphics);
 
-    if (node.pickingThreshold() == 0 && node.isTrackingEnabled())
+    if (node.pickingThreshold() == 0 && node.isTaggingEnabled())
       _bbNeed = frameCount();
 
     pGraphics.popStyle();
@@ -1253,30 +1205,30 @@ public class Scene extends Graph implements PConstants {
   // DRAWING
 
   /**
-   * Convenience function that simply calls {@code drawPath(interpolator, isEye(interpolator.node()) ? 3 : 5, 6, radius())}.
+   * Convenience function that simply calls {@code drawCatmullRom(interpolator, isEye(interpolator.node()) ? 3 : 5, 6, radius())}.
    *
-   * @see #drawPath(Interpolator, int, int, float)
+   * @see #drawCatmullRom(Interpolator, int, int, float)
    */
-  public void drawPath(Interpolator interpolator) {
-    drawPath(interpolator, isEye(interpolator.node()) ? 3 : 5, 6, radius());
+  public void drawCatmullRom(Interpolator interpolator) {
+    drawCatmullRom(interpolator, isEye(interpolator.node()) ? 3 : 5, 6, radius());
   }
 
   /**
-   * Convenience function that simply calls {@code drawPath(interpolator, mask, 6, radius())}
+   * Convenience function that simply calls {@code drawCatmullRom(interpolator, mask, 6, radius())}
    *
-   * @see #drawPath(Interpolator, int, int, float)
+   * @see #drawCatmullRom(Interpolator, int, int, float)
    */
-  public void drawPath(Interpolator interpolator, int mask) {
-    drawPath(interpolator, mask, 6, radius());
+  public void drawCatmullRom(Interpolator interpolator, int mask) {
+    drawCatmullRom(interpolator, mask, 6, radius());
   }
 
   /**
-   * Convenience function that simply calls {@code drawPath(interpolator, mask, count, radius())}.
+   * Convenience function that simply calls {@code drawCatmullRom(interpolator, mask, count, radius())}.
    *
-   * @see #drawPath(Interpolator, int, int, float)
+   * @see #drawCatmullRom(Interpolator, int, int, float)
    */
-  public void drawPath(Interpolator interpolator, int mask, int steps) {
-    drawPath(interpolator, mask, steps, radius());
+  public void drawCatmullRom(Interpolator interpolator, int mask, int steps) {
+    drawCatmullRom(interpolator, mask, steps, radius());
   }
 
   /**
@@ -1286,9 +1238,9 @@ public class Scene extends Graph implements PConstants {
    * drawn. If ( (mask &amp; 2) != 0 ), an eye representation is regularly drawn and if
    * ( (mask &amp; 4) != 0 ), oriented axes are regularly drawn. Examples:
    * <p>
-   * {@code drawPath(1); // Simply draws the interpolation path} <br>
-   * {@code drawPath(3); // Draws path and eyes} <br>
-   * {@code drawPath(5); // Draws path and axes} <br>
+   * {@code drawCatmullRom(1); // Simply draws the interpolation path} <br>
+   * {@code drawCatmullRom(3); // Draws path and eyes} <br>
+   * {@code drawCatmullRom(5); // Draws path and axes} <br>
    * <p>
    * In the case where the eye or axes are drawn, {@code steps} controls the number of
    * objects (axes or eyes) drawn between two successive keyframes. When
@@ -1299,7 +1251,7 @@ public class Scene extends Graph implements PConstants {
    * {@code scale} controls the scaling of the eye and axes drawing. A value of
    * {@link #radius()} should give good results.
    */
-  public void drawPath(Interpolator interpolator, int mask, int steps, float scale) {
+  public void drawCatmullRom(Interpolator interpolator, int mask, int steps, float scale) {
     context().pushStyle();
     if (mask != 0) {
       int nbSteps = 30;
@@ -1308,8 +1260,8 @@ public class Scene extends Graph implements PConstants {
       List<Node> path = interpolator.path();
       if (((mask & 1) != 0) && path.size() > 1) {
         context().beginShape();
-        for (Node myFr : path)
-          vertex(myFr.position().x(), myFr.position().y(), myFr.position().z());
+        for (Node node : path)
+          vertex(node.position().x(), node.position().y(), node.position().z());
         context().endShape();
       }
       if ((mask & 6) != 0) {
@@ -1317,7 +1269,6 @@ public class Scene extends Graph implements PConstants {
         if (steps > nbSteps)
           steps = nbSteps;
         float goal = 0.0f;
-
         for (Node node : path)
           if ((count++) >= goal) {
             goal += nbSteps / (float) steps;
@@ -1330,10 +1281,16 @@ public class Scene extends Graph implements PConstants {
             _matrixHandler.popMatrix();
           }
       }
-      context().strokeWeight(context().strokeWeight / 2f);
+      context().strokeWeight(context().strokeWeight / 2f); // draw the picking targets:
+      /*
+      // TODO picking targets currently broken, requires attach nodes in interpolator._list to interpolator._path
+      for (Node node : interpolator.path())
+        if(node.isAttached(this))
+          drawBullsEye(node);
+       */
     }
     // draw the picking targets:
-    for (Node node : interpolator.keyFrames())
+    for (Node node : interpolator.keyFrames().values())
       drawBullsEye(node);
     context().popStyle();
   }
@@ -2408,14 +2365,14 @@ public class Scene extends Graph implements PConstants {
    * {@link #drawCross(float, float, float)} centered at the projected node origin.
    * If node is a Node instance the length of the cross is the node
    * {@link Node#pickingThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If node a Node instance and it is {@link #isTrackedNode(Node)} it also applies
+   * If node a Node instance and it is {@link #hasTag(Node)} it also applies
    * a stroke highlight.
    *
    * @see #drawSquaredBullsEye(Node, float)
    */
   public void drawCross(Node node) {
     context().pushStyle();
-    if (node.isTracked())
+    if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
     drawCross(node, node.pickingThreshold() < 1 ? 200 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position()) : node.pickingThreshold());
     context().popStyle();
@@ -2494,7 +2451,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawSquaredBullsEye(float, float, float)} centered at the projected node origin.
    * The length of the target is the node {@link Node#pickingThreshold()}.
-   * If node {@link #isTrackedNode(Node)} it also applies a stroke highlight.
+   * If node {@link #hasTag(Node)} it also applies a stroke highlight.
    *
    * @see #drawSquaredBullsEye(Node, float)
    * @see #drawCircledBullsEye(Node)
@@ -2504,7 +2461,7 @@ public class Scene extends Graph implements PConstants {
     if (node.pickingThreshold() == 0)
       return;
     context().pushStyle();
-    if (node.isTracked())
+    if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
     drawSquaredBullsEye(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToGraphRatio(node.position())
         : Math.abs(node.pickingThreshold()));
@@ -2590,7 +2547,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawCircledBullsEye(float, float, float)} centered at the projected node origin.
    * The length of the target is the node {@link Node#pickingThreshold()}.
-   * If node {@link #isTrackedNode(Node)} it also applies a stroke highlight.
+   * If node {@link #hasTag(Node)} it also applies a stroke highlight.
    *
    * @see #drawSquaredBullsEye(Node, float)
    * @see #drawCircledBullsEye(Node)
@@ -2600,7 +2557,7 @@ public class Scene extends Graph implements PConstants {
     if (node.pickingThreshold() == 0)
       return;
     context().pushStyle();
-    if (node.isTracked())
+    if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
     drawCircledBullsEye(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToGraphRatio(node.position())
         : Math.abs(node.pickingThreshold()));
@@ -2811,13 +2768,13 @@ public class Scene extends Graph implements PConstants {
    * @param height
    * @param vertices
    */
-  public void drawCone(PGraphics pGraphics, float height, float scaling, List<Vector> vertices) {
+  public void drawCone(PGraphics pGraphics, float height, List<Vector> vertices) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     pGraphics.vertex(0, 0, 0);
     for (Vector v : vertices) {
-      pGraphics.vertex(scaling * v.x(), scaling * v.y(), height);
+      pGraphics.vertex(v.x(), v.y(), height);
     }
-    if (!vertices.isEmpty()) pGraphics.vertex(scaling * vertices.get(0).x(), scaling * vertices.get(0).y(), height);
+    if (!vertices.isEmpty()) pGraphics.vertex(vertices.get(0).x(), vertices.get(0).y(), height);
     pGraphics.endShape();
   }
 
@@ -2842,48 +2799,6 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Draws a truncated cone onto {@code pGraphics} along the positive {@code z} axis,
-   * with its base centered at {@code (x,y)}, {@code height}, and radii {@code radius1}
-   * and {@code radius2} (basis and height respectively).
-   */
-  public static void drawCone(PGraphics pGraphics, int detail, float x, float y, float height, float left_radius, float up_radius, float right_radius, float down_radius) {
-    if (!(pGraphics instanceof PGraphics3D))
-      return;
-    pGraphics.pushStyle();
-    detail = detail % 4 != 0 ? detail + (4 - detail % 4) : detail;
-    detail = Math.min(16, detail);
-
-    float unitConeX[] = new float[detail + 1];
-    float unitConeY[] = new float[detail + 1];
-
-    int d = detail / 4;
-
-    for (int i = 0; i <= d; i++) {
-      float a1 = (PApplet.PI * i) / (2.f * d);
-      unitConeX[i] = right_radius * (float) Math.cos(a1);
-      unitConeY[i] = up_radius * (float) Math.sin(a1);
-      unitConeX[i + d] = left_radius * (float) Math.cos(a1 + PApplet.HALF_PI);
-      unitConeY[i + d] = up_radius * (float) Math.sin(a1 + PApplet.HALF_PI);
-      unitConeX[i + 2 * d] = left_radius * (float) Math.cos(a1 + PApplet.PI);
-      unitConeY[i + 2 * d] = down_radius * (float) Math.sin(a1 + PApplet.PI);
-      unitConeX[i + 3 * d] = right_radius * (float) Math.cos(a1 + 3 * PApplet.PI / 2);
-      unitConeY[i + 3 * d] = down_radius * (float) Math.sin(a1 + 3 * PApplet.PI / 2);
-    }
-
-    pGraphics.pushMatrix();
-    pGraphics.translate(x, y);
-    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
-    vertex(pGraphics, 0, 0, 0);
-    for (int i = 0; i <= detail; i++) {
-      vertex(pGraphics, unitConeX[i], unitConeY[i], height);
-    }
-    pGraphics.endShape();
-    pGraphics.popMatrix();
-    pGraphics.popStyle();
-  }
-
-
-  /**
    * Draws an Arc onto {@code pGraphics} centered at {@code (0,0)} on the XY Plane
    * {@code minAngle} and {@code maxAngle} represents the Arc's width.
    *
@@ -2895,117 +2810,11 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
-    if (pGraphics.is3D()) {
-      pGraphics.vertex(0, 0, 0);
-    } else {
-      pGraphics.vertex(0, 0);
-    }
+    pGraphics.vertex(0, 0, 0);
     float step = (maxAngle - minAngle) / detail;
-    for (float theta = minAngle; theta < maxAngle; theta += step)
+    for (float theta = minAngle; theta <= maxAngle; theta += step)
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
-    pGraphics.vertex(radius * (float) Math.cos(maxAngle), radius * (float) Math.sin(maxAngle));
     pGraphics.endShape(PApplet.CLOSE);
-  }
-
-  /**
-   * Same as {@code drawConstraint(frontBuffer(), frame)}.
-   *
-   * @see #drawConstraint(PGraphics, Node)
-   */
-  public void drawConstraint(Node node) {
-    //Makes no sense to draw constraint on BackBuffer unless the user make it explicit
-    drawConstraint(context(), node);
-  }
-
-  /**
-   * Draws the frame constraint if it's non-null.
-   *
-   * @see Node#constraint()
-   * @see nub.core.constraint.Constraint
-   */
-  public void drawConstraint(PGraphics pGraphics, Node node) {
-    drawConstraint(pGraphics, node, 0.5f);
-  }
-
-  /**
-   * Draws the frame constraint if it's non-null.
-   *
-   * @see Node#constraint()
-   * @see nub.core.constraint.Constraint
-   */
-  public void drawConstraint(PGraphics pGraphics, Node node, float factor) {
-    if (node == null) return;
-    if (node.constraint() == null) return;
-    // TODO test
-    if (!node.isAttached(this)) return;
-    float boneLength = 0;
-    if (!node.children().isEmpty()) {
-      for (Node child : node.children())
-        boneLength += child.translation().magnitude();
-      boneLength = boneLength / (1.f * node.children().size());
-    } else
-      boneLength = node.translation().magnitude();
-    if (boneLength == 0) return;
-
-    pGraphics.pushMatrix();
-    pGraphics.pushStyle();
-    pGraphics.noStroke();
-
-    pGraphics.fill(62, 203, 55, 150);
-    Node reference = new Node();
-    reference.setTranslation(new Vector());
-    reference.setRotation(node.rotation().inverse());
-
-    if (node.constraint() instanceof BallAndSocket) {
-      BallAndSocket constraint = (BallAndSocket) node.constraint();
-      reference.rotate(((BallAndSocket) node.constraint()).orientation());
-      applyTransformation(pGraphics, reference);
-      float width = boneLength * factor;
-      float max = Math.max(Math.max(Math.max(constraint.up(), constraint.down()), constraint.left()), constraint.right());
-      //Max value will define max radius length
-      float height = (float) (width / Math.tan(max));
-      if (height > boneLength * factor) height = width;
-      //drawAxes(pGraphics,height*1.2f);
-      //get all radius
-      float up_r = (float) Math.abs((height * Math.tan(constraint.up())));
-      float down_r = (float) Math.abs((height * Math.tan(constraint.down())));
-      float left_r = (float) Math.abs((height * Math.tan(constraint.left())));
-      float right_r = (float) Math.abs((height * Math.tan(constraint.right())));
-      drawCone(pGraphics, 20, 0, 0, height, left_r, up_r, right_r, down_r);
-    } else if (node.constraint() instanceof PlanarPolygon) {
-      reference.rotate(((PlanarPolygon) node.constraint()).orientation());
-      applyTransformation(pGraphics, reference);
-      float w_d = boneLength * factor;
-      float w_c = (float) Math.abs((Math.tan(((PlanarPolygon) node.constraint()).angle())));
-      float height = w_d / w_c;
-      if (height > boneLength * factor) height = w_d;
-      //drawAxes(pGraphics,height*1.2f);
-      drawCone(pGraphics, height, height, ((PlanarPolygon) node.constraint()).vertices());
-    } else if (node.constraint() instanceof SphericalPolygon) {
-      //TODO : Fix as Planar Polygon
-      reference.rotate(((SphericalPolygon) node.constraint()).restRotation());
-      applyTransformation(pGraphics, reference);
-      //drawAxes(pGraphics,5);
-      drawCone(pGraphics, ((SphericalPolygon) node.constraint()).vertices(), boneLength);
-    } else if (node.constraint() instanceof Hinge) {
-      //TODO: Only works well if child lies on Axis Plane
-      Hinge constraint = (Hinge) node.constraint();
-      if (node.children().size() == 1) {
-        reference.rotate(constraint.orientation());
-        reference.rotate(new Quaternion(new Vector(1, 0, 0), new Vector(0, 1, 0)));
-        applyTransformation(pGraphics, reference);
-        drawArc(pGraphics, boneLength * factor, -constraint.minAngle(), constraint.maxAngle(), 10);
-      }
-    }
-    pGraphics.popMatrix();
-    pGraphics.popStyle();
-  }
-
-  /**
-   * Converts the {@code x, y} coordinates into a new {@link Point} and returns it.
-   */
-  public static Point toPoint(float x, float y) {
-    return new Point(x, y);
   }
 
   /**
@@ -3057,153 +2866,300 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Returns the current mouse cursor position.
+   * Returns the current mouse x coordinate.
    */
-  public Point mouse() {
-    return toPoint(pApplet().mouseX - _upperLeftCorner.x(), pApplet().mouseY - _upperLeftCorner.y());
+  public int mouseX() {
+    return pApplet().mouseX - _upperLeftCornerX;
   }
 
   /**
-   * Returns the previous mouse cursor position.
+   * Returns the current mouse y coordinate.
    */
-  public Point pmouse() {
-    return toPoint(pApplet().pmouseX - _upperLeftCorner.x(), pApplet().pmouseY - _upperLeftCorner.y());
+  public int mouseY() {
+    return pApplet().mouseY - _upperLeftCornerY;
   }
 
   /**
-   * Same as {@code return track(hid, mouse())}.
+   * Returns the previous mouse x coordinate.
+   */
+  public int pmouseX() {
+    return pApplet().pmouseX - _upperLeftCornerX;
+  }
+
+  /**
+   * Returns the previous mouse y coordinate.
+   */
+  public int pmouseY() {
+    return pApplet().pmouseY - _upperLeftCornerY;
+  }
+
+  /**
+   * Same as {@code return super.tracks(node, mouseX(), mouseY())}.
    *
-   * @see #track(String, Point)
-   * @see #mouse()
+   * @see #tracks(Node, int, int)
+   * @see #mouseX()
+   * @see #mouseY()
    */
-  public Node track(String hid) {
-    return track(hid, mouse());
+  public boolean mouseTracks(Node node) {
+    return super.tracks(node, mouseX(), mouseY());
   }
 
   /**
-   * Same as {@code return track(mouse())}.
+   * Same as {@code return super.updateTag(mouseX(), mouseY(), nodeList)}.
    *
-   * @see #track(Point)
-   * @see #mouse()
+   * @see Graph#updateTag(int, int, List< Node >)
+   * @see #mouseX()
+   * @see #mouseY()
    */
-  public Node track() {
-    return track(mouse());
+  public Node updateMouseTag(List<Node> nodeList) {
+    return super.updateTag(mouseX(), mouseY(), nodeList);
   }
 
   /**
-   * Same as {@code cast(hid, mouse())}.
+   * Same as {@code return super.track(mouse(), nodeList)}.
    *
-   * @see #cast(String, Point)
-   * @see #mouse()
+   * @see Graph#updateTag(String, int, int, List< Node >)
+   * @see #mouseX()
+   * @see #mouseY()
    */
-  public void cast(String hid) {
-    cast(hid, mouse());
+  public Node updateMouseTag(String tag, List<Node> nodeList) {
+    return super.updateTag(tag, mouseX(), mouseY(), nodeList);
   }
 
   /**
-   * Same as {@code cast(mouse())}.
+   * Same as {@code return super.track(mouse(), nodeArray)}.
    *
-   * @see #cast(Point)
-   * @see #mouse()
+   * @see Graph#updateTag(int, int, Node[])
    */
-  public void cast() {
-    cast(mouse());
+  public Node updateMouseTag(Node[] nodeArray) {
+    return super.updateTag(mouseX(), mouseY(), nodeArray);
   }
 
   /**
-   * Same as {@code translate(mouseDX(), mouseDY())}.
+   * Same as {@code return super.updateTag(tag, mouseX(), mouseY(), nodes)}.
+   *
+   * @see #updateTag(int, int, Node[])
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public Node updateMouseTag(String tag, Node[] nodes) {
+    return super.updateTag(tag, mouseX(), mouseY(), nodes);
+  }
+
+  /**
+   * Same as {@code return super.updateTag(tag, mouseX(), mouseY())}.
+   *
+   * @see #updateTag(String, int, int)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public Node updateMouseTag(String tag) {
+    return super.updateTag(tag, mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code return super.updateTag(mouseX(), mouseY())}.
+   *
+   * @see #updateTag(int, int)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public Node updateMouseTag() {
+    return super.updateTag(mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code super.tag(tag, mouseX(), mouseY())}.
+   *
+   * @see Graph#tag(String, int, int)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public void mouseTag(String tag) {
+    super.tag(tag, mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code super.tag(mouseX(), mouseY())}.
+   *
+   * @see #tag(int, int)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public void mouseTag() {
+    super.tag(mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code super.translate(mouseDX(), mouseDY())}.
    *
    * @see #translate(float, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
-  public void translate() {
-    translate(mouseDX(), mouseDY());
+  public void mouseTranslate() {
+    super.translate(mouseDX(), mouseDY());
   }
 
   /**
-   * Same as {@code translate(mouseDX(), mouseDY(), node)}.
+   * Same as {@code super.translate(tag, mouseDX(), mouseDY())}.
    *
-   * @see #translate(float, float, Node)
+   * @see #translate(String, float, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
-  public void translate(Node node) {
-    translate(mouseDX(), mouseDY(), node);
+  public void mouseTranslate(String tag) {
+    super.translate(tag, mouseDX(), mouseDY());
   }
 
   /**
-   * Same as {@code spin(pmouse(), mouse())}.
+   * Same as {@code return super.translateTag(tag, mouseDX(), mouseDY())}.
    *
-   * @see #spin(Point, Point)
-   * @see #pmouse()
-   * @see #mouse()
+   * @see #translateTag(String, float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
    */
-  public void spin() {
-    spin(pmouse(), mouse());
+  public boolean mouseTranslateTag(String tag) {
+    return super.translateTag(tag, mouseDX(), mouseDY());
   }
 
   /**
-   * Same as {@code spin(pmouse(), mouse(), node)}.
+   * Same as {@code return super.translate(mouseDX(), mouseDY())}.
    *
-   * @see #spin(Point, Point, Node)
-   * @see #pmouse()
-   * @see #mouse()
+   * @see #translate(float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
    */
-  public void spin(Node node) {
-    spin(pmouse(), mouse(), node);
+  public boolean mouseTranslateTag() {
+    return super.translateTag(mouseDX(), mouseDY());
+  }
+
+  /**
+   * Same as {@code super.translateNode(node, mouseDX(), mouseDY())}.
+   *
+   * @see #translateNode(Node, float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
+   */
+  public void mouseTranslateNode(Node node) {
+    super.translateNode(node, mouseDX(), mouseDY());
+  }
+
+  /**
+   * Same as {@code super.translateEye(mouseDX(), mouseDY())}.
+   *
+   * @see #translateEye(float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
+   */
+  public void mouseTranslateEye() {
+    super.translateEye(mouseDX(), mouseDY());
+  }
+
+  /**
+   * Same as {@code mouseSpin(null)}.
+   *
+   * @see #mouseSpin(String)
+   */
+  public void mouseSpin() {
+    mouseSpin(null);
+  }
+
+  /**
+   * Calls {@code mouseSpinTag(tag)} if {@code node(tag)} is non-null and {@code mouseSpinEye()} otherwise.
+   *
+   * @see #mouseSpinTag(String)
+   * @see #mouseSpinEye()
+   */
+  public void mouseSpin(String tag) {
+    if (!mouseSpinTag(tag))
+      mouseSpinEye();
+  }
+
+  /**
+   * Same as {@code return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   *
+   * @see #spinTag(int, int, int, int)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public boolean mouseSpinTag() {
+    return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   *
+   * @see #spinTag(String, int, int, int, int)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public boolean mouseSpinTag(String tag) {
+    return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   *
+   * @see #spinNode(Node, int, int, int, int)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public void mouseSpinNode(Node node) {
+    super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   *
+   * @see #spinEye(int, int, int, int)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public void mouseSpinEye() {
+    super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
   // only eye
 
   /**
-   * Same as {@code lookAround(mouseRADX(), mouseRADY())}.
+   * Same as {@code super.lookAround(mouseRADX(), mouseRADY())}.
    *
    * @see #lookAround(float, float)
    * @see #mouseRADX()
    * @see #mouseRADY()
    */
-  public void lookAround() {
-    lookAround(mouseRADX(), mouseRADY());
+  public void mouseLookAround() {
+    super.lookAround(mouseRADX(), mouseRADY());
   }
 
   /**
-   * Same as {@code rotateCAD(mouseRADX(), mouseRADY())}.
+   * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY())}.
    *
    * @see #rotateCAD(float, float)
    * @see #mouseRADX()
    * @see #mouseRADY()
    */
-  public void rotateCAD() {
-    rotateCAD(mouseRADX(), mouseRADY());
+  public void mouseRotateCAD() {
+    super.rotateCAD(mouseRADX(), mouseRADY());
   }
 
   /**
-   * Same as {@code rotateCAD(mouseRADX(), mouseRADY(), up)}.
+   * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY(), up)}.
    *
    * @see #rotateCAD(float, float, Vector)
    * @see #mouseRADX()
    * @see #mouseRADY()
    */
-  public void rotateCAD(Vector up) {
-    rotateCAD(mouseRADX(), mouseRADY(), up);
+  public void mouseRotateCAD(Vector up) {
+    super.rotateCAD(mouseRADX(), mouseRADY(), up);
   }
-
-  /*
-  public void screenRotate() {
-    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY));
-  }
-
-  public void screenRotate(float sensitivity) {
-    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity);
-  }
-
-  public void screenRotate(Node node) {
-    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), node);
-  }
-
-  public void screenRotate(float sensitivity, Node node) {
-    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity, node);
-  }
-  */
 }

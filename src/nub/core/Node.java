@@ -12,7 +12,6 @@ package nub.core;
 
 import nub.core.constraint.Constraint;
 import nub.primitives.Matrix;
-import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.TimingHandler;
@@ -68,8 +67,8 @@ import java.util.List;
  * {@code popMatrix();} <br>
  * <p>
  * Use {@link #view()} and {@link #projection(Graph.Type, float, float, float, float, boolean)}
- * when rendering the scene from the node point-of-view. Note these methods are used by the
- * graph when a node is set as its eye, see {@link Graph#preDraw()}.
+ * when rendering the scene from the node point-of-view. Note that these methods are used by
+ * the graph when a node is set as its eye, see {@link Graph#preDraw()}.
  * <p>
  * To transform a point from one node to another use {@link #location(Vector, Node)} and
  * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
@@ -101,21 +100,16 @@ import java.util.List;
  * <h2>Shapes</h2>
  * A node shape can be set from a retained-mode rendering object, see {@link #setShape(Object)};
  * or from an immediate-mode rendering procedure, see {@link #graphics(Object)}.
- * Picking a node is done according to a {@link #pickingThreshold()}. When a node is tracked
+ * Picking a node is done according to a {@link #pickingThreshold()}. When a node is tagged
  * it will be highlighted (scaled) according to a {@link #highlighting()} magnitude.
- * See also {@link #enableTracking(boolean)}.
- * <h2>Application Control</h2>
- * Implementing an application control for the node is a two step process:
+ * See also {@link #enableTagging(boolean)}.
+ * <h2>Custom behavior</h2>
+ * Implementing a custom behavior for node is a two step process:
  * <ul>
  * <li>Parse user gesture data by overriding {@link #interact(Object...)}.</li>
- * <li>Send gesture data to the node by calling {@link Graph#defaultHIDControl(Object...)},
- * {@link Graph#control(String, Object...)} or {@link Graph#control(Node, Object...)}.</li>
+ * <li>Send gesture data to the node by calling {@link Graph#interactNode(Node, Object...)},
+ * {@link Graph#interactTag(String, Object...)} or {@link Graph#interactTag(Object...)}.</li>
  * </ul>
- * <h2>Syncing</h2>
- * Two nodes can be synced together ({@link #sync(Node, Node)}), meaning that they will
- * share their global parameters (position, orientation and magnitude) taken the one
- * that has been most recently updated. Syncing can be useful to share nodes
- * among different off-screen canvases.
  */
 public class Node {
   /**
@@ -137,7 +131,7 @@ public class Node {
   protected Constraint _constraint;
   protected long _lastUpdate;
 
-  // Tracking & Precision
+  // Tagging & Precision
   protected float _threshold;
 
   // ID
@@ -148,7 +142,7 @@ public class Node {
   protected Graph _graph;
   protected List<Node> _children;
   protected boolean _culled;
-  protected boolean _tracking;
+  protected boolean _tagging;
 
   // Rendering
   protected Object _shape;
@@ -369,7 +363,7 @@ public class Node {
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
     _lastUpdate = 0;
     _threshold = .2f;
-    _tracking = true;
+    _tagging = true;
     _highlight = 0.15f;
     if (graph() == null)
       return;
@@ -397,7 +391,7 @@ public class Node {
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
     _lastUpdate = node.lastUpdate();
     this._threshold = node._threshold;
-    this._tracking = node._tracking;
+    this._tagging = node._tagging;
 
     if (graph() == null)
       return;
@@ -509,6 +503,10 @@ public class Node {
 
   // colorID
 
+  /**
+   * Returns the unique sequential node id assigned at instantiation time.
+   * Used by {@link #colorID()} and {@link Graph#_drawBackBuffer(Node)}.
+   */
   public int id() {
     return _id;
   }
@@ -528,39 +526,6 @@ public class Node {
    */
   public long lastUpdate() {
     return _lastUpdate;
-  }
-
-  // SYNC
-
-  /**
-   * Same as {@code sync(this, other)}.
-   *
-   * @see #sync(Node, Node)
-   */
-  public void sync(Node node) {
-    sync(this, node);
-  }
-
-  /**
-   * If {@code node1} has been more recently updated than {@code node2}, calls
-   * {@code node2.set(node1)}, otherwise calls {@code node1.set(node2)}.
-   * Does nothing if both objects were updated at the same time.
-   * <p>
-   * This method syncs only the global geometry attributes ({@link #position()},
-   * {@link #orientation()} and {@link #magnitude()}) among the two nodes. The
-   * {@link #reference()} and {@link #constraint()} (if any) of each node are kept
-   * separately.
-   *
-   * @see #set(Node)
-   */
-  public static void sync(Node node1, Node node2) {
-    if (node1 == null || node2 == null)
-      return;
-    if (node1.lastUpdate() == node2.lastUpdate())
-      return;
-    Node source = (node1.lastUpdate() > node2.lastUpdate()) ? node1 : node2;
-    Node target = (node1.lastUpdate() > node2.lastUpdate()) ? node2 : node1;
-    target.set(source);
   }
 
   /**
@@ -1154,7 +1119,7 @@ public class Node {
   /**
    * Rotates the node by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
    * passes through {@code point}. The {@code quaternion} {@link Quaternion#axis()} is
-   * defined in the node coordinate system, while {@code point} is defined in the world
+   * defined in this node coordinate system, while {@code point} is defined in the world
    * coordinate system).
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
@@ -1217,7 +1182,7 @@ public class Node {
    * Rotates this node around {@code node} (which may be null for the world coordinate system)
    * according to {@code quaternion}.
    * <p>
-   * The {@code quaternion} axes (see {@link Quaternion#axis()}) is defined in the {@code node}
+   * The {@code quaternion} axis (see {@link Quaternion#axis()}) is defined in the {@code node}
    * coordinate system.
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
@@ -2266,75 +2231,65 @@ public class Node {
   }
 
   /**
-   * Returns {@code true} if tracking is enabled.
+   * Returns {@code true} if tagging is enabled.
    *
-   * @see #enableTracking(boolean)
-   * @see #enableTracking()
-   * @see #disableTracking()
+   * @see #enableTagging(boolean)
+   * @see #enableTagging()
+   * @see #disableTagging()
    */
-  public boolean isTrackingEnabled() {
-    return _tracking;
+  public boolean isTaggingEnabled() {
+    return _tagging;
   }
 
   /**
-   * Same as {@code enableTracking(false)}.
+   * Same as {@code enableTagging(false)}.
    *
-   * @see #isTrackingEnabled()
-   * @see #enableTracking()
-   * @see #enableTracking(boolean)
+   * @see #isTaggingEnabled()
+   * @see #enableTagging()
+   * @see #enableTagging(boolean)
    */
-  public void disableTracking() {
-    enableTracking(false);
+  public void disableTagging() {
+    enableTagging(false);
   }
 
   /**
-   * Same as {@code enableTracking(true)}.
+   * Same as {@code enableTagging(true)}.
    *
-   * @see #isTrackingEnabled()
-   * @see #enableTracking(boolean)
-   * @see #disableTracking()
+   * @see #isTaggingEnabled()
+   * @see #enableTagging(boolean)
+   * @see #disableTagging()
    */
-  public void enableTracking() {
-    enableTracking(true);
+  public void enableTagging() {
+    enableTagging(true);
   }
 
   /**
-   * Enables node tracking according to {@code flag}. When tracking is disabled {@link Graph#tracks(Point, Node)}
-   * returns {@code false}, {@link Graph#setTrackedNode(String, Node)} does nothing while
-   * {@link Graph#track(String, Point)} and {@link Graph#cast(String, Point)} would bypass the node.
+   * Enables tagging of the node according to {@code flag}. When tagging is disabled
+   * {@link Graph#tracks(Node, int, int)} returns {@code false} and the node cannot be
+   * tagged (i.e., {@link Graph#tag(String, Node)}, {@link Graph#updateTag(String, int, int)}
+   * and {@link Graph#tag(int, int)} never tag the node).
    *
-   * @see #isTrackingEnabled()
-   * @see #enableTracking()
-   * @see #disableTracking()
+   * @see #isTaggingEnabled()
+   * @see #enableTagging()
+   * @see #disableTagging()
    */
-  public void enableTracking(boolean flag) {
-    _tracking = flag;
+  public void enableTagging(boolean flag) {
+    _tagging = flag;
   }
 
   /**
-   * Same as {@code return isDetached() ? false : isTracked(graph())}. Use it if the node is
-   * attached to a {@link #graph()}. Use {@link #isTracked(Graph)} if the node {@link #isDetached()}.
+   * Returns {@code true} if the {@code node} has been tagged by the {@code graph} at least once
+   * and {@code false} otherwise.
    *
-   * @see #isDetached()
-   * @see #isTracked(Graph)
+   * @see Graph#hasTag(String, Node)
+   * @see Graph#hasTag(Node)
    */
-  public boolean isTracked() {
-    return !isDetached() && isTracked(graph());
+  public boolean isTagged(Graph graph) {
+    return graph.isTagged(this);
   }
 
   /**
-   * Returns {@code true} if the {@code node} is being tracked by at least one {@code graph}
-   * {@code hid} and {@code false} otherwise.
-   *
-   * @see Graph#isTrackedNode(String, Node)
-   * @see Graph#isTrackedNode(Node)
-   */
-  public boolean isTracked(Graph graph) {
-    return graph._agents.containsValue(this);
-  }
-
-  /**
-   * Parse {@code gesture} params. Useful to implement the node as an for application control.
+   * Parse {@code gesture} params. Useful to customize the node behavior.
    * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
    */
   public void interact(Object... gesture) {
@@ -2418,7 +2373,7 @@ public class Node {
   }
 
   /**
-   * Returns the highlighting magnitude use to scale the node when it's tracked.
+   * Returns the highlighting magnitude use to scale the node when it's tagged.
    *
    * @see #setHighlighting(float)
    * @see #pickingThreshold()

@@ -1,15 +1,17 @@
 /**
- * Application Control.
+ * Custom Node Interaction.
  * by Jean Pierre Charalambos.
- * 
+ *
  * This example illustrates how to customize shape behaviors by
- * overriding the node interact(Object... gesture) method.
+ * overriding the node interact(Object... gesture) method and
+ * sending gesture data to the node with the scene
+ * interactTag(Object... gesture) method.
  *
  * The toruses color and number of faces are controled with the
  * keys and the mouse. To pick a torus press the [0..9] keys
  * or double-click on it; press other key or double-click on the
  * the background to reset your picking selection. Once a torus
- * is picked try the key arrows, the mouse wheel or a single 
+ * is picked try the key arrows, the mouse wheel or a single
  * mouse click, to control its color and number of faces.
  */
 
@@ -25,7 +27,7 @@ int totalShapes;
 //Choose FX2D, JAVA2D, P2D or P3D
 String renderer = P3D;
 
-public void settings() {
+void settings() {
   size(1240, 840, renderer);
 }
 
@@ -44,7 +46,7 @@ void setup() {
         Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
         scene.beginHUD(pg);
         Vector position = scene.screenLocation(position());
-        pg.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
+        pg.fill(isTagged(scene) ? 0 : 255, isTagged(scene) ? 255 : 0, isTagged(scene) ? 0 : 255);
         pg.textFont(font36);
         pg.text(_id, position.x(), position.y());
         scene.endHUD(pg);
@@ -93,36 +95,36 @@ void draw() {
 void keyPressed() {
   int value = Character.getNumericValue(key);
   if (value >= 0 && value < 10)
-    scene.setTrackedNode(shapes[value]);
+    scene.tag("key", shapes[value]);
   if (key == ' ')
-    scene.resetTrackedNode();
+    scene.removeTag("key");
   if (key == CODED)
     if (keyCode == UP)
-      scene.translate(0, -10);
+      scene.translate("key", 0, -10);
     else if (keyCode == DOWN)
-      scene.translate(0, 10);
+      scene.translate("key", 0, 10);
     else if (keyCode == LEFT)
-      scene.defaultHIDControl("menos");
+      scene.interactTag("key", "menos");
     else if (keyCode == RIGHT)
-      scene.defaultHIDControl("mas");
+      scene.interactTag("key", "mas");
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.spin();
+    scene.mouseSpin("key");
   else if (mouseButton == CENTER)
-    scene.scale(scene.mouseDX());
+    scene.scale("key", scene.mouseDX());
   else
-    scene.translate();
+    scene.mouseTranslate("key");
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.defaultHIDControl(event.getCount());
+  scene.interactTag("key", event.getCount());
 }
 
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1)
-    scene.defaultHIDControl();
+    scene.interactTag("key");
   if (event.getCount() == 2)
-    scene.cast();
+    scene.mouseTag("key");
 }
