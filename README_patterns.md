@@ -104,11 +104,11 @@ Note that the hierarchy of nodes may be modified with [setReference(Node)](https
 
 A node [position](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#position--), [orientation](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#orientation--) and [magnitude]() may be set with the following methods:
 
-| Node localization | Position                     | Orientation                      | Magnitude                 |
-|-------------------|----------------------------- |----------------------------------|---------------------------|
-| Globally          | ```setPosition(Vector)```    | ```setOrientation(Quaternion)``` | ```setMagnitude(float)``` |
-| Locally           | ```setTranslation(Vector)``` | ```setRotation(Quaternion)```    | ```setScaling(float)```   |
-| Incrementally     | ```translate(Vector)```      | ```rotate(Quaternion)```         | ```scale(float)```        |
+| Node localization | Position                     | Orientation                      | Magnitude               |
+|-------------------|------------------------------|----------------------------------|-------------------------|
+| Globally          | ```setPosition(vector)```    | ```setOrientation(quaternion)``` | ```setMagnitude(mag)``` |
+| Locally           | ```setTranslation(vector)``` | ```setRotation(quaternion)```    | ```setScaling(scl)```   |
+| Incrementally     | ```translate(vector)```      | ```rotate(quaternion)```         | ```scale(amount)```     |
 
 #### Shapes
 
@@ -118,20 +118,22 @@ Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Im
 
 The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions, where user interaction takes place) and nodes (including the world):
 
-| Space transformation | Points                             | Vectors                                |
-|----------------------|------------------------------------|----------------------------------------|
-| Screen to Node       | ```location(Vector, Node)```       | ```displacement(Vector, Node)```       |
-| Node to Screen       | ```screenLocation(Vector, Node)``` | ```screenDisplacement(Vector, Node)``` |
-| Screen to World      | ```location(Vector)```             | ```displacement(Vector, Node)```       |
-| World to Screen      | ```screenLocation(Vector)```       | ```screenDisplacement(Vector)```       |
+| Space transformation | Points                            | Vectors                                |
+|----------------------|-----------------------------------|----------------------------------------|
+| Screen to Node       | ```location(pixel, node)```       | ```displacement(vector, node)```       |
+| Node to Screen       | ```screenLocation(point, node)``` | ```screenDisplacement(vector, node)``` |
+| Screen to World      | ```location(pixel)```             | ```displacement(vector, node)```       |
+| World to Screen      | ```screenLocation(point)```       | ```screenDisplacement(vector)```       |
 
 The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world) to this node:
 
-| Space transformation | Points                             | Vectors                                |
-|----------------------|------------------------------------|----------------------------------------|
-| Node to (this) Node  | ```location(Vector, Node)```       | ```displacement(Vector, Node)```       |
-| World to Node        | ```location(Vector)```             | ```displacement(Vector)```             |
-| Node to World        | ```worldLocation(Vector)```        | ```worldDisplacement(Vector)```        |
+| Space transformation | Points                      | Vectors                          |
+|----------------------|-----------------------------|----------------------------------|
+| Node to (this) Node  | ```location(point, node)``` | ```displacement(vector, node)``` |
+| World to Node        | ```location(point)```       | ```displacement(vector)```       |
+| Node to World        | ```worldLocation(point)```  | ```worldDisplacement(vector)```  |
+
+Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances.
 
 ## Rendering
 
@@ -170,17 +172,17 @@ The scene has several methods to position and orient the _eye_ node, such as: [l
 
 The following scene methods implement _eye_ motion actions particularly suited for input devices, possibly having several degrees-of-freedom:
 
-| Action       | Generic input device                    | Mouse                     |
-|--------------|-----------------------------------------|---------------------------|
-| Align        | ```alignEye()```                        | n.a.                      |
-| Focus        | ```focusEye()```                        | n.a.                      |
-| Translate    | ```translateEye(float, float, float)``` | ```mouseTranslateEye()``` |
-| Rotate       | ```rotateEye(float, float, float)```    | n.a.                      |
-| Scale        | ```scaleEye(float)```                   | n.a.                      |
-| Spin         | ```spinEye(int, int, int, int)```       | ```mouseSpinEye()```      |
-| Move forward | ```moveForward(float)```                | n.a.                      |
-| Rotate CAD   | ```rotateCAD(float, float)```           | ```mouseRotateCAD()```    |
-| Look around  | ```lookAround(float, float)```          | ```mouseLookAround()```   |
+| Action       | Generic input device                              | Mouse                     |
+|--------------|---------------------------------------------------|---------------------------|
+| Align        | ```alignEye()```                                  | n.a.                      |
+| Focus        | ```focusEye()```                                  | n.a.                      |
+| Translate    | ```translateEye(dx, dy, dz)```                    | ```mouseTranslateEye()``` |
+| Rotate       | ```rotateEye(roll, pitch, yaw)```                 | n.a.                      |
+| Scale        | ```scaleEye(delta)```                             | n.a.                      |
+| Spin         | ```spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```mouseSpinEye()```      |
+| Move forward | ```moveForward(dz)```                             | n.a.                      |
+| Rotate CAD   | ```rotateCAD(roll, pitch)```                      | ```mouseRotateCAD()```    |
+| Look around  | ```lookAround(deltaX, deltaY)```                  | ```mouseLookAround()```   |
 
 Note that the mouse actions follows the [delegation pattern](https://en.wikipedia.org/wiki/Delegation_pattern), simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` as parameters to their relative delegates (the generic input device method counterparts), and hence their simpler signatures. Mouse examples:
 
@@ -223,16 +225,16 @@ The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples
 
 To directly interact with a given node, call any of the following scene methods:
 
-| Action       | Generic input device                           | Mouse                          |
-|--------------|------------------------------------------------|--------------------------------|
-| Align        | ```alignNode(Node)```                          | n.a.                           |
-| Focus        | ```focusNode(Node)```                          | n.a.                           |
-| Translate    | ```translateNode(Node, float, float, float)``` | ```mouseTranslateNode(Node)``` |
-| Rotate       | ```rotateNode(Node, float, float, float)```    | n.a.                           |
-| Scale        | ```scaleNode(Node, float)```                   | n.a.                           |
-| Spin         | ```spinNode(Node, int, int, int, int)```       | ```mouseSpinNode(Node)```      |
+| Action       | Generic input device                                     | Mouse                          |
+|--------------|----------------------------------------------------------|--------------------------------|
+| Align        | ```alignNode(node)```                                    | n.a.                           |
+| Focus        | ```focusNode(node)```                                    | n.a.                           |
+| Translate    | ```translateNode(node, dx, dy, dz)```                    | ```mouseTranslateNode(node)``` |
+| Rotate       | ```rotateNode(node, roll, pitch, yaw)```                 | n.a.                           |
+| Scale        | ```scaleNode(node, delta)```                             | n.a.                           |
+| Spin         | ```spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```mouseSpinNode(node)```      |
 
-Note that the mouse actions are implemented using the _delegation pattern_, as it has been done previously with the [eye](#eye). Mouse examples:
+Note that the mouse actions are implemented using the _delegation pattern_, in a similar manner as it has been done with the [eye](#eye). Mouse examples:
 
 ```processing
 public void mouseDragged() {
@@ -254,40 +256,40 @@ Picking a node (which should be different than the scene eye) to interact with i
 
 1. Tag the node using an arbitrary name either with [tag(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-nub.core.Node-) or ray-casting:
    
-   | Ray casting | Synchronously :small_blue_diamond: | Asynchronously :small_orange_diamond: |
-   |-------------|------------------------------------|---------------------------------------|
-   | Generic     | ```updateTag(String, int, int)```  | ```tag(String, int, int)```           |
-   | Mouse       | ```updateMouseTag(String)```       | ```mouseTag(String)```                |
+   | Ray casting | Synchronously :small_blue_diamond:   | Asynchronously :small_orange_diamond: |
+   |-------------|--------------------------------------|---------------------------------------|
+   | Generic     | ```updateTag(tag, pixelX, pixelY)``` | ```tag(tag, pixelX, pixelY)```        |
+   | Mouse       | ```updateMouseTag(tag)```            | ```mouseTag(tag)```                |
    
    :small_blue_diamond: The tagged node (see [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-)) is returned immediately
    :small_orange_diamond: The tagged node is returned during the next call to the ```render()``` algorithm
    
 2. Interact with your _tagged_ nodes using one of the following patterns:
    
-   1. **Tagged node**: `interactTag(tag, gesture...) interactNode(node(tag))` which uses [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-) to pass the node parameter to `interactNode(String` which is the pattern implemented by the [node](#nodes-1) methods above. 
-   2. **Tagged node or `eye`**: `interact(String, Object...) if (!interactTag(String, Object...)) interactEye(Object....)` i.e., To either interact with the node referred with a given tag or the eye, when that tag is not in use.
+   1. **Tagged node**: `interactTag(tag, gesture...)` which simply calls `interactNode(node(tag))` using [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-) to resolve the node parameter in the [node methods above](#nodes-1).
+   2. **Tagged node or `eye`**: `interact(tag, gesture...)` which is the same as `if (!interactTag(tag, gesture...)) interactEye(gesture....)` i.e., To either interact with the node referred with a given tag (pattern 1) or the eye ([see above](#eye)), when that tag is not in use.
    
    Generic actions:
 
-   | Action    | Tagged node                                     | Tagged node or `eye`                         |
-   |-----------|-------------------------------------------------|----------------------------------------------|
-   | Align     | ```alignTag(String)```                          | ```align(String)```                          |
-   | Focus     | ```focusTag(String)```                          | ```focus(String)```                          |
-   | Translate | ```translateTag(String, float, float, float)``` | ```translate(String, float, float, float)``` |
-   | Rotate    | ```rotateTag(String, float, float, float)```    | ```rotate(String, float, float, float)```    |
-   | Scale     | ```scaleTag(String, float)```                   | ```scale(String, float)```                   |
-   | Spin      | ```spinTag(String, int, int, int, int)```       | ```spin(String, int, int, int, int)```       |
+   | Action    | Tagged node                                            | Tagged node or `eye`                                   |
+   |-----------|--------------------------------------------------------|--------------------------------------------------------|
+   | Align     | ```alignTag(tag)```                                    | ```align(tag)```                                       |
+   | Focus     | ```focusTag(tag)```                                    | ```focus(tag)```                                       |
+   | Translate | ```translateTag(tag, dx, dy, dz)```                    | ```translate(tag, dx, dy, dz)```                       |
+   | Rotate    | ```rotateTag(tag, roll, pitch, yaw)```                 | ```rotate(tag, roll, pitch, yaw)```                    |
+   | Scale     | ```scaleTag(tag, delta)```                             | ```scale(tag, delta)```                                |
+   | Spin      | ```spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```spin(String, pixel1X, pixel1Y, pixel2X, pixel2Y)``` |
 
    Mouse actions:
 
-   | Action    | Tagged nodes                    | Tagged node or `eye`         |
-   |-----------|---------------------------------|------------------------------|
-   | Translate | ```mouseTranslateTag(String)``` | ```mouseTranslate(String)``` |
-   | Spin      | ```mouseSpinTag(String)```      | ```mouseSpin(String)```      |
+   | Action    | Tagged nodes                 | Tagged node or `eye`      |
+   |-----------|------------------------------|----------------- ---------|
+   | Translate | ```mouseTranslateTag(tag)``` | ```mouseTranslate(tag)``` |
+   | Spin      | ```mouseSpinTag(tag)```      | ```mouseSpin(tag)```      |
 
 Observations:
 
-1. TODO (which may be `null`) null tag delegate methods -> omit String parameter. Examples: 
+1. Since thee `null` tag is allowed you can pass the `null` tag to any of the above methods or use the stringless versions of them provided for convenience, e.g., `mouseTag(null)` is equivalent to `mouseTag()`.
 2. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
 3. To check if a given node would be picked with a ray casted at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-) or [mouseTracks(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTracks-nub.core.Node-).
 4. Customize node behaviors by overridden the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) and then invoke them by either calling: [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-). See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
