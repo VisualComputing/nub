@@ -3128,18 +3128,28 @@ public class Scene extends Graph implements PConstants {
     super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
-  // only eye
-
-  /**
-   * Same as {@code super.lookAround(mouseRADX(), mouseRADY())}.
-   *
-   * @see #lookAround(float, float)
-   * @see #mouseRADX()
-   * @see #mouseRADY()
-   */
   public void mouseLookAround() {
-    super.lookAround(mouseRADX(), mouseRADY());
+    mouseLookAround(null);
   }
+
+  public void mouseLookAround(String tag) {
+    if (!mouseLookAroundTag(tag))
+      mouseLookAroundEye();
+  }
+
+  public boolean mouseLookAroundTag(String tag) {
+    return super.lookAroundTag(tag, mouseRADX(), mouseRADY());
+  }
+
+  public void mouseLookAroundNode(Node node) {
+    super.lookAroundNode(node, mouseRADX(), mouseRADY());
+  }
+
+  public void mouseLookAroundEye() {
+    super.lookAroundEye(mouseRADX(), mouseRADY());
+  }
+
+  // only eye
 
   /**
    * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY())}.

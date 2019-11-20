@@ -4153,6 +4153,90 @@ public class Graph {
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
   }
 
+  // 8. lookAround
+
+  public void lookAround(float deltaX, float deltaY) {
+    lookAround(null, deltaX, deltaY);
+  }
+
+  /**
+   * Calls {@code scaleTag(tag, delta)} if {@code node(tag)} is non-null and {@code scaleEye(delta)} otherwise.
+   *
+   * @see #scaleEye(float)
+   * @see #scaleTag(String, float)
+   */
+  public void lookAround(String tag, float deltaX, float deltaY) {
+    if (!lookAroundTag(tag, deltaX, deltaY))
+      lookAroundEye(deltaX, deltaY);
+  }
+
+  /**
+   * Same as {@code scaleTag(null, delta)}.
+   *
+   * @see #scaleTag(String, float)
+   */
+  public boolean lookAroundTag(float deltaX, float deltaY) {
+    return lookAroundTag(null, deltaX, deltaY);
+  }
+
+  /**
+   * Same as {@code scaleNode(node(tag), delta)}. Returns {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #scaleNode(Node, float)
+   */
+  public boolean lookAroundTag(String tag, float deltaX, float deltaY) {
+    if (node(tag) != null) {
+      lookAroundNode(node(tag), deltaX, deltaY);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Scales the {@code node} (which should be different than the {@link #eye()}) according to {@code delta}.
+   *
+   * @see #scaleEye(float)
+   */
+  public void lookAroundNode(Node node, float deltaX, float deltaY) {
+    Quaternion quaternion;
+    if (is2D()) {
+      System.out.println("Warning: lookAroundEye is only available in 3D");
+      quaternion = new Quaternion();
+    } else {
+      if (frameCount() > _lookAroundCount) {
+        _upVector = node.yAxis();
+        _lookAroundCount = this.frameCount();
+      }
+      _lookAroundCount++;
+      Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? deltaY : -deltaY);
+      Quaternion rotY = new Quaternion(node.displacement(_upVector), deltaX);
+      quaternion = Quaternion.multiply(rotY, rotX);
+    }
+    node.rotate(quaternion);
+  }
+
+  /**
+   * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
+   * expressed in radians.
+   */
+  public void lookAroundEye(float deltaX, float deltaY) {
+    Quaternion quaternion;
+    if (is2D()) {
+      System.out.println("Warning: lookAroundEye is only available in 3D");
+      quaternion = new Quaternion();
+    } else {
+      if (frameCount() > _lookAroundCount) {
+        _upVector = eye().yAxis();
+        _lookAroundCount = this.frameCount();
+      }
+      _lookAroundCount++;
+      Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
+      Quaternion rotY = new Quaternion(eye().displacement(_upVector), -deltaX);
+      quaternion = Quaternion.multiply(rotY, rotX);
+    }
+    eye().rotate(quaternion);
+  }
+
   // only 3d eye
 
   // 7. moveForward
@@ -4172,30 +4256,6 @@ public class Graph {
     if (type() == Type.ORTHOGRAPHIC)
       if (d2 / d1 > 0 && d1 != 0)
         eye().scale(d2 / d1);
-  }
-
-  // 8. lookAround
-
-  /**
-   * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
-   * expressed in radians.
-   */
-  public void lookAround(float deltaX, float deltaY) {
-    Quaternion quaternion;
-    if (is2D()) {
-      System.out.println("Warning: lookAround is only available in 3D");
-      quaternion = new Quaternion();
-    } else {
-      if (frameCount() > _lookAroundCount) {
-        _upVector = eye().yAxis();
-        _lookAroundCount = this.frameCount();
-      }
-      _lookAroundCount++;
-      Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
-      Quaternion rotY = new Quaternion(eye().displacement(_upVector), -deltaX);
-      quaternion = Quaternion.multiply(rotY, rotX);
-    }
-    eye().rotate(quaternion);
   }
 
   // 9. rotateCAD
