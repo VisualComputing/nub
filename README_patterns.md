@@ -265,8 +265,7 @@ Picking a node (which should be different than the scene eye) to interact with i
 2. Interact with your _tagged_ nodes using one of the actions according to one of the following patterns:
    
    1. Tagged node:
-   2. Node tagged with the `null` tag: To interact with the node that is referred with the ```null``` tag
-   3. Tagged node or `eye`: To either interact with the node referred with a given tag or the eye, when that tag is not in use
+   2. Tagged node or `eye`: To either interact with the node referred with a given tag or the eye, when that tag is not in use
    
    Generic actions:
 
