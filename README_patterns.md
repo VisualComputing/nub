@@ -1,4 +1,4 @@
-<!-- omit in toc -->nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
+nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 **Table of Contents**
@@ -377,7 +377,9 @@ void keyPressed() {
 [Timing tasks](https://visualcomputing.github.io/nub-javadocs/nub/processing/TimingTask.html) are (non)recurrent, (non)concurrent (see [isRecurrent()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#isRecurrent--) and [isConcurrent()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#isConcurrent--) resp.) callbacks defined by overridden [execute()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#execute--). For example:
 
 ```processing
+Scene scene;
 void setup() {
+  scene = new Scene(this);
   TimingTask spinningTask = new TimingTask(scene) {
     @Override
     public void execute() {
