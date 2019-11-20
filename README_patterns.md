@@ -283,7 +283,7 @@ Picking a node (which should be different than the scene eye) to interact with i
    Mouse actions:
 
    | Action    | Tagged nodes                 | Tagged node or `eye`      |
-   |-----------|------------------------------|----------------- ---------|
+   |-----------|------------------------------|---------------------------|
    | Translate | ```mouseTranslateTag(tag)``` | ```mouseTranslate(tag)``` |
    | Spin      | ```mouseSpinTag(tag)```      | ```mouseSpin(tag)```      |
 
