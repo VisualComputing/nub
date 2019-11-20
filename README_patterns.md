@@ -116,7 +116,7 @@ Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Im
 
 #### Space transformations
 
-The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions, where user interaction takes place) and nodes (including the world, i.e., the `null` node):
+The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions where user interaction takes place) and nodes (including the world, i.e., the `null` node):
 
 | Space transformation | Points                            | Vectors                                |
 |----------------------|-----------------------------------|----------------------------------------|
@@ -184,7 +184,9 @@ The following scene methods implement _eye_ motion actions particularly suited f
 | Rotate CAD   | ```rotateCAD(roll, pitch)```                      | ```mouseRotateCAD()```    |
 | Look around  | ```lookAround(deltaX, deltaY)```                  | ```mouseLookAround()```   |
 
-Note that the mouse actions follows the [delegation pattern](https://en.wikipedia.org/wiki/Delegation_pattern), simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` as parameters to their relative delegates (the generic input device method counterparts), and hence their simpler signatures. Mouse examples:
+Note that the mouse actions follows the [delegation pattern](https://en.wikipedia.org/wiki/Delegation_pattern), simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` as parameters to their relative delegates (the generic input device method counterparts), and hence their simpler signatures. 
+
+Mouse and keyboard examples:
 
 ```processing
 // define a mouse-dragged eye interaction
@@ -219,6 +221,23 @@ void mouseWheel(MouseEvent event) {
 }
 ```
 
+```processing
+// define a mouse-click eye interaction
+void mouseClicked(MouseEvent event) {
+  if (event.getCount() == 1)
+    scene.alignEye();
+  else
+    scene.focusEye();
+}
+```
+
+```processing
+// define a key-pressed eye interaction
+void keyPressed() {
+  scene.rotateEye(key == 'x' ? QUARTER_PI / 2 : -QUARTER_PI / 2, 0, 0);
+}
+```
+
 The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples/basics/SpaceNavigator) and [CustomEyeInteraction](https://github.com/VisualComputing/nub/tree/master/examples/demos/CustomEyeInteraction) examples illustrate how to set up other hardware such as a keyboard or a [space-navigator](https://en.wikipedia.org/wiki/3Dconnexion).
 
 ### Nodes
@@ -234,7 +253,9 @@ To directly interact with a given node, call any of the following scene methods:
 | Scale        | ```scaleNode(node, delta)```                             | n.a.                           |
 | Spin         | ```spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```mouseSpinNode(node)```      |
 
-Note that the mouse actions are implemented using the _delegation pattern_, in a similar manner as it has been done with the [eye](#eye). Mouse examples:
+Note that the mouse actions are implemented using the _delegation pattern_, in a similar manner as it has been done with the [eye](#eye).
+
+Mouse and keyboard examples:
 
 ```processing
 public void mouseDragged() {
@@ -247,6 +268,16 @@ public void mouseDragged() {
   // scale n2
   else
     scene.scaleNode(n2, scene.mouseDX());
+}
+```
+
+```processing
+void keyPressed() {
+  if (key == CODED)
+    if(keyCode == UP)
+      scene.translateNode(esfera, 0, 10);
+    if(keyCode == DOWN)
+      scene.translateNode(esfera, 0, -10);
 }
 ```
 
@@ -267,7 +298,7 @@ Picking a node (which should be different than the scene eye) to interact with i
 2. Interact with your _tagged_ nodes using one of the following patterns:
    
    1. **Tagged node**: `interactTag(tag, gesture...)` which simply calls `interactNode(node(tag))` using [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-) to resolve the node parameter in the [node methods above](#nodes-1).
-   2. **Tagged node or `eye`**: `interact(tag, gesture...)` which is the same as `if (!interactTag(tag, gesture...)) interactEye(gesture....)` i.e., To either interact with the node referred with a given tag (pattern **i.**) or the eye ([see above](#eye)), when that tag is not in use.
+   2. **Tagged node or `eye`**: `interact(tag, gesture...)` which is the same as `if (!interactTag(tag, gesture...)) interactEye(gesture....)` i.e., To either interact with the node referred with a given tag (pattern **i.**) or delegate the gesture to the eye ([see above](#eye)) when that tag is not in use.
    
    Generic actions:
 
@@ -289,12 +320,58 @@ Picking a node (which should be different than the scene eye) to interact with i
 
 Observations:
 
-1. Since thee `null` tag is allowed you can pass the `null` tag to any of the above methods or use the stringless versions of them provided for convenience, e.g., `mouseTag(null)` is equivalent to `mouseTag()`.
+1. Since thee `null` tag is allowed you can pass it to any of the above methods or use the stringless versions of them that are provided for convenience, e.g., `mouseTag(null)` is equivalent to `mouseTag()`.
 2. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
 3. To check if a given node would be picked with a ray casted at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-) or [mouseTracks(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTracks-nub.core.Node-).
 4. Customize node behaviors by overridden the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) and then invoke them by either calling: [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-). See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
 
-Mouse examples:
+Mouse examples and keyboard:
+
+```processing
+// pick with mouse-moved
+void mouseMoved() {
+  scene.mouseTag();
+}
+
+// interact with mouse-dragged
+void mouseDragged() {
+  if (mouseButton == LEFT)
+    // spin the picked node or the eye if no node has been picked
+    scene.mouseSpin();
+  else if (mouseButton == RIGHT)
+    // spin the picked node or the eye if no node has been picked
+    scene.mouseTranslate();
+  else
+    // spin the picked node or the eye if no node has been picked
+    scene.scale(mouseX - pmouseX);
+}
+```
+
+```processing
+// pick with mouse-clicked
+void mouseClicked(MouseEvent event) {
+  if (event.getCount() == 1)
+    // use the null tag to manipulate the picked node with mouse-moved
+    scene.mouseTag();
+  if (event.getCount() == 2)
+    // use the "key" tag to manipulate the picked node with key-pressed
+    scene.mouseTag("key");
+}
+
+// interact with mouse-dragged
+void mouseMoved() {
+  scene.mouseSpinTag();
+}
+
+// interact with mouse-moved
+void keyPressed() {
+  // focus picked node with two clicks
+  scene.focusTag("key");
+}
+```
+
+```processing
+```
 
 ## Timing
 
