@@ -182,7 +182,7 @@ The following scene methods implement _eye_ motion actions particularly suited f
 | Rotate CAD   | ```rotateCAD(float, float)```           | ```mouseRotateCAD()```    |
 | Look around  | ```lookAround(float, float)```          | ```mouseLookAround()```   |
 
-Note that the mouse actions are implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` as parameters to their relative generic methods, and hence their simpler signatures.
+Note that the mouse actions follows the [delegation pattern](https://en.wikipedia.org/wiki/Delegation_pattern), simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` as parameters to their relative delegates (the generic input device method counterparts), and hence their simpler signatures.
 
 Mouse examples:
 
@@ -223,7 +223,18 @@ The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples
 
 ### Nodes
 
-To directly interact with a given node, call any of the following scene methods: [alignNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#alignNode-nub.core.Node-), [focusNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#focusNode-nub.core.Node-), [translateNode(Node, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translateNode-nub.core.Node-float-float-float-), [rotateNode(Node, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#rotateNode-nub.core.Node-float-float-float-), [scaleNode(Node, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scaleNode-nub.core.Node-float-) and [spinNode(Node, int, int, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#spinNode-nub.core.Node-int-int-int-int-). The methods [mouseTranslateNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTranslateNode-nub.core.Node-) and [mouseSpinNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseSpinNode-nub.core.Node-) , are implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to some of the above methods, and hence their simpler signatures. 
+To directly interact with a given node, call any of the following scene methods:
+
+| Action       | Generic input device                           | Mouse                      |
+|--------------|------------------------------------------------|----------------------------|
+| Align        | ```alignNode(Node)```                          | n.a.                       |
+| Focus        | ```focusNode(Node)```                          | n.a.                       |
+| Translate    | ```translateNode(Node, float, float, float)``` | ```mouseTranslateNode()``` |
+| Rotate       | ```rotateNode(Node, float, float, float)```    | n.a.                       |
+| Scale        | ```scaleNode(Node, float)```                   | n.a.                       |
+| Spin         | ```spinNode(Node, int, int, int, int)```       | ```mouseSpinNode()```      |
+
+Note that the mouse actions are implemented using the _delegation pattern_, as it has been done with the [eye](#eye) actions above.
 
 Mouse examples:
 
