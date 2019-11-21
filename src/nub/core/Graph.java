@@ -4208,8 +4208,8 @@ public class Graph {
         _lookAroundCount = this.frameCount();
       }
       _lookAroundCount++;
-      Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? deltaY : -deltaY);
-      Quaternion rotY = new Quaternion(node.displacement(_upVector), deltaX);
+      Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
+      Quaternion rotY = new Quaternion(node.displacement(_upVector), -deltaX);
       quaternion = Quaternion.multiply(rotY, rotX);
     }
     node.rotate(quaternion);
