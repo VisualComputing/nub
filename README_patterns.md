@@ -127,13 +127,13 @@ The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/process
 | Screen to World      | ```location(pixel)```             | ```displacement(vector, node)```       |
 | World to Screen      | ```screenLocation(point)```       | ```screenDisplacement(vector)```       |
 
-The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world) to this node:
+The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world):
 
 | Space transformation | Points                      | Vectors                          |
 |----------------------|-----------------------------|----------------------------------|
 | Node to (this) Node  | ```location(point, node)``` | ```displacement(vector, node)``` |
-| World to Node        | ```location(point)```       | ```displacement(vector)```       |
-| Node to World        | ```worldLocation(point)```  | ```worldDisplacement(vector)```  |
+| World to (this) Node | ```location(point)```       | ```displacement(vector)```       |
+| (this) Node to World | ```worldLocation(point)```  | ```worldDisplacement(vector)```  |
 
 Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances.
 
