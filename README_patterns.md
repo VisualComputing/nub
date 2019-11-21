@@ -116,22 +116,24 @@ Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Im
 
 #### Space transformations
 
-The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions where user interaction takes place) and nodes (including the world, i.e., the `null` node):
+The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions where user interaction takes place), [NDC](http://www.songho.ca/opengl/gl_projectionmatrix.html) and nodes (including the world, i.e., the `null` node):
 
 | Space transformation | Points                            | Vectors                                |
 |----------------------|-----------------------------------|----------------------------------------|
+| NDC to Screen        | ```ndcToScreenLocation(point)```  | ```ndcToScreenDisplacement(vector)```  |
+| Screen to NDC        | ```screenToNDCLocation(pixel)```  | ```screenToNDCDisplacement(vector)```  |
 | Screen to Node       | ```location(pixel, node)```       | ```displacement(vector, node)```       |
 | Node to Screen       | ```screenLocation(point, node)``` | ```screenDisplacement(vector, node)``` |
 | Screen to World      | ```location(pixel)```             | ```displacement(vector, node)```       |
 | World to Screen      | ```screenLocation(point)```       | ```screenDisplacement(vector)```       |
 
-The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world) to this node:
+The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world):
 
 | Space transformation | Points                      | Vectors                          |
 |----------------------|-----------------------------|----------------------------------|
 | Node to (this) Node  | ```location(point, node)``` | ```displacement(vector, node)``` |
-| World to Node        | ```location(point)```       | ```displacement(vector)```       |
-| Node to World        | ```worldLocation(point)```  | ```worldDisplacement(vector)```  |
+| World to (this) Node | ```location(point)```       | ```displacement(vector)```       |
+| (this) Node to World | ```worldLocation(point)```  | ```worldDisplacement(vector)```  |
 
 Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances.
 
@@ -320,12 +322,12 @@ Picking a node (which should be different than the scene eye) to interact with i
 
 Observations:
 
-1. Since thee `null` tag is allowed you can pass it to any of the above methods or use the stringless versions of them that are provided for convenience, e.g., `mouseTag(null)` is equivalent to `mouseTag()`.
+1. Since thee `null` tag is allowed you can pass it to any of the above methods or use the stringless versions of them that are provided for convenience, e.g., `mouseTag()` is equivalent to `mouseTag(null)`.
 2. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
 3. To check if a given node would be picked with a ray casted at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-) or [mouseTracks(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTracks-nub.core.Node-).
 4. Customize node behaviors by overridden the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) and then invoke them by either calling: [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-). See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
 
-Mouse examples and keyboard:
+Mouse and keyboard examples:
 
 ```processing
 // pick with mouse-moved
@@ -358,14 +360,15 @@ void mouseClicked(MouseEvent event) {
     scene.mouseTag("key");
 }
 
-// interact with mouse-dragged
+// interact with mouse-moved
 void mouseMoved() {
+  // spin the node picked with one click
   scene.mouseSpinTag();
 }
 
 // interact with key-pressed
 void keyPressed() {
-  // focus picked node with two clicks
+  // focus the node picked with two clicks
   scene.focusTag("key");
 }
 ```
