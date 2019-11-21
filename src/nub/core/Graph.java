@@ -3169,10 +3169,10 @@ public class Graph {
 
   /**
    * Converts {@code vector} location from normalized device coordinates (NDC) to screen space.
-   * {@link #screenToNdcLocation(Vector)} performs the inverse transformation.
+   * {@link #screenToNDCLocation(Vector)} performs the inverse transformation.
    * {@link #ndcToScreenDisplacement(Vector)} transforms vector displacements instead of locations.
    *
-   * @see #screenToNdcLocation(Vector)
+   * @see #screenToNDCLocation(Vector)
    * @see #ndcToScreenDisplacement(Vector)
    */
   public Vector ndcToScreenLocation(Vector vector) {
@@ -3184,12 +3184,12 @@ public class Graph {
   /**
    * Converts {@code vector} location from screen space to normalized device coordinates (NDC).
    * {@link #ndcToScreenLocation(Vector)} performs the inverse transformation.
-   * {@link #screenToNdcDisplacement(Vector)} transforms vector displacements instead of locations.
+   * {@link #screenToNDCDisplacement(Vector)} transforms vector displacements instead of locations.
    *
    * @see #ndcToScreenLocation(Vector)
-   * @see #screenToNdcDisplacement(Vector)
+   * @see #screenToNDCDisplacement(Vector)
    */
-  public Vector screenToNdcLocation(Vector vector) {
+  public Vector screenToNDCLocation(Vector vector) {
     return new Vector(_map(vector.x(), 0, width(), -1, 1),
         _map(vector.y(), 0, height(), -1, 1),
         _map(vector.z(), 0, 1, -1, 1));
@@ -3379,10 +3379,10 @@ public class Graph {
 
   /**
    * Converts {@code vector} displacement from normalized device coordinates (NDC) to screen space.
-   * {@link #screenToNdcDisplacement(Vector)} performs the inverse transformation.
+   * {@link #screenToNDCDisplacement(Vector)} performs the inverse transformation.
    * {@link #ndcToScreenLocation(Vector)} transforms locations instead of vector displacements.
    *
-   * @see #screenToNdcDisplacement(Vector)
+   * @see #screenToNDCDisplacement(Vector)
    * @see #ndcToScreenLocation(Vector)
    */
   public Vector ndcToScreenDisplacement(Vector vector) {
@@ -3392,12 +3392,12 @@ public class Graph {
   /**
    * Converts {@code vector} displacement from screen space to normalized device coordinates (NDC).
    * {@link #ndcToScreenDisplacement(Vector)} performs the inverse transformation.
-   * {@link #screenToNdcLocation(Vector)} transforms locations instead of vector displacements.
+   * {@link #screenToNDCLocation(Vector)} transforms locations instead of vector displacements.
    *
    * @see #ndcToScreenDisplacement(Vector)
-   * @see #screenToNdcLocation(Vector)
+   * @see #screenToNDCLocation(Vector)
    */
-  public Vector screenToNdcDisplacement(Vector vector) {
+  public Vector screenToNDCDisplacement(Vector vector) {
     return new Vector(2 * vector.x() / width(), 2 * vector.y() / height(), 2 * vector.z());
   }
 

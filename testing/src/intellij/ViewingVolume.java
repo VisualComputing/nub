@@ -144,17 +144,17 @@ public class ViewingVolume extends PApplet {
       Vector r = Vector.multiply(Vector.random(), scene1.radius());
       //Vector r = point;
       Vector s = scene1.screenLocation(r);
-      Vector t = scene1.screenToNdcLocation(s);
+      Vector t = scene1.screenToNDCLocation(s);
       Vector u = scene1.ndcToScreenLocation(t);
       println("screenLocation: " + s.toString());
-      println("screenToNdcLocation: " + t.toString());
+      println("screenToNDCLocation: " + t.toString());
       println("screenLocation: " + u.toString());
 
       Vector a = scene1.screenDisplacement(r);
-      Vector b = scene1.screenToNdcDisplacement(a);
+      Vector b = scene1.screenToNDCDisplacement(a);
       Vector c = scene1.ndcToScreenDisplacement(b);
       println("screenDisplacement: " + a.toString());
-      println("screenToNdcDisplacement: " + b.toString());
+      println("screenToNDCDisplacement: " + b.toString());
       println("screenDisplacement: " + c.toString());
     }
   }
