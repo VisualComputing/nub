@@ -360,14 +360,15 @@ void mouseClicked(MouseEvent event) {
     scene.mouseTag("key");
 }
 
-// interact with mouse-dragged
+// interact with mouse-moved
 void mouseMoved() {
+  // spin the node picked with one click
   scene.mouseSpinTag();
 }
 
 // interact with key-pressed
 void keyPressed() {
-  // focus picked node with two clicks
+  // focus the node picked with two clicks
   scene.focusTag("key");
 }
 ```
