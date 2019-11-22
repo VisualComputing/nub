@@ -100,7 +100,7 @@ void setup() {
   n4 = new Node();
   // for detached child nodes we pass any constructor taking a
   // reference node parameter, such as Node(Node referenceNode)
-  n5 = new Node(n4);
+  n5 = new Node(n4, createShape(SPHERE, 70));
 }
 ```
 
