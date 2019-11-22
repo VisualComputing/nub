@@ -62,13 +62,13 @@ In this case, the [Scene](https://visualcomputing.github.io/nub-javadocs/nub/pro
 A node may be translated, rotated and scaled (the order is important) and be rendered when it has a shape. [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instances define each of the nodes comprising a scene graph. To illustrate their use, suppose the following scene graph is being implemented:
 
 ```processing
- World
-  ^
-  |\
-  1 eye
-  ^
-  |\
-  2 3
+       World
+         ^
+        /|\
+      n1 n4 eye
+      ^  ^
+     /|  |
+   n2 n3 n5
 ```
 
 To setup the scene hierarchy of _attached_ nodes, i.e., nodes belonging to the scene, use code such as the following:
@@ -79,8 +79,8 @@ Node n1, n2, n3;
 void setup() {
   // the scene object creates a default eye node
   scene = new Scene(this);
-  // To attach a leading-node (those whose parent is the world, such as n1)
-  // the scene parameter is passed to the Node constructor:
+  // To create an 'attached' node as a leading one (those whose parent is
+  // the world, such as n1) the scene parameter is passed to the Node constructor:
   n1 = new Node(scene);
   // whereas for the remaining nodes we pass any constructor taking a
   // reference node parameter, such as Node(Node referenceNode)
@@ -95,6 +95,12 @@ void setup() {
   // retained-mode rendering PShape
   // defines n3 visual representation
   n3 = new Node(n1, createShape(BOX, 60));
+  // To create an 'detached' node as a leading one (those whose parent
+  // is the world such, as n4) we use the default Node constructor:
+  n4 = new Node();
+  // for detached child nodes we pass any constructor taking a
+  // reference node parameter, such as Node(Node referenceNode)
+  n5 = new Node(n4);
 }
 ```
 
@@ -143,8 +149,13 @@ Render the node hierarchy onto [context()](https://visualcomputing.github.io/nub
 
 ```processing
 void draw() {
-  // visits each shape drawing it
+  // render the attached nodes (n1, n2 and n3)
   scene.render();
+  // render the detached nodes (n4 and n5)
+  scene.applyTransformation(n4);
+  scene.draw(n4);
+  scene.applyTransformation(n5);
+  scene.draw(n5);
 }
 ```
 
@@ -155,7 +166,7 @@ observe that:
 * Call [render(PGraphics, Graph.Type, Node, zNear, zFar)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#render-processing.core.PGraphics-frames.core.Graph.Type-frames.core.Node-float-float-) to render the scene into an arbitrary _PGraphics_ context from an arbitrary node point-of-view. See the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) and [ShadowMapping](https://github.com/VisualComputing/nub/tree/master/examples/demos/ShadowMapping) examples.
 * The role played by a [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance during a scene graph traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--) method.
 
-To bypass the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm use [detached nodes](detached.md), or cull the node (see [cull(boolean)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#isCulled--)).
+To bypass the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm use detached nodes, or cull the node (see [cull(boolean)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#isCulled--)).
 
 #### Drawing functionality
 
@@ -322,10 +333,11 @@ Picking a node (which should be different than the scene eye) to interact with i
 
 Observations:
 
-1. Since thee `null` tag is allowed you can pass it to any of the above methods or use the stringless versions of them that are provided for convenience, e.g., `mouseTag()` is equivalent to `mouseTag(null)`.
+1. A node can have multiple tags but a given tag and cannot be assigned to more than one node, and since the `null` tag is allowed you can pass it to any of the above methods or use the _stringless_ versions of them which are provided for convenience, e.g., `mouseTag()` is equivalent to `mouseTag(null)`.
 2. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
 3. To check if a given node would be picked with a ray casted at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-) or [mouseTracks(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTracks-nub.core.Node-).
-4. Customize node behaviors by overridden the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) and then invoke them by either calling: [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-). See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
+4. To tag detached nodes with ray casting use [updateTag(String, int, int, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-nub.core.Node:A-) and [updateMouseTag(String, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#updateMouseTag-java.lang.String-nub.core.Node:A-).
+5. Customize node behaviors by overridden the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) and then invoke them by either calling: [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-). See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
 
 Mouse and keyboard examples:
 
