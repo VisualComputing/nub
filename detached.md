@@ -10,7 +10,7 @@
 
 Nodes can also be instantiated without attaching them to a `scene` by simply omitting the `scene` parameter in its constructor: `node = new Node()`. This article discusses how to use them. This is a low-level technique that may be useful to port the library to other frameworks different than [Processing](https://processing.org/).
 
-## Sceneless
+## Traversal
 
 To setup the hierarchy of _detached_ nodes, i.e., nodes not belonging to a particular `scene`, use code such as the following:
 
@@ -22,7 +22,7 @@ void setup() {
   eye =  new Node();
   n1 = new Node();
   // whereas for the remaining nodes we pass any constructor taking a
-  // reference node paramater, such as Node(Node referenceNode, float scaling):
+  // reference node parameter, such as Node(Node referenceNode, float scaling):
   n2 = new Node(n1);
   n3 = new Node(n1);
 }
@@ -34,7 +34,7 @@ then traverse it with:
 void draw() {
   // define a projection matrix
   perspective(fov, width / height, cameraZ / 10.0f, cameraZ * 10.0f);
-  // render from the eye poin-of-view
+  // render from the eye point-of-view
   setMatrix(Scene.toPMatrix(eye.view()));
   // enter n1
   pushMatrix();
