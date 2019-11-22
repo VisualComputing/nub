@@ -278,9 +278,9 @@ public void mouseDragged() {
   // translate n3
   else if (mouseButton == RIGHT)
     scene.translateNode(n3);
-  // scale n2
+  // scale n4
   else
-    scene.scaleNode(n2, scene.mouseDX());
+    scene.scaleNode(n4, scene.mouseDX());
 }
 ```
 
@@ -290,7 +290,7 @@ void keyPressed() {
     if(keyCode == UP)
       scene.translateNode(n2, 0, 10);
     if(keyCode == DOWN)
-      scene.translateNode(n2, 0, -10);
+      scene.translateNode(n5, 0, -10);
 }
 ```
 
