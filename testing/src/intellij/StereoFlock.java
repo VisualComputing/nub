@@ -61,10 +61,10 @@ public class StereoFlock extends PApplet {
     leftEye.beginDraw();
     leftEye.context().background(75, 25, 15);
     walls(leftEye.context());
-    for(Boid boid : flock) {
+    for (Node node : nodes) {
       leftEye.context().pushMatrix();
-      leftEye.applyTransformation(boid.node);
-      leftEye.draw(boid.node);
+      leftEye.applyTransformation(node);
+      leftEye.draw(node);
       leftEye.context().popMatrix();
     }
     leftEye.endDraw();
@@ -72,10 +72,10 @@ public class StereoFlock extends PApplet {
     rightEye.beginDraw();
     rightEye.context().background(125, 80, 90);
     walls(rightEye.context());
-    for(Boid boid : flock) {
+    for (Node node : nodes) {
       rightEye.context().pushMatrix();
-      rightEye.applyTransformation(boid.node);
-      rightEye.draw(boid.node);
+      rightEye.applyTransformation(node);
+      rightEye.draw(node);
       rightEye.context().popMatrix();
     }
     rightEye.endDraw();
