@@ -17,7 +17,7 @@ public class Flock extends PApplet {
   static boolean avoidWalls = true;
 
   int initBoidNum = 900; // amount of boids to start the program with
-  static ArrayList<Boid> flock;
+  ArrayList<Boid> flock;
   static Node avatar;
 
   public void settings() {
@@ -32,7 +32,7 @@ public class Flock extends PApplet {
     // create and fill the list of boids
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
-      flock.add(new Boid(scene, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
+      flock.add(new Boid(scene, flock, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
   }
 
   public void draw() {

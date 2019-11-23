@@ -174,7 +174,7 @@ void keyPressed() {
       scene.fit(1);
     break;
   case 'p':
-    println("Node rate: " + frameRate);
+    println("Frame rate: " + frameRate);
     break;
   case 'v':
     avoidWalls = !avoidWalls;

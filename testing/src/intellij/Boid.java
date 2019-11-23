@@ -8,9 +8,11 @@ import nub.processing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 
+import java.util.ArrayList;
+
 class Boid extends TimingTask {
   Scene scene;
-  //Flock parent;
+  ArrayList<Boid> flock;
   // render
   Node node;
   // fields
@@ -23,9 +25,10 @@ class Boid extends TimingTask {
   float flap = 0;
   float t = 0;
 
-  Boid(Scene scn, Vector inPos) {
+  Boid(Scene scn, ArrayList<Boid> f, Vector inPos) {
     super(scn);
     scene = scn;
+    flock = f;
     // the boid node just holds the boid appearance for rendering
     node = new Node(scn) {
       @Override
@@ -105,8 +108,8 @@ class Boid extends TimingTask {
     //separation
     separation = new Vector(0, 0, 0);
     Vector repulse;
-    for (int i = 0; i < Flock.flock.size(); i++) {
-      Boid boid = Flock.flock.get(i);
+    for (int i = 0; i < flock.size(); i++) {
+      Boid boid = flock.get(i);
       //alignment
       float distance = Vector.distance(position, boid.position);
       if (distance > 0 && distance <= neighborhoodRadius) {
