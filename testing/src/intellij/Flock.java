@@ -1,6 +1,5 @@
 package intellij;
 
-import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -20,15 +19,14 @@ public class Flock extends PApplet {
   int initBoidNum = 900; // amount of boids to start the program with
   static ArrayList<Boid> flock;
   static Node avatar;
-  static boolean animate = true;
 
   public void settings() {
     size(1000, 800, P3D);
   }
 
   public void setup() {
+    size(1000, 800, P3D);
     scene = new Scene(this);
-    scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.fit();
     // create and fill the list of boids
@@ -38,24 +36,69 @@ public class Flock extends PApplet {
   }
 
   public void draw() {
-    background(0);
+    background(10, 50, 25);
     ambientLight(128, 128, 128);
     directionalLight(255, 255, 255, 0, 1, -100);
     walls();
     scene.render();
-    updateAvatar();
+    // uncomment to asynchronously update boid avatar. See mouseClicked()
+    // updateAvatar(scene.node("mouseClicked"));
   }
 
-  public void updateAvatar() {
-    // boid is the one picked with a 'mouseClicked'
-    Node boid = scene.node("mouseClicked");
-    if (boid != avatar) {
-      avatar = boid;
+  void walls() {
+    pushStyle();
+    noFill();
+    stroke(255, 255, 0);
+    line(0, 0, 0, 0, flockHeight, 0);
+    line(0, 0, flockDepth, 0, flockHeight, flockDepth);
+    line(0, 0, 0, flockWidth, 0, 0);
+    line(0, 0, flockDepth, flockWidth, 0, flockDepth);
+    line(flockWidth, 0, 0, flockWidth, flockHeight, 0);
+    line(flockWidth, 0, flockDepth, flockWidth, flockHeight, flockDepth);
+    line(0, flockHeight, 0, flockWidth, flockHeight, 0);
+    line(0, flockHeight, flockDepth, flockWidth, flockHeight, flockDepth);
+    line(0, 0, 0, 0, 0, flockDepth);
+    line(0, flockHeight, 0, 0, flockHeight, flockDepth);
+    line(flockWidth, 0, 0, flockWidth, 0, flockDepth);
+    line(flockWidth, flockHeight, 0, flockWidth, flockHeight, flockDepth);
+    popStyle();
+  }
+
+  void updateAvatar(Node node) {
+    if (node != avatar) {
+      avatar = node;
       if (avatar != null)
         thirdPerson();
       else if (scene.eye().reference() != null)
         resetEye();
     }
+  }
+
+  // Sets current avatar as the eye reference and interpolate the eye to it
+  void thirdPerson() {
+    scene.eye().setReference(avatar);
+    scene.fit(avatar, 1);
+  }
+
+  // Resets the eye
+  void resetEye() {
+    // same as: scene.eye().setReference(null);
+    scene.eye().resetReference();
+    scene.lookAt(scene.center());
+    scene.fit(1);
+  }
+
+  // picks up a boid avatar, may be null
+  public void mouseClicked() {
+    // two options to update the boid avatar:
+    // 1. Synchronously
+    updateAvatar(scene.updateMouseTag("mouseClicked"));
+    // which is the same as these two lines:
+    // scene.updateMouseTag("mouseClicked");
+    // updateAvatar(scene.node("mouseClicked"));
+    // 2. Asynchronously
+    // which requires updateAvatar(scene.node("mouseClicked")) to be called within draw()
+    // scene.mouseTag("mouseClicked");
   }
 
   // 'first-person' interaction
@@ -68,15 +111,14 @@ public class Flock extends PApplet {
         // same as: scene.translate(scene.eye());
         scene.mouseTranslate();
       else
-        // same as: scene.zoom(mouseX - pmouseX, scene.eye());
         scene.moveForward(mouseX - pmouseX);
   }
 
   // highlighting and 'third-person' interaction
   public void mouseMoved(MouseEvent event) {
     // 1. highlighting
-    scene.tag("mouseMoved", mouseX, mouseY);
-    // 2. 'third-person interaction
+    scene.mouseTag("mouseMoved");
+    // 2. third-person interaction
     if (scene.eye().reference() != null)
       // press shift to move the mouse without looking around
       if (!event.isShiftDown())
@@ -88,51 +130,27 @@ public class Flock extends PApplet {
     scene.scale(event.getCount() * 20);
   }
 
-  // picks up a boid avatar, may be null
-  public void mouseClicked() {
-    scene.tag("mouseClicked", mouseX, mouseY);
-  }
-
-  // Sets current avatar as the eye reference and interpolate the eye to it
-  public void thirdPerson() {
-    scene.eye().setReference(avatar);
-    scene.fit(avatar, 0);
-  }
-
-  // Resets the eye
-  public void resetEye() {
-    // same as: scene.eye().setReference(null);
-    scene.eye().resetReference();
-    scene.lookAt(scene.center());
-    scene.fit(1);
-  }
-
-  public void walls() {
-    pushStyle();
-    noFill();
-    stroke(255);
-
-    line(0, 0, 0, 0, flockHeight, 0);
-    line(0, 0, flockDepth, 0, flockHeight, flockDepth);
-    line(0, 0, 0, flockWidth, 0, 0);
-    line(0, 0, flockDepth, flockWidth, 0, flockDepth);
-
-    line(flockWidth, 0, 0, flockWidth, flockHeight, 0);
-    line(flockWidth, 0, flockDepth, flockWidth, flockHeight, flockDepth);
-    line(0, flockHeight, 0, flockWidth, flockHeight, 0);
-    line(0, flockHeight, flockDepth, flockWidth, flockHeight, flockDepth);
-
-    line(0, 0, 0, 0, 0, flockDepth);
-    line(0, flockHeight, 0, 0, flockHeight, flockDepth);
-    line(flockWidth, 0, 0, flockWidth, 0, flockDepth);
-    line(flockWidth, flockHeight, 0, flockWidth, flockHeight, flockDepth);
-    popStyle();
-  }
-
   public void keyPressed() {
     switch (key) {
       case 'a':
-        animate = !animate;
+        for (Boid boid : flock)
+          boid.toggle();
+        break;
+      case '+':
+        for (Boid boid : flock)
+          boid.increasePeriod(-2);
+        break;
+      case '-':
+        for (Boid boid : flock)
+          boid.increasePeriod(2);
+        break;
+      case 'e':
+        for (Boid boid : flock)
+          boid.enableConcurrence(true);
+        break;
+      case 'd':
+        for (Boid boid : flock)
+          boid.enableConcurrence(false);
         break;
       case 's':
         if (scene.eye().reference() == null)
