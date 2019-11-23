@@ -24,6 +24,7 @@ public class StereoFlock extends PApplet {
   int initBoidNum = 300; // amount of boids to start the program with
   ArrayList<Boid> flock;
   static Node avatar;
+  ArrayList<Node> nodes;
 
   int w = 2000;
   int h = 800;
@@ -45,6 +46,9 @@ public class StereoFlock extends PApplet {
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
       flock.add(new Boid(leftEye, flock, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
+    nodes = new ArrayList();
+    for (Boid boid : flock)
+      nodes.add(boid.node);
     rightEye = new Scene(this, P3D, w / 2, h, w / 2, 0);
     // eye only should belong only to the minimap
     // so set a detached 'node' instance as the eye
@@ -144,7 +148,7 @@ public class StereoFlock extends PApplet {
   public void mousePressed() {
     // two options to update the boid avatar:
     // 1. Synchronously
-    updateAvatar(leftEye.updateMouseTag("mousePressed"));
+    updateAvatar(leftEye.updateMouseTag("mousePressed", nodes));
     // which is the same as these two lines:
     // scene.updateMouseTag("mouseClicked");
     // updateAvatar(scene.node("mouseClicked"));
@@ -230,7 +234,7 @@ public class StereoFlock extends PApplet {
         avoidWalls = !avoidWalls;
         break;
       case ' ':
-        if (leftEye.eye().reference() != null)
+        if (head.reference() != null)
           resetEye();
         else if (avatar != null)
           thirdPerson();
