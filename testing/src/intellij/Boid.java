@@ -30,7 +30,7 @@ class Boid extends TimingTask {
     scene = scn;
     flock = f;
     // the boid node just holds the boid appearance for rendering
-    node = new Node(scn) {
+    node = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();

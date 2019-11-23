@@ -71,7 +71,7 @@ A node may be translated, rotated and scaled (the order is important) and be ren
    n2 n3 n5
 ```
 
-To setup the scene hierarchy of _attached_ nodes, i.e., nodes belonging to the scene, use code such as the following:
+To setup the scene hierarchy of nodes use code such as the following:
 
 ```processing
 Scene scene;
@@ -95,7 +95,7 @@ void setup() {
   // retained-mode rendering PShape
   // defines n3 visual representation
   n3 = new Node(n1, createShape(BOX, 60));
-  // To create an 'detached' node as a leading one (those whose parent
+  // To create a 'detached' node as a leading one (those whose parent
   // is the world such, as n4) we use the default Node constructor:
   n4 = new Node();
   // for detached child nodes we pass any constructor taking a

@@ -57,19 +57,25 @@ public class StereoFlock extends PApplet {
     leftEye.beginDraw();
     leftEye.context().background(75, 25, 15);
     walls(leftEye.context());
-    leftEye.render();
+    for(Boid boid : flock) {
+      leftEye.context().pushMatrix();
+      leftEye.applyTransformation(boid.node);
+      leftEye.draw(boid.node);
+      leftEye.context().popMatrix();
+    }
     leftEye.endDraw();
     leftEye.display();
-    // shift scene attached nodes to minimap
-    leftEye.shift(rightEye);
     rightEye.beginDraw();
     rightEye.context().background(125, 80, 90);
     walls(rightEye.context());
-    rightEye.render();
+    for(Boid boid : flock) {
+      rightEye.context().pushMatrix();
+      rightEye.applyTransformation(boid.node);
+      rightEye.draw(boid.node);
+      rightEye.context().popMatrix();
+    }
     rightEye.endDraw();
     rightEye.display();
-    // shift back minimap attached nodes to the scene
-    rightEye.shift(leftEye);
     // uncomment to asynchronously update boid avatar. See mouseClicked()
     // updateAvatar(scene.node("mouseClicked"));
   }
@@ -98,23 +104,23 @@ public class StereoFlock extends PApplet {
       avatar = node;
       if (avatar != null)
         thirdPerson();
-      else if (leftEye.eye().reference() != null)
+      else if (head.reference() != null)
         resetEye();
     }
   }
 
   // Sets current avatar as the eye reference and interpolate the eye to it
   void thirdPerson() {
-    leftEye.eye().setReference(avatar);
-    leftEye.fit(avatar, 1);
+    head.setReference(avatar);
+    head.set(avatar);
   }
 
   // Resets the eye
   void resetEye() {
     // same as: scene.eye().setReference(null);
-    leftEye.eye().resetReference();
-    leftEye.lookAt(leftEye.center());
-    leftEye.fit(1);
+    head.resetReference();
+    head.setPosition(640, 360, 1500);
+    head.setOrientation(new Quaternion());
   }
 
   void lookAround(Node node, float deltaX, float deltaY) {
@@ -133,6 +139,18 @@ public class StereoFlock extends PApplet {
       quaternion = Quaternion.multiply(rotY, rotX);
     }
     node.rotate(quaternion);
+  }
+
+  public void mousePressed() {
+    // two options to update the boid avatar:
+    // 1. Synchronously
+    updateAvatar(leftEye.updateMouseTag("mousePressed"));
+    // which is the same as these two lines:
+    // scene.updateMouseTag("mouseClicked");
+    // updateAvatar(scene.node("mouseClicked"));
+    // 2. Asynchronously
+    // which requires updateAvatar(scene.node("mouseClicked")) to be called within draw()
+    // scene.mouseTag("mouseClicked");
   }
 
   /*
