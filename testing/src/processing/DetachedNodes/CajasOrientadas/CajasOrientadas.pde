@@ -40,7 +40,7 @@ void setup() {
     cajas[i] = new Box(color(random(255), random(255), random(255)));
 
   scene.fit(1);
-  scene.setTrackedNode("keyboard", esfera);
+  scene.tag("keyboard", esfera);
 }
 
 void draw() {
@@ -63,14 +63,14 @@ void draw() {
 }
 
 void mouseMoved() {
-  scene.track(cajas);
+  scene.updateMouseTag(cajas);
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.spin();
+    scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.translate();
+    scene.mouseTranslate();
   else
     scene.scale(mouseX - pmouseX);
 }
@@ -101,10 +101,10 @@ void keyPressed() {
   if (key == 'S')
     scene.fit();
   if (key == 'u')
-    if (scene.trackedNode("keyboard") == null)
-      scene.setTrackedNode("keyboard", esfera);
+    if (!scene.isTagValid("keyboard"))
+      scene.tag("keyboard", esfera);
     else
-      scene.resetTrackedNode("keyboard");
+      scene.removeTag("keyboard");
   if (key == CODED)
     if (keyCode == UP)
       scene.translate("keyboard", 0, -10);

@@ -19,7 +19,7 @@ class Sphere extends Node {
       scene.drawAxes(radius() * 1.3f);
 
     noStroke();
-    fill(255, isTracked(scene) ? 0 : 255, 0);
+    fill(255, isTagged(scene) ? 0 : 255, 0);
     sphere(radius() * 1.2f);
 
     popMatrix();

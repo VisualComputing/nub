@@ -18,7 +18,7 @@ class Box extends Node {
     if (drawAxes)
       scene.drawAxes(max(w, h, d) * 1.3f);
     noStroke();
-    if (isTracked(scene))
+    if (isTagged(scene))
       fill(255, 0, 0);
     else
       fill(c);
@@ -27,7 +27,7 @@ class Box extends Node {
     popMatrix();
     stroke(255);
     if (drawShooterTarget)
-      scene.drawShooterTarget(this);
+      scene.drawBullsEye(this);
     popStyle();
   }
 
