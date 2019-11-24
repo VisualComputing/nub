@@ -39,8 +39,7 @@ public class StereoFlock extends PApplet {
     head = new Node();
     head.setPosition(640, 360, 1500);
     leftEye = new Scene(this, P3D, w / 2, h);
-    // eye only should belong only to the scene
-    // so set a detached 'node' instance as the eye
+    // set a detached 'node' instance as the eye
     leftEye.setEye(new Node(head));
     leftEye.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     leftEye.eye().setMagnitude(tan((PI / 3) / 2));
@@ -51,8 +50,7 @@ public class StereoFlock extends PApplet {
     nodes = new Node[flock.size()];
     nodes = flock.toArray(nodes);
     rightEye = new Scene(this, P3D, w / 2, h, w / 2, 0);
-    // eye only should belong only to the minimap
-    // so set a detached 'node' instance as the eye
+    // set a detached 'node' instance as the eye
     rightEye.setEye(new Node(head));
     rightEye.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     rightEye.eye().setMagnitude(tan((PI / 3) / 2));
@@ -123,29 +121,24 @@ public class StereoFlock extends PApplet {
 
   void lookAround(float deltaX, float deltaY) {
     Quaternion quaternion;
-    if (leftEye.is2D()) {
-      System.out.println("Warning: lookAroundEye is only available in 3D");
-      quaternion = new Quaternion();
-    } else {
-      if (leftEye.frameCount() > lrCount) {
-        upVector = head.yAxis();
-        lrCount = leftEye.frameCount();
-      }
-      lrCount++;
-      Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftEye.isRightHanded() ? -deltaY : deltaY);
-      Quaternion rotY = new Quaternion(head.displacement(upVector), -deltaX);
-      quaternion = Quaternion.multiply(rotY, rotX);
+    if (leftEye.frameCount() > lrCount) {
+      upVector = head.yAxis();
+      lrCount = leftEye.frameCount();
     }
+    lrCount++;
+    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftEye.isRightHanded() ? -deltaY : deltaY);
+    Quaternion rotY = new Quaternion(head.displacement(upVector), -deltaX);
+    quaternion = Quaternion.multiply(rotY, rotX);
     head.rotate(quaternion);
   }
 
   public void mousePressed() {
-    updateAvatar(leftEye.updateMouseTag("mousePressed", nodes));
+    updateAvatar(focus.updateMouseTag("mousePressed", nodes));
   }
 
   public void mouseMoved(MouseEvent event) {
     // 1. highlighting
-    focus.mouseTag("mousePressed");
+    focus.updateMouseTag("mouseMoved", nodes);
     // 2. third-person interaction
     if (head.reference() != null)
       // press shift to move the mouse without looking around
@@ -293,13 +286,13 @@ public class StereoFlock extends PApplet {
       pg.fill(color(0, 255, 0, 125));
 
       // highlight boids under the mouse
-      if (leftEye.node("mouseMoved") == this || rightEye.node("mouseMoved") == this) {
+      if (focus.node("mouseMoved") == this) {
         pg.stroke(color(0, 0, 255));
         pg.fill(color(0, 0, 255));
       }
 
       // highlight avatar
-      if (this == Flock.avatar) {
+      if (this == avatar) {
         pg.stroke(color(255, 0, 0));
         pg.fill(color(255, 0, 0));
       }
