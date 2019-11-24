@@ -7,6 +7,7 @@ import nub.processing.Scene;
 import nub.processing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PGraphics;
+import processing.event.MouseEvent;
 
 import java.util.ArrayList;
 
@@ -25,7 +26,7 @@ public class StereoFlock extends PApplet {
   int initBoidNum = 300; // amount of boids to start the program with
   ArrayList<Boid> flock;
   static Node avatar;
-  ArrayList<Node> nodes;
+  Node nodes[];
 
   int w = 2000;
   int h = 800;
@@ -47,9 +48,8 @@ public class StereoFlock extends PApplet {
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
       flock.add(new Boid(new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
-    nodes = new ArrayList();
-    for (Boid boid : flock)
-      nodes.add(boid);
+    nodes = new Node[flock.size()];
+    nodes = flock.toArray(nodes);
     rightEye = new Scene(this, P3D, w / 2, h, w / 2, 0);
     // eye only should belong only to the minimap
     // so set a detached 'node' instance as the eye
@@ -59,6 +59,7 @@ public class StereoFlock extends PApplet {
   }
 
   public void draw() {
+    focus = mouseX < w / 2 ? leftEye : rightEye;
     draw(leftEye);
     draw(rightEye);
   }
@@ -120,79 +121,37 @@ public class StereoFlock extends PApplet {
     head.setOrientation(new Quaternion());
   }
 
-  void lookAround(Node node, float deltaX, float deltaY) {
+  void lookAround(float deltaX, float deltaY) {
     Quaternion quaternion;
     if (leftEye.is2D()) {
       System.out.println("Warning: lookAroundEye is only available in 3D");
       quaternion = new Quaternion();
     } else {
       if (leftEye.frameCount() > lrCount) {
-        upVector = node.yAxis();
+        upVector = head.yAxis();
         lrCount = leftEye.frameCount();
       }
       lrCount++;
       Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftEye.isRightHanded() ? -deltaY : deltaY);
-      Quaternion rotY = new Quaternion(node.displacement(upVector), -deltaX);
+      Quaternion rotY = new Quaternion(head.displacement(upVector), -deltaX);
       quaternion = Quaternion.multiply(rotY, rotX);
     }
-    node.rotate(quaternion);
+    head.rotate(quaternion);
   }
 
   public void mousePressed() {
-    // two options to update the boid avatar:
-    // 1. Synchronously
     updateAvatar(leftEye.updateMouseTag("mousePressed", nodes));
-    // which is the same as these two lines:
-    // scene.updateMouseTag("mouseClicked");
-    // updateAvatar(scene.node("mouseClicked"));
-    // 2. Asynchronously
-    // which requires updateAvatar(scene.node("mouseClicked")) to be called within draw()
-    // scene.mouseTag("mouseClicked");
   }
 
-  /*
-  // picks up a boid avatar, may be null
-  public void mouseClicked() {
-    // two options to update the boid avatar:
-    // 1. Synchronously
-    updateAvatar(leftEye.updateMouseTag("mouseClicked"));
-    // which is the same as these two lines:
-    // scene.updateMouseTag("mouseClicked");
-    // updateAvatar(scene.node("mouseClicked"));
-    // 2. Asynchronously
-    // which requires updateAvatar(scene.node("mouseClicked")) to be called within draw()
-    // scene.mouseTag("mouseClicked");
-  }
-
-  // 'first-person' interaction
-  public void mouseDragged() {
-    if (leftEye.eye().reference() == null)
-      if (mouseButton == LEFT)
-        // same as: scene.spin(scene.eye());
-        leftEye.mouseSpin();
-      else if (mouseButton == RIGHT)
-        // same as: scene.translate(scene.eye());
-        leftEye.mouseTranslate();
-      else
-        leftEye.moveForward(mouseX - pmouseX);
-  }
-
-  // highlighting and 'third-person' interaction
   public void mouseMoved(MouseEvent event) {
     // 1. highlighting
-    leftEye.mouseTag("mouseMoved");
+    focus.mouseTag("mousePressed");
     // 2. third-person interaction
-    if (leftEye.eye().reference() != null)
+    if (head.reference() != null)
       // press shift to move the mouse without looking around
       if (!event.isShiftDown())
-        leftEye.mouseLookAround();
+        this.lookAround(focus.mouseRADX(), focus.mouseRADY());
   }
-
-  public void mouseWheel(MouseEvent event) {
-    // same as: scene.scale(event.getCount() * 20, scene.eye());
-    leftEye.scale(event.getCount() * 20);
-  }
-   */
 
   public void keyPressed() {
     switch (key) {
