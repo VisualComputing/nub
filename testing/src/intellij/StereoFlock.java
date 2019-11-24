@@ -23,7 +23,7 @@ public class StereoFlock extends PApplet {
   protected long lrCount;
 
   int initBoidNum = 300; // amount of boids to start the program with
-  ArrayList<Pajaro> flock;
+  ArrayList<Boid> flock;
   static Node avatar;
   ArrayList<Node> nodes;
 
@@ -46,9 +46,9 @@ public class StereoFlock extends PApplet {
     // create and fill the list of boids
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
-      flock.add(new Pajaro(new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
+      flock.add(new Boid(new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
     nodes = new ArrayList();
-    for (Pajaro boid : flock)
+    for (Boid boid : flock)
       nodes.add(boid);
     rightEye = new Scene(this, P3D, w / 2, h, w / 2, 0);
     // eye only should belong only to the minimap
@@ -59,30 +59,22 @@ public class StereoFlock extends PApplet {
   }
 
   public void draw() {
-    leftEye.beginDraw();
-    leftEye.context().background(75, 25, 15);
-    walls(leftEye.context());
+    draw(leftEye);
+    draw(rightEye);
+  }
+
+  void draw(Scene scene) {
+    scene.beginDraw();
+    scene.context().background(75, 25, 15);
+    walls(scene.context());
     for (Node node : nodes) {
-      leftEye.context().pushMatrix();
-      leftEye.applyTransformation(node);
-      leftEye.draw(node);
-      leftEye.context().popMatrix();
+      scene.context().pushMatrix();
+      scene.applyTransformation(node);
+      scene.draw(node);
+      scene.context().popMatrix();
     }
-    leftEye.endDraw();
-    leftEye.display();
-    rightEye.beginDraw();
-    rightEye.context().background(125, 80, 90);
-    walls(rightEye.context());
-    for (Node node : nodes) {
-      rightEye.context().pushMatrix();
-      rightEye.applyTransformation(node);
-      rightEye.draw(node);
-      rightEye.context().popMatrix();
-    }
-    rightEye.endDraw();
-    rightEye.display();
-    // uncomment to asynchronously update boid avatar. See mouseClicked()
-    // updateAvatar(scene.node("mouseClicked"));
+    scene.endDraw();
+    scene.display();
   }
 
   void walls(PGraphics pg) {
@@ -205,23 +197,23 @@ public class StereoFlock extends PApplet {
   public void keyPressed() {
     switch (key) {
       case 'a':
-        for (Pajaro boid : flock)
+        for (Boid boid : flock)
           boid.animation.toggle();
         break;
       case '+':
-        for (Pajaro boid : flock)
+        for (Boid boid : flock)
           boid.animation.increasePeriod(-2);
         break;
       case '-':
-        for (Pajaro boid : flock)
+        for (Boid boid : flock)
           boid.animation.increasePeriod(2);
         break;
       case 'e':
-        for (Pajaro boid : flock)
+        for (Boid boid : flock)
           boid.animation.enableConcurrence(true);
         break;
       case 'd':
-        for (Pajaro boid : flock)
+        for (Boid boid : flock)
           boid.animation.enableConcurrence(false);
         break;
       case 's':
@@ -243,7 +235,7 @@ public class StereoFlock extends PApplet {
     }
   }
 
-  class Pajaro extends Node {
+  class Boid extends Node {
     TimingTask animation;
     // fields
     Vector position, velocity, acceleration, alignment, cohesion, separation; // position, velocity, and acceleration in
@@ -255,7 +247,7 @@ public class StereoFlock extends PApplet {
     float flap = 0;
     float t = 0;
 
-    Pajaro(Vector inPos) {
+    Boid(Vector inPos) {
       position = new Vector();
       position.set(inPos);
       setPosition(new Vector(position.x(), position.y(), position.z()));
@@ -287,7 +279,7 @@ public class StereoFlock extends PApplet {
           separation = new Vector(0, 0, 0);
           Vector repulse;
           for (int i = 0; i < flock.size(); i++) {
-            Pajaro boid = flock.get(i);
+            Boid boid = flock.get(i);
             //alignment
             float distance = Vector.distance(position, boid.position);
             if (distance > 0 && distance <= neighborhoodRadius) {
