@@ -79,8 +79,8 @@ Node n1, n2, n3;
 void setup() {
   // the scene object creates a default eye node
   scene = new Scene(this);
-  // To create an 'attached' node as a leading one (those whose parent is
-  // the world, such as n1) the scene parameter is passed to the Node constructor:
+  // To create a node as a leading one (those whose parent is the world,
+  // such as n1) the scene parameter is passed to the Node constructor:
   n1 = new Node(scene);
   // whereas for the remaining nodes we pass any constructor taking a
   // reference node parameter, such as Node(Node referenceNode)
@@ -143,7 +143,7 @@ Render the node hierarchy onto the scene [context()](https://visualcomputing.git
 
 ```processing
 void draw() {
-  // render the attached nodes (n1, n2 and n3)
+  // render the nodes (n1, n2 and n3)
   scene.render();
 }
 ```
@@ -154,14 +154,14 @@ render the hierarchy onto a second off-screen scene context with:
 void draw() {
   // 1. render onto the scene
   scene.render();
-  // shift the scene attached nodes to the offScreenScene
+  // shift the scene nodes to the offScreenScene
   scene.shift(offScreenScene);
   // 2. render onto the off-screen scene
   offScreenScene.beginDraw();
   offScreenScene.render();
   offScreenScene.endDraw();
   offScreenScene.display();
-  // shift back the offScreenScene attached nodes to the scene
+  // shift back the offScreenScene nodes to the scene
   offScreenScene.shift(scene);
 }
 ```
