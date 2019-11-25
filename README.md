@@ -187,15 +187,6 @@ void draw() {
 }
 ```
 
-render the hierarchy onto an arbitrary _PGraphics_ `pg` context with:
-
-```processing
-void draw() {
-  scene.render(pg);
-
-}
-```
-
 observe that:
 
 * The scene gets rendered respect to the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) node.
