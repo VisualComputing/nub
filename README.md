@@ -47,11 +47,11 @@ The [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.
 Off-screen scenes should be instantiated upon a [PGraphics](https://processing.org/reference/PGraphics.html) object:
 
 ```processing
-Scene scene;
+Scene offScreenScene;
 void setup() {
-  scene = new Scene(this, createGraphics(500, 500, P3D));
+  offScreenScene = new Scene(this, createGraphics(500, 500, P3D));
   // or use the equivalent but simpler version:
-  // scene = new Scene(this, P3D, 500, 500);
+  // offScreenScene = new Scene(this, P3D, 500, 500);
 }
 ```
 
@@ -59,48 +59,48 @@ In this case, the [Scene](https://visualcomputing.github.io/nub-javadocs/nub/pro
 
 ## Nodes
 
-A node may be translated, rotated and scaled (the order is important) and be rendered when it has a shape. [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instances define each of the nodes comprising a scene graph. To illustrate their use, suppose the following scene graph is being implemented:
+A node may be translated, rotated and scaled (the order is important) and be rendered when it has a shape. [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instances define each of the nodes comprising a scene graph and they can be or _attached_ to a particular scene or _detached_. To illustrate their use, suppose the following scene graph is being implemented:
 
 ```processing
        World
          ^
         /|\
-      n1 n4 eye
+      a1 d1 eye
       ^  ^
      /|  |
-   n2 n3 n5
+   a2 a3 d2
 ```
 
 To setup the scene hierarchy of nodes use code such as the following:
 
 ```processing
 Scene scene;
-Node n1, n2, n3;
+Node a1, a2, a3, d1, d2;
 void setup() {
   // the scene object creates a default eye node
   scene = new Scene(this);
   // To create an 'attached' node as a leading one (those whose parent is
-  // the world, such as n1) the scene parameter is passed to the Node constructor:
-  n1 = new Node(scene);
+  // the world, such as a1) the scene parameter is passed to the Node constructor:
+  a1 = new Node(scene);
   // whereas for the remaining nodes we pass any constructor taking a
   // reference node parameter, such as Node(Node referenceNode)
-  n2 = new Node(n1) {
+  a2 = new Node(a1) {
     // immediate mode rendering procedure
-    // defines n2 visual representation
+    // defines a2 visual representation
     @Override
     public void graphics(PGraphics pg) {
       Scene.drawTorusSolenoid(pg);
     }
   };
   // retained-mode rendering PShape
-  // defines n3 visual representation
-  n3 = new Node(n1, createShape(BOX, 60));
+  // defines a3 visual representation
+  a3 = new Node(a1, createShape(BOX, 60));
   // To create a 'detached' node as a leading one (those whose parent
-  // is the world such, as n4) we use the default Node constructor:
-  n4 = new Node();
+  // is the world such, as d1) we use the default Node constructor:
+  d1 = new Node();
   // for detached child nodes we pass any constructor taking a
   // reference node parameter, such as Node(Node referenceNode)
-  n5 = new Node(n4, createShape(SPHERE, 70));
+  d2 = new Node(d1, createShape(SPHERE, 70));
 }
 ```
 
@@ -145,17 +145,54 @@ Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomput
 
 ## Rendering
 
-Render the node hierarchy onto [context()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#context--) with:
+Render the node hierarchy onto the scene [context()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#context--) with:
 
 ```processing
 void draw() {
-  // render the attached nodes (n1, n2 and n3)
+  // render the attached nodes (a1, a2 and a3)
   scene.render();
-  // render the detached nodes (n4 and n5)
-  scene.applyTransformation(n4);
-  scene.draw(n4);
-  scene.applyTransformation(n5);
-  scene.draw(n5);
+  // render the detached nodes (d1 and d2)
+  renderDetachedNodes(scene);
+}
+
+void renderDetachedNodes(Scene target) {
+  target.context().push();
+  target.applyTransformation(d1);
+  target.draw(d1);
+  target.context().push();
+  target.applyTransformation(d2);
+  target.draw(d2);
+  target.context().pop();
+  target.context().pop();
+}
+```
+
+render the hierarchy onto a second off-screen scene context with:
+
+```processing
+void draw() {
+  // 1. render onto the scene
+  scene.render();
+  renderDetachedNodes(scene);
+  // shift the scene attached nodes to the offScreenScene
+  scene.shift(offScreenScene);
+  // 2. render onto the off-screen scene
+  offScreenScene.beginDraw();
+  offScreenScene.render();
+  renderDetachedNodes(offScreenScene);
+  offScreenScene.endDraw();
+  offScreenScene.display();
+  // shift back the offScreenScene attached nodes to the scene
+  offScreenScene.shift(scene);
+}
+```
+
+render the hierarchy onto an arbitrary _PGraphics_ `pg` context with:
+
+```processing
+void draw() {
+  scene.render(pg);
+
 }
 ```
 
@@ -164,7 +201,7 @@ observe that:
 * The scene gets rendered respect to the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) node.
 * Call [render(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render-java.lang.Object-) to render the scene into an arbitrary _PGraphics_ context. See the [PostEffects](https://github.com/VisualComputing/nub/tree/master/examples/demos/PostEffects) example.
 * Call [render(PGraphics, Graph.Type, Node, zNear, zFar)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#render-processing.core.PGraphics-frames.core.Graph.Type-frames.core.Node-float-float-) to render the scene into an arbitrary _PGraphics_ context from an arbitrary node point-of-view. See the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) and [ShadowMapping](https://github.com/VisualComputing/nub/tree/master/examples/demos/ShadowMapping) examples.
-* Call [draw(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#draw-java.lang.Object-nub.core.Node-) to render the node into an arbitrary _PGraphics_ context.
+* Call [draw(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#draw-java.lang.Object-nub.core.Node-) and [applyTransformation(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#applyTransformation-processing.core.PGraphics-nub.core.Node-) to render the node into an arbitrary _PGraphics_ context.
 * The role played by a [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance during a scene graph traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--) method.
 
 To bypass the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm use detached nodes, or cull the node (see [cull(boolean)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#isCulled--)).
@@ -273,15 +310,15 @@ Mouse and keyboard examples:
 
 ```processing
 public void mouseDragged() {
-  // spin n1
+  // spin a1
   if (mouseButton == LEFT)
-    scene.spinNode(n1);
-  // translate n3
+    scene.spinNode(a1);
+  // translate a3
   else if (mouseButton == RIGHT)
-    scene.translateNode(n3);
-  // scale n4
+    scene.translateNode(a3);
+  // scale d1
   else
-    scene.scaleNode(n4, scene.mouseDX());
+    scene.scaleNode(d1, scene.mouseDX());
 }
 ```
 
@@ -289,9 +326,9 @@ public void mouseDragged() {
 void keyPressed() {
   if (key == CODED)
     if(keyCode == UP)
-      scene.translateNode(n2, 0, 10);
+      scene.translateNode(a2, 0, 10);
     if(keyCode == DOWN)
-      scene.translateNode(n5, 0, -10);
+      scene.translateNode(d2, 0, -10);
 }
 ```
 
