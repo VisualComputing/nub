@@ -166,7 +166,7 @@ void draw() {
 }
 ```
 
-observe that:
+see the [MiniMap](https://github.com/VisualComputing/nub/blob/master/examples/demos/MiniMap/MiniMap.pde) example. Observe that:
 
 * The scene gets rendered respect to the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) node.
 * Call [render(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render-java.lang.Object-) to render the scene into an arbitrary _PGraphics_ context. See the [PostEffects](https://github.com/VisualComputing/nub/tree/master/examples/demos/PostEffects) example.
