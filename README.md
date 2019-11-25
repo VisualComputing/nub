@@ -62,45 +62,39 @@ In this case, the [Scene](https://visualcomputing.github.io/nub-javadocs/nub/pro
 A node may be translated, rotated and scaled (the order is important) and be rendered when it has a shape. [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instances define each of the nodes comprising a scene graph and they can be either _attached_ to a particular scene or _detached_. To illustrate their use, suppose the following scene graph is being implemented:
 
 ```processing
-       World
-         ^
-        /|\
-      a1 d1 eye
-      ^  ^
-     /|  |
-   a2 a3 d2
+World
+  ^
+  |\
+ n1 eye
+  ^
+  |\
+ n2 n3
 ```
 
 To setup the scene hierarchy of nodes use code such as the following:
 
 ```processing
 Scene scene;
-Node a1, a2, a3, d1, d2;
+Node n1, n2, n3;
 void setup() {
   // the scene object creates a default eye node
   scene = new Scene(this);
   // To create an 'attached' node as a leading one (those whose parent is
-  // the world, such as a1) the scene parameter is passed to the Node constructor:
-  a1 = new Node(scene);
+  // the world, such as n1) the scene parameter is passed to the Node constructor:
+  n1 = new Node(scene);
   // whereas for the remaining nodes we pass any constructor taking a
   // reference node parameter, such as Node(Node referenceNode)
-  a2 = new Node(a1) {
+  n2 = new Node(n1) {
     // immediate mode rendering procedure
-    // defines a2 visual representation
+    // defines n2 visual representation
     @Override
     public void graphics(PGraphics pg) {
       Scene.drawTorusSolenoid(pg);
     }
   };
   // retained-mode rendering PShape
-  // defines a3 visual representation
-  a3 = new Node(a1, createShape(BOX, 60));
-  // To create a 'detached' node as a leading one (those whose parent
-  // is the world such, as d1) we use the default Node constructor:
-  d1 = new Node();
-  // for detached child nodes we pass any constructor taking a
-  // reference node parameter, such as Node(Node referenceNode)
-  d2 = new Node(d1, createShape(SPHERE, 70));
+  // defines n3 visual representation
+  n3 = new Node(n1, createShape(BOX, 60));
 }
 ```
 
@@ -149,21 +143,8 @@ Render the node hierarchy onto the scene [context()](https://visualcomputing.git
 
 ```processing
 void draw() {
-  // render the attached nodes (a1, a2 and a3)
+  // render the attached nodes (n1, n2 and n3)
   scene.render();
-  // render the detached nodes (d1 and d2)
-  renderDetachedNodes(scene);
-}
-
-void renderDetachedNodes(Scene target) {
-  target.context().push();
-  target.applyTransformation(d1);
-  target.draw(d1);
-  target.context().push();
-  target.applyTransformation(d2);
-  target.draw(d2);
-  target.context().pop();
-  target.context().pop();
 }
 ```
 
@@ -173,13 +154,11 @@ render the hierarchy onto a second off-screen scene context with:
 void draw() {
   // 1. render onto the scene
   scene.render();
-  renderDetachedNodes(scene);
   // shift the scene attached nodes to the offScreenScene
   scene.shift(offScreenScene);
   // 2. render onto the off-screen scene
   offScreenScene.beginDraw();
   offScreenScene.render();
-  renderDetachedNodes(offScreenScene);
   offScreenScene.endDraw();
   offScreenScene.display();
   // shift back the offScreenScene attached nodes to the scene
@@ -301,12 +280,12 @@ Mouse and keyboard examples:
 
 ```processing
 public void mouseDragged() {
-  // spin a1
+  // spin n1
   if (mouseButton == LEFT)
-    scene.spinNode(a1);
-  // translate a3
+    scene.spinNode(n1);
+  // translate n3
   else if (mouseButton == RIGHT)
-    scene.translateNode(a3);
+    scene.translateNode(n3);
   // scale d1
   else
     scene.scaleNode(d1, scene.mouseDX());
@@ -317,7 +296,7 @@ public void mouseDragged() {
 void keyPressed() {
   if (key == CODED)
     if(keyCode == UP)
-      scene.translateNode(a2, 0, 10);
+      scene.translateNode(n2, 0, 10);
     if(keyCode == DOWN)
       scene.translateNode(d2, 0, -10);
 }
