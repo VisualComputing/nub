@@ -59,7 +59,7 @@ In this case, the [Scene](https://visualcomputing.github.io/nub-javadocs/nub/pro
 
 ## Nodes
 
-A node may be translated, rotated and scaled (the order is important) and be rendered when it has a shape. [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instances define each of the nodes comprising a scene graph and they can be or _attached_ to a particular scene or _detached_. To illustrate their use, suppose the following scene graph is being implemented:
+A node may be translated, rotated and scaled (the order is important) and be rendered when it has a shape. [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instances define each of the nodes comprising a scene graph and they can be either _attached_ to a particular scene or _detached_. To illustrate their use, suppose the following scene graph is being implemented:
 
 ```processing
        World
