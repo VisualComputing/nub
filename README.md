@@ -341,7 +341,7 @@ Picking a node (which should be different than the scene eye) to interact with i
 
 Observations:
 
-1. A node can have multiple tags but a given tag and cannot be assigned to more than one node, and since the `null` tag is allowed you can pass it to any of the above methods or use the _stringless_ versions of them which are provided for convenience, e.g., `mouseTag()` is equivalent to `mouseTag(null)`.
+1. A node can have multiple tags but a given tag cannot be assigned to more than one node, and since the `null` tag is allowed you can pass it to any of the above methods or use the _stringless_ versions of them which are provided for convenience, e.g., `mouseTag()` is equivalent to `mouseTag(null)`.
 2. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
 3. To check if a given node would be picked with a ray casted at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-) or [mouseTracks(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTracks-nub.core.Node-).
 4. To tag the nodes in a given array with ray casting use [updateTag(String, int, int, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-nub.core.Node:A-) and [updateMouseTag(String, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#updateMouseTag-java.lang.String-nub.core.Node:A-).
