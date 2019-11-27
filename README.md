@@ -318,8 +318,8 @@ Picking a node (which should be different than the scene eye) to interact with i
    
 2. Interact with your _tagged_ nodes using one of the following patterns:
    
-   1. **Tagged node**: `interactTag(tag, gesture...)` which simply calls `interactNode(node(tag))` using [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-) to resolve the node parameter in the [node methods above](#nodes-1).
-   2. **Tagged node or `eye`**: `interact(tag, gesture...)` which is the same as `if (!interactTag(tag, gesture...)) interactEye(gesture....)` i.e., To either interact with the node referred with a given tag (pattern **i.**) or delegate the gesture to the eye ([see above](#eye)) when that tag is not in use.
+   1. **Tagged node**: `interactTag(tag, gesture...)` which simply calls `interactNode(node(tag), gesture)` using [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-) to resolve the node parameter in the [node methods above](#nodes-1).
+   2. **Tagged node or `eye`**: `interact(tag, gesture...)` which is the same as `if (!interactTag(tag, gesture...)) interactEye(gesture...)` i.e., To either interact with the node referred with a given tag (pattern **i.**) or delegate the gesture to the eye ([see above](#eye)) when that tag is not in use.
    
    Generic actions:
 
