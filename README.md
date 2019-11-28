@@ -147,7 +147,7 @@ void draw() {
 }
 ```
 
-see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example among several others. Render the scene node hierarchy onto an arbitrary `PGraphics` with:
+see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render the scene node hierarchy onto an arbitrary `PGraphics` with:
 
 ```processing
 PGraphics pg;
