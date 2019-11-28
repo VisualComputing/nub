@@ -413,7 +413,7 @@ void setup() {
 }
 ```
 
-will run the timing-task at 25Hz (which is its default [frequency()]()).
+will run the timing-task at 25Hz (which is its default [frequency()]()). See the [ParticleSystem](https://github.com/VisualComputing/nub/tree/master/examples/basics/ParticleSystem) example.
 
 ### Interpolators
 
