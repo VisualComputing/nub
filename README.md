@@ -98,7 +98,7 @@ void setup() {
 }
 ```
 
-Note that the hierarchy of nodes may be modified with [setReference(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setReference-frames.core.Node-) and the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) set from an arbitrary node instance with [setEye(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setEye-frames.core.Node-). Calling [setConstraint(Constrain)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setConstraint-frames.core.constraint.Constraint-) will apply a [Constraint](https://visualcomputing.github.io/nub-javadocs/nub/core/constraint/Constraint.html) to a node to limit its motion, see the [ConstrainedEye](https://github.com/VisualComputing/nub/tree/master/examples/basics/ConstrainedEye) and [ConstrainedNode](https://github.com/VisualComputing/nub/tree/master/examples/basics/ConstrainedNode) examples.
+Note that the hierarchy of nodes may be modified with [setReference(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setReference-nub.core.Node-) and the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) set from an arbitrary node instance with [setEye(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setEye-nub.core.Node-). Calling [setConstraint(Constraint)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setConstraint-nub.core.constraint.Constraint-) will apply a [Constraint](https://visualcomputing.github.io/nub-javadocs/nub/core/constraint/Constraint.html) to a node to limit its motion, see the [ConstrainedEye](https://github.com/VisualComputing/nub/tree/master/examples/basics/ConstrainedEye) and [ConstrainedNode](https://github.com/VisualComputing/nub/tree/master/examples/basics/ConstrainedNode) examples.
 
 #### Localization
 
@@ -139,16 +139,55 @@ Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomput
 
 ## Rendering
 
-Render the node hierarchy onto the scene [context()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#context--) with:
+Render the scene node hierarchy with:
 
 ```processing
 void draw() {
-  // render the nodes (n1, n2 and n3)
   scene.render();
 }
 ```
 
-render the hierarchy onto a second off-screen scene context with:
+see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example among several others. Render the scene node hierarchy onto an arbitrary `PGraphics` with:
+
+```processing
+PGraphics pg;
+
+void setup() {
+  pg = createGraphics(width, height, P3D);
+}
+
+void draw() {
+  scene.render(pg);
+}
+```
+
+see the [PostEffects](https://github.com/VisualComputing/nub/tree/master/examples/demos/PostEffects) example. Render the scene node hierarchy onto an arbitrary `PGraphics`, from an arbitrary node `viewPoint` with:
+
+```processing
+Node viewPoint;
+// frustum data
+Graph.Type frustumType = Graph.Type.PERSPECTIVE;
+float zNear, zFar;
+
+void draw() {
+  scene.render(pg, frustumType, viewPoint, zNear, zFar);
+}
+```
+
+see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) and [ShadowMapping](https://github.com/VisualComputing/nub/tree/master/examples/demos/ShadowMapping) examples.
+
+Render the off-screen node hierarchy with:
+
+```processing
+void draw() {
+  offScreenScene.beginDraw();
+  offScreenScene.render();
+  offScreenScene.endDraw();
+  offScreenScene.display();
+}
+```
+
+see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde) example. Render the same node hierarchy among the scene and several off-screen scenes with:
 
 ```processing
 void draw() {
@@ -169,8 +208,6 @@ void draw() {
 see the [MiniMap](https://github.com/VisualComputing/nub/blob/master/examples/demos/MiniMap/MiniMap.pde) example. Observe that:
 
 * The scene gets rendered respect to the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) node.
-* Call [render(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render-java.lang.Object-) to render the scene into an arbitrary _PGraphics_ context. See the [PostEffects](https://github.com/VisualComputing/nub/tree/master/examples/demos/PostEffects) example.
-* Call [render(PGraphics, Graph.Type, Node, zNear, zFar)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#render-processing.core.PGraphics-frames.core.Graph.Type-frames.core.Node-float-float-) to render the scene into an arbitrary _PGraphics_ context from an arbitrary node point-of-view. See the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) and [ShadowMapping](https://github.com/VisualComputing/nub/tree/master/examples/demos/ShadowMapping) examples.
 * Call [draw(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#draw-java.lang.Object-nub.core.Node-) and [applyTransformation(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#applyTransformation-processing.core.PGraphics-nub.core.Node-) to render the node into an arbitrary _PGraphics_ context.
 * The role played by a [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance during a scene graph traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--) method.
 
@@ -178,12 +215,12 @@ To bypass the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core
 
 #### Drawing functionality
 
-The [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) implements several static drawing functions that complements those already provided by Processing, such as: [drawCylinder(PGraphics, int, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCylinder-processing.core.PGraphics-int-float-float-), [drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawHollowCylinder-processing.core.PGraphics-int-float-float-frames.primitives.Vector-frames.primitives.Vector-), [drawCone(PGraphics, int, float, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-), [drawCone(PGraphics, int, float, float, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-float-) and [drawTorusSolenoid(PGraphics, int, int, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawTorusSolenoid-processing.core.PGraphics-int-int-float-float-).
+The [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) implements several static drawing functions that complements those already provided by Processing, such as: [drawCylinder(PGraphics, int, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCylinder-processing.core.PGraphics-int-float-float-), [drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawHollowCylinder-processing.core.PGraphics-int-float-float-nub.primitives.Vector-nub.primitives.Vector-), [drawCone(PGraphics, int, float, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-), [drawCone(PGraphics, int, float, float, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-float-) and [drawTorusSolenoid(PGraphics, int, int, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawTorusSolenoid-processing.core.PGraphics-int-int-float-float-).
 
 Drawing functions that take a `PGraphics` parameter (including the above static ones), such as [beginHUD(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#beginHUD-processing.core.PGraphics-),
 [endHUD(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#endHUD-processing.core.PGraphics-), [drawAxes(PGraphics, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawAxes-processing.core.PGraphics-float-), [drawCross(PGraphics, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCross-processing.core.PGraphics-float-float-float-) and [drawGrid(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawGrid-processing.core.PGraphics-) among others, can be used to set a node shape.
 
-Another scene's eye (different than this one) can be drawn with [drawEye(Graph)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawEye-frames.core.Graph-). Typical usage include interactive [minimaps](https://en.wikipedia.org/wiki/Mini-map) and _visibility culling_ visualization and debugging.
+Another scene's eye (different than this one) can be drawn with [drawFrustum(Scene)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawFrustum-nub.core.Graph-). Typical usage include interactive [minimaps](https://en.wikipedia.org/wiki/Mini-map) and _visibility culling_ visualization and debugging.
 
 ## Interactivity
 
