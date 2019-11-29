@@ -139,7 +139,7 @@ Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomput
 
 ## Rendering
 
-Render the scene node hierarchy with:
+Render the scene node hierarchy from the [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) node point-of-view with:
 
 ```processing
 void draw() {
@@ -147,7 +147,7 @@ void draw() {
 }
 ```
 
-see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render the scene node hierarchy onto an arbitrary `PGraphics` with:
+see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render the scene node hierarchy from the `eye` point-of-view, onto an arbitrary `PGraphics` with:
 
 ```processing
 PGraphics pg;
@@ -173,7 +173,7 @@ void draw() {
 
 see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) and [ShadowMapping](https://github.com/VisualComputing/nub/tree/master/examples/demos/ShadowMapping) examples.
 
-Render the off-screen node hierarchy with:
+Render the off-screen node hierarchy from the `eye` point-of-view with:
 
 ```processing
 void draw() {
@@ -184,7 +184,7 @@ void draw() {
 }
 ```
 
-see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde) example. Render the same node hierarchy among the scene and several off-screen scenes with:
+see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde) example. Render the same node hierarchy among the scene and several off-screen scenes, each one from its owm `eye` point-of-view, with:
 
 ```processing
 void draw() {
@@ -204,11 +204,9 @@ void draw() {
 
 see the [MiniMap](https://github.com/VisualComputing/nub/blob/master/examples/demos/MiniMap/MiniMap.pde) example. Observe that:
 
-* The scene gets rendered respect to the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) node.
-* Call [draw(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#draw-java.lang.Object-nub.core.Node-) and [applyTransformation(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#applyTransformation-processing.core.PGraphics-nub.core.Node-) to render the node into an arbitrary _PGraphics_ context.
+* To render a single node into an arbitrary _PGraphics_ context, call [draw(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#draw-java.lang.Object-nub.core.Node-) and [applyTransformation(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#applyTransformation-processing.core.PGraphics-nub.core.Node-) .
 * The role played by a [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance during a scene graph traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--) method.
-
-To bypass the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm cull the node (see [cull(boolean)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#isCulled--)).
+* To bypass the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm cull the node (see [cull(boolean)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#isCulled--)).
 
 #### Drawing functionality
 
