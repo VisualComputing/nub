@@ -163,7 +163,7 @@ see the [PostEffects](https://github.com/VisualComputing/nub/tree/master/example
 PGraphics pg;
 Node viewPoint;
 // frustum data
-Graph.Type frustumType = Graph.Type.PERSPECTIVE;
+Scene.Type frustumType = Scene.Type.PERSPECTIVE;
 float zNear, zFar;
 
 void draw() {
