@@ -152,10 +152,6 @@ see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basic
 ```processing
 PGraphics pg;
 
-void setup() {
-  pg = createGraphics(width, height, P3D);
-}
-
 void draw() {
   scene.render(pg);
 }
@@ -164,6 +160,7 @@ void draw() {
 see the [PostEffects](https://github.com/VisualComputing/nub/tree/master/examples/demos/PostEffects) example. Render the scene node hierarchy onto an arbitrary `PGraphics`, from an arbitrary node `viewPoint` with:
 
 ```processing
+PGraphics pg;
 Node viewPoint;
 // frustum data
 Graph.Type frustumType = Graph.Type.PERSPECTIVE;
