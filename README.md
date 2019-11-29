@@ -184,7 +184,7 @@ void draw() {
 }
 ```
 
-see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde) example. Render the same node hierarchy among the scene and several off-screen scenes, each one from its owm `eye` point-of-view, with:
+see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde) example. Render the same node hierarchy among the scene and several off-screen scenes, each one from its own `eye` point-of-view, with:
 
 ```processing
 void draw() {
