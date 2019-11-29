@@ -139,7 +139,7 @@ Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomput
 
 ## Rendering
 
-Render the scene node hierarchy from the [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) node point-of-view with:
+Render the scene node hierarchy from its [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) point-of-view with:
 
 ```processing
 void draw() {
@@ -147,7 +147,7 @@ void draw() {
 }
 ```
 
-see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render the scene node hierarchy from the `eye` point-of-view, onto an arbitrary `PGraphics` with:
+see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render the scene node hierarchy from its `eye` point-of-view, onto an arbitrary `PGraphics` with:
 
 ```processing
 PGraphics pg;
@@ -173,7 +173,7 @@ void draw() {
 
 see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) and [ShadowMapping](https://github.com/VisualComputing/nub/tree/master/examples/demos/ShadowMapping) examples.
 
-Render the off-screen node hierarchy from the `eye` point-of-view with:
+Render the off-screen scene node hierarchy from its `eye` point-of-view with:
 
 ```processing
 void draw() {
