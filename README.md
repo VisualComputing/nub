@@ -237,7 +237,7 @@ The following scene methods implement _eye_ motion actions particularly suited f
 | Rotate CAD   | ```rotateCAD(roll, pitch)```                      | ```mouseRotateCAD()```    |
 | Look around  | ```lookAround(deltaX, deltaY)```                  | ```mouseLookAround()```   |
 
-Note that the mouse actions follows the [delegation pattern](https://en.wikipedia.org/wiki/Delegation_pattern), simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative delegates (the generic input device method counterparts), and hence their simpler signatures. 
+Note that the mouse actions are implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts, and hence their simpler signatures. 
 
 Mouse and keyboard examples:
 
@@ -306,7 +306,7 @@ To directly interact with a given node, call any of the following scene methods:
 | Scale        | ```scaleNode(node, delta)```                             | n.a.                           |
 | Spin         | ```spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```mouseSpinNode(node)```      |
 
-Note that the mouse actions are implemented using the _delegation pattern_, in a similar manner as it has been done with the [eye](#eye).
+Note that the mouse actions are implemented in a similar manner as it has been done with the [eye](#eye).
 
 Mouse and keyboard examples:
 
