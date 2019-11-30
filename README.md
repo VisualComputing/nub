@@ -487,7 +487,8 @@ void setup() {
   shape = new Node(scene, pshape);
   interpolator = new Interpolator(shape);
   for (int i = 0; i < random(4, 10); i++)
-    interpolator.addKeyFrame(scene.randomNode());
+    // addKeyFrame(node, time):
+    interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
   interpolator.run();
 }
 ```
