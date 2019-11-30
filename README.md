@@ -168,7 +168,7 @@ void draw() {
 }
 ```
 
-this technique is also useful when projecting the same subtree among several scenes, but it requires the node hierarchy to be known in advanced. Render the scene node hierarchy from its `eye` point-of-view, onto an arbitrary `PGraphics` with:
+this technique may also be useful when projecting the same subtree among several scenes, but it requires the node hierarchy to be known in advanced. Render the scene node hierarchy from its `eye` point-of-view, onto an arbitrary `PGraphics` with:
 
 ```processing
 PGraphics pg;
