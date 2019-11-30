@@ -147,7 +147,28 @@ void draw() {
 }
 ```
 
-see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render the scene node hierarchy from its `eye` point-of-view, onto an arbitrary `PGraphics` with:
+see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render a scene sub-tree from its `eye` point-of-view, like n1-n2, with:
+
+```processing
+// renders n1-n2, discarding n3
+void draw() {
+  // save space
+  pushMatrix();
+  // enter n1 space
+  scene.applyTransformation(n1);
+  scene.draw(n1);
+  // save state
+  pushMatrix();
+  // enter n2 space
+  scene.applyTransformation(n2);
+  scene.draw(n2);
+  // restore space
+  popMatrix();
+  popMatrix();
+}
+```
+
+this technique is also useful when projecting the same subtree among several scenes, but it requires the node hierarchy to be known in advanced. Render the scene node hierarchy from its `eye` point-of-view, onto an arbitrary `PGraphics` with:
 
 ```processing
 PGraphics pg;
@@ -223,7 +244,7 @@ Another scene's eye (different than this one) can be drawn with [drawFrustum(Sce
 
 The scene has several methods to position and orient the _eye_ node, such as: [lookAt(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#lookAt-nub.primitives.Vector-), [setFov(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setFOV-float-), [setViewDirection(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setViewDirection-nub.primitives.Vector-), [setUpVector(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setUpVector-nub.primitives.Vector-), [fit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#fit--) and [fit(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#fit-nub.core.Node-), among others.
 
-The following scene methods implement _eye_ motion actions particularly suited for input devices, possibly having several degrees-of-freedom:
+The following scene methods implement _eye_ motion actions particularly suited for input devices, possibly having several degrees-of-freedom ([DOFs](https://en.wikipedia.org/wiki/Degrees_of_freedom_(mechanics))):
 
 | Action       | Generic input device                              | Mouse                     |
 |--------------|---------------------------------------------------|---------------------------|
@@ -237,7 +258,7 @@ The following scene methods implement _eye_ motion actions particularly suited f
 | Rotate CAD   | ```rotateCAD(roll, pitch)```                      | ```mouseRotateCAD()```    |
 | Look around  | ```lookAround(deltaX, deltaY)```                  | ```mouseLookAround()```   |
 
-Note that the mouse actions are implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts, and hence their simpler signatures. 
+**n.a.** doesn't mean the mouse action isn't available, but that it can be implemented in several ways (see the code snippets below). The provided mouse actions got _non-ambiguously_ implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts, and hence their simpler signatures. 
 
 Mouse and keyboard examples:
 
@@ -249,8 +270,8 @@ void mouseDragged() {
   else if (mouseButton == RIGHT)
     scene.mouseTranslateEye();
   else
-    // changes the scene field-of-view
-    scene.scaleEye(mouseX - pmouseX);
+    // drag along x-axis: changes the scene field-of-view
+    scene.scaleEye(scene.mouseDX());
 }
 ```
 
@@ -258,7 +279,9 @@ void mouseDragged() {
 // define a mouse-moved eye interaction
 void mouseMoved(MouseEvent event) {
   if (event.isShiftDown())
-    scene.mouseTranslateEye();
+    // move mouse along y-axis: roll
+    // move mouse along x-axis: pitch
+    scene.rotateEye(scene.mouseRADY(), scene.mouseRADX(), 0);
   else
     scene.mouseLookAround();
 }
@@ -268,8 +291,10 @@ void mouseMoved(MouseEvent event) {
 // define a mouse-wheel eye interaction
 void mouseWheel(MouseEvent event) {
   if (scene.is3D())
+    // move along z
     scene.moveForward(event.getCount() * 20);
   else
+    // changes the eye scaling
     scene.scaleEye(event.getCount() * 20);
 }
 ```
@@ -287,11 +312,12 @@ void mouseClicked(MouseEvent event) {
 ```processing
 // define a key-pressed eye interaction
 void keyPressed() {
+  // roll with 'x' key
   scene.rotateEye(key == 'x' ? QUARTER_PI / 2 : -QUARTER_PI / 2, 0, 0);
 }
 ```
 
-The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples/basics/SpaceNavigator) and [CustomEyeInteraction](https://github.com/VisualComputing/nub/tree/master/examples/demos/CustomEyeInteraction) examples illustrate how to set up other hardware such as a keyboard or a [space-navigator](https://en.wikipedia.org/wiki/3Dconnexion).
+The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples/basics/SpaceNavigator) and [CustomEyeInteraction](https://github.com/VisualComputing/nub/tree/master/examples/demos/CustomEyeInteraction) examples illustrate how to set up other hardware such as a keyboard or a full fledged 6-DOFs device like the [space-navigator](https://en.wikipedia.org/wiki/3Dconnexion).
 
 ### Nodes
 
@@ -333,6 +359,8 @@ void keyPressed() {
       scene.translateNode(d2, 0, -10);
 }
 ```
+
+Customize node behaviors by overridden the node [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) method and then invoke it with the scene [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-) method. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
 
 ### Picking
 
@@ -377,7 +405,7 @@ Observations:
 2. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
 3. To check if a given node would be picked with a ray casted at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-) or [mouseTracks(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTracks-nub.core.Node-).
 4. To tag the nodes in a given array with ray casting use [updateTag(String, int, int, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-nub.core.Node:A-) and [updateMouseTag(String, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#updateMouseTag-java.lang.String-nub.core.Node:A-).
-5. Customize node behaviors by overridden the node [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) method and then invoke them by either calling the scene [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-) methods. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
+5. Invoke custom node behaviors by either calling the scene [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-) methods. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
 
 Mouse and keyboard examples:
 
