@@ -335,7 +335,7 @@ Note that the mouse actions are implemented in a similar manner as it has been d
 Mouse and keyboard examples:
 
 ```processing
-public void mouseDragged() {
+void mouseDragged() {
   // spin n1
   if (mouseButton == LEFT)
     scene.spinNode(n1);
