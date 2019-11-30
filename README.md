@@ -147,7 +147,7 @@ void draw() {
 }
 ```
 
-see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render a scene subtree, like n1-n2, from its `eye` point-of-view with:
+see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render a scene subtree, like n1-n2, from the scene `eye` point-of-view with:
 
 ```processing
 // renders n1-n2, discarding n3
