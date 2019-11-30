@@ -475,7 +475,7 @@ will run the timing-task at 25Hz (which is its default [frequency()]()). See the
 
 ### Interpolators
 
-Interpolators are special timing-tasks that allow to define the position, orientation and magnitude a node (including the eye) should have at a particular time, a.k.a., [key-frame](https://en.wikipedia.org/wiki/Key_frame). When the interpolator is ran the node is then animated through a [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) [interpolator](https://visualcomputing.github.io/nub-javadocs/nub/core/Interpolator.html) spline, matching in space-time the keyFrames which defines it. Use code such as the following:
+An [interpolator](https://visualcomputing.github.io/nub-javadocs/nub/core/Interpolator.html) is a special timing-tasks that allows to define the position, orientation and magnitude a node (including the eye) should have at a particular moment in time, a.k.a., [key-frame](https://en.wikipedia.org/wiki/Key_frame). When the interpolator is ran the node is then animated through a [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) spline, matching in space-time the keyFrames which defines it. Use code such as the following:
 
 ```processing
 Scene scene;
