@@ -492,7 +492,7 @@ void setup() {
 }
 ```
 
-which will create a `shape` interpolator containing [4..10] random key-frames. The interpolation is also ran. The interpolator trajectory may be drawn with code like this:
+which will create a `shape` interpolator containing [4..10] random key-frames. The interpolation is also run. The interpolator trajectory may be drawn with code like this:
 
 ```processing
 ...
