@@ -221,7 +221,23 @@ void draw() {
 }
 ```
 
-see the [MiniMap](https://github.com/VisualComputing/nub/blob/master/examples/demos/MiniMap/MiniMap.pde) example. Observe that:
+see the [MiniMap](https://github.com/VisualComputing/nub/blob/master/examples/demos/MiniMap/MiniMap.pde) example. Render 2D screen space stuff (such as gui elements and text) on top of a 3D scene with:
+
+```processing
+PGraphics pg;
+
+void draw() {
+ // save space and setup projection matrix for 2D drawing
+ // https://manmohanbishnoi.wordpress.com/2014/12/02/2d-hud-graphics-over-3d-objects-in-modern-opengl/
+ scene.beginHUD();
+ // Use 2D screen space coordinates from here:
+ image(pg, width / 2, height / 2);
+ // restore space
+ scene.endHUD();
+}
+```
+
+see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) example, among several others.Observe that:
 
 * To render a single node into an arbitrary _PGraphics_ context, call [draw(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#draw-java.lang.Object-nub.core.Node-) and [applyTransformation(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#applyTransformation-processing.core.PGraphics-nub.core.Node-) .
 * The role played by a [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance during a scene graph traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--) method.
