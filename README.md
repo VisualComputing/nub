@@ -192,7 +192,18 @@ void draw() {
 }
 ```
 
-see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) and [ShadowMapping](https://github.com/VisualComputing/nub/tree/master/examples/demos/ShadowMapping) examples. Render the off-screen scene node hierarchy from its `eye` point-of-view with:
+see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) and [ShadowMapping](https://github.com/VisualComputing/nub/tree/master/examples/demos/ShadowMapping) examples.  Render the scene node hierarchy onto an arbitrary `PGraphics`, passing `projection` and `view` matrices with:
+
+```processing
+PGraphics pg;
+Matrix projection, view;
+
+void draw() {
+  scene.render(pg, projection, view);
+}
+```
+
+Render the off-screen scene node hierarchy from its `eye` point-of-view with:
 
 ```processing
 void draw() {
