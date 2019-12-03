@@ -139,7 +139,7 @@ Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomput
 
 ## Rendering
 
-Render the scene node hierarchy from its [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) point-of-view with:
+Render (and display) the scene node hierarchy from its [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) point-of-view with:
 
 ```processing
 void draw() {
@@ -147,7 +147,7 @@ void draw() {
 }
 ```
 
-see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render a scene subtree, like n1-n2, from the scene `eye` point-of-view with:
+see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render (and display) a scene subtree, like n1-n2, from the scene `eye` point-of-view with:
 
 ```processing
 // renders n1-n2, discarding n3
@@ -203,18 +203,19 @@ void draw() {
 }
 ```
 
-Render the off-screen scene node hierarchy from its `eye` point-of-view with:
+Render (and display) the off-screen scene node hierarchy from its `eye` point-of-view with:
 
 ```processing
 void draw() {
   offScreenScene.beginDraw();
   offScreenScene.render();
   offScreenScene.endDraw();
+  // display the rendered offScreenScene
   offScreenScene.display();
 }
 ```
 
-see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde) example. Render the same node hierarchy among the scene and several off-screen scenes, each one from its own `eye` point-of-view, with:
+see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde) example. Render (and display) the same node hierarchy among the scene and several off-screen scenes, each one from its own `eye` point-of-view, with:
 
 ```processing
 void draw() {
@@ -226,6 +227,7 @@ void draw() {
   offScreenScene.beginDraw();
   offScreenScene.render();
   offScreenScene.endDraw();
+  // display the rendered offScreenScene
   offScreenScene.display();
   // shift back the offScreenScene nodes to the scene
   offScreenScene.shift(scene);
@@ -283,7 +285,7 @@ The following scene methods implement _eye_ motion actions particularly suited f
 | Rotate CAD   | ```rotateCAD(roll, pitch)```                      | ```mouseRotateCAD()```    |
 | Look around  | ```lookAround(deltaX, deltaY)```                  | ```mouseLookAround()```   |
 
-**n.a.** doesn't mean the mouse action isn't available, but that it can be implemented in several ways (see the code snippets below). The provided mouse actions got _non-ambiguously_ implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts (e.g., `mouseTranslateEye()` is the same as `translateEye(pmouseX - mouseX, pmouseY - mouseY, 0)`), and hence their simpler signatures. 
+**n.a.** doesn't mean the mouse action isn't available, but that it can be implemented in several ways (see the code snippets below). The provided mouse actions got _non-ambiguously_ implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts (e.g., `mouseTranslateEye()` is the same as `translateEye(pmouseX - mouseX, pmouseY - mouseY, 0)` and `mouseSpinEye()` is the same as `spinEye(pmouseX, pmouseY, mouseX, mouseY)`), and hence their simpler signatures. 
 
 Mouse and keyboard examples:
 
