@@ -283,7 +283,7 @@ The following scene methods implement _eye_ motion actions particularly suited f
 | Rotate CAD   | ```rotateCAD(roll, pitch)```                      | ```mouseRotateCAD()```    |
 | Look around  | ```lookAround(deltaX, deltaY)```                  | ```mouseLookAround()```   |
 
-**n.a.** doesn't mean the mouse action isn't available, but that it can be implemented in several ways (see the code snippets below). The provided mouse actions got _non-ambiguously_ implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts (e.g., `mouseTranslateEye()` is the same as `translateEye(mouseX, mouseY, 0)`), and hence their simpler signatures. 
+**n.a.** doesn't mean the mouse action isn't available, but that it can be implemented in several ways (see the code snippets below). The provided mouse actions got _non-ambiguously_ implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts (e.g., `mouseTranslateEye()` is the same as `translateEye(pmouseX - mouseX, pmouseY - mouseY, 0)`), and hence their simpler signatures. 
 
 Mouse and keyboard examples:
 
