@@ -65,6 +65,7 @@ public class DOF extends PApplet {
     depthPGraphics.beginDraw();
     depthPGraphics.background(0);
     // only for depth_linear shader
+    // Don't pay attention to the doesn't have a uniform called "far/near" message
     depthShader.set("near", scene.zNear());
     depthShader.set("far", scene.zFar());
     scene.render(depthPGraphics);
