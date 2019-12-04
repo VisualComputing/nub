@@ -24,19 +24,17 @@ public class DOF extends PApplet {
 
   @Override
   public void setup() {
-    colorMode(HSB, 255);
     scene = new Scene(this, P3D, width, height);
     scene.setRadius(1000);
     scene.fit(1);
-
     models = new Node[100];
-
     for (int i = 0; i < models.length; i++) {
       models[i] = new Node(scene, boxShape());
       models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
 
+    // Depth shader
     // Test all the different versions
     //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
     //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_nonlinear.glsl");
@@ -44,6 +42,7 @@ public class DOF extends PApplet {
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
+    // DOF shader
     dofShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/dof.glsl");
     dofShader.set("aspect", width / (float) height);
     dofShader.set("maxBlur", (float) 0.015);
