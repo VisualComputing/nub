@@ -7,7 +7,7 @@ import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.*;
 import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.BioIk;
-import nub.ik.solver.geometric.trik.TRIK;
+import nub.ik.solver.geometric.oldtrik.TRIK;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;

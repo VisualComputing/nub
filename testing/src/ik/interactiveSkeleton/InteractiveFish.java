@@ -4,7 +4,7 @@ import nub.ik.skinning.GPULinearBlendSkinning;
 import nub.core.Node;
 import nub.core.Graph;
 import nub.core.Interpolator;
-import nub.ik.solver.geometric.trik.TRIK;
+import nub.ik.solver.geometric.oldtrik.TRIK;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.ik.visual.Joint;

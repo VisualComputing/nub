@@ -5,7 +5,7 @@ import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
-import nub.ik.solver.geometric.trik.TRIKTree;
+import nub.ik.solver.geometric.oldtrik.TRIKTree;
 import nub.ik.visual.Joint;
 import nub.primitives.Vector;
 import nub.processing.Scene;

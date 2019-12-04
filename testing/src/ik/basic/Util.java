@@ -13,7 +13,7 @@ import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.evolutionary.GASolver;
 import nub.ik.solver.evolutionary.HillClimbingSolver;
 import nub.ik.solver.geometric.MySolver;
-import nub.ik.solver.geometric.trik.TRIK;
+import nub.ik.solver.geometric.oldtrik.TRIK;
 import nub.ik.solver.numerical.PseudoInverseSolver;
 import nub.ik.solver.numerical.SDLSSolver;
 import nub.ik.solver.numerical.TransposeSolver;

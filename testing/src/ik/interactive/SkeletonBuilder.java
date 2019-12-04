@@ -6,7 +6,7 @@ import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
 import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.trik.TRIKTree;
+import nub.ik.solver.geometric.oldtrik.TRIKTree;
 import nub.ik.solver.geometric.TreeSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;

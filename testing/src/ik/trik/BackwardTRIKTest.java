@@ -1,9 +1,14 @@
-package ik.basic;
+package ik.trik;
 
+import ik.basic.Util;
 import nub.core.Graph;
 import nub.core.Node;
+import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.oldtrik.TRIK;
+import nub.ik.solver.trik.implementations.BackwardTRIK;
+import nub.ik.solver.trik.implementations.ForwardTRIK;
 import nub.ik.visual.Joint;
+import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -14,56 +19,42 @@ import processing.event.MouseEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-/**
- * Created by sebchaparr on 01/06/19.
- */
-
-public class MultipleTRIKTest extends PApplet {
+public class BackwardTRIKTest extends PApplet {
     Scene scene;
     //Set the scene as P3D or P2D
     String renderer = P3D;
     float jointRadius = 5;
     float length = 50;
+    int numJoints = 8;
     boolean enableSolver = false;
-    TRIK trik1, trik2, trik3;
-    List<Node> skeleton_trik1, skeleton_trik2, skeleton_trik3;
+    Solver backwardTrik;
+    List<Node> skeleton, idle_sk;
     List<Node> targets = new ArrayList<Node>();
-
+    Random random = new Random(0);
 
     public void settings() {
         size(700, 700, renderer);
     }
 
     public void setup() {
-        //TRIK._debug = true;
         Joint.axes = true;
         //Setting the scene
         scene = new Scene(this);
         if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(280);
         scene.fit(1);
-        //Create the Skeleton (chain described above)
-        skeleton_trik1 = createSkeleton(Vector.multiply(scene.rightVector(), -scene.radius()/2f));
-        skeleton_trik2 = createSkeleton(new Vector());
-        skeleton_trik3 = createSkeleton(Vector.multiply(scene.rightVector(), scene.radius()/2f));
+        int color = color(random(255), random(255), random(255));
+        skeleton = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), -scene.radius()/2f), color, -1, 0);
+        color = color(random(255), random(255), random(255));
+        idle_sk = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), color(255), -1, 0);
+
+        //Util.generateConstraints(skeleton, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
+        //Util.generateConstraints(idle_sk, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
+
         //Create solver
-        trik1 = createSolver(skeleton_trik1, 0);
-        trik2 = createSolver(skeleton_trik2, 1);
-        trik3 = createSolver(skeleton_trik3, 2);
-        trik1.enableDirection(true);
-        trik2.enableDirection(true);
-        trik3.enableDirection(true);
-        //trik1.enableTwistHeuristics(false);
-        //trik2.enableTwistHeuristics(false);
-        //trik3.enableTwistHeuristics(false);
-
-        //trik2.enableWeight(true);
-        trik3.enableWeight(true);
-        trik2.setLookAhead(3);
-        trik3.setLookAhead(3);
-        trik3.smooth(true);
-
+        backwardTrik = createSolver(skeleton);
         //Define Text Properties
         textAlign(CENTER);
         textSize(24);
@@ -75,29 +66,11 @@ public class MultipleTRIKTest extends PApplet {
         scene.drawAxes();
         scene.render();
         scene.beginHUD();
-        //drawInfo(skeleton_trik1);
-        //drawInfo(skeleton_trik2);
-        //drawInfo(skeleton_trik3);
         scene.endHUD();
     }
 
-    public List<Node> createSkeleton(Vector translation){
-        ArrayList<Node> skeleton = new ArrayList<Node>();
-        skeleton.add(createJoint(scene, null, new Vector(0, -scene.radius() / 2), jointRadius, false));
-        int i;
-        for(i = 0; i < 5; i++) {
-            skeleton.add(createJoint(scene, skeleton.get(i), new Vector(0, length), jointRadius, true));
-        }
-        //End Effector
-        Node endEffector = createJoint(scene,skeleton.get(i), new Vector(0, length), jointRadius, true);
-        skeleton.add(endEffector);
-        //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
-        endEffector.enableTagging(false);
-        skeleton.get(0).translate(translation);
-        return skeleton;
-    }
-
-    public TRIK createSolver(List<Node> skeleton, int gTargets){
+    public Solver createSolver(List<Node> skeleton){
+        Solver solver;
         Node endEffector = skeleton.get(skeleton.size() - 1);
         //2. Lets create a Target (a bit bigger than a Joint in the structure)
         Node target = createTarget(scene, jointRadius * 1.5f);
@@ -105,17 +78,17 @@ public class MultipleTRIKTest extends PApplet {
         target.setPosition(endEffector.position());
         targets.add(target);
         //3. Relate the structure with a Solver. In this example we instantiate a solver
-        TRIK solver = new TRIK(skeleton);
+        solver = new BackwardTRIK(skeleton);
 
         //Optionally you could modify the following parameters of the Solver:
         //Maximum distance between end effector and target, If is below maxError, then we stop executing IK solver (Default value is 0.01)
-        //solver.setMaxError(0.0001f);
+        //solver.setMaxError(1);
         //Number of iterations to perform in order to reach the target (Default value is 50)
-        solver.setMaxIterations(10);
+        solver.setMaxIterations(500);
         //Times a solver will iterate on a single Frame (Default value is 5)
-        solver.setTimesPerFrame(TRIK._debug ? 1 : 10);
+        solver.setTimesPerFrame(1);
         //Minimum distance between previous and current solution to consider that Solver converges (Default value is 0.01)
-        //solver.setMinDistance(5f);
+        //solver.setMinDistance(0.5f);
         //4. relate targets with end effectors
         solver.setTarget(endEffector, target);
         //5. Create a Timing Task such that the solver executes each amount of time
@@ -133,10 +106,6 @@ public class MultipleTRIKTest extends PApplet {
     }
 
     public Node createTarget(Scene scene, float radius){
-        return createTarget(scene, radius, color(255,0,0));
-    }
-
-    public Node createTarget(Scene scene, float radius, int col){
         /*
          * A target is a Node, we represent a Target as a
          * Red ball.
@@ -145,7 +114,7 @@ public class MultipleTRIKTest extends PApplet {
         if (scene.is2D()) redBall = createShape(ELLIPSE,0, 0, radius*2, radius*2);
         else  redBall = createShape(SPHERE, radius);
         redBall.setStroke(false);
-        redBall.setFill(col);
+        redBall.setFill(color(255,0,0));
 
         Node target = new Node(scene){
             @Override
@@ -171,14 +140,6 @@ public class MultipleTRIKTest extends PApplet {
         joint.setTranslation(translation);
         if(!drawLine) joint.setRoot(true);
         return joint;
-    }
-
-    public void drawInfo(List<Node> skeleton){
-        for (int i = 0; i < skeleton.size(); i++) {
-            //Print Node names
-            Vector screenLocation = scene.screenLocation(skeleton.get(i).position());
-            text("Node " + i, screenLocation.x(), screenLocation.y());
-        }
     }
 
     @Override
@@ -215,17 +176,44 @@ public class MultipleTRIKTest extends PApplet {
     }
 
     public void keyPressed(){
-        if(key == 'A' || key == 'a'){
-            trik1.solve();
-            trik2.solve();
-            trik3.solve();
+        if(key == 'Q'){
+            TRIK._singleStep = !TRIK._singleStep;
         }
+
+        if(key == 'A' || key == 'a'){
+            enableSolver = false;
+            backwardTrik.solve();
+        }
+
         if(key == 'S' || key == 's'){
             enableSolver = !enableSolver;
         }
+
+        if(key == 'R' || key == 'r'){
+            generateRandomReachablePosition(idle_sk, scene.is3D());
+            Node f = generateRandomReachablePosition(idle_sk, scene.is3D());
+            Vector delta = Vector.subtract(f.position(), targets.get(0).position());
+            for(Node target : targets) {
+                target.setPosition(Vector.add(target.position(), delta));
+                target.setOrientation(f.orientation());
+            }
+
+        }
     }
 
+    public Node generateRandomReachablePosition(List<? extends Node> chain, boolean is3D){
+        for(int i = 0; i < chain.size() - 1; i++){
+            if(is3D)
+                chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextFloat()*2*PI)));
+            else
+                chain.get(i).rotate(new Quaternion(new Vector(0,0,1), (float)(random.nextFloat()*2*PI)));
+        }
+        return chain.get(chain.size()-1);
+    }
+
+
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.basic.MultipleTRIKTest"});
+        PApplet.main(new String[]{"ik.trik.BackwardTRIKTest"});
     }
 }
+
