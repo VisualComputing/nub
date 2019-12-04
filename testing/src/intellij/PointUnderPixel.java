@@ -4,31 +4,35 @@ import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
-/**
- * Created by pierre on 11/15/16.
- */
 public class PointUnderPixel extends PApplet {
   Scene scene;
   Node[] models;
 
-  //Point screenPoint = new Point();
   Vector orig = new Vector();
   Vector dir = new Vector();
   Vector end = new Vector();
-
   Vector pup;
+
+  // offScreen breaks reading depths in Processing
+  // try offScreen = false to see how it should work
+  boolean offScreen = true;
 
   @Override
   public void settings() {
     size(1000, 800, P3D);
+    //noSmooth();
   }
 
   public void setup() {
-    scene = new Scene(this);
-    //scene = new Scene(this, P3D, width, height);
+    if (offScreen)
+      // hint(ENABLE_DEPTH_READING) doesn't exist
+      //hint(PApplet.ENABLE_BUFFER_READING);
+      hint(PApplet.ENABLE_DEPTH_TEST);
+    scene = offScreen ? new Scene(this, P3D, width, height) : new Scene(this);
     scene.setRadius(1000);
     scene.fit(1);
     models = new Node[100];
@@ -40,28 +44,31 @@ public class PointUnderPixel extends PApplet {
   }
 
   public void draw() {
-    background(0);
-    drawRay();
-    scene.render();
-    /*
-    scene.beginDraw();
-    scene.context().background(0);
-    scene.render();
-    scene.endDraw();
-
-     */
+    if (offScreen) {
+      scene.beginDraw();
+      scene.context().background(0);
+      drawRay();
+      scene.render();
+      scene.endDraw();
+      scene.display();
+    } else {
+      background(0);
+      drawRay();
+      scene.render();
+    }
   }
 
-  // /*
   void drawRay() {
+    PGraphics pg = scene.context();
     if (pup != null) {
-      pushStyle();
-      strokeWeight(10);
-      stroke(255, 255, 0);
-      point(pup.x(), pup.y(), pup.z());
-      stroke(0, 0, 255);
-      line(orig.x(), orig.y(), orig.z(), end.x(), end.y(), end.z());
-      popStyle();
+      pg.pushStyle();
+      pg.strokeWeight(20);
+      pg.stroke(255, 255, 0);
+      pg.point(pup.x(), pup.y(), pup.z());
+      pg.strokeWeight(8);
+      pg.stroke(0, 0, 255);
+      pg.line(orig.x(), orig.y(), orig.z(), end.x(), end.y(), end.z());
+      pg.popStyle();
     }
   }
 
@@ -79,7 +86,6 @@ public class PointUnderPixel extends PApplet {
         scene.align();
     }
   }
-  // */
 
   PShape boxShape() {
     PShape box = createShape(BOX, 60);
