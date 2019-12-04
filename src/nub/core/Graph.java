@@ -17,7 +17,7 @@ import nub.timing.Task;
 import nub.timing.TimingHandler;
 
 import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.trik.TRIKTree;
+import nub.ik.solver.geometric.oldtrik.TRIKTree;
 import nub.ik.solver.geometric.TreeSolver;
 
 
