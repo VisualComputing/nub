@@ -124,7 +124,7 @@ The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/process
 | Screen to NDC        | ```screenToNDCLocation(pixel)```  | ```screenToNDCDisplacement(vector)```  |
 | Screen to Node       | ```location(pixel, node)```       | ```displacement(vector, node)```       |
 | Node to Screen       | ```screenLocation(point, node)``` | ```screenDisplacement(vector, node)``` |
-| Screen to World      | ```location(pixel)```             | ```displacement(vector, node)```       |
+| Screen to World      | ```location(pixel)```             | ```displacement(vector)```             |
 | World to Screen      | ```screenLocation(point)```       | ```screenDisplacement(vector)```       |
 
 The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world):
@@ -252,7 +252,6 @@ void draw() {
 
 see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) example, among several others.Observe that:
 
-* To render a single node into an arbitrary _PGraphics_ context, call [draw(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#draw-java.lang.Object-nub.core.Node-) and [applyTransformation(PGraphics, Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#applyTransformation-processing.core.PGraphics-nub.core.Node-) .
 * The role played by a [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance during a scene hierarchical traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--) method.
 * To bypass the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm cull the node (see [cull(boolean)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#isCulled--)).
 
