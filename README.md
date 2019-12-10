@@ -386,7 +386,7 @@ void keyPressed() {
 }
 ```
 
-Customize node behaviors by overridden the node [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) method and then invoke it with the scene [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-) method. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
+Customize node behaviors by overriding the node [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) method and then invoke it with the scene [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-) method. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
 
 ### Picking
 
@@ -409,14 +409,14 @@ Picking a node (which should be different than the scene eye) to interact with i
    
    Generic actions:
 
-   | Action    | Tagged node                                            | Tagged node or `eye`                                   |
-   |-----------|--------------------------------------------------------|--------------------------------------------------------|
-   | Align     | ```alignTag(tag)```                                    | ```align(tag)```                                       |
-   | Focus     | ```focusTag(tag)```                                    | ```focus(tag)```                                       |
-   | Translate | ```translateTag(tag, dx, dy, dz)```                    | ```translate(tag, dx, dy, dz)```                       |
-   | Rotate    | ```rotateTag(tag, roll, pitch, yaw)```                 | ```rotate(tag, roll, pitch, yaw)```                    |
-   | Scale     | ```scaleTag(tag, delta)```                             | ```scale(tag, delta)```                                |
-   | Spin      | ```spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```spin(String, pixel1X, pixel1Y, pixel2X, pixel2Y)``` |
+   | Action    | Tagged node                                            | Tagged node or `eye`                                |
+   |-----------|--------------------------------------------------------|-----------------------------------------------------|
+   | Align     | ```alignTag(tag)```                                    | ```align(tag)```                                    |
+   | Focus     | ```focusTag(tag)```                                    | ```focus(tag)```                                    |
+   | Translate | ```translateTag(tag, dx, dy, dz)```                    | ```translate(tag, dx, dy, dz)```                    |
+   | Rotate    | ```rotateTag(tag, roll, pitch, yaw)```                 | ```rotate(tag, roll, pitch, yaw)```                 |
+   | Scale     | ```scaleTag(tag, delta)```                             | ```scale(tag, delta)```                             |
+   | Spin      | ```spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y)``` |
 
    Mouse actions:
 
