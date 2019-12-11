@@ -11,11 +11,6 @@ public class BackwardHeuristic extends Heuristic{
      * The idea of this heuristics is similar to FABRIK forward phase, where we want to reduce the distance between the goal and the end effector
      * hoping that the position of the joints doesn't change, while most of the motion is done by the joints near the  end effector of the chain.
      * */
-    protected boolean _smooth = false; //smooth tries to reduce the movement done by each joint, such that the distance from initial one is reduced
-    protected float _smoothAngle = (float) Math.toRadians(10);
-    protected boolean  _enableTwist = true;
-    protected float _maxTwistDirection = (float) Math.toRadians(15), _maxTwistCCD = (float) Math.toRadians(15);
-
     public BackwardHeuristic(Context context) {
         super(context);
     }
@@ -48,19 +43,13 @@ public class BackwardHeuristic extends Heuristic{
         alpha.compose(j_i1.node().rotation());
 
         if(j_i1.node().constraint() != null){
-            alpha = j_i.node().constraint().constrainRotation(alpha, j_i1.node());
+            alpha = j_i1.node().constraint().constrainRotation(alpha, j_i1.node());
             delta = Quaternion.compose(j_i1.node().rotation(), alpha.inverse());
             delta.compose(j_i1.node().rotation().inverse());
         }
-        j_i.rotateAndUpdateCache(delta, false, endEffector); //Apply local rotation
+        j_i.rotateAndUpdateCache(delta, true, endEffector); //Apply local rotation
         j_i1.updateCacheUsingReference();
         j_i1.rotateAndUpdateCache(alpha, false, endEffector);
-        if(_enableTwist) {
-            Quaternion q2;
-            if(_smooth) q2 = _findTwist(j_i, j_i1, endEffector, _context.worldTarget(), _smoothAngle, _smoothAngle, _context.direction());
-            else q2 = _findTwist(j_i, j_i1, endEffector, _context.worldTarget(), _maxTwistCCD, _maxTwistDirection, _context.direction());
-            j_i.rotateAndUpdateCache(q2, true, endEffector, j_i1); //Apply twist rotation
-        }
     }
 
     @Override
@@ -104,77 +93,4 @@ public class BackwardHeuristic extends Heuristic{
         }
         return rotation;
     }
-
-
-    protected Quaternion _findTwisting(NodeInformation j_i, NodeInformation j_i1, NodeInformation endEffector, Node target, float maxAngle){ //Math.toRadians(15)
-        //Find twist that approach EFF to its desired orientation
-        //q_delta = O_i_inv * O_t * (O_i_inv * O_eff)^-1
-        Quaternion delta = j_i.orientationCache().inverse();
-        delta.compose(target.orientation());
-        delta.compose(endEffector.orientationCache().inverse());
-        delta.compose(j_i.orientationCache());
-        //get the twist component of the given quaternion
-        Vector tw = j_i1.node().translation(); // w.r.t j_i
-        //if delta is too short then avoid this operation
-        if (Math.abs(delta.angle()) < Math.toRadians(5)) {
-            return new Quaternion(tw, 0);
-        }
-
-        Vector rotationAxis = new Vector(delta._quaternion[0], delta._quaternion[1], delta._quaternion[2]);
-        rotationAxis = Vector.projectVectorOnAxis(rotationAxis, tw); // w.r.t j_i
-        //Get rotation component on Axis direction
-        Quaternion rotationTwist = new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), delta.w()); //w.r.t j_i
-        //Quaternion rotationSwing = Quaternion.compose(delta, rotationTwist.inverse()); //w.r.t j_i
-        //Clamp twist (Max 15 degrees)
-        float rotationTwistAngle = rotationTwist.angle();
-        rotationTwistAngle = Math.abs(rotationTwistAngle) > maxAngle ? (Math.signum(rotationTwistAngle) * maxAngle) : rotationTwistAngle;
-        rotationTwist = new Quaternion(rotationTwist.axis(), rotationTwistAngle);
-        //Apply twist to j_i
-        return rotationTwist;
-    }
-
-    //Try to approach to target final position by means of twisting
-    protected Quaternion _findCCDTwist(NodeInformation j_i, NodeInformation j_i1, NodeInformation eff, Node target, float maxAngle){ //(float) Math.toRadians(20)
-        Vector j_i_to_target = j_i.locationWithCache(target.position());
-        Vector j_i_to_eff = j_i.locationWithCache(eff);
-        Vector j_i_to_eff_proj, j_i_to_target_proj;
-        Vector tw = j_i1.node().translation(); // w.r.t j_i
-        //Project the given vectors in the plane given by twist axis
-        try {
-            j_i_to_target_proj = Vector.projectVectorOnPlane(j_i_to_target, tw);
-            j_i_to_eff_proj = Vector.projectVectorOnPlane(j_i_to_eff, tw);
-        } catch(Exception e){
-            return new Quaternion(tw, 0);
-        }
-
-        //Perform this operation only when Projected Vectors have not a despicable length
-        if (j_i_to_target_proj.magnitude() < 0.1*j_i_to_target.magnitude() && j_i_to_eff_proj.magnitude() < 0.1*j_i_to_eff.magnitude()) {
-            return new Quaternion(tw, 0);
-        }
-
-        //Find the angle between projected vectors
-        float angle = Vector.angleBetween(j_i_to_eff_proj, j_i_to_target_proj);
-        //clamp angle
-        angle = Math.min(angle, maxAngle);
-        if(Vector.cross(j_i_to_eff_proj, j_i_to_target_proj, null).dot(tw) <0)
-            angle *= -1;
-        return new Quaternion(tw, angle);
-    }
-
-
-    protected Quaternion _findTwist(NodeInformation j_i, NodeInformation j_i1, NodeInformation endEffector, Node target, float maxT1, float maxT2, boolean direction){
-        //Step 3. Apply twisting to help reach desired rotation
-        Quaternion t1, t2, twist;
-        t1 = t2 = _findCCDTwist(j_i, j_i1, endEffector, target, maxT1);
-        if(direction){
-            t2 = _findTwisting(j_i, j_i1, endEffector, target, maxT2);
-        }
-        if(t1.axis().dot(t2.axis()) < 0){
-            twist = new Quaternion(t1.axis(), 0.5f * t1.angle() - 0.5f * t2.angle());
-        } else{
-            twist = new Quaternion(t1.axis(), 0.5f * t1.angle() + 0.5f * t2.angle());
-        }
-        return twist;
-    }
-
 }
