@@ -148,6 +148,14 @@ public class NodeInformation {
         _positionCache = Vector.add(reference().positionCache(), reference().orientationCache().rotate(node().translation()));
     }
 
+    //Updates cache using child
+    public void updateCacheUsingChild(NodeInformation child){
+        _orientationCache = Quaternion.compose(child.orientationCache(), child.node().rotation().inverse());
+        _orientationCache.normalize();
+        _positionCache = Vector.subtract(child.positionCache(), _orientationCache.rotate(child.node().translation()));
+    }
+
+
     public static List<NodeInformation> _createInformationList(List<? extends Node> nodeList, boolean updateCache){
         List<NodeInformation> infoList = new ArrayList<NodeInformation>();
         NodeInformation ref = null;
