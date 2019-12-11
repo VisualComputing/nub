@@ -1,0 +1,79 @@
+package nub.ik.solver.trik.heuristic;
+
+import nub.ik.solver.geometric.oldtrik.NodeInformation;
+import nub.ik.solver.trik.Context;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+
+public class ForwardTriangulation extends Heuristic{
+    /**
+     * The idea of this heuristics is to apply popular CCD Step. Here most of the work is done by the last joint and as them could move
+     * that what is truly required the final pose of the chain will not be perceived as a natural pose.
+     * */
+    public ForwardTriangulation(Context context) {
+        super(context);
+    }
+
+
+    @Override
+    public void prepare() {
+        //Update cache of usable chain
+        NodeInformation._updateCache(_context.usableChainInformation());
+    }
+
+    @Override
+    public void applyActions(int i) {
+        NodeInformation j_i = _context.usableChainInformation().get(i);
+        NodeInformation j_i1 = _context.usableChainInformation().get(i + 1);
+        Vector a = j_i1.node().translation();
+        Vector b = j_i.locationWithCache(_context.endEffectorInformation());
+        b.subtract(a);
+        Vector c = j_i.locationWithCache(_context.worldTarget().position());
+        float a_mag = a.magnitude(), b_mag = b.magnitude(), c_mag = c.magnitude();
+
+        Quaternion delta;
+        if(a_mag + b_mag <= c_mag){
+            //Chain must be extended as much as possible
+            delta = new Quaternion(a, c);
+        } else if(c_mag < Math.abs(a_mag - b_mag)){
+            //Chain must be contracted as much as possible
+            delta = new Quaternion(a, Vector.multiply(c, -1));
+        } else{
+            //Apply law of cosines
+            float angle = (float) (Math.acos(Vector.dot(a,c) / (a_mag * c_mag)) - Math.acos(- (b_mag * b_mag - a_mag * a_mag - c_mag * c_mag) / (2f * a_mag * c_mag)));
+            delta = new Quaternion(Vector.cross(a, c, null), angle);
+        }
+
+        //float f = 1f / (2 + _context.usableChain().size() - 2 - i);
+        //delta = _clampRotation(delta, f);
+
+        if(_smooth) delta = _clampRotation(delta, _smoothAngle);
+        if(j_i.node().constraint() != null){
+            delta = j_i.node().constraint().constrainRotation(delta, j_i.node());
+        }
+
+        j_i.rotateAndUpdateCache(delta, false, _context.endEffectorInformation()); //Apply local rotation
+    }
+
+    @Override
+    public NodeInformation[] nodesToModify(int i) {
+        return new NodeInformation[]{_context.usableChainInformation().get(i - 1), _context.usableChainInformation().get(i)};
+    }
+
+
+    //IMPORTANT: THE FOLLOWING METHODS USE THE CACHE POSITION/ORIENTATION IT IS AND ASSUMED THAT THEY ARE UPDATE
+    protected static float _calculateWeight(float boneLength, float distToDesired){
+        float dist = distToDesired - boneLength;
+        dist = dist < 0 ? -1f / dist : dist;
+        float d_i = dist / boneLength;
+        return (float) Math.pow(1.5, -d_i);
+    }
+
+    protected static Quaternion _clampRotation(Quaternion rotation, float maxAngle){
+        float angle = rotation.angle();
+        if(Math.abs(angle) > maxAngle ){
+            rotation = new Quaternion(rotation.axis(), (Math.signum(angle) * maxAngle));
+        }
+        return rotation;
+    }
+}
