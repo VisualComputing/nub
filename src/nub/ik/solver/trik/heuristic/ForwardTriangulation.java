@@ -26,6 +26,21 @@ public class ForwardTriangulation extends Heuristic{
         NodeInformation j_i = _context.usableChainInformation().get(i);
         NodeInformation j_i1 = _context.usableChainInformation().get(i + 1);
         Vector a = j_i1.node().translation();
+
+        //TODO : Use triangulation with discounted actions - mid point
+
+        /*if(i < _context.last() - 1){
+            int middle = i + (int) Math.ceil((_context.usableChain().size() - i) / 2);
+            List<NodeInformation> chain = _context.usableChainInformation();
+
+            Quaternion o_prev = Quaternion.compose(chain.get(i + 1).orientationCache().get(), chain.get(i + 1).node().rotation().get().inverse());
+            o_prev.normalize();
+            Quaternion q = o_prev.inverse();
+            Vector middle_pos = q.rotate(Vector.subtract(chain.get(middle).positionCache(), chain.get(i+1).positionCache()));
+            middle_pos.add(chain.get(i+1).node().translation());
+            a = middle_pos;
+        }*/
+
         Vector b = j_i.locationWithCache(_context.endEffectorInformation());
         b.subtract(a);
         Vector c = j_i.locationWithCache(_context.worldTarget().position());
