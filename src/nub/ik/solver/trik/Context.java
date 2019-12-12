@@ -167,29 +167,6 @@ public class Context {
         _target = target;
     }
 
-    /**
-    * There will be cases in which we modify the chain based on a heuristic and look at some intermediary solution.
-     * This solution could give us information of better local actions.
-     *
-     * To do so, we require to save and restore previous states.
-    * */
-    protected List<State> _states;
-
-    //saves the state of the specified nodes of usable chain
-    public void saveState(Heuristic heuristic, int i){
-        State state = new State();
-        for(NodeInformation ni : heuristic.nodesToModify(i)){
-            state.addNodeState(ni);
-        }
-        _states.add(state);
-    }
-
-    //restore the last state saved
-    public void restoreState(){
-        State state = _states.remove(_states.size() - 1);
-        state.restoreState();
-    }
-
     public void copyChainState(List<NodeInformation> origin, List<NodeInformation> dest){
         //Copy the content of the origin chain into dest
         Node refDest = dest.get(0).node().reference();

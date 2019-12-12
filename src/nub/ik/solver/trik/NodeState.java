@@ -9,11 +9,24 @@ public class NodeState{
     protected Quaternion _rotation, _orientation;
     protected Vector _translation, _position;
 
-    protected NodeState(NodeInformation nodeInformation){
+    public NodeState(NodeInformation nodeInformation){
         _nodeInformation = nodeInformation;
         _rotation = nodeInformation.node().rotation().get();
         _orientation = nodeInformation.orientationCache().get();
         _translation = nodeInformation.node().translation().get();
         _position = nodeInformation.positionCache().get();
     }
+
+    public Quaternion rotation(){
+        return _rotation;
+    }
+
+    public Vector position(){
+        return _position;
+    }
+
+    public Quaternion orientation(){
+        return _orientation;
+    }
+
 }
