@@ -50,8 +50,8 @@ public class BackwardTRIKTest extends PApplet {
         color = color(random(255), random(255), random(255));
         idle_sk = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), color(255), -1, 0);
 
-        //Util.generateConstraints(skeleton, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
-        //Util.generateConstraints(idle_sk, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
+        Util.generateConstraints(skeleton, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
+        Util.generateConstraints(idle_sk, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
 
         //Create solver
         backwardTrik = createSolver(skeleton);

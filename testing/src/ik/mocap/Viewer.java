@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class Viewer extends PApplet{
     Scene scene;
-    String path = "/testing/data/bvh/mocap.bvh";
+    String path = "/testing/data/bvh/80_52.bvh";
 
     BVHLoader parser;
     HashMap<String, Node> originalLimbs = new HashMap<String, Node>();
@@ -132,7 +132,7 @@ public class Viewer extends PApplet{
         chain_solver.setTarget(targets.get("RIGHTHAND"));
         ccd_solver.setTarget(targets.get("RIGHTHAND"));
         //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));*/
-
+        /*
         String[] target_names = {"RIGHTFOOT", "RIGHTHAND", "LEFTHAND", "LEFTFOOT", "HEAD"};
         String[] head_names = {"RIGHTUPLEG", "RIGHTUPARM", "LEFTUPARM", "LEFTUPLEG", "NECK"};
 
@@ -224,7 +224,7 @@ public class Viewer extends PApplet{
             };
             task.run(40);
             chainsolvers.add(chain);
-        }
+        }*/
         exploration = new float[chainsolvers.size()];
 
         //Solver solver = scene.registerTreeSolver(rootIK);
@@ -234,8 +234,8 @@ public class Viewer extends PApplet{
         //scene.addIKTarget(limbs.get("LEFTFOOT"), targets.get("LEFTFOOT"));
         //scene.addIKTarget(limbs.get("RIGHTFOOT"), targets.get("RIGHTFOOT"));
         //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
-        //rootIK.cull(true);
-        root.cull(true);
+        rootIK.cull(true);
+        //root.cull(true);
     }
 
     public Node createTarget(float radius){

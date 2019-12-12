@@ -8,6 +8,7 @@ import nub.ik.solver.geometric.*;
 import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.geometric.oldtrik.TRIK;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -24,7 +25,7 @@ import java.util.List;
 
 public class NaiveBiped extends PApplet {
 
-    public enum IKMode{ BIOIK, FABRIK, CCD, MYSOLVER, TRIK};
+    public enum IKMode{ BIOIK, FABRIK, CCD, MYSOLVER, TRIK, SIMPLETRIK};
 
     Scene scene;
     float boneLength = 50;
@@ -59,7 +60,7 @@ public class NaiveBiped extends PApplet {
         scene.fit(1);
 
         if(!debug) {
-            createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(-boneLength*3, 0,0), IKMode.TRIK, 40 , 0);
+            createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(-boneLength*3, 0,0), IKMode.SIMPLETRIK, 40 , 0);
             //createStructure(scene, segments, boneLength, radius, color(255, 0, 0), new Vector(-boneLength * 3, 0, 0), IKMode.BIOIK);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
@@ -190,6 +191,12 @@ public class NaiveBiped extends PApplet {
                 break;
             }
 
+            case SIMPLETRIK:{
+                solver = new SimpleTRIK(limb, SimpleTRIK.HeuristicMode.FORWARD);
+                solver.setTarget(limb.get(limb.size() - 1), target);
+                break;
+            }
+
             default:{
                 return null;
             }
@@ -197,9 +204,9 @@ public class NaiveBiped extends PApplet {
 
         //solver.setMaxError(0f);
         if (!debug){
-            solver.setTimesPerFrame(3);
-            solver.setMaxIterations(10);
-            solver.setMaxError(0.5f);
+            solver.setTimesPerFrame(50);
+            solver.setMaxIterations(50);
+            //solver.setMaxError(0.5f);
         }
         else{
             solver.setTimesPerFrame(1);

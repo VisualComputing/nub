@@ -1,9 +1,9 @@
-package ik.basic;
+package ik.trik;
 
-import nub.core.Node;
+import ik.basic.Util;
 import nub.core.Graph;
-import nub.ik.solver.geometric.ChainSolver;
-import nub.ik.solver.geometric.FABRIKSolver;
+import nub.core.Interpolator;
+import nub.core.Node;
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.oldtrik.TRIK;
 import nub.ik.visual.Joint;
@@ -11,6 +11,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
+import nub.timing.Task;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 
@@ -18,15 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Created by sebchaparr on 8/10/18.
- */
-public class VisualBenchmark extends PApplet {
+public class HeuristicBenchmark extends PApplet {
     //Scene Parameters
     Scene scene;
     String renderer = P3D; //Define a 2D/3D renderer
-    int numJoints = 12; //Define the number of joints that each chain will contain
-    float targetRadius = 30; //Define size of target
+    int numJoints = 10; //Define the number of joints that each chain will contain
+    float targetRadius = 10; //Define size of target
     float boneLength = 50; //Define length of segments (bones)
 
     //Benchmark Parameters
@@ -36,22 +34,26 @@ public class VisualBenchmark extends PApplet {
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
     int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
 
+    Util.SolverType solversType [] = {Util.SolverType.FORWARD_TRIK_AND_TWIST, Util.SolverType.LOOK_AHEAD_FORWARD_AND_TWIST,  Util.SolverType.BACKWARD_TRIK_AND_TWIST, Util.SolverType.CCD_TRIK_AND_TWIST, Util.SolverType.CCD,
+            Util.SolverType.TRIK_V1, Util.SolverType.FABRIK, Util.SolverType.FORWARD_TRIANGULATION_TRIK_AND_TWIST, Util.SolverType.BACK_AND_FORTH_TRIK}; //Place Here Solvers that you want to compare
 
-    Util.SolverType solversType [] = {Util.SolverType.CCD, Util.SolverType.FABRIK, Util.SolverType.FABRIK_H1_H2, Util.SolverType.TRIK_V1,
-            Util.SolverType.TRIK_V2, Util.SolverType.TRIK_V3, Util.SolverType.TRIK_V4}; //Place Here Solvers that you want to compare
 
+    //Util.SolverType solversType [] = {Util.SolverType.BACKWARD_TRIANGULATION_TRIK};
     ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
+    ArrayList<Node> idleSkeleton;
+
     ArrayList<Node> targets = new ArrayList<Node>(); //Keep targets
 
-    boolean solve = false;
-    boolean show1 = false, show2 = false, show3 = false, show4 = false, show5 = false;
+    Interpolator interpolator;
+    Task task;
 
+
+    boolean solve = false;
     public void settings() {
         size(1500, 800, renderer);
     }
 
     public void setup() {
-        TRIK._debug = false;
         Joint.axes = true;
         scene = new Scene(this);
         if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
@@ -68,14 +70,17 @@ public class VisualBenchmark extends PApplet {
 
         //2. Generate Structures
         for(int i = 0; i < numSolvers; i++){
+            float offset = numSolvers == 1 ? 0 : i * 2 * alpha * scene.radius()/(numSolvers - 1) - alpha * scene.radius();
             int color = color(random(255), random(255), random(255));
-            structures.add(Util.generateChain(scene, numJoints, 0.3f* targetRadius, boneLength, new Vector(i * 2 * alpha * scene.radius()/(numSolvers - 1) - alpha * scene.radius(), 0, 0), color, randRotation, randLength));
+            structures.add(Util.generateChain(scene, numJoints, 0.7f* targetRadius, boneLength, new Vector(offset, 0, 0), color, randRotation, randLength));
         }
 
         //3. Apply constraints
         for(ArrayList<Node> structure : structures){
             Util.generateConstraints(structure, constraintType, 0, scene.is3D());
         }
+
+        idleSkeleton = Util.copy(structures.get(0));
 
         //4. Set eye scene
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
@@ -88,7 +93,7 @@ public class VisualBenchmark extends PApplet {
             solvers.add(solver);
             //6. Define solver parameters
             //solvers.get(i).setMaxError(0.001f);
-            solvers.get(i).setTimesPerFrame(5);
+            solvers.get(i).setTimesPerFrame(1);
             solvers.get(i).setMaxIterations(40);
             //solvers.get(i).setMinDistance(0.001f);
             //7. Set targets
@@ -103,6 +108,24 @@ public class VisualBenchmark extends PApplet {
             };
             task.run(40);
         }
+
+        interpolator = new Interpolator(scene);
+        //define the interpolator task
+        task = new Task(scene.timingHandler()) {
+            @Override
+            public void execute() {
+                Vector pos = targets.get(0).position().get();
+                interpolator.execute();
+                //update other targets
+                for(Node target : targets){
+                    if(target == targets.get(0)) continue;
+                    Vector diff = Vector.subtract(targets.get(0).position(), pos);
+                    target.translate(diff);
+                    target.setOrientation(targets.get(0).orientation());
+                }
+            }
+        };
+        interpolator.setTask(task);
     }
 
     public void draw() {
@@ -110,54 +133,15 @@ public class VisualBenchmark extends PApplet {
         if(scene.is3D()) lights();
         //Draw Constraints
         scene.drawAxes();
-
-        //Debugging exploration
-        for(int  i = 0; i < solvers.size(); i++) {
-            if (solvers.get(i) instanceof ChainSolver) {
-                if (show2) Util.drawPositions(scene.context(), ((ChainSolver) solvers.get(i)).positions(), color(255, 0, 100), 3);
-                if (show4 && ((ChainSolver) solvers.get(i)).avoidHistory() != null) {
-                    for(ArrayList<Vector> l : ((ChainSolver) solvers.get(i)).avoidHistory()){
-                        Util.drawPositions(scene.context(), l, color(255, 255, 0, 50), 3);
-                    }
-                }
-                if (show5 && ((ChainSolver) solvers.get(i)).divergeHistory() != null) {
-                    for(ArrayList<Vector> l : ((ChainSolver) solvers.get(i)).divergeHistory()){
-                        Util.drawPositions(scene.context(), l, color(255, 0, 0, 50), 3);
-                    }
-                }
-
-                if(((ChainSolver) solvers.get(i)).bestAvoidPosition() != null && show1){
-                    Util.drawPositions(scene.context(),((ChainSolver) solvers.get(i)).bestAvoidPosition(), color(255, 0, 0), 6);
-                }
-                if(((ChainSolver) solvers.get(i)).afterAvoidPosition() != null && show1){
-                    Util.drawPositions(scene.context(),((ChainSolver) solvers.get(i)).afterAvoidPosition(), color(0, 255, 0), 6);
-                }
-
-            } else if(solvers.get(i) instanceof TRIK){
-                List<Node> aux = ((TRIK) solvers.get(i)).auxiliaryChain();
-                List<Node> chain = ((TRIK) solvers.get(i)).copyChain();
-
-                ArrayList<Vector> aux_pos = new ArrayList<Vector>();
-                for(Node n : aux){
-                    aux_pos.add(n.position());
-                }
-
-                ArrayList<Vector> ch_pos = new ArrayList<Vector>();
-                for(Node n : chain){
-                    ch_pos.add(n.position());
-                }
-
-                if (show1) Util.drawPositions(scene.context(), aux_pos, color(255, 0, 100), 3);
-                if (show2) Util.drawPositions(scene.context(), ch_pos, color(255, 0, 100), 3);
-            }
-        }
-
         scene.render();
         scene.beginHUD();
         for(int  i = 0; i < solvers.size(); i++) {
             Util.printInfo(scene, solvers.get(i), structures.get(i).get(0).position());
         }
         scene.endHUD();
+        fill(255);
+        stroke(255);
+        scene.drawCatmullRom(interpolator, 1);
     }
 
     public Node generateRandomReachablePosition(List<? extends Node> chain, boolean is3D){
@@ -173,19 +157,38 @@ public class VisualBenchmark extends PApplet {
         return chain.get(chain.size()-1);
     }
 
+    public void generatePath(List<? extends Node> structure){
+        interpolator.clear(); // reset the interpolator
+        interpolator.setNode(targets.get(0));
+        //Generate a random near pose
+        Node node = structure.get(structure.size() - 1);
+
+        for(float t = 0; t < 10 ; t += 0.2f) {
+            for (int i = 0; i < structure.size(); i++) {
+                float angle = TWO_PI * noise(1000 * i + t) - PI;
+                Vector dir = new Vector(noise(10000 * i + t), noise(20000 * i + t), noise(30000 * i + t));
+                structure.get(i).rotate(dir, angle);
+            }
+            interpolator.addKeyFrame(new Node(node.position(), node.orientation(), 1.f));
+        }
+    }
+
+
+
+
     public void keyPressed(){
         if(key == 'w' || key == 'W'){
             solve = !solve;
         }
-        if(key == 's' || key == 'S'){
-            Node f = generateRandomReachablePosition(structures.get(0), scene.is3D());
+        if(key == 'R' || key == 'r'){
+            Node f = generateRandomReachablePosition(idleSkeleton, scene.is3D());
             Vector delta = Vector.subtract(f.position(), targets.get(0).position());
             for(Node target : targets) {
                 target.setPosition(Vector.add(target.position(), delta));
                 target.setOrientation(f.orientation());
             }
         }
-        if(key == 'd' || key == 'D'){
+        if(key == 'i' || key == 'I'){
             for(List<Node> structure : structures) {
                 for (Node f : structure) {
                     f.setRotation(new Quaternion());
@@ -193,30 +196,17 @@ public class VisualBenchmark extends PApplet {
             }
         }
 
-        // /* Uncomment this to debug a Specific Solver
-        if(key == 'z' || key == 'Z'){
+        if(key == 's' || key == 'S'){
             for(Solver s: solvers) s.solve();
         }
-        // /*
 
-        if(key == '1'){
-            TRIK._debug = !TRIK._debug;
-            show1 = !show1;
+        if(key == 'p' || key == 'P'){
+            generatePath(idleSkeleton);
         }
-        if(key == '2'){
-            show2 = !show2;
-        }
-        if(key == '3'){
-            show3 = !show3;
-        }
-        if(key == '4'){
-            show4 = !show4;
-        }
-        if(key == '5'){
-            show5 = !show5;
-        }
-        if(key == '6'){
-            FABRIKSolver.rand = !FABRIKSolver.rand;
+
+        if(key == 'k' || key == 'K'){
+            interpolator.enableRecurrence();
+            interpolator.run();
         }
     }
 
@@ -252,6 +242,7 @@ public class VisualBenchmark extends PApplet {
     }
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.basic.VisualBenchmark"});
+        PApplet.main(new String[]{"ik.trik.HeuristicBenchmark"});
     }
+
 }

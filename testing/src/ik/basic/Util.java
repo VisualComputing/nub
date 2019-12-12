@@ -17,6 +17,7 @@ import nub.ik.solver.geometric.oldtrik.TRIK;
 import nub.ik.solver.numerical.PseudoInverseSolver;
 import nub.ik.solver.numerical.SDLSSolver;
 import nub.ik.solver.numerical.TransposeSolver;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -32,7 +33,9 @@ import static processing.core.PApplet.*;
 
 public class Util {
     public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, CONE_CIRCLE, MIX }
-    public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, CCD_V2, GA, HAEA, MySolver, TRIK_V1, TRIK_V2, TRIK_V3, TRIK_V4}
+    public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, CCD_V2, GA, HAEA, MySolver, TRIK_V1, TRIK_V2, TRIK_V3, TRIK_V4,
+    FORWARD_TRIK, BACKWARD_TRIK, CCD_TRIK, FORWARD_TRIK_AND_TWIST, BACKWARD_TRIK_AND_TWIST, CCD_TRIK_AND_TWIST, FORWARD_TRIANGULATION_TRIK ,FORWARD_TRIANGULATION_TRIK_AND_TWIST,
+    BACKWARD_TRIANGULATION_TRIK ,BACKWARD_TRIANGULATION_TRIK_AND_TWIST, BACK_AND_FORTH_TRIK, LOOK_AHEAD_FORWARD, LOOK_AHEAD_FORWARD_AND_TWIST}
 
     public static Solver createSolver(SolverType type, ArrayList<Node> structure){
         switch (type){
@@ -48,6 +51,7 @@ public class Util {
                 ChainSolver solver = new ChainSolver(structure);
                 solver.setKeepDirection(false);
                 solver.setFixTwisting(false);
+                solver.explore(false);
                 return solver;
             }
             case FABRIK_H1:{
@@ -80,14 +84,14 @@ public class Util {
             case TRIK_V2:{
                 TRIK solver = new TRIK(structure);
                 solver.enableWeight(true);
-                solver.enableDirection(true);
+                //solver.enableDirection(true);
                 return solver;
             }
             case TRIK_V3:{
                 TRIK solver = new TRIK(structure);
                 solver.setLookAhead(5);
                 solver.enableWeight(true);
-                solver.enableDirection(true);
+                //solver.enableDirection(true);
                 return solver;
             }
             case TRIK_V4:{
@@ -95,9 +99,84 @@ public class Util {
                 solver.setLookAhead(5);
                 solver.enableWeight(true);
                 solver.smooth(true);
-                solver.enableDirection(true);
+                //solver.enableDirection(true);
                 return solver;
             }
+
+            case FORWARD_TRIK:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.FORWARD);
+                solver.enableTwist(false);
+                return solver;
+            }
+
+            case BACKWARD_TRIK:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.BACKWARD);
+                solver.enableTwist(false);
+                return solver;
+
+            }
+
+            case CCD_TRIK:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.CCD);
+                solver.enableTwist(false);
+                return solver;
+            }
+
+            case FORWARD_TRIK_AND_TWIST:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.FORWARD);
+                return solver;
+            }
+
+            case BACKWARD_TRIK_AND_TWIST:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.BACKWARD);
+                return solver;
+
+            }
+
+            case CCD_TRIK_AND_TWIST:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.CCD);
+                return solver;
+            }
+
+            case FORWARD_TRIANGULATION_TRIK:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.FORWARD_TRIANGULATION);
+                solver.enableTwist(false);
+                return solver;
+            }
+
+            case FORWARD_TRIANGULATION_TRIK_AND_TWIST:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.FORWARD_TRIANGULATION);
+                return solver;
+            }
+
+            case BACKWARD_TRIANGULATION_TRIK:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.BACKWARD_TRIANGULATION);
+                solver.enableTwist(false);
+                return solver;
+            }
+
+            case BACKWARD_TRIANGULATION_TRIK_AND_TWIST:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.BACKWARD_TRIANGULATION);
+                return solver;
+            }
+
+            case BACK_AND_FORTH_TRIK:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.BACK_AND_FORTH);
+                solver.enableTwist(false);
+                return solver;
+            }
+
+            case LOOK_AHEAD_FORWARD:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.LOOK_AHEAD_FORWARD);
+                solver.enableTwist(false);
+                return solver;
+            }
+
+            case LOOK_AHEAD_FORWARD_AND_TWIST:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.LOOK_AHEAD_FORWARD);
+                return solver;
+            }
+
             default: return null;
         }
     }
@@ -199,7 +278,7 @@ public class Util {
             Constraint constraint = null;
             ConstraintType current = type;
             if(type == ConstraintType.MIX){
-                int r = random.nextInt(ConstraintType.values().length - 1);
+                int r = random.nextInt(ConstraintType.values().length - 2) + 1;
                 r = is3D ? r : r % 2;
                 current = ConstraintType.values()[r];
             }
@@ -303,7 +382,6 @@ public class Util {
             pg.text("MySolver" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof TRIK){
-            String heuristics = "";
             TRIK  trik = (TRIK) solver;
             String error = "\n Error (pos): " + String.format( "%.3f", trik.positionError());
             if(trik.direction()){
@@ -312,6 +390,42 @@ public class Util {
             error += "\n Avg actions : " + String.format( "%.3f", trik._average_actions);
 
             pg.text("TRIK" +  error  + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+        }
+
+        if(solver instanceof SimpleTRIK){
+            SimpleTRIK  trik = (SimpleTRIK) solver;
+
+            String heuristics = "";
+            switch (trik.mode()){
+                case BACKWARD:{
+                    heuristics += "BACKWARD TRIK";
+                    break;
+                }
+                case FORWARD:{
+                    heuristics += "FORWARD TRIK";
+                    break;
+                }
+                case CCD:{
+                    heuristics += "CCD TRIK";
+                    break;
+                }
+                case FORWARD_TRIANGULATION:{
+                    heuristics += "TRIANGULATION TRIK";
+                    break;
+                }
+
+                case BACKWARD_TRIANGULATION:{
+                    heuristics += "BKW TRIANGULATION TRIK";
+                    break;
+                }
+            }
+            if(trik.enableTwist()) heuristics += "\nWITH TWIST";
+
+            String error = "\n Error (pos): " + String.format( "%.3f", trik.positionError());
+            if(trik.direction()){
+                error += "\n Error (or): " + String.format( "%.3f", trik.orientationError());
+            }
+           pg.text(heuristics +  error  + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
 
         pg.popStyle();

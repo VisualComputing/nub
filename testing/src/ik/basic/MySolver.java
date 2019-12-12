@@ -49,7 +49,7 @@ public class MySolver extends PApplet {
     String renderer = P3D;
     float jointRadius = 5;
     float length = 50;
-    boolean enableSolver = false;
+    boolean enableSolver = true;
     //Skeleton structure defined above
     ArrayList<Node> skeleton = new ArrayList<Node>();
     Solver solver;
