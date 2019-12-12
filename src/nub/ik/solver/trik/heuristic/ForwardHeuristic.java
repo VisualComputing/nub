@@ -17,8 +17,8 @@ public class ForwardHeuristic extends Heuristic{
      * hoping that the position of the joints doesn't change, while most of the motion is done by the joints near the head (base) of the chain.
     * */
     protected List<NodeInformation> _auxiliaryChainInformation;
-
-
+    protected boolean _discountedActions = true, _useMiddle = true;
+    protected float _gamma = 0.5f;
 
     public ForwardHeuristic(Context context) {
         super(context);
@@ -57,17 +57,66 @@ public class ForwardHeuristic extends Heuristic{
 
     @Override
     public void applyActions(int i) {
-        NodeInformation j_i = _context.usableChainInformation().get(i); //must have a parent
-        NodeInformation j_i1 = _context.usableChainInformation().get(i + 1);
-        NodeInformation j_i1_hat = _auxiliaryChainInformation.get(i + 1);
+
+        List<NodeInformation> chain = _context.usableChainInformation();
+        NodeInformation j_i = chain.get(i); //must have a parent
         NodeInformation endEffector = _context.endEffectorInformation();
 
-        Quaternion q1 = _findLocalRotation(j_i1, j_i1_hat, _context.enableWeight());
-        float f = 1f / (2 + _context.usableChain().size() - 2 - i);
-        q1 = _clampRotation(q1, f);
+        Quaternion q1 = _findLocalRotation(j_i, chain.get(i + 1).node().translation(), _auxiliaryChainInformation.get(i + 1), _context.enableWeight());
+        if(!_discountedActions){
+            if(_smooth) q1 = _clampRotation(q1, _smoothAngle);
+            j_i.rotateAndUpdateCache(q1, true, endEffector); //Apply local rotation
+            return;
+        }
+        //with discounting actions
+        Vector des = new Vector();
 
+        float sum = 0;
+        float factor = 1;
+        Vector v = chain.get(i + 1).node().translation().get();
+        Vector v1 = q1.rotate(v);
+        sum += factor;
+        des.add(v1);
+
+        if(_useMiddle && i < chain.size() - 2) {
+            int middle = i + (int) Math.ceil((chain.size() - i) / 2);
+            Quaternion o_new = j_i.orientationCache().get();
+            Quaternion o_prev = Quaternion.compose(chain.get(i + 1).orientationCache().get(), chain.get(i + 1).node().rotation().get().inverse());
+            o_prev.normalize();
+            Quaternion delta = Quaternion.compose(o_new, o_prev.inverse());
+            delta.normalize();
+            Quaternion delta2 = Quaternion.compose(o_prev.inverse(), delta);
+            delta2.normalize();
+
+            Vector middle_pos = delta2.rotate(Vector.subtract(chain.get(middle).positionCache(), chain.get(i+1).positionCache()));
+            middle_pos.add(chain.get(i + 1).node().translation().get());
+
+            delta = o_prev.inverse();
+            middle_pos = delta.rotate(Vector.subtract(chain.get(middle).positionCache(), chain.get(i+1).positionCache()));
+            middle_pos.add(chain.get(i+1).node().translation());
+
+            Quaternion q2 = _findLocalRotation(j_i, middle_pos, _auxiliaryChainInformation.get(middle), _context.enableWeight());
+            Vector v2 = q2.rotate(v);
+            factor *= _gamma;
+            v2.multiply(factor);
+            sum += factor;
+            des.add(v2);
+        }
+
+        Quaternion q3 = _findLocalRotation(j_i, j_i.locationWithCache(chain.get(chain.size() - 1)), _auxiliaryChainInformation.get(chain.size() - 1), _context.enableWeight());
+        Vector v3 = q3.rotate(v);
+        factor *= _gamma;
+        v3.multiply(factor);
+        sum += factor;
+        des.add(v3);
+
+        //Get discount average
+        des.multiply(1/sum);
+        q1 = new Quaternion(v, des);
         if(_smooth) q1 = _clampRotation(q1, _smoothAngle);
         j_i.rotateAndUpdateCache(q1, true, endEffector); //Apply local rotation
+        //float f = 1f / (2 + _context.usableChain().size() - 2 - i);
+        //q1 = _clampRotation(q1, f);
     }
 
 
@@ -78,13 +127,12 @@ public class ForwardHeuristic extends Heuristic{
     }
 
     //IMPORTANT: THE FOLLOWING METHODS USE THE CACHE POSITION/ORIENTATION IT IS AND ASSUMED THAT THEY ARE UPDATE
-    protected Quaternion _findLocalRotation(NodeInformation j_i1, NodeInformation j_i1_hat, boolean enableWeight){
-        NodeInformation j_i = j_i1.reference(); //must have a parent
+    protected Quaternion _findLocalRotation(NodeInformation j_i, Vector j_i1, NodeInformation j_i1_hat, boolean enableWeight){
         //Define how much rotate j_i in order to align j_i1 with j_i1_hat
-        Vector p = j_i1.node().translation();
+        Vector p = j_i1;
         //Find j_i1_hat w.r.t j_i
         Vector q = j_i.locationWithCache(j_i1_hat);
-        if(j_i.node().constraint() != null && j_i.node().constraint() instanceof Hinge){
+        /*if(j_i.node().constraint() != null && j_i.node().constraint() instanceof Hinge){
             Hinge h = (Hinge) j_i.node().constraint();
             Quaternion quat = Quaternion.compose(j_i.node().rotation().inverse(), h.orientation());
             Vector tw = h.restRotation().rotate(new Vector(0,0,1));
@@ -92,7 +140,7 @@ public class ForwardHeuristic extends Heuristic{
             //Project p & q on the plane of rot
             p = Vector.projectVectorOnPlane(p, tw);
             q = Vector.projectVectorOnPlane(q, tw);
-        }
+        }*/
 
         //Apply desired rotation removing twist component
         Quaternion delta = new Quaternion(p, q);
