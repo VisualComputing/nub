@@ -12,7 +12,7 @@ import java.util.List;
 
 public class SimpleTRIK extends Solver {
     public enum HeuristicMode{
-        CCD, FORWARD, BACKWARD, FORWARD_TRIANGULATION, BACKWARD_TRIANGULATION, FORWARD_CCD_DOUBLE_PASS, BACKWARD_CCD_DOUBLE_PASS, BACK_AND_FORTH;
+        CCD, FORWARD, LOOK_AHEAD_FORWARD, BACKWARD, FORWARD_TRIANGULATION, BACKWARD_TRIANGULATION, FORWARD_CCD_DOUBLE_PASS, BACKWARD_CCD_DOUBLE_PASS, BACK_AND_FORTH;
     }
 
     protected boolean _topToBottom;
@@ -36,7 +36,7 @@ public class SimpleTRIK extends Solver {
         _setHeuristicMode(mode);
         this._twistHeuristic = new TwistHeuristic(_context);
         //enableSmooth(true);
-        //_context.setSingleStep(true);
+        _context.setSingleStep(false);
     }
 
     protected void _setHeuristicMode(HeuristicMode mode){
@@ -46,6 +46,12 @@ public class SimpleTRIK extends Solver {
                 _topToBottom = false;
                 break;
             }
+            case LOOK_AHEAD_FORWARD:{
+                _mainHeuristic = new LookAheadHeuristic(new ForwardHeuristic(_context));
+                _topToBottom = true;
+                break;
+            }
+
             case FORWARD:{
                 _mainHeuristic = new ForwardHeuristic(_context);
                 _topToBottom = true;
