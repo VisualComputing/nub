@@ -1,7 +1,6 @@
 package nub.ik.solver.trik.heuristic;
 
 import nub.core.Node;
-import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.FABRIKSolver;
 import nub.ik.solver.geometric.oldtrik.NodeInformation;
 import nub.ik.solver.trik.Context;
@@ -80,19 +79,22 @@ public class ForwardHeuristic extends Heuristic{
 
         if(_useMiddle && i < chain.size() - 2) {
             int middle = i + (int) Math.ceil((chain.size() - i) / 2);
-            Quaternion o_new = j_i.orientationCache().get();
+            //Quaternion o_new = j_i.orientationCache().get();
+            //Quaternion o_prev = Quaternion.compose(chain.get(i + 1).orientationCache().get(), chain.get(i + 1).node().rotation().get().inverse());
+            //o_prev.normalize();
+            //Quaternion delta = Quaternion.compose(o_new, o_prev.inverse());
+            //delta.normalize();
+            //Quaternion delta2 = Quaternion.compose(o_prev.inverse(), delta);
+            //delta2.normalize();
+
+            //Vector middle_pos = delta2.rotate(Vector.subtract(chain.get(middle).positionCache(), chain.get(i+1).positionCache()));
+            //middle_pos.add(chain.get(i + 1).node().translation().get());
+
+
             Quaternion o_prev = Quaternion.compose(chain.get(i + 1).orientationCache().get(), chain.get(i + 1).node().rotation().get().inverse());
             o_prev.normalize();
-            Quaternion delta = Quaternion.compose(o_new, o_prev.inverse());
-            delta.normalize();
-            Quaternion delta2 = Quaternion.compose(o_prev.inverse(), delta);
-            delta2.normalize();
-
-            Vector middle_pos = delta2.rotate(Vector.subtract(chain.get(middle).positionCache(), chain.get(i+1).positionCache()));
-            middle_pos.add(chain.get(i + 1).node().translation().get());
-
-            delta = o_prev.inverse();
-            middle_pos = delta.rotate(Vector.subtract(chain.get(middle).positionCache(), chain.get(i+1).positionCache()));
+            Quaternion delta = o_prev.inverse();
+            Vector middle_pos = delta.rotate(Vector.subtract(chain.get(middle).positionCache(), chain.get(i+1).positionCache()));
             middle_pos.add(chain.get(i+1).node().translation());
 
             Quaternion q2 = _findLocalRotation(j_i, middle_pos, _auxiliaryChainInformation.get(middle), _context.enableWeight());
