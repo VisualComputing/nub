@@ -163,10 +163,10 @@ public class Graph {
     public String _tag;
     public int _pixelX, _pixelY;
 
-    Ray(String tag, int x, int y) {
+    Ray(String tag, int pixelX, int pixelY) {
       _tag = tag;
-      _pixelX = x;
-      _pixelY = y;
+      _pixelX = pixelX;
+      _pixelY = pixelY;
     }
   }
 
@@ -556,10 +556,10 @@ public class Graph {
   /**
    * Sets the {@link #zNearCoefficient()} value.
    */
-  public void setZNearCoefficient(float coef) {
-    if (coef != _zNearCoefficient)
+  public void setZNearCoefficient(float coefficient) {
+    if (coefficient != _zNearCoefficient)
       _modified();
-    _zNearCoefficient = coef;
+    _zNearCoefficient = coefficient;
   }
 
   /**
@@ -582,10 +582,10 @@ public class Graph {
   /**
    * Sets the {@link #zClippingCoefficient()} value.
    */
-  public void setZClippingCoefficient(float coef) {
-    if (coef != _zClippingCoefficient)
+  public void setZClippingCoefficient(float coefficient) {
+    if (coefficient != _zClippingCoefficient)
       _modified();
-    _zClippingCoefficient = coef;
+    _zClippingCoefficient = coefficient;
   }
 
   // Graph and nodes stuff
@@ -1053,10 +1053,8 @@ public class Graph {
       if (allOut)
         return Visibility.INVISIBLE;
     }
-
     if (allInForAllPlanes)
       return Visibility.VISIBLE;
-
     // Too conservative, but tangent cases are too expensive to detect
     return Visibility.SEMIVISIBLE;
   }
@@ -1117,9 +1115,7 @@ public class Graph {
     Vector viewDir = viewDirection();
     Vector up = upVector();
     Vector right = rightVector();
-
     float posViewDir = Vector.dot(pos, viewDir);
-
     switch (type()) {
       case PERSPECTIVE: {
         // horizontal fov: radians(eye().magnitude() * aspectRatio())
@@ -1131,24 +1127,20 @@ public class Graph {
         _normal[0] = Vector.add(_normal[0], Vector.multiply(right, -chhfov));
         _normal[2] = Vector.multiply(viewDir, -1);
         _normal[3] = viewDir;
-
         float hfov = fov() / 2.0f;
         float chfov = (float) Math.cos(hfov);
         float shfov = (float) Math.sin(hfov);
         _normal[4] = Vector.multiply(viewDir, -shfov);
         _normal[5] = Vector.add(_normal[4], Vector.multiply(up, -chfov));
         _normal[4] = Vector.add(_normal[4], Vector.multiply(up, chfov));
-
         for (int i = 0; i < 2; ++i)
           _distance[i] = Vector.dot(pos, _normal[i]);
         for (int j = 4; j < 6; ++j)
           _distance[j] = Vector.dot(pos, _normal[j]);
-
         // Natural equations are:
         // dist[0,1,4,5] = pos * normal[0,1,4,5];
         // dist[2] = (pos + zNear() * viewDir) * normal[2];
         // dist[3] = (pos + zFar() * viewDir) * normal[3];
-
         // 2 times less computations using expanded/merged equations. Dir vectors
         // are normalized.
         float posRightCosHH = chhfov * Vector.dot(pos, right);
@@ -1166,7 +1158,6 @@ public class Graph {
         _normal[1] = right;
         _normal[4] = up;
         _normal[5] = Vector.multiply(up, -1);
-
         float wh0 = eye().magnitude() * width() / 2;
         float wh1 = eye().magnitude() * height() / 2;
         _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
@@ -1175,20 +1166,17 @@ public class Graph {
         _distance[5] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh1)), _normal[5]);
         break;
     }
-
     // Front and far planes are identical for both camera types.
     _normal[2] = Vector.multiply(viewDir, -1);
     _normal[3] = viewDir;
     _distance[2] = -posViewDir - zNear();
     _distance[3] = posViewDir + zFar();
-
     for (int i = 0; i < 6; ++i) {
       _coefficients[i][0] = _normal[i]._vector[0];
       _coefficients[i][1] = _normal[i]._vector[1];
       _coefficients[i][2] = _normal[i]._vector[2];
       _coefficients[i][3] = _distance[i];
     }
-
     return _coefficients;
   }
 
@@ -1197,26 +1185,22 @@ public class Graph {
     Vector pos = eye().position();
     Vector up = upVector();
     Vector right = rightVector();
-
     _normal[0] = Vector.multiply(right, -1);
     _normal[1] = right;
     _normal[2] = up;
     _normal[3] = Vector.multiply(up, -1);
-
     float wh0 = eye().magnitude() * width() / 2;
     float wh1 = eye().magnitude() * height() / 2;
     _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
     _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
     _distance[2] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[2]);
     _distance[3] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh1)), _normal[3]);
-
     for (int i = 0; i < 4; ++i) {
       _coefficients[i][0] = _normal[i]._vector[0];
       _coefficients[i][1] = _normal[i]._vector[1];
       // Change respect to Camera occurs here:
       _coefficients[i][2] = -_distance[i];
     }
-
     return _coefficients;
   }
 
@@ -1473,10 +1457,8 @@ public class Graph {
   public boolean isConeBackFacing(Vector vertex, Vector[] normals) {
     float angle;
     Vector axis = new Vector(0, 0, 0);
-
     if (normals.length == 0)
       throw new RuntimeException("Normal array provided is empty");
-
     Vector[] n = new Vector[normals.length];
     for (int i = 0; i < normals.length; i++) {
       n[i] = new Vector();
@@ -1484,16 +1466,13 @@ public class Graph {
       n[i].normalize();
       axis = Vector.add(axis, n[i]);
     }
-
     if (axis.magnitude() != 0)
       axis.normalize();
     else
       axis.set(0, 0, 1);
-
     angle = 0;
     for (int i = 0; i < normals.length; i++)
       angle = Math.max(angle, (float) Math.acos(Vector.dot(n[i], axis)));
-
     return isConeBackFacing(vertex, axis, angle);
   }
 
@@ -2169,16 +2148,15 @@ public class Graph {
       lookAt(location(new Vector(centerX, centerY, 0)));
       return;
     }
-
     Vector vd = viewDirection();
     float distToPlane = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
     Vector orig = new Vector();
     Vector dir = new Vector();
-    convertPixelToLine(centerX, centerY, orig, dir);
+    pixelToLine(centerX, centerY, orig, dir);
     Vector newCenter = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    convertPixelToLine(x, centerY, orig, dir);
+    pixelToLine(x, centerY, orig, dir);
     Vector pointX = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    convertPixelToLine(centerX, y, orig, dir);
+    pixelToLine(centerX, y, orig, dir);
     Vector pointY = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
     float distance = 0.0f;
     float distX, distY;
@@ -2201,7 +2179,7 @@ public class Graph {
 
   /**
    * Gives the coefficients of a 3D half-line passing through the eye and pixel
-   * (x,y). Origin in the upper left corner. Use {@link #height()} - y to locate the
+   * (pixelX,pixelY). Origin in the upper left corner. Use {@link #height()} - pixelY to locate the
    * origin at the lower left corner.
    * <p>
    * The origin of the half line (eye position) is stored in {@code orig}, while
@@ -2209,27 +2187,25 @@ public class Graph {
    * <p>
    * This method is useful for analytical intersection in a selection method.
    */
-  public void convertPixelToLine(int x, int y, Vector origin, Vector direction) {
+  public void pixelToLine(int pixelX, int pixelY, Vector origin, Vector direction) {
     // left-handed coordinate system correction
     if (isLeftHanded())
-      y = height() - y;
-
+      pixelY = height() - pixelY;
     switch (type()) {
       case PERSPECTIVE:
         origin.set(eye().position());
-        direction.set(new Vector(((2.0f * x / width()) - 1.0f) * eye().magnitude() * aspectRatio(),
-            ((2.0f * (height() - y) / height()) - 1.0f) * eye().magnitude(),
+        direction.set(new Vector(((2.0f * pixelX / width()) - 1.0f) * eye().magnitude() * aspectRatio(),
+            ((2.0f * (height() - pixelY) / height()) - 1.0f) * eye().magnitude(),
             -1.0f));
         direction.set(Vector.subtract(eye().worldLocation(direction), origin));
         direction.normalize();
         break;
-
       case TWO_D:
       case ORTHOGRAPHIC: {
         float wh0 = eye().magnitude() * width() / 2;
         float wh1 = eye().magnitude() * height() / 2;
-        origin.set(new Vector((2.0f * x / width() - 1.0f) * wh0,
-            -(2.0f * y / height() - 1.0f) * wh1,
+        origin.set(new Vector((2.0f * pixelX / width() - 1.0f) * wh0,
+            -(2.0f * pixelY / height() - 1.0f) * wh1,
             0.0f));
         origin.set(eye().worldLocation(origin));
         direction.set(viewDirection());
@@ -2402,17 +2378,17 @@ public class Graph {
   // detached nodes
 
   /**
-   * Same as {@code return track(null, x, y, nodeArray)}.
+   * Same as {@code return track(null, pixelX, pixelY, nodeArray)}.
    *
    * @see #updateTag(String, int, int, Node[])
    */
-  public Node updateTag(int x, int y, Node[] nodeArray) {
-    return updateTag(null, x, y, nodeArray);
+  public Node updateTag(int pixelX, int pixelY, Node[] nodeArray) {
+    return updateTag(null, pixelX, pixelY, nodeArray);
   }
 
   /**
    * Tags (with {@code tag} which may be {@code null}) the node in {@code nodeArray} picked with ray-casting
-   * at pixel {@code x, y} and returns it (see {@link #node(String)}).
+   * at pixel {@code pixelX, pixelY} and returns it (see {@link #node(String)}).
    * <p>
    * Use this version of the method instead of {@link #updateTag(String, int, int)} when dealing with
    * detached nodes.
@@ -2431,10 +2407,10 @@ public class Graph {
    * @see #tag(String, int, int)
    * @see #tag(String, int, int)
    */
-  public Node updateTag(String tag, int x, int y, Node[] nodeArray) {
+  public Node updateTag(String tag, int pixelX, int pixelY, Node[] nodeArray) {
     removeTag(tag);
     for (Node node : nodeArray)
-      if (tracks(node, x, y)) {
+      if (tracks(node, pixelX, pixelY)) {
         tag(tag, node);
         break;
       }
@@ -2442,12 +2418,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return track(null, x, y, nodeList)}.
+   * Same as {@code return track(null, pixelX, pixelY, nodeList)}.
    *
    * @see #updateTag(String, int, int, List)
    */
-  public Node updateTag(int x, int y, List<Node> nodeList) {
-    return updateTag(null, x, y, nodeList);
+  public Node updateTag(int pixelX, int pixelY, List<Node> nodeList) {
+    return updateTag(null, pixelX, pixelY, nodeList);
   }
 
   /**
@@ -2455,10 +2431,10 @@ public class Graph {
    *
    * @see #updateTag(String, int, int, Node[])
    */
-  public Node updateTag(String tag, int x, int y, List<Node> nodeList) {
+  public Node updateTag(String tag, int pixelX, int pixelY, List<Node> nodeList) {
     removeTag(tag);
     for (Node node : nodeList)
-      if (tracks(node, x, y)) {
+      if (tracks(node, pixelX, pixelY)) {
         tag(tag, node);
         break;
       }
@@ -2468,17 +2444,17 @@ public class Graph {
   // attached nodes
 
   /**
-   * Same as {@code return track(null, x, y)}.
+   * Same as {@code return track(null, pixelX, pixelY)}.
    *
    * @see #updateTag(String, int, int)
    */
-  public Node updateTag(int x, int y) {
-    return updateTag(null, x, y);
+  public Node updateTag(int pixelX, int pixelY) {
+    return updateTag(null, pixelX, pixelY);
   }
 
   /**
    * Tags (with {@code tag} which may be {@code null}) the node in {@link #nodes()} picked with ray-casting at pixel
-   * {@code x, y} and returns it (see {@link #node(String)}). May return {@code null} if no node is intersected by
+   * {@code pixelX, pixelY} and returns it (see {@link #node(String)}). May return {@code null} if no node is intersected by
    * the ray. Not that the {@link #eye()} is never tagged.
    * <p>
    * Use this version of the method instead of {@link #updateTag(String, int, int, Node[])} when dealing with
@@ -2496,29 +2472,29 @@ public class Graph {
    * @see Node#setPickingThreshold(float)
    * @see #tag(String, int, int)
    */
-  public Node updateTag(String tag, int x, int y) {
+  public Node updateTag(String tag, int pixelX, int pixelY) {
     removeTag(tag);
     for (Node node : _leadingNodes())
-      _track(tag, node, x, y);
+      _track(tag, node, pixelX, pixelY);
     return node(tag);
   }
 
   /**
    * Use internally by {@link #updateTag(String, int, int)}.
    */
-  protected void _track(String tag, Node node, int x, int y) {
+  protected void _track(String tag, Node node, int pixelX, int pixelY) {
     if (node(tag) == null && node.isTaggingEnabled())
-      if (tracks(node, x, y)) {
+      if (tracks(node, pixelX, pixelY)) {
         tag(tag, node);
         return;
       }
     if (!node.isCulled() && node(tag) == null)
       for (Node child : node.children())
-        _track(tag, child, x, y);
+        _track(tag, child, pixelX, pixelY);
   }
 
   /**
-   * Casts a ray at pixel position {@code (x, y)} and returns {@code true} if the ray picks the {@code node} and
+   * Casts a ray at pixel position {@code (pixelX, pixelY)} and returns {@code true} if the ray picks the {@code node} and
    * {@code false} otherwise. The node is picked according to the {@link Node#pickingThreshold()}.
    *
    * @see #node(String)
@@ -2529,49 +2505,49 @@ public class Graph {
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
    */
-  public boolean tracks(Node node, int x, int y) {
+  public boolean tracks(Node node, int pixelX, int pixelY) {
     if (node.pickingThreshold() == 0 && _bb != null)
-      return _tracks(node, x, y);
+      return _tracks(node, pixelX, pixelY);
     else
-      return _tracks(node, x, y, screenLocation(node.position()));
+      return _tracks(node, pixelX, pixelY, screenLocation(node.position()));
   }
 
   /**
    * A shape may be picked using
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
    * color buffer. This method
-   * compares the color of a back-buffer at {@code (x,y)} against the {@link Node#id()}.
+   * compares the color of a back-buffer at {@code (pixelX,pixelY)} against the {@link Node#id()}.
    * Returns true if both colors are the same, and false otherwise.
    * <p>
    * This method should be overridden. Default implementation simply return {@code false}.
    *
    * @see Node#setPickingThreshold(float)
    */
-  protected boolean _tracks(Node node, int x, int y) {
+  protected boolean _tracks(Node node, int pixelX, int pixelY) {
     return false;
   }
 
   /**
    * Cached version of {@link #tracks(Node, int, int)}.
    */
-  protected boolean _tracks(Node node, int x, int y, Vector projection) {
+  protected boolean _tracks(Node node, int pixelX, int pixelY, Vector projection) {
     if (node == null || isEye(node))
       return false;
     if (!node.isTaggingEnabled())
       return false;
     float threshold = Math.abs(node.pickingThreshold()) < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position())
         : node.pickingThreshold() / 2;
-    return threshold > 0 ? ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold)) :
-        (float) Math.sqrt((float) Math.pow((projection._vector[0] - x), 2.0) + (float) Math.pow((projection._vector[1] - y), 2.0)) < -threshold;
+    return threshold > 0 ? ((Math.abs(pixelX - projection._vector[0]) < threshold) && (Math.abs(pixelY - projection._vector[1]) < threshold)) :
+        (float) Math.sqrt((float) Math.pow((projection._vector[0] - pixelX), 2.0) + (float) Math.pow((projection._vector[1] - pixelY), 2.0)) < -threshold;
   }
 
   /**
-   * Same as {@code tag(null, x, y)}.
+   * Same as {@code tag(null, pixelX, pixelY)}.
    *
    * @see #tag(String, int, int)
    */
-  public void tag(int x, int y) {
-    tag(null, x, y);
+  public void tag(int pixelX, int pixelY) {
+    tag(null, pixelX, pixelY);
   }
 
   /**
@@ -2597,8 +2573,8 @@ public class Graph {
    * @see Node#setPickingThreshold(float)
    * @see #tag(int, int)
    */
-  public void tag(String tag, int x, int y) {
-    _rays.add(new Ray(tag, x, y));
+  public void tag(String tag, int pixelX, int pixelY) {
+    _rays.add(new Ray(tag, pixelX, pixelY));
   }
 
   // Off-screen
@@ -3973,98 +3949,98 @@ public class Graph {
   // 6. Spin
 
   /**
-   * Same as {@code spin(point1X, point1Y, point2X, point2Y, 1)}.
+   * Same as {@code spin(pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
    *
    * @see #spin(int, int, int, int, float)
    */
-  public void spin(int point1X, int point1Y, int point2X, int point2Y) {
-    spin(point1X, point1Y, point2X, point2Y, 1);
+  public void spin(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    spin(pixel1X, pixel1Y, pixel2X, pixel2Y, 1);
   }
 
   /**
-   * Same as {@code spin(null, point1X, point1Y, point2X, point2Y, sensitivity)}.
+   * Same as {@code spin(null, pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity)}.
    *
    * @see #spin(String, int, int, int, int, float)
    */
-  public void spin(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
-    spin(null, point1X, point1Y, point2X, point2Y, sensitivity);
+  public void spin(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity) {
+    spin(null, pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity);
   }
 
   /**
-   * Same as {@code spin(tag, point1X, point1Y, point2X, point2Y, 1)}.
+   * Same as {@code spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
    *
    * @see #spin(String, int, int, int, int, float)
    */
-  public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y) {
-    spin(tag, point1X, point1Y, point2X, point2Y, 1);
+  public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 1);
   }
 
   /**
-   * Same as {@code if (!spinTag(tag, point1X, point1Y, point2X, point2Y, sensitivity))
-   * spinEye(point1X, point1Y, point2X, point2Y, sensitivity)}
+   * Same as {@code if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity))
+   * spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity)}
    *
    * @see #spinTag(String, int, int, int, int, float)
    * @see #spinEye(int, int, int, int, float)
    */
-  public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
-    if (!spinTag(tag, point1X, point1Y, point2X, point2Y, sensitivity))
-      spinEye(point1X, point1Y, point2X, point2Y, sensitivity);
+  public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity) {
+    if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity))
+      spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity);
   }
 
   /**
-   * Same as {@code return spinTag(point1X, point1Y, point2X, point2Y, 1)}.
+   * Same as {@code return spinTag(pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
    *
    * @see #spinTag(int, int, int, int, float)
    */
-  public boolean spinTag(int point1X, int point1Y, int point2X, int point2Y) {
-    return spinTag(point1X, point1Y, point2X, point2Y, 1);
+  public boolean spinTag(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    return spinTag(pixel1X, pixel1Y, pixel2X, pixel2Y, 1);
   }
 
   /**
-   * Same as {@code return spinTag(null, point1X, point1Y, point2X, point2Y, sensitivity)}.
+   * Same as {@code return spinTag(null, pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity)}.
    *
    * @see #spinTag(String, int, int, int, int, float)
    */
-  public boolean spinTag(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
-    return spinTag(null, point1X, point1Y, point2X, point2Y, sensitivity);
+  public boolean spinTag(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity) {
+    return spinTag(null, pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity);
   }
 
   /**
-   * Same as {@code return spinTag(tag, point1X, point1Y, point2X, point2Y, 1)}.
+   * Same as {@code return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
    *
    * @see #spinTag(String, int, int, int, int, float)
    */
-  public boolean spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y) {
-    return spinTag(tag, point1X, point1Y, point2X, point2Y, 1);
+  public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 1);
   }
 
   /**
-   * Same as {@code spinNode(node(tag), point1X, point1Y, point2X, point2Y, sensitivity)}. Returns
+   * Same as {@code spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity)}. Returns
    * {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #node(String)
    * @see #spinNode(Node, int, int, int, int, float)
    */
-  public boolean spinTag(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+  public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity) {
     if (node(tag) != null) {
-      spinNode(node(tag), point1X, point1Y, point2X, point2Y, sensitivity);
+      spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity);
       return true;
     }
     return false;
   }
 
   /**
-   * Same as {@code spinNode(node, point1X, point1Y, point2X, point2Y, 1)}.
+   * Same as {@code spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
    *
    * @see #spinNode(Node, int, int, int, int, float)
    */
-  public void spinNode(Node node, int point1X, int point1Y, int point2X, int point2Y) {
-    spinNode(node, point1X, point1Y, point2X, point2Y, 1);
+  public void spinNode(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 1);
   }
 
   /**
    * Rotates the {@code node} (which should be different than the {@link #eye()}) using an arcball
-   * interface, from points {@code (point1X, point1Y)} to {@code (point2X, point2Y)} pixel positions.
+   * interface, from points {@code (pixel1X, pixel1Y)} to {@code (pixel2X, pixel2Y)} pixel positions.
    * The {@code sensitivity} controls the gesture strength. The center of the rotation is the screen
    * projected node origin (see {@link Node#position()}).
    * <p>
@@ -4073,7 +4049,7 @@ public class Graph {
    *
    * @see #spinEye(int, int, int, int, float)
    */
-  public void spinNode(Node node, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+  public void spinNode(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity) {
     if (node == null || node == eye()) {
       System.out.println("Warning: spinNode requires a non-null node different than the eye. Nothing done");
       return;
@@ -4081,10 +4057,10 @@ public class Graph {
     Vector center = screenLocation(node.position());
     int centerX = (int) center.x();
     int centerY = (int) center.y();
-    float px = sensitivity * (point1X - centerX) / width();
-    float py = sensitivity * (isLeftHanded() ? (point1Y - centerY) : (centerY - point1Y)) / height();
-    float dx = sensitivity * (point2X - centerX) / width();
-    float dy = sensitivity * (isLeftHanded() ? (point2Y - centerY) : (centerY - point2Y)) / height();
+    float px = sensitivity * (pixel1X - centerX) / width();
+    float py = sensitivity * (isLeftHanded() ? (pixel1Y - centerY) : (centerY - pixel1Y)) / height();
+    float dx = sensitivity * (pixel2X - centerX) / width();
+    float dy = sensitivity * (isLeftHanded() ? (pixel2Y - centerY) : (centerY - pixel2Y)) / height();
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
@@ -4099,17 +4075,17 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spinEye(point1X, point1Y, point2X, point2Y, 1)}.
+   * Same as {@code spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
    *
    * @see #spinEye(int, int, int, int, float)
    */
-  public void spinEye(int point1X, int point1Y, int point2X, int point2Y) {
-    spinEye(point1X, point1Y, point2X, point2Y, 1);
+  public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 1);
   }
 
   /**
-   * Rotates the {@link #eye()} using an arcball interface, from points {@code (point1X, point1Y)} to
-   * {@code (point2X, point2Y)} pixel positions. The {@code sensitivity} controls the gesture strength.
+   * Rotates the {@link #eye()} using an arcball interface, from points {@code (pixel1X, pixel1Y)} to
+   * {@code (pixel2X, pixel2Y)} pixel positions. The {@code sensitivity} controls the gesture strength.
    * The center of the rotation is the screen projected graph {@link #anchor()}.
    * <p>
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
@@ -4117,14 +4093,14 @@ public class Graph {
    *
    * @see #spinNode(Node, int, int, int, int, float)
    */
-  public void spinEye(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+  public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity) {
     Vector center = screenLocation(anchor());
     int centerX = (int) center.x();
     int centerY = (int) center.y();
-    float px = sensitivity * (point1X - centerX) / width();
-    float py = sensitivity * (isLeftHanded() ? (point1Y - centerY) : (centerY - point1Y)) / height();
-    float dx = sensitivity * (point2X - centerX) / width();
-    float dy = sensitivity * (isLeftHanded() ? (point2Y - centerY) : (centerY - point2Y)) / height();
+    float px = sensitivity * (pixel1X - centerX) / width();
+    float py = sensitivity * (isLeftHanded() ? (pixel1Y - centerY) : (centerY - pixel1Y)) / height();
+    float dx = sensitivity * (pixel2X - centerX) / width();
+    float dy = sensitivity * (isLeftHanded() ? (pixel2Y - centerY) : (centerY - pixel2Y)) / height();
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0

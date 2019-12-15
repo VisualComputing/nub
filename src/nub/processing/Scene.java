@@ -114,8 +114,8 @@ import java.util.Map;
  * @see TimingTask
  */
 public class Scene extends Graph implements PConstants {
-  public static String prettyVersion = "0.3.0";
-  public static String version = "3";
+  public static String prettyVersion = "0.4.0";
+  public static String version = "4";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
@@ -358,6 +358,28 @@ public class Scene extends Graph implements PConstants {
   // OPENGL
 
   /**
+   * Same as {@code pixelToLine(mouseX(), mouseY(), origin, direction)}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #pixelToLine(int, int, Vector, Vector)
+   */
+  public void mouseToLine(Vector origin, Vector direction) {
+    pixelToLine(mouseX(), mouseY(), origin, direction);
+  }
+
+  /**
+   * Same as {@code return setCenter(mouseX(), mouseY())}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #setCenter(int, int)
+   */
+  public boolean mouseSetCenter() {
+    return setCenter(mouseX(), mouseY());
+  }
+
+  /**
    * The {@link #center()} is set to the point located under {@code pixel} on screen.
    * <p>
    * 2D windows always returns true.
@@ -365,8 +387,8 @@ public class Scene extends Graph implements PConstants {
    * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
    * {@code false} if none was found (in this case no {@link #center()} is set).
    */
-  public boolean setCenterFromPixel(int pixelX, int pixelY) {
-    Vector pup = pointUnderPixel(pixelX, pixelY);
+  public boolean setCenter(int pixelX, int pixelY) {
+    Vector pup = location(pixelX, pixelY);
     if (pup != null) {
       setCenter(pup);
       return true;
@@ -375,15 +397,26 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code return pixelDepth(mouseX(), mouseY())}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #pixelDepth(int, int)
+   */
+  public float mouseDepth() {
+    return pixelDepth(mouseX(), mouseY());
+  }
+
+  /**
    * Returns the depth (z-value) of the object under the {@code pixel}. Used by
-   * {@link #pointUnderPixel(int, int)}.
+   * {@link #location(int, int)}.
    * <p>
    * The z-value ranges in [0..1] (near and far plane respectively). In 3D note that this
    * value is not a linear interpolation between {@link #zNear()} and {@link #zFar()}:
    * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z')} where {@code z'} is
    * the distance from the point you project to the eye, along the {@link #viewDirection()}.
    *
-   * @see #pointUnderPixel(int, int)
+   * @see #location(int, int)
    */
   public float pixelDepth(int pixelX, int pixelY) {
     PGraphicsOpenGL pggl;
@@ -393,17 +426,27 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
     float[] depth = new float[1];
     PGL pgl = pggl.beginPGL();
-    pgl.readPixels(pixelX, (height() - pixelY), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
-        FloatBuffer.wrap(depth));
+    pgl.readPixels(pixelX, (height() - pixelY), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT, FloatBuffer.wrap(depth));
     pggl.endPGL();
     return depth[0];
   }
 
   /**
-   * Returns the world coordinates of the 3D point located at {@code pixel} (x,y) on
+   * Same as {@code return location(mouseX(), mouseY())}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #location(int, int)
+   */
+  public Vector mouseLocation() {
+    return location(mouseX(), mouseY());
+  }
+
+  /**
+   * Returns the world coordinates of the 3D point located at {@code (pixelX, pixelY)} on
    * screen. May be null if no object is under pixel.
    */
-  public Vector pointUnderPixel(int pixelX, int pixelY) {
+  public Vector location(int pixelX, int pixelY) {
     float depth = pixelDepth(pixelX, pixelY);
     Vector point = location(new Vector(pixelX, pixelY, depth));
     return (depth < 1.0f) ? point : null;
@@ -450,7 +493,7 @@ public class Scene extends Graph implements PConstants {
    * {@code false} if none was found (in this case no {@link #anchor()} is set).
    */
   public boolean setAnchorFromPixel(int pixelX, int pixelY) {
-    Vector pup = pointUnderPixel(pixelX, pixelY);
+    Vector pup = location(pixelX, pixelY);
     if (pup != null) {
       setAnchor(pup);
       // new animation
@@ -817,12 +860,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  protected boolean _tracks(Node node, int x, int y) {
+  protected boolean _tracks(Node node, int pixelX, int pixelY) {
     if (node == null || isEye(node))
       return false;
     if (!node.isTaggingEnabled())
       return false;
-    int index = y * width() + x;
+    int index = pixelY * width() + pixelX;
     if (_backBuffer().pixels != null)
       if ((0 <= index) && (index < _backBuffer().pixels.length))
         return _backBuffer().pixels[index] == node.colorID();

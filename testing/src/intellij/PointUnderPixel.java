@@ -74,9 +74,9 @@ public class PointUnderPixel extends PApplet {
 
   public void mouseClicked(MouseEvent event) {
     if (event.getButton() == RIGHT) {
-      pup = scene.pointUnderPixel(mouseX, mouseY);
+      pup = scene.mouseLocation();
       if (pup != null) {
-        scene.convertPixelToLine(mouseX, mouseY, orig, dir);
+        scene.mouseToLine(orig, dir);
         end = Vector.add(orig, Vector.multiply(dir, 4000.0f));
       }
     } else {
