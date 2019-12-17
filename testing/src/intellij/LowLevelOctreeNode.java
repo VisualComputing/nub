@@ -1,36 +1,22 @@
 package intellij;
 
-import nub.core.Node;
+import nub.core.Graph;
 import nub.primitives.Vector;
-import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 
-public class OctreeNode extends Node {
+public class LowLevelOctreeNode {
   Vector p1, p2;
-  int level = 4;
+  LowLevelOctreeNode child[];
+  int level;
 
-  OctreeNode(Scene scene, Vector P1, Vector P2) {
-    super(scene);
+  LowLevelOctreeNode(Vector P1, Vector P2) {
     p1 = P1;
     p2 = P2;
-  }
-
-  OctreeNode(OctreeNode node, Vector P1, Vector P2) {
-    super(node);
-    level = node.level - 1;
-    // setScaling(node.scaling() / 2);
-    p1 = P1;
-    p2 = P2;
-  }
-
-  // Calculates the base-10 logarithm of a number
-  float log2(float x) {
-    return (PApplet.log(x) / PApplet.log(2));
+    child = new LowLevelOctreeNode[8];
   }
 
   public void draw(PGraphics pg) {
-    //float level = 4 - log2(1/magnitude());
     pg.stroke(pg.color(0.3f * level * 255, 0.2f * 255, (1.0f - 0.3f * level) * 255));
     pg.strokeWeight(level + 1);
 
@@ -57,28 +43,29 @@ public class OctreeNode extends Node {
     pg.endShape();
   }
 
-  @Override
-  public void graphics(PGraphics pg) {
-    switch (graph().boxVisibility(p1, p2)) {
-      case VISIBLE:
+  public void drawIfAllChildrenAreVisible(PGraphics pg, Graph camera) {
+    Graph.Visibility vis = camera.boxVisibility(p1, p2);
+    if (vis == Graph.Visibility.VISIBLE)
+      draw(pg);
+    else if (vis == Graph.Visibility.SEMIVISIBLE)
+      if (child[0] != null)
+        for (int i = 0; i < 8; ++i)
+          child[i].drawIfAllChildrenAreVisible(pg, camera);
+      else
         draw(pg);
-        for (Node node : children())
-          node.cull();
-        break;
-      case SEMIVISIBLE:
-        for (Node node : children())
-          node.cull(false);
-        break;
-      case INVISIBLE:
-        cull();
-        break;
-    }
   }
 
-  /*
-  @Override
-  public void visit() {
-    cull(graph().boxVisibility(p1, p2) == Graph.Visibility.VISIBLE);
+  public void buildBoxHierarchy(int l) {
+    level = l;
+    Vector middle = Vector.multiply(Vector.add(p1, p2), 1 / 2.0f);
+    for (int i = 0; i < 8; ++i) {
+      // point in one of the 8 box corners
+      Vector point = new Vector(((i & 4) != 0) ? p1.x() : p2.x(), ((i & 2) != 0) ? p1.y() : p2.y(), ((i & 1) != 0) ? p1.z() : p2.z());
+      if (level > 0) {
+        child[i] = new LowLevelOctreeNode(point, middle);
+        child[i].buildBoxHierarchy(level - 1);
+      } else
+        child[i] = null;
+    }
   }
-   */
 }
