@@ -29,7 +29,9 @@ public class OctreeNode extends Node {
     return (PApplet.log(x) / PApplet.log(2));
   }
 
-  public void draw(PGraphics pg) {
+  //public void draw(PGraphics pg) {
+  @Override
+  public void graphics(PGraphics pg) {
     //float level = 4 - log2(1/magnitude());
     pg.stroke(pg.color(0.3f * level * 255, 0.2f * 255, (1.0f - 0.3f * level) * 255));
     pg.strokeWeight(level + 1);
@@ -57,11 +59,11 @@ public class OctreeNode extends Node {
     pg.endShape();
   }
 
+  // customize traversal
   @Override
-  public void graphics(PGraphics pg) {
+  public void visit() {
     switch (graph().boxVisibility(p1, p2)) {
       case VISIBLE:
-        draw(pg);
         for (Node node : children())
           node.cull();
         break;
@@ -74,11 +76,4 @@ public class OctreeNode extends Node {
         break;
     }
   }
-
-  /*
-  @Override
-  public void visit() {
-    cull(graph().boxVisibility(p1, p2) == Graph.Visibility.VISIBLE);
-  }
-   */
 }
