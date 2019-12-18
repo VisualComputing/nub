@@ -7,21 +7,18 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 
 public class OctreeNode extends Node {
-  Vector p1, p2;
   int level = 4;
 
-  OctreeNode(Scene scene, Vector P1, Vector P2) {
+  OctreeNode(Scene scene) {
     super(scene);
-    p1 = P1;
-    p2 = P2;
   }
 
-  OctreeNode(OctreeNode node, Vector P1, Vector P2) {
+  OctreeNode(OctreeNode node, Vector vector) {
     super(node);
+    scale(0.5f);
+    translate(Vector.multiply(vector, scaling() / 2));
     level = node.level - 1;
     // setScaling(node.scaling() / 2);
-    p1 = P1;
-    p2 = P2;
   }
 
   // Calculates the base-10 logarithm of a number
@@ -34,35 +31,17 @@ public class OctreeNode extends Node {
   public void graphics(PGraphics pg) {
     //float level = 4 - log2(1/magnitude());
     pg.stroke(pg.color(0.3f * level * 255, 0.2f * 255, (1.0f - 0.3f * level) * 255));
-    pg.strokeWeight(level + 1);
-
-    pg.beginShape();
-    pg.vertex(p1.x(), p1.y(), p1.z());
-    pg.vertex(p1.x(), p2.y(), p1.z());
-    pg.vertex(p2.x(), p2.y(), p1.z());
-    pg.vertex(p2.x(), p1.y(), p1.z());
-    pg.vertex(p1.x(), p1.y(), p1.z());
-    pg.vertex(p1.x(), p1.y(), p2.z());
-    pg.vertex(p1.x(), p2.y(), p2.z());
-    pg.vertex(p2.x(), p2.y(), p2.z());
-    pg.vertex(p2.x(), p1.y(), p2.z());
-    pg.vertex(p1.x(), p1.y(), p2.z());
-    pg.endShape();
-
-    pg.beginShape(PApplet.LINES);
-    pg.vertex(p1.x(), p2.y(), p1.z());
-    pg.vertex(p1.x(), p2.y(), p2.z());
-    pg.vertex(p2.x(), p2.y(), p1.z());
-    pg.vertex(p2.x(), p2.y(), p2.z());
-    pg.vertex(p2.x(), p1.y(), p1.z());
-    pg.vertex(p2.x(), p1.y(), p2.z());
-    pg.endShape();
+    pg.strokeWeight(8);
+    pg.noFill();
+    pg.box(ViewFrustumCulling.a, ViewFrustumCulling.b, ViewFrustumCulling.c);
   }
 
   // customize traversal
   @Override
   public void visit() {
-    switch (graph().boxVisibility(p1, p2)) {
+    Vector corner1 = worldLocation(new Vector(-ViewFrustumCulling.a / 2f, -ViewFrustumCulling.b / 2f, -ViewFrustumCulling.c / 2f));
+    Vector corner2 = worldLocation(new Vector(ViewFrustumCulling.a / 2f, ViewFrustumCulling.b / 2f, ViewFrustumCulling.c / 2f));
+    switch (graph().boxVisibility(corner1, corner2)) {
       case VISIBLE:
         for (Node node : children())
           node.cull();

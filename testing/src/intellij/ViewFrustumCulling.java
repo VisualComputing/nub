@@ -16,6 +16,9 @@ public class ViewFrustumCulling extends PApplet {
   String renderer = P3D;
   int w = 1200;
   int h = 800;
+  static float a = 100;
+  static float b = 70;
+  static float c = 130;
 
   public void settings() {
     size(w, h, renderer);
@@ -27,12 +30,11 @@ public class ViewFrustumCulling extends PApplet {
     scene1 = new Scene(this, canvas1);
     scene1.setType(Graph.Type.ORTHOGRAPHIC);
     scene1.enableBoundaryEquations();
-    scene1.setRadius(150);
+    //scene1.setRadius(150);
     scene1.fit(1);
 
     // declare and build the octree hierarchy
-    Vector p = new Vector(100, 70, 130);
-    root = new OctreeNode(scene1, p, Vector.multiply(p, -1.0f));
+    root = new OctreeNode(scene1);
     buildBoxHierarchy(root);
 
     /*
@@ -47,13 +49,10 @@ public class ViewFrustumCulling extends PApplet {
   }
 
   public void buildBoxHierarchy(OctreeNode parent) {
-    Vector middle = Vector.multiply(Vector.add(parent.p1, parent.p2), 1 / 2.0f);
     //if (parent.magnitude() > 1.0f/8.0f) {
-    if (parent.level > 0) {
+    if (parent.level > 1) {
       for (int i = 0; i < 8; ++i) {
-        // point in one of the 8 box corners
-        Vector point = new Vector(((i & 4) != 0) ? parent.p1.x() : parent.p2.x(), ((i & 2) != 0) ? parent.p1.y() : parent.p2.y(), ((i & 1) != 0) ? parent.p1.z() : parent.p2.z());
-        buildBoxHierarchy(new OctreeNode(parent, point, middle));
+        buildBoxHierarchy(new OctreeNode(parent, new Vector((i & 4) == 0 ? a : -a, (i & 2) == 0 ? b : -b, (i & 1) == 0 ? c : -c)));
       }
     }
   }
@@ -67,6 +66,9 @@ public class ViewFrustumCulling extends PApplet {
     background(255);
     scene1.beginDraw();
     canvas1.background(255);
+    scene1.drawAxes();
+    scene1.context().noFill();
+    scene1.context().box(a, b, c);
     scene1.render();
     scene1.endDraw();
     scene1.display();
@@ -104,9 +106,9 @@ public class ViewFrustumCulling extends PApplet {
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        focus.focus();
+        focus.focusEye();
       else
-        focus.alignTag();
+        focus.alignEye();
   }
 
   public void keyPressed() {
