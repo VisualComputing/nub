@@ -2188,11 +2188,11 @@ public class Graph {
    * This method is useful for analytical intersection in a selection method.
    */
   public void pixelToLine(int pixelX, int pixelY, Vector origin, Vector direction) {
-    // left-handed coordinate system correction
-    if (isLeftHanded())
-      pixelY = height() - pixelY;
     switch (type()) {
       case PERSPECTIVE:
+        // left-handed coordinate system correction
+        if (isLeftHanded())
+          pixelY = height() - pixelY;
         origin.set(eye().position());
         direction.set(new Vector(((2.0f * pixelX / width()) - 1.0f) * eye().magnitude() * aspectRatio(),
             ((2.0f * (height() - pixelY) / height()) - 1.0f) * eye().magnitude(),
@@ -2202,12 +2202,7 @@ public class Graph {
         break;
       case TWO_D:
       case ORTHOGRAPHIC: {
-        float wh0 = eye().magnitude() * width() / 2;
-        float wh1 = eye().magnitude() * height() / 2;
-        origin.set(new Vector((2.0f * pixelX / width() - 1.0f) * wh0,
-            -(2.0f * pixelY / height() - 1.0f) * wh1,
-            0.0f));
-        origin.set(eye().worldLocation(origin));
+        origin.set(location(new Vector(pixelX, pixelY, 0)));
         direction.set(viewDirection());
         break;
       }

@@ -21,6 +21,10 @@ Scene scene;
 Box[] cajas;
 boolean drawAxes = true, bullseye = true;
 Sphere esfera;
+Vector orig = new Vector();
+Vector dir = new Vector();
+Vector end = new Vector();
+Vector pup;
 
 void setup() {
   size(800, 800, P3D);
@@ -43,6 +47,32 @@ void draw() {
   // calls render() on all scene attached nodes
   // automatically applying all the node transformations
   scene.render();
+  drawRay();
+}
+
+void drawRay() {
+  if (pup != null) {
+    pushStyle();
+    strokeWeight(20);
+    stroke(255, 255, 0);
+    point(pup.x(), pup.y(), pup.z());
+    strokeWeight(8);
+    stroke(0, 0, 255);
+    line(orig.x(), orig.y(), orig.z(), end.x(), end.y(), end.z());
+    popStyle();
+  }
+}
+
+void mouseClicked(MouseEvent event) {
+  if (event.getButton() == RIGHT) {
+    pup = scene.mouseLocation();
+    if (pup != null) {
+      scene.mouseToLine(orig, dir);
+      end = Vector.add(orig, Vector.multiply(dir, 4000.0f));
+    }
+  } else {
+    scene.focusEye();
+  }
 }
 
 void mouseMoved() {
@@ -78,7 +108,7 @@ void keyPressed() {
           caja.setPickingThreshold(100 * caja.pickingThreshold());
         else
           caja.setPickingThreshold(caja.pickingThreshold() / 100);
-  if(key == 'c')
+  if (key == 'c')
     for (Box caja : cajas)
       caja.setPickingThreshold(-1 * caja.pickingThreshold());
   if (key == 'a')

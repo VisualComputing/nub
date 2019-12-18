@@ -113,6 +113,14 @@ public class PointUnderPixel extends PApplet {
     scene.scale(event.getCount() * 20);
   }
 
+  @Override
+  public void keyPressed() {
+    if (key == ' ')
+      scene.togglePerspective();
+    if (key == 'f')
+      scene.flip();
+  }
+
   public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.PointUnderPixel"});
   }
