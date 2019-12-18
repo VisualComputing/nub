@@ -19,6 +19,7 @@ public class ViewFrustumCulling extends PApplet {
   static float a = 100;
   static float b = 70;
   static float c = 130;
+  static final int levels = 4;
 
   public void settings() {
     size(w, h, renderer);
@@ -49,12 +50,9 @@ public class ViewFrustumCulling extends PApplet {
   }
 
   public void buildBoxHierarchy(OctreeNode parent) {
-    //if (parent.magnitude() > 1.0f/8.0f) {
-    if (parent.level > 1) {
-      for (int i = 0; i < 8; ++i) {
+    if (parent.level() < levels)
+      for (int i = 0; i < 8; ++i)
         buildBoxHierarchy(new OctreeNode(parent, new Vector((i & 4) == 0 ? a : -a, (i & 2) == 0 ? b : -b, (i & 1) == 0 ? c : -c)));
-      }
-    }
   }
 
   @Override

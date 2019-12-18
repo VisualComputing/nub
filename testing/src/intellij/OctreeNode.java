@@ -7,8 +7,6 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 
 public class OctreeNode extends Node {
-  int level = 4;
-
   OctreeNode(Scene scene) {
     super(scene);
   }
@@ -17,21 +15,18 @@ public class OctreeNode extends Node {
     super(node);
     scale(0.5f);
     translate(Vector.multiply(vector, scaling() / 2));
-    level = node.level - 1;
-    // setScaling(node.scaling() / 2);
+    System.out.println(level());
   }
 
-  // Calculates the base-10 logarithm of a number
-  float log2(float x) {
-    return (PApplet.log(x) / PApplet.log(2));
+  float level() {
+    return (PApplet.log(1 / magnitude()) / PApplet.log(2)) - 1;
   }
 
-  //public void draw(PGraphics pg) {
   @Override
   public void graphics(PGraphics pg) {
-    //float level = 4 - log2(1/magnitude());
+    float level = level();
     pg.stroke(pg.color(0.3f * level * 255, 0.2f * 255, (1.0f - 0.3f * level) * 255));
-    pg.strokeWeight(8);
+    pg.strokeWeight(PApplet.pow(2, ViewFrustumCulling.levels - 1));
     pg.noFill();
     pg.box(ViewFrustumCulling.a, ViewFrustumCulling.b, ViewFrustumCulling.c);
   }
