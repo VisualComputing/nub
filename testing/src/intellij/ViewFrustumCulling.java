@@ -9,7 +9,7 @@ import processing.event.MouseEvent;
 
 public class ViewFrustumCulling extends PApplet {
   OctreeNode root;
-  Scene scene1, scene2, focus;
+  static Scene scene1, scene2, focus;
   PGraphics canvas1, canvas2;
 
   //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
@@ -38,15 +38,13 @@ public class ViewFrustumCulling extends PApplet {
     root = new OctreeNode(scene1);
     buildBoxHierarchy(root);
 
-    /*
     canvas2 = createGraphics(w, h / 2, P3D);
     // Note that we pass the upper left corner coordinates where the scene
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(this, canvas2, 0, h / 2);
     scene2.setType(Graph.Type.ORTHOGRAPHIC);
-    scene2.setRadius(600);
+    scene2.setRadius(200);
     scene2.fit();
-     */
   }
 
   public void buildBoxHierarchy(OctreeNode parent) {
@@ -57,8 +55,6 @@ public class ViewFrustumCulling extends PApplet {
 
   @Override
   public void draw() {
-    //for(Node node : scene1.nodes())
-    //node.cull(false);
     root.cull(false);
     handleMouse();
     background(255);
@@ -71,10 +67,10 @@ public class ViewFrustumCulling extends PApplet {
     scene1.endDraw();
     scene1.display();
 
-    /*
+    scene1.shift(scene2);
     scene2.beginDraw();
     canvas2.background(255);
-    root.drawIfAllChildrenAreVisible(scene2.context(), scene1);
+    scene2.render();
     scene2.context().pushStyle();
     scene2.context().strokeWeight(2);
     scene2.context().stroke(255, 0, 255);
@@ -83,21 +79,19 @@ public class ViewFrustumCulling extends PApplet {
     scene2.context().popStyle();
     scene2.endDraw();
     scene2.display();
-     */
+    scene2.shift(scene1);
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.mouseSpin();
+      focus.mouseSpinEye();
     else if (mouseButton == RIGHT)
-      focus.mouseTranslate();
+      focus.mouseTranslateEye();
     else
-      //focus.zoom(mouseX - pmouseX);
-      focus.scale(mouseX - pmouseX);
+      focus.scaleEye(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    //focus.scale(event.getCount() * 20);
     focus.moveForward(event.getCount() * 20);
   }
 
@@ -129,8 +123,7 @@ public class ViewFrustumCulling extends PApplet {
   }
 
   void handleMouse() {
-    //focus = mouseY < h / 2 ? scene1 : scene2;
-    focus = scene1;
+    focus = mouseY < h / 2 ? scene1 : scene2;
   }
 
   public static void main(String args[]) {
