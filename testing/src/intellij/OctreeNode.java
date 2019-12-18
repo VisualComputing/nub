@@ -1,5 +1,6 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -7,6 +8,8 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 
 public class OctreeNode extends Node {
+  Graph.Visibility visibility;
+
   OctreeNode(Scene scene) {
     super(scene);
     disableTagging();
@@ -25,7 +28,8 @@ public class OctreeNode extends Node {
 
   @Override
   public void graphics(PGraphics pg) {
-    if (bypass)
+    // bypass drawing if node is semivisible but it has children
+    if (visibility == Graph.Visibility.SEMIVISIBLE && !children().isEmpty())
       return;
     float level = level();
     pg.stroke(pg.color(0.3f * level * 255, 0.2f * 255, (1.0f - 0.3f * level) * 255));
@@ -34,23 +38,19 @@ public class OctreeNode extends Node {
     pg.box(ViewFrustumCulling.a, ViewFrustumCulling.b, ViewFrustumCulling.c);
   }
 
-  boolean bypass;
-
   // customize traversal
   @Override
   public void visit() {
     if (graph() != ViewFrustumCulling.scene1)
       return;
-    bypass = false;
-    switch (graph().boxVisibility(worldLocation(new Vector(-ViewFrustumCulling.a / 2f, -ViewFrustumCulling.b / 2f, -ViewFrustumCulling.c / 2f)),
-        worldLocation(new Vector(ViewFrustumCulling.a / 2f, ViewFrustumCulling.b / 2f, ViewFrustumCulling.c / 2f)))) {
+    visibility = graph().boxVisibility(worldLocation(new Vector(-ViewFrustumCulling.a / 2f, -ViewFrustumCulling.b / 2f, -ViewFrustumCulling.c / 2f)),
+        worldLocation(new Vector(ViewFrustumCulling.a / 2f, ViewFrustumCulling.b / 2f, ViewFrustumCulling.c / 2f)));
+    switch (visibility) {
       case VISIBLE:
         for (Node node : children())
           node.cull();
         break;
       case SEMIVISIBLE:
-        if (!children().isEmpty())
-          bypass = true;
         for (Node node : children())
           node.cull(false);
         break;
