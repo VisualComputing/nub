@@ -279,7 +279,7 @@ public void visit() {
 }
 ```
 
-See the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
+see the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
 
 Observe that:
 
