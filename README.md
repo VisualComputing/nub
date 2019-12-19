@@ -3,23 +3,24 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
 
 **Table of Contents**
 
-- [Description](#description)
-- [Scene](#scene)
-- [Nodes](#nodes)
-    - [Localization](#localization)
-    - [Shapes](#shapes)
-    - [Space transformations](#space-transformations)
-- [Rendering](#rendering)
-    - [Drawing functionality](#drawing-functionality)
-- [Interactivity](#interactivity)
-  - [Eye](#eye)
-  - [Nodes](#nodes-1)
-  - [Picking](#picking)
-- [Timing](#timing)
-  - [Timing tasks](#timing-tasks)
-  - [Interpolators](#interpolators)
-- [Installation](#installation)
-- [Contributors](#contributors)
+- [nub<img src="https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square" alt="All Contributors">](#nubimg-src%22httpsimgshieldsiobadgeallcontributors-1-orangesvgstyleflat-square%22-alt%22all-contributors%22)
+  - [Description](#description)
+  - [Scene](#scene)
+  - [Nodes](#nodes)
+      - [Localization](#localization)
+      - [Shapes](#shapes)
+      - [Space transformations](#space-transformations)
+  - [Rendering](#rendering)
+      - [Drawing functionality](#drawing-functionality)
+  - [Interactivity](#interactivity)
+    - [Eye](#eye)
+    - [Nodes](#nodes-1)
+    - [Picking](#picking)
+  - [Timing](#timing)
+    - [Timing tasks](#timing-tasks)
+    - [Interpolators](#interpolators)
+  - [Installation](#installation)
+  - [Contributors](#contributors)
 
 ## Description
 
@@ -250,7 +251,37 @@ void draw() {
 }
 ```
 
-see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) example, among several others.Observe that:
+see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) example, among several others. Customize the rendering traversal algorithm by overriding the node `visit()` method, for example:
+
+```processing
+Graph.Visibility visibility;
+
+@Override
+public void visit() {
+  switch (visibility) {
+  case VISIBLE:
+    for (Node node : children())
+      node.cull();
+    break;
+  case SEMIVISIBLE:
+    if (!children().isEmpty()) {
+      // don't render the node...
+      bypass();
+      // ... but don't cull its children either
+      for (Node node : children())
+        node.cull(false);
+    }
+    break;
+  case INVISIBLE:
+    cull();
+    break;
+  }
+}
+```
+
+See the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
+
+Observe that:
 
 * The role played by a [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance during a scene hierarchical traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--) method.
 * To bypass the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm cull the node (see [cull(boolean)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#isCulled--)).
