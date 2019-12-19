@@ -22,7 +22,7 @@ Scene mainScene, secondaryScene, focus;
 int w = 1000;
 int h = 800;
 //octree
-float a = 100, b = 70, c = 130;
+float a = 220, b = 100, c = 280;
 int levels = 4;
 
 void settings() {
@@ -54,13 +54,11 @@ void buildBoxHierarchy(OctreeNode parent) {
 }
 
 void draw() {
-  root.cull(false);
   handleMouse();
   background(255);
   mainScene.beginDraw();
   mainScene.context().background(255);
-  mainScene.context().noFill();
-  mainScene.context().box(a, b, c);
+  root.cull(false);
   mainScene.render();
   mainScene.endDraw();
   mainScene.display();

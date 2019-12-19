@@ -55,14 +55,12 @@ public class ViewFrustumCulling extends PApplet {
 
   @Override
   public void draw() {
-    root.cull(false);
     handleMouse();
     background(255);
     scene1.beginDraw();
     canvas1.background(255);
     scene1.drawAxes();
-    scene1.context().noFill();
-    scene1.context().box(a, b, c);
+    root.cull(false);
     scene1.render();
     scene1.endDraw();
     scene1.display();

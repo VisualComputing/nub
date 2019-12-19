@@ -234,7 +234,7 @@ void draw() {
 }
 ```
 
-see the [MiniMap](https://github.com/VisualComputing/nub/blob/master/examples/demos/MiniMap/MiniMap.pde) example. Render 2D screen space stuff (such as gui elements and text) on top of a 3D scene with:
+see the [MiniMap](https://github.com/VisualComputing/nub/blob/master/examples/demos/MiniMap/MiniMap.pde) and the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) examples. Render 2D screen space stuff (such as gui elements and text) on top of a 3D scene with:
 
 ```processing
 PGraphics pg;

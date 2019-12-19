@@ -68,7 +68,7 @@ void mouseClicked(MouseEvent event) {
     pup = scene.mouseLocation();
     if (pup != null) {
       scene.mouseToLine(orig, dir);
-      end = Vector.add(orig, Vector.multiply(dir, 4000.0f));
+      end = Vector.add(orig, Vector.multiply(dir, 4000));
     }
   } else {
     scene.focusEye();

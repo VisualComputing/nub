@@ -28,9 +28,6 @@ public class OctreeNode extends Node {
 
   @Override
   public void graphics(PGraphics pg) {
-    // bypass drawing if node is semivisible but it has children
-    if (visibility == Graph.Visibility.SEMIVISIBLE && !children().isEmpty())
-      return;
     float level = level();
     pg.stroke(pg.color(0.3f * level * 255, 0.2f * 255, (1.0f - 0.3f * level) * 255));
     pg.strokeWeight(PApplet.pow(2, ViewFrustumCulling.levels - 1));
@@ -51,8 +48,13 @@ public class OctreeNode extends Node {
           node.cull();
         break;
       case SEMIVISIBLE:
-        for (Node node : children())
-          node.cull(false);
+        if (!children().isEmpty()) {
+          // don't render the node...
+          bypass();
+          // ... but don't cull its children either
+          for (Node node : children())
+            node.cull(false);
+        }
         break;
       case INVISIBLE:
         cull();

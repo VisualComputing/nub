@@ -2478,7 +2478,7 @@ public class Graph {
    * Use internally by {@link #updateTag(String, int, int)}.
    */
   protected void _track(String tag, Node node, int pixelX, int pixelY) {
-    if (node(tag) == null && node.isTaggingEnabled())
+    if (node(tag) == null && node.isTaggingEnabled() && (node._bypass != TimingHandler.frameCount))
       if (tracks(node, pixelX, pixelY)) {
         tag(tag, node);
         return;
@@ -2614,9 +2614,11 @@ public class Graph {
     _bbMatrixHandler.pushMatrix();
     _bbMatrixHandler.applyTransformation(node);
     if (!node.isCulled()) {
-      _drawBackBuffer(node);
-      if (!isOffscreen())
-        _trackBackBuffer(node);
+      if (node._bypass != TimingHandler.frameCount) {
+        _drawBackBuffer(node);
+        if (!isOffscreen())
+          _trackBackBuffer(node);
+      }
       for (Node child : node.children())
         _renderBackBuffer(child);
     }
@@ -2731,6 +2733,7 @@ public class Graph {
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
+   * @see Node#bypass()
    * @see Node#graphics(Object)
    * @see Node#setShape(Object)
    */
@@ -2748,10 +2751,12 @@ public class Graph {
     _matrixHandler.applyTransformation(node);
     node.visit();
     if (!node.isCulled()) {
-      _trackFrontBuffer(node);
-      if (isOffscreen())
-        _trackBackBuffer(node);
-      _drawFrontBuffer(node);
+      if (node._bypass != TimingHandler.frameCount) {
+        _trackFrontBuffer(node);
+        if (isOffscreen())
+          _trackBackBuffer(node);
+        _drawFrontBuffer(node);
+      }
       for (Node child : node.children())
         _render(child);
     }
@@ -2881,7 +2886,8 @@ public class Graph {
     matrixHandler.pushMatrix();
     matrixHandler.applyTransformation(node);
     if (!node.isCulled()) {
-      _drawOntoBuffer(context, node);
+      if (node._bypass != TimingHandler.frameCount)
+        _drawOntoBuffer(context, node);
       for (Node child : node.children())
         _render(matrixHandler, context, child);
     }
@@ -2925,6 +2931,7 @@ public class Graph {
    * @see #render()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
+   * @see Node#bypass()
    * @see Node#visit()
    * @see Node#graphics(Object)
    * @see Node#setShape(Object)

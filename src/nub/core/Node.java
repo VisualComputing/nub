@@ -147,6 +147,7 @@ public class Node {
   // Rendering
   protected Object _shape;
   protected float _highlight;
+  protected long _bypass;
 
   /**
    * Creates a detached node.
@@ -2316,12 +2317,26 @@ public class Node {
    * }
    * }
    * </pre>
+   * Bypassing rendering of the node may also be decided here, according to a bypassCondition
+   * (which should be implemented by you):
+   * <pre>
+   * {@code
+   * node = new Node(graph) {
+   *   @Override
+   *   public void visit() {
+   *     if(bypassCondition)
+   *       // this will bypass node rendering without culling its children
+   *       bypass();
+   *   }
+   * }
+   * }
+   * </pre>
    *
    * @see Graph#render()
-   * @see Graph#render()
+   * @see Graph#draw(Object, Node)
    * @see #cull(boolean)
    * @see #isCulled()
-   * @see Graph#draw(Object, Node)
+   * @see #bypass()
    */
   public void visit() {
   }
@@ -2332,6 +2347,7 @@ public class Node {
    *
    * @see #cull(boolean)
    * @see #isCulled()
+   * @see #bypass()
    */
   public void cull() {
     cull(true);
@@ -2343,6 +2359,7 @@ public class Node {
    * Only meaningful if the node is attached to a {@code graph}.
    *
    * @see #isCulled()
+   * @see #bypass()
    */
   public void cull(boolean cull) {
     if (isDetached())
@@ -2356,9 +2373,20 @@ public class Node {
    * {@code false} if the node {@link #isDetached()}.
    *
    * @see #cull(boolean)
+   * @see #bypass()
    */
   public boolean isCulled() {
     return !isDetached() && _culled;
+  }
+
+  /**
+   * Bypass rendering the node for the current frame. Set it before calling {@link Graph#render()}
+   * or any rendering algorithm. Note that the node nor its children get culled.
+   *
+   * @see #cull(boolean)
+   */
+  public void bypass() {
+    _bypass = TimingHandler.frameCount;
   }
 
   /**

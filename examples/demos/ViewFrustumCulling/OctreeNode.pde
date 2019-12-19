@@ -31,14 +31,19 @@ class OctreeNode extends Node {
     if (graph() != mainScene)
       return;
     switch (graph().boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
-                                  worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
+      worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
     case VISIBLE:
       for (Node node : children())
         node.cull();
       break;
     case SEMIVISIBLE:
-      for (Node node : children())
-        node.cull(false);
+      if (!children().isEmpty()) {
+        // don't render the node...
+        bypass();
+        // ... but don't cull its children either
+        for (Node node : children())
+          node.cull(false);
+      }
       break;
     case INVISIBLE:
       cull();
