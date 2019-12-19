@@ -151,23 +151,23 @@ void keyPressed() {
   switch (key) {
   case 'a':
     for (Boid boid : flock)
-      boid.toggle();
+      boid.task.toggle();
     break;
   case '+':
     for (Boid boid : flock)
-      boid.increasePeriod(-2);
+      boid.task.increasePeriod(-2);
     break;
   case '-':
     for (Boid boid : flock)
-      boid.increasePeriod(2);
+      boid.task.increasePeriod(2);
     break;
   case 'e':
     for (Boid boid : flock)
-      boid.enableConcurrence(true);
+      boid.task.enableConcurrence(true);
     break;
   case 'd':
     for (Boid boid : flock)
-      boid.enableConcurrence(false);
+      boid.task.enableConcurrence(false);
     break;
   case 's':
     if (scene.eye().reference() == null)
