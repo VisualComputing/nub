@@ -31,7 +31,7 @@ class OctreeNode extends Node {
     if (graph() != mainScene)
       return;
     switch (graph().boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
-      worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
+                                  worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
     case VISIBLE:
       for (Node node : children())
         node.cull();

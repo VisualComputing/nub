@@ -38,7 +38,7 @@ void setup() {
 
   // declare and build the octree hierarchy
   root = new OctreeNode(mainScene);
-  buildBoxHierarchy(root);
+  buildOctree(root);
 
   // secondary scene
   secondaryScene = new Scene(this, P3D, w, h / 2, 0, h / 2);
@@ -47,10 +47,10 @@ void setup() {
   secondaryScene.fit();
 }
 
-void buildBoxHierarchy(OctreeNode parent) {
+void buildOctree(OctreeNode parent) {
   if (parent.level() < levels)
     for (int i = 0; i < 8; ++i)
-      buildBoxHierarchy(new OctreeNode(parent, new Vector((i & 4) == 0 ? a : -a, (i & 2) == 0 ? b : -b, (i & 1) == 0 ? c : -c)));
+      buildOctree(new OctreeNode(parent, new Vector((i & 4) == 0 ? a : -a, (i & 2) == 0 ? b : -b, (i & 1) == 0 ? c : -c)));
 }
 
 void draw() {
@@ -58,11 +58,12 @@ void draw() {
   background(255);
   mainScene.beginDraw();
   mainScene.context().background(255);
+  // culling condition should be retested every frame
   root.cull(false);
   mainScene.render();
   mainScene.endDraw();
   mainScene.display();
-
+  // shift octreenodes to the secondary scene
   mainScene.shift(secondaryScene);
   secondaryScene.beginDraw();
   secondaryScene.context().background(185);
@@ -75,6 +76,7 @@ void draw() {
   secondaryScene.context().popStyle();
   secondaryScene.endDraw();
   secondaryScene.display();
+  // shift back octreenodes to the main scene
   secondaryScene.shift(mainScene);
 }
 
