@@ -250,7 +250,7 @@ void draw() {
 }
 ```
 
-see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) example, among several others. Customize the rendering traversal algorithm by overriding the node `visit()` method, for example:
+see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) example, among several others. Customize the rendering traversal algorithm by overriding the node `visit()` method, which is just called before its drawing routine, for example:
 
 ```processing
 Graph.Visibility visibility;
