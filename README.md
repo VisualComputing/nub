@@ -533,10 +533,12 @@ An [interpolator](https://visualcomputing.github.io/nub-javadocs/nub/core/Interp
 ```processing
 Scene scene;
 PShape pshape;
+Node shape;
 Interpolator interpolator;
 void setup() {
   ...
-  interpolator = new Interpolator(new Node(scene, pshape));
+  shape = new Node(scene, pshape);
+  interpolator = new Interpolator(shape);
   for (int i = 0; i < random(4, 10); i++)
     // addKeyFrame(node, elapsedTime) where elapsedTime is defined respect
     // to the previously added key-frame and expressed in seconds.
@@ -545,7 +547,7 @@ void setup() {
 }
 ```
 
-which will create a `pshape` interpolator containing [4..10] random key-frames. The interpolation is also run. The interpolator trajectory may be drawn with code like this:
+which will create a `shape` interpolator containing [4..10] random key-frames. The interpolation is also run. The interpolator trajectory may be drawn with code like this:
 
 ```processing
 ...
