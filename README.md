@@ -508,7 +508,7 @@ void keyPressed() {
 
 ### Timing tasks
 
-[Timing tasks](https://visualcomputing.github.io/nub-javadocs/nub/processing/TimingTask.html) are (non)recurrent, (non)concurrent (see [isRecurrent()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#isRecurrent--) and [isConcurrent()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#isConcurrent--) resp.) callbacks defined by overridden [execute()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#execute--). For example:
+[Timing tasks](https://visualcomputing.github.io/nub-javadocs/nub/processing/TimingTask.html) are (non)recurrent, (non)concurrent (see [isRecurrent()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#isRecurrent--) and [isConcurrent()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#isConcurrent--) resp.) callbacks defined by overriding [execute()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#execute--). For example:
 
 ```processing
 Scene scene;
@@ -533,12 +533,10 @@ An [interpolator](https://visualcomputing.github.io/nub-javadocs/nub/core/Interp
 ```processing
 Scene scene;
 PShape pshape;
-Node shape;
 Interpolator interpolator;
 void setup() {
   ...
-  shape = new Node(scene, pshape);
-  interpolator = new Interpolator(shape);
+  interpolator = new Interpolator(new Node(scene, pshape));
   for (int i = 0; i < random(4, 10); i++)
     // addKeyFrame(node, elapsedTime) where elapsedTime is defined respect
     // to the previously added key-frame and expressed in seconds.
@@ -547,7 +545,7 @@ void setup() {
 }
 ```
 
-which will create a `shape` interpolator containing [4..10] random key-frames. The interpolation is also run. The interpolator trajectory may be drawn with code like this:
+which will create a `pshape` interpolator containing [4..10] random key-frames. The interpolation is also run. The interpolator trajectory may be drawn with code like this:
 
 ```processing
 ...
