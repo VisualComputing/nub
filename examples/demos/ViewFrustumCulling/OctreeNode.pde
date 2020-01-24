@@ -12,7 +12,7 @@ class OctreeNode extends Node {
   }
 
   float level() {
-    return (log(1 / magnitude()) / log(2)) - 1;
+    return -log(magnitude()) / log(2) + 1;
   }
 
   @Override
