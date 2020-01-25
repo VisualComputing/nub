@@ -23,7 +23,7 @@ public class OctreeNode extends Node {
   }
 
   float level() {
-    return (PApplet.log(1 / magnitude()) / PApplet.log(2)) - 1;
+    return 1 - PApplet.log(magnitude()) / PApplet.log(2);
   }
 
   @Override

@@ -12,7 +12,7 @@ class OctreeNode extends Node {
   }
 
   float level() {
-    return -log(magnitude()) / log(2) + 1;
+    return 1 - log(magnitude()) / log(2);
   }
 
   @Override
@@ -24,14 +24,14 @@ class OctreeNode extends Node {
     pg.box(a, b, c);
   }
 
-  // customize traversal
+  // The visit() method is called just before the graphics(PGraphics pg) method
   @Override
   public void visit() {
     // cull only against main scene
     if (graph() != mainScene)
       return;
     switch (graph().boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
-                                  worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
+      worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
     case VISIBLE:
       for (Node node : children())
         node.cull();
