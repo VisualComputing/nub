@@ -24,14 +24,14 @@ class OctreeNode extends Node {
     pg.box(a, b, c);
   }
 
-  // The visit() method is called just before the graphics(PGraphics pg) method
+  // The visit() method is called just before the graphics(PGraphics) method
   @Override
   public void visit() {
     // cull only against main scene
     if (graph() != mainScene)
       return;
-    switch (graph().boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
-      worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
+    switch (mainScene.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
+                                    worldLocation(new Vector( a / 2,  b / 2,  c / 2)))) {
     case VISIBLE:
       for (Node node : children())
         node.cull();
