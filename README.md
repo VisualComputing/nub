@@ -112,6 +112,7 @@ void setup() {
   // retained-mode rendering PShape
   // defines n3 visual representation
   n3 = new Node(n1, createShape(BOX, 30));
+  // translate the node to make it visible
   n3.translate(50, 50, 50);
 }
 ```
