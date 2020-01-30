@@ -36,7 +36,13 @@ Readers unfamiliar with geometry transformations may first check the great [Proc
 Instantiate your on-screen scene at the [setup()](https://processing.org/reference/setup_.html):
 
 ```processing
+// import all nub classes
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
+
 Scene scene;
+
 void setup() {
   scene = new Scene(this);
 }
@@ -47,7 +53,12 @@ The [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.
 Off-screen scenes should be instantiated upon a [PGraphics](https://processing.org/reference/PGraphics.html) object:
 
 ```processing
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
+
 Scene offScreenScene;
+
 void setup() {
   offScreenScene = new Scene(this, createGraphics(500, 500, P3D));
   // or use the equivalent but simpler version:
@@ -74,9 +85,15 @@ World
 To setup the scene hierarchy of nodes use code such as the following:
 
 ```processing
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
+
 Scene scene;
 Node n1, n2, n3;
+
 void setup() {
+  size(720, 480, P3D);
   // the scene object creates a default eye node
   scene = new Scene(this);
   // To create a node as a leading one (those whose parent is the world,
@@ -94,7 +111,8 @@ void setup() {
   };
   // retained-mode rendering PShape
   // defines n3 visual representation
-  n3 = new Node(n1, createShape(BOX, 60));
+  n3 = new Node(n1, createShape(BOX, 30));
+  n3.translate(50, 50, 50);
 }
 ```
 
