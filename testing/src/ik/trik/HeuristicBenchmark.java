@@ -5,7 +5,8 @@ import nub.core.Graph;
 import nub.core.Interpolator;
 import nub.core.Node;
 import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.oldtrik.TRIK;
+import nub.ik.solver.trik.heuristic.FinalHeuristic;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -28,17 +29,18 @@ public class HeuristicBenchmark extends PApplet {
     float boneLength = 50; //Define length of segments (bones)
 
     //Benchmark Parameters
-    Util.ConstraintType constraintType = Util.ConstraintType.MIX; //Choose what kind of constraints apply to chain
+    Util.ConstraintType constraintType = Util.ConstraintType.CONE_ELLIPSE; //Choose what kind of constraints apply to chain
     Random random = new Random();
     ArrayList<Solver> solvers; //Will store Solvers
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
     int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
 
-    Util.SolverType solversType [] = {Util.SolverType.FORWARD_TRIK_AND_TWIST, Util.SolverType.LOOK_AHEAD_FORWARD_AND_TWIST,  Util.SolverType.BACKWARD_TRIK_AND_TWIST, Util.SolverType.CCD_TRIK_AND_TWIST, Util.SolverType.CCD,
-            Util.SolverType.TRIK_V1, Util.SolverType.FABRIK, Util.SolverType.FORWARD_TRIANGULATION_TRIK_AND_TWIST, Util.SolverType.BACK_AND_FORTH_TRIK}; //Place Here Solvers that you want to compare
+    //Util.SolverType solversType [] = {Util.SolverType.CCD_BACK_AND_FORTH, Util.SolverType.CCDT_BACK_AND_FORTH, Util.SolverType.CCD_TRIK_AND_TWIST, Util.SolverType.CCD,
+            //Util.SolverType.TRIK_V3, Util.SolverType.FABRIK, Util.SolverType.BACK_AND_FORTH_TRIK, Util.SolverType.BACK_AND_FORTH_TRIK_T}; //Place Here Solvers that you want to compare*/
 
+    //Util.SolverType solversType [] = {Util.SolverType.CCD, Util.SolverType.CCD_TRIK, Util.SolverType.FORWARD_TRIANGULATION_TRIK, Util.SolverType.FINAL_TRIK, Util.SolverType.EXPRESSIVE_FINAL_TRIK, Util.SolverType.FABRIK};
 
-    //Util.SolverType solversType [] = {Util.SolverType.BACKWARD_TRIANGULATION_TRIK};
+    Util.SolverType solversType [] = {Util.SolverType.FINAL_TRIK};
     ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Node> idleSkeleton;
 
@@ -92,9 +94,16 @@ public class HeuristicBenchmark extends PApplet {
             Solver solver = Util.createSolver(solversType[i], structures.get(i));
             solvers.add(solver);
             //6. Define solver parameters
-            //solvers.get(i).setMaxError(0.001f);
+            solvers.get(i).setMaxError(0.00f);
             solvers.get(i).setTimesPerFrame(1);
-            solvers.get(i).setMaxIterations(40);
+            solvers.get(i).setMaxIterations(50);
+
+            if(solversType[i] == Util.SolverType.CCD ){
+                solvers.get(i).setMaxError(-10f);
+                solvers.get(i).setMinDistance(-10f);
+                solvers.get(i).setTimesPerFrame(50);
+                solvers.get(i).setMaxIterations(50);
+            }
             //solvers.get(i).setMinDistance(0.001f);
             //7. Set targets
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
@@ -128,6 +137,7 @@ public class HeuristicBenchmark extends PApplet {
         interpolator.setTask(task);
     }
 
+    boolean showPath = true;
     public void draw() {
         background(0);
         if(scene.is3D()) lights();
@@ -141,15 +151,27 @@ public class HeuristicBenchmark extends PApplet {
         scene.endHUD();
         fill(255);
         stroke(255);
-        scene.drawCatmullRom(interpolator, 1);
+        if(showPath)scene.drawCatmullRom(interpolator, 1);
+
+        for(Solver s : solvers){
+            if(s instanceof SimpleTRIK){
+                if(((SimpleTRIK) s).mainHeuristic() instanceof FinalHeuristic){
+                    FinalHeuristic hig = (FinalHeuristic) ((SimpleTRIK) s).mainHeuristic();
+                    hig.drawVectors(scene);
+                }
+            }
+        }
+
     }
 
     public Node generateRandomReachablePosition(List<? extends Node> chain, boolean is3D){
         for(int i = 0; i < chain.size() - 1; i++){
             if(is3D) {
-                chain.get(i).rotate(new Quaternion(new Vector(0,0,1), random.nextFloat() * 2 * PI));
-                chain.get(i).rotate(new Quaternion(new Vector(0,1,0), random.nextFloat() * 2* PI));
-                chain.get(i).rotate(new Quaternion(new Vector(1,0,0), random.nextFloat() * 2 * PI));
+                if(random.nextFloat() > 0.5f) {
+                    chain.get(i).rotate(new Quaternion(new Vector(0, 0, 1), random.nextFloat() * 2 * PI - PI));
+                    chain.get(i).rotate(new Quaternion(new Vector(0, 1, 0), random.nextFloat() * 2 * PI - PI));
+                    chain.get(i).rotate(new Quaternion(new Vector(1, 0, 0), random.nextFloat() * 2 * PI - PI));
+                }
             }
             else
                 chain.get(i).rotate(new Quaternion(new Vector(0,0,1), (float)(random.nextFloat()*PI)));
@@ -158,19 +180,37 @@ public class HeuristicBenchmark extends PApplet {
     }
 
     public void generatePath(List<? extends Node> structure){
+        randomSeed(0);
+
         interpolator.clear(); // reset the interpolator
         interpolator.setNode(targets.get(0));
         //Generate a random near pose
         Node node = structure.get(structure.size() - 1);
-
-        for(float t = 0; t < 10 ; t += 0.2f) {
+        float maxDist = 0, minDist = Float.MAX_VALUE, meanDist = 0;
+        Vector prev = node.position();
+        int n = 0;
+        for(float t = 0; t < 10.001 ; t += 0.05f) {
             for (int i = 0; i < structure.size(); i++) {
                 float angle = TWO_PI * noise(1000 * i + t) - PI;
                 Vector dir = new Vector(noise(10000 * i + t), noise(20000 * i + t), noise(30000 * i + t));
-                structure.get(i).rotate(dir, angle);
+                structure.get(i).setRotation(new Quaternion(dir, angle));
             }
             interpolator.addKeyFrame(new Node(node.position(), node.orientation(), 1.f));
+            Vector curr = node.position();
+            if(t != 0) {
+                if (Vector.distance(prev, curr) > maxDist) {
+                    maxDist = Vector.distance(prev, curr);
+                }
+                if (Vector.distance(prev, curr) < minDist) {
+                    minDist = Vector.distance(prev, curr);
+                }
+                meanDist += Vector.distance(prev, curr);
+                n++;
+            }
+            prev = curr;
         }
+        //interpolator.setSpeed(10);
+        //System.out.println("max dist " + maxDist + "min dist " + minDist + " mean Dist " + meanDist/n + " n : " + n );
     }
 
 
@@ -200,6 +240,20 @@ public class HeuristicBenchmark extends PApplet {
             for(Solver s: solvers) s.solve();
         }
 
+        if(key == 'm' || key == 'M'){
+            for(Solver s: solvers){
+                if(s instanceof SimpleTRIK)
+                    ((SimpleTRIK) s).context().setSingleStep(!((SimpleTRIK) s).context().singleStep());
+            }
+        }
+
+        if(key == 'n' || key == 'N'){
+            for(Solver s: solvers){
+                if(s instanceof SimpleTRIK)
+                    ((SimpleTRIK) s).enableSmooth(!((SimpleTRIK) s).enableSmooth());
+            }
+        }
+
         if(key == 'p' || key == 'P'){
             generatePath(idleSkeleton);
         }
@@ -207,6 +261,15 @@ public class HeuristicBenchmark extends PApplet {
         if(key == 'k' || key == 'K'){
             interpolator.enableRecurrence();
             interpolator.run();
+        }
+        if(key == '1'){
+            showPath = !showPath;
+        }
+        if(key == '2'){
+            interpolator.setSpeed(interpolator.speed() * 1.2f);
+        }
+        if(key == '3'){
+            interpolator.setSpeed(interpolator.speed() * 0.8f);
         }
     }
 

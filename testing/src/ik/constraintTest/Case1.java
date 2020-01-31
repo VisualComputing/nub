@@ -9,6 +9,7 @@ import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.geometric.oldtrik.TRIK;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -90,14 +91,18 @@ public class Case1 extends PApplet {
         solvers.add(ccdSolver);
         //BioIK
         solvers.add(new BioIk(structures.get(i++), 10, 4));
-        //Standard FABRIK
-        ChainSolver chainSolver;
-        chainSolver = new ChainSolver(structures.get(i++));
-        chainSolver.setKeepDirection(false);
-        chainSolver.setFixTwisting(false);
-        solvers.add(chainSolver);
+        //CCD TRIK
+        SimpleTRIK simpleTRIK = new SimpleTRIK(structures.get(i++), SimpleTRIK.HeuristicMode.CCD);
+        solvers.add(simpleTRIK);
+
+        //ChainSolver chainSolver;
+        //chainSolver = new ChainSolver(structures.get(i++));
+        //chainSolver.setKeepDirection(false);
+        //chainSolver.setFixTwisting(false);
+
+        //solvers.add(chainSolver);
         //FABRIK Keeping directions (H1)
-        chainSolver = new ChainSolver(structures.get(i++));
+        ChainSolver chainSolver = new ChainSolver(structures.get(i++));
         chainSolver.setFixTwisting(true);
         chainSolver.setKeepDirection(false);
         solvers.add(chainSolver);

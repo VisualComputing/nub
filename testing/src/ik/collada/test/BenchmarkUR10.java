@@ -3,6 +3,7 @@ package ik.collada.test;
 import ik.basic.Util;
 import nub.ik.loader.collada.URDFLoader;
 import nub.ik.solver.geometric.oldtrik.TRIK;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.ik.visual.Joint;
 import ik.interactive.Target;
 import nub.core.Graph;
@@ -106,7 +107,8 @@ public class BenchmarkUR10 extends PApplet {
                     break;
                 }
                 case "BIOIK":{
-                    solver = new BioIk(branch, 10, 4);
+                    //solver = new BioIk(branch, 10, 4);
+                    solver = new SimpleTRIK(branch, SimpleTRIK.HeuristicMode.CCD);
                     break;
                 }
                 case "CCD":{

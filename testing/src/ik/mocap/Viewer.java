@@ -8,6 +8,7 @@ import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.oldtrik.TRIK;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.core.constraint.BallAndSocket;
@@ -28,7 +29,7 @@ import java.util.Map;
  */
 public class Viewer extends PApplet{
     Scene scene;
-    String path = "/testing/data/bvh/80_52.bvh";
+    String path = "/testing/data/bvh/mocap.bvh";
 
     BVHLoader parser;
     HashMap<String, Node> originalLimbs = new HashMap<String, Node>();
@@ -54,6 +55,7 @@ public class Viewer extends PApplet{
     }
 
     public void setup() {
+        Joint.axes = true;
         //TRIK._debug = true;
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
@@ -132,7 +134,7 @@ public class Viewer extends PApplet{
         chain_solver.setTarget(targets.get("RIGHTHAND"));
         ccd_solver.setTarget(targets.get("RIGHTHAND"));
         //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));*/
-        /*
+
         String[] target_names = {"RIGHTFOOT", "RIGHTHAND", "LEFTHAND", "LEFTFOOT", "HEAD"};
         String[] head_names = {"RIGHTUPLEG", "RIGHTUPARM", "LEFTUPARM", "LEFTUPLEG", "NECK"};
 
@@ -202,15 +204,16 @@ public class Viewer extends PApplet{
 
             //BioIk chain = new BioIk(fr, 10, 4);
             //ChainSolver chain = new ChainSolver((ArrayList) fr);
-            TRIK chain = new TRIK((ArrayList) fr);
-            chain.setLookAhead(3);
-            chain.enableWeight(true);
+            SimpleTRIK chain = new SimpleTRIK((ArrayList) fr, SimpleTRIK.HeuristicMode.CCD);
+            //SimpleTRIK chain = new TRIK((ArrayList) fr);
+            //chain.setLookAhead(3);
+            //chain.enableWeight(true);
             //chain.setKeepDirection(true);
             //chain.setFixTwisting(true);
 
             //chain.explore(true);
-            chain.setTimesPerFrame(10);
-            chain.setMaxIterations(10);
+            chain.setTimesPerFrame(2);
+            chain.setMaxIterations(2);
             //chain.setMaxError(0.1f);
             //chain.setMinDistance(0.1f);
             chain.setTarget(limbs.get(target_names[i]), targets.get(target_names[i]));
@@ -224,7 +227,7 @@ public class Viewer extends PApplet{
             };
             task.run(40);
             chainsolvers.add(chain);
-        }*/
+        }
         exploration = new float[chainsolvers.size()];
 
         //Solver solver = scene.registerTreeSolver(rootIK);
@@ -234,8 +237,8 @@ public class Viewer extends PApplet{
         //scene.addIKTarget(limbs.get("LEFTFOOT"), targets.get("LEFTFOOT"));
         //scene.addIKTarget(limbs.get("RIGHTFOOT"), targets.get("RIGHTFOOT"));
         //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
-        rootIK.cull(true);
-        //root.cull(true);
+        //rootIK.cull(true);
+        root.cull(true);
     }
 
     public Node createTarget(float radius){
@@ -359,7 +362,7 @@ public class Viewer extends PApplet{
             if(targets.containsKey(entry.getKey())) {
                 targets.get(entry.getKey()).setPosition(entry.getValue().position());
             }
-       }
+        }
     }
 
     public void keyPressed(){

@@ -1,5 +1,6 @@
 package ik.basic;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
@@ -32,12 +33,13 @@ import java.util.Random;
 import static processing.core.PApplet.*;
 
 public class Util {
-    public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, CONE_CIRCLE, MIX }
+    public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, CONE_CIRCLE, MIX, HINGE_ALIGNED }
     public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, CCD_V2, GA, HAEA, MySolver, TRIK_V1, TRIK_V2, TRIK_V3, TRIK_V4,
     FORWARD_TRIK, BACKWARD_TRIK, CCD_TRIK, FORWARD_TRIK_AND_TWIST, BACKWARD_TRIK_AND_TWIST, CCD_TRIK_AND_TWIST, FORWARD_TRIANGULATION_TRIK ,FORWARD_TRIANGULATION_TRIK_AND_TWIST,
-    BACKWARD_TRIANGULATION_TRIK ,BACKWARD_TRIANGULATION_TRIK_AND_TWIST, BACK_AND_FORTH_TRIK, LOOK_AHEAD_FORWARD, LOOK_AHEAD_FORWARD_AND_TWIST}
+    BACKWARD_TRIANGULATION_TRIK ,BACKWARD_TRIANGULATION_TRIK_AND_TWIST, BACK_AND_FORTH_TRIK, LOOK_AHEAD_FORWARD, LOOK_AHEAD_FORWARD_AND_TWIST,
+    CCDT_BACK_AND_FORTH, CCD_BACK_AND_FORTH, BACK_AND_FORTH_TRIK_T, FINAL_TRIK, EXPRESSIVE_FINAL_TRIK}
 
-    public static Solver createSolver(SolverType type, ArrayList<Node> structure){
+    public static Solver createSolver(SolverType type, List<Node> structure){
         switch (type){
             case HC: return new HillClimbingSolver(5, radians(5), structure);
             case HGSA: return new BioIk(structure,10, 4 );
@@ -105,13 +107,13 @@ public class Util {
 
             case FORWARD_TRIK:{
                 SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.FORWARD);
-                solver.enableTwist(false);
+                //solver.enableTwist(false);
                 return solver;
             }
 
             case BACKWARD_TRIK:{
                 SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.BACKWARD);
-                solver.enableTwist(false);
+                //solver.enableTwist(false);
                 return solver;
 
             }
@@ -119,6 +121,19 @@ public class Util {
             case CCD_TRIK:{
                 SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.CCD);
                 solver.enableTwist(false);
+                return solver;
+            }
+
+            case CCDT_BACK_AND_FORTH:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.CCDT_BACK_AND_FORTH);
+                //solver.enableTwist(false);
+                return solver;
+            }
+
+            case CCD_BACK_AND_FORTH:{
+
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.CCD_BACK_AND_FORTH);
+                //solver.enableTwist(false);
                 return solver;
             }
 
@@ -140,7 +155,7 @@ public class Util {
 
             case FORWARD_TRIANGULATION_TRIK:{
                 SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.FORWARD_TRIANGULATION);
-                solver.enableTwist(false);
+                //solver.enableTwist(false);
                 return solver;
             }
 
@@ -151,7 +166,7 @@ public class Util {
 
             case BACKWARD_TRIANGULATION_TRIK:{
                 SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.BACKWARD_TRIANGULATION);
-                solver.enableTwist(false);
+                //solver.enableTwist(false);
                 return solver;
             }
 
@@ -162,13 +177,18 @@ public class Util {
 
             case BACK_AND_FORTH_TRIK:{
                 SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.BACK_AND_FORTH);
-                solver.enableTwist(false);
+                //solver.enableTwist(false);
                 return solver;
             }
 
+            case BACK_AND_FORTH_TRIK_T:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.BACK_AND_FORTH_T);
+                //solver.enableTwist(false);
+                return solver;
+            }
             case LOOK_AHEAD_FORWARD:{
                 SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.LOOK_AHEAD_FORWARD);
-                solver.enableTwist(false);
+                //solver.enableTwist(false);
                 return solver;
             }
 
@@ -177,6 +197,15 @@ public class Util {
                 return solver;
             }
 
+            case FINAL_TRIK:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.FINAL);
+                return solver;
+            }
+
+            case EXPRESSIVE_FINAL_TRIK:{
+                SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL);
+                return solver;
+            }
             default: return null;
         }
     }
@@ -268,6 +297,71 @@ public class Util {
         return (ArrayList) scene.branch(chainRoot);
     }
 
+    public static List<Node> generateChain(Graph graph, int numJoints, float boneLength, int randRotation, int randLength) {
+        List<Node> chain = new ArrayList<Node>();
+        Random r1 = randRotation != -1 ? new Random(randRotation) : null;
+        Random r2 = randLength != -1 ? new Random(randLength) : null;
+        Node prevJoint = null;
+        for (int i = 0; i < numJoints; i++) {
+            Node joint = new Node(graph);
+            if (i == 0)
+            if (prevJoint != null) joint.setReference(prevJoint);
+            float x = 0;
+            float y = 1;
+            float z = 0;
+
+            if(r1 != null) {
+                x = 2 * r1.nextFloat() - 1;
+                z = r1.nextFloat();
+                y = 2 * r1.nextFloat() - 1;
+            }
+
+            Vector translate = new Vector(x,y,z);
+            translate.normalize();
+            if(r2 != null)
+                translate.multiply(boneLength * (1 - 0.4f*r2.nextFloat()));
+            else
+                translate.multiply(boneLength);
+            joint.setTranslation(translate);
+            prevJoint = joint;
+            chain.add(joint);
+        }
+        return chain;
+    }
+
+
+    public static List<Node> generateChain(int numJoints, float boneLength, int randRotation, int randLength) {
+        List<Node> chain = new ArrayList<Node>();
+        Random r1 = randRotation != -1 ? new Random(randRotation) : null;
+        Random r2 = randLength != -1 ? new Random(randLength) : null;
+        Node prevJoint = null;
+        for (int i = 0; i < numJoints; i++) {
+            Node joint = new Node();
+            if (prevJoint != null) joint.setReference(prevJoint);
+            float x = 0;
+            float y = 1;
+            float z = 0;
+
+            if(r1 != null) {
+                x = 2 * r1.nextFloat() - 1;
+                z = r1.nextFloat();
+                y = 2 * r1.nextFloat() - 1;
+            }
+
+            Vector translate = new Vector(x,y,z);
+            translate.normalize();
+            if(r2 != null)
+                translate.multiply(boneLength * (1 - 0.4f*r2.nextFloat()));
+            else
+                translate.multiply(boneLength);
+            joint.setTranslation(translate);
+            prevJoint = joint;
+            chain.add(joint);
+        }
+        return chain;
+    }
+
+
     public static void generateConstraints(List<? extends Node> structure, ConstraintType type, int seed, boolean is3D){
         Random random = new Random(seed);
         int numJoints = structure.size();
@@ -278,7 +372,7 @@ public class Util {
             Constraint constraint = null;
             ConstraintType current = type;
             if(type == ConstraintType.MIX){
-                int r = random.nextInt(ConstraintType.values().length - 2) + 1;
+                int r = random.nextInt(ConstraintType.values().length - 1) + 1;
                 r = is3D ? r : r % 2;
                 current = ConstraintType.values()[r];
             }
@@ -292,6 +386,8 @@ public class Util {
                     float up = radians(random.nextFloat()*40 + 10);
                     float left = radians(random.nextFloat()*40 + 10);
                     float right = radians(random.nextFloat()*40 + 10);
+
+                    //down = left = right = up = radians(40);
                     constraint = new BallAndSocket(down, up, left, right);
                     Quaternion rest = Quaternion.compose(structure.get(i).rotation().get(), offset);
                     ((BallAndSocket) constraint).setRestRotation(rest, new Vector(0, 1, 0), twist);
@@ -327,10 +423,24 @@ public class Util {
                     if(Vector.squaredNorm(vector) == 0) {
                         constraint = null;
                     }
-                    constraint = new Hinge(radians(random.nextFloat()*160 + 10),
-                            radians(radians(random.nextFloat()*160 + 10)),
-                            structure.get(i).rotation().get(), structure.get(i + 1).translation(), vector);
+                    float min = random.nextFloat()*120 + 10;
+                    float max = random.nextFloat()*120 + 10;
+
+                    constraint = new Hinge(radians(min),
+                            radians(max),
+                            structure.get(i).rotation().get(), new Vector(0,1,0), vector);
+                    break;
                 }
+                case HINGE_ALIGNED:{
+                    float min = random.nextFloat()*120 + 10;
+                    float max = random.nextFloat()*120 + 10;
+                    Vector vector = new Vector(0,0,1);
+
+                    constraint = new Hinge(radians(min),
+                            radians(max),
+                            structure.get(i).rotation().get(), new Vector(0,1,0), vector);
+                }
+                break;
             }
             structure.get(i).setConstraint(constraint);
         }
@@ -343,52 +453,53 @@ public class Util {
         pg.textSize(15);
         Vector pos = scene.screenLocation(basePosition);
         if(solver instanceof BioIk){
-            pg.text("HGSA \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("HGSA \n Algorithm" + "\n Error: " + String.format( "%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof ChainSolver){
             ChainSolver s = (ChainSolver) solver;
             String heuristics = "";
             if(s.keepDirection()) heuristics += "\n Keep directions";
             if(s.fixTwisting()) heuristics += "\n Fix Twisting";
-            pg.text("FABRIK" + heuristics + "\n Error: " + String.format( "%.3f", solver.error()) + "\n Exploration : " + s.explorationTimes() + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            heuristics += "\nAccum error : "  + solver.accumulatedError();
+            pg.text("FABRIK" + heuristics + "\n Error: " + String.format( "%.7f", solver.error()) + "\n Exploration : " + s.explorationTimes() + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof CCDSolver){
-            pg.text("CCD" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("CCD" + "\n Error: " + String.format( "%.7f", solver.error()) + "\nAccum error : "  + solver.accumulatedError() + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof TransposeSolver){
-            pg.text("Transpose" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("Transpose" + "\n Error: " + String.format( "%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof SDLSSolver){
-            pg.text("SDLS" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("SDLS" + "\n Error: " + String.format( "%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof PseudoInverseSolver){
-            pg.text("PseudoInv" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("PseudoInv" + "\n Error: " + String.format( "%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof HillClimbingSolver){
             HillClimbingSolver s = (HillClimbingSolver) solver;
             if(s.powerLaw()){
-                pg.text("Power Law  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Alpha: " + String.format( "%.2f", s.alpha()) + "\n Error: " + String.format( "%.3f", s.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                pg.text("Power Law  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Alpha: " + String.format( "%.2f", s.alpha()) + "\n Error: " + String.format( "%.7f", s.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             } else{
-                pg.text("Gaussian  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Error: " + String.format( "%.3f", s.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                pg.text("Gaussian  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Error: " + String.format( "%.7f", s.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             }
         }
         if(solver instanceof GASolver){
-            pg.text("Genetic \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("Genetic \n Algorithm" + "\n Error: " + String.format( "%.7f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof HAEASolver){
-            pg.text("HAEA \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("HAEA \n Algorithm" + "\n Error: " + String.format( "%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof MySolver){
-            pg.text("MySolver" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("MySolver" + "\n Error: " + String.format( "%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof TRIK){
             TRIK  trik = (TRIK) solver;
-            String error = "\n Error (pos): " + String.format( "%.3f", trik.positionError());
+            String error = "\n Error (pos): " + String.format( "%.7f", trik.positionError());
             if(trik.direction()){
-                error += "\n Error (or): " + String.format( "%.3f", trik.orientationError());
+                error += "\n Error (or): " + String.format( "%.7f", trik.orientationError());
             }
-            error += "\n Avg actions : " + String.format( "%.3f", trik._average_actions);
-
+            error += "\n Avg actions : " + String.format( "%.7f", trik._average_actions);
+            error += "\nAccum error : "  + solver.accumulatedError();
             pg.text("TRIK" +  error  + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
 
@@ -409,6 +520,15 @@ public class Util {
                     heuristics += "CCD TRIK";
                     break;
                 }
+                case CCD_BACK_AND_FORTH:{
+                    heuristics += "CCD BACK AND FORTH";
+                    break;
+                }
+
+                case CCDT_BACK_AND_FORTH:{
+                    heuristics += "CCDT BACK AND FORTH";
+                    break;
+                }
                 case FORWARD_TRIANGULATION:{
                     heuristics += "TRIANGULATION TRIK";
                     break;
@@ -418,13 +538,31 @@ public class Util {
                     heuristics += "BKW TRIANGULATION TRIK";
                     break;
                 }
+
+                case BACK_AND_FORTH:{
+                    heuristics += "BACK AND FORTH";
+                    break;
+                }
+                case BACK_AND_FORTH_T:{
+                    heuristics += "BACK AND FORTH T";
+                    break;
+                }
+                case FINAL:{
+                    heuristics += "Final";
+                    break;
+                }
+
+                case EXPRESSIVE_FINAL:{
+                    heuristics += "Expressive final";
+                    break;
+                }
             }
             if(trik.enableTwist()) heuristics += "\nWITH TWIST";
-
-            String error = "\n Error (pos): " + String.format( "%.3f", trik.positionError());
+            String error = "\n Error (pos): " + String.format( "%.7f", trik.positionError());
             if(trik.direction()){
-                error += "\n Error (or): " + String.format( "%.3f", trik.orientationError());
+                error += "\n Error (or): " + String.format( "%.7f", trik.orientationError());
             }
+            error += "\nAccum error : "  + solver.accumulatedError();
            pg.text(heuristics +  error  + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
 
