@@ -11,10 +11,14 @@ import nub.primitives.Vector;
 import java.util.List;
 
 public class SimpleTRIK extends Solver {
+
     public enum HeuristicMode{
-        CCD, FORWARD, LOOK_AHEAD_FORWARD, BACKWARD, FORWARD_TRIANGULATION, BACKWARD_TRIANGULATION, FORWARD_CCD_DOUBLE_PASS, BACKWARD_CCD_DOUBLE_PASS, BACK_AND_FORTH;
+        CCD, FORWARD, LOOK_AHEAD_FORWARD, BACKWARD, FORWARD_TRIANGULATION, BACKWARD_TRIANGULATION, FORWARD_CCD_DOUBLE_PASS, BACK_AND_FORTH,
+        CCD_BACK_AND_FORTH, CCDT_BACK_AND_FORTH, BACK_AND_FORTH_T, FINAL, EXPRESSIVE_FINAL;
+        ;
     }
 
+    protected boolean _disable_order_swapping = true; //TODO : REMOVE!
     protected boolean _topToBottom;
     protected Context _context;
     protected HeuristicMode _heuristicMode;
@@ -32,20 +36,51 @@ public class SimpleTRIK extends Solver {
 
     public SimpleTRIK(List<? extends Node> chain, Node target, HeuristicMode mode) {
         super();
-        this._context = new Context(chain, target, false);
+        this._context = new Context(chain, target, true);
+        _context.setSolver(this);
         _setHeuristicMode(mode);
         this._twistHeuristic = new TwistHeuristic(_context);
-        //enableSmooth(true);
-        _context.setSingleStep(false);
+        _enableTwist = false;
+        enableSmooth(false);
+        _context.setSingleStep(true);
     }
 
     protected void _setHeuristicMode(HeuristicMode mode){
         switch (mode){
+            case FINAL:{
+                _mainHeuristic = new FinalHeuristic(_context);
+                ((FinalHeuristic)_mainHeuristic).setTopToBottom(true);
+                ((FinalHeuristic)_mainHeuristic).enableDelegation(false);
+                _secondaryHeuristic = _mainHeuristic;
+                _topToBottom = true;
+                break;
+            }
+            case EXPRESSIVE_FINAL:{
+                _mainHeuristic = new FinalHeuristic(_context);
+                ((FinalHeuristic)_mainHeuristic).setTopToBottom(true);
+                ((FinalHeuristic)_mainHeuristic).enableDelegation(true);
+                _secondaryHeuristic = _mainHeuristic;
+                _topToBottom = true;
+                break;
+            }
+
             case CCD:{
                 _mainHeuristic = new CCDHeuristic(_context);
                 _topToBottom = false;
                 break;
             }
+
+            case CCD_BACK_AND_FORTH:{
+                _mainHeuristic = new BackAndForthCCDHeuristic(_context, false, false);
+                _topToBottom = false;
+                break;
+            }
+            case CCDT_BACK_AND_FORTH:{
+                _mainHeuristic = new BackAndForthCCDHeuristic(_context, true, true);
+                _topToBottom = true;
+                break;
+            }
+
             case LOOK_AHEAD_FORWARD:{
                 _mainHeuristic = new LookAheadHeuristic(new ForwardHeuristic(_context));
                 _topToBottom = true;
@@ -74,11 +109,23 @@ public class SimpleTRIK extends Solver {
             }
             case BACK_AND_FORTH:{
                 _topToBottom = true;
-                _mainHeuristic = new ForwardHeuristic(_context);
-                _secondaryHeuristic = new BackwardHeuristic(_context);
+                //_mainHeuristic = new ForwardHeuristic(_context);
+                //_secondaryHeuristic = new BackwardHeuristic(_context);
+                _mainHeuristic = new BackAndForthCCDHeuristic(_context, false, true);
+                _secondaryHeuristic = new BackAndForthCCDHeuristic(_context, false, false);
+            }
+            case BACK_AND_FORTH_T:{
+                _topToBottom = true;
+                //_mainHeuristic = new ForwardHeuristic(_context);
+                //_secondaryHeuristic = new BackwardHeuristic(_context);
+                _mainHeuristic = new BackAndForthCCDHeuristic(_context, true, true);
+                _secondaryHeuristic = new BackAndForthCCDHeuristic(_context, true, false);
             }
         }
         _heuristicMode = mode;
+    }
+    public Context context(){
+        return _context;
     }
 
     public boolean enableTwist(){
@@ -95,6 +142,10 @@ public class SimpleTRIK extends Solver {
 
     public HeuristicMode mode(){
         return _heuristicMode;
+    }
+
+    public boolean enableSmooth(){
+        return mainHeuristic().enableSmooth();
     }
 
     public void enableSmooth(boolean smooth){
@@ -118,6 +169,17 @@ public class SimpleTRIK extends Solver {
             _current = _error(_context.usableChainInformation().get(_context.last()), _context.worldTarget(), _context.weightRatio(), 1);
             _update();
             _stepCounter = -1;
+
+            if(!_disable_order_swapping && (_heuristicMode == HeuristicMode.BACK_AND_FORTH || _heuristicMode == HeuristicMode.FINAL || _heuristicMode == HeuristicMode.EXPRESSIVE_FINAL)){
+                _topToBottom = !_topToBottom;
+                if(_mainHeuristic instanceof FinalHeuristic){
+                    ((FinalHeuristic)_mainHeuristic).setTopToBottom(_topToBottom);
+                }
+                Heuristic aux = _mainHeuristic;
+                _mainHeuristic = _secondaryHeuristic;
+                _secondaryHeuristic = aux;
+            }
+
         }
         _stepCounter++;
         return  false;
@@ -144,8 +206,12 @@ public class SimpleTRIK extends Solver {
             }
         }
 
-        if(_heuristicMode == HeuristicMode.BACK_AND_FORTH){
+        if(!_disable_order_swapping && (_heuristicMode == HeuristicMode.BACK_AND_FORTH || _heuristicMode == HeuristicMode.FINAL || _heuristicMode == HeuristicMode.EXPRESSIVE_FINAL)){
             _topToBottom = !_topToBottom;
+            if(_mainHeuristic instanceof FinalHeuristic){
+                //_topToBottom = !_topToBottom;
+                ((FinalHeuristic)_mainHeuristic).setTopToBottom(_topToBottom);
+            }
             Heuristic aux = _mainHeuristic;
             _mainHeuristic = _secondaryHeuristic;
             _secondaryHeuristic = aux;
@@ -157,8 +223,10 @@ public class SimpleTRIK extends Solver {
         _current = _error(_context.usableChainInformation().get(_context.last()), _context.worldTarget(), _context.weightRatio(), 1);
         if(_context.debug()) System.out.println("Current :" + _current + "Best error: " + _best);
         _update(); //update if required
-        if(_positionError(_context.chainInformation().get(_context.last()).positionCache(), _context.worldTarget().position()) < _maxError &&
-                _orientationError(_context.chainInformation().get(_context.last()).orientationCache(), _context.worldTarget().orientation(), true) < 1) {
+        //if(_positionError(_context.chainInformation().get(_context.last()).positionCache(), _context.worldTarget().position()) < _maxError &&
+                //_orientationError(_context.chainInformation().get(_context.last()).orientationCache(), _context.worldTarget().orientation(), true) < 1) {
+        //if(_positionError(_context.chainInformation().get(_context.last()).positionCache(), _context.worldTarget().position()) <= _maxError){
+        if(error() <= _maxError){
             return true;
         }
         return  false;
@@ -185,6 +253,14 @@ public class SimpleTRIK extends Solver {
             return true;
         }
         return !(_context.previousTarget().position().matches(_context.target().position()) && _context.previousTarget().orientation().matches(_context.target().orientation()));
+    }
+
+    public boolean changed(){
+        return _changed();
+    }
+
+    public void reset(){
+        _reset();
     }
 
     @Override
@@ -215,6 +291,18 @@ public class SimpleTRIK extends Solver {
         _context.setMaxLength(maxLength);
         _context.setAvgLength(maxLength / _context.chain().size());
         if(_context.singleStep()) _stepCounter = 0;
+
+        if(!_disable_order_swapping && ((_heuristicMode == HeuristicMode.BACK_AND_FORTH || _heuristicMode == HeuristicMode.FINAL || _heuristicMode == HeuristicMode.EXPRESSIVE_FINAL) && _topToBottom == false)){
+            _topToBottom = !_topToBottom;
+            if(_mainHeuristic instanceof FinalHeuristic){
+                //_topToBottom = !_topToBottom;
+                ((FinalHeuristic)_mainHeuristic).setTopToBottom(_topToBottom);
+            }
+            Heuristic aux = _mainHeuristic;
+            _mainHeuristic = _secondaryHeuristic;
+            _secondaryHeuristic = aux;
+        }
+
     }
 
     public float positionError(){
@@ -276,14 +364,25 @@ public class SimpleTRIK extends Solver {
         return error;
     }
 
+    public Node target(){
+        return _context.target();
+    }
 
     @Override
     public float error() {
-        return _error(_context.chainInformation().get(_context.last()), _context.worldTarget());
+        return Vector.distance(_context.chain().get(_context.chain().size() - 1).position(), target().position());
     }
 
     @Override
     public void setTarget(Node endEffector, Node target) {
         _context.setTarget(target);
+    }
+
+    public void setTarget(Node target){
+        _context.setTarget(target);
+    }
+
+    public Heuristic mainHeuristic(){
+        return _mainHeuristic;
     }
 }
