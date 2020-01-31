@@ -149,19 +149,58 @@ public class BallAndSocket extends ConeConstraint {
     float ellipse = ((xaspect * xaspect) / (xbound * xbound)) + ((yaspect * yaspect) / (ybound * ybound));
     inbounds = inbounds && ellipse <= 1;
     if ((!inbounds && !inv && proj.magnitude() > Float.MIN_VALUE) || (inbounds && inv && proj.magnitude() > Float.MIN_VALUE)) {
-      float a = (float) (Math.atan2(yaspect, xaspect));
+      /*float a = (float) (Math.atan2(yaspect, xaspect));
       float cos = (float) (Math.cos(a));
       float sin = (float) (Math.sin(a));
       float rad = 1.f / (float) Math.sqrt(((cos * cos) / (xbound * xbound)) + ((sin * sin) / (ybound * ybound)));
       float x = rad * cos;
-      float y = rad * sin;
+      float y = rad * sin;*/
 
-      f = Vector.add(proj, Vector.multiply(rvec, x));
-      f = Vector.add(f, Vector.multiply(uvec, y));
+      Vector v = closestPointToEllipse(xbound, ybound, new Vector(xaspect, yaspect));
+      f = Vector.add(proj, Vector.multiply(rvec, v.x()));
+      f = Vector.add(f, Vector.multiply(uvec, v.y()));
 
       f.normalize();
       f.multiply(target.magnitude());
     }
     return f;
+  }
+
+  //this is an adaptation from https://github.com/0xfaded/ellipse_demo/issues/1
+  //more info at: https://wet-robots.ghost.io/simple-method-for-distance-to-ellipse/
+  public static Vector closestPointToEllipse(float semi_major, float  semi_minor, Vector point){
+    float px = Math.abs(point.x());
+    float py = Math.abs(point.y());
+
+    float tx = 0.707f;
+    float ty = 0.707f;
+
+    float a = semi_major;
+    float b = semi_minor;
+
+    float x, y, ex, ey, rx, ry, qx, qy, r, q, t;
+
+    for(int i = 0; i < 3; i++){
+      x = a * tx;
+      y = b * ty;
+      ex = (a*a - b*b) * (tx*tx*tx) / a;
+      ey = (b*b - a*a) * (ty*ty*ty) / b;
+      rx = x - ex;
+      ry = y - ey;
+      qx = px - ex;
+      qy = py - ey;
+
+      r = (float) Math.sqrt(ry * ry + rx * rx);
+      q = (float) Math.sqrt(qy * qy + qx * qx);
+
+      tx = Math.min(1, Math.max(0, (qx * r / q + ex) / a));
+      ty = Math.min(1, Math.max(0, (qy * r / q + ey) / b));
+
+      t = (float) Math.sqrt(ty * ty + tx * tx);
+      tx /= t;
+      ty /= t;
+    }
+
+    return new Vector(Math.signum(point.x()) * a * tx,  Math.signum(point.y()) * b * ty);
   }
 }
