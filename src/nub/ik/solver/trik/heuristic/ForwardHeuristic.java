@@ -1,6 +1,7 @@
 package nub.ik.solver.trik.heuristic;
 
 import nub.core.Node;
+import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.FABRIKSolver;
 import nub.ik.solver.geometric.oldtrik.NodeInformation;
 import nub.ik.solver.trik.Context;
@@ -115,6 +116,8 @@ public class ForwardHeuristic extends Heuristic{
         //Get discount average
         des.multiply(1/sum);
         q1 = new Quaternion(v, des);
+        _smoothAngle = (float) Math.pow((i + 1.f) / (_context.last()) , 1f / (0.2f * _context.solver().iteration() + 1 ));
+
         if(_smooth) q1 = _clampRotation(q1, _smoothAngle);
         j_i.rotateAndUpdateCache(q1, true, endEffector); //Apply local rotation
         //float f = 1f / (2 + _context.usableChain().size() - 2 - i);
@@ -134,15 +137,15 @@ public class ForwardHeuristic extends Heuristic{
         Vector p = j_i1;
         //Find j_i1_hat w.r.t j_i
         Vector q = j_i.locationWithCache(j_i1_hat);
-        /*if(j_i.node().constraint() != null && j_i.node().constraint() instanceof Hinge){
+        if(j_i.node().constraint() != null && j_i.node().constraint() instanceof Hinge){
             Hinge h = (Hinge) j_i.node().constraint();
-            Quaternion quat = Quaternion.compose(j_i.node().rotation().inverse(), h.orientation());
+            Quaternion quat = Quaternion.compose(j_i.node().rotation().inverse(), h.idleRotation());
             Vector tw = h.restRotation().rotate(new Vector(0,0,1));
             tw = quat.rotate(tw);
             //Project p & q on the plane of rot
             p = Vector.projectVectorOnPlane(p, tw);
             q = Vector.projectVectorOnPlane(q, tw);
-        }*/
+        }
 
         //Apply desired rotation removing twist component
         Quaternion delta = new Quaternion(p, q);
