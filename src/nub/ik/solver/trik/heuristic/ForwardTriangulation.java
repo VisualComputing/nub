@@ -1,5 +1,6 @@
 package nub.ik.solver.trik.heuristic;
 
+import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.oldtrik.NodeInformation;
 import nub.ik.solver.trik.Context;
 import nub.primitives.Quaternion;
@@ -44,14 +45,32 @@ public class ForwardTriangulation extends Heuristic{
         Vector b = j_i.locationWithCache(_context.endEffectorInformation());
         b.subtract(a);
         Vector c = j_i.locationWithCache(_context.worldTarget().position());
+
+        if(j_i.node().constraint() != null && j_i.node().constraint() instanceof Hinge){
+            Hinge h = (Hinge) j_i.node().constraint();
+            Quaternion quat = Quaternion.compose(j_i.node().rotation().inverse(), h.idleRotation());
+            Vector tw = h.restRotation().rotate(new Vector(0,0,1));
+            tw = quat.rotate(tw);
+            //Project b & c on the plane of rot
+            a = Vector.projectVectorOnPlane(a, tw);
+            b = Vector.projectVectorOnPlane(b, tw);
+            c = Vector.projectVectorOnPlane(c, tw);
+        }
+
+
         float a_mag = a.magnitude(), b_mag = b.magnitude(), c_mag = c.magnitude();
+
+
+
 
         Quaternion delta;
         if(a_mag + b_mag <= c_mag){
             //Chain must be extended as much as possible
+            if(_context.debug())System.out.println("Extend chain!");
             delta = new Quaternion(a, c);
         } else if(c_mag < Math.abs(a_mag - b_mag)){
             //Chain must be contracted as much as possible
+            if(_context.debug())System.out.println("Contract chain!");
             delta = new Quaternion(a, Vector.multiply(c, -1));
         } else{
             //Apply law of cosines
@@ -59,13 +78,23 @@ public class ForwardTriangulation extends Heuristic{
             delta = new Quaternion(Vector.cross(a, c, null), angle);
         }
 
+
         //float f = 1f / (2 + _context.usableChain().size() - 2 - i);
         //delta = _clampRotation(delta, f);
 
-        if(_smooth) delta = _clampRotation(delta, _smoothAngle);
+        //_smoothAngle = (float) Math.pow((i + 1.f) / (_context.last()) , 1f / (_context.solver().iteration() + 1 ));
+        if(_context.debug()) {
+            System.out.println("Tr. Vec a : " + a + "mag" + a.magnitude());
+            System.out.println("Tr. Vec b : " + b + "mag" + b.magnitude());
+            System.out.println("Tr. Vec c : " + c + "mag" + c.magnitude());
+        }
+
+
+        if(_smooth) delta = _clampRotation(delta, _smoothAngle * delta.angle());
         if(j_i.node().constraint() != null){
             delta = j_i.node().constraint().constrainRotation(delta, j_i.node());
         }
+        if(_context.debug()) System.out.println("***** Tr. angle : " + Math.toDegrees(delta.angle()));
 
         j_i.rotateAndUpdateCache(delta, false, _context.endEffectorInformation()); //Apply local rotation
     }
