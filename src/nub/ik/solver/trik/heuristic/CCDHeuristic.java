@@ -1,5 +1,6 @@
 package nub.ik.solver.trik.heuristic;
 
+import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.oldtrik.NodeInformation;
 import nub.ik.solver.trik.Context;
 import nub.primitives.Quaternion;
@@ -24,20 +25,31 @@ public class CCDHeuristic extends Heuristic{
     @Override
     public void applyActions(int i) {
         NodeInformation j_i = _context.usableChainInformation().get(i);
-
         NodeInformation endEffector = _context.endEffectorInformation();
         Vector p = j_i.locationWithCache(_context.endEffectorInformation().positionCache());
         Vector q = j_i.locationWithCache(_context.worldTarget().position());
+
+        if(j_i.node().constraint() instanceof Hinge){
+            Hinge h = (Hinge) j_i.node().constraint();
+            Quaternion quat = Quaternion.compose(j_i.node().rotation().inverse(), h.idleRotation());
+            Vector tw = h.restRotation().rotate(new Vector(0,0,1));
+            tw = quat.rotate(tw);
+            //Project b & c on the plane of rot
+            p = Vector.projectVectorOnPlane(p, tw);
+            q = Vector.projectVectorOnPlane(q, tw);
+        }
+
         //Apply desired rotation removing twist component
         Quaternion delta = new Quaternion(p, q);
         float weight = 1;
-        if(_context.enableWeight()) {
+        /*if(_context.enableWeight()) {
             weight = _calculateWeight(p.magnitude(), q.magnitude());
             if(_context.singleStep())System.out.println("weight : " + weight);
             delta = new Quaternion(delta.axis(), delta.angle() * weight);
-        }
-
+        }*/
+        //_smoothAngle = (float) Math.pow((i + 1.f) / (_context.last()) , 1f / (_context.solver().iteration() + 1 ));
         if(_smooth) delta = _clampRotation(delta, _smoothAngle);
+
         if(j_i.node().constraint() != null){
             delta = j_i.node().constraint().constrainRotation(delta, j_i.node());
         }
