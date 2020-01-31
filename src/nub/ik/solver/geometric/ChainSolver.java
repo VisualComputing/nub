@@ -135,7 +135,7 @@ public class ChainSolver extends FABRIKSolver {
       prevPosition = position;
       prevOrientation = orientation.get();
     }
-    _is3D = chain.get(0).graph().is3D();
+    _is3D = chain.get(0).graph() == null ? true : chain.get(0).graph().is3D();
     if (!_is3D) _fixTwisting = false;
     _jointChange.remove(0);
     this._target = target;
