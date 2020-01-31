@@ -2,6 +2,7 @@ package nub.ik.solver.geometric.oldtrik;
 
 import nub.core.Node;
 import nub.ik.solver.Solver;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -15,7 +16,7 @@ public class TRIKTree extends Solver {
         protected TreeNode _parent;
         protected List<TreeNode> _children;
 
-        protected TRIK _solver;
+        protected SimpleTRIK _solver;
         protected boolean _modified;
         protected float _weight = 1.f;
 
@@ -23,14 +24,14 @@ public class TRIKTree extends Solver {
             _children = new ArrayList<TreeNode>();
         }
 
-        public TreeNode(TRIK solver) {
+        public TreeNode(SimpleTRIK solver) {
             this._solver = solver;
             _solver.setTimesPerFrame(1);
 
             _children = new ArrayList<TreeNode>();
         }
 
-        protected TreeNode(TreeNode parent, TRIK solver) {
+        protected TreeNode(TreeNode parent, SimpleTRIK solver) {
             this._parent = parent;
             this._solver = solver;
             if (parent != null) {
@@ -51,7 +52,7 @@ public class TRIKTree extends Solver {
             return _weight;
         }
 
-        protected TRIK _solver() {
+        protected SimpleTRIK _solver() {
             return _solver;
         }
     }
@@ -74,11 +75,11 @@ public class TRIKTree extends Solver {
         if(node == null) return;
         if(node.children().isEmpty()) { //Is a leaf node, hence we've found a chain of the structure
             list.add(node);
-            TRIK solver = new TRIK(list);
+            SimpleTRIK solver = new SimpleTRIK(list, SimpleTRIK.HeuristicMode.BACK_AND_FORTH_T);
             new TreeNode(parent, solver);
         } else if(node.children().size() > 1){
             list.add(node);
-            TRIK solver = new TRIK(list);
+            SimpleTRIK solver = new SimpleTRIK(list, SimpleTRIK.HeuristicMode.BACK_AND_FORTH_T);
             TreeNode treeNode = new TreeNode(parent, solver);
             for(Node child : node.children()){
                 List<Node> newList = new ArrayList<>();
@@ -94,24 +95,24 @@ public class TRIKTree extends Solver {
     Vector[] _desired_coords;
     protected boolean _solve(TreeNode treeNode){
         if(treeNode._children == null || treeNode._children.isEmpty()){
-            TRIK solver = treeNode._solver;
-            if(solver._target == null) return false;
+            SimpleTRIK solver = treeNode._solver;
+            if(solver.target() == null) return false;
             //solve ik for current chain
-            solver._reset();
+            solver.reset();
             solver.solve(); //Perform a given number of iterations
             return true;
         }
 
         int childrenModified = 0;
-        TRIK solver = treeNode._solver;
+        SimpleTRIK solver = treeNode._solver;
         List<Vector> current_coords = new ArrayList<Vector>();
         List<Vector> desired_coords = new ArrayList<Vector>();
         for(TreeNode child : treeNode._children()){
             if( _solve(child)){
                 childrenModified++;
-                Vector o = solver._original.get(solver._original.size() - 1).location(child._solver._original.get(0));
-                Vector eff = solver._original.get(solver._original.size() - 1).location(child._solver._original.get(child._solver._original.size() - 1));
-                Vector t = solver._original.get(solver._original.size() - 1).location(child._solver._target);
+                Vector o = solver.context().chain().get(solver.context().last()).location(child._solver.context().chain().get(0));
+                Vector eff = solver.context().chain().get(solver.context().chain().size() - 1).location(child._solver.context().chain().get(child._solver.context().chain().size() - 1));
+                Vector t = solver.context().chain().get(solver.context().chain().size() - 1).location(child._solver.target());
                 Vector diff = Vector.subtract(t, eff);
                 current_coords.add(o);
                 //current_coords[c] = Vector.subtract(current_coords[c],o);
@@ -124,10 +125,10 @@ public class TRIKTree extends Solver {
 
         //in case a children was modified and the node is not a leaf
         Quaternion rotation = QCP.CalcRMSDRotationalMatrix(desired_coords, current_coords, null);
-        solver._original.get(solver._original.size() - 1).rotate(rotation);
+        solver.context().chain().get(solver.context().chain().size() - 1).rotate(rotation);
         Node target = new Node();
         //solve ik for current chain
-        if(solver._chain.size() >= 2){//If the solver has only a node we require to update manually
+        if(solver.context().chain().size() >= 2){//If the solver has only a node we require to update manually
             //Set the target position
             Vector translation = new Vector();
             for(int i = 0; i < current_coords.size(); i++){
@@ -135,7 +136,7 @@ public class TRIKTree extends Solver {
                 translation.add(Vector.subtract(desired_coords.get(i), o)); //TODO: consider weights
             }
             translation.multiply(1f/current_coords.size());
-            target.setPosition(solver._original.get(solver._original.size() - 1).worldLocation(translation));
+            target.setPosition(solver.context().chain().get(solver.context().chain().size() - 1).worldLocation(translation));
 
             solver.setTarget(target);
             solver.solve(); //Perform a given number of iterations
@@ -156,7 +157,7 @@ public class TRIKTree extends Solver {
 
     protected boolean _changed(TreeNode treeNode) {
         if (treeNode == null) return false;
-        if (treeNode._solver()._changed() && treeNode._children().isEmpty()) return true;
+        if (treeNode._solver().changed() && treeNode._children().isEmpty()) return true;
         for (TreeNode child : treeNode._children()) {
             if (_changed(child)) return true;
         }
@@ -171,7 +172,7 @@ public class TRIKTree extends Solver {
     protected void _reset(TreeNode treeNode) {
         if (treeNode == null) return;
         //Update Previous Target
-        if (treeNode._solver()._changed()) treeNode._solver()._reset();
+        if (treeNode._solver().changed()) treeNode._solver().reset();
         for (TreeNode child : treeNode._children()) {
             _reset(child);
         }
@@ -201,13 +202,13 @@ public class TRIKTree extends Solver {
     }
 
     public Node head() {
-        return (Node) _root._solver()._original.get(0);
+        return (Node) _root._solver().context().chain().get(0);
     }
 
 
     protected boolean _addTarget(TreeNode treeNode, Node endEffector, Node target) {
         if (treeNode == null) return false;
-        for(Node node : treeNode._solver().chain()){
+        for(Node node : treeNode._solver().context().chain()){
             if (node == endEffector) {
                 treeNode._solver().setTarget(target);
                 _endEffectorMap.put(endEffector, target);

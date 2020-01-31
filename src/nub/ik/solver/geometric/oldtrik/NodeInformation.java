@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NodeInformation {
+
     //THIS CLASS IS USED IN ORDER TO AVOID REDUNDANT WORK
     //TODO: Move this class and refine
+    public static boolean disableCache = false; //DISABLE CACHE ONLY FOR HIGH PRECISION BENCHMARK
     NodeInformation _reference;
     Node _node;
     Quaternion _orientationCache;
@@ -43,10 +45,12 @@ public class NodeInformation {
     }
 
     public Quaternion orientationCache(){
+        if(disableCache) return node().orientation();
         return _orientationCache;
     }
 
     public Vector positionCache(){
+        if(disableCache) return node().position();
         return _positionCache;
     }
 
@@ -85,8 +89,9 @@ public class NodeInformation {
     }
 
     public Vector locationWithCache(Vector worldVector){
-        Vector translation = Vector.subtract(worldVector, _positionCache);
-        return _orientationCache.inverseRotate(translation);
+        if(disableCache) return node().location(worldVector);
+        Vector translation = Vector.subtract(worldVector, positionCache());
+        return orientationCache().inverseRotate(translation);
     }
 
     public Vector locationWithCache(NodeInformation node){
@@ -102,7 +107,7 @@ public class NodeInformation {
     public void translateAndUpdateCache(Vector delta, boolean useConstraint, NodeInformation... nodeInfoList){
         Constraint constraint = _node.constraint();
         if(useConstraint && constraint != null) delta = constraint.constrainTranslation(delta, _node);
-        Quaternion ref = Quaternion.compose(_orientationCache, _node.rotation().inverse());
+        Quaternion ref = Quaternion.compose(orientationCache(), _node.rotation().inverse());
         ref.normalize();
         Vector t = ref.rotate(delta); //w.r.t world
         _node.setConstraint(null);
@@ -111,7 +116,7 @@ public class NodeInformation {
         _positionCache.add(t);
         if(nodeInfoList.length > 0) {
             for (NodeInformation other : nodeInfoList) {
-                other._positionCache.add(t);
+                other.positionCache().add(t);
             }
         }
     }
@@ -123,17 +128,17 @@ public class NodeInformation {
         if(useConstraint && constraint != null) delta = constraint.constrainRotation(delta, _node);
 
         _node.setConstraint(null);
-        Quaternion orientation = Quaternion.compose(_orientationCache, delta);
+        Quaternion orientation = Quaternion.compose(orientationCache(), delta);
         orientation.normalize(); // Prevents numerical drift
         if(nodeInfoList.length > 0) {
-            Quaternion q = Quaternion.compose(orientation, _orientationCache.inverse());
+            Quaternion q = Quaternion.compose(orientation, orientationCache().inverse());
             q.normalize();
             for (NodeInformation other : nodeInfoList) {
                 Quaternion o = Quaternion.compose(q, other.orientationCache());
                 o.normalize();
                 other.setOrientationCache(o);
-                Vector p = Vector.subtract(other.positionCache(), _positionCache);
-                other.setPositionCache(Vector.add(_positionCache, q.rotate(p)));
+                Vector p = Vector.subtract(other.positionCache(), positionCache());
+                other.setPositionCache(Vector.add(positionCache(), q.rotate(p)));
             }
         }
         _node.rotate(delta);
@@ -152,7 +157,7 @@ public class NodeInformation {
     public void updateCacheUsingChild(NodeInformation child){
         _orientationCache = Quaternion.compose(child.orientationCache(), child.node().rotation().inverse());
         _orientationCache.normalize();
-        _positionCache = Vector.subtract(child.positionCache(), _orientationCache.rotate(child.node().translation()));
+        _positionCache = Vector.subtract(child.positionCache(), orientationCache().rotate(child.node().translation()));
     }
 
 
