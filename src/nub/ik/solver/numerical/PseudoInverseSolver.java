@@ -17,10 +17,11 @@ import nub.primitives.Vector;
 import org.ejml.simple.SimpleMatrix;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PseudoInverseSolver extends Solver {
   //look at https://www.math.ucsd.edu/~sbuss/ResearchWeb/ikmethods/iksurvey.pdf
-  protected ArrayList<? extends Node> _chain;
+  protected List<? extends Node> _chain;
   protected Node _target;
   protected Node _previousTarget;
   protected SimpleMatrix _J;
@@ -28,7 +29,7 @@ public class PseudoInverseSolver extends Solver {
   protected SimpleMatrix _delta;
   protected float _d_max;
 
-  public PseudoInverseSolver(ArrayList<? extends Node> chain) {
+  public PseudoInverseSolver(List<? extends Node> chain) {
     super();
     this._chain = chain;
     for (Node f : _chain) {
@@ -47,7 +48,7 @@ public class PseudoInverseSolver extends Solver {
     _axes = new Vector[_chain.size() - 1];
   }
 
-  public ArrayList<? extends Node> chain() {
+  public List<? extends Node> chain() {
     return _chain;
   }
 
