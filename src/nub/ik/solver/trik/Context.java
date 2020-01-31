@@ -2,9 +2,9 @@ package nub.ik.solver.trik;
 
 import nub.core.Node;
 import nub.core.constraint.Constraint;
+import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.FABRIKSolver;
 import nub.ik.solver.geometric.oldtrik.NodeInformation;
-import nub.ik.solver.trik.heuristic.Heuristic;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -41,6 +41,7 @@ public class Context {
 
     //Error attributes
     protected float _maxLength = 0, _avgLength = 0;
+    protected Solver _solver;
 
 
     protected boolean _debug = false;
@@ -78,6 +79,13 @@ public class Context {
         this._last = _chain.size() - 1;
     }
 
+    public void setSolver(Solver solver){
+        _solver = solver;
+    }
+
+    public Solver solver(){
+        return _solver;
+    }
     //Getters and setters
     public List<? extends Node> chain(){
         return _chain;
@@ -189,5 +197,9 @@ public class Context {
             dest.get(i).node().setScaling(node.scaling());
             dest.get(i).node().setConstraint(constraint);
         }
+    }
+
+    public int _currentIteration(){
+        return _solver.iteration();
     }
 }
