@@ -4066,10 +4066,10 @@ public class Graph {
     float dy = sensitivity * (isLeftHanded() ? (pixel2Y - centerY) : (centerY - pixel2Y)) / height();
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
-    // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
+    // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
     Vector axis = p2.cross(p1);
     // 2D is an ad-hoc
-    float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
+    float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
     Quaternion quaternion = new Quaternion(axis, angle);
     Vector vector = quaternion.axis();
     vector = eye().orientation().rotate(vector);
@@ -4106,10 +4106,10 @@ public class Graph {
     float dy = sensitivity * (isLeftHanded() ? (pixel2Y - centerY) : (centerY - pixel2Y)) / height();
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
-    // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
+    // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
     Vector axis = p2.cross(p1);
     // 2D is an ad-hoc
-    float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
+    float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
     //same as:
     //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle));
     eye()._orbit(new Quaternion(axis, angle), anchor());
