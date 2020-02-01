@@ -1120,8 +1120,8 @@ public class Node {
 
   /**
    * Rotates the node by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
-   * passes through {@code point}. The {@code quaternion} {@link Quaternion#axis()} is
-   * defined in this node coordinate system, while {@code point} is defined in the world
+   * passes through {@code center}. The {@code quaternion} {@link Quaternion#axis()} is
+   * defined in this node coordinate system, while {@code center} is defined in the world
    * coordinate system).
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
@@ -1154,7 +1154,7 @@ public class Node {
   }
 
   /**
-   * Same as { orbit(new Quaternion(axis, angle))}.
+   * Same as {@code orbit(new Quaternion(axis, angle))}.
    *
    * @see #orbit(Quaternion)
    */
