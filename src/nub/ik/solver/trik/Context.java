@@ -30,11 +30,18 @@ public class Context {
     * */
     protected List<? extends Node> _chain; //the kinematic chain to modify
     protected List<Node> _usableChain; //a copy of the kinematic chain.
+
+
+    protected boolean _enableDelegation = false;
+    protected float[] _delegationAtJoint;
+    protected float _delegationFactor = 5f; //current joint will work at least "delegation factor" times the remaining ones
+
     //This structures allows to find the world position /orientation of a Node using the sufficient operations
     protected List<NodeInformation> _chainInformation, _usableChainInformation; //Keep position / orientation information
     protected Node _target, _worldTarget, _previousTarget; //Target to reach
 
     protected boolean _direction = false;
+    protected boolean _topToBottom = true;
 
     protected boolean _enableWeight, _explore;
     protected int _lockTimes = 0, _lockTimesCriteria = 4;
@@ -77,6 +84,7 @@ public class Context {
 
         this._worldTarget = target == null ? new Node() : new Node(_target.position(), _target.orientation(), 1);
         this._last = _chain.size() - 1;
+        _delegationAtJoint = new float[chain.size() - 1];
     }
 
     public void setSolver(Solver solver){
@@ -201,5 +209,68 @@ public class Context {
 
     public int _currentIteration(){
         return _solver.iteration();
+    }
+
+    public float delegationAtJoint(int i){
+        return _delegationAtJoint[i];
+    }
+
+    public void setDelegationAtJoint(int i, float value){
+        _delegationAtJoint[i] = value;
+    }
+
+    //TODO : Define various default ways for delegation distribution
+    public void setKDistributionDelegation(float k){//work done by current joint is k times greater than done by remaining ones
+        for(int i = 0; i < chain().size() - 1; i++){
+            int n = chain().size() - 1 - i;
+            int idx = i; //int idx = _topToBottom ? i : chain().size() - 2 - i;
+            _delegationAtJoint[idx] = k / (k + n - 1);
+        }
+    }
+
+
+    public void setDelegationFactor(float k){
+        _enableDelegation = true;
+        _delegationFactor = k;
+        setKDistributionDelegation(_delegationFactor);
+    }
+
+    public void enableDelegation(boolean enableDelegation){
+        _enableDelegation = enableDelegation;
+    }
+
+    public boolean enableDelegation(){
+        return _enableDelegation;
+    }
+
+    public void setTopToBottom(boolean topToBottom){
+        if(_topToBottom != topToBottom) {
+            _topToBottom = topToBottom;
+            //swap delegation per joint
+            //_swapDelegationPerJoint();
+        }
+    }
+
+    public void _swapDelegationPerJoint(){
+        System.out.println("swap!!");
+        int last  = _delegationAtJoint.length - 1;
+        for(int i =0; i <= last; i++){
+            System.out.print(_delegationAtJoint[i] + " , ");
+        }
+        System.out.println();
+        for(int i =0; i <= last / 2 ; i++){
+            float aux = _delegationAtJoint[i];
+            _delegationAtJoint[i] = _delegationAtJoint[last - i];
+            _delegationAtJoint[last - i] = aux;
+        }
+        for(int i =0; i <= last; i++){
+            System.out.print(_delegationAtJoint[i] + " , ");
+        }
+        System.out.println();
+    }
+
+
+    public boolean topToBottom(){
+        return  _topToBottom;
     }
 }
