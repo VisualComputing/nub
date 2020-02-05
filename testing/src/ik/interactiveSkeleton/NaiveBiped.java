@@ -31,7 +31,7 @@ public class NaiveBiped extends PApplet {
     float boneLength = 50;
     float radius = 10;
 
-    int segments = 25;
+    int segments = 12;
     float stepHeight = boneLength/2 * segments/3f, stepWidth = boneLength * segments/3f;
 
     public void settings() {
@@ -60,7 +60,7 @@ public class NaiveBiped extends PApplet {
         scene.fit(1);
 
         if(!debug) {
-            createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(-boneLength*3, 0,0), IKMode.SIMPLETRIK, 40 , 0);
+            createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(-boneLength*3, 0,0), IKMode.SIMPLETRIK, 20 , 0);
             //createStructure(scene, segments, boneLength, radius, color(255, 0, 0), new Vector(-boneLength * 3, 0, 0), IKMode.BIOIK, 40, 0);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK,40, 0);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
@@ -192,7 +192,7 @@ public class NaiveBiped extends PApplet {
             }
 
             case SIMPLETRIK:{
-                solver = new SimpleTRIK(limb, SimpleTRIK.HeuristicMode.CCD);
+                solver = new SimpleTRIK(limb, SimpleTRIK.HeuristicMode.FINAL);
                 solver.setTarget(limb.get(limb.size() - 1), target);
                 break;
             }
@@ -206,7 +206,7 @@ public class NaiveBiped extends PApplet {
         if (!debug){
             solver.setTimesPerFrame(10);
             solver.setMaxIterations(10);
-            solver.setMaxError(0.05f);
+            solver.setMaxError(0.5f);
         }
         else{
             solver.setTimesPerFrame(1);

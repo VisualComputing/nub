@@ -216,6 +216,9 @@ public class Util {
             redBall = scene.context().createShape(SPHERE, targetRadius);
         else
             redBall = scene.context().createShape(ELLIPSE, 0,0, targetRadius, targetRadius);
+
+        redBall.setFill(scene.context().color(0,255,0));
+        redBall.setStroke(false);
         return createTarget(scene, redBall, targetRadius);
     }
 
@@ -230,7 +233,8 @@ public class Util {
                 }else{
                     shape.setFill(pg.color(255,0,0));
                 }
-                scene.pApplet().shape(shape);
+                pg.noStroke();
+                pg.shape(shape);
             }
         };
     }

@@ -55,7 +55,7 @@ public class LowerLimb extends PApplet {
 
         List<Joint> skeleton2 = createSkeleton(scene, numJoints, boneLength, radius, color(0,255,0));
         SimpleTRIK solver2 = new SimpleTRIK(skeleton2, SimpleTRIK.HeuristicMode.FINAL);
-        ((FinalHeuristic) solver2.mainHeuristic()).enableDelegation(true);
+        solver2.context().enableDelegation(true);
 
         //solver2.enableSmooth(true);
         solver2.setTimesPerFrame(10);

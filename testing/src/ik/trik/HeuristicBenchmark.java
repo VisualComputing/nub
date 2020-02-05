@@ -29,7 +29,7 @@ public class HeuristicBenchmark extends PApplet {
     float boneLength = 50; //Define length of segments (bones)
 
     //Benchmark Parameters
-    Util.ConstraintType constraintType = Util.ConstraintType.CONE_ELLIPSE; //Choose what kind of constraints apply to chain
+    Util.ConstraintType constraintType = Util.ConstraintType.NONE; //Choose what kind of constraints apply to chain
     Random random = new Random();
     ArrayList<Solver> solvers; //Will store Solvers
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
@@ -38,9 +38,9 @@ public class HeuristicBenchmark extends PApplet {
     //Util.SolverType solversType [] = {Util.SolverType.CCD_BACK_AND_FORTH, Util.SolverType.CCDT_BACK_AND_FORTH, Util.SolverType.CCD_TRIK_AND_TWIST, Util.SolverType.CCD,
             //Util.SolverType.TRIK_V3, Util.SolverType.FABRIK, Util.SolverType.BACK_AND_FORTH_TRIK, Util.SolverType.BACK_AND_FORTH_TRIK_T}; //Place Here Solvers that you want to compare*/
 
-    //Util.SolverType solversType [] = {Util.SolverType.CCD, Util.SolverType.CCD_TRIK, Util.SolverType.FORWARD_TRIANGULATION_TRIK, Util.SolverType.FINAL_TRIK, Util.SolverType.EXPRESSIVE_FINAL_TRIK, Util.SolverType.FABRIK};
+    Util.SolverType solversType [] = {Util.SolverType.CCD, Util.SolverType.CCD_TRIK, Util.SolverType.BACK_AND_FORTH_TRIK, Util.SolverType.FINAL_TRIK, Util.SolverType.EXPRESSIVE_FINAL_TRIK, Util.SolverType.FABRIK};
 
-    Util.SolverType solversType [] = {Util.SolverType.FINAL_TRIK};
+    //Util.SolverType solversType [] = {Util.SolverType.FINAL_TRIK};
     ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Node> idleSkeleton;
 
@@ -95,7 +95,7 @@ public class HeuristicBenchmark extends PApplet {
             solvers.add(solver);
             //6. Define solver parameters
             solvers.get(i).setMaxError(0.00f);
-            solvers.get(i).setTimesPerFrame(1);
+            solvers.get(i).setTimesPerFrame(5);
             solvers.get(i).setMaxIterations(50);
 
             if(solversType[i] == Util.SolverType.CCD ){
