@@ -19,7 +19,6 @@ public class SimpleTRIK extends Solver {
     }
 
     protected boolean _disable_order_swapping = true; //TODO : REMOVE!
-    protected boolean _topToBottom;
     protected Context _context;
     protected HeuristicMode _heuristicMode;
     protected Heuristic _mainHeuristic, _secondaryHeuristic, _twistHeuristic;
@@ -28,6 +27,8 @@ public class SimpleTRIK extends Solver {
     protected float _current = 10e10f, _best = 10e10f;
     protected int _stepCounter;
     protected boolean  _enableTwist = true;
+    protected float[] _delegationPerJoint;
+
 
 
     public SimpleTRIK(List<? extends Node> chain, HeuristicMode mode) {
@@ -36,86 +37,84 @@ public class SimpleTRIK extends Solver {
 
     public SimpleTRIK(List<? extends Node> chain, Node target, HeuristicMode mode) {
         super();
-        this._context = new Context(chain, target, true);
+        this._context = new Context(chain, target, false);
         _context.setSolver(this);
         _setHeuristicMode(mode);
         this._twistHeuristic = new TwistHeuristic(_context);
         _enableTwist = false;
         enableSmooth(false);
-        _context.setSingleStep(true);
+        _context.setSingleStep(false);
     }
 
     protected void _setHeuristicMode(HeuristicMode mode){
         switch (mode){
             case FINAL:{
                 _mainHeuristic = new FinalHeuristic(_context);
-                ((FinalHeuristic)_mainHeuristic).setTopToBottom(true);
-                ((FinalHeuristic)_mainHeuristic).enableDelegation(false);
+                _context.setTopToBottom(true);
+                context().enableDelegation(false);
                 _secondaryHeuristic = _mainHeuristic;
-                _topToBottom = true;
                 break;
             }
             case EXPRESSIVE_FINAL:{
                 _mainHeuristic = new FinalHeuristic(_context);
-                ((FinalHeuristic)_mainHeuristic).setTopToBottom(true);
-                ((FinalHeuristic)_mainHeuristic).enableDelegation(true);
+                _context.setTopToBottom(false);
+                context().setDelegationFactor(0.5f);
                 _secondaryHeuristic = _mainHeuristic;
-                _topToBottom = true;
                 break;
             }
 
             case CCD:{
                 _mainHeuristic = new CCDHeuristic(_context);
-                _topToBottom = false;
+                _context.setTopToBottom(false);
                 break;
             }
 
             case CCD_BACK_AND_FORTH:{
                 _mainHeuristic = new BackAndForthCCDHeuristic(_context, false, false);
-                _topToBottom = false;
+                _context.setTopToBottom(false);
                 break;
             }
             case CCDT_BACK_AND_FORTH:{
                 _mainHeuristic = new BackAndForthCCDHeuristic(_context, true, true);
-                _topToBottom = true;
+                _context.setTopToBottom(true);
                 break;
             }
 
             case LOOK_AHEAD_FORWARD:{
                 _mainHeuristic = new LookAheadHeuristic(new ForwardHeuristic(_context));
-                _topToBottom = true;
+                _context.setTopToBottom(true);
                 break;
             }
 
             case FORWARD:{
                 _mainHeuristic = new ForwardHeuristic(_context);
-                _topToBottom = true;
+                _context.setTopToBottom(true);
                 break;
             }
             case BACKWARD:{
                 _mainHeuristic = new BackwardHeuristic(_context);
-                _topToBottom = false;
+                _context.setTopToBottom(false);
                 break;
             }
             case FORWARD_TRIANGULATION:{
                 _mainHeuristic = new ForwardTriangulation(_context);
-                _topToBottom = true;
+                _context.setTopToBottom(true);
                 break;
             }
             case BACKWARD_TRIANGULATION:{
                 _mainHeuristic = new BackwardTriangulation(_context);
-                _topToBottom = false;
+                _context.setTopToBottom(false);
                 break;
             }
             case BACK_AND_FORTH:{
-                _topToBottom = true;
+                _context.setTopToBottom(true);
                 //_mainHeuristic = new ForwardHeuristic(_context);
                 //_secondaryHeuristic = new BackwardHeuristic(_context);
                 _mainHeuristic = new BackAndForthCCDHeuristic(_context, false, true);
                 _secondaryHeuristic = new BackAndForthCCDHeuristic(_context, false, false);
             }
             case BACK_AND_FORTH_T:{
-                _topToBottom = true;
+                _context.setTopToBottom(false);
                 //_mainHeuristic = new ForwardHeuristic(_context);
                 //_secondaryHeuristic = new BackwardHeuristic(_context);
                 _mainHeuristic = new BackAndForthCCDHeuristic(_context, true, true);
@@ -160,10 +159,10 @@ public class SimpleTRIK extends Solver {
             _current = 10e10f; //Keep the current error
             _mainHeuristic.prepare();
         } else if(_stepCounter < _context.chain().size()){
-            int i = _topToBottom ? _stepCounter - 1 : _context.last() - _stepCounter;
+            int i = context().topToBottom() ? _stepCounter - 1 : _context.last() - _stepCounter;
             _mainHeuristic.applyActions(i);
             if(_enableTwist) _twistHeuristic.applyActions(i);
-            if(_topToBottom) _context.usableChainInformation().get(i + 1).updateCacheUsingReference();
+            if(context().topToBottom()) _context.usableChainInformation().get(i + 1).updateCacheUsingReference();
 
         } else{
             _current = _error(_context.usableChainInformation().get(_context.last()), _context.worldTarget(), _context.weightRatio(), 1);
@@ -171,10 +170,7 @@ public class SimpleTRIK extends Solver {
             _stepCounter = -1;
 
             if(!_disable_order_swapping && (_heuristicMode == HeuristicMode.BACK_AND_FORTH || _heuristicMode == HeuristicMode.FINAL || _heuristicMode == HeuristicMode.EXPRESSIVE_FINAL)){
-                _topToBottom = !_topToBottom;
-                if(_mainHeuristic instanceof FinalHeuristic){
-                    ((FinalHeuristic)_mainHeuristic).setTopToBottom(_topToBottom);
-                }
+                context().setTopToBottom(!context().topToBottom());
                 Heuristic aux = _mainHeuristic;
                 _mainHeuristic = _secondaryHeuristic;
                 _secondaryHeuristic = aux;
@@ -192,7 +188,7 @@ public class SimpleTRIK extends Solver {
         if(_context.singleStep()) return _iterateStepByStep();
         _current = 10e10f; //Keep the current error
         _mainHeuristic.prepare();
-        if(_topToBottom){
+        if(context().topToBottom()){
             for(int i = 0; i < _context.chain().size() - 1; i++) {
                 _mainHeuristic.applyActions(i);
                 if(_enableTwist) _twistHeuristic.applyActions(i);
@@ -207,11 +203,7 @@ public class SimpleTRIK extends Solver {
         }
 
         if(!_disable_order_swapping && (_heuristicMode == HeuristicMode.BACK_AND_FORTH || _heuristicMode == HeuristicMode.FINAL || _heuristicMode == HeuristicMode.EXPRESSIVE_FINAL)){
-            _topToBottom = !_topToBottom;
-            if(_mainHeuristic instanceof FinalHeuristic){
-                //_topToBottom = !_topToBottom;
-                ((FinalHeuristic)_mainHeuristic).setTopToBottom(_topToBottom);
-            }
+            context().setTopToBottom(!context().topToBottom());
             Heuristic aux = _mainHeuristic;
             _mainHeuristic = _secondaryHeuristic;
             _secondaryHeuristic = aux;
@@ -292,12 +284,8 @@ public class SimpleTRIK extends Solver {
         _context.setAvgLength(maxLength / _context.chain().size());
         if(_context.singleStep()) _stepCounter = 0;
 
-        if(!_disable_order_swapping && ((_heuristicMode == HeuristicMode.BACK_AND_FORTH || _heuristicMode == HeuristicMode.FINAL || _heuristicMode == HeuristicMode.EXPRESSIVE_FINAL) && _topToBottom == false)){
-            _topToBottom = !_topToBottom;
-            if(_mainHeuristic instanceof FinalHeuristic){
-                //_topToBottom = !_topToBottom;
-                ((FinalHeuristic)_mainHeuristic).setTopToBottom(_topToBottom);
-            }
+        if(!_disable_order_swapping && ((_heuristicMode == HeuristicMode.BACK_AND_FORTH || _heuristicMode == HeuristicMode.FINAL || _heuristicMode == HeuristicMode.EXPRESSIVE_FINAL) && context().topToBottom() == false)){
+            context().setTopToBottom(true);
             Heuristic aux = _mainHeuristic;
             _mainHeuristic = _secondaryHeuristic;
             _secondaryHeuristic = aux;
