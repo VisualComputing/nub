@@ -142,6 +142,12 @@ public class Graph {
   protected Vector _center;
   protected float _radius;
   protected Vector _anchor;
+  // TODO
+  protected Quaternion _spinningQuaternion = new Quaternion();
+  protected Task _spinningTask;
+  protected float _velocityI, _velocityJ, _velocityK;
+  // original friction is 0.16
+  protected float _damping = 1.0f - 0.16f; // 1 - friction
   //Interpolator
   protected Interpolator _interpolator;
   //boundary eqns
@@ -934,6 +940,27 @@ public class Graph {
       _interpolator = new Interpolator(this, _eye);
     else
       _interpolator.setNode(_eye);
+    _spinningTask = new Task(timingHandler()) {
+      @Override
+      public void execute() {
+        if (_velocityI == 0 && _velocityJ == 0 && _velocityK == 0) {
+          stop();
+        }
+        _spinningQuaternion.fromEulerAngles(_velocityI, _velocityJ, _velocityK);
+        //same as:
+        //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle));
+        eye()._orbit(_spinningQuaternion, anchor());
+        _velocityI *= _damping;
+        if (Math.abs(_velocityI) < .001)
+          _velocityI = 0;
+        _velocityJ *= _damping;
+        if (Math.abs(_velocityJ) < .001)
+          _velocityJ = 0;
+        _velocityK *= _damping;
+        if (Math.abs(_velocityK) < .001)
+          _velocityK = 0;
+      }
+    };
     _modified();
   }
 
@@ -4113,6 +4140,37 @@ public class Graph {
     //same as:
     //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle));
     eye()._orbit(new Quaternion(axis, angle), anchor());
+  }
+
+  /**
+   * Rotates the {@link #eye()} using an arcball interface, from points {@code (pixel1X, pixel1Y)} to
+   * {@code (pixel2X, pixel2Y)} pixel positions. The {@code sensitivity} controls the gesture strength.
+   * The center of the rotation is the screen projected graph {@link #anchor()}.
+   * <p>
+   * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
+   * three-dimensional orientation using a mouse.
+   *
+   * @see #spinNode(Node, int, int, int, int, float)
+   */
+  public void dampedSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
+    float distance = Vector.subtract(eye().position(), anchor()).magnitude();
+    float mult = (float) -Math.pow((float) Math.log10(1 + distance), 0.5f) * 0.00125f;
+    float dmx = dx * mult;
+    float dmy = dy * mult;
+    float viewX = _upperLeftCornerX;
+    float viewY = _upperLeftCornerY;
+    float viewW = _width;
+    float viewH = _height;
+    // mouse [-1, +1]
+    float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
+    float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
+    _velocityJ += +dmx * (1.0f - myNdc * myNdc);
+    _velocityI += -dmy * (1.0f - mxNdc * mxNdc);
+    _velocityK += -dmx * myNdc;
+    _velocityK += +dmy * mxNdc;
+    if (!_spinningTask.isActive())
+      _spinningTask.run();
   }
 
   /**
