@@ -1127,9 +1127,11 @@ public class Node {
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
+   * @see #orbit(Vector, float, Vector)
+   * @see #orbit(Vector, float)
    * @see #setConstraint(Constraint)
    */
-  protected void _orbit(Quaternion quaternion, Vector center) {
+  protected void orbit(Quaternion quaternion, Vector center) {
     if (constraint() != null)
       quaternion = constraint().constrainRotation(quaternion, this);
     this.rotation().compose(quaternion);
@@ -1154,61 +1156,25 @@ public class Node {
   }
 
   /**
-   * Same as {@code orbit(new Quaternion(axis, angle))}.
+   * Rotates the node around {@code axis} passing through the origin, both defined in the world
+   * coordinate system. Same as {@code orbit(axis, angle, new Vector())}.
    *
-   * @see #orbit(Quaternion)
+   * @see #orbit(Vector, float, Vector)
+   * @see #orbit(Quaternion, Vector)
    */
   public void orbit(Vector axis, float angle) {
-    orbit(new Quaternion(axis, angle));
+    orbit(axis, angle, new Vector());
   }
 
+  /**
+   * Rotates the node around {@code axis} passing through {@code center}, both defined in the world
+   * coordinate system. Same as {@code orbit(new Quaternion(displacement(axis), angle), center)}.
+   *
+   * @see #orbit(Quaternion, Vector)
+   * @see #orbit(Vector, float)
+   */
   public void orbit(Vector axis, float angle, Vector center) {
-    Node node = new Node();
-    node.setPosition(center);
-    orbit(axis, angle, node);
-  }
-
-  /**
-   * Same as {@code orbit(new Quaternion(axis, angle), node)}.
-   *
-   * @see #orbit(Quaternion, Node)
-   */
-  public void orbit(Vector axis, float angle, Node node) {
-    orbit(new Quaternion(axis, angle), node);
-  }
-
-  /**
-   * Same as {@code orbit(quaternion, null)}.
-   *
-   * @see #orbit(Quaternion, Node)
-   */
-  public void orbit(Quaternion quaternion) {
-    orbit(quaternion, null);
-  }
-
-  /**
-   * Rotates this node around {@code node} (which may be null for the world coordinate system)
-   * according to {@code quaternion}.
-   * <p>
-   * The {@code quaternion} axis (see {@link Quaternion#axis()}) is defined in the {@code node}
-   * coordinate system.
-   * <p>
-   * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
-   */
-  public void orbit(Quaternion quaternion, Node node) {
-    Quaternion localQuaternion = new Quaternion(displacement(quaternion.axis(), node), quaternion.angle());
-    _orbit(localQuaternion, node == null ? new Vector() : node.position());
-
-    // Note that the 'easy way' to do it (not relying on the _orbit() method)
-    // by-passes the node constraint (kept for the curious):
-    /*
-    Node reference = node == null ? new Node() : node.detach();
-    Node copy = new Node(reference);
-    copy.set(this);
-    reference.rotate(quaternion);
-    set(copy);
-    // */
+    orbit(new Quaternion(displacement(axis), angle), center);
   }
 
   // ORIENTATION

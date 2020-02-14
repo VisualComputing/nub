@@ -142,8 +142,7 @@ public class Graph {
   protected Vector _center;
   protected float _radius;
   protected Vector _anchor;
-  // TODO
-  protected Quaternion _spinningQuaternion = new Quaternion();
+  protected Quaternion _spinningQuaternion;
   protected Task _spinningTask;
   protected float _velocityI, _velocityJ, _velocityK;
   // original friction is 0.16
@@ -254,6 +253,27 @@ public class Graph {
     _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
     setEye(new Node(this));
+    _spinningQuaternion = new Quaternion();
+    _spinningTask = new Task(timingHandler()) {
+      @Override
+      public void execute() {
+        if (_velocityI == 0 && _velocityJ == 0 && _velocityK == 0)
+          stop();
+        _spinningQuaternion.fromEulerAngles(is2D() ? 0 : _velocityI, is2D() ? 0 : _velocityJ, _velocityK);
+        //same as:
+        //eye().orbit(eye().worldDisplacement(_spinningQuaternion.axis()), _spinningQuaternion.angle(), anchor());
+        eye().orbit(_spinningQuaternion, anchor());
+        _velocityI *= _damping;
+        if (Math.abs(_velocityI) < .001)
+          _velocityI = 0;
+        _velocityJ *= _damping;
+        if (Math.abs(_velocityJ) < .001)
+          _velocityJ = 0;
+        _velocityK *= _damping;
+        if (Math.abs(_velocityK) < .001)
+          _velocityK = 0;
+      }
+    };
     setType(type);
     if (is3D())
       setFOV((float) Math.PI / 3);
@@ -940,26 +960,6 @@ public class Graph {
       _interpolator = new Interpolator(this, _eye);
     else
       _interpolator.setNode(_eye);
-    _spinningTask = new Task(timingHandler()) {
-      @Override
-      public void execute() {
-        if (_velocityI == 0 && _velocityJ == 0 && _velocityK == 0)
-          stop();
-        _spinningQuaternion.fromEulerAngles(is2D() ? 0 : _velocityI, is2D() ? 0 : _velocityJ, _velocityK);
-        //same as:
-        //eye().orbit(eye().worldDisplacement(_spinningQuaternion.axis()), _spinningQuaternion.angle(), anchor());
-        eye()._orbit(_spinningQuaternion, anchor());
-        _velocityI *= _damping;
-        if (Math.abs(_velocityI) < .001)
-          _velocityI = 0;
-        _velocityJ *= _damping;
-        if (Math.abs(_velocityJ) < .001)
-          _velocityJ = 0;
-        _velocityK *= _damping;
-        if (Math.abs(_velocityK) < .001)
-          _velocityK = 0;
-      }
-    };
     _modified();
   }
 
@@ -3972,7 +3972,7 @@ public class Graph {
       pitch = 0;
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
-    eye()._orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor());
+    eye().orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor());
   }
 
   // 6. Spin
@@ -4138,7 +4138,7 @@ public class Graph {
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
     //same as:
     //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle), anchor());
-    eye()._orbit(new Quaternion(axis, angle), anchor());
+    eye().orbit(new Quaternion(axis, angle), anchor());
   }
 
   /**
@@ -4267,6 +4267,6 @@ public class Graph {
     }
     //same as:
     //eye().orbit(eye().worldDisplacement(quaternion.axis()), quaternion.angle(), anchor());
-    eye()._orbit(quaternion, anchor());
+    eye().orbit(quaternion, anchor());
   }
 }
