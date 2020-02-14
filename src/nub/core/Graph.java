@@ -943,12 +943,11 @@ public class Graph {
     _spinningTask = new Task(timingHandler()) {
       @Override
       public void execute() {
-        if (_velocityI == 0 && _velocityJ == 0 && _velocityK == 0) {
+        if (_velocityI == 0 && _velocityJ == 0 && _velocityK == 0)
           stop();
-        }
-        _spinningQuaternion.fromEulerAngles(_velocityI, _velocityJ, _velocityK);
+        _spinningQuaternion.fromEulerAngles(is2D() ? 0 : _velocityI, is2D() ? 0 : _velocityJ, _velocityK);
         //same as:
-        //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle));
+        //eye().orbit(eye().worldDisplacement(_spinningQuaternion.axis()), _spinningQuaternion.angle(), anchor());
         eye()._orbit(_spinningQuaternion, anchor());
         _velocityI *= _damping;
         if (Math.abs(_velocityI) < .001)
@@ -4138,7 +4137,7 @@ public class Graph {
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
     //same as:
-    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle));
+    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle), anchor());
     eye()._orbit(new Quaternion(axis, angle), anchor());
   }
 
@@ -4267,7 +4266,7 @@ public class Graph {
       quaternion = Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
     }
     //same as:
-    //eye().orbit(new Quaternion(eye().worldDisplacement(quaternion.axis()), quaternion.angle()));
+    //eye().orbit(eye().worldDisplacement(quaternion.axis()), quaternion.angle(), anchor());
     eye()._orbit(quaternion, anchor());
   }
 }

@@ -1162,6 +1162,12 @@ public class Node {
     orbit(new Quaternion(axis, angle));
   }
 
+  public void orbit(Vector axis, float angle, Vector center) {
+    Node node = new Node();
+    node.setPosition(center);
+    orbit(new Quaternion(axis, angle), node);
+  }
+
   /**
    * Same as {@code orbit(new Quaternion(axis, angle), node)}.
    *
