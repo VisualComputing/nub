@@ -31,7 +31,7 @@ public class CajasOrientadas extends PApplet {
     for (int i = 0; i < cajas.length; i++)
       cajas[i] = new Box();
 
-    scene.fit(1);
+    scene.fit();
     scene.tag("keyboard", esfera.iNode);
   }
 

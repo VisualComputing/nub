@@ -38,7 +38,7 @@ void setup() {
   for (int i = 0; i < cajas.length; i++)
     cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)),
       random(10, 40), random(10, 40), random(10, 40));
-  scene.fit(1);
+  scene.fit();
   scene.tag("keyboard", esfera);
 }
 
