@@ -947,8 +947,8 @@ public class Graph {
           stop();
         _spinningQuaternion.fromEulerAngles(is2D() ? 0 : _velocityI, is2D() ? 0 : _velocityJ, _velocityK);
         //same as:
-        //eye().orbit(eye().worldDisplacement(_spinningQuaternion.axis()), _spinningQuaternion.angle(), anchor());
-        eye()._orbit(_spinningQuaternion, anchor());
+        eye().orbit(eye().worldDisplacement(_spinningQuaternion.axis()), _spinningQuaternion.angle(), anchor());
+        //eye()._orbit(_spinningQuaternion, anchor());
         _velocityI *= _damping;
         if (Math.abs(_velocityI) < .001)
           _velocityI = 0;
