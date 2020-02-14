@@ -142,7 +142,6 @@ public class Graph {
   protected Vector _center;
   protected float _radius;
   protected Vector _anchor;
-  protected Quaternion _spinningQuaternion;
   protected Task _spinningTask;
   protected float _velocityI, _velocityJ, _velocityK;
   // original friction is 0.16
@@ -253,16 +252,15 @@ public class Graph {
     _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
     setEye(new Node(this));
-    _spinningQuaternion = new Quaternion();
     _spinningTask = new Task(timingHandler()) {
       @Override
       public void execute() {
         if (_velocityI == 0 && _velocityJ == 0 && _velocityK == 0)
           stop();
-        _spinningQuaternion.fromEulerAngles(is2D() ? 0 : _velocityI, is2D() ? 0 : _velocityJ, _velocityK);
         //same as:
-        //eye().orbit(eye().worldDisplacement(_spinningQuaternion.axis()), _spinningQuaternion.angle(), anchor());
-        eye().orbit(_spinningQuaternion, anchor());
+        //Quaternion spinningQuaternion = new Quaternion(is2D() ? 0 : _velocityI, is2D() ? 0 : _velocityJ, _velocityK);
+        //eye().orbit(eye().worldDisplacement(spinningQuaternion.axis()), spinningQuaternion.angle(), anchor());
+        eye().orbit(new Quaternion(is2D() ? 0 : _velocityI, is2D() ? 0 : _velocityJ, _velocityK), anchor());
         _velocityI *= _damping;
         if (Math.abs(_velocityI) < .001)
           _velocityI = 0;
@@ -1671,7 +1669,7 @@ public class Graph {
     }
 
     Quaternion q = new Quaternion();
-    q.fromRotatedBasis(xAxis, xAxis.cross(direction), Vector.multiply(direction, -1));
+    q.set(xAxis, xAxis.cross(direction), Vector.multiply(direction, -1));
     eye().setOrientation(q);
   }
 

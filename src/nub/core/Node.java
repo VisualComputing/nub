@@ -1475,7 +1475,7 @@ public class Node {
         if (vector.dot(dir) >= 0.0)
           angle = -angle;
         // setOrientation(Quaternion(axis, angle) * orientation());
-        q.fromAxisAngle(axis, angle);
+        q.set(axis, angle);
         q = Quaternion.multiply(rotation().inverse(), q);
         q = Quaternion.multiply(q, orientation());
         rotate(q);
@@ -1513,7 +1513,7 @@ public class Node {
    * world coordinate system.
    *
    * <b>Attention:</b> this rotation is not uniquely defined. See
-   * {@link Quaternion#fromTo(Vector, Vector)}.
+   * {@link Quaternion#set(Vector, Vector)}.
    *
    * @see #xAxis()
    * @see #setYAxis(Vector)
@@ -1528,7 +1528,7 @@ public class Node {
    * world coordinate system.
    *
    * <b>Attention:</b> this rotation is not uniquely defined. See
-   * {@link Quaternion#fromTo(Vector, Vector)}.
+   * {@link Quaternion#set(Vector, Vector)}.
    *
    * @see #yAxis()
    * @see #setYAxis(Vector)
@@ -1543,7 +1543,7 @@ public class Node {
    * world coordinate system.
    *
    * <b>Attention:</b> this rotation is not uniquely defined. See
-   * {@link Quaternion#fromTo(Vector, Vector)}.
+   * {@link Quaternion#set(Vector, Vector)}.
    *
    * @see #zAxis()
    * @see #setYAxis(Vector)

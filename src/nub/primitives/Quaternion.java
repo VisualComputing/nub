@@ -130,16 +130,16 @@ public class Quaternion {
   }
 
   /**
-   * Same as {@code fromAxisAngle(new Vector(0,0,1), angle)}.
+   * Same as {@code set(new Vector(0,0,1), angle)}.
    * <p>
    * Constructs and initializes a quaternion from the specified 2d rotation {@code angle} (in radians).
    * The axis of the quaternion is Z.
    *
    * @param angle the angle in radians
-   * @see #fromAxisAngle(Vector, float)
+   * @see #set(Vector, float)
    */
   public Quaternion(float angle) {
-    fromAxisAngle(new Vector(0, 0, 1), angle);
+    set(new Vector(0, 0, 1), angle);
   }
 
   /**
@@ -148,10 +148,10 @@ public class Quaternion {
    *
    * @param axis  the Vector representing the axis
    * @param angle the angle in radians
-   * @see #fromAxisAngle(Vector, float)
+   * @see #set(Vector, float)
    */
   public Quaternion(Vector axis, float angle) {
-    fromAxisAngle(axis, angle);
+    set(axis, angle);
   }
 
   /**
@@ -160,10 +160,10 @@ public class Quaternion {
    *
    * @param from the first Vector
    * @param to   the second Vector
-   * @see #fromTo(Vector, Vector)
+   * @see #set(Vector, Vector)
    */
   public Quaternion(Vector from, Vector to) {
-    fromTo(from, to);
+    set(from, to);
   }
 
   /**
@@ -172,10 +172,10 @@ public class Quaternion {
    * @param roll  Rotation angle in radians around the x-Axis
    * @param pitch Rotation angle in radians around the y-Axis
    * @param yaw   Rotation angle in radians around the z-Axis
-   * @see #fromEulerAngles(float, float, float)
+   * @see #set(float, float, float)
    */
   public Quaternion(float roll, float pitch, float yaw) {
-    fromEulerAngles(roll, pitch, yaw);
+    set(roll, pitch, yaw);
   }
 
   /**
@@ -183,10 +183,10 @@ public class Quaternion {
    * left 3x3 sub-matrix of the Matrix.
    *
    * @param matrix
-   * @see #fromMatrix(Matrix)
+   * @see #set(Matrix)
    */
   public Quaternion(Matrix matrix) {
-    fromMatrix(matrix);
+    set(matrix);
   }
 
   /**
@@ -195,12 +195,15 @@ public class Quaternion {
    * @param X 1st Orthogonal Vector
    * @param Y 2nd Orthogonal Vector
    * @param Z 3rd Orthogonal Vector
-   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #set(Vector, Vector, Vector)
    */
   public Quaternion(Vector X, Vector Y, Vector Z) {
-    fromRotatedBasis(X, Y, Z);
+    set(X, Y, Z);
   }
 
+  /**
+   * Copy constructor.
+   */
   protected Quaternion(Quaternion quaternion) {
     set(quaternion);
   }
@@ -608,6 +611,24 @@ public class Quaternion {
   }
 
   /**
+   * Get a quaternion as a rotation of {@link #axis() axis} and {@link #angle() angle} (in
+   * radians).
+   * <p>
+   * The {@code axis} does not need to be normalized. A null {@code axis} will result in
+   * an identity quaternion.
+   *
+   * @param axis  the Vector representing the axis
+   * @param angle the angle in radians
+   * @see #fromEulerAngles(float, float, float)
+   * @see #fromMatrix(Matrix)
+   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #fromTo(Vector, Vector)
+   */
+  public static Quaternion fromAxisAngle(Vector axis, float angle) {
+    return new Quaternion(axis, angle);
+  }
+
+  /**
    * Sets the quaternion as a rotation of {@link #axis() axis} and {@link #angle() angle} (in
    * radians).
    * <p>
@@ -617,7 +638,7 @@ public class Quaternion {
    * @param axis  the Vector representing the axis
    * @param angle the angle in radians
    */
-  public void fromAxisAngle(Vector axis, float angle) {
+  public void set(Vector axis, float angle) {
     float norm = axis.magnitude();
     if (norm == 0) {
       // Null rotation
@@ -635,44 +656,34 @@ public class Quaternion {
   }
 
   /**
-   * Same as {@code fromAxisAngle(new Vector(x,y,z), angle)}.
+   * Get a Quaternion from Euler rotation angles {@code roll}, {@code pitch} and {@code yaw},
+   * respectively defined to the x, y and z axes. In the convention used here these angles
+   * represent a composition of extrinsic rotations (rotations about the
+   * reference node axes), which is also known as Tait-Bryan angles (See
+   * http://en.wikipedia.org/wiki/Euler_angles and
+   * http://en.wikipedia.org/wiki/Tait-Bryan_angles). {@link #eulerAngles()} performs the
+   * inverse operation.
+   * <p>
+   * Each rotation angle is converted to an axis-angle pair, with the axis corresponding
+   * to one of the Euclidean axes. The axis-angle pairs are converted to quaternions and
+   * multiplied together. The order of the rotations is: y,z,x which follows the
+   * convention found here:
+   * http://www.euclideanspace.com/maths/geometry/rotations/euler/index.htm.
    *
    * @see #fromAxisAngle(Vector, float)
+   * @see #fromMatrix(Matrix)
+   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #fromTo(Vector, Vector)
    */
-  public void fromAxisAngle(float x, float y, float z, float angle) {
-    fromAxisAngle(new Vector(x, y, z), angle);
-  }
-
-  /**
-   * Same as {@link #fromEulerAngles(Vector)}.
-   */
-  public void fromTaitBryan(Vector angles) {
-    fromEulerAngles(angles);
-  }
-
-  /**
-   * Same as {@link #fromEulerAngles(float, float, float)}.
-   */
-  public void fromTaitBryan(float roll, float pitch, float yaw) {
-    fromEulerAngles(roll, pitch, yaw);
-  }
-
-  /**
-   * Convenience function that simply calls
-   * {@code fromEulerAngles(angles.vec[0], angles.vec[1], angles.vec[2])}.
-   *
-   * @see #fromEulerAngles(float, float, float)
-   * @see #eulerAngles()
-   */
-  public void fromEulerAngles(Vector angles) {
-    fromEulerAngles(angles._vector[0], angles._vector[1], angles._vector[2]);
+  public static Quaternion fromEulerAngles(float roll, float pitch, float yaw) {
+    return new Quaternion(roll, pitch, yaw);
   }
 
   /**
    * Converts Euler rotation angles {@code roll}, {@code pitch} and {@code yaw},
    * respectively defined to the x, y and z axes, to this quaternion. In the convention used
    * here these angles represent a composition of extrinsic rotations (rotations about the
-   * reference node axes), which is also known as {@link #taitBryanAngles()} (See
+   * reference node axes), which is also known as Tait-Bryan angles (See
    * http://en.wikipedia.org/wiki/Euler_angles and
    * http://en.wikipedia.org/wiki/Tait-Bryan_angles). {@link #eulerAngles()} performs the
    * inverse operation.
@@ -685,7 +696,7 @@ public class Quaternion {
    *
    * @see #eulerAngles()
    */
-  public void fromEulerAngles(float roll, float pitch, float yaw) {
+  public void set(float roll, float pitch, float yaw) {
     Quaternion qx = new Quaternion(new Vector(1, 0, 0), roll);
     Quaternion qy = new Quaternion(new Vector(0, 1, 0), pitch);
     Quaternion qz = new Quaternion(new Vector(0, 0, 1), yaw);
@@ -695,15 +706,8 @@ public class Quaternion {
   }
 
   /**
-   * Same as {@link #eulerAngles()}.
-   */
-  public Vector taitBryanAngles() {
-    return eulerAngles();
-  }
-
-  /**
    * Converts this quaternion to Euler rotation angles {@code roll}, {@code pitch} and
-   * {@code yaw} in radians. {@link #fromEulerAngles(float, float, float)} performs the
+   * {@code yaw} in radians. {@link #set(float, float, float)} performs the
    * inverse operation. The code was adapted from:
    * http://www.euclideanspace.com/maths/geometry/rotations/conversions/
    * quaternionToEuler/index.htm.
@@ -713,8 +717,8 @@ public class Quaternion {
    * @return the Vector holding the roll (x coordinate of the vector), pitch (y coordinate of
    * the vector) and yaw angles (z coordinate of the vector). <b>Note:</b> The
    * order of the rotations that would produce this Quaternion (i.e., as with
-   * {@code fromEulerAngles(roll, pitch, yaw)}) is: y,z,x.
-   * @see #fromEulerAngles(float, float, float)
+   * {@code set(roll, pitch, yaw)}) is: y,z,x.
+   * @see #set(float, float, float)
    */
   public Vector eulerAngles() {
     float roll, pitch, yaw;
@@ -741,6 +745,23 @@ public class Quaternion {
   }
 
   /**
+   * Get a quaternion as a rotation from the {@code from} direction to the {@code to}
+   * direction.
+   *
+   * <b>Attention:</b> this rotation is not uniquely defined. The selected axis is usually
+   * orthogonal to {@code from} and {@code to}, minimizing the rotation angle. This method
+   * is robust and can handle small or almost identical vectors.
+   *
+   * @see #fromEulerAngles(float, float, float)
+   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #fromAxisAngle(Vector, float)
+   * @see #fromMatrix(Matrix)
+   */
+  public static Quaternion fromTo(Vector from, Vector to) {
+    return new Quaternion(from, to);
+  }
+
+  /**
    * Sets the quaternion as a rotation from the {@code from} direction to the {@code to}
    * direction.
    *
@@ -748,9 +769,9 @@ public class Quaternion {
    * orthogonal to {@code from} and {@code to}, minimizing the rotation angle. This method
    * is robust and can handle small or almost identical vectors.
    *
-   * @see #fromAxisAngle(Vector, float)
+   * @see #set(Vector, float)
    */
-  public void fromTo(Vector from, Vector to) {
+  public void set(Vector from, Vector to) {
     float fromSqNorm = from.squaredNorm();
     float toSqNorm = to.squaredNorm();
     // Identity Quaternion when one vector is null
@@ -759,42 +780,56 @@ public class Quaternion {
       this._quaternion[3] = 1.0f;
     } else {
       Vector axis = from.cross(to);
-
       float axisSqNorm = axis.squaredNorm();
-
       // Aligned vectors, pick any axis, not aligned with from or to
       if (axisSqNorm == 0)
         axis = from.orthogonalVector();
-
       float angle = (float) Math.asin((float) Math.sqrt(axisSqNorm / (fromSqNorm * toSqNorm)));
-
       if (from.dot(to) < 0.0)
         angle = (float) Math.PI - angle;
-
-      fromAxisAngle(axis, angle);
+      set(axis, angle);
     }
   }
 
   /**
-   * Same as {@code fromTo(new Vector(x1,y1,z1), new Vector(x2,y2,z2))}.
+   * Get a quaternion from a (supposedly correct) 3x3 rotation matrix given in the upper left
+   * 3x3 sub-matrix of the Matrix.
    *
+   * @see #fromAxisAngle(Vector, float)
    * @see #fromTo(Vector, Vector)
+   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #fromEulerAngles(float, float, float)
    */
-  public void fromTo(float x1, float y1, float z1, float x2, float y2, float z2) {
-    fromTo(new Vector(x1, y1, z1), new Vector(x2, y2, z2));
+  public static Quaternion fromMatrix(Matrix matrix) {
+    return new Quaternion(matrix);
   }
 
   /**
    * Set the quaternion from a (supposedly correct) 3x3 rotation matrix given in the upper left
    * 3x3 sub-matrix of the Matrix.
    *
-   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #set(Vector, Vector, Vector)
    */
-  public void fromMatrix(Matrix matrix) {
+  public void set(Matrix matrix) {
     Vector x = new Vector(matrix._matrix[0], matrix._matrix[4], matrix._matrix[8]);
     Vector y = new Vector(matrix._matrix[1], matrix._matrix[5], matrix._matrix[9]);
     Vector z = new Vector(matrix._matrix[2], matrix._matrix[6], matrix._matrix[10]);
-    fromRotatedBasis(x, y, z);
+    set(x, y, z);
+  }
+
+  /**
+   * Get a quaternion from the three rotated vectors of an orthogonal basis.
+   * <p>
+   * The three vectors do not have to be normalized but must be orthogonal and direct
+   * (i,e., {@code X^Y=k*Z, with k>0}).
+   *
+   * @see #fromMatrix(Matrix)
+   * @see #fromAxisAngle(Vector, float)
+   * @see #fromEulerAngles(float, float, float)
+   * @see #fromTo(Vector, Vector)
+   */
+  public static Quaternion fromRotatedBasis(Vector X, Vector Y, Vector Z) {
+    return new Quaternion(X, Y, Z);
   }
 
   /**
@@ -806,10 +841,10 @@ public class Quaternion {
    * @param X the first Vector
    * @param Y the second Vector
    * @param Z the third Vector
-   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #set(Vector, Vector, Vector)
    * @see #Quaternion(Vector, Vector)
    */
-  public void fromRotatedBasis(Vector X, Vector Y, Vector Z) {
+  public void set(Vector X, Vector Y, Vector Z) {
     float threeXthree[][] = new float[3][3];
     float normX = X.magnitude();
     float normY = Y.magnitude();
