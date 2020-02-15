@@ -1,10 +1,13 @@
 package intellij;
 
+import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 public class PeasyCam extends PApplet {
+  //Node box1, box2;
   Scene scene;
 
   public void settings() {
@@ -13,25 +16,39 @@ public class PeasyCam extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    scene.setRadius(200);
+    Node box1 = new Node(scene) {
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+        pg.strokeWeight(1 / 10f);
+        pg.fill(255, 0, 0);
+        pg.box(30);
+        pg.popStyle();
+      }
+    };
+    box1.setPickingThreshold(0);
+    Node box2 = new Node(box1) {
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+        pg.strokeWeight(1 / 10f);
+        pg.fill(0, 0, 255);
+        pg.box(5);
+        pg.popStyle();
+      }
+    };
+    box2.setPickingThreshold(0);
+    box2.translate(0, 0, 20);
+    scene.setRadius(50);
     scene.fit(1);
   }
 
   public void draw() {
-    //background(0);
-    rotateX(-.5f);
-    rotateY(-.5f);
-    lights();
-    scale(10);
-    strokeWeight(1 / 10f);
     background(0);
-    fill(255, 0, 0);
-    box(30);
-    pushMatrix();
-    translate(0, 0, 20);
-    fill(0, 0, 255);
-    box(5);
-    popMatrix();
+    scene.drawAxes();
+    stroke(125);
+    scene.drawGrid();
+    lights();
     scene.render();
   }
 
@@ -40,20 +57,35 @@ public class PeasyCam extends PApplet {
   }
 
   public void mouseDragged() {
-    if (mouseButton == LEFT) {
-      if (!scene.mouseSpinTag())
-        //scene.mouseSpinEye();
-        scene.mouseDampedSpinEye();
-    } else if (mouseButton == RIGHT)
-      if (!scene.mouseTranslateTag())
-        scene.mouseDampedTranslateEye();
-        //scene.mouseTranslateEye();
-      else
-        scene.scale(mouseX - pmouseX);
+    switch (mouseButton) {
+      case LEFT:
+        if (!scene.mouseSpinTag())
+          scene.mouseDampedSpinEye();
+        break;
+      case RIGHT:
+        if (!scene.mouseTranslateTag())
+          scene.mouseDampedTranslateEye();
+        else
+          scene.scale(mouseX - pmouseX);
+        break;
+      case CENTER:
+        scene.mouseDampedLookAround();
+        //scene.mouseLookAround();
+        break;
+    }
   }
 
   public void mouseWheel(MouseEvent event) {
     scene.dampedMoveForward(event.getCount() * 40);
+  }
+
+  public void keyPressed() {
+    if (key == 'f')
+      scene.flip();
+    if (key == 's')
+      scene.fit(1);
+    if (key == 'S')
+      scene.fit();
   }
 
   public static void main(String[] args) {

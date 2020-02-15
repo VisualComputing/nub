@@ -145,11 +145,8 @@ public class Graph {
   // Damped
   protected DampedTask _spinningTask;
   protected DampedTask _translationTask;
-
-  protected Task _aroundTask;
-  protected float _rotX, _rotY;
-  // original friction is 0.16
-  protected float _aroundSpin = 1.0f - 0.16f; // 1 - friction
+  protected DampedTask _lookAroundTask;
+  protected DampedTask _cadRotateTask;
 
   //Interpolator
   protected Interpolator _interpolator;
@@ -288,7 +285,7 @@ public class Graph {
     _spinningTask = new DampedTask(timingHandler()) {
       @Override
       public void action() {
-        eye().orbit(new Quaternion(is2D() ? 0 : _x, is2D() ? 0 : _y, _z), anchor());
+        eye().orbit(new Quaternion(is2D() ? 0 : isLeftHanded() ? _x : -_x, is2D() ? 0 : _y, _z), anchor());
       }
     };
     _translationTask = new DampedTask(timingHandler()) {
@@ -297,26 +294,13 @@ public class Graph {
         eye().translate(_x, _y, _z);
       }
     };
-
-    /*
-    protected Task _aroundTask;
-    protected float _lrX, _lrY;
-    // original friction is 0.16
-    protected float _aroundSpin = 1.0f - 0.16f; // 1 - friction
-     */
-
-    _aroundTask = new Task(timingHandler()) {
+    _lookAroundTask = new DampedTask(timingHandler()) {
       @Override
-      public void execute() {
-        if (_rotX == 0 && _rotY == 0)
-          stop();
-        eye().rotate(new Quaternion(_rotY, _rotX, 0));
-        _rotX *= _aroundSpin;
-        if (Math.abs(_rotX) < .001)
-          _rotX = 0;
-        _rotY *= _aroundSpin;
-        if (Math.abs(_rotY) < .001)
-          _rotY = 0;
+      public void action() {
+        Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_y : _y);
+        Quaternion rotY = new Quaternion(eye().displacement(_upVector), -_x);
+        Quaternion quaternion = Quaternion.multiply(rotY, rotX);
+        eye().rotate(quaternion);
       }
     };
 
@@ -4246,8 +4230,7 @@ public class Graph {
     node.setPosition(anchor());
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     vector.multiply(-1);
-    Vector translation = eye().reference() == null ? eye().worldDisplacement(vector) :
-        eye().reference().displacement(vector, eye());
+    Vector translation = eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye());
     _translationTask._x += translation.x() / 5;
     _translationTask._y += translation.y() / 5;
     _translationTask._z += translation.z() / 5;
@@ -4285,10 +4268,8 @@ public class Graph {
    * expressed in radians.
    */
   public void lookAround(float deltaX, float deltaY) {
-    Quaternion quaternion;
     if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
-      quaternion = new Quaternion();
     } else {
       if (frameCount() > _lookAroundCount) {
         _upVector = eye().yAxis();
@@ -4297,28 +4278,24 @@ public class Graph {
       _lookAroundCount++;
       Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
       Quaternion rotY = new Quaternion(eye().displacement(_upVector), -deltaX);
-      quaternion = Quaternion.multiply(rotY, rotX);
+      eye().rotate(Quaternion.multiply(rotY, rotX));
     }
-    eye().rotate(quaternion);
   }
 
-  public void dampedLookAround(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
-    float distance = Vector.subtract(eye().position(), anchor()).magnitude();
-    float mult = (float) -Math.pow((float) Math.log10(1 + distance), 0.5f) * 0.00125f;
-    float dmx = dx * mult;
-    float dmy = dy * mult;
-    float viewX = _upperLeftCornerX;
-    float viewY = _upperLeftCornerY;
-    float viewW = _width;
-    float viewH = _height;
-    // mouse [-1, +1]
-    float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
-    float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
-    _rotX += +dmx * (1.0f - myNdc * myNdc);
-    _rotY += -dmy * (1.0f - mxNdc * mxNdc);
-    if (!_aroundTask.isActive())
-      _aroundTask.run();
+  public void dampedLookAround(float deltaX, float deltaY) {
+    if (is2D()) {
+      System.out.println("Warning: lookAround is only available in 3D");
+    } else {
+      if (frameCount() > _lookAroundCount) {
+        _upVector = eye().yAxis();
+        _lookAroundCount = this.frameCount();
+      }
+      _lookAroundCount++;
+      _lookAroundTask._x += deltaX / 5;
+      _lookAroundTask._y += deltaY / 5;
+      if (!_lookAroundTask.isActive())
+        _lookAroundTask.run();
+    }
   }
 
   // 10. rotateCAD

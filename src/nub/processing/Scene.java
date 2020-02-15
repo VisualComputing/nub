@@ -3183,7 +3183,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   public void mouseDampedLookAround() {
-    super.dampedLookAround(pmouseX(), pmouseY(), mouseX(), mouseY());
+    super.dampedLookAround(mouseRADX(), mouseRADY());
   }
 
   /**
