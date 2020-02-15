@@ -142,10 +142,17 @@ public class Graph {
   protected Vector _center;
   protected float _radius;
   protected Vector _anchor;
+  // Damped
   protected Task _spinningTask;
   protected float _roll, _pitch, _yaw;
   // original friction is 0.16
   protected float _dampingSpin = 1.0f - 0.16f; // 1 - friction
+
+  protected Task _aroundTask;
+  protected float _rotX, _rotY;
+  // original friction is 0.16
+  protected float _aroundSpin = 1.0f - 0.16f; // 1 - friction
+
   protected Task _translationTask;
   protected float _dx, _dy, _dz;
   // original friction is 0.16
@@ -281,14 +288,7 @@ public class Graph {
       public void execute() {
         if (_dx == 0 && _dy == 0 && _dz == 0)
           stop();
-
-        Node node = eye().get();
-        node.setPosition(anchor());
-        Vector vector = displacement(new Vector(_dx, _dy, _dz), node);
-        vector.multiply(-1);
-        eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()));
-
-        //eye().orbit(new Quaternion(is2D() ? 0 : _roll, is2D() ? 0 : _pitch, _yaw), anchor());
+        eye().translate(_dx, _dy, _dz);
         _dx *= _dampingTranslation;
         if (Math.abs(_dx) < .001)
           _dx = 0;
@@ -300,6 +300,29 @@ public class Graph {
           _dz = 0;
       }
     };
+
+    /*
+    protected Task _aroundTask;
+    protected float _lrX, _lrY;
+    // original friction is 0.16
+    protected float _aroundSpin = 1.0f - 0.16f; // 1 - friction
+     */
+
+    _aroundTask = new Task(timingHandler()) {
+      @Override
+      public void execute() {
+        if (_rotX == 0 && _rotY == 0)
+          stop();
+        eye().rotate(new Quaternion(_rotY, _rotX, 0));
+        _rotX *= _aroundSpin;
+        if (Math.abs(_rotX) < .001)
+          _rotX = 0;
+        _rotY *= _aroundSpin;
+        if (Math.abs(_rotY) < .001)
+          _rotY = 0;
+      }
+    };
+
     setType(type);
     if (is3D())
       setFOV((float) Math.PI / 3);
@@ -3913,27 +3936,6 @@ public class Graph {
     eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()));
   }
 
-  public void dampedTranslateEye(float dx, float dy) {
-    dampedTranslateEye(dx, dy, 0);
-  }
-
-  public void dampedTranslateEye(float dx, float dy, float dz) {
-    float distance = Vector.subtract(eye().position(), anchor()).magnitude();
-    //float panScale = distance * 0.0025f;
-    //pan(dragConstraint == Constraint.PITCH ? 0 : -dx * panScale, dragConstraint == Constraint.YAW ? 0 : -dy * panScale);
-    // _dx = -dx * panScale;
-    // _dy = -dy * panScale;
-    // _dz = -dz * panScale;
-    //dampedPanX.impulse(dx / 8.);
-    //dampedPanY.impulse(dy / 8.);
-    _dx += dx / 8.;
-    _dy += dy / 8.;
-    _dz += dz / 8.;
-    if (!_translationTask.isActive())
-      _translationTask.run();
-  }
-
-
   // 5. Rotate
 
   /**
@@ -4188,27 +4190,6 @@ public class Graph {
     eye().orbit(new Quaternion(axis, angle), anchor());
   }
 
-  public void dampedSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
-    float distance = Vector.subtract(eye().position(), anchor()).magnitude();
-    float mult = (float) -Math.pow((float) Math.log10(1 + distance), 0.5f) * 0.00125f;
-    float dmx = dx * mult;
-    float dmy = dy * mult;
-    float viewX = _upperLeftCornerX;
-    float viewY = _upperLeftCornerY;
-    float viewW = _width;
-    float viewH = _height;
-    // mouse [-1, +1]
-    float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
-    float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
-    _pitch += +dmx * (1.0f - myNdc * myNdc);
-    _roll += -dmy * (1.0f - mxNdc * mxNdc);
-    _yaw += -dmx * myNdc;
-    _yaw += +dmy * mxNdc;
-    if (!_spinningTask.isActive())
-      _spinningTask.run();
-  }
-
   /**
    * Returns "pseudo-_distance" from (x,y) to ball of radius size. For a point inside the
    * ball, it is proportional to the euclidean distance to the ball. For a point outside
@@ -4247,7 +4228,60 @@ public class Graph {
         eye().scale(d2 / d1);
   }
 
-  // 8. lookAround
+  public void dampedMoveForward(float delta) {
+    float d1 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
+    // we negate z which targets the Processing mouse wheel
+    dampedTranslateEye(0, 0, delta / (zNear() - zFar()));
+    float d2 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
+    if (type() == Type.ORTHOGRAPHIC)
+      if (d2 / d1 > 0 && d1 != 0)
+        eye().scale(d2 / d1);
+  }
+
+  // 7. Damped translation
+
+  public void dampedTranslateEye(float dx, float dy) {
+    dampedTranslateEye(dx, dy, 0);
+  }
+
+  public void dampedTranslateEye(float dx, float dy, float dz) {
+    Node node = eye().get();
+    node.setPosition(anchor());
+    Vector vector = displacement(new Vector(dx, dy, dz), node);
+    vector.multiply(-1);
+    Vector translation = eye().reference() == null ? eye().worldDisplacement(vector) :
+        eye().reference().displacement(vector, eye());
+    _dx += translation.x() / 5;
+    _dy += translation.y() / 5;
+    _dz += translation.z() / 5;
+    if (!_translationTask.isActive())
+      _translationTask.run();
+  }
+
+  // 8. Damped spin eye
+
+  public void dampedSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
+    float distance = Vector.subtract(eye().position(), anchor()).magnitude();
+    float mult = (float) -Math.pow((float) Math.log10(1 + distance), 0.5f) * 0.00125f;
+    float dmx = dx * mult;
+    float dmy = dy * mult;
+    float viewX = _upperLeftCornerX;
+    float viewY = _upperLeftCornerY;
+    float viewW = _width;
+    float viewH = _height;
+    // mouse [-1, +1]
+    float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
+    float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
+    _pitch += +dmx * (1.0f - myNdc * myNdc);
+    _roll += -dmy * (1.0f - mxNdc * mxNdc);
+    _yaw += -dmx * myNdc;
+    _yaw += +dmy * mxNdc;
+    if (!_spinningTask.isActive())
+      _spinningTask.run();
+  }
+
+  // 9. lookAround
 
   /**
    * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
@@ -4271,7 +4305,26 @@ public class Graph {
     eye().rotate(quaternion);
   }
 
-  // 9. rotateCAD
+  public void dampedLookAround(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
+    float distance = Vector.subtract(eye().position(), anchor()).magnitude();
+    float mult = (float) -Math.pow((float) Math.log10(1 + distance), 0.5f) * 0.00125f;
+    float dmx = dx * mult;
+    float dmy = dy * mult;
+    float viewX = _upperLeftCornerX;
+    float viewY = _upperLeftCornerY;
+    float viewW = _width;
+    float viewH = _height;
+    // mouse [-1, +1]
+    float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
+    float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
+    _rotX += +dmx * (1.0f - myNdc * myNdc);
+    _rotY += -dmy * (1.0f - mxNdc * mxNdc);
+    if (!_aroundTask.isActive())
+      _aroundTask.run();
+  }
+
+  // 10. rotateCAD
 
   /**
    * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0))}.
