@@ -143,9 +143,13 @@ public class Graph {
   protected float _radius;
   protected Vector _anchor;
   protected Task _spinningTask;
-  protected float _velocityI, _velocityJ, _velocityK;
+  protected float _roll, _pitch, _yaw;
   // original friction is 0.16
-  protected float _damping = 1.0f - 0.16f; // 1 - friction
+  protected float _dampingSpin = 1.0f - 0.16f; // 1 - friction
+  protected Task _translationTask;
+  protected float _dx, _dy, _dz;
+  // original friction is 0.16
+  protected float _dampingTranslation = 1.0f - 0.16f; // 1 - friction
   //Interpolator
   protected Interpolator _interpolator;
   //boundary eqns
@@ -255,21 +259,45 @@ public class Graph {
     _spinningTask = new Task(timingHandler()) {
       @Override
       public void execute() {
-        if (_velocityI == 0 && _velocityJ == 0 && _velocityK == 0)
+        if (_roll == 0 && _pitch == 0 && _yaw == 0)
           stop();
         //same as:
         //Quaternion spinningQuaternion = new Quaternion(is2D() ? 0 : _velocityI, is2D() ? 0 : _velocityJ, _velocityK);
         //eye().orbit(eye().worldDisplacement(spinningQuaternion.axis()), spinningQuaternion.angle(), anchor());
-        eye().orbit(new Quaternion(is2D() ? 0 : _velocityI, is2D() ? 0 : _velocityJ, _velocityK), anchor());
-        _velocityI *= _damping;
-        if (Math.abs(_velocityI) < .001)
-          _velocityI = 0;
-        _velocityJ *= _damping;
-        if (Math.abs(_velocityJ) < .001)
-          _velocityJ = 0;
-        _velocityK *= _damping;
-        if (Math.abs(_velocityK) < .001)
-          _velocityK = 0;
+        eye().orbit(new Quaternion(is2D() ? 0 : _roll, is2D() ? 0 : _pitch, _yaw), anchor());
+        _roll *= _dampingSpin;
+        if (Math.abs(_roll) < .001)
+          _roll = 0;
+        _pitch *= _dampingSpin;
+        if (Math.abs(_pitch) < .001)
+          _pitch = 0;
+        _yaw *= _dampingSpin;
+        if (Math.abs(_yaw) < .001)
+          _yaw = 0;
+      }
+    };
+    _translationTask = new Task(timingHandler()) {
+      @Override
+      public void execute() {
+        if (_dx == 0 && _dy == 0 && _dz == 0)
+          stop();
+
+        Node node = eye().get();
+        node.setPosition(anchor());
+        Vector vector = displacement(new Vector(_dx, _dy, _dz), node);
+        vector.multiply(-1);
+        eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()));
+
+        //eye().orbit(new Quaternion(is2D() ? 0 : _roll, is2D() ? 0 : _pitch, _yaw), anchor());
+        _dx *= _dampingTranslation;
+        if (Math.abs(_dx) < .001)
+          _dx = 0;
+        _dy *= _dampingTranslation;
+        if (Math.abs(_dy) < .001)
+          _dy = 0;
+        _dz *= _dampingTranslation;
+        if (Math.abs(_dz) < .001)
+          _dz = 0;
       }
     };
     setType(type);
@@ -3885,6 +3913,27 @@ public class Graph {
     eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()));
   }
 
+  public void dampedTranslateEye(float dx, float dy) {
+    dampedTranslateEye(dx, dy, 0);
+  }
+
+  public void dampedTranslateEye(float dx, float dy, float dz) {
+    float distance = Vector.subtract(eye().position(), anchor()).magnitude();
+    //float panScale = distance * 0.0025f;
+    //pan(dragConstraint == Constraint.PITCH ? 0 : -dx * panScale, dragConstraint == Constraint.YAW ? 0 : -dy * panScale);
+    // _dx = -dx * panScale;
+    // _dy = -dy * panScale;
+    // _dz = -dz * panScale;
+    //dampedPanX.impulse(dx / 8.);
+    //dampedPanY.impulse(dy / 8.);
+    _dx += dx / 8.;
+    _dy += dy / 8.;
+    _dz += dz / 8.;
+    if (!_translationTask.isActive())
+      _translationTask.run();
+  }
+
+
   // 5. Rotate
 
   /**
@@ -4139,16 +4188,6 @@ public class Graph {
     eye().orbit(new Quaternion(axis, angle), anchor());
   }
 
-  /**
-   * Rotates the {@link #eye()} using an arcball interface, from points {@code (pixel1X, pixel1Y)} to
-   * {@code (pixel2X, pixel2Y)} pixel positions. The {@code sensitivity} controls the gesture strength.
-   * The center of the rotation is the screen projected graph {@link #anchor()}.
-   * <p>
-   * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
-   * three-dimensional orientation using a mouse.
-   *
-   * @see #spinNode(Node, int, int, int, int, float)
-   */
   public void dampedSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
     int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
     float distance = Vector.subtract(eye().position(), anchor()).magnitude();
@@ -4162,10 +4201,10 @@ public class Graph {
     // mouse [-1, +1]
     float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
     float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
-    _velocityJ += +dmx * (1.0f - myNdc * myNdc);
-    _velocityI += -dmy * (1.0f - mxNdc * mxNdc);
-    _velocityK += -dmx * myNdc;
-    _velocityK += +dmy * mxNdc;
+    _pitch += +dmx * (1.0f - myNdc * myNdc);
+    _roll += -dmy * (1.0f - mxNdc * mxNdc);
+    _yaw += -dmx * myNdc;
+    _yaw += +dmy * mxNdc;
     if (!_spinningTask.isActive())
       _spinningTask.run();
   }
