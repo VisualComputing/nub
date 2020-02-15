@@ -130,7 +130,7 @@ public class Quaternion {
   }
 
   /**
-   * Same as {@code set(new Vector(0,0,1), angle)}.
+   * Same as {@code fromAxisAngle(new Vector(0,0,1), angle)}.
    * <p>
    * Constructs and initializes a quaternion from the specified 2d rotation {@code angle} (in radians).
    * The axis of the quaternion is Z.
@@ -684,7 +684,7 @@ public class Quaternion {
    * @return the Vector holding the roll (x coordinate of the vector), pitch (y coordinate of
    * the vector) and yaw angles (z coordinate of the vector). <b>Note:</b> The
    * order of the rotations that would produce this Quaternion (i.e., as with
-   * {@code set(roll, pitch, yaw)}) is: y,z,x.
+   * {@code fromEulerAngles(roll, pitch, yaw)}) is: y,z,x.
    * @see #fromEulerAngles(float, float, float)
    */
   public Vector eulerAngles() {
