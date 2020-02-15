@@ -143,20 +143,14 @@ public class Graph {
   protected float _radius;
   protected Vector _anchor;
   // Damped
-  protected Task _spinningTask;
-  protected float _roll, _pitch, _yaw;
-  // original friction is 0.16
-  protected float _dampingSpin = 1.0f - 0.16f; // 1 - friction
+  protected DampedTask _spinningTask;
+  protected DampedTask _translationTask;
 
   protected Task _aroundTask;
   protected float _rotX, _rotY;
   // original friction is 0.16
   protected float _aroundSpin = 1.0f - 0.16f; // 1 - friction
 
-  protected Task _translationTask;
-  protected float _dx, _dy, _dz;
-  // original friction is 0.16
-  protected float _dampingTranslation = 1.0f - 0.16f; // 1 - friction
   //Interpolator
   protected Interpolator _interpolator;
   //boundary eqns
@@ -184,6 +178,34 @@ public class Graph {
       _pixelX = pixelX;
       _pixelY = pixelY;
     }
+  }
+
+  protected abstract class DampedTask extends Task {
+    // original friction is 0.16
+    float _damp = 1.0f - 0.16f; // 1 - friction
+    float _x, _y, _z;
+
+    DampedTask(TimingHandler timingHandler) {
+      super(timingHandler);
+    }
+
+    @Override
+    public void execute() {
+      if (_x == 0 && _y == 0 && _z == 0)
+        stop();
+      action();
+      _x *= _damp;
+      if (Math.abs(_x) < .001)
+        _x = 0;
+      _y *= _damp;
+      if (Math.abs(_y) < .001)
+        _y = 0;
+      _z *= _damp;
+      if (Math.abs(_z) < .001)
+        _z = 0;
+    }
+
+    abstract void action();
   }
 
   protected TimingHandler _timingHandler;
@@ -263,41 +285,16 @@ public class Graph {
     _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
     setEye(new Node(this));
-    _spinningTask = new Task(timingHandler()) {
+    _spinningTask = new DampedTask(timingHandler()) {
       @Override
-      public void execute() {
-        if (_roll == 0 && _pitch == 0 && _yaw == 0)
-          stop();
-        //same as:
-        //Quaternion spinningQuaternion = new Quaternion(is2D() ? 0 : _velocityI, is2D() ? 0 : _velocityJ, _velocityK);
-        //eye().orbit(eye().worldDisplacement(spinningQuaternion.axis()), spinningQuaternion.angle(), anchor());
-        eye().orbit(new Quaternion(is2D() ? 0 : _roll, is2D() ? 0 : _pitch, _yaw), anchor());
-        _roll *= _dampingSpin;
-        if (Math.abs(_roll) < .001)
-          _roll = 0;
-        _pitch *= _dampingSpin;
-        if (Math.abs(_pitch) < .001)
-          _pitch = 0;
-        _yaw *= _dampingSpin;
-        if (Math.abs(_yaw) < .001)
-          _yaw = 0;
+      public void action() {
+        eye().orbit(new Quaternion(is2D() ? 0 : _x, is2D() ? 0 : _y, _z), anchor());
       }
     };
-    _translationTask = new Task(timingHandler()) {
+    _translationTask = new DampedTask(timingHandler()) {
       @Override
-      public void execute() {
-        if (_dx == 0 && _dy == 0 && _dz == 0)
-          stop();
-        eye().translate(_dx, _dy, _dz);
-        _dx *= _dampingTranslation;
-        if (Math.abs(_dx) < .001)
-          _dx = 0;
-        _dy *= _dampingTranslation;
-        if (Math.abs(_dy) < .001)
-          _dy = 0;
-        _dz *= _dampingTranslation;
-        if (Math.abs(_dz) < .001)
-          _dz = 0;
+      public void action() {
+        eye().translate(_x, _y, _z);
       }
     };
 
@@ -4251,9 +4248,9 @@ public class Graph {
     vector.multiply(-1);
     Vector translation = eye().reference() == null ? eye().worldDisplacement(vector) :
         eye().reference().displacement(vector, eye());
-    _dx += translation.x() / 5;
-    _dy += translation.y() / 5;
-    _dz += translation.z() / 5;
+    _translationTask._x += translation.x() / 5;
+    _translationTask._y += translation.y() / 5;
+    _translationTask._z += translation.z() / 5;
     if (!_translationTask.isActive())
       _translationTask.run();
   }
@@ -4273,10 +4270,10 @@ public class Graph {
     // mouse [-1, +1]
     float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
     float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
-    _pitch += +dmx * (1.0f - myNdc * myNdc);
-    _roll += -dmy * (1.0f - mxNdc * mxNdc);
-    _yaw += -dmx * myNdc;
-    _yaw += +dmy * mxNdc;
+    _spinningTask._y += +dmx * (1.0f - myNdc * myNdc);
+    _spinningTask._x += -dmy * (1.0f - mxNdc * mxNdc);
+    _spinningTask._z += -dmx * myNdc;
+    _spinningTask._z += +dmy * mxNdc;
     if (!_spinningTask.isActive())
       _spinningTask.run();
   }

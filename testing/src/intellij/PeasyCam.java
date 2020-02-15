@@ -14,7 +14,7 @@ public class PeasyCam extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.setRadius(200);
-    scene.fit();
+    scene.fit(1);
   }
 
   public void draw() {
