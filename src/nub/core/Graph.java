@@ -1711,7 +1711,7 @@ public class Graph {
     }
 
     Quaternion q = new Quaternion();
-    q.set(xAxis, xAxis.cross(direction), Vector.multiply(direction, -1));
+    q.fromRotatedBasis(xAxis, xAxis.cross(direction), Vector.multiply(direction, -1));
     eye().setOrientation(q);
   }
 
