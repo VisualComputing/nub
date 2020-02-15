@@ -147,6 +147,7 @@ public class Graph {
   protected DampedTask _translationTask;
   protected DampedTask _lookAroundTask;
   protected DampedTask _cadRotateTask;
+  protected Vector _eyeUp;
 
   //Interpolator
   protected Interpolator _interpolator;
@@ -303,7 +304,16 @@ public class Graph {
         eye().rotate(quaternion);
       }
     };
-
+    _cadRotateTask = new DampedTask(timingHandler()) {
+      @Override
+      public void action() {
+        Vector _eyeUp = eye().displacement(Graph.this._eyeUp);
+        //same as:
+        //Quaternion quaternion = Quaternion.multiply(new Quaternion(_eyeUp, _eyeUp.y() < 0.0f ? _x : -_x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_y : _y));
+        //eye().orbit(eye().worldDisplacement(quaternion.axis()), quaternion.angle(), anchor());
+        eye().orbit(Quaternion.multiply(new Quaternion(_eyeUp, _eyeUp.y() < 0.0f ? _x : -_x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_y : _y)), anchor());
+      }
+    };
     setType(type);
     if (is3D())
       setFOV((float) Math.PI / 3);
@@ -4321,16 +4331,30 @@ public class Graph {
    * @see #rotateCAD(float, float)
    */
   public void rotateCAD(float roll, float pitch, Vector upVector) {
-    Quaternion quaternion;
     if (is2D()) {
       System.out.println("Warning: rotateCAD is only available in 3D");
-      quaternion = new Quaternion();
     } else {
       Vector eyeUp = eye().displacement(upVector);
-      quaternion = Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
+      //same as:
+      //Quaternion quaternion = Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
+      //eye().orbit(eye().worldDisplacement(quaternion.axis()), quaternion.angle(), anchor());
+      eye().orbit(Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch)), anchor());
     }
-    //same as:
-    //eye().orbit(eye().worldDisplacement(quaternion.axis()), quaternion.angle(), anchor());
-    eye().orbit(quaternion, anchor());
+  }
+
+  public void dampedRotateCAD(float roll, float pitch) {
+    dampedRotateCAD(roll, pitch, new Vector(0, 1, 0));
+  }
+
+  public void dampedRotateCAD(float roll, float pitch, Vector upVector) {
+    if (is2D()) {
+      System.out.println("Warning: rotateCAD is only available in 3D");
+    } else {
+      _eyeUp = upVector;
+      _cadRotateTask._x += roll / 5;
+      _cadRotateTask._y += pitch / 5;
+      if (!_cadRotateTask.isActive())
+        _cadRotateTask.run();
+    }
   }
 }

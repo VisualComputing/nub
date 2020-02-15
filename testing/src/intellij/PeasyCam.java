@@ -9,6 +9,7 @@ import processing.event.MouseEvent;
 public class PeasyCam extends PApplet {
   //Node box1, box2;
   Scene scene;
+  boolean cad;
 
   public void settings() {
     size(800, 800, P3D);
@@ -65,12 +66,12 @@ public class PeasyCam extends PApplet {
       case RIGHT:
         if (!scene.mouseTranslateTag())
           scene.mouseDampedTranslateEye();
-        else
-          scene.scale(mouseX - pmouseX);
         break;
       case CENTER:
-        scene.mouseDampedLookAround();
-        //scene.mouseLookAround();
+        if (cad)
+          scene.mouseDampedRotateCAD();
+        else
+          scene.mouseDampedLookAround();
         break;
     }
   }
@@ -82,6 +83,8 @@ public class PeasyCam extends PApplet {
   public void keyPressed() {
     if (key == 'f')
       scene.flip();
+    if (key == 'c')
+      cad = !cad;
     if (key == 's')
       scene.fit(1);
     if (key == 'S')

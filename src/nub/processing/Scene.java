@@ -3218,4 +3218,12 @@ public class Scene extends Graph implements PConstants {
   public void mouseRotateCAD(Vector up) {
     super.rotateCAD(mouseRADX(), mouseRADY(), up);
   }
+
+  public void mouseDampedRotateCAD() {
+    super.dampedRotateCAD(mouseRADX(), mouseRADY());
+  }
+
+  public void mouseDampedRotateCAD(Vector up) {
+    super.dampedRotateCAD(mouseRADX(), mouseRADY(), up);
+  }
 }
