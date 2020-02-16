@@ -17,6 +17,7 @@ public class PeasyCam extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
+    //scene.togglePerspective();
     Node box1 = new Node(scene) {
       @Override
       public void graphics(PGraphics pg) {
@@ -62,10 +63,14 @@ public class PeasyCam extends PApplet {
       case LEFT:
         if (!scene.mouseSpinTag())
           scene.mouseDampedSpinEye();
+        //scene.mouseSpinEye();
         break;
       case RIGHT:
         if (!scene.mouseTranslateTag())
           scene.mouseDampedTranslateEye();
+        //scene.rotateEye(scene.mouseRADY(), 0, 0);
+        //scene.rotateEye(0, scene.mouseRADX(), 0);
+        //scene.rotateEye(0, 0, scene.mouseRADX());
         break;
       case CENTER:
         if (cad)

@@ -286,6 +286,8 @@ public class Graph {
     _spinningTask = new DampedTask(timingHandler()) {
       @Override
       public void action() {
+        // TODO check rotateEye signs in relation to this
+        //eye().orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor());
         eye().orbit(new Quaternion(is2D() ? 0 : isLeftHanded() ? _x : -_x, is2D() ? 0 : _y, _z), anchor());
       }
     };
@@ -3914,10 +3916,11 @@ public class Graph {
   /**
    * Translates the {@link #eye()}.
    *
-   * @see #displacement(Vector, Node)
    * @param dx screen space delta-x units in [0..width()]
    * @param dy screen space delta-y units in [0..height()]
    * @param dz screen space delta-z units in [0..1]
+   * @see #dampedTranslateEye(float, float, float)
+   * @see #displacement(Vector, Node)
    */
   public void translateEye(float dx, float dy, float dz) {
     Node node = eye().get();
@@ -4001,9 +4004,10 @@ public class Graph {
   }
 
   /**
-   * Rotate the {@link #eye()} around its world x-y-z axes according
-   * to {@code roll}, {@code pitch} and {@code yaw} radians, resp.
+   * Rotate the {@link #eye()} around the world x-y-z axes passing through {@link #anchor()},
+   * according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.
    *
+   * @see #dampedRotateEye(float, float, float)
    * @see #rotateNode(Node, float, float, float)
    */
   public void rotateEye(float roll, float pitch, float yaw) {
@@ -4200,7 +4204,7 @@ public class Graph {
 
   // only 3d eye
 
-  // 7. moveForward
+  // 7. move forward
 
   /**
    * Same as {@code translateEye(0, 0, delta / (zNear() - zFar()))}. Also rescales the {@link #eye()}
@@ -4210,31 +4214,64 @@ public class Graph {
    * @see #translateEye(float, float, float)
    */
   public void moveForward(float delta) {
-    float d1 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
+    // TODO move to translate
+    float d1 = 1, d2;
+    if (type() == Type.ORTHOGRAPHIC)
+      d1 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
     // we negate z which targets the Processing mouse wheel
     translateEye(0, 0, delta / (zNear() - zFar()));
-    float d2 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
-    if (type() == Type.ORTHOGRAPHIC)
-      if (d2 / d1 > 0 && d1 != 0)
-        eye().scale(d2 / d1);
+    if (type() == Type.ORTHOGRAPHIC) {
+      d2 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
+      if (d1 != 0)
+        if (d2 / d1 > 0)
+          eye().scale(d2 / d1);
+    }
   }
+
+  // 8. damped move forward
 
   public void dampedMoveForward(float delta) {
-    float d1 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
+    float d1 = 1, d2;
+    if (type() == Type.ORTHOGRAPHIC)
+      d1 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
     // we negate z which targets the Processing mouse wheel
     dampedTranslateEye(0, 0, delta / (zNear() - zFar()));
-    float d2 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
-    if (type() == Type.ORTHOGRAPHIC)
-      if (d2 / d1 > 0 && d1 != 0)
-        eye().scale(d2 / d1);
+    if (type() == Type.ORTHOGRAPHIC) {
+      d2 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
+      if (d1 != 0)
+        if (d2 / d1 > 0)
+          eye().scale(d2 / d1);
+    }
   }
 
-  // 7. Damped translation
+  // 9. Damped translation
 
+  /**
+   * Same as {@code dampedTranslateEye(dx, dy, 0)}.
+   *
+   * @see #translateEye(float, float, float)
+   * @see #dampedTranslateEye(float, float, float)
+   * @see #dampedMoveForward(float)
+   * @see #dampedSpinEye(int, int, int, int)
+   * @see #dampedLookAround(float, float)
+   * @see #dampedRotateCAD(float, float)
+   * @see #dampedRotateCAD(float, float, Vector)
+   */
   public void dampedTranslateEye(float dx, float dy) {
     dampedTranslateEye(dx, dy, 0);
   }
 
+  /**
+   * Translate the eye with damping.
+   *
+   * @see #translateEye(float, float, float)
+   * @see #dampedTranslateEye(float, float)
+   * @see #dampedMoveForward(float)
+   * @see #dampedSpinEye(int, int, int, int)
+   * @see #dampedLookAround(float, float)
+   * @see #dampedRotateCAD(float, float)
+   * @see #dampedRotateCAD(float, float, Vector)
+   */
   public void dampedTranslateEye(float dx, float dy, float dz) {
     Node node = eye().get();
     node.setPosition(anchor());
@@ -4248,8 +4285,32 @@ public class Graph {
       _translationTask.run();
   }
 
-  // 8. Damped spin eye
+  // 10.  TODO Damped rotate which should be factorized with dampedSpin
 
+  /**
+   * Rotate the {@link #eye()} around the world x-y-z axes passing through {@link #anchor()},
+   * according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.
+   *
+   * @see #rotateEye(float, float, float)
+   * @see #rotateNode(Node, float, float, float)
+   */
+  public void dampedRotateEye(float roll, float pitch, float yaw) {
+    /*
+    if (is2D() && (roll != 0 || pitch != 0)) {
+      roll = 0;
+      pitch = 0;
+      System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
+    }
+    eye().orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor());
+    */
+  }
+
+  // 10. Damped spin
+
+  /**
+   * @see #spinEye(int, int, int, int)
+   */
+  // TODO a isLeftHanded() is missing
   public void dampedSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
     int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
     float distance = Vector.subtract(eye().position(), anchor()).magnitude();
@@ -4271,7 +4332,7 @@ public class Graph {
       _spinningTask.run();
   }
 
-  // 9. lookAround
+  // 11. lookAround
 
   /**
    * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
@@ -4292,6 +4353,8 @@ public class Graph {
     }
   }
 
+  // 12. damped look around
+
   public void dampedLookAround(float deltaX, float deltaY) {
     if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
@@ -4308,7 +4371,7 @@ public class Graph {
     }
   }
 
-  // 10. rotateCAD
+  // 13. rotate CAD
 
   /**
    * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0))}.
@@ -4341,6 +4404,8 @@ public class Graph {
       eye().orbit(Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch)), anchor());
     }
   }
+
+  // 14. damped rotate CAD
 
   public void dampedRotateCAD(float roll, float pitch) {
     dampedRotateCAD(roll, pitch, new Vector(0, 1, 0));

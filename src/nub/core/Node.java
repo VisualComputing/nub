@@ -1119,10 +1119,8 @@ public class Node {
   }
 
   /**
-   * Rotates the node by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
-   * passes through {@code center}. The {@code quaternion} {@link Quaternion#axis()} is
-   * defined in this node coordinate system, while {@code center} is defined in the world
-   * coordinate system).
+   * Rotates the node by the {@code quaternion} (defined in the node coordinate system)
+   * around {@code center} defined in the world coordinate system.
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
@@ -1132,10 +1130,8 @@ public class Node {
    * @see #setConstraint(Constraint)
    */
   protected void orbit(Quaternion quaternion, Vector center) {
-    if (constraint() != null)
-      quaternion = constraint().constrainRotation(quaternion, this);
-    this.rotation().compose(quaternion);
-    this.rotation().normalize(); // Prevents numerical drift
+    rotation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
+    rotation().normalize(); // Prevents numerical drift
 
     // Original in nodes-0.1.x and proscene:
     //Vector vector = Vector.add(center, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), center)));
