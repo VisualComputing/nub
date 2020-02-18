@@ -108,10 +108,10 @@ public class BallAndSocket extends ConeConstraint {
   //TODO : rename, discard?
   //TODO : remove unnecessary calculations (consider this restriction only from 0 to PI)
   //TODO: look at https://wet-robots.ghost.io/simple-method-for-distance-to-ellipse/
-  public Vector apply(Vector target, Quaternion restRotation) {
-    Vector uvec = Quaternion.multiply(restRotation, new Vector(0, 1, 0));
-    Vector rvec = Quaternion.multiply(restRotation, new Vector(1, 0, 0));
-    Vector line = Quaternion.multiply(restRotation, new Vector(0, 0, 1));
+  public Vector apply(Vector target) {
+    Vector uvec = new Vector(0, 1, 0);
+    Vector rvec = new Vector(1, 0, 0);
+    Vector line = new Vector(0, 0, 1);
 
     float PI = (float) Math.PI;
     Vector f = target.get();

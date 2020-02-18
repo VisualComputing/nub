@@ -67,6 +67,7 @@ public abstract class ConeConstraint extends Constraint {
     if(Vector.cross(new Vector(0,1,0),tw, null).dot(new Vector(0,0,1)) < 0)
       angle *= -1;
     delta.compose(new Quaternion(new Vector(0, 0, 1), angle));
+    delta.normalize();
     _orientation.compose(delta); // orientation = idle * rest
     _offset = new Quaternion(twist, offset); // TODO : check offset
     _restRotation = delta;
@@ -91,22 +92,31 @@ public abstract class ConeConstraint extends Constraint {
 
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Node node) {
-    //Define how much idle rotation must change : idle * change = frame * rot
-    //Identify rotation that must be applied to move twist and up to its  new values
-    Quaternion curr = _idleRotation; //w.r.t ref
-    Quaternion next = Quaternion.compose(node.rotation(), rotation); // w.r.t ref
-    Quaternion change = Quaternion.compose(curr.inverse(), next); // w.r.t idle
-    change = Quaternion.compose(change, _offset); // w.r.t idle
-    //Decompose change in terms of twist and swing (twist vector w.r.t idle)
-    Vector tw = _restRotation.rotate(new Vector(0, 0, 1)); // w.r.t idle
-    Vector rotationAxis = new Vector(change._quaternion[0], change._quaternion[1], change._quaternion[2]);
+    //Define how much idle rotation must change according to this rules:
+    //(1) idle * idle_change = node * rotation * offset
+    //(2) idle * idle_change * rest_rotation = idle * rest_rotation * rest_change
+    //(3) offset is applied w.r.t idle space
+    Quaternion delta_idle = Quaternion.compose(_idleRotation.inverse(), node.rotation());
+    delta_idle.normalize();
+    delta_idle.compose(rotation);
+    delta_idle.normalize();
+    delta_idle.compose(_offset);
+    Quaternion delta_rest =  Quaternion.compose(_restRotation.inverse(), delta_idle);
+    delta_rest.normalize();
+    delta_rest.compose(_restRotation);
+    delta_rest.normalize();
+
+    //work w.r.t rest space
+    //Decompose delta in terms of twist and swing (twist vector w.r.t rest)
+    Vector tw = new Vector(0, 0, 1); // w.r.t idle
+    Vector rotationAxis = new Vector(delta_rest._quaternion[0], delta_rest._quaternion[1], delta_rest._quaternion[2]);
     rotationAxis = Vector.projectVectorOnAxis(rotationAxis, tw); // w.r.t idle
     //Get rotation component on Axis direction
-    Quaternion rotationTwist = new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), change.w()); //w.r.t idle
-    Quaternion rotationSwing = Quaternion.compose(change, rotationTwist.inverse()); //w.r.t idle
+    Quaternion rotationTwist = new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), delta_rest.w()); //w.r.t rest
+    Quaternion rotationSwing = Quaternion.compose(delta_rest, rotationTwist.inverse()); //w.r.t rest
     //Constraint swing
-    Vector new_pos = rotationSwing.rotate(_restRotation.rotate(new Vector(0, 0, 1))); //get twist desired target position
-    Vector constrained = apply(new_pos, _restRotation); // constraint target position
+    Vector new_pos = rotationSwing.rotate(new Vector(0, 0, 1)); //get twist desired target position
+    Vector constrained = apply(new_pos); // constraint target position
     rotationSwing = new Quaternion(tw, constrained); // get constrained swing rotation
     //Constraint twist
     //Find idle twist
@@ -119,13 +129,22 @@ public abstract class ConeConstraint extends Constraint {
       twistAngle = twistAngle < 0 ? (float) (twistAngle + 2 * Math.PI) : twistAngle;
       twistAngle = twistAngle - _max < (float) (-_min + 2 * Math.PI) - twistAngle ? _max : -_min;
     }
-    rotationTwist = new Quaternion(tw, twistAngle); //w.r.t idle
+    rotationTwist = new Quaternion(tw, twistAngle); //w.r.t rest
 
     //constrained change
     Quaternion constrained_change = Quaternion.compose(rotationSwing, rotationTwist);
     //find change in terms of frame rot
     //_idle * constrained_change = frame * rot
-    Quaternion rot = Quaternion.compose(node.rotation().inverse(), Quaternion.compose(_idleRotation, Quaternion.compose(constrained_change, _offset.inverse())));
+    Quaternion rot = Quaternion.compose(node.rotation().inverse(), _idleRotation);
+    rot.normalize();
+    rot.compose(_restRotation);
+    rot.normalize();
+    rot.compose(constrained_change);
+    rot.normalize();
+    rot.compose(_restRotation.inverse());
+    rot.normalize();
+    rot.compose(_offset.inverse());
+    rot.normalize();
     return rot;
   }
 
@@ -134,7 +153,7 @@ public abstract class ConeConstraint extends Constraint {
     return new Vector(0, 0, 0);
   }
 
-  public abstract Vector apply(Vector target, Quaternion restRotation);
+  public abstract Vector apply(Vector target);
 
 }
 
