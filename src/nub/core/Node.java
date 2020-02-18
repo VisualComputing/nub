@@ -1218,6 +1218,7 @@ public class Node {
     Node reference = reference();
     while (reference != null) {
       quaternion = Quaternion.compose(reference.rotation(), quaternion);
+      quaternion.normalize();
       reference = reference.reference();
     }
     return quaternion;
