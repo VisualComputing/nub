@@ -14,7 +14,6 @@ package nub.ik.solver.geometric;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.ik.animation.VisualizerMediator;
-import nub.ik.solver.KinematicStructure;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -26,10 +25,11 @@ public class ChainSolver extends FABRIKSolver {
   //TODO: Enable Translation of Head (Skip Backward Step)
   protected List<Node> _chain;
   protected List<? extends Node> _original;
-  protected float _current = 10e10f, _best = 10e10f;
+  protected float _current = 10e10f, _best = 10e10f, _previous = 10e10f;
   protected Node _target;
   protected Node _prevTarget;
   protected boolean _is3D = true;
+  protected int _deadlockCounter = 0;
 
   //TODO : Check this ideas, clean and refine (*)
   //----------------------------------------------------
@@ -244,8 +244,30 @@ public class ChainSolver extends FABRIKSolver {
         _avoidDeadlock(avoid);
       }
     }
+
     _current = Vector.distance(target, _chain.get(_chain.size() - 1).position());
+
+    if(Math.abs(_previous - _current) <= 0.001f){
+      _deadlockCounter++;
+    }
+    else {
+      _deadlockCounter = 0;
+    }
+
+    if(_deadlockCounter == 5){ //apply random perturbation
+      for(int i = 0; i < _chain.size(); i++){
+        Node j_i = _chain.get(i);
+        Quaternion q = Quaternion.random();
+        if(j_i.constraint() != null) j_i.constraint().constrainRotation(q, j_i);
+        j_i.rotate(q);
+      }
+      _deadlockCounter = 0;
+      _current = 10e10f;
+    }
+
     _update();
+
+    _previous = _current;
     //if(debug) addIterationRecord(_positions);
     //Check total position change
     return false;
@@ -268,7 +290,10 @@ public class ChainSolver extends FABRIKSolver {
   protected void _update() {
     if (_current < _best) {
       for (int i = 0; i < _original.size(); i++) {
-        _original.get(i).setRotation(_chain.get(i).rotation().get());
+        _original.get(i).rotation()._quaternion[0] = _chain.get(i).rotation()._quaternion[0];
+        _original.get(i).rotation()._quaternion[1] = _chain.get(i).rotation()._quaternion[1];
+        _original.get(i).rotation()._quaternion[2] = _chain.get(i).rotation()._quaternion[2];
+        _original.get(i).rotation()._quaternion[3] = _chain.get(i).rotation()._quaternion[3];
       }
       _best = _current;
     }
@@ -297,6 +322,8 @@ public class ChainSolver extends FABRIKSolver {
     } else {
       _best = 10e10f;
     }
+    _deadlockCounter = 0;
+    _previous = 10e10f;
   }
 
   @Override
@@ -689,7 +716,7 @@ public class ChainSolver extends FABRIKSolver {
     Vector axis = b.restRotation().rotate(new Vector(0,0,1));
     Vector target = rot.rotate(axis);
     //Apply constraint
-    Vector result = b.apply(target,b.restRotation());
+    Vector result = b.apply(target);
     //Apply inverse transformation
     return new Quaternion(result, target);
   }
