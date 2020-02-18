@@ -18,13 +18,13 @@ public class SimpleTRIK extends Solver {
         ;
     }
 
-    protected boolean _disable_order_swapping = true; //TODO : REMOVE!
+    protected boolean _disable_order_swapping = false; //TODO : REMOVE!
     protected Context _context;
     protected HeuristicMode _heuristicMode;
     protected Heuristic _mainHeuristic, _secondaryHeuristic, _twistHeuristic;
 
     //Steady state algorithm
-    protected float _current = 10e10f, _best = 10e10f;
+    protected float _current = 10e10f, _best = 10e10f, _previous = 10e10f;
     protected int _stepCounter;
     protected boolean  _enableTwist = true;
     protected float[] _delegationPerJoint;
@@ -49,16 +49,21 @@ public class SimpleTRIK extends Solver {
     protected void _setHeuristicMode(HeuristicMode mode){
         switch (mode){
             case FINAL:{
+                _disable_order_swapping = false;
                 _mainHeuristic = new FinalHeuristic(_context);
                 _context.setTopToBottom(true);
                 context().enableDelegation(false);
+                ((FinalHeuristic)_mainHeuristic).checkHinge(false);
                 _secondaryHeuristic = _mainHeuristic;
                 break;
             }
             case EXPRESSIVE_FINAL:{
+                _disable_order_swapping = true;
                 _mainHeuristic = new FinalHeuristic(_context);
                 _context.setTopToBottom(false);
+                context().enableDelegation(true);
                 context().setDelegationFactor(0.5f);
+                ((FinalHeuristic)_mainHeuristic).checkHinge(false);
                 _secondaryHeuristic = _mainHeuristic;
                 break;
             }
@@ -198,7 +203,6 @@ public class SimpleTRIK extends Solver {
         }else{
             for(int i = _context.chain().size() - 2; i >= 0; i--) {
                 _mainHeuristic.applyActions(i);
-                if(_enableTwist) _twistHeuristic.applyActions(i);
             }
         }
 
@@ -214,10 +218,36 @@ public class SimpleTRIK extends Solver {
         //measure the error depending on position error
         _current = _error(_context.usableChainInformation().get(_context.last()), _context.worldTarget(), _context.weightRatio(), 1);
         if(_context.debug()) System.out.println("Current :" + _current + "Best error: " + _best);
+
         _update(); //update if required
+
+        //Define dead lock if eff does not move to a better position
+        if(Math.abs(_previous - _current) <= 0.001f){
+            context().incrementDeadlockCounter();
+        }
+        else {
+            context().resetDeadlockCounter();
+        }
+
+        if(context().deadlockCounter() == 5){ //apply random perturbation
+            for(int i = 0; i < _context.usableChainInformation().size(); i++){
+                NodeInformation j_i = _context.usableChainInformation().get(i);
+                Quaternion q = Quaternion.random();
+                if(j_i.node().constraint() != null) j_i.node().constraint().constrainRotation(q, j_i.node());
+                j_i.node().rotate(q);
+            }
+            NodeInformation._updateCache(_context.usableChainInformation());
+            context().resetDeadlockCounter();
+            _current = 10e10f;
+        }
+
+
         //if(_positionError(_context.chainInformation().get(_context.last()).positionCache(), _context.worldTarget().position()) < _maxError &&
                 //_orientationError(_context.chainInformation().get(_context.last()).orientationCache(), _context.worldTarget().orientation(), true) < 1) {
         //if(_positionError(_context.chainInformation().get(_context.last()).positionCache(), _context.worldTarget().position()) <= _maxError){
+
+        _previous = _current;
+
         if(error() <= _maxError){
             return true;
         }
@@ -229,7 +259,10 @@ public class SimpleTRIK extends Solver {
         if(_context.singleStep()) System.out.println("Current : " + _current + " best " + _best);
         if (_current < _best) {
             for (int i = 0; i < _context.chain().size(); i++) {
-                _context.chain().get(i).setRotation(_context.usableChain().get(i).rotation().get());
+                _context.chain().get(i).rotation()._quaternion[0] = _context.usableChain().get(i).rotation()._quaternion[0];
+                _context.chain().get(i).rotation()._quaternion[1] = _context.usableChain().get(i).rotation()._quaternion[1];
+                _context.chain().get(i).rotation()._quaternion[2] = _context.usableChain().get(i).rotation()._quaternion[2];
+                _context.chain().get(i).rotation()._quaternion[3] = _context.usableChain().get(i).rotation()._quaternion[3];
             }
             NodeInformation._copyCache(_context.usableChainInformation(), _context.chainInformation());
             _best = _current;
@@ -255,6 +288,10 @@ public class SimpleTRIK extends Solver {
         _reset();
     }
 
+    public float bestError(){
+        return _best;
+    }
+
     @Override
     protected void _reset() {
         _context.setPreviousTarget(_context.target() == null ? null : new Node(_context.target().position().get(), _context.target().orientation().get(), 1));
@@ -274,6 +311,7 @@ public class SimpleTRIK extends Solver {
         } else {
             _best = 10e10f;
         }
+        _previous = 10e10f;
 
         //find maxLength
         float maxLength = 0;
@@ -290,7 +328,7 @@ public class SimpleTRIK extends Solver {
             _mainHeuristic = _secondaryHeuristic;
             _secondaryHeuristic = aux;
         }
-
+        context().resetDeadlockCounter();
     }
 
     public float positionError(){
@@ -358,7 +396,7 @@ public class SimpleTRIK extends Solver {
 
     @Override
     public float error() {
-        return Vector.distance(_context.chain().get(_context.chain().size() - 1).position(), target().position());
+        return Vector.distance(_context.chain().get(_context.chain().size() - 1).position(), context().worldTarget().position());
     }
 
     @Override

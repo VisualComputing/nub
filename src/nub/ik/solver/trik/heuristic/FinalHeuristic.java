@@ -11,6 +11,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PGraphics;
+
 import java.util.HashMap;
 
 public class FinalHeuristic extends Heuristic {
@@ -23,13 +24,18 @@ public class FinalHeuristic extends Heuristic {
     HashMap<String, Pair<Vector, Vector>> vectors = new HashMap<>();
     protected float _proximityWeight = 1f;
     protected float _lengthWeight = 1f;
-    protected int _smoothingIterations = 5;
+    protected int _smoothingIterations = 10;
     protected Quaternion[] _initialRotations;
+    protected boolean _checkHinge = true;
+
+    public void checkHinge(boolean check){
+        _checkHinge = check;
+    }
 
     public FinalHeuristic(Context context) {
         super(context);
         _initialRotations = new Quaternion[_context.chain().size()];
-        _log = context.debug();
+        _log = false;
     }
 
 
@@ -54,14 +60,20 @@ public class FinalHeuristic extends Heuristic {
 
     @Override
     public void applyActions(int i) {
-        if(_log) vectors.clear();
+        if(_context.debug()) vectors.clear();
         Vector target = _context.worldTarget().position();
 
         if(_smooth || _context.enableDelegation()){
+            _context.usableChainInformation().get(i + 1).updateCacheUsingReference();
             //Apply delegation
             _delegationParameter = _context.delegationAtJoint(i);
             //If smooth is enable calculate smooth parameters
-            _iterationParameter = 1f/Math.max(_smoothingIterations - _context._currentIteration(), 1);
+            int currentIteration = _context._currentIteration();
+            if(_context.singleStep()){
+                currentIteration = currentIteration / _context.chain().size();
+            }
+
+            _iterationParameter = 1f/Math.max(_smoothingIterations - currentIteration, 1);
 
             if(_log){
                 System.out.println("Delegation parameter : " + _delegationParameter);
@@ -70,11 +82,13 @@ public class FinalHeuristic extends Heuristic {
             }
 
             float k = Math.min(1,_delegationParameter);
-            //if(!_context.singleStep()) k += (1.f - k) * _iterationParameter;
+            k += (1.f - k) * _iterationParameter;
+            _delegationParameter = k;
             float remaining_work = 1 - k;
+            if(_log)System.out.println("Final Delegation parameter : " + _delegationParameter);
 
-            Vector t = Vector.subtract(target, _context.chainInformation().get(0).positionCache());
-            Vector eff = Vector.subtract(_context.endEffectorInformation().positionCache(), _context.chainInformation().get(0).positionCache());
+            Vector t = Vector.subtract(target, _context.usableChainInformation().get(0).positionCache());
+            Vector eff = Vector.subtract(_context.endEffectorInformation().positionCache(), _context.usableChainInformation().get(0).positionCache());
             float t_m = t.magnitude(), eff_m = eff.magnitude();
 
             float length_diff = t_m - eff_m;
@@ -82,6 +96,8 @@ public class FinalHeuristic extends Heuristic {
 
             float smooth_length = t_m - length_diff * remaining_work;
             Quaternion smooth_rot = new Quaternion(rot_diff.axis(), rot_diff.angle() * k);
+            smooth_rot = Quaternion.slerp(new Quaternion(rot_diff.axis(), 0), rot_diff, k);
+
 
 
             Vector error = Vector.subtract(eff, t);
@@ -94,7 +110,7 @@ public class FinalHeuristic extends Heuristic {
             t.multiply(smooth_length);
 
             //Use TRIK heuristic
-            Vector v = Vector.subtract(_context.usableChainInformation().get(i).positionCache(), _context.worldTarget().position());
+            /*Vector v = Vector.subtract(_context.usableChainInformation().get(i).positionCache(), _context.worldTarget().position());
             v.subtract(_context.usableChainInformation().get(i+1).positionCache());
             v.add(_context.endEffectorInformation().positionCache());
             v.normalize();
@@ -102,9 +118,35 @@ public class FinalHeuristic extends Heuristic {
             Vector t_des = Vector.subtract(_context.endEffectorInformation().positionCache(), _context.usableChainInformation().get(i + 1).positionCache());
             t_des.add(v);
             t_des.add(_context.usableChainInformation().get(i).positionCache());
-            target = t_des;
+            target = t_des;*/
+
+            Vector eff_to_j_i1 = Vector.subtract(_context.endEffectorInformation().positionCache(), _context.usableChainInformation().get(i + 1).positionCache());
+            float eff_to_j_i1_m = eff_to_j_i1.magnitude();
+            Vector j_i1_proj = Vector.subtract(_context.worldTarget().position(), eff_to_j_i1);
+            Vector j_i_proj = Vector.subtract(j_i1_proj, _context.usableChainInformation().get(i).positionCache());
+            j_i_proj.normalize();
+            j_i_proj.multiply(Vector.distance(_context.usableChainInformation().get(i).positionCache(), _context.usableChainInformation().get(i + 1).positionCache()));
+            j_i_proj.add(_context.usableChainInformation().get(i).positionCache());
+
+            Vector aux = Vector.subtract(target, j_i_proj);
+            aux.normalize();
+            aux.multiply(eff_to_j_i1_m);
+            target = Vector.add(j_i_proj, aux);
+
+            vectors.put("j_i_proj ", new Pair<>(_context.usableChainInformation().get(i).positionCache(), j_i_proj));
+            vectors.put("j_i1_proj ", new Pair<>(_context.usableChainInformation().get(i).positionCache(), j_i1_proj));
+            vectors.put("eff_ji1 ", new Pair<>(_context.usableChainInformation().get(i + 1).positionCache(), _context.endEffectorInformation().positionCache()));
+
+            if(_log) {
+                System.out.println(" t_m " + t_m + " p0" + _context.usableChainInformation().get(0).positionCache() + " rem " + remaining_work + " k " + k);
+                System.out.println(" t : " + target + "mag" + target.magnitude());
+                System.out.println("smooth t : " + target + "mag" + target.magnitude());
+                System.out.println("J_i pos : " + _context.usableChainInformation().get(i).positionCache() + " vs " + _context.usableChainInformation().get(i).node().position());
+                System.out.println("J_i1 pos : " + _context.usableChainInformation().get(i + 1).positionCache() + " vs " + _context.usableChainInformation().get(i + 1).node().position());
+            }
 
             //target = Vector.add(t, _context.chainInformation().get(0).positionCache());
+
 
             if(_log) {
                 System.out.println("delegation factor : " + k);
@@ -112,8 +154,10 @@ public class FinalHeuristic extends Heuristic {
                 System.out.println("Error covered by current joint: " + smooth_error);
                 System.out.println("smooth t : " + target + "mag" + target.magnitude());
                 System.out.println("smooth t : " + target + "mag" + target.magnitude());
-
                 System.out.println("Eff length " + eff_m + " target length " + t_m + " t des length " + smooth_length);
+            }
+
+            if(_context.debug()){
                 vectors.put("st ", new Pair<>(target, _context.endEffectorInformation().positionCache()));
                 vectors.put("t_des ", new Pair<>(_context.usableChainInformation().get(0).positionCache(), target));
             }
@@ -131,10 +175,10 @@ public class FinalHeuristic extends Heuristic {
         }
 
         if(i == _context.last() - 1){
-            Quaternion q_i = applyCCD(j_i, eff_wrt_j_i, target_wrt_j_i, true);
+            Quaternion q_i = applyCCD(i, j_i, eff_wrt_j_i, target_wrt_j_i, true);
             if(_smooth || _context.enableDelegation()) {
                 q_i = new Quaternion(q_i.axis(), q_i.angle() * _delegationParameter);
-                //if(_smooth) q_i = _clampRotation(_initialRotations[i], q_i, _smoothAngle); //clamp
+                if(_smooth) q_i = _clampRotation(j_i.node().rotation(), _initialRotations[i], Quaternion.compose(j_i.node().rotation(), q_i), _smoothAngle); //clamp
             }
             j_i.rotateAndUpdateCache(q_i, false, _context.endEffectorInformation()); //Apply local rotation //TODO: Enable constraint?
             return;
@@ -145,7 +189,10 @@ public class FinalHeuristic extends Heuristic {
         Vector eff_wrt_j_i1 = j_i1.locationWithCache(_context.endEffectorInformation().positionCache());
         Vector target_wrt_j_i1 = j_i1.locationWithCache(target);
         //Find the two solutions of the triangulation problem on joint j_i1
-        Solution[] solutions = applyTriangulation(i, j_i, j_i1, eff_wrt_j_i1, target_wrt_j_i1, true);
+        Solution[] solutions;
+        solutions = applyTriangulation(i, j_i, j_i1, eff_wrt_j_i1, target_wrt_j_i1, _checkHinge);
+        //if(!_smooth) solutions = applyTriangulation(i, j_i, j_i1, eff_wrt_j_i1, target_wrt_j_i1, true);
+        //else solutions = new Solution[]{new Solution(new Quaternion(), 0)};
 
         //Keep original State of J_i and J_i1
         NodeInformation endEffector =_context.endEffectorInformation();
@@ -159,7 +206,7 @@ public class FinalHeuristic extends Heuristic {
         NodeState[] final_eff = new NodeState[solutions.length];
 
         int best = 0; // keep track of best solution
-        float best_dist = Float.MAX_VALUE;
+        float best_dist = Float.MAX_VALUE, best_angle = Float.MAX_VALUE;
         for(int s = 0; s < solutions.length; s++){
             float a  = 0; //amount or rotation applied
             j_i1.updateCacheUsingReference();
@@ -173,15 +220,15 @@ public class FinalHeuristic extends Heuristic {
 
 
             //Apply CCD t times (best local action if joint rotation constraints are quite different)
-            j_i.rotateAndUpdateCache(applyCCD(j_i,j_i.locationWithCache(endEffector.positionCache()), j_i.locationWithCache(target), true), true, endEffector);
+            j_i.rotateAndUpdateCache(applyCCD(i,j_i,j_i.locationWithCache(endEffector.positionCache()), j_i.locationWithCache(target), true), true, endEffector);
             //Apply twisting if possible
 
 
             for(int t = 0; t < _times; t++){
                 j_i1.updateCacheUsingReference();
-                Quaternion q_i1 = applyCCD(j_i1,j_i1.locationWithCache(endEffector.positionCache()), j_i1.locationWithCache(target), true);
+                Quaternion q_i1 = applyCCD(i+1,j_i1,j_i1.locationWithCache(endEffector.positionCache()), j_i1.locationWithCache(target), true);
                 j_i1.rotateAndUpdateCache(q_i1, false, endEffector);
-                Quaternion q_i = applyCCD(j_i,j_i.locationWithCache(endEffector.positionCache()), j_i.locationWithCache(target), true);
+                Quaternion q_i = applyCCD(i, j_i,j_i.locationWithCache(endEffector.positionCache()), j_i.locationWithCache(target), true);
                 j_i.rotateAndUpdateCache(q_i, false, endEffector);
             }
             j_i1.updateCacheUsingReference();
@@ -219,11 +266,13 @@ public class FinalHeuristic extends Heuristic {
                 System.out.println("---> constraint error : " + solutions[s].value());
             }
 
-
-            dist = _iterationParameter * dist + solutions[s].value() + a * 0.5f;// + length_distance * _lengthWeight;
-
+            if(_log)System.out.println("iteration_ param " + _iterationParameter);
 
             //if(_iterationParameter < 1) dist = solutions.get(s).getValue();
+            dist =  dist + 0.1f*a;// + solutions[s].value();// + length_distance * _lengthWeight;
+            //dist = _iterationParameter * dist + solutions[s].value() + a * 0.5f;// + length_distance * _lengthWeight;
+
+
             if(dist < best_dist){
                 best_dist = dist;
                 best = s;
@@ -235,7 +284,7 @@ public class FinalHeuristic extends Heuristic {
             j_i1.node().setRotation(initial_j_i1.rotation().get());
             endEffector.setCache(initial_eff.position().get(), initial_eff.orientation().get());
 
-            if(_log) {
+            if(_context.debug()) {
                 vectors.put("sol " + (s + 1), new Pair<>(final_j_i[s].position().get(), final_j_i1[s].position().get()));
                 vectors.put("sol " + (s + 1) + " d : " + String.format("%.3f", dist), new Pair<>(final_j_i1[s].position().get(), final_eff[s].position().get()));
             }
@@ -258,7 +307,6 @@ public class FinalHeuristic extends Heuristic {
             j_i.node().setConstraint(null);
             j_i.node().setRotation(final_j_i[best].rotation().get());
             j_i.node().setConstraint(c_i);
-
             j_i1.setCache(final_j_i1[best].position().get(), final_j_i1[best].orientation().get());
             Constraint c_i1 = j_i1.node().constraint();
             j_i1.node().setConstraint(null);
@@ -300,13 +348,13 @@ public class FinalHeuristic extends Heuristic {
             //Quaternion q_i1 = Quaternion.compose(j_i1.node().rotation().inverse(), final_j_i1);
             //q_i1 = new Quaternion(q_i1.axis(), q_i1.angle() * w);
             //clamp
-            Quaternion q_i = _clampRotation(_initialRotations[i], final_j_i, _smoothAngle);
-            Quaternion q_i1 = _clampRotation(_initialRotations[i + 1], final_j_i1, _smoothAngle);
+            Quaternion q_i = _clampRotation(j_i.node().rotation(), _initialRotations[i], final_j_i, _smoothAngle);
+            Quaternion q_i1 = _clampRotation(j_i1.node().rotation(), _initialRotations[i + 1], final_j_i1, _smoothAngle);
 
-            q_i = Quaternion.compose(j_i.node().rotation().inverse(), q_i);
-            q_i.normalize();
-            q_i1 = Quaternion.compose(j_i1.node().rotation().inverse(), q_i1);
-            q_i1.normalize();
+            //q_i = Quaternion.compose(j_i.node().rotation().inverse(), q_i);
+            //q_i.normalize();
+            //q_i1 = Quaternion.compose(j_i1.node().rotation().inverse(), q_i1);
+            //q_i1.normalize();
 
             j_i.rotateAndUpdateCache(q_i, true, endEffector);
             j_i1.updateCacheUsingReference();
@@ -343,13 +391,14 @@ public class FinalHeuristic extends Heuristic {
     }
 
     protected Solution[] applyTriangulation(int i , NodeInformation j_i, NodeInformation j_i1, Vector endEffector, Vector target, boolean checkHinge){
-        //checkHinge = false;
+        //checkHinge = true;
+        Hinge h_i1 = null;
         Vector v_i = j_i1.locationWithCache(j_i.positionCache());
         Vector normal;
         //In this case we apply triangulation over j_i1
-        if(checkHinge && j_i1.node().constraint() instanceof Hinge){
+        if(j_i1.node().constraint() instanceof Hinge){
             //Project endEffector to lie on the plane defined by the axis of rotation
-            Hinge h_i1 = ((Hinge) j_i1.node().constraint());
+            h_i1 = ((Hinge) j_i1.node().constraint());
             //1. find rotation axis
             normal = h_i1.orientation().rotate(new Vector(0,0,1));
             if(_log) System.out.println("normal " + normal);
@@ -359,8 +408,9 @@ public class FinalHeuristic extends Heuristic {
             v_i = Vector.projectVectorOnPlane(v_i, normal);
             endEffector = Vector.projectVectorOnPlane(endEffector, normal);
             target = Vector.projectVectorOnPlane(target, normal);
-        } else if(checkHinge && j_i1.node().constraint() instanceof BallAndSocket){
-            Hinge h_i1 = fixConeConstraint(i, j_i1, endEffector, target);
+        } else if(false && j_i1.node().constraint() instanceof BallAndSocket){
+            h_i1 = fixConeConstraint(i, j_i, j_i1, endEffector, target, true);
+
             //1. find rotation axis
             normal = h_i1.orientation().rotate(new Vector(0,0,1));
             if(_log) System.out.println("normal " + normal);
@@ -427,15 +477,13 @@ public class FinalHeuristic extends Heuristic {
         //Find limits centered at angle
         float max = (float)Math.PI;
         float min = -max;
-        if(checkHinge && (j_i1.node().constraint() instanceof BallAndSocket || j_i1.node().constraint() instanceof Hinge)) {
+        /*if(h_i1 != null) {
             Quaternion q_i1 = j_i1.node().rotation().get(); //w.r.t hinge reference
-            Hinge h_i1 = null;
-
-            if(j_i1.node().constraint() instanceof Hinge) h_i1 = ((Hinge) j_i1.node().constraint());
-            else if(j_i1.node().constraint() instanceof BallAndSocket) h_i1 = fixConeConstraint(i, j_i1, endEffector, target);
 
             q_i1 = Quaternion.compose(h_i1.orientation().inverse(), q_i1);
+            q_i1.normalize();
             q_i1 = Quaternion.compose(q_i1, h_i1.restRotation());
+            q_i1.normalize();
 
             Vector rotationAxis = new Vector(q_i1._quaternion[0], q_i1._quaternion[1], q_i1._quaternion[2]);
             rotationAxis = Vector.projectVectorOnAxis(rotationAxis, new Vector(0, 0, 1));
@@ -455,7 +503,7 @@ public class FinalHeuristic extends Heuristic {
                 System.out.println("--- rotation axis : " + rotationAxis);
                 System.out.println("--- rotation tw : " + rotationTwist.axis() + " a : " + rotationTwist.angle());
             }
-        }
+        }*/
         if(_log) {
             System.out.println("--- max limit : " + Math.toDegrees(max));
             System.out.println("--- min limit : " + Math.toDegrees(min));
@@ -532,7 +580,9 @@ public class FinalHeuristic extends Heuristic {
         deltas[0] = new Solution(new Quaternion(normal, constrained_angle_1), 1 - (Math.abs(constrained_angle_1) + 1)/(Math.abs(angle_1) + 1));
         deltas[1] = new Solution(new Quaternion(normal, constrained_angle_2), 1 - (Math.abs(constrained_angle_2) + 1)/(Math.abs(angle_2) + 1));
         for(Solution delta : deltas){
-            if(_smooth) delta.setQuaternion(_clampRotation(delta.quaternion(), _smoothAngle));
+            if(_smooth){
+                //delta.setQuaternion(_clampRotation(j_i1.node().rotation(), _initialRotations[i + 1], Quaternion.compose(j_i1.node().rotation(),delta.quaternion()), _smoothAngle));
+            }
             if(j_i1.node().constraint() != null){
                 delta.setQuaternion(j_i1.node().constraint().constrainRotation(delta.quaternion(), j_i1.node()));
             }
@@ -577,7 +627,7 @@ public class FinalHeuristic extends Heuristic {
     }
 
 
-    protected Quaternion applyCCD(NodeInformation j_i, Vector endEffector, Vector target, boolean checkHinge){
+    protected Quaternion applyCCD(int i, NodeInformation j_i, Vector endEffector, Vector target, boolean checkHinge){
         Vector p = endEffector;
         Vector q = target;
         if(checkHinge && j_i.node().constraint() != null && j_i.node().constraint() instanceof Hinge) {
@@ -592,7 +642,7 @@ public class FinalHeuristic extends Heuristic {
         //Apply desired rotation removing twist component
         Quaternion delta = new Quaternion(p, q);
         if(_smooth){
-            delta = _clampRotation(delta, _smoothAngle);
+            //delta =_clampRotation(j_i.node().rotation(), _initialRotations[i], Quaternion.compose(j_i.node().rotation(), delta), _smoothAngle);
         }
         if(j_i.node().constraint() != null){
             delta = j_i.node().constraint().constrainRotation(delta, j_i.node());
@@ -601,42 +651,72 @@ public class FinalHeuristic extends Heuristic {
         return delta;
     }
 
-
     /*Check the axis in which there is greater change
     *
     * Returns: a normal pointing out the found plane along with the max and min angle of rotation
     * */
     public Hinge fixConeConstraint(int i, NodeInformation j_i1, Vector endEffector, Vector target){
         BallAndSocket cone = (BallAndSocket) j_i1.node().constraint();
-        Quaternion node_rotation = j_i1.node().rotation();
-        Quaternion idle = cone.idleRotation();
-        Quaternion rest = cone.restRotation();
-        Quaternion offset = cone.offset();
 
         Quaternion rotation = new Quaternion(endEffector, target);
+
+        if(rotation.angle() < 0.0001f){
+            //Use J_i and j_i1 instead
+            Vector prev_bone = j_i1.locationWithCache(_context.usableChainInformation().get(i).positionCache());
+            prev_bone.multiply(-1);
+            rotation = new Quaternion(prev_bone, target);
+        }
+
         Vector axis = rotation.axis();
         //Find max and min rotation
-        Quaternion q1 = cone.constrainRotation(new Quaternion(axis, (float) Math.PI * 0.7f), j_i1.node());
-        Quaternion q2 = cone.constrainRotation(new Quaternion(axis, (float) -Math.PI * 0.7f), j_i1.node());
+        Quaternion r1 = new Quaternion(axis, (float) Math.PI * 0.8f);
+        Quaternion r2 = new Quaternion(axis, (float) -Math.PI * 0.8f);
+
+        Quaternion q1 = cone.constrainRotation(new Quaternion(axis, (float) Math.PI * 0.98f), j_i1.node());
+        Quaternion q2 = cone.constrainRotation(new Quaternion(axis, (float) -Math.PI * 0.98f), j_i1.node());
 
         Vector f1 = q1.rotate(_context.chain().get(i+2).translation());
         Vector f2 = q2.rotate(_context.chain().get(i+2).translation());
 
+        Vector fu1 = r1.rotate(_context.chain().get(i+2).translation());
+        Vector fu2 = r2.rotate(_context.chain().get(i+2).translation());
+
         if(_log) {
-            vectors.put("f1 ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(f1)));
-            vectors.put("f2 ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(f2)));
+            System.out.println("------------------------------------------------");
+            System.out.println("------------------------------------------------");
+
+            System.out.println("Target : " + target);
+            System.out.println("Eff : " + endEffector);
+            System.out.println("Angle : " + Vector.angleBetween(target, endEffector));
+            System.out.println("rotation : " + rotation.axis() + " a : " + rotation.angle());
+            System.out.println("r1 : " + r1.axis() + " a : " + r1.angle());
+            System.out.println("r2 : " + r2.axis() + " a : " + r2.angle());
+
+            System.out.println("q1 : " + q1.axis() + " a : " + q1.angle());
+            System.out.println("q2 : " + q2.axis() + " a : " + q2.angle());
+
+            System.out.println("f1 " + j_i1.node().worldLocation(f1));
+            System.out.println("f2 " + j_i1.node().worldLocation(f1));
+            System.out.println("fu1 " + j_i1.node().worldLocation(f1));
+            System.out.println("fu2 " + j_i1.node().worldLocation(f1));
+            System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+            System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         }
 
+        if(_context.debug()) {
+            vectors.put("f1 ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(f1)));
+            vectors.put("f2 ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(f2)));
+            vectors.put("fu1 ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(fu1)));
+            vectors.put("fu2 ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(fu2)));
 
-
+        }
 
         //Define Hinge vector
         Hinge h = new Hinge(q1.angle(), q2.angle(), new Quaternion(), axis.orthogonalVector(), axis);
         return h;
     }
 
-
-    public Hinge fixConeConstraintAlt(NodeInformation j_i1, Vector endEffector, Vector target) {
+    public Hinge fixConeConstraint(int i, NodeInformation j_i, NodeInformation j_i1, Vector endEffector, Vector target, boolean enable_offset) {
         BallAndSocket cone = (BallAndSocket) j_i1.node().constraint();
         Quaternion node_rotation = j_i1.node().rotation();
         Quaternion idle = cone.idleRotation();
@@ -650,23 +730,307 @@ public class FinalHeuristic extends Heuristic {
         Vector line = new Vector(0, 0, 1);
 
         //1. Find normal
-        Vector normal = Vector.cross(endEffector, target, null);
+        Vector normal = null;
+
+        if(_log) {
+            System.out.println("Eff " + endEffector);
+            System.out.println("target " + target);
+        }
+
+        //1.1 Edge case if both vectors are collinear define plane using j_i
+        if (Vector.angleBetween(endEffector, target) < 0.0001) {
+            Vector v1 = j_i1.locationWithCache(j_i);
+            v1.multiply(-1);
+            if(_log) System.out.println("v1 " + v1 + "angle with eff " + Vector.angleBetween(v1, endEffector));
+            //Edge case: If vectors are collinear choose any vector
+            if (Vector.angleBetween(v1, endEffector) < 0.0001) {
+                v1 = j_i1.locationWithCache(_context.usableChainInformation().get(i + 2));
+                normal = v1.orthogonalVector();
+            } else {
+                normal = Vector.cross(v1, endEffector, null);
+            }
+        } else {
+            normal = Vector.cross(endEffector, target, null);
+        }
         normal.normalize();
-        System.out.println("||---> normal : " + normal.normalize(null));
+
+        if(_log) System.out.println("||---> normal : " + normal);
 
         //2. Express w.r.t idle
-        Quaternion jointToIdle = Quaternion.compose(rest.inverse(), Quaternion.compose(idle.inverse(), Quaternion.compose(offset, node_rotation)));
+        Quaternion jointToIdle = Quaternion.compose(offset, idle.inverse());
+        jointToIdle.normalize();
+        jointToIdle.compose(node_rotation);
+        jointToIdle.normalize();
+        if(_log) System.out.println("<<<<jointToIdle : " + jointToIdle.axis() + jointToIdle.angle());
+
+        //w.r.t rest
+        jointToIdle = Quaternion.compose(rest.inverse(), jointToIdle);
+        jointToIdle.normalize();
+        if(_log) System.out.println("<<<<jointToRest : " + jointToIdle.axis() + jointToIdle.angle());
+
+        Vector normal_wrt_idle = jointToIdle.rotate(normal);
+        if(_log) System.out.println("||---> normal : " + normal_wrt_idle);
+
+        //3. Find the ellipse - line intersection
+        //For each Quadrant solve the quadratic equation and keep intersections
+        int n_intersections = 0;
+        float left = findSemiaxis(1, cone.left());
+        float right = findSemiaxis(1, cone.right());
+        float up = findSemiaxis(1, cone.up());
+        float down = findSemiaxis(1, cone.down());
+        float line_slope, line_offset;
+        boolean opposite = up == down && left == right;
+
+        boolean swap = false;
+        //Edge case: if line is vertical swap x, y coordinates
+        if(normal.y() < 0.00001f){
+            //swap
+            float aux = left;
+            left = down;
+            down = aux;
+            aux = right;
+            right = up;
+            up = aux;
+            swap = true;
+            line_slope = -normal_wrt_idle.y() / normal_wrt_idle.x();
+            line_offset = -normal_wrt_idle.z()/ normal_wrt_idle.x();
+        } else{
+            line_slope = -normal_wrt_idle.x() / normal_wrt_idle.y();
+            line_offset = -normal_wrt_idle.z()/ normal_wrt_idle.y();
+        }
+        if(!enable_offset){
+            line_offset = 0;
+        }
+
+
+
+        if(_log) {
+            System.out.println("=====================================");
+            System.out.println("=====================================");
+
+            System.out.println("left " + left + " right " + right + " up " + up + " down " + down);
+            System.out.println(" line_slope " + line_slope + " offset " + line_offset);
+
+
+            System.out.println("=====================================");
+            System.out.println("=====================================");
+        }
+
+
+        Vector[] intersections;
+        Vector[] valid_intersections = new Vector[2];
+
+        //3.1 Upper  Right Quadrant - valid intersections: x >= 0, y >= 0
+        intersections = lineEllipseIntersection(line_slope, line_offset, right, up);
+        n_intersections = keepValidIntersections(1,1, intersections, valid_intersections, n_intersections, opposite, swap);
+        //3.2 Upper  Left Quadrant - valid intersections: x <= 0, y >= 0
+        if(n_intersections < 2) {
+            intersections = lineEllipseIntersection(line_slope, line_offset, left, up);
+            n_intersections = keepValidIntersections(-1, 1, intersections, valid_intersections, n_intersections, opposite, swap);
+            //3.3 Down  Left Quadrant - valid intersections: x <= 0, y <= 0
+            if(n_intersections < 2) {
+                intersections = lineEllipseIntersection(line_slope, line_offset, left, down);
+                n_intersections = keepValidIntersections(-1, -1, intersections, valid_intersections, n_intersections, false, swap);
+                //3.3 Down right Quadrant - valid intersections: x <= 0, y <= 0
+                if(n_intersections < 2) {
+                    intersections = lineEllipseIntersection(line_slope, line_offset, right, down);
+                    n_intersections = keepValidIntersections(1, -1, intersections, valid_intersections, n_intersections, false, swap);
+                }
+            }
+        }
+
+        if(n_intersections < 2){
+            //repeat the process without considering offset
+            //System.out.println("No intersections were found!!!!");
+            return fixConeConstraint(i, j_i, j_i1, endEffector, target, false);
+        }
+
+        //4. Back to node space
+        if(_log){
+            System.out.println("v1 ---- " + valid_intersections[0]);
+            System.out.println("v2 ---- " + valid_intersections[1]);
+        }
+
+
+        Vector f1 = Vector.add(line, Vector.multiply(rvec, valid_intersections[0].x()));
+        f1 = Vector.add(f1, Vector.multiply(uvec, valid_intersections[0].y()));
+        f1.normalize();
+        f1.multiply(target.magnitude());
+
+        Vector f2 = Vector.add(line, Vector.multiply(rvec, valid_intersections[1].x()));
+        f2 = Vector.add(f2, Vector.multiply(uvec, valid_intersections[1].y()));
+        f2.normalize();
+        f2.multiply(target.magnitude());
+
+        if(_log) {
+            System.out.println("f1 ---- " + valid_intersections[0]);
+            System.out.println("f2 ---- " + valid_intersections[1]);
+        }
+
+        Vector tw = new Vector(0, 0, 1); // w.r.t idle
+        //f1 to j_i1 node
+        Quaternion idle_to_j_i1 = Quaternion.compose(node_rotation.inverse(), idle);
+        idle_to_j_i1.normalize();
+        idle_to_j_i1.compose(offset.inverse());
+        idle_to_j_i1.normalize();
+        //w.r.t rest
+        idle_to_j_i1.compose(rest);
+        idle_to_j_i1.normalize();
+        if(_log) System.out.println("<<<<jointToIdle : " + jointToIdle.axis() + jointToIdle.angle());
+
+
+
+        Vector f1_wrt_ji1 = idle_to_j_i1.rotate(f1);
+        Vector f2_wrt_ji1 = idle_to_j_i1.rotate(f2);
+        Vector tw_wrt_ji1 = idle_to_j_i1.rotate(tw);
+        Vector rg_wrt_ji1 = idle_to_j_i1.rotate(rvec);
+        Vector up_wrt_ji1 = idle_to_j_i1.rotate(uvec);
+        if(_log) {
+            System.out.println("f1 wrt j ---- " + f1_wrt_ji1);
+            System.out.println("f2 wrt j ---- " + f2_wrt_ji1);
+        }
+
+        Quaternion q1 = new Quaternion(tw , f1);
+        Quaternion q2 = new Quaternion(tw , f2);
+
+        Quaternion rot11 = new Quaternion(tw_wrt_ji1, f1_wrt_ji1);
+        Quaternion rot22 = new Quaternion(tw_wrt_ji1, f2_wrt_ji1);
+
+        if(_log) {
+            System.out.println("rot1 " + q1.axis() + Math.toDegrees(q1.angle()));
+            System.out.println("rot2 " + q2.axis() + Math.toDegrees(q2.angle()));
+
+            System.out.println("rot11 " + rot11.axis() + Math.toDegrees(rot11.angle()));
+            System.out.println("rot22 " + rot22.axis() + Math.toDegrees(rot22.angle()));
+
+        }
+        //return Hinge parameters
+        Vector normal1 = rot11.axis();
+        if(_log) System.out.println("||---- normal 1 " + normal1);
+
+        Hinge h = new Hinge(rot22.angle(), rot11.angle(), cone.idleRotation(), normal1.orthogonalVector(), normal1);
+
+        if(_context.debug()) {
+            vectors.put("f1 ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(f1_wrt_ji1)));
+            vectors.put("f2 ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(f2_wrt_ji1)));
+            vectors.put("tw ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(Vector.multiply(tw_wrt_ji1, 10))));
+            vectors.put("right ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(Vector.multiply(rg_wrt_ji1, 30))));
+            vectors.put("up ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(Vector.multiply(up_wrt_ji1, 30))));
+
+            vectors.put("normal! ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(Vector.multiply(normal1, 30))));
+            vectors.put("real_normal! ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(Vector.multiply(normal, 30))));
+            vectors.put("diff ", new Pair<>(j_i1.node().worldLocation(endEffector), j_i1.node().worldLocation(target)));
+            vectors.put("eff ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(endEffector)));
+        }
+
+
+        return h;
+    }
+
+    protected int keepValidIntersections(int sign_x, int sign_y, Vector[] intersections, Vector[] valid_intersections, int n_intersections, boolean opposite, boolean swap){
+        if(intersections == null) return n_intersections;
+        for(Vector intersection : intersections) {
+            if(Math.signum(intersection.x()) * sign_x >= 0 && Math.signum(intersection.y()) * sign_y >= 0) {
+                //The solution is valid
+                if(swap){
+                    float aux = intersection.x();
+                    intersection.setX(intersection.y());
+                    intersection.setY(aux);
+                }
+                valid_intersections[n_intersections++] = intersection;
+            } else if(opposite && (Math.signum(intersection.x()) * sign_x <= 0 && Math.signum(intersection.y()) * sign_y <= 0)){
+                //The solution is valid
+                if(swap){
+                    float aux = intersection.x();
+                    intersection.setX(intersection.y());
+                    intersection.setY(aux);
+                }
+                valid_intersections[n_intersections++] = intersection;
+            }
+            if(n_intersections == 2) return n_intersections;
+        }
+        return n_intersections;
+    }
+
+
+    protected float findSemiaxis(float z, float angle){
+        return (float) (Math.tan(angle) * z);
+    }
+
+
+    protected Vector[] lineEllipseIntersection(float m, float c, float a, float b){
+        float a2 = a * a;
+        float b2 = b * b;
+        float c2 = c * c;
+        float m2 = m * m;
+
+        float A = a2 * m2 + b2;
+        float B = 2 * a2 * m * c;
+        float C = a2 * (c2 - b2);
+
+        float B2 = B * B;
+
+        //solve quadratic equation
+        float aux = B2 - 4 * A * C;
+        if(aux < 0) return null;
+        aux = (float) Math.sqrt(aux);
+
+        float x1 = (B2 + aux) / (2 * A);
+        float y1 = m * x1 + c;
+        float x2 = (B2 - aux) / (2 * A);
+        float y2 = m * x2 + c;
+        return new Vector[]{new Vector(x1, y1), new Vector(x2, y2)};
+    }
+
+
+
+        public Hinge fixConeConstraintAlt(NodeInformation j_i, NodeInformation j_i1, Vector endEffector, Vector target) {
+        BallAndSocket cone = (BallAndSocket) j_i1.node().constraint();
+        Quaternion node_rotation = j_i1.node().rotation();
+        Quaternion idle = cone.idleRotation();
+        Quaternion rest = cone.restRotation();
+        Quaternion offset = cone.offset();
+
+        //Quaternion change = Quaternion.compose(idle.inverse(), Quaternion.compose(node_rotation, offset)); //w.r.t idle
+
+        Vector uvec = new Vector(0, 1, 0);
+        Vector rvec = new Vector(1, 0, 0);
+        Vector line = new Vector(0, 0, 1);
+
+        //1. Find normal
+        Vector normal = null;
+        //1.1 Edge case if both vectors are collinear define plane using j_i
+        if(Vector.angleBetween(endEffector, target) < 0.0001){
+            Vector v1 = j_i1.locationWithCache(j_i);
+            v1.multiply(-1);
+            //Edge case: If vectors are collinear choose any vector
+            if(Vector.angleBetween(v1, endEffector) < 0.0001){
+                normal = v1.orthogonalVector();
+            } else{
+                normal = Vector.cross(v1, endEffector, null);
+            }
+        } else {
+            normal = Vector.cross(endEffector, target, null);
+        }
+        normal.normalize();
+
+        System.out.println("||---> normal : " + normal);
+
+        //2. Express w.r.t idle
+        Quaternion jointToIdle = Quaternion.compose(offset.inverse(), idle.inverse());
+        jointToIdle.normalize();
+        jointToIdle.compose(node_rotation);
+        jointToIdle.normalize();
+        //w.r.t rest
+        jointToIdle.compose(rest.inverse());
+        jointToIdle.normalize();
         System.out.println("<<<<jointToIdle : " + jointToIdle.axis() + jointToIdle.angle());
 
         Vector normal_wrt_idle = jointToIdle.rotate(normal);
-        if (normal.squaredNorm() < 0.0001) normal_wrt_idle = uvec;
-        normal_wrt_idle = Vector.projectVectorOnPlane(normal_wrt_idle, line);
-
         //3. Find the ellipse - line intersection
+
         float angle;
-
         System.out.println("==== normal " + normal_wrt_idle);
-
         if(Math.abs(normal_wrt_idle.y()) < 0.00001){
             System.out.println("==== edge case " + normal_wrt_idle.y());
             //is a vertical line
@@ -757,7 +1121,7 @@ public class FinalHeuristic extends Heuristic {
 
         Hinge h = new Hinge(rot22.angle(), rot11.angle(), cone.idleRotation(), normal1.orthogonalVector(), normal1);
 
-        if(_log) {
+        if(_context.debug()) {
             vectors.put("f1 ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(f1_wrt_ji1)));
             vectors.put("f2 ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(f2_wrt_ji1)));
             vectors.put("tw ", new Pair<>(j_i1.node().position(), j_i1.node().worldLocation(Vector.multiply(tw_wrt_ji1, 10))));
@@ -781,26 +1145,28 @@ public class FinalHeuristic extends Heuristic {
     }
 
     protected static Quaternion _clampRotation(Quaternion rotation, float maxAngle) {
-        float angle = rotation.angle();
-        if (Math.abs(angle) > maxAngle) {
-            rotation = new Quaternion(rotation.axis(), (Math.signum(angle) * maxAngle));
-        }
+        //float angle = rotation.angle();
+        //if (Math.abs(angle) > maxAngle) {
+//            rotation = new Quaternion(rotation.axis(), (Math.signum(angle) * maxAngle));
+//        }
         return rotation;
     }
 
-    protected static Quaternion _clampRotation(Quaternion q_i, Quaternion q_f, float maxAngle) {
+    protected static Quaternion _clampRotation(Quaternion q_cur, Quaternion q_i, Quaternion q_f, float maxAngle) {
         Quaternion diff = Quaternion.compose(q_i.inverse(), q_f);
         diff.normalize();
         float angle = diff.angle();
         if (angle > maxAngle) {
             diff = new Quaternion(diff.axis(), (Math.signum(angle) * maxAngle));
         }
-        return Quaternion.compose(q_i, diff);
+        Quaternion delta = Quaternion.compose(q_cur.inverse(), q_i);
+        delta.compose(diff);
+        return delta;
     }
 
 
     public void drawVectors(Scene scene){
-        if(!_log) return;
+        if(!_context.debug()) return;
         PGraphics pg = scene.context();
         int i = 0;
         for(String key : vectors.keySet()){

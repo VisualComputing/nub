@@ -36,6 +36,8 @@ public class Context {
     protected float[] _delegationAtJoint;
     protected float _delegationFactor = 5f; //current joint will work at least "delegation factor" times the remaining ones
 
+    protected int _deadlockCounter = 0;
+
     //This structures allows to find the world position /orientation of a Node using the sufficient operations
     protected List<NodeInformation> _chainInformation, _usableChainInformation; //Keep position / orientation information
     protected Node _target, _worldTarget, _previousTarget; //Target to reach
@@ -58,6 +60,19 @@ public class Context {
     protected int _last = -1;
 
     protected boolean _singleStep = false;
+
+
+    public int deadlockCounter(){
+        return _deadlockCounter;
+    }
+
+    public void incrementDeadlockCounter(){
+        _deadlockCounter++;
+    }
+
+    public void resetDeadlockCounter(){
+        _deadlockCounter = 0;
+    }
 
     public Context(List<? extends Node> chain, Node target){
         this(chain, target, false);

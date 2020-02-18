@@ -41,6 +41,7 @@ public class CCDHeuristic extends Heuristic{
 
         //Apply desired rotation removing twist component
         Quaternion delta = new Quaternion(p, q);
+        delta.normalize();
         float weight = 1;
         /*if(_context.enableWeight()) {
             weight = _calculateWeight(p.magnitude(), q.magnitude());
@@ -52,6 +53,7 @@ public class CCDHeuristic extends Heuristic{
 
         if(j_i.node().constraint() != null){
             delta = j_i.node().constraint().constrainRotation(delta, j_i.node());
+            delta.normalize();
         }
 
         j_i.rotateAndUpdateCache(delta, false, endEffector); //Apply local rotation
