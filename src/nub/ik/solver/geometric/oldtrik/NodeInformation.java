@@ -196,8 +196,8 @@ public class NodeInformation {
 
     public static void _copyCache(List<NodeInformation> origin, List<NodeInformation> dest){
         for(int i = 0; i < origin.size(); i++){
-            dest.get(i).setPositionCache(origin.get(i).positionCache());
-            dest.get(i).setOrientationCache(origin.get(i).orientationCache());
+            dest.get(i).setPositionCache(origin.get(i).positionCache().get());
+            dest.get(i).setOrientationCache(origin.get(i).orientationCache().get());
         }
     }
 }
