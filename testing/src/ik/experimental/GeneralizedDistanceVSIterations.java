@@ -4,7 +4,6 @@ import ik.basic.Util;
 import nub.core.Node;
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.oldtrik.NodeInformation;
-import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import processing.core.PApplet;
@@ -13,38 +12,40 @@ import processing.data.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-public class DistanceVSIterations{
+public class GeneralizedDistanceVSIterations {
     static float PI = (float) Math.PI;
     static Random random = new Random();
     static int seed = 0;
-    static String dir = "C:/Users/olgaa/Desktop/Sebas/Thesis/Results/DistanceVSIterations/";
+    static String dir = "C:/Users/olgaa/Desktop/Sebas/Thesis/Results/GeneralizedDistanceVSIterations/";
 
     //Benchmark Parameters
     static boolean continuousPath = false;
-    static int numPostures = 10000; //Set the number of different postures to solve
+    static int numStructures = 100;
+    static int numPostures = 100; //Set the number of different postures to solve
     static int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
     static int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
-    static int numJoints = 10; //Define the number of joints that each chain will contain
     static float boneLength = 50; //Define length of segments (bones)
+    static int numJoints;
 
 
     static Util.ConstraintType constraintTypes[] = {Util.ConstraintType.NONE, Util.ConstraintType.HINGE, Util.ConstraintType.HINGE_ALIGNED, Util.ConstraintType.CONE_CIRCLE, Util.ConstraintType.CONE_ELLIPSE, Util.ConstraintType.MIX, Util.ConstraintType.MIX_CONSTRAINED}; //Choose what kind of constraints apply to chain
-    //static Util.ConstraintType constraintTypes[] = {Util.ConstraintType.CONE_CIRCLE, Util.ConstraintType.CONE_ELLIPSE, Util.ConstraintType.MIX}; //Choose what kind of constraints apply to chain
-    //static Util.ConstraintType constraintTypes[] = {Util.ConstraintType.HINGE_ALIGNED}; //Choose what kind of constraints apply to chain
     static Util.SolverType solversType [] = {Util.SolverType.CCD_TRIK, Util.SolverType.FORWARD_TRIANGULATION_TRIK, Util.SolverType.FINAL_TRIK, Util.SolverType.EXPRESSIVE_FINAL_TRIK, Util.SolverType.FABRIK};
     static List<Vector> targetPositions;
 
+    static HashMap<Util.SolverType, StatisticsPerIteration[]> _statisticsPerSolver = new HashMap<>();
+    static HashMap<Util.SolverType, ArrayList<Float>> _histPerSolver = new HashMap<>();
 
-    public static void generateExperiment(Util.SolverType type, Util.ConstraintType constraintType, int iterations, JSONObject jsonSolver){
 
+    public static void generateExperiment(Util.SolverType type, StatisticsPerIteration[] stats, ArrayList<Float> hist, Util.ConstraintType constraintType, int iterations, int seed){
         //1. Generate structure
         List<Node> structure = Util.generateChain(numJoints, boneLength, randRotation, randLength);
         Node endEffector = structure.get(structure.size() - 1);
         //2. Apply constraints
-        Util.generateConstraints(structure, constraintType, 0, true);
+        Util.generateConstraints(structure, constraintType, seed, true);
         //3. generate solver
         Solver solver = Util.createSolver(type, structure);
         //4. Define solver parameters
@@ -56,12 +57,6 @@ public class DistanceVSIterations{
         target.setPosition(endEffector.position());
         target.setOrientation(endEffector.orientation());
         solver.setTarget(endEffector, target);
-        //6. Solve and keep statistics per iteration
-        StatisticsPerIteration[] stats = new StatisticsPerIteration[iterations];
-        for(int i = 0; i < iterations; i ++){
-            stats[i] = new StatisticsPerIteration();
-        }
-
         int sample = 0;
         for(Vector t : targetPositions){
             if(sample % 100 == 0) System.out.println(type.name() + "On sample : " + sample);
@@ -70,35 +65,14 @@ public class DistanceVSIterations{
                 solver.solve();
                 stats[i].addValue(solver.error());
             }
+            hist.add(solver.error());
             sample++;
         }
-
-        for(int i = 0; i < iterations; i ++){
-            stats[i].updateStatistics();
-        }
-
-        //save the statistics in a convenient file
-        JSONArray meanValues = new JSONArray();
-        JSONArray stdValues = new JSONArray();
-        JSONArray minValues = new JSONArray();
-        JSONArray maxValues = new JSONArray();
-
-        for(int i = 0; i < stats.length; i++){
-            meanValues.append(stats[i].mean());
-            stdValues.append(stats[i].std());
-            maxValues.append(stats[i].maxError());
-            minValues.append(stats[i].minError());
-        }
-
-        jsonSolver.setJSONArray("mean", meanValues);
-        jsonSolver.setJSONArray("std", stdValues);
-        jsonSolver.setJSONArray("max", maxValues);
-        jsonSolver.setJSONArray("min", minValues);
     }
 
-    public static void generateRandomReachablePositions(int n, Util.ConstraintType constraintType){
+    public static void generateRandomReachablePositions(int n, int seed, Util.ConstraintType constraintType){
         List<Node> chain = Util.generateChain(numJoints, boneLength, randRotation, randLength);
-        Util.generateConstraints(chain, constraintType, 0, true);
+        Util.generateConstraints(chain, constraintType, seed, true);
 
         targetPositions = new ArrayList<Vector>();
         for(int t = 0; t < n; t++) {
@@ -114,11 +88,11 @@ public class DistanceVSIterations{
         }
     }
 
-    public static void generateRandomPath(int n, Util.ConstraintType constraintType){
+    public static void generateRandomPath(int n, int seed, Util.ConstraintType constraintType){
         PApplet pa = new PApplet();
         pa.randomSeed(0);
         List<Node> chain = Util.generateChain(numJoints, boneLength, randRotation, randLength);
-        Util.generateConstraints(chain, constraintType, 0, true);
+        Util.generateConstraints(chain, constraintType, seed, true);
 
         targetPositions = new ArrayList<Vector>();
         float last = 0.005f * n;
@@ -138,24 +112,76 @@ public class DistanceVSIterations{
         NodeInformation.disableCache = true; //disable cache for "highly" precision benchmarking
         int numSolvers = solversType.length;
         //prepare random path/targets
-        for(int c = 0; c < constraintTypes.length; c++) {
-            JSONObject jsonExperiment = new JSONObject();
-            JSONArray jsonSolverArray = new JSONArray();
-            for(int i = 0; i < numSolvers; i++){
-                JSONObject jsonSolver = new JSONObject();
-                jsonSolver.setString("name", solversType[i].name());
-                if (continuousPath) generateRandomPath(numPostures, constraintTypes[c]);
-                else generateRandomReachablePositions(numPostures, constraintTypes[c]);
-                generateExperiment(solversType[i], constraintTypes[c] , 100, jsonSolver);
-                jsonSolverArray.append(jsonSolver);
+        JSONObject jsonExperiment = new JSONObject();
+        JSONArray jsonSolverArray = new JSONArray();
+
+        int iterations = 100;
+        //Initialize statistics per solver
+        for(int s = 0; s < numSolvers; s++) {
+            StatisticsPerIteration[] stats = new StatisticsPerIteration[iterations];
+            for (int i = 0; i < iterations; i++) {
+                stats[i] = new StatisticsPerIteration();
             }
-            jsonExperiment.setJSONArray("solvers", jsonSolverArray);
-            //save json file
-            String name = continuousPath ? "continuous_path" : "discontinuous_path";
-            //add the parameters to the files name
-            name += "_joints_" + numJoints + "_postures_" + numPostures + "_" + constraintTypes[c] + "_seed_" + seed;
-            jsonExperiment.save(new File(dir + name + ".json"), null);
+            _statisticsPerSolver.put(solversType[s], stats);
+            _histPerSolver.put(solversType[s], new ArrayList<Float>());
         }
+
+
+        int c_seed = 0;
+        for(int s = 0; s < numStructures; s++) {
+            numJoints = random.nextInt(16) + 4;
+            Util.ConstraintType constraintType = constraintTypes[random.nextInt(constraintTypes.length)];
+            System.out.println("On structure " + s + " joints : " + numJoints + " constraint : " + constraintType);
+
+            for(int i = 0; i < numSolvers; i++){
+                if (continuousPath) generateRandomPath(numPostures, c_seed, constraintType);
+                else generateRandomReachablePositions(numPostures, c_seed, constraintType);
+                generateExperiment(solversType[i], _statisticsPerSolver.get(solversType[i]), _histPerSolver.get(solversType[i]), constraintType, 100, c_seed);
+            }
+            c_seed = random.nextInt(100000);
+        }
+
+        //Save all info in a json
+        for(int s = 0; s < numSolvers; s++) {
+            JSONObject jsonSolver = new JSONObject();
+            jsonSolver.setString("name", solversType[s].name());
+            StatisticsPerIteration[] stats = _statisticsPerSolver.get(solversType[s]);
+            ArrayList<Float> hist = _histPerSolver.get(solversType[s]);
+
+            for(int i = 0; i < iterations; i ++){
+                stats[i].updateStatistics();
+            }
+            //save the statistics in a convenient file
+            JSONArray meanValues = new JSONArray();
+            JSONArray stdValues = new JSONArray();
+            JSONArray minValues = new JSONArray();
+            JSONArray maxValues = new JSONArray();
+            JSONArray histValues = new JSONArray();
+
+            for(int i = 0; i < stats.length; i++){
+                meanValues.append(stats[i].mean());
+                stdValues.append(stats[i].std());
+                maxValues.append(stats[i].maxError());
+                minValues.append(stats[i].minError());
+            }
+
+            for(int i = 0; i < hist.size(); i++){
+                histValues.append(hist.get(i));
+            }
+
+            jsonSolver.setJSONArray("mean", meanValues);
+            jsonSolver.setJSONArray("std", stdValues);
+            jsonSolver.setJSONArray("max", maxValues);
+            jsonSolver.setJSONArray("min", minValues);
+            jsonSolver.setJSONArray("hist", histValues);
+            jsonSolverArray.append(jsonSolver);
+        }
+        jsonExperiment.setJSONArray("solvers", jsonSolverArray);
+        //save json file
+        String name = continuousPath ? "continuous_path" : "discontinuous_path";
+        //add the parameters to the files name
+        name += "_joints_" + numJoints + "_postures_" + numPostures + "_structures_" + numStructures + "_seed_" + seed;
+        jsonExperiment.save(new File(dir + name + ".json"), null);
     }
 
     public static class StatisticsPerIteration {

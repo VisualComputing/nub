@@ -33,7 +33,7 @@ import java.util.Random;
 import static processing.core.PApplet.*;
 
 public class Util {
-    public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, CONE_CIRCLE, MIX, HINGE_ALIGNED }
+    public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, CONE_CIRCLE, MIX, HINGE_ALIGNED, MIX_CONSTRAINED }
     public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, CCD_V2, GA, HAEA, MySolver, TRIK_V1, TRIK_V2, TRIK_V3, TRIK_V4,
     FORWARD_TRIK, BACKWARD_TRIK, CCD_TRIK, FORWARD_TRIK_AND_TWIST, BACKWARD_TRIK_AND_TWIST, CCD_TRIK_AND_TWIST, FORWARD_TRIANGULATION_TRIK ,FORWARD_TRIANGULATION_TRIK_AND_TWIST,
     BACKWARD_TRIANGULATION_TRIK ,BACKWARD_TRIANGULATION_TRIK_AND_TWIST, BACK_AND_FORTH_TRIK, LOOK_AHEAD_FORWARD, LOOK_AHEAD_FORWARD_AND_TWIST,
@@ -204,6 +204,7 @@ public class Util {
 
             case EXPRESSIVE_FINAL_TRIK:{
                 SimpleTRIK solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL);
+                //solver.enableSmooth(true);
                 return solver;
             }
             default: return null;
@@ -379,17 +380,24 @@ public class Util {
                 int r = random.nextInt(ConstraintType.values().length - 1) + 1;
                 r = is3D ? r : r % 2;
                 current = ConstraintType.values()[r];
+                if(current == ConstraintType.CONE_POLYGON) current = ConstraintType.CONE_ELLIPSE;
+            } else if(type == ConstraintType.MIX_CONSTRAINED){
+                int r = random.nextInt(100);
+                r = is3D ? r : 0;
+                if(r % 2 == 0) current = ConstraintType.CONE_ELLIPSE;
+                else current = ConstraintType.HINGE;
             }
+
             switch (current){
                 case NONE:{
                     break;
                 }
                 case CONE_ELLIPSE:{
                     if(!is3D) break;
-                    float down = radians(random.nextFloat()*40 + 10);
-                    float up = radians(random.nextFloat()*40 + 10);
-                    float left = radians(random.nextFloat()*40 + 10);
-                    float right = radians(random.nextFloat()*40 + 10);
+                    float down = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 60, 0), 80));
+                    float up = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 60, 0), 80));
+                    float left = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 60, 0), 80));
+                    float right = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 60, 0), 80));
 
                     //down = left = right = up = radians(40);
                     constraint = new BallAndSocket(down, up, left, right);
@@ -399,12 +407,14 @@ public class Util {
                 }
                 case CONE_CIRCLE:{
                     if(!is3D) break;
-                    float r = radians(random.nextFloat()*40 + 10);
+                    float r = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 60, 0), 80));
+                    //r = radians(40);
                     constraint = new BallAndSocket(r,r,r,r);
                     Quaternion rest = Quaternion.compose(structure.get(i).rotation().get(), offset);
                     ((BallAndSocket) constraint).setRestRotation(rest, new Vector(0, 1, 0), twist);
                     break;
                 }
+
                 case CONE_POLYGON:{
                     if(!is3D) break;
                     ArrayList<Vector> vertices = new ArrayList<Vector>();
@@ -427,8 +437,8 @@ public class Util {
                     if(Vector.squaredNorm(vector) == 0) {
                         constraint = null;
                     }
-                    float min = random.nextFloat()*120 + 10;
-                    float max = random.nextFloat()*120 + 10;
+                    float min = (float) Math.min(Math.max(random.nextGaussian()*30 + 60, 10), 120);
+                    float max = (float) Math.min(Math.max(random.nextGaussian()*30 + 60, 10), 120);
 
                     constraint = new Hinge(radians(min),
                             radians(max),
@@ -436,8 +446,8 @@ public class Util {
                     break;
                 }
                 case HINGE_ALIGNED:{
-                    float min = random.nextFloat()*120 + 10;
-                    float max = random.nextFloat()*120 + 10;
+                    float min = (float) Math.min(Math.max(random.nextGaussian()*30 + 60, 10), 120);
+                    float max = (float) Math.min(Math.max(random.nextGaussian()*30 + 60, 10), 120);
                     Vector vector = new Vector(0,0,1);
 
                     constraint = new Hinge(radians(min),

@@ -1,8 +1,10 @@
 package ik.constraintTest;
 
+import ik.basic.Util;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -11,6 +13,9 @@ import processing.core.PConstants;
 import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class DrawingConstraint  extends PApplet {
@@ -21,6 +26,8 @@ public class DrawingConstraint  extends PApplet {
     ThetaControl t_lr, t_ud;
     BaseControl base;
     Joint j0, j1;
+    SimpleTRIK solver;
+
     static PFont font;
 
     public void settings() {
@@ -49,11 +56,26 @@ public class DrawingConstraint  extends PApplet {
         v.normalize();
         v.multiply(sceneConstraint.radius());
         j1.translate(v);
+        j1.enableTagging(false);
 
         //Add constraint to joint j0
         BallAndSocket constraint = new BallAndSocket(radians(30), radians(30));
         constraint.setRestRotation(j0.rotation(), new Vector(0,1,0), new Vector(1,0,0), j1.translation());
         j0.setConstraint(constraint);
+
+        List<Node> structure = new ArrayList<>();
+        structure.add(j0);
+        structure.add(j1);
+
+        solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.CCD);
+        Joint target = new Joint(sceneConstraint, color(255,0,0), 0.2f * sceneConstraint.radius());
+        target.setRoot(true);
+        solver.setTarget(target);
+        target.set(j1);
+
+        solver.setTimesPerFrame(1);
+
+
 
         //Create controllers
         t_lr = new ThetaControl(sceneTheta, color(255, 154, 31));
@@ -695,6 +717,12 @@ public class DrawingConstraint  extends PApplet {
                 focus.focus();
             else
                 focus.align();
+    }
+
+    public void keyPressed(){
+        if(key == 's' || key == 'S'){
+            solver.solve();
+        }
     }
 
     public static void main(String args[]) {

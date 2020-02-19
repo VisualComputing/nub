@@ -15,14 +15,14 @@ import processing.event.MouseEvent;
 import java.util.List;
 
 public class ExpressiveTest extends PApplet {
-    int numJoints = 10;
+    int numJoints = 20;
     float boneLength = 50;
     float targetRadius = 10;
 
     SimpleTRIK solver;
     Scene delegationScene, mainScene, focus;
     DelegationPanel panel;
-    boolean solve = true;
+    boolean solve = false, enableTask = false;
 
 
     public void settings() {
@@ -40,14 +40,15 @@ public class ExpressiveTest extends PApplet {
         Node target = Util.createTarget(mainScene, targetRadius);
         List<Node> structure = Util.generateChain(mainScene, numJoints, targetRadius * 0.7f, boneLength, new Vector(), color(0,255, 0));
 
-        //Util.generateConstraints(structure, Util.ConstraintType.CONE_CIRCLE, 1, true);
+        Util.generateConstraints(structure, Util.ConstraintType.CONE_CIRCLE, 0, true);
 
         solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL);
         solver.setTarget(structure.get(numJoints - 1), target);
         //solver.enableSmooth(true);
         solver.context().setSingleStep(!solve);
-        solver.setTimesPerFrame(solve ? 5 : 1);
-        solver.setMaxIterations(solve ? 10 : 50);
+        solver.setTimesPerFrame(1);
+        solver.setMaxIterations(100);
+        solver.setMaxError(0.1f);
 
         //Move the target to any position
         target.setPosition(structure.get(numJoints - 1).position());
@@ -55,7 +56,7 @@ public class ExpressiveTest extends PApplet {
         TimingTask task = new TimingTask(mainScene) {
             @Override
             public void execute() {
-                if(solve){
+                if(enableTask){
                     if(!solver.solve()) panel.updateSliders();
                 }
             }
@@ -146,10 +147,19 @@ public class ExpressiveTest extends PApplet {
 
 
     public void keyPressed(){
+        if(key == 'W' || key == 'w'){
+            enableTask = !enableTask;
+        }
+
         if(key == 'S' || key == 's') {
             solver.solve();
             panel.updateSliders();
         }
+        if(key == 'C' || key == 'c'){
+            solve = !solve;
+            solver.context().setSingleStep(!solve);
+        }
+
     }
 
     public void mouseClicked(MouseEvent event) {

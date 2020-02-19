@@ -4,6 +4,7 @@ import ik.basic.Util;
 import nub.core.Node;
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.oldtrik.NodeInformation;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import processing.core.PApplet;
@@ -26,10 +27,10 @@ public class ContinuousTrajectoryExample {
     static int numJoints = 10; //Define the number of joints that each chain will contain
     static float boneLength = 50; //Define length of segments (bones)
     static int seed = 0; //Seed to use
-    static float maxError = 0.00000f;
+    static float maxError = 0.1f;
 
     static Util.ConstraintType constraintTypes[] = {Util.ConstraintType.HINGE_ALIGNED}; //Choose what kind of constraints apply to chain
-    static Util.SolverType solversType [] = {Util.SolverType.CCD, Util.SolverType.FORWARD_TRIANGULATION_TRIK, Util.SolverType.FINAL_TRIK, Util.SolverType.EXPRESSIVE_FINAL_TRIK, Util.SolverType.FABRIK};
+    static Util.SolverType solversType [] = {Util.SolverType.CCD_TRIK, Util.SolverType.FORWARD_TRIANGULATION_TRIK, Util.SolverType.FINAL_TRIK, Util.SolverType.EXPRESSIVE_FINAL_TRIK, Util.SolverType.FABRIK};
     static List<Vector> targetPositions;
     static float[] lissajousPath = {1, 3, 3, boneLength * numJoints * 0.2f};
     static boolean enableLissajous = true;
@@ -54,12 +55,26 @@ public class ContinuousTrajectoryExample {
         //6. Solve and keep statistics per iteration
         StatisticsPerExperiment stats = new StatisticsPerExperiment();
         int sample = 0;
+
+        List<Vector> prevPos = obtainPositions(structure), nextPos;
+        List<Quaternion> prevOrs = obtainOrientations(structure), nextOrs;
+
         for(Vector t : targetPositions){
             if(sample % 100 == 0) System.out.println(type.name() + "On sample : " + sample);
             target.setPosition(t.get());
+
             for(int i = 0; i < iterations; i ++){
                 solver.solve();
             }
+
+            nextPos = obtainPositions(structure);
+            stats.addDistance(distanceBetweenPostures(prevPos, nextPos));
+            prevPos = nextPos;
+
+            nextOrs = obtainOrientations(structure);
+            stats.addOrientationDistance(orientationDistanceBetweenPostures(prevOrs, nextOrs));
+            prevOrs = nextOrs;
+
             stats.addValue(solver.error());
             stats.addPoint(structure.get(structure.size() - 1).position());
             sample++;
@@ -71,7 +86,20 @@ public class ContinuousTrajectoryExample {
         for(Double value : stats.values()){
             jsonErrorValues.append(value);
         }
+
+        JSONArray jsonDistanceValues = new JSONArray();
+        for(Double value : stats.distances()){
+            jsonDistanceValues.append(value);
+        }
+
+        JSONArray jsonOrientationDistanceValues = new JSONArray();
+        for(Double value : stats.orientationDistances()){
+            jsonOrientationDistanceValues.append(value);
+        }
+
         jsonSolver.setJSONArray("errorValues", jsonErrorValues);
+        jsonSolver.setJSONArray("distanceValues", jsonDistanceValues);
+        jsonSolver.setJSONArray("orientationDistanceValues", jsonOrientationDistanceValues);
 
         JSONArray jsonPoints = new JSONArray();
         for(Vector point : stats.points()){
@@ -190,10 +218,16 @@ public class ContinuousTrajectoryExample {
     public static class StatisticsPerExperiment {
         protected List<Vector> _points = new ArrayList<Vector>();
         protected List<Double> _errorValues = new ArrayList<Double>();
-        protected double _minError = Float.MAX_VALUE, _maxError = Float.MIN_VALUE, _mean, _std;
+        protected List<Double> _distances = new ArrayList<Double>();
+        protected List<Double> _orientationDistances = new ArrayList<Double>();
+
+        protected double _minError = Float.MAX_VALUE, _maxError = Float.MIN_VALUE, _mean, _std, _meanDistances, _meanOrientationDistances;
 
         public double minError() {
             return _minError;
+        }
+        public double meanDistances(){
+            return _meanDistances;
         }
 
         public double maxError() {
@@ -210,6 +244,14 @@ public class ContinuousTrajectoryExample {
 
         public List<Double> values(){
             return _errorValues;
+        }
+
+        public List<Double> distances(){
+            return _distances;
+        }
+
+        public List<Double> orientationDistances(){
+            return _orientationDistances;
         }
 
         public List<Vector> points(){
@@ -232,6 +274,14 @@ public class ContinuousTrajectoryExample {
             _errorValues.add(value);
         }
 
+        public void addDistance(double dist){
+            _distances.add(dist);
+        }
+
+        public void addOrientationDistance(double dist){
+            _orientationDistances.add(dist);
+        }
+
         public void updateStatistics(){
             for(Double value : _errorValues){
                 _minError = Math.min(value, _minError);
@@ -240,7 +290,60 @@ public class ContinuousTrajectoryExample {
             }
             _mean = _mean / _errorValues.size();
             _std = std(_mean);
+
+            _meanDistances = 0;
+            for(Double value : _distances){
+                _meanDistances += value;
+            }
+            _meanDistances = _meanDistances / _distances.size();
+
+            _meanOrientationDistances = 0;
+            for(Double value : _orientationDistances){
+                _meanOrientationDistances += value;
+            }
+            _meanOrientationDistances = _meanOrientationDistances / _orientationDistances.size();
         }
+    }
+
+    public static List<Vector> obtainPositions(List<? extends Node> structure){
+        List<Vector> positions = new ArrayList<Vector>();
+        for(Node node : structure){
+            positions.add(node.position().get());
+        }
+        return positions;
+    }
+
+    public static List<Quaternion> obtainOrientations(List<? extends Node> structure){
+        List<Quaternion> orientations = new ArrayList<Quaternion>();
+        for(Node node : structure){
+            orientations.add(node.orientation().get());
+        }
+        return orientations;
+    }
+
+    public static double distanceBetweenPostures(List<Vector> prev, List<Vector> cur){
+        double dist = 0;
+        for(int i = 0; i < prev.size(); i++){
+            dist += Vector.distance(prev.get(i), cur.get(i));
+        }
+        return dist / prev.size();
+    }
+
+    public static double orientationDistanceBetweenPostures(List<Quaternion> prev, List<Quaternion> cur){
+        double dist = 0;
+        for(int i = 0; i < prev.size(); i++){
+            dist += quaternionDistance(prev.get(i), cur.get(i));
+        }
+        return dist / prev.size();
+    }
+
+    public static double quaternionDistance(Quaternion a, Quaternion b){
+        double s1 = 1, s2 = 1;
+        if(a.w() < 0) s1 = -1;
+        if(b.w() < 0) s2 = - 1;
+        double dot = s1 * a._quaternion[0] * s2 * b._quaternion[0] + s1 * a._quaternion[1] * s2 * b._quaternion[1] + s1 * a._quaternion[2] * s2 * b._quaternion[2] + s1 * a._quaternion[3] * s2 * b._quaternion[3];
+        dot = Math.max(Math.min(dot, 1), -1);
+        return Math.acos(2 * Math.pow(dot, 2) - 1);
     }
 
 }

@@ -92,7 +92,7 @@ public class Case1 extends PApplet {
         //BioIK
         solvers.add(new BioIk(structures.get(i++), 10, 4));
         //CCD TRIK
-        SimpleTRIK simpleTRIK = new SimpleTRIK(structures.get(i++), SimpleTRIK.HeuristicMode.CCD);
+        SimpleTRIK simpleTRIK = new SimpleTRIK(structures.get(i++), SimpleTRIK.HeuristicMode.FINAL);
         solvers.add(simpleTRIK);
 
         //ChainSolver chainSolver;
