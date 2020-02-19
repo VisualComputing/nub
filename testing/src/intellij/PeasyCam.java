@@ -1,6 +1,7 @@
 package intellij;
 
 import nub.core.Node;
+import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -9,6 +10,7 @@ import processing.event.MouseEvent;
 public class PeasyCam extends PApplet {
   //Node box1, box2;
   Scene scene;
+  Vector axis;
   boolean cad;
 
   public void settings() {
@@ -27,6 +29,14 @@ public class PeasyCam extends PApplet {
         pg.box(30);
         pg.popStyle();
       }
+      @Override
+      public void interact(Object... gesture) {
+        if (gesture.length == 1) {
+          if (gesture[0] instanceof Float) {
+            orbit(axis, (float)gesture[0]);
+          }
+        }
+      }
     };
     box1.setPickingThreshold(0);
     Node box2 = new Node(box1) {
@@ -43,11 +53,14 @@ public class PeasyCam extends PApplet {
     box2.translate(0, 0, 20);
     scene.setRadius(50);
     scene.fit(1);
+    axis = Vector.random();
+    axis.multiply(scene.radius() / 3);
   }
 
   public void draw() {
     background(0);
     scene.drawAxes();
+    scene.drawArrow(axis);
     stroke(125);
     scene.drawGrid();
     lights();
@@ -82,7 +95,8 @@ public class PeasyCam extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.dampedMoveForward(event.getCount() * 40);
+    if (!scene.interactTag((float)event.getCount() * 10.f * PI / (float)width))
+      scene.dampedMoveForward(event.getCount() * 40);
   }
 
   public void keyPressed() {
