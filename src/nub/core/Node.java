@@ -150,6 +150,9 @@ public class Node {
   protected float _highlight;
   protected long _bypass;
 
+  // Tasks
+  protected DampedTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
+
   /**
    * Creates a detached node.
    * Same as {@code this(null, null, null, null, new Vector(), new Quaternion(), 1)}.
@@ -372,6 +375,7 @@ public class Node {
     // attached nodes:
     _children = new ArrayList<Node>();
     _culled = false;
+    _initTasks();
   }
 
   /**
@@ -404,6 +408,36 @@ public class Node {
 
     this._shape = node._shape;
     this._highlight = node._highlight;
+    this._initTasks();
+  }
+
+  protected void _initTasks() {
+    _translationTask = new DampedTask(graph()) {
+      @Override
+      public void action() {
+        translate(_x, _y, _z);
+      }
+    };
+    _rotationTask = new DampedTask(graph()) {
+      @Override
+      public void action() {
+        rotate(new Quaternion(_x, _y, _z));
+      }
+    };
+    // TODO how to deal with center, maybe removing anchor?
+    _orbitTask = new DampedTask(graph()) {
+      @Override
+      public void action() {
+        orbit(new Quaternion(_x, _y, _z), _center);
+      }
+    };
+    _scalingTask = new DampedTask(graph()) {
+      @Override
+      public void action() {
+        float factor = 1 + Math.abs(_x) / graph().height();
+        scale(_x >= 0 ? factor : 1 / factor);
+      }
+    };
   }
 
   /**

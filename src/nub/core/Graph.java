@@ -143,8 +143,6 @@ public class Graph {
   protected float _radius;
   protected Vector _anchor;
   // Damped
-  protected DampedTask _spinningTask;
-  protected DampedTask _translationTask;
   protected DampedTask _lookAroundTask;
   protected DampedTask _cadRotateTask;
   protected Vector _eyeUp;
@@ -176,34 +174,6 @@ public class Graph {
       _pixelX = pixelX;
       _pixelY = pixelY;
     }
-  }
-
-  protected abstract class DampedTask extends Task {
-    // original friction is 0.16
-    float _damp = 1.0f - 0.16f; // 1 - friction
-    float _x, _y, _z;
-
-    DampedTask(TimingHandler timingHandler) {
-      super(timingHandler);
-    }
-
-    @Override
-    public void execute() {
-      if (_x == 0 && _y == 0 && _z == 0)
-        stop();
-      action();
-      _x *= _damp;
-      if (Math.abs(_x) < .001)
-        _x = 0;
-      _y *= _damp;
-      if (Math.abs(_y) < .001)
-        _y = 0;
-      _z *= _damp;
-      if (Math.abs(_z) < .001)
-        _z = 0;
-    }
-
-    abstract void action();
   }
 
   protected TimingHandler _timingHandler;
@@ -290,21 +260,7 @@ public class Graph {
     _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
     setEye(new Node(this));
-    _spinningTask = new DampedTask(timingHandler()) {
-      @Override
-      public void action() {
-        // TODO check rotateEye signs in relation to this
-        //eye().orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor());
-        eye().orbit(new Quaternion(is2D() ? 0 : isLeftHanded() ? _x : -_x, is2D() ? 0 : _y, _z), anchor());
-      }
-    };
-    _translationTask = new DampedTask(timingHandler()) {
-      @Override
-      public void action() {
-        eye().translate(_x, _y, _z);
-      }
-    };
-    _lookAroundTask = new DampedTask(timingHandler()) {
+    _lookAroundTask = new DampedTask(this) {
       @Override
       public void action() {
         Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_y : _y);
@@ -313,7 +269,7 @@ public class Graph {
         eye().rotate(quaternion);
       }
     };
-    _cadRotateTask = new DampedTask(timingHandler()) {
+    _cadRotateTask = new DampedTask(this) {
       @Override
       public void action() {
         Vector _eyeUp = eye().displacement(Graph.this._eyeUp);
@@ -4285,11 +4241,11 @@ public class Graph {
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     vector.multiply(-1);
     Vector translation = eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye());
-    _translationTask._x += translation.x() / 5;
-    _translationTask._y += translation.y() / 5;
-    _translationTask._z += translation.z() / 5;
-    if (!_translationTask.isActive())
-      _translationTask.run();
+    eye()._translationTask._x += translation.x() / 5;
+    eye()._translationTask._y += translation.y() / 5;
+    eye()._translationTask._z += translation.z() / 5;
+    if (!eye()._translationTask.isActive())
+      eye()._translationTask.run();
   }
 
   // 10.  TODO Damped rotate which should be factorized with dampedSpin
@@ -4331,12 +4287,24 @@ public class Graph {
     // mouse [-1, +1]
     float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
     float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
-    _spinningTask._y += +dmx * (1.0f - myNdc * myNdc);
-    _spinningTask._x += -dmy * (1.0f - mxNdc * mxNdc);
-    _spinningTask._z += -dmx * myNdc;
-    _spinningTask._z += +dmy * mxNdc;
-    if (!_spinningTask.isActive())
-      _spinningTask.run();
+    /*
+    _spinningTask = new DampedTask(this) {
+      @Override
+      public void action() {
+        // TODO check rotateEye signs in relation to this
+        //eye().orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor());
+        eye().orbit(new Quaternion(is2D() ? 0 : isLeftHanded() ? _x : -_x, is2D() ? 0 : _y, _z), anchor());
+      }
+    };
+     */
+    // TODO signs (isLeftHanded) are missed
+    eye()._orbitTask._center = anchor();
+    eye()._orbitTask._y += +dmx * (1.0f - myNdc * myNdc);
+    eye()._orbitTask._x += -dmy * (1.0f - mxNdc * mxNdc);
+    eye()._orbitTask._z += -dmx * myNdc;
+    eye()._orbitTask._z += +dmy * mxNdc;
+    if (!eye()._orbitTask.isActive())
+      eye()._orbitTask.run();
   }
 
   // 11. lookAround
