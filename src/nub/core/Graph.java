@@ -3887,7 +3887,7 @@ public class Graph {
    */
   public void translateEye(float dx, float dy, float dz) {
     Node node = eye().get();
-    node.setPosition(anchor());
+    node.setPosition(anchor().get());
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     vector.multiply(-1);
     eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()));
@@ -4237,7 +4237,8 @@ public class Graph {
    */
   public void dampedTranslateEye(float dx, float dy, float dz) {
     Node node = eye().get();
-    node.setPosition(anchor());
+    // without copying the anchor we get a weird bug that changes graph_center
+    node.setPosition(anchor().get());
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     vector.multiply(-1);
     Vector translation = eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye());
