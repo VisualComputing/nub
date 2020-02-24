@@ -17,7 +17,7 @@ import nub.timing.Task;
 public abstract class DampedTask extends Task {
   // original friction is 0.16
   protected Vector _center = new Vector();
-  public float _damp = 1.0f - 0.16f; // 1 - friction
+  public float _damp = 1.0f - 0.2f; // 1 - friction
   public float _x, _y, _z;
 
   DampedTask(Graph graph) {
@@ -26,9 +26,6 @@ public abstract class DampedTask extends Task {
 
   @Override
   public void execute() {
-    if (_x == 0 && _y == 0 && _z == 0)
-      stop();
-    action();
     _x *= _damp;
     if (Math.abs(_x) < .001)
       _x = 0;
@@ -38,6 +35,10 @@ public abstract class DampedTask extends Task {
     _z *= _damp;
     if (Math.abs(_z) < .001)
       _z = 0;
+    if (_x == 0 && _y == 0 && _z == 0)
+      stop();
+    else
+      action();
   }
 
   abstract void action();

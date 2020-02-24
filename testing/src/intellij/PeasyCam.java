@@ -4,12 +4,13 @@ import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
+import nub.timing.TimingHandler;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 public class PeasyCam extends PApplet {
-  //Node box1, box2;
+  Node n1, n2;
   Scene scene;
   Vector axis;
   boolean cad;
@@ -85,6 +86,11 @@ public class PeasyCam extends PApplet {
     scene.fit(1);
     axis = Vector.random();
     axis.multiply(scene.radius() / 3);
+    // test
+    n1 = scene.randomNode();
+    n2 = new Node(scene);
+    n1.setPosition(new Vector());
+    n2.set(n1);
   }
 
   public void draw() {
@@ -130,7 +136,7 @@ public class PeasyCam extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     if (!scene.interactTag((float)event.getCount() * 10.f * PI / (float)width))
-      scene.dampedMoveForward(event.getCount() * 40);
+      scene.dampedMoveForward(event.getCount() * 20);
   }
 
   public void keyPressed() {
@@ -142,6 +148,18 @@ public class PeasyCam extends PApplet {
       scene.fit(1);
     if (key == 'S')
       scene.fit();
+    if (key == 't') {
+      Vector t = Vector.random();
+      t.println();
+      println("current frameRate: " + frameRate);
+      println("translate() issued at: " + TimingHandler.frameCount);
+      n1.translate(t);
+      n2.translate(t);
+      //n1.println();
+      //n2.println();
+      n1.position().println();
+      n2.position().println();
+    }
   }
 
   public static void main(String[] args) {

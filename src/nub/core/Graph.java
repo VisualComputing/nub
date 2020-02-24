@@ -4242,11 +4242,7 @@ public class Graph {
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     vector.multiply(-1);
     Vector translation = eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye());
-    eye()._translationTask._x += translation.x() / 5;
-    eye()._translationTask._y += translation.y() / 5;
-    eye()._translationTask._z += translation.z() / 5;
-    if (!eye()._translationTask.isActive())
-      eye()._translationTask.run();
+    eye().translate(translation, 0.2f);
   }
 
   // 10.  TODO Damped rotate which should be factorized with dampedSpin

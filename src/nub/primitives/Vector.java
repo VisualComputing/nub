@@ -814,10 +814,23 @@ public class Vector {
     return target;
   }
 
-  public void print() {
-    System.out.println(x() + " " + y() + " " + z() + "\n");
+  /**
+   * println this vector components.
+   */
+  public void println() {
+    System.out.println(toString() + "\n");
   }
 
+  /**
+   * print this vector components.
+   */
+  public void print() {
+    System.out.print(toString());
+  }
+
+  /**
+   * Return this vector components as a String.
+   */
   public String toString() {
     return "[ " + this._vector[0] + ", " + this._vector[1] + ", " + this._vector[2] + " ]";
   }

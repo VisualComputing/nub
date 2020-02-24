@@ -441,6 +441,27 @@ public class Node {
   }
 
   /**
+   * println this node components.
+   */
+  public void println() {
+    System.out.println(toString() + "\n");
+  }
+
+  /**
+   * print this node components.
+   */
+  public void print() {
+    System.out.print(toString());
+  }
+
+  /**
+   * Return this node components as a String.
+   */
+  public String toString() {
+    return "Position: " + position().toString() + " Orientation: " + orientation().toString() + " Magnitude: " + Float.toString(magnitude());
+  }
+
+  /**
    * Performs a deep copy of this node into {@code graph}.
    * <p>
    * Same as {@code return new Node(graph, this)}.
@@ -1003,6 +1024,30 @@ public class Node {
 
   /**
    * Translates the node according to {@code vector}, locally defined with respect to the
+   * {@link #reference()} and with an impulse defined with {@code friction} which should
+   * be in {@code [0..1]}.
+   * <p>
+   * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
+   * applied to the node may differ from {@code vector} (since it can be filtered by the
+   * {@link #constraint()}).
+   *
+   * @see #rotate(Quaternion, float)
+   * @see #scale(float, float)
+   * @see #orbit(Quaternion, Vector, float)
+   */
+  public void translate(Vector vector, float friction) {
+    translate(vector);
+    _translationTask._damp = 1 - friction;
+    _translationTask._x += vector.x() * friction;
+    _translationTask._y += vector.y() * friction;
+    _translationTask._z += vector.z() * friction;
+    if (!_translationTask.isActive()) {
+      _translationTask.run();
+    }
+  }
+
+  /**
+   * Translates the node according to {@code vector}, locally defined with respect to the
    * {@link #reference()}.
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
@@ -1163,7 +1208,7 @@ public class Node {
    * @see #orbit(Vector, float)
    * @see #setConstraint(Constraint)
    */
-  protected void orbit(Quaternion quaternion, Vector center) {
+  public void orbit(Quaternion quaternion, Vector center) {
     rotation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
     rotation().normalize(); // Prevents numerical drift
 
