@@ -1,7 +1,6 @@
 package intellij;
 
 import nub.core.Node;
-import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.timing.TimingHandler;
@@ -35,13 +34,12 @@ public class PeasyCam extends PApplet {
       public void interact(Object... gesture) {
         if (gesture.length == 1) {
           if (gesture[0] instanceof Float) {
-            // /*
+            /*
             // Orbit
             //orbit(axis, (float)gesture[0], new Vector(0,0,0));
             //orbit(new Quaternion(displacement(axis), (float)gesture[0]), new Vector(0,0,0));
             Quaternion q = new Quaternion(displacement(axis), (float) gesture[0]);
             orbit(q, scene.center(), 0.2f);
-            /*
             Vector e =  q.eulerAngles();
             //orbit(new Quaternion(displacement(axis), (float)gesture[0]), new Vector(0,0,0));
             _orbitTask._x += e.x();
@@ -50,13 +48,14 @@ public class PeasyCam extends PApplet {
             if (!_orbitTask.isActive())
               _orbitTask.run();
             // */
-            /*
+            // /*
             // Scaling
             //float factor = 1 + Math.abs((float)gesture[0]) / graph().height();
             //scale((float)gesture[0] >= 0 ? factor : 1 / factor);
             _scalingTask._x += (float)gesture[0];
             if (!_scalingTask.isActive())
               _scalingTask.run();
+            // */
             /*
             // Rotation
             Quaternion q = new Quaternion(displacement(axis), (float) gesture[0]);
@@ -127,7 +126,7 @@ public class PeasyCam extends PApplet {
       case CENTER:
         // Scaling
         scene.interactTag((float) (mouseX - pmouseX));
-        // /*
+        /*
         if (cad)
           scene.mouseDampedRotateCAD();
         else
@@ -163,6 +162,8 @@ public class PeasyCam extends PApplet {
       n1.position().println();
       n2.position().println();
     }
+    if (key == 'x')
+      scene.clearTags();
   }
 
   public static void main(String[] args) {
