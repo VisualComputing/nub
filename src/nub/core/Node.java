@@ -1199,6 +1199,29 @@ public class Node {
 
   /**
    * Rotates the node by the {@code quaternion} (defined in the node coordinate system)
+   * around {@code center} defined in the world coordinate system, and with an impulse
+   * defined with {@code friction} which should be in {@code [0..1]}.
+   * <p>
+   * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
+   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   *
+   * @see #orbit(Vector, float, Vector)
+   * @see #orbit(Vector, float)
+   * @see #setConstraint(Constraint)
+   */
+  public void orbit(Quaternion quaternion, Vector center, float friction) {
+    orbit(quaternion, center);
+    _orbitTask._center = center;
+    Vector e = quaternion.eulerAngles();
+    _orbitTask._x += e.x();
+    _orbitTask._y += e.y();
+    _orbitTask._z += e.z();
+    if (!_orbitTask.isActive())
+      _orbitTask.run();
+  }
+
+  /**
+   * Rotates the node by the {@code quaternion} (defined in the node coordinate system)
    * around {@code center} defined in the world coordinate system.
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to

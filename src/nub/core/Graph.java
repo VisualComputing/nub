@@ -4295,13 +4295,46 @@ public class Graph {
     };
      */
     // TODO signs (isLeftHanded) are missed
+    // /*
     eye()._orbitTask._center = anchor();
     eye()._orbitTask._y += +dmx * (1.0f - myNdc * myNdc);
     eye()._orbitTask._x += -dmy * (1.0f - mxNdc * mxNdc);
     eye()._orbitTask._z += -dmx * myNdc;
     eye()._orbitTask._z += +dmy * mxNdc;
+    //eye().orbit(new Quaternion(eye()._orbitTask._x, eye()._orbitTask._y, eye()._orbitTask._z), eye()._orbitTask._center);
     if (!eye()._orbitTask.isActive())
       eye()._orbitTask.run();
+    // */
+    /*
+    float y = eye()._orbitTask._y + +dmx * (1.0f - myNdc * myNdc);
+    float x = eye()._orbitTask._x + -dmy * (1.0f - mxNdc * mxNdc);
+    float z = eye()._orbitTask._z + -dmx * myNdc;
+    z += +dmy * mxNdc;
+    eye().orbit(new Quaternion(x, y, z), anchor(), 0.2f);
+    // */
+  }
+
+  public void dampedSpinEye2(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    dampedSpinEye2(pixel1X, pixel1Y, pixel2X, pixel2Y, 1);
+  }
+
+  public void dampedSpinEye2(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity) {
+    Vector center = screenLocation(anchor());
+    int centerX = (int) center.x();
+    int centerY = (int) center.y();
+    float px = sensitivity * (pixel1X - centerX) / width();
+    float py = sensitivity * (isLeftHanded() ? (pixel1Y - centerY) : (centerY - pixel1Y)) / height();
+    float dx = sensitivity * (pixel2X - centerX) / width();
+    float dy = sensitivity * (isLeftHanded() ? (pixel2Y - centerY) : (centerY - pixel2Y)) / height();
+    Vector p1 = new Vector(px, py, _projectOnBall(px, py));
+    Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
+    // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
+    Vector axis = p2.cross(p1);
+    // 2D is an ad-hoc
+    float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
+    //same as:
+    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle), anchor());
+    eye().orbit(new Quaternion(axis, angle), anchor(), 0.2f);
   }
 
   // 11. lookAround

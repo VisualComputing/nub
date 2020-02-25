@@ -3178,6 +3178,10 @@ public class Scene extends Graph implements PConstants {
     super.dampedSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
+  public void mouseDampedSpinEye2() {
+    super.dampedSpinEye2(pmouseX(), pmouseY(), mouseX(), mouseY());
+  }
+
   public void mouseDampedTranslateEye() {
     super.dampedTranslateEye(mouseDX(), mouseDY());
   }

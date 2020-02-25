@@ -35,11 +35,13 @@ public class PeasyCam extends PApplet {
       public void interact(Object... gesture) {
         if (gesture.length == 1) {
           if (gesture[0] instanceof Float) {
-            /*
+            // /*
             // Orbit
             //orbit(axis, (float)gesture[0], new Vector(0,0,0));
             //orbit(new Quaternion(displacement(axis), (float)gesture[0]), new Vector(0,0,0));
-            Quaternion q = new Quaternion(displacement(axis), (float)gesture[0]);
+            Quaternion q = new Quaternion(displacement(axis), (float) gesture[0]);
+            orbit(q, scene.center(), 0.2f);
+            /*
             Vector e =  q.eulerAngles();
             //orbit(new Quaternion(displacement(axis), (float)gesture[0]), new Vector(0,0,0));
             _orbitTask._x += e.x();
@@ -47,7 +49,7 @@ public class PeasyCam extends PApplet {
             _orbitTask._z += e.z();
             if (!_orbitTask.isActive())
               _orbitTask.run();
-             // */
+            // */
             /*
             // Scaling
             //float factor = 1 + Math.abs((float)gesture[0]) / graph().height();
@@ -55,7 +57,7 @@ public class PeasyCam extends PApplet {
             _scalingTask._x += (float)gesture[0];
             if (!_scalingTask.isActive())
               _scalingTask.run();
-             // */
+            /*
             // Rotation
             Quaternion q = new Quaternion(displacement(axis), (float) gesture[0]);
             Vector e = q.eulerAngles();
@@ -65,6 +67,7 @@ public class PeasyCam extends PApplet {
             //_rotationTask._z += e.z();
             if (!_rotationTask.isActive())
               _rotationTask.run();
+            // */
           }
         }
       }
@@ -111,7 +114,7 @@ public class PeasyCam extends PApplet {
     switch (mouseButton) {
       case LEFT:
         if (!scene.mouseSpinTag())
-          scene.mouseDampedSpinEye();
+          scene.mouseDampedSpinEye2();
         //scene.mouseSpinEye();
         break;
       case RIGHT:
