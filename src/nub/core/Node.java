@@ -1414,6 +1414,16 @@ public class Node {
       System.out.println("Warning. Scaling should be positive. Nothing done");
   }
 
+  /**
+   * Scales the node according to {@code scaling}, locally defined with respect to the
+   * {@link #reference()}  and with an impulse defined with {@code friction} which should
+   * be in {@code [0..1]}.
+   *
+   * @see #translate(Vector, float)
+   * @see #rotate(Quaternion, float)
+   * @see #orbit(Quaternion, Vector, float)
+   * @see #setConstraint(Constraint)
+   */
   public void scale(float scaling, float friction) {
     scale(scaling);
     if (isDetached()) {
