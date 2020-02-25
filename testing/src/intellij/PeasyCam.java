@@ -1,16 +1,13 @@
 package intellij;
 
 import nub.core.Node;
-import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingHandler;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 public class PeasyCam extends PApplet {
-  Node n1, n2;
   Scene scene;
   Vector axis;
   boolean cad;
@@ -49,13 +46,19 @@ public class PeasyCam extends PApplet {
             if (!_orbitTask.isActive())
               _orbitTask.run();
             // */
-            /*
+            // /*
             // Scaling
-            //float factor = 1 + Math.abs((float)gesture[0]) / graph().height();
-            //scale((float)gesture[0] >= 0 ? factor : 1 / factor);
-            _scalingTask._x += (float)gesture[0];
-            if (!_scalingTask.isActive())
-              _scalingTask.run();
+            float factor = 1 + (Math.abs((float) gesture[0]) / graph().height());
+            //scale(delta >= 0 ? factor : 1 / factor);
+            scale((float) gesture[0] >= 0 ? factor : 1 / factor, 0.2f);
+
+            //float dx = Math.abs((float)gesture[0]);
+            //float factor = 1 + dx / graph().height();
+            //scale(dx >= 0 ? factor : 1 / factor);
+            //scale(dx >= 0 ? factor : 1 / factor, 0.2f);
+            //_scalingTask._x += (float)gesture[0];
+            //if (!_scalingTask.isActive())
+            //  _scalingTask.run();
             // */
             /*
             // Rotation
@@ -68,8 +71,10 @@ public class PeasyCam extends PApplet {
             if (!_rotationTask.isActive())
               _rotationTask.run();
             // */
+            /*
             Quaternion q = new Quaternion((float) gesture[0], 0, 0);
             rotate(q, 0f);
+            // */
           }
         }
       }
@@ -91,11 +96,6 @@ public class PeasyCam extends PApplet {
     scene.fit(1);
     axis = Vector.random();
     axis.multiply(scene.radius() / 3);
-    // test
-    n1 = scene.randomNode();
-    n2 = new Node(scene);
-    n1.setPosition(new Vector());
-    n2.set(n1);
   }
 
   public void draw() {
@@ -128,8 +128,9 @@ public class PeasyCam extends PApplet {
         break;
       case CENTER:
         // Scaling
-        scene.interactTag((float) (mouseX - pmouseX));
-        // /*
+        //println(mouseX - pmouseX);
+        scene.interactTag((float) mouseX - pmouseX);
+        /*
         if (cad)
           scene.mouseDampedRotateCAD();
         else
@@ -153,20 +154,6 @@ public class PeasyCam extends PApplet {
       scene.fit(1);
     if (key == 'S')
       scene.fit();
-    if (key == 't') {
-      Vector t = Vector.random();
-      t.println();
-      println("current frameRate: " + frameRate);
-      println("translate() issued at: " + TimingHandler.frameCount);
-      n1.translate(t);
-      n2.translate(t);
-      //n1.println();
-      //n2.println();
-      n1.position().println();
-      n2.position().println();
-    }
-    if (key == 'x')
-      scene.clearTags();
   }
 
   public static void main(String[] args) {

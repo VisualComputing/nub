@@ -15,6 +15,7 @@ import nub.core.constraint.Constraint;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.timing.Task;
 import nub.timing.TimingHandler;
 
 import java.util.ArrayList;
@@ -151,7 +152,32 @@ public class Node {
   protected long _bypass;
 
   // Tasks
-  protected DampedTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
+  protected DampedTask _translationTask, _rotationTask, _orbitTask;
+
+  class DampedScalingTask extends Task {
+    // original friction is 0.16
+    protected float _damp = 1.0f - 0.2f; // 1 - friction
+    protected float _x;
+
+    DampedScalingTask(Graph graph) {
+      super(graph.timingHandler());
+    }
+
+    @Override
+    public void execute() {
+      _x *= _damp;
+      if (Math.abs(_x) < .001)
+        _x = 0;
+      if (_x == 0)
+        stop();
+      else {
+        float factor = 1 + Math.abs(_x) / graph().height();
+        scale(_x >= 0 ? factor : 1 / factor);
+      }
+    }
+  }
+
+  protected DampedScalingTask _scalingTask;
 
   /**
    * Creates a detached node.
@@ -431,13 +457,7 @@ public class Node {
         orbit(new Quaternion(_x, _y, _z), _center);
       }
     };
-    _scalingTask = new DampedTask(graph()) {
-      @Override
-      public void action() {
-        float factor = 1 + Math.abs(_x) / graph().height();
-        scale(_x >= 0 ? factor : 1 / factor);
-      }
-    };
+    _scalingTask = new DampedScalingTask(graph());
   }
 
   /**
@@ -1038,6 +1058,10 @@ public class Node {
    */
   public void translate(Vector vector, float friction) {
     translate(vector);
+    if (isDetached()) {
+      System.out.println("Warning: translate(vector, friction) is only available if node is attached to a Graph. Use translate(vector) instead");
+      return;
+    }
     _translationTask._damp = 1 - friction;
     _translationTask._x += vector.x() * friction;
     _translationTask._y += vector.y() * friction;
@@ -1179,6 +1203,10 @@ public class Node {
    */
   public void rotate(Quaternion quaternion, float friction) {
     rotate(quaternion);
+    if (isDetached()) {
+      System.out.println("Warning: rotate(quaternion, friction) is only available if node is attached to a Graph. Use rotate(quaternion) instead");
+      return;
+    }
     _rotationTask._damp = 1 - friction;
     Vector e = quaternion.eulerAngles();
     _rotationTask._x += e.x();
@@ -1237,6 +1265,10 @@ public class Node {
    */
   public void orbit(Quaternion quaternion, Vector center, float friction) {
     orbit(quaternion, center);
+    if (isDetached()) {
+      System.out.println("Warning: orbit(quaternion, center, friction) is only available if node is attached to a Graph. Use orbit(quaternion, center) instead");
+      return;
+    }
     _orbitTask._damp = 1 - friction;
     _orbitTask._center = center;
     Vector e = quaternion.eulerAngles();
@@ -1380,6 +1412,19 @@ public class Node {
       _modified();
     } else
       System.out.println("Warning. Scaling should be positive. Nothing done");
+  }
+
+  public void scale(float scaling, float friction) {
+    scale(scaling);
+    if (isDetached()) {
+      System.out.println("Warning: scale(scaling, friction) is only available if node is attached to a Graph. Use scale(scaling) instead");
+      return;
+    }
+    _scalingTask._damp = 1 - friction;
+    _scalingTask._x += scaling > 1 ? graph().height() * (scaling - 1) : graph().height() * (scaling - 1) / scaling;
+    if (!_scalingTask.isActive()) {
+      _scalingTask.run();
+    }
   }
 
   /**
