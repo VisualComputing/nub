@@ -14,7 +14,8 @@ package nub.core;
 import nub.primitives.Vector;
 import nub.timing.Task;
 
-public abstract class DampedTask extends Task {
+// Translate, Orbit & Rotate (Euler angles)
+abstract class DampedTask extends Task {
   // original friction is 0.16
   protected Vector _center = new Vector();
   public float _damp = 1.0f - 0.2f; // 1 - friction

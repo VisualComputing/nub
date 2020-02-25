@@ -1034,6 +1034,7 @@ public class Node {
    * @see #rotate(Quaternion, float)
    * @see #scale(float, float)
    * @see #orbit(Quaternion, Vector, float)
+   * @see #setConstraint(Constraint)
    */
   public void translate(Vector vector, float friction) {
     translate(vector);
@@ -1165,6 +1166,30 @@ public class Node {
 
   /**
    * Rotates the node by {@code quaternion} (defined in the node coordinate system):
+   * {@code rotation().compose(quaternion)} and with an impulse defined with
+   * {@code friction} which should be in {@code [0..1]}.
+   * <p>
+   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
+   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   *
+   * @see #translate(Vector, float)
+   * @see #orbit(Quaternion, Vector, float)
+   * @see #scale(float, float)
+   * @see #setConstraint(Constraint)
+   */
+  public void rotate(Quaternion quaternion, float friction) {
+    rotate(quaternion);
+    _rotationTask._damp = 1 - friction;
+    Vector e = quaternion.eulerAngles();
+    _rotationTask._x += e.x();
+    _rotationTask._y += e.y();
+    _rotationTask._z += e.z();
+    if (!_rotationTask.isActive())
+      _rotationTask.run();
+  }
+
+  /**
+   * Rotates the node by {@code quaternion} (defined in the node coordinate system):
    * {@code rotation().compose(quaternion)}.
    * <p>
    * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
@@ -1205,12 +1230,14 @@ public class Node {
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
-   * @see #orbit(Vector, float, Vector)
-   * @see #orbit(Vector, float)
+   * @see #translate(Vector, float)
+   * @see #rotate(Quaternion, float)
+   * @see #scale(float, float)
    * @see #setConstraint(Constraint)
    */
   public void orbit(Quaternion quaternion, Vector center, float friction) {
     orbit(quaternion, center);
+    _orbitTask._damp = 1 - friction;
     _orbitTask._center = center;
     Vector e = quaternion.eulerAngles();
     _orbitTask._x += e.x();

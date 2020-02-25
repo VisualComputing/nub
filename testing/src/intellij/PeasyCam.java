@@ -1,6 +1,7 @@
 package intellij;
 
 import nub.core.Node;
+import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.timing.TimingHandler;
@@ -48,7 +49,7 @@ public class PeasyCam extends PApplet {
             if (!_orbitTask.isActive())
               _orbitTask.run();
             // */
-            // /*
+            /*
             // Scaling
             //float factor = 1 + Math.abs((float)gesture[0]) / graph().height();
             //scale((float)gesture[0] >= 0 ? factor : 1 / factor);
@@ -67,6 +68,8 @@ public class PeasyCam extends PApplet {
             if (!_rotationTask.isActive())
               _rotationTask.run();
             // */
+            Quaternion q = new Quaternion((float) gesture[0], 0, 0);
+            rotate(q, 0f);
           }
         }
       }
@@ -126,7 +129,7 @@ public class PeasyCam extends PApplet {
       case CENTER:
         // Scaling
         scene.interactTag((float) (mouseX - pmouseX));
-        /*
+        // /*
         if (cad)
           scene.mouseDampedRotateCAD();
         else
