@@ -14,7 +14,11 @@ package nub.core;
 import nub.primitives.Vector;
 import nub.timing.Task;
 
-// Translate, Orbit & Rotate (Euler angles)
+/**
+ * Translate, Orbit & Rotate (Euler angles) damped task based on PeasyCam, see
+ * <a href="https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java">DampedAction</a.
+ * in turn based on a "damned clever and aesthetic idea by David Bollinger".
+ */
 abstract class DampedTask extends Task {
   // original friction is 0.16
   protected Vector _center = new Vector();
@@ -42,5 +46,8 @@ abstract class DampedTask extends Task {
       action();
   }
 
+  /**
+   * Callback method for translate, orbit & rotate damped actions.
+   */
   abstract void action();
 }
