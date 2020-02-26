@@ -4165,6 +4165,7 @@ public class Graph {
    * https://github.com/jdf/peasycam/blob/master/src/peasy/PeasyCam.java
    */
   public void debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float friction) {
+    // TODO isRightHanded is broken
     int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
     float distance = Vector.subtract(eye().position(), anchor()).magnitude();
     float mult = (float) -Math.pow((float) Math.log10(1 + distance), 0.5f) * 0.00125f;
@@ -4177,8 +4178,7 @@ public class Graph {
     // mouse [-1, +1]
     float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
     float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
-    // TODO signs (isLeftHanded) are missed
-    // /*
+    /*
     eye()._orbitTask._damp = 1 - friction;
     eye()._orbitTask._center = anchor();
     eye()._orbitTask._y += +dmx * (1.0f - myNdc * myNdc);
@@ -4192,15 +4192,17 @@ public class Graph {
       //eye()._orbitTask._z *= -1;
     }
     // */
+    /*
     eye().orbit(new Quaternion(eye()._orbitTask._x, eye()._orbitTask._y, eye()._orbitTask._z), eye()._orbitTask._center);
     if (!eye()._orbitTask.isActive())
       eye()._orbitTask.run();
     // */
-    // TODO was functional, now broken
-    /*
-    float y = eye()._orbitTask._y + +dmx * (1.0f - myNdc * myNdc);
-    float x = eye()._orbitTask._x + -dmy * (1.0f - mxNdc * mxNdc);
-    float z = eye()._orbitTask._z + -dmx * myNdc;
+    // /*
+    eye()._orbitTask._damp = 1 - friction;
+    eye()._orbitTask._center = anchor();
+    float y = +dmx * (1.0f - myNdc * myNdc);
+    float x = -dmy * (1.0f - mxNdc * mxNdc);
+    float z = -dmx * myNdc;
     z += +dmy * mxNdc;
     eye().orbit(new Quaternion(x, y, z), anchor(), friction);
     // */
