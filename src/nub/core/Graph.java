@@ -242,10 +242,7 @@ public class Graph {
    * @see #setEye(Node)
    */
   // TODO
-  // 1. Try to unify damped and original models, by checking:
-  // * Spin and DampedSpin
-  // * Node movements, particularly that of spin
-  // * Reductions: friction and no friction
+  // 1. Calibrate friction for all damped methods -> fine tune damped methods API
   // 2. Interpolator should have a Task by default and a setTask method to change it
   // Maybe Node should go in the same way if models are unified
   public Graph(Object context, Type type, int width, int height) {
