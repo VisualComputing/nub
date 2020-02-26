@@ -4158,8 +4158,58 @@ public class Graph {
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
     //same as:
-    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle), anchor());
+    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle), anchor(), friction);
     eye().orbit(new Quaternion(axis, angle), anchor(), friction);
+  }
+
+  public void debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.2f);
+  }
+
+  /**
+   * @see #spinEye(int, int, int, int). Debug. Idea took from peasycam. See mouseRotate():
+   * https://github.com/jdf/peasycam/blob/master/src/peasy/PeasyCam.java
+   */
+  public void debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float friction) {
+    int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
+    float distance = Vector.subtract(eye().position(), anchor()).magnitude();
+    float mult = (float) -Math.pow((float) Math.log10(1 + distance), 0.5f) * 0.00125f;
+    float dmx = dx * mult;
+    float dmy = dy * mult;
+    float viewX = _upperLeftCornerX;
+    float viewY = _upperLeftCornerY;
+    float viewW = _width;
+    float viewH = _height;
+    // mouse [-1, +1]
+    float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
+    float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
+    // TODO signs (isLeftHanded) are missed
+    // /*
+    eye()._orbitTask._damp = 1 - friction;
+    eye()._orbitTask._center = anchor();
+    eye()._orbitTask._y += +dmx * (1.0f - myNdc * myNdc);
+    eye()._orbitTask._x += -dmy * (1.0f - mxNdc * mxNdc);
+    eye()._orbitTask._z += -dmx * myNdc;
+    eye()._orbitTask._z += +dmy * mxNdc;
+    /*
+    // TODO isRightHanded is broken
+    if(isRightHanded()) {
+      eye()._orbitTask._x *= -1;
+      //eye()._orbitTask._z *= -1;
+    }
+    // */
+    eye().orbit(new Quaternion(eye()._orbitTask._x, eye()._orbitTask._y, eye()._orbitTask._z), eye()._orbitTask._center);
+    if (!eye()._orbitTask.isActive())
+      eye()._orbitTask.run();
+    // */
+    // TODO was functional, now broken
+    /*
+    float y = eye()._orbitTask._y + +dmx * (1.0f - myNdc * myNdc);
+    float x = eye()._orbitTask._x + -dmy * (1.0f - mxNdc * mxNdc);
+    float z = eye()._orbitTask._z + -dmx * myNdc;
+    z += +dmy * mxNdc;
+    eye().orbit(new Quaternion(x, y, z), anchor(), friction);
+    // */
   }
 
   /**
@@ -4208,60 +4258,13 @@ public class Graph {
     }
   }
 
-  /**
-   * @see #spinEye(int, int, int, int)
-   */
-  // TODO a isLeftHanded() is missing
-  public void peasySpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
-    float distance = Vector.subtract(eye().position(), anchor()).magnitude();
-    float mult = (float) -Math.pow((float) Math.log10(1 + distance), 0.5f) * 0.00125f;
-    float dmx = dx * mult;
-    float dmy = dy * mult;
-    float viewX = _upperLeftCornerX;
-    float viewY = _upperLeftCornerY;
-    float viewW = _width;
-    float viewH = _height;
-    // mouse [-1, +1]
-    float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
-    float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
-    /*
-    _spinningTask = new DampedTask(this) {
-      @Override
-      public void action() {
-        // TODO check rotateEye signs in relation to this
-        //eye().orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor());
-        eye().orbit(new Quaternion(is2D() ? 0 : isLeftHanded() ? _x : -_x, is2D() ? 0 : _y, _z), anchor());
-      }
-    };
-     */
-    // TODO signs (isLeftHanded) are missed
-    // /*
-    eye()._orbitTask._center = anchor();
-    eye()._orbitTask._y += +dmx * (1.0f - myNdc * myNdc);
-    eye()._orbitTask._x += -dmy * (1.0f - mxNdc * mxNdc);
-    eye()._orbitTask._z += -dmx * myNdc;
-    eye()._orbitTask._z += +dmy * mxNdc;
-    //eye().orbit(new Quaternion(eye()._orbitTask._x, eye()._orbitTask._y, eye()._orbitTask._z), eye()._orbitTask._center);
-    if (!eye()._orbitTask.isActive())
-      eye()._orbitTask.run();
-    // */
-    /*
-    float y = eye()._orbitTask._y + +dmx * (1.0f - myNdc * myNdc);
-    float x = eye()._orbitTask._x + -dmy * (1.0f - mxNdc * mxNdc);
-    float z = eye()._orbitTask._z + -dmx * myNdc;
-    z += +dmy * mxNdc;
-    eye().orbit(new Quaternion(x, y, z), anchor(), 0.2f);
-    // */
-  }
+
 
   // 11. lookAround
 
   public void lookAround(float deltaX, float deltaY) {
     lookAround(deltaX, deltaY, 1.f);
   }
-
-  // 12. damped look around
 
   /**
    * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
@@ -4324,6 +4327,9 @@ public class Graph {
     }
   }
 
+  /**
+   * {@link #rotateCAD(float, float, Vector, float) procedure}.
+   */
   protected void _rotateCAD() {
     Vector _up = eye().displacement(_eyeUp);
     //same as:

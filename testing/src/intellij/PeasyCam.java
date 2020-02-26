@@ -115,8 +115,9 @@ public class PeasyCam extends PApplet {
   public void mouseDragged() {
     switch (mouseButton) {
       case LEFT:
-        if (!scene.mouseSpinTag(0.2f))
-          scene.mouseSpinEye();
+        if (!scene.mouseSpinTag(0.3f))
+          //scene.mouseSpinEye(0.16f);
+          scene.mouseDebugSpinEye();
         break;
       case RIGHT:
         if (!scene.mouseTranslateTag())

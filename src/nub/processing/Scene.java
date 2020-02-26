@@ -3214,6 +3214,14 @@ public class Scene extends Graph implements PConstants {
 
   // only eye
 
+  public void mouseDebugSpinEye(float friction) {
+    super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), friction);
+  }
+
+  public void mouseDebugSpinEye() {
+    super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
+  }
+
   public void mouseLookAround(float friction) {
     super.lookAround(mouseRADX(), mouseRADY(), friction);
   }
