@@ -25,6 +25,9 @@ abstract class DampedTask extends Task {
   protected float _damp = 1.0f - 0.2f; // 1 - friction
   protected float _x, _y, _z;
 
+  /**
+   * Just register the timing task at the graph timing handler.
+   */
   DampedTask(Graph graph) {
     super(graph.timingHandler());
   }

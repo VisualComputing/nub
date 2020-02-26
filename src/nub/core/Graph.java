@@ -272,11 +272,7 @@ public class Graph {
     _cadRotateTask = new DampedTask(this) {
       @Override
       public void action() {
-        Vector _eyeUp = eye().displacement(Graph.this._eyeUp);
-        //same as:
-        //Quaternion quaternion = Quaternion.multiply(new Quaternion(_eyeUp, _eyeUp.y() < 0.0f ? _x : -_x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_y : _y));
-        //eye().orbit(eye().worldDisplacement(quaternion.axis()), quaternion.angle(), anchor());
-        eye().orbit(Quaternion.multiply(new Quaternion(_eyeUp, _eyeUp.y() < 0.0f ? _x : -_x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_y : _y)), anchor());
+        _rotateCAD();
       }
     };
     setType(type);
@@ -4319,11 +4315,20 @@ public class Graph {
       System.out.println("Warning: rotateCAD is only available in 3D");
     } else {
       _eyeUp = upVector;
+      _rotateCAD();
       _cadRotateTask._damp = 1 - friction;
       _cadRotateTask._x += roll / 5;
       _cadRotateTask._y += pitch / 5;
       if (!_cadRotateTask.isActive())
         _cadRotateTask.run();
     }
+  }
+
+  protected void _rotateCAD() {
+    Vector _up = eye().displacement(_eyeUp);
+    //same as:
+    //Quaternion quaternion = Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_cadRotateTask._y : _cadRotateTask._y));
+    //eye().orbit(eye().worldDisplacement(quaternion.axis()), quaternion.angle(), anchor());
+    eye().orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_cadRotateTask._y : _cadRotateTask._y)), anchor());
   }
 }

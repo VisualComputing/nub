@@ -128,7 +128,6 @@ public class PeasyCam extends PApplet {
       case CENTER:
         if (!scene.interactTag((float) mouseX - pmouseX))
           if (cad)
-            // TODO broken when friction == 1
             scene.mouseRotateCAD(0.2f);
           else
             // TODO broken when friction == 1
