@@ -131,9 +131,8 @@ public class PeasyCam extends PApplet {
           if (cad)
             scene.mouseRotateCAD(0.2f);
           else
-            // TODO broken when friction == 1
             // TODO angles are broken
-            scene.mouseLookAround(0.2f);
+            scene.mouseLookAround(1);
         break;
     }
   }

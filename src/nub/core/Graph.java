@@ -263,10 +263,7 @@ public class Graph {
     _lookAroundTask = new DampedTask(this) {
       @Override
       public void action() {
-        Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_y : _y);
-        Quaternion rotY = new Quaternion(eye().displacement(_upVector), -_x);
-        Quaternion quaternion = Quaternion.multiply(rotY, rotX);
-        eye().rotate(quaternion);
+        _lookAround();
       }
     };
     _cadRotateTask = new DampedTask(this) {
@@ -4258,9 +4255,7 @@ public class Graph {
     }
   }
 
-
-
-  // 11. lookAround
+  // 8. lookAround
 
   public void lookAround(float deltaX, float deltaY) {
     lookAround(deltaX, deltaY, 1.f);
@@ -4282,12 +4277,23 @@ public class Graph {
       _lookAroundTask._damp = 1 - friction;
       _lookAroundTask._x += deltaX / 5;
       _lookAroundTask._y += deltaY / 5;
+      _lookAround();
       if (!_lookAroundTask.isActive())
         _lookAroundTask.run();
     }
   }
 
-  // 13. rotate CAD
+  /**
+   * {@link #lookAround(float, float)}  procedure}.
+   */
+  protected void _lookAround() {
+    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_lookAroundTask._y : _lookAroundTask._y);
+    Quaternion rotY = new Quaternion(eye().displacement(_upVector), -_lookAroundTask._x);
+    Quaternion quaternion = Quaternion.multiply(rotY, rotX);
+    eye().rotate(quaternion);
+  }
+
+  // 9. rotate CAD
 
   /**
    * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0))}.
