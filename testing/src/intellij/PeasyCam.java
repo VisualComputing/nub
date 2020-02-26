@@ -115,34 +115,32 @@ public class PeasyCam extends PApplet {
   public void mouseDragged() {
     switch (mouseButton) {
       case LEFT:
-        if (!scene.mouseSpinTag())
-          scene.mouseDampedSpinEye2();
-        //scene.mouseSpinEye();
+        if (!scene.mouseSpinTag(0.2f))
+          scene.mouseSpinEye();
         break;
       case RIGHT:
         if (!scene.mouseTranslateTag())
-          scene.mouseDampedTranslateEye();
+          scene.mouseTranslateEye();
         //scene.rotateEye(scene.mouseRADY(), 0, 0);
         //scene.rotateEye(0, scene.mouseRADX(), 0);
         //scene.rotateEye(0, 0, scene.mouseRADX());
         break;
       case CENTER:
-        // Scaling
-        //println(mouseX - pmouseX);
-        scene.interactTag((float) mouseX - pmouseX);
-        /*
-        if (cad)
-          scene.mouseDampedRotateCAD();
-        else
-          scene.mouseDampedLookAround();
-        // */
+        if (!scene.interactTag((float) mouseX - pmouseX))
+          if (cad)
+            // TODO broken when friction == 1
+            scene.mouseRotateCAD(0.2f);
+          else
+            // TODO broken when friction == 1
+            // TODO angles are broken
+            scene.mouseLookAround(0.2f);
         break;
     }
   }
 
   public void mouseWheel(MouseEvent event) {
     if (!scene.interactTag((float)event.getCount() * 10.f * PI / (float)width))
-      scene.dampedMoveForward(event.getCount() * 20);
+      scene.moveForward(event.getCount() * 20, 0.2f);
   }
 
   public void keyPressed() {
