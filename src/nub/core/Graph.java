@@ -4269,11 +4269,6 @@ public class Graph {
     if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
     } else {
-      if (frameCount() > _lookAroundCount) {
-        _upVector = eye().yAxis();
-        _lookAroundCount = this.frameCount();
-      }
-      _lookAroundCount++;
       _lookAroundTask._damp = 1 - friction;
       _lookAroundTask._x += deltaX / 5;
       _lookAroundTask._y += deltaY / 5;
@@ -4287,6 +4282,11 @@ public class Graph {
    * {@link #lookAround(float, float)}  procedure}.
    */
   protected void _lookAround() {
+    if (frameCount() > _lookAroundCount) {
+      _upVector = eye().yAxis();
+      _lookAroundCount = this.frameCount();
+    }
+    _lookAroundCount++;
     Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_lookAroundTask._y : _lookAroundTask._y);
     Quaternion rotY = new Quaternion(eye().displacement(_upVector), -_lookAroundTask._x);
     Quaternion quaternion = Quaternion.multiply(rotY, rotX);
