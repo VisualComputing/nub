@@ -128,11 +128,11 @@ void keyPressed() {
       scene.tag("keyboard", esfera);
   if (key == CODED)
     if (keyCode == UP)
-      scene.translate("keyboard", 0, -10);
+      scene.translate("keyboard", 0, -10, 0);
     else if (keyCode == DOWN)
-      scene.translate("keyboard", 0, 10);
+      scene.translate("keyboard", 0, 10, 0);
     else if (keyCode == LEFT)
-      scene.translate("keyboard", -10, 0);
+      scene.translate("keyboard", -10, 0, 0);
     else if (keyCode == RIGHT)
-      scene.translate("keyboard", 10, 0);
+      scene.translate("keyboard", 10, 0, 0);
 }
