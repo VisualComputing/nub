@@ -50,7 +50,7 @@ public class DebugCam extends PApplet {
             // Scaling
             float factor = 1 + (Math.abs((float) gesture[0]) / graph().height());
             //scale(delta >= 0 ? factor : 1 / factor);
-            scale((float) gesture[0] >= 0 ? factor : 1 / factor, 0.2f);
+            scale((float) gesture[0] >= 0 ? factor : 1 / factor, 0.8f);
 
             //float dx = Math.abs((float)gesture[0]);
             //float factor = 1 + dx / graph().height();

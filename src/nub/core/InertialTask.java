@@ -20,9 +20,9 @@ import nub.timing.Task;
  * in turn based on a "damned clever and aesthetic idea by David Bollinger".
  */
 abstract class InertialTask extends Task {
-  // original friction is 0.16
   protected Vector _center = new Vector();
-  protected float _inertia = 1.0f - 0.2f; // 1 - friction
+  // original friction is 0.16
+  protected float _inertia;// 1 - friction
   protected float _x, _y, _z;
 
   /**
@@ -30,6 +30,18 @@ abstract class InertialTask extends Task {
    */
   InertialTask(Graph graph) {
     super(graph.timingHandler());
+  }
+
+  /**
+   * Sets inertia in [0..1].
+   */
+  void setInertia(float inertia) {
+    float val = Math.abs(inertia);
+    while (val > 1)
+      val /= 10;
+    if (val != inertia)
+      System.out.println("Warning: inertia should be in [0..1]. Setting it as " + val);
+    _inertia = val;
   }
 
   @Override

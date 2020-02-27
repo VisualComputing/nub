@@ -156,7 +156,7 @@ public class Node {
 
   class InertialScalingTask extends Task {
     // original friction is 0.16
-    protected float _damp = 1.0f - 0.2f; // 1 - friction
+    protected float _inertia = 0.8f; // 1 - friction
     protected float _x;
 
     InertialScalingTask(Graph graph) {
@@ -165,7 +165,7 @@ public class Node {
 
     @Override
     public void execute() {
-      _x *= _damp;
+      _x *= _inertia;
       if (Math.abs(_x) < .001)
         _x = 0;
       if (_x == 0)
@@ -177,6 +177,7 @@ public class Node {
     }
   }
 
+  // TODO pending
   protected InertialScalingTask _scalingTask;
 
   /**
@@ -1435,7 +1436,7 @@ public class Node {
       System.out.println("Warning: scale(scaling, inertia) is only available if node is attached to a Graph. Use scale(scaling) instead");
       return;
     }
-    _scalingTask._damp = inertia;
+    _scalingTask._inertia = inertia;
     _scalingTask._x += scaling > 1 ? graph().height() * (scaling - 1) : graph().height() * (scaling - 1) / scaling;
     if (!_scalingTask.isActive()) {
       _scalingTask.run();
