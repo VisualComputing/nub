@@ -4204,7 +4204,7 @@ public class Graph {
       myNdc = -myNdc;
     /*
     // Option 1
-    eye()._orbitTask._damp = 1 - friction;
+    eye()._orbitTask._inertia = inertia;
     eye()._orbitTask._center = anchor();
     eye()._orbitTask._y += +dmx * (1.0f - myNdc * myNdc);
     eye()._orbitTask._x += -dmy * (1.0f - mxNdc * mxNdc);
@@ -4216,7 +4216,7 @@ public class Graph {
     // */
     // /*
     // Option 2
-    eye()._orbitTask._inertia = 1 - inertia;
+    eye()._orbitTask._inertia = inertia;
     eye()._orbitTask._center = anchor();
     float y = +dmx * (1.0f - myNdc * myNdc);
     float x = -dmy * (1.0f - mxNdc * mxNdc);

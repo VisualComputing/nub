@@ -10,7 +10,8 @@ import processing.event.MouseEvent;
 public class DebugCam extends PApplet {
   Scene scene;
   Vector axis;
-  boolean cad;
+  boolean cad, peasy;
+  float inertia = 0.8f;
 
   public void settings() {
     size(800, 800, P3D);
@@ -50,7 +51,7 @@ public class DebugCam extends PApplet {
             // Scaling
             float factor = 1 + (Math.abs((float) gesture[0]) / graph().height());
             //scale(delta >= 0 ? factor : 1 / factor);
-            scale((float) gesture[0] >= 0 ? factor : 1 / factor, 0.8f);
+            scale((float) gesture[0] >= 0 ? factor : 1 / factor, 0.2f);
 
             //float dx = Math.abs((float)gesture[0]);
             //float factor = 1 + dx / graph().height();
@@ -115,41 +116,65 @@ public class DebugCam extends PApplet {
   public void mouseDragged() {
     switch (mouseButton) {
       case LEFT:
-        if (!scene.mouseSpinTag(0.84f))
-          scene.mouseSpinEye(0.84f);
-          //scene.mouseDebugSpinEye(0.84f);
+        if (!scene.mouseSpinTag(inertia))
+          if (peasy)
+            scene.mouseDebugSpinEye(inertia);
+          else
+            scene.mouseSpinEye(inertia);
+        //scene.mouseSpin();
         break;
       case RIGHT:
-        if (!scene.mouseTranslateTag(0.8f))
-          scene.mouseTranslateEye(0.8f);
-        //scene.rotateEye(scene.mouseRADY(), 0, 0);
-        //scene.rotateEye(0, scene.mouseRADX(), 0);
-        //scene.rotateEye(0, 0, scene.mouseRADX());
+        if (!scene.mouseTranslateTag(inertia))
+          scene.mouseTranslateEye(inertia);
         break;
       case CENTER:
         if (!scene.interactTag((float) mouseX - pmouseX))
           if (cad)
-            scene.mouseRotateCAD(0.8f);
+            scene.mouseRotateCAD(inertia);
           else
-            scene.mouseLookAround(0.8f);
+            scene.mouseLookAround(inertia);
         break;
     }
   }
 
   public void mouseWheel(MouseEvent event) {
     if (!scene.interactTag((float)event.getCount() * 10.f * PI / (float)width))
-      scene.moveForward(event.getCount() * 20, 0.8f);
+      scene.moveForward(event.getCount() * 20, inertia);
   }
 
   public void keyPressed() {
     if (key == 'f')
       scene.flip();
+    if (key == 'p')
+      peasy = !peasy;
     if (key == 'c')
       cad = !cad;
     if (key == 's')
       scene.fit(1);
     if (key == 'S')
       scene.fit();
+    if (key == '0')
+      inertia = 0.f;
+    if (key == '1')
+      inertia = 0.1f;
+    if (key == '2')
+      inertia = 0.2f;
+    if (key == '3')
+      inertia = 0.3f;
+    if (key == '4')
+      inertia = 0.4f;
+    if (key == '5')
+      inertia = 0.5f;
+    if (key == '6')
+      inertia = 0.6f;
+    if (key == '7')
+      inertia = 0.7f;
+    if (key == '8')
+      inertia = 0.8f;
+    if (key == '9')
+      inertia = 0.9f;
+    if (key == 'd')
+      inertia = 1.f;
   }
 
   public static void main(String[] args) {
