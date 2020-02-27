@@ -1208,7 +1208,7 @@ public class Node {
       System.out.println("Warning: rotate(quaternion, inertia) is only available if node is attached to a Graph. Use rotate(quaternion) instead");
       return;
     }
-    _translationTask.setInertia(inertia);
+    _rotationTask.setInertia(inertia);
     Vector e = quaternion.eulerAngles();
     _rotationTask._x += e.x();
     _rotationTask._y += e.y();
@@ -1270,7 +1270,7 @@ public class Node {
       System.out.println("Warning: orbit(quaternion, center, inertia) is only available if node is attached to a Graph. Use orbit(quaternion, center) instead");
       return;
     }
-    _translationTask.setInertia(inertia);
+    _orbitTask.setInertia(inertia);
     _orbitTask._center = center;
     Vector e = quaternion.eulerAngles();
     _orbitTask._x += e.x();

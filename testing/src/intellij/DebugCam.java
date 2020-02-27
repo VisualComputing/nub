@@ -115,13 +115,13 @@ public class DebugCam extends PApplet {
   public void mouseDragged() {
     switch (mouseButton) {
       case LEFT:
-        if (!scene.mouseSpinTag(0.2f))
-          //scene.mouseSpinEye(0.84f);
-          scene.mouseDebugSpinEye(0.84f);
+        if (!scene.mouseSpinTag(0.84f))
+          scene.mouseSpinEye(0.84f);
+          //scene.mouseDebugSpinEye(0.84f);
         break;
       case RIGHT:
-        if (!scene.mouseTranslateTag())
-          scene.mouseTranslateEye();
+        if (!scene.mouseTranslateTag(0.8f))
+          scene.mouseTranslateEye(0.8f);
         //scene.rotateEye(scene.mouseRADY(), 0, 0);
         //scene.rotateEye(0, scene.mouseRADX(), 0);
         //scene.rotateEye(0, 0, scene.mouseRADX());
