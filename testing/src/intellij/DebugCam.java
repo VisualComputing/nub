@@ -7,7 +7,7 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
-public class PeasyCam extends PApplet {
+public class DebugCam extends PApplet {
   Scene scene;
   Vector axis;
   boolean cad;
@@ -153,6 +153,6 @@ public class PeasyCam extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.PeasyCam"});
+    PApplet.main(new String[]{"intellij.DebugCam"});
   }
 }
