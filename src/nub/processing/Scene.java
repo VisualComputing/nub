@@ -3081,14 +3081,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return mouseTranslateTag(tag, 0.8f)}.
+   * Same as {@code return mouseTranslateTag(tag, 0.6f)}.
    *
    * @see #mouseTranslateTag(String, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public boolean mouseTranslateTag(String tag) {
-    return mouseTranslateTag(tag, 0.8f);
+    return mouseTranslateTag(tag, 0.6f);
   }
 
   /**
@@ -3117,20 +3117,20 @@ public class Scene extends Graph implements PConstants {
       i /= 10;
     if (i != inertia)
       System.out.println("Warning: inertia should be in [0..1]. Setting it as " + i);
-    // TODO test from here
+    // hack: idea is to have node always under the cursor
     //super.translateNode(node, mouseDX(), mouseDY(), 0, i);
     super.translateNode(node, mouseDX() * (1 - i), mouseDY() * (1 - i), 0, i);
   }
 
   /**
-   * Same as {@code mouseTranslateNode(node, 0.8f)}.
+   * Same as {@code mouseTranslateNode(node, 0.6f)}.
    *
    * @see #mouseTranslateNode(Node, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslateNode(Node node) {
-    mouseTranslateNode(node, 0.8f);
+    mouseTranslateNode(node, 0.6f);
   }
 
   /**
@@ -3145,21 +3145,20 @@ public class Scene extends Graph implements PConstants {
       i /= 10;
     if (i != inertia)
       System.out.println("Warning: inertia should be in [0..1]. Setting it as " + i);
-    // TODO test from here
+    // hack: idea is to have the world axes under the cursor
     //super.translateEye(mouseDX(), mouseDY(), 0, inertia);
-    // Goal is next line!
     super.translateEye(mouseDX() * (1 - i), mouseDY() * (1 - i), 0, i);
   }
 
   /**
-   * Same as {@code mouseTranslateEye(0.8f)}.
+   * Same as {@code mouseTranslateEye(0.7f)}.
    *
    * @see #mouseTranslateEye()
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslateEye() {
-    mouseTranslateEye(0.8f);
+    mouseTranslateEye(0.7f);
   }
 
   /**

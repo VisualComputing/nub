@@ -8,7 +8,7 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
-public class DebugCam extends PApplet {
+public class DebugEye extends PApplet {
   Scene scene;
   Vector axis;
   boolean cad, peasy, orbit;
@@ -30,6 +30,7 @@ public class DebugCam extends PApplet {
         pg.box(30);
         pg.popStyle();
       }
+
       @Override
       public void interact(Object... gesture) {
         if (gesture.length == 1) {
@@ -81,34 +82,28 @@ public class DebugCam extends PApplet {
   public void mouseDragged(MouseEvent event) {
     switch (mouseButton) {
       case LEFT:
-        if (!scene.mouseSpinTag(inertia))
-          if (peasy)
-            scene.mouseDebugSpinEye(inertia);
-          else
-            scene.mouseSpinEye(inertia);
+        scene.mouseSpin();
         break;
       case RIGHT:
-        if (!scene.mouseTranslateTag(inertia))
-          scene.mouseTranslateEye(inertia);
+        scene.mouseTranslate();
         break;
       case CENTER:
         if (event.isShiftDown()) {
-          if (!scene.scaleTag((float) mouseX - pmouseX, inertia))
-            scene.scaleEye((float) mouseX - pmouseX, inertia);
+          scene.scale((float) mouseX - pmouseX);
         } else {
           if (!scene.interactTag(scene.mouseRADX()))
             if (cad)
-              scene.mouseRotateCAD(inertia);
+              scene.mouseRotateCAD();
             else
-              scene.mouseLookAround(inertia);
+              scene.mouseLookAround();
         }
         break;
     }
   }
 
   public void mouseWheel(MouseEvent event) {
-    if (!scene.interactTag((float)event.getCount() * 10.f * PI / (float)width))
-      scene.moveForward(event.getCount() * 10, inertia);
+    if (!scene.interactTag((float) event.getCount() * 10.f * PI / (float) width))
+      scene.moveForward(event.getCount() * 10);
   }
 
   public void keyPressed() {
@@ -149,6 +144,6 @@ public class DebugCam extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.DebugCam"});
+    PApplet.main(new String[]{"intellij.DebugEye"});
   }
 }

@@ -3939,12 +3939,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return rotateTag(tag, roll, pitch, yaw, 0.8f)}.
+   * Same as {@code return rotateTag(tag, roll, pitch, yaw, 0.84f)}.
    *
    * @see #rotateTag(String, float, float, float, float)
    */
   public boolean rotateTag(String tag, float roll, float pitch, float yaw) {
-    return rotateTag(tag, roll, pitch, yaw, 0.8f);
+    return rotateTag(tag, roll, pitch, yaw, 0.84f);
   }
 
   /**
@@ -3963,12 +3963,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code rotateNode(node, roll, pitch, yaw, 0.8f)}.
+   * Same as {@code rotateNode(node, roll, pitch, yaw, 0.84f)}.
    *
    * @see #rotateNode(Node, float, float, float, float)
    */
   public void rotateNode(Node node, float roll, float pitch, float yaw) {
-    rotateNode(node, roll, pitch, yaw, 0.8f);
+    rotateNode(node, roll, pitch, yaw, 0.84f);
   }
 
   /**
@@ -4000,12 +4000,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code rotateEye(roll, pitch, yaw, 0.8f)}.
+   * Same as {@code rotateEye(roll, pitch, yaw, 0.84f)}.
    *
    * @see #rotateEye(float, float, float, float)
    */
   public void rotateEye(float roll, float pitch, float yaw) {
-    rotateEye(roll, pitch, yaw, 0.8f);
+    rotateEye(roll, pitch, yaw, 0.84f);
   }
 
   /**
@@ -4067,12 +4067,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
+   * Same as {@code return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f)}.
    *
    * @see #spinTag(String, int, int, int, int, float)
    */
   public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
+    return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f);
   }
 
   /**
@@ -4091,12 +4091,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
+   * Same as {@code spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f)}.
    *
    * @see #spinNode(Node, int, int, int, int, float)
    */
   public void spinNode(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
+    spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f);
   }
 
   /**
@@ -4138,12 +4138,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
+   * Same as {@code spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f)}.
    *
    * @see #spinEye(int, int, int, int, float)
    */
   public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
+    spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f);
   }
 
   /**
@@ -4178,7 +4178,7 @@ public class Graph {
   }
 
   public void debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
+    debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f);
   }
 
   /**
