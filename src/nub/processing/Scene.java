@@ -3064,8 +3064,8 @@ public class Scene extends Graph implements PConstants {
     super.translate(tag, mouseDX(), mouseDY());
   }
 
-  public boolean mouseTranslateTag(String tag, float inertia) {
-    return super.translateTag(tag, mouseDX(), mouseDY(), inertia);
+  public boolean mouseTranslateTag() {
+    return mouseTranslateTag(null, 0.8f);
   }
 
   /**
@@ -3076,11 +3076,11 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseDY()
    */
   public boolean mouseTranslateTag(String tag) {
-    return super.translateTag(tag, mouseDX(), mouseDY());
+    return mouseTranslateTag(tag, 0.8f);
   }
 
   public boolean mouseTranslateTag(float inertia) {
-    return super.translateTag(mouseDX(), mouseDY(), inertia);
+    return mouseTranslateTag(null, inertia);
   }
 
   /**
@@ -3090,12 +3090,16 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseDX()
    * @see #mouseDY()
    */
-  public boolean mouseTranslateTag() {
-    return super.translateTag(mouseDX(), mouseDY());
+  public boolean mouseTranslateTag(String tag, float inertia) {
+    if (node(tag) != null) {
+      mouseTranslateNode(node(tag), inertia);
+      return true;
+    }
+    return false;
   }
 
   public void mouseTranslateNode(Node node, float inertia) {
-    super.translateNode(node, mouseDX(), mouseDY(), inertia);
+    super.translateNode(node, (1-inertia) * mouseDX(), (1-inertia) * mouseDY(), 0, inertia);
   }
 
   /**
@@ -3106,11 +3110,11 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseDY()
    */
   public void mouseTranslateNode(Node node) {
-    super.translateNode(node, mouseDX(), mouseDY());
+    mouseTranslateNode(node, 0.8f);
   }
 
   public void mouseTranslateEye(float inertia) {
-    super.translateEye(mouseDX(), mouseDY(), inertia);
+    super.translateEye((1-inertia) * mouseDX(), (1-inertia) * mouseDY(), 0, inertia);
   }
 
   /**
@@ -3121,7 +3125,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseDY()
    */
   public void mouseTranslateEye() {
-    super.translateEye(mouseDX(), mouseDY());
+    mouseTranslateEye(0.8f);
   }
 
   /**

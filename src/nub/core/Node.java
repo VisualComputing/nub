@@ -155,7 +155,7 @@ public class Node {
   protected InertialTask _translationTask, _rotationTask, _orbitTask;
 
   class InertialScalingTask extends Task {
-    // original friction is 0.16
+    // original friction is 0.16f
     protected float _inertia = 0.8f; // 1 - friction
     protected float _x;
 
@@ -1046,7 +1046,7 @@ public class Node {
   /**
    * Translates the node according to {@code vector}, locally defined with respect to the
    * {@link #reference()} and with an impulse defined with {@code inertia} which should
-   * be in {@code [0..1]}.
+   * be in {@code [0..1], 0 no inertia & 1 no friction}.
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
    * applied to the node may differ from {@code vector} (since it can be filtered by the
@@ -1063,12 +1063,7 @@ public class Node {
       System.out.println("Warning: translate(vector, inertia) is only available if node is attached to a Graph. Use translate(vector) instead");
       return;
     }
-    _translationTask._inertia = inertia;
-    /*
-    _translationTask._x += vector.x() * inertia;
-    _translationTask._y += vector.y() * inertia;
-    _translationTask._z += vector.z() * inertia;
-     */
+    _translationTask.setInertia(inertia);
     _translationTask._x += vector.x();
     _translationTask._y += vector.y();
     _translationTask._z += vector.z();
@@ -1197,7 +1192,7 @@ public class Node {
   /**
    * Rotates the node by {@code quaternion} (defined in the node coordinate system):
    * {@code rotation().compose(quaternion)} and with an impulse defined with
-   * {@code inertia} which should be in {@code [0..1]}.
+   * {@code inertia} which should be in {@code [0..1], 0 no inertia & 1 no friction}.
    * <p>
    * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
@@ -1213,7 +1208,7 @@ public class Node {
       System.out.println("Warning: rotate(quaternion, inertia) is only available if node is attached to a Graph. Use rotate(quaternion) instead");
       return;
     }
-    _rotationTask._inertia = inertia;
+    _translationTask.setInertia(inertia);
     Vector e = quaternion.eulerAngles();
     _rotationTask._x += e.x();
     _rotationTask._y += e.y();
@@ -1259,7 +1254,7 @@ public class Node {
   /**
    * Rotates the node by the {@code quaternion} (defined in the node coordinate system)
    * around {@code center} defined in the world coordinate system, and with an impulse
-   * defined with {@code inertia} which should be in {@code [0..1]}.
+   * defined with {@code inertia} which should be in {@code [0..1], 0 no inertia & 1 no friction}.
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
@@ -1275,7 +1270,7 @@ public class Node {
       System.out.println("Warning: orbit(quaternion, center, inertia) is only available if node is attached to a Graph. Use orbit(quaternion, center) instead");
       return;
     }
-    _orbitTask._inertia = inertia;
+    _translationTask.setInertia(inertia);
     _orbitTask._center = center;
     Vector e = quaternion.eulerAngles();
     _orbitTask._x += e.x();
@@ -1423,7 +1418,7 @@ public class Node {
   /**
    * Scales the node according to {@code scaling}, locally defined with respect to the
    * {@link #reference()}  and with an impulse defined with {@code inertia} which should
-   * be in {@code [0..1]}.
+   * be in {@code [0..1], 0 no inertia & 1 no friction}.
    *
    * @see #translate(Vector, float)
    * @see #rotate(Quaternion, float)
