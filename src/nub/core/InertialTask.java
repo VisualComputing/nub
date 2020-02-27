@@ -19,28 +19,28 @@ import nub.timing.Task;
  * <a href="https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java">DampedAction</a.
  * in turn based on a "damned clever and aesthetic idea by David Bollinger".
  */
-abstract class DampedTask extends Task {
+abstract class InertialTask extends Task {
   // original friction is 0.16
   protected Vector _center = new Vector();
-  protected float _damp = 1.0f - 0.2f; // 1 - friction
+  protected float _inertia = 1.0f - 0.2f; // 1 - friction
   protected float _x, _y, _z;
 
   /**
    * Just register the timing task at the graph timing handler.
    */
-  DampedTask(Graph graph) {
+  InertialTask(Graph graph) {
     super(graph.timingHandler());
   }
 
   @Override
   public void execute() {
-    _x *= _damp;
+    _x *= _inertia;
     if (Math.abs(_x) < .001)
       _x = 0;
-    _y *= _damp;
+    _y *= _inertia;
     if (Math.abs(_y) < .001)
       _y = 0;
-    _z *= _damp;
+    _z *= _inertia;
     if (Math.abs(_z) < .001)
       _z = 0;
     if (_x == 0 && _y == 0 && _z == 0)

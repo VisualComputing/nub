@@ -152,14 +152,14 @@ public class Node {
   protected long _bypass;
 
   // Tasks
-  protected DampedTask _translationTask, _rotationTask, _orbitTask;
+  protected InertialTask _translationTask, _rotationTask, _orbitTask;
 
-  class DampedScalingTask extends Task {
+  class InertialScalingTask extends Task {
     // original friction is 0.16
     protected float _damp = 1.0f - 0.2f; // 1 - friction
     protected float _x;
 
-    DampedScalingTask(Graph graph) {
+    InertialScalingTask(Graph graph) {
       super(graph.timingHandler());
     }
 
@@ -177,7 +177,7 @@ public class Node {
     }
   }
 
-  protected DampedScalingTask _scalingTask;
+  protected InertialScalingTask _scalingTask;
 
   /**
    * Creates a detached node.
@@ -438,26 +438,26 @@ public class Node {
   }
 
   protected void _initTasks() {
-    _translationTask = new DampedTask(graph()) {
+    _translationTask = new InertialTask(graph()) {
       @Override
       public void action() {
         translate(_x, _y, _z);
       }
     };
-    _rotationTask = new DampedTask(graph()) {
+    _rotationTask = new InertialTask(graph()) {
       @Override
       public void action() {
         rotate(new Quaternion(_x, _y, _z));
       }
     };
     // TODO how to deal with center, maybe removing anchor?
-    _orbitTask = new DampedTask(graph()) {
+    _orbitTask = new InertialTask(graph()) {
       @Override
       public void action() {
         orbit(new Quaternion(_x, _y, _z), _center);
       }
     };
-    _scalingTask = new DampedScalingTask(graph());
+    _scalingTask = new InertialScalingTask(graph());
   }
 
   /**
@@ -1044,7 +1044,7 @@ public class Node {
 
   /**
    * Translates the node according to {@code vector}, locally defined with respect to the
-   * {@link #reference()} and with an impulse defined with {@code friction} which should
+   * {@link #reference()} and with an impulse defined with {@code inertia} which should
    * be in {@code [0..1]}.
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
@@ -1056,16 +1056,21 @@ public class Node {
    * @see #orbit(Quaternion, Vector, float)
    * @see #setConstraint(Constraint)
    */
-  public void translate(Vector vector, float friction) {
+  public void translate(Vector vector, float inertia) {
     translate(vector);
     if (isDetached()) {
-      System.out.println("Warning: translate(vector, friction) is only available if node is attached to a Graph. Use translate(vector) instead");
+      System.out.println("Warning: translate(vector, inertia) is only available if node is attached to a Graph. Use translate(vector) instead");
       return;
     }
-    _translationTask._damp = 1 - friction;
-    _translationTask._x += vector.x() * friction;
-    _translationTask._y += vector.y() * friction;
-    _translationTask._z += vector.z() * friction;
+    _translationTask._inertia = inertia;
+    /*
+    _translationTask._x += vector.x() * inertia;
+    _translationTask._y += vector.y() * inertia;
+    _translationTask._z += vector.z() * inertia;
+     */
+    _translationTask._x += vector.x();
+    _translationTask._y += vector.y();
+    _translationTask._z += vector.z();
     if (!_translationTask.isActive()) {
       _translationTask.run();
     }
@@ -1191,7 +1196,7 @@ public class Node {
   /**
    * Rotates the node by {@code quaternion} (defined in the node coordinate system):
    * {@code rotation().compose(quaternion)} and with an impulse defined with
-   * {@code friction} which should be in {@code [0..1]}.
+   * {@code inertia} which should be in {@code [0..1]}.
    * <p>
    * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
@@ -1201,13 +1206,13 @@ public class Node {
    * @see #scale(float, float)
    * @see #setConstraint(Constraint)
    */
-  public void rotate(Quaternion quaternion, float friction) {
+  public void rotate(Quaternion quaternion, float inertia) {
     rotate(quaternion);
     if (isDetached()) {
-      System.out.println("Warning: rotate(quaternion, friction) is only available if node is attached to a Graph. Use rotate(quaternion) instead");
+      System.out.println("Warning: rotate(quaternion, inertia) is only available if node is attached to a Graph. Use rotate(quaternion) instead");
       return;
     }
-    _rotationTask._damp = 1 - friction;
+    _rotationTask._inertia = inertia;
     Vector e = quaternion.eulerAngles();
     _rotationTask._x += e.x();
     _rotationTask._y += e.y();
@@ -1253,7 +1258,7 @@ public class Node {
   /**
    * Rotates the node by the {@code quaternion} (defined in the node coordinate system)
    * around {@code center} defined in the world coordinate system, and with an impulse
-   * defined with {@code friction} which should be in {@code [0..1]}.
+   * defined with {@code inertia} which should be in {@code [0..1]}.
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
@@ -1263,13 +1268,13 @@ public class Node {
    * @see #scale(float, float)
    * @see #setConstraint(Constraint)
    */
-  public void orbit(Quaternion quaternion, Vector center, float friction) {
+  public void orbit(Quaternion quaternion, Vector center, float inertia) {
     orbit(quaternion, center);
     if (isDetached()) {
-      System.out.println("Warning: orbit(quaternion, center, friction) is only available if node is attached to a Graph. Use orbit(quaternion, center) instead");
+      System.out.println("Warning: orbit(quaternion, center, inertia) is only available if node is attached to a Graph. Use orbit(quaternion, center) instead");
       return;
     }
-    _orbitTask._damp = 1 - friction;
+    _orbitTask._inertia = inertia;
     _orbitTask._center = center;
     Vector e = quaternion.eulerAngles();
     _orbitTask._x += e.x();
@@ -1416,7 +1421,7 @@ public class Node {
 
   /**
    * Scales the node according to {@code scaling}, locally defined with respect to the
-   * {@link #reference()}  and with an impulse defined with {@code friction} which should
+   * {@link #reference()}  and with an impulse defined with {@code inertia} which should
    * be in {@code [0..1]}.
    *
    * @see #translate(Vector, float)
@@ -1424,13 +1429,13 @@ public class Node {
    * @see #orbit(Quaternion, Vector, float)
    * @see #setConstraint(Constraint)
    */
-  public void scale(float scaling, float friction) {
+  public void scale(float scaling, float inertia) {
     scale(scaling);
     if (isDetached()) {
-      System.out.println("Warning: scale(scaling, friction) is only available if node is attached to a Graph. Use scale(scaling) instead");
+      System.out.println("Warning: scale(scaling, inertia) is only available if node is attached to a Graph. Use scale(scaling) instead");
       return;
     }
-    _scalingTask._damp = 1 - friction;
+    _scalingTask._damp = inertia;
     _scalingTask._x += scaling > 1 ? graph().height() * (scaling - 1) : graph().height() * (scaling - 1) / scaling;
     if (!_scalingTask.isActive()) {
       _scalingTask.run();

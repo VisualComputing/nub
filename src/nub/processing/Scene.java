@@ -3034,8 +3034,8 @@ public class Scene extends Graph implements PConstants {
     super.tag(mouseX(), mouseY());
   }
 
-  public void mouseTranslate(float friction) {
-    super.translate(mouseDX(), mouseDY(), friction);
+  public void mouseTranslate(float inertia) {
+    super.translate(mouseDX(), mouseDY(), inertia);
   }
 
   /**
@@ -3049,8 +3049,8 @@ public class Scene extends Graph implements PConstants {
     super.translate(mouseDX(), mouseDY());
   }
 
-  public void mouseTranslate(String tag, float friction) {
-    super.translate(tag, mouseDX(), mouseDY(), friction);
+  public void mouseTranslate(String tag, float inertia) {
+    super.translate(tag, mouseDX(), mouseDY(), inertia);
   }
 
   /**
@@ -3064,8 +3064,8 @@ public class Scene extends Graph implements PConstants {
     super.translate(tag, mouseDX(), mouseDY());
   }
 
-  public boolean mouseTranslateTag(String tag, float friction) {
-    return super.translateTag(tag, mouseDX(), mouseDY(), friction);
+  public boolean mouseTranslateTag(String tag, float inertia) {
+    return super.translateTag(tag, mouseDX(), mouseDY(), inertia);
   }
 
   /**
@@ -3079,8 +3079,8 @@ public class Scene extends Graph implements PConstants {
     return super.translateTag(tag, mouseDX(), mouseDY());
   }
 
-  public boolean mouseTranslateTag(float friction) {
-    return super.translateTag(mouseDX(), mouseDY(), friction);
+  public boolean mouseTranslateTag(float inertia) {
+    return super.translateTag(mouseDX(), mouseDY(), inertia);
   }
 
   /**
@@ -3094,8 +3094,8 @@ public class Scene extends Graph implements PConstants {
     return super.translateTag(mouseDX(), mouseDY());
   }
 
-  public void mouseTranslateNode(Node node, float friction) {
-    super.translateNode(node, mouseDX(), mouseDY(), friction);
+  public void mouseTranslateNode(Node node, float inertia) {
+    super.translateNode(node, mouseDX(), mouseDY(), inertia);
   }
 
   /**
@@ -3109,8 +3109,8 @@ public class Scene extends Graph implements PConstants {
     super.translateNode(node, mouseDX(), mouseDY());
   }
 
-  public void mouseTranslateEye(float friction) {
-    super.translateEye(mouseDX(), mouseDY(), friction);
+  public void mouseTranslateEye(float inertia) {
+    super.translateEye(mouseDX(), mouseDY(), inertia);
   }
 
   /**
@@ -3144,8 +3144,8 @@ public class Scene extends Graph implements PConstants {
       mouseSpinEye();
   }
 
-  public boolean mouseSpinTag(float friction) {
-    return super.spinTag(null, pmouseX(), pmouseY(), mouseX(), mouseY(), 1, friction);
+  public boolean mouseSpinTag(float inertia) {
+    return super.spinTag(null, pmouseX(), pmouseY(), mouseX(), mouseY(), 1, inertia);
   }
 
   /**
@@ -3161,8 +3161,8 @@ public class Scene extends Graph implements PConstants {
     return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
-  public boolean mouseSpinTag(String tag, float friction) {
-    return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY(), 1, friction);
+  public boolean mouseSpinTag(String tag, float inertia) {
+    return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY(), 1, inertia);
   }
 
   /**
@@ -3178,8 +3178,8 @@ public class Scene extends Graph implements PConstants {
     return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
-  public void mouseSpinNode(Node node, float friction) {
-    super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), 1.f, friction);
+  public void mouseSpinNode(Node node, float inertia) {
+    super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), 1.f, inertia);
   }
 
   /**
@@ -3195,8 +3195,8 @@ public class Scene extends Graph implements PConstants {
     super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
-  public void mouseSpinEye(float friction) {
-    super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), 1, friction);
+  public void mouseSpinEye(float inertia) {
+    super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), 1, inertia);
   }
 
   /**
@@ -3214,16 +3214,16 @@ public class Scene extends Graph implements PConstants {
 
   // only eye
 
-  public void mouseDebugSpinEye(float friction) {
-    super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), friction);
+  public void mouseDebugSpinEye(float inertia) {
+    super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   public void mouseDebugSpinEye() {
     super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
-  public void mouseLookAround(float friction) {
-    super.lookAround(mouseRADX(), mouseRADY(), friction);
+  public void mouseLookAround(float inertia) {
+    super.lookAround(mouseRADX(), mouseRADY(), inertia);
   }
 
   /**
@@ -3237,8 +3237,8 @@ public class Scene extends Graph implements PConstants {
     super.lookAround(mouseRADX(), mouseRADY());
   }
 
-  public void mouseRotateCAD(float friction) {
-    super.rotateCAD(mouseRADX(), mouseRADY(), new Vector(0, 1, 0), friction);
+  public void mouseRotateCAD(float inertia) {
+    super.rotateCAD(mouseRADX(), mouseRADY(), new Vector(0, 1, 0), inertia);
   }
 
   /**
@@ -3252,8 +3252,8 @@ public class Scene extends Graph implements PConstants {
     super.rotateCAD(mouseRADX(), mouseRADY());
   }
 
-  public void mouseRotateCAD(Vector up, float friction) {
-    super.rotateCAD(mouseRADX(), mouseRADY(), up, friction);
+  public void mouseRotateCAD(Vector up, float inertia) {
+    super.rotateCAD(mouseRADX(), mouseRADY(), up, inertia);
   }
 
   /**

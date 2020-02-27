@@ -143,8 +143,8 @@ public class Graph {
   protected float _radius;
   protected Vector _anchor;
   // Damped
-  protected DampedTask _lookAroundTask;
-  protected DampedTask _cadRotateTask;
+  protected InertialTask _lookAroundTask;
+  protected InertialTask _cadRotateTask;
   protected Vector _eyeUp;
 
   //Interpolator
@@ -242,7 +242,7 @@ public class Graph {
    * @see #setEye(Node)
    */
   // TODO
-  // 1. Calibrate friction for all damped methods -> fine tune damped methods API
+  // 1. Calibrate inertia for all damped methods -> fine tune damped methods API
   // 2. Interpolator should have a Task by default and a setTask method to change it
   // Maybe Node should go in the same way if models are unified
   public Graph(Object context, Type type, int width, int height) {
@@ -257,13 +257,13 @@ public class Graph {
     _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
     setEye(new Node(this));
-    _lookAroundTask = new DampedTask(this) {
+    _lookAroundTask = new InertialTask(this) {
       @Override
       public void action() {
         _lookAround();
       }
     };
-    _cadRotateTask = new DampedTask(this) {
+    _cadRotateTask = new InertialTask(this) {
       @Override
       public void action() {
         _rotateCAD();
@@ -3723,9 +3723,9 @@ public class Graph {
    *
    * @see #scaleNode(Node, float)
    */
-  public boolean scaleTag(String tag, float delta, float friction) {
+  public boolean scaleTag(String tag, float delta, float inertia) {
     if (node(tag) != null) {
-      scaleNode(node(tag), delta, friction);
+      scaleNode(node(tag), delta, inertia);
       return true;
     }
     return false;
@@ -3740,13 +3740,13 @@ public class Graph {
    *
    * @see #scaleEye(float)
    */
-  public void scaleNode(Node node, float delta, float friction) {
+  public void scaleNode(Node node, float delta, float inertia) {
     if (node == null || node == eye()) {
       System.out.println("Warning: scaleNode requires a non-null node different than the eye. Nothing done");
       return;
     }
     float factor = 1 + Math.abs(delta) / height();
-    node.scale(delta >= 0 ? factor : 1 / factor, friction);
+    node.scale(delta >= 0 ? factor : 1 / factor, inertia);
   }
 
   public void scaleEye(float delta) {
@@ -3758,9 +3758,9 @@ public class Graph {
    *
    * @see #scaleNode(Node, float)
    */
-  public void scaleEye(float delta, float friction) {
+  public void scaleEye(float delta, float inertia) {
     float factor = 1 + Math.abs(delta) / (float) -height();
-    eye().scale(delta >= 0 ? factor : 1 / factor, friction);
+    eye().scale(delta >= 0 ? factor : 1 / factor, inertia);
   }
 
   // 4. Translate
@@ -3839,9 +3839,9 @@ public class Graph {
    *
    * @see #translateNode(Node, float, float, float)
    */
-  public boolean translateTag(String tag, float dx, float dy, float dz, float friction) {
+  public boolean translateTag(String tag, float dx, float dy, float dz, float inertia) {
     if (node(tag) != null) {
-      translateNode(node(tag), dx, dy, dz, friction);
+      translateNode(node(tag), dx, dy, dz, inertia);
       return true;
     }
     return false;
@@ -3868,13 +3868,13 @@ public class Graph {
    * @param dz screen space delta-z units in [0..1]
    * @see #displacement(Vector, Node)
    */
-  public void translateNode(Node node, float dx, float dy, float dz, float friction) {
+  public void translateNode(Node node, float dx, float dy, float dz, float inertia) {
     if (node == null || node == eye()) {
       System.out.println("Warning: translateNode requires a non-null node different than the eye. Nothing done");
       return;
     }
     Vector vector = displacement(new Vector(dx, dy, dz), node);
-    node.translate(node.reference() == null ? node.worldDisplacement(vector) : node.reference().displacement(vector, node), friction);
+    node.translate(node.reference() == null ? node.worldDisplacement(vector) : node.reference().displacement(vector, node), inertia);
   }
 
   /**
@@ -3899,12 +3899,12 @@ public class Graph {
    * @see #translateEye(float, float, float)
    * @see #displacement(Vector, Node)
    */
-  public void translateEye(float dx, float dy, float dz, float friction) {
+  public void translateEye(float dx, float dy, float dz, float inertia) {
     Node node = eye().get();
     node.setPosition(anchor().get());
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     vector.multiply(-1);
-    eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()), friction);
+    eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()), inertia);
   }
 
   // 5. Rotate
@@ -3949,9 +3949,9 @@ public class Graph {
    * @see #node(String)
    * @see #rotateNode(Node, float, float, float)
    */
-  public boolean rotateTag(String tag, float roll, float pitch, float yaw, float friction) {
+  public boolean rotateTag(String tag, float roll, float pitch, float yaw, float inertia) {
     if (node(tag) != null) {
-      rotateNode(node(tag), roll, pitch, yaw, friction);
+      rotateNode(node(tag), roll, pitch, yaw, inertia);
       return true;
     }
     return false;
@@ -3967,7 +3967,7 @@ public class Graph {
    *
    * @see #rotateEye(float, float, float)
    */
-  public void rotateNode(Node node, float roll, float pitch, float yaw, float friction) {
+  public void rotateNode(Node node, float roll, float pitch, float yaw, float inertia) {
     if (node == null || node == eye()) {
       System.out.println("Warning: rotateNode requires a non-null node different than the eye. Nothing done");
       return;
@@ -3985,7 +3985,7 @@ public class Graph {
     quaternion.setX(vector.x());
     quaternion.setY(vector.y());
     quaternion.setZ(vector.z());
-    node.rotate(quaternion, friction);
+    node.rotate(quaternion, inertia);
   }
 
   public void rotateEye(float roll, float pitch, float yaw) {
@@ -3999,13 +3999,13 @@ public class Graph {
    * @see #rotateEye(float, float, float)
    * @see #rotateNode(Node, float, float, float)
    */
-  public void rotateEye(float roll, float pitch, float yaw, float friction) {
+  public void rotateEye(float roll, float pitch, float yaw, float inertia) {
     if (is2D() && (roll != 0 || pitch != 0)) {
       roll = 0;
       pitch = 0;
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
-    eye().orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor(), friction);
+    eye().orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor(), inertia);
   }
 
   // 6. Spin
@@ -4035,9 +4035,9 @@ public class Graph {
    * @see #spinTag(String, int, int, int, int, float, float)
    * @see #spinEye(int, int, int, int, float, float)
    */
-  public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float friction) {
-    if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity, friction))
-      spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity, friction);
+  public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float inertia) {
+    if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity, inertia))
+      spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity, inertia);
   }
 
   /**
@@ -4065,9 +4065,9 @@ public class Graph {
    * @see #node(String)
    * @see #spinNode(Node, int, int, int, int, float, float)
    */
-  public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float friction) {
+  public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float inertia) {
     if (node(tag) != null) {
-      spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity, friction);
+      spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity, inertia);
       return true;
     }
     return false;
@@ -4093,7 +4093,7 @@ public class Graph {
    *
    * @see #spinEye(int, int, int, int, float, float)
    */
-  public void spinNode(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float friction) {
+  public void spinNode(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float inertia) {
     if (node == null || node == eye()) {
       System.out.println("Warning: spinNode requires a non-null node different than the eye. Nothing done");
       return;
@@ -4115,7 +4115,7 @@ public class Graph {
     Vector vector = quaternion.axis();
     vector = eye().orientation().rotate(vector);
     vector = node.displacement(vector);
-    node.rotate(new Quaternion(vector, -quaternion.angle()), friction);
+    node.rotate(new Quaternion(vector, -quaternion.angle()), inertia);
   }
 
   /**
@@ -4137,7 +4137,7 @@ public class Graph {
    *
    * @see #spinNode(Node, int, int, int, int, float, float)
    */
-  public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float friction) {
+  public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float inertia) {
     Vector center = screenLocation(anchor());
     int centerX = (int) center.x();
     int centerY = (int) center.y();
@@ -4152,8 +4152,8 @@ public class Graph {
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
     //same as:
-    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle), anchor(), friction);
-    eye().orbit(new Quaternion(axis, angle), anchor(), friction);
+    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle), anchor(), inertia);
+    eye().orbit(new Quaternion(axis, angle), anchor(), inertia);
   }
 
   public void debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
@@ -4164,7 +4164,7 @@ public class Graph {
    * @see #spinEye(int, int, int, int). Debug. Idea took from peasycam. See mouseRotate():
    * https://github.com/jdf/peasycam/blob/master/src/peasy/PeasyCam.java
    */
-  public void debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float friction) {
+  public void debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
     int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
     if (isRightHanded())
       dy = -dy;
@@ -4183,7 +4183,7 @@ public class Graph {
       myNdc = -myNdc;
     /*
     // Option 1
-    eye()._orbitTask._damp = 1 - friction;
+    eye()._orbitTask._inertia = inertia;
     eye()._orbitTask._center = anchor();
     eye()._orbitTask._y += +dmx * (1.0f - myNdc * myNdc);
     eye()._orbitTask._x += -dmy * (1.0f - mxNdc * mxNdc);
@@ -4195,13 +4195,13 @@ public class Graph {
     // */
     // /*
     // Option 2
-    eye()._orbitTask._damp = 1 - friction;
+    eye()._orbitTask._inertia = inertia;
     eye()._orbitTask._center = anchor();
     float y = +dmx * (1.0f - myNdc * myNdc);
     float x = -dmy * (1.0f - mxNdc * mxNdc);
     float z = -dmx * myNdc;
     z += +dmy * mxNdc;
-    eye().orbit(new Quaternion(x, y, z), anchor(), friction);
+    eye().orbit(new Quaternion(x, y, z), anchor(), inertia);
     // */
   }
 
@@ -4237,12 +4237,12 @@ public class Graph {
    *
    * @see #translateEye(float, float, float)
    */
-  public void moveForward(float delta, float friction) {
+  public void moveForward(float delta, float inertia) {
     float d1 = 1, d2;
     if (type() == Type.ORTHOGRAPHIC)
       d1 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
     // we negate z which targets the Processing mouse wheel
-    translateEye(0, 0, delta / (zNear() - zFar()), friction);
+    translateEye(0, 0, delta / (zNear() - zFar()), inertia);
     if (type() == Type.ORTHOGRAPHIC) {
       d2 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
       if (d1 != 0)
@@ -4261,11 +4261,11 @@ public class Graph {
    * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
    * expressed in radians.
    */
-  public void lookAround(float deltaX, float deltaY, float friction) {
+  public void lookAround(float deltaX, float deltaY, float inertia) {
     if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
     } else {
-      _lookAroundTask._damp = 1 - friction;
+      _lookAroundTask._inertia = inertia;
       _lookAroundTask._x += deltaX / 5;
       _lookAroundTask._y += deltaY / 5;
       _lookAround();
@@ -4315,13 +4315,13 @@ public class Graph {
    *
    * @see #rotateCAD(float, float)
    */
-  public void rotateCAD(float roll, float pitch, Vector upVector, float friction) {
+  public void rotateCAD(float roll, float pitch, Vector upVector, float inertia) {
     if (is2D()) {
       System.out.println("Warning: rotateCAD is only available in 3D");
     } else {
       _eyeUp = upVector;
       _rotateCAD();
-      _cadRotateTask._damp = 1 - friction;
+      _cadRotateTask._inertia = inertia;
       _cadRotateTask._x += roll / 5;
       _cadRotateTask._y += pitch / 5;
       if (!_cadRotateTask.isActive())

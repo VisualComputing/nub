@@ -115,9 +115,9 @@ public class DebugCam extends PApplet {
   public void mouseDragged() {
     switch (mouseButton) {
       case LEFT:
-        if (!scene.mouseSpinTag(0.3f))
-          //scene.mouseSpinEye(0.16f);
-          scene.mouseDebugSpinEye();
+        if (!scene.mouseSpinTag(0.7f))
+          //scene.mouseSpinEye(0.84f);
+          scene.mouseDebugSpinEye(0.84f);
         break;
       case RIGHT:
         if (!scene.mouseTranslateTag())
@@ -129,16 +129,16 @@ public class DebugCam extends PApplet {
       case CENTER:
         if (!scene.interactTag((float) mouseX - pmouseX))
           if (cad)
-            scene.mouseRotateCAD(0.2f);
+            scene.mouseRotateCAD(0.8f);
           else
-            scene.mouseLookAround(0.2f);
+            scene.mouseLookAround(0.8f);
         break;
     }
   }
 
   public void mouseWheel(MouseEvent event) {
     if (!scene.interactTag((float)event.getCount() * 10.f * PI / (float)width))
-      scene.moveForward(event.getCount() * 20, 0.2f);
+      scene.moveForward(event.getCount() * 20, 0.8f);
   }
 
   public void keyPressed() {
