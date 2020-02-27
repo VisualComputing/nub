@@ -3218,14 +3218,19 @@ public class Scene extends Graph implements PConstants {
 
   // only eye
 
-  public void mouseDebugSpinEye(float inertia) {
-    super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
+  public void mouseDebugSpinEye(float friction) {
+    super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), friction);
   }
 
   public void mouseDebugSpinEye() {
     super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
+  /**
+   * Same as {@code super.lookAround(mouseRADX(), mouseRADY(), inertia)}.
+   *
+   * @see #lookAround(float, float, float)
+   */
   public void mouseLookAround(float inertia) {
     super.lookAround(mouseRADX(), mouseRADY(), inertia);
   }
@@ -3241,6 +3246,11 @@ public class Scene extends Graph implements PConstants {
     super.lookAround(mouseRADX(), mouseRADY());
   }
 
+  /**
+   * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY(), new Vector(0, 1, 0), inertia)}.
+   *
+   * @see #rotateCAD(float, float, Vector, float)
+   */
   public void mouseRotateCAD(float inertia) {
     super.rotateCAD(mouseRADX(), mouseRADY(), new Vector(0, 1, 0), inertia);
   }
@@ -3256,6 +3266,11 @@ public class Scene extends Graph implements PConstants {
     super.rotateCAD(mouseRADX(), mouseRADY());
   }
 
+  /**
+   * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY(), up, inertia)}.
+   *
+   * @see #rotateCAD(float, float, Vector, float)
+   */
   public void mouseRotateCAD(Vector up, float inertia) {
     super.rotateCAD(mouseRADX(), mouseRADY(), up, inertia);
   }

@@ -4226,13 +4226,19 @@ public class Graph {
 
   // 7. move forward
 
+  /**
+   * Same as {@code moveForward(delta, 0.8f)}.
+   *
+   * @see #moveForward(float, float)
+   */
   public void moveForward(float delta) {
-    moveForward(delta, 1.f);
+    moveForward(delta, 0.8f);
   }
 
   /**
-   * Same as {@code translateEye(0, 0, delta / (zNear() - zFar()))}. Also rescales the {@link #eye()}
-   * if the graph type is {@link Type#ORTHOGRAPHIC} so that nearby objects
+   * Same as {@code translateEye(0, 0, delta / (zNear() - zFar()))}. The gesture strength is controlled
+   * with {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction. Also rescales
+   * the {@link #eye()} if the graph type is {@link Type#ORTHOGRAPHIC} so that nearby objects
    * appear bigger when moving towards them.
    *
    * @see #translateEye(float, float, float)
@@ -4253,19 +4259,23 @@ public class Graph {
 
   // 8. lookAround
 
+  /**
+   * Same as {@code lookAround(deltaX, deltaY, 0.8f)}.
+   */
   public void lookAround(float deltaX, float deltaY) {
-    lookAround(deltaX, deltaY, 1.f);
+    lookAround(deltaX, deltaY, 0.8f);
   }
 
   /**
    * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
-   * expressed in radians.
+   * expressed in radians. The gesture strength is controlled with {@code inertia} which should be in {@code [0..1]},
+   * 0 no inertia & 1 no friction.
    */
   public void lookAround(float deltaX, float deltaY, float inertia) {
     if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
     } else {
-      _lookAroundTask._inertia = inertia;
+      _lookAroundTask.setInertia(inertia);
       _lookAroundTask._x += deltaX / 5;
       _lookAroundTask._y += deltaY / 5;
       _lookAround();
@@ -4292,23 +4302,29 @@ public class Graph {
   // 9. rotate CAD
 
   /**
-   * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0))}.
+   * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0), 0.8f)}.
    *
    * @see #rotateCAD(float, float, Vector, float)
    */
   public void rotateCAD(float roll, float pitch) {
-    rotateCAD(roll, pitch, new Vector(0, 1, 0), 1.f);
+    rotateCAD(roll, pitch, new Vector(0, 1, 0), 0.8f);
   }
 
+  /**
+   * Same as {@code rotateCAD(roll, pitch, upVector, 0.8f)}.
+   *
+   * @see #rotateCAD(float, float, Vector, float)
+   */
   public void rotateCAD(float roll, float pitch, Vector upVector) {
-    rotateCAD(roll, pitch, upVector, 1.f);
+    rotateCAD(roll, pitch, upVector, 0.8f);
   }
 
   /**
    * Defines an axis which the eye rotates around. The eye can rotate left or right around
    * this axis. It can also be moved up or down to show the 'top' and 'bottom' views of the scene.
    * As a result, the {@code upVector} will always appear vertical in the scene, and the horizon
-   * is preserved and stays projected along the eye's horizontal axis.
+   * is preserved and stays projected along the eye's horizontal axis. The gesture strength is
+   * controlled with {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * <p>
    * This method requires calling {@code scene.eye().setYAxis(upVector)} (see
    * {@link Node#setYAxis(Vector)}) and {@link #fit()} first.
@@ -4321,7 +4337,7 @@ public class Graph {
     } else {
       _eyeUp = upVector;
       _rotateCAD();
-      _cadRotateTask._inertia = inertia;
+      _cadRotateTask.setInertia(inertia);
       _cadRotateTask._x += roll / 5;
       _cadRotateTask._y += pitch / 5;
       if (!_cadRotateTask.isActive())
