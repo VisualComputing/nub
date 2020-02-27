@@ -3034,44 +3034,56 @@ public class Scene extends Graph implements PConstants {
     super.tag(mouseX(), mouseY());
   }
 
-  public void mouseTranslate(float inertia) {
-    super.translate(mouseDX(), mouseDY(), inertia);
-  }
-
   /**
-   * Same as {@code super.translate(mouseDX(), mouseDY())}.
+   * Same as {@code mouseTranslate(null)}.
    *
-   * @see #translate(float, float)
+   * @see #mouseTranslate(String)
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslate() {
-    super.translate(mouseDX(), mouseDY());
-  }
-
-  public void mouseTranslate(String tag, float inertia) {
-    super.translate(tag, mouseDX(), mouseDY(), inertia);
+    mouseTranslate(null);
   }
 
   /**
-   * Same as {@code super.translate(tag, mouseDX(), mouseDY())}.
+   * Same as {@code if (!mouseTranslateTag(tag)) mouseTranslateEye()}.
    *
-   * @see #translate(String, float, float)
+   * @see #mouseTranslateTag(String)
+   * @see #mouseTranslateEye()
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslate(String tag) {
-    super.translate(tag, mouseDX(), mouseDY());
-  }
-
-  public boolean mouseTranslateTag() {
-    return mouseTranslateTag(null, 0.8f);
+    if (!mouseTranslateTag(tag))
+      mouseTranslateEye();
   }
 
   /**
-   * Same as {@code return super.translateTag(tag, mouseDX(), mouseDY())}.
+   * Same as {@code return mouseTranslateTag(null)}.
    *
-   * @see #translateTag(String, float, float)
+   * @see #mouseTranslateTag(String)
+   * @see #mouseDX()
+   * @see #mouseDY()
+   */
+  public boolean mouseTranslateTag() {
+    return mouseTranslateTag(null);
+  }
+
+  /**
+   * Same as {@code return mouseTranslateTag(null, inertia)}.
+   *
+   * @see #mouseTranslateTag(String, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
+   */
+  public boolean mouseTranslateTag(float inertia) {
+    return mouseTranslateTag(null, inertia);
+  }
+
+  /**
+   * Same as {@code return mouseTranslateTag(tag, 0.8f)}.
+   *
+   * @see #mouseTranslateTag(String, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
@@ -3079,16 +3091,11 @@ public class Scene extends Graph implements PConstants {
     return mouseTranslateTag(tag, 0.8f);
   }
 
-  public boolean mouseTranslateTag(float inertia) {
-    return mouseTranslateTag(null, inertia);
-  }
-
   /**
-   * Same as {@code return super.translate(mouseDX(), mouseDY())}.
+   * Same as {@code mouseTranslateNode(node(tag), inertia)}. Returns {@code true} if succeeded
+   * and {@code false} otherwise.
    *
-   * @see #translate(float, float)
-   * @see #mouseDX()
-   * @see #mouseDY()
+   * @see #mouseTranslateNode(Node, float)
    */
   public boolean mouseTranslateTag(String tag, float inertia) {
     if (node(tag) != null) {
@@ -3098,14 +3105,27 @@ public class Scene extends Graph implements PConstants {
     return false;
   }
 
+  /**
+   * Same as {@code super.translateNode(node,mouseDX() * inertia, mouseDY() * inertia, 0, inertia)}.
+   * It tries to keep the node under the mouse cursor independently of {@code inertia}.
+   *
+   * @see #translateEye(float, float, float, float)
+   */
   public void mouseTranslateNode(Node node, float inertia) {
-    super.translateNode(node, (1-inertia) * mouseDX(), (1-inertia) * mouseDY(), 0, inertia);
+    float i = Math.abs(inertia);
+    while (i > 1)
+      i /= 10;
+    if (i != inertia)
+      System.out.println("Warning: inertia should be in [0..1]. Setting it as " + i);
+    // TODO test from here
+    //super.translateNode(node, mouseDX(), mouseDY(), 0, i);
+    super.translateNode(node, mouseDX() * (1 - i), mouseDY() * (1 - i), 0, i);
   }
 
   /**
-   * Same as {@code super.translateNode(node, mouseDX(), mouseDY())}.
+   * Same as {@code mouseTranslateNode(node, 0.8f)}.
    *
-   * @see #translateNode(Node, float, float)
+   * @see #mouseTranslateNode(Node, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
@@ -3113,14 +3133,28 @@ public class Scene extends Graph implements PConstants {
     mouseTranslateNode(node, 0.8f);
   }
 
+  /**
+   * Same as {@code super.translateEye(mouseDX() * inertia, mouseDY() * inertia, 0, inertia)}.
+   * It tries to keep the world axes under the mouse cursor independently of {@code inertia}.
+   *
+   * @see #translateEye(float, float, float, float)
+   */
   public void mouseTranslateEye(float inertia) {
-    super.translateEye((1-inertia) * mouseDX(), (1-inertia) * mouseDY(), 0, inertia);
+    float i = Math.abs(inertia);
+    while (i > 1)
+      i /= 10;
+    if (i != inertia)
+      System.out.println("Warning: inertia should be in [0..1]. Setting it as " + i);
+    // TODO test from here
+    //super.translateEye(mouseDX(), mouseDY(), 0, inertia);
+    // Goal is next line!
+    super.translateEye(mouseDX() * (1 - i), mouseDY() * (1 - i), 0, i);
   }
 
   /**
-   * Same as {@code super.translateEye(mouseDX(), mouseDY())}.
+   * Same as {@code mouseTranslateEye(0.8f)}.
    *
-   * @see #translateEye(float, float)
+   * @see #mouseTranslateEye()
    * @see #mouseDX()
    * @see #mouseDY()
    */
@@ -3148,8 +3182,17 @@ public class Scene extends Graph implements PConstants {
       mouseSpinEye();
   }
 
+  /**
+   * Same as {@code return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
+   *
+   * @see #spinTag(int, int, int, int, float)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
   public boolean mouseSpinTag(float inertia) {
-    return super.spinTag(null, pmouseX(), pmouseY(), mouseX(), mouseY(), 1, inertia);
+    return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   /**
@@ -3165,8 +3208,17 @@ public class Scene extends Graph implements PConstants {
     return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
+  /**
+   * Same as {@code return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
+   *
+   * @see #spinTag(String, int, int, int, int, float)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
   public boolean mouseSpinTag(String tag, float inertia) {
-    return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY(), 1, inertia);
+    return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   /**
@@ -3182,8 +3234,17 @@ public class Scene extends Graph implements PConstants {
     return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
+  /**
+   * Same as {@code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
+   *
+   * @see #spinNode(Node, int, int, int, int, float)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
   public void mouseSpinNode(Node node, float inertia) {
-    super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), 1.f, inertia);
+    super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   /**
@@ -3199,8 +3260,17 @@ public class Scene extends Graph implements PConstants {
     super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
+  /**
+   * Same as {@code super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
+   *
+   * @see #spinEye(int, int, int, int, float)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
   public void mouseSpinEye(float inertia) {
-    super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), 1, inertia);
+    super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   /**

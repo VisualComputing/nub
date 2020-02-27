@@ -242,7 +242,7 @@ public class Graph {
    * @see #setEye(Node)
    */
   // TODO
-  // 1. Calibrate inertia for all damped methods -> fine tune damped methods API
+  // 1. Calibrate friction for all damped methods -> fine tune damped methods API
   // 2. Interpolator should have a Task by default and a setTask method to change it
   // Maybe Node should go in the same way if models are unified
   public Graph(Object context, Type type, int width, int height) {
@@ -3714,14 +3714,28 @@ public class Graph {
     return scaleTag(null, delta);
   }
 
-  public boolean scaleTag(String tag, float delta) {
-    return scaleTag(tag, delta, 1.f);
+  /**
+   * Same as {@code return scaleTag(null, delta, inertia)}.
+   *
+   * @see #scaleTag(String, float, float)
+   */
+  public boolean scaleTag(float delta, float inertia) {
+    return scaleTag(null, delta, inertia);
   }
 
   /**
-   * Same as {@code scaleNode(node(tag), delta)}. Returns {@code true} if succeeded and {@code false} otherwise.
+   * Same as {@code return scaleTag(tag, delta, 0.8f)}.
    *
-   * @see #scaleNode(Node, float)
+   * @see #scaleTag(String, float, float)
+   */
+  public boolean scaleTag(String tag, float delta) {
+    return scaleTag(tag, delta, 0.8f);
+  }
+
+  /**
+   * Same as {@code scaleNode(node(tag), delta, inertia)}. Returns {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #scaleNode(Node, float, float)
    */
   public boolean scaleTag(String tag, float delta, float inertia) {
     if (node(tag) != null) {
@@ -3731,14 +3745,20 @@ public class Graph {
     return false;
   }
 
+  /**
+   * Same as {@code scaleNode(node, delta, 0.8f)}.
+   *
+   * @see #scaleNode(Node, float, float)
+   */
   public void scaleNode(Node node, float delta) {
-    scaleNode(node, delta, 1.f);
+    scaleNode(node, delta, 0.8f);
   }
 
   /**
-   * Scales the {@code node} (which should be different than the {@link #eye()}) according to {@code delta}.
+   * Scales the {@code node} (which should be different than the {@link #eye()}) according to {@code delta} and
+   * {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
-   * @see #scaleEye(float)
+   * @see #scaleEye(float, float)
    */
   public void scaleNode(Node node, float delta, float inertia) {
     if (node == null || node == eye()) {
@@ -3749,12 +3769,18 @@ public class Graph {
     node.scale(delta >= 0 ? factor : 1 / factor, inertia);
   }
 
+  /**
+   * Same as {@code scaleEye(delta, 0.8f)}.
+   *
+   * @see #scaleEye(float, float)
+   */
   public void scaleEye(float delta) {
-    scaleEye(delta, 1.f);
+    scaleEye(delta, 0.8f);
   }
 
   /**
-   * Scales the {@link #eye()}, i.e., modifies {@link #fov()}.
+   * Scales the {@link #eye()}, i.e., modifies {@link #fov()} according to {@code delta} and {@code inertia}
+   * which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
    * @see #scaleNode(Node, float)
    */
@@ -3766,30 +3792,12 @@ public class Graph {
   // 4. Translate
 
   /**
-   * Same as {@code translate(dx, dy, 0)}.
-   *
-   * @see #translate(float, float, float)
-   */
-  public void translate(float dx, float dy) {
-    translate(dx, dy, 0);
-  }
-
-  /**
    * Same as {@code translate(null, dx, dy, dz)}.
    *
    * @see #translate(String, float, float, float)
    */
   public void translate(float dx, float dy, float dz) {
     translate(null, dx, dy, dz);
-  }
-
-  /**
-   * Same as {@code translate(tag, dx, dy, 0)}.
-   *
-   * @see #translate(String, float, float, float)
-   */
-  public void translate(String tag, float dx, float dy) {
-    translate(tag, dx, dy, 0);
   }
 
   /**
@@ -3804,16 +3812,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translateTag(null, dx, dy)}.
-   *
-   * @see #translateTag(String, float, float)
-   */
-  public boolean translateTag(float dx, float dy) {
-    return translateTag(null, dx, dy);
-  }
-
-  /**
-   * Same as {@code translateTag(null, dx, dy, dz)}.
+   * Same as {@code return translateTag(null, dx, dy, dz)}.
    *
    * @see #translateTag(String, float, float, float)
    */
@@ -3822,22 +3821,27 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translateNode(node(tag), dx, dy)}.
+   * Same as {@code return translateTag(null, dx, dy, dz, inertia)}.
    *
-   * @see #translateNode(Node, float, float)
+   * @see #translateTag(String, float, float, float, float)
    */
-  public boolean translateTag(String tag, float dx, float dy) {
-    return translateTag(tag, dx, dy, 0);
-  }
-
-  public boolean translateTag(String tag, float dx, float dy, float dz) {
-    return translateTag(tag, dx, dy, dz, 1.f);
+  public boolean translateTag(float dx, float dy, float dz, float inertia) {
+    return translateTag(null, dx, dy, dz, inertia);
   }
 
   /**
-   * Same as {@code translateNode(node(tag), dx, dy, dz)}. Returns {@code true} if succeeded and {@code false} otherwise.
+   * Same as {@code return translateTag(tag, dx, dy, dz, 0)}.
    *
-   * @see #translateNode(Node, float, float, float)
+   * @see #translateTag(String, float, float, float, float)
+   */
+  public boolean translateTag(String tag, float dx, float dy, float dz) {
+    return translateTag(tag, dx, dy, dz, 0);
+  }
+
+  /**
+   * Same as {@code translateNode(node(tag), dx, dy, dz, inertia)}. Returns {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #translateNode(Node, float, float, float, float)
    */
   public boolean translateTag(String tag, float dx, float dy, float dz, float inertia) {
     if (node(tag) != null) {
@@ -3848,24 +3852,22 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translateNode(node, dx, dy, 0)}.
+   * Same as {@code translateNode(node, dx, dy, dz, 0)}.
    *
-   * @see #translateNode(Node, float, float, float)
+   * @see #translateNode(Node, float, float, float, float)
    */
-  public void translateNode(Node node, float dx, float dy) {
-    translateNode(node, dx, dy, 0);
-  }
-
   public void translateNode(Node node, float dx, float dy, float dz) {
-    translateNode(node, dx, dy, dz, 1.f);
+    translateNode(node, dx, dy, dz, 0);
   }
 
   /**
-   * Translates the node (which should be different than the {@link #eye()}).
+   * Translates the node (which should be different than the {@link #eye()}) according to
+   * {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
-   * @param dx screen space delta-x units in [0..width()]
-   * @param dy screen space delta-y units in [0..height()]
-   * @param dz screen space delta-z units in [0..1]
+   * @param dx      screen space delta-x units in [0..width()]
+   * @param dy      screen space delta-y units in [0..height()]
+   * @param dz      screen space delta-z units in [0..1]
+   * @param inertia should be in {@code [0..1]
    * @see #displacement(Vector, Node)
    */
   public void translateNode(Node node, float dx, float dy, float dz, float inertia) {
@@ -3878,24 +3880,22 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translateEye(dx, dy, 0)}.
+   * Same as {@code translateEye(dx, dy, dz, 0)}.
    *
-   * @see #translateEye(float, float, float)
+   * @see #translateEye(float, float, float, float)
    */
-  public void translateEye(float dx, float dy) {
-    translateEye(dx, dy, 0);
-  }
-
   public void translateEye(float dx, float dy, float dz) {
-    translateEye(dx, dy, dz, 1.f);
+    translateEye(dx, dy, dz, 0);
   }
 
   /**
-   * Translates the {@link #eye()}.
+   * Translates the {@link #eye()} according to {@code inertia} which should be in {@code [0..1],
+   * 0 no inertia & 1 no friction.
    *
-   * @param dx screen space delta-x units in [0..width()]
-   * @param dy screen space delta-y units in [0..height()]
-   * @param dz screen space delta-z units in [0..1]
+   * @param dx      screen space delta-x units in [0..width()]
+   * @param dy      screen space delta-y units in [0..height()]
+   * @param dz      screen space delta-z units in [0..1]
+   * @param inertia should be in {@code [0..1]
    * @see #translateEye(float, float, float)
    * @see #displacement(Vector, Node)
    */
@@ -3938,16 +3938,21 @@ public class Graph {
     return rotateTag(null, roll, pitch, yaw);
   }
 
+  /**
+   * Same as {@code return rotateTag(tag, roll, pitch, yaw, 0.8f)}.
+   *
+   * @see #rotateTag(String, float, float, float, float)
+   */
   public boolean rotateTag(String tag, float roll, float pitch, float yaw) {
-    return rotateTag(tag, roll, pitch, yaw, 1.f);
+    return rotateTag(tag, roll, pitch, yaw, 0.8f);
   }
 
   /**
-   * Same as {@code rotateNode(node(tag), roll, pitch, yaw)}. Returns
+   * Same as {@code rotateNode(node(tag), roll, pitch, yaw, inertia)}. Returns
    * {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #node(String)
-   * @see #rotateNode(Node, float, float, float)
+   * @see #rotateNode(Node, float, float, float, float)
    */
   public boolean rotateTag(String tag, float roll, float pitch, float yaw, float inertia) {
     if (node(tag) != null) {
@@ -3957,15 +3962,21 @@ public class Graph {
     return false;
   }
 
+  /**
+   * Same as {@code rotateNode(node, roll, pitch, yaw, 0.8f)}.
+   *
+   * @see #rotateNode(Node, float, float, float, float)
+   */
   public void rotateNode(Node node, float roll, float pitch, float yaw) {
-    rotateNode(node, roll, pitch, yaw, 1.f);
+    rotateNode(node, roll, pitch, yaw, 0.8f);
   }
 
   /**
    * Rotate the {@code node} (which should be different than the {@link #eye()}) around the
-   * world x-y-z axes according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.
+   * world x-y-z axes according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.,
+   * and according to {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
-   * @see #rotateEye(float, float, float)
+   * @see #rotateEye(float, float, float, float)
    */
   public void rotateNode(Node node, float roll, float pitch, float yaw, float inertia) {
     if (node == null || node == eye()) {
@@ -3988,16 +3999,22 @@ public class Graph {
     node.rotate(quaternion, inertia);
   }
 
+  /**
+   * Same as {@code rotateEye(roll, pitch, yaw, 0.8f)}.
+   *
+   * @see #rotateEye(float, float, float, float)
+   */
   public void rotateEye(float roll, float pitch, float yaw) {
-    rotateEye(roll, pitch, yaw, 1.f);
+    rotateEye(roll, pitch, yaw, 0.8f);
   }
 
   /**
    * Rotate the {@link #eye()} around the world x-y-z axes passing through {@link #anchor()},
-   * according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.
+   * according to {@code roll}, {@code pitch} and {@code yaw} radians, resp., and {@code inertia}
+   * which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
    * @see #rotateEye(float, float, float)
-   * @see #rotateNode(Node, float, float, float)
+   * @see #rotateNode(Node, float, float, float, float)
    */
   public void rotateEye(float roll, float pitch, float yaw, float inertia) {
     if (is2D() && (roll != 0 || pitch != 0)) {
@@ -4011,89 +4028,91 @@ public class Graph {
   // 6. Spin
 
   /**
-   * Same as {@code spin(pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
+   * Same as {@code spin(pixel1X, pixel1Y, pixel2X, pixel2Y)}.
    *
-   * @see #spin(String, int, int, int, int, float, float)
+   * @see #spin(String, int, int, int, int)
    */
   public void spin(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spin(null, pixel1X, pixel1Y, pixel2X, pixel2Y, 1, 1);
+    spin(null, pixel1X, pixel1Y, pixel2X, pixel2Y);
   }
 
   /**
-   * Same as {@code spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
+   * Same as {@code if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y))
+   * spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}
    *
-   * @see #spin(String, int, int, int, int, float, float)
+   * @see #spinTag(String, int, int, int, int, float)
+   * @see #spinEye(int, int, int, int, float)
    */
   public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 1, 1);
+    if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y))
+      spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y);
   }
 
   /**
-   * Same as {@code if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity))
-   * spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity)}
+   * Same as {@code return spinTag(null, pixel1X, pixel1Y, pixel2X, pixel2Y)}.
    *
-   * @see #spinTag(String, int, int, int, int, float, float)
-   * @see #spinEye(int, int, int, int, float, float)
-   */
-  public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float inertia) {
-    if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity, inertia))
-      spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity, inertia);
-  }
-
-  /**
-   * Same as {@code return spinTag(pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
-   *
-   * @see #spinTag(String, int, int, int, int, float, float)
+   * @see #spinTag(String, int, int, int, int)
    */
   public boolean spinTag(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    return spinTag(null, pixel1X, pixel1Y, pixel2X, pixel2Y, 1, 1);
+    return spinTag(null, pixel1X, pixel1Y, pixel2X, pixel2Y);
   }
 
   /**
-   * Same as {@code return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
+   * Same as {@code return spinTag(null, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}.
    *
-   * @see #spinTag(String, int, int, int, int, float, float)
+   * @see #spinTag(String, int, int, int, int, float)
+   */
+  public boolean spinTag(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
+    return spinTag(null, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
+  }
+
+  /**
+   * Same as {@code return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
+   *
+   * @see #spinTag(String, int, int, int, int, float)
    */
   public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 1, 1);
+    return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
   }
 
   /**
-   * Same as {@code spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity)}. Returns
+   * Same as {@code spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}. Returns
    * {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #node(String)
-   * @see #spinNode(Node, int, int, int, int, float, float)
+   * @see #spinNode(Node, int, int, int, int, float)
    */
-  public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float inertia) {
+  public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
     if (node(tag) != null) {
-      spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, sensitivity, inertia);
+      spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
       return true;
     }
     return false;
   }
 
   /**
-   * Same as {@code spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
+   * Same as {@code spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
    *
-   * @see #spinNode(Node, int, int, int, int, float, float)
+   * @see #spinNode(Node, int, int, int, int, float)
    */
   public void spinNode(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 1, 1.f);
+    spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
   }
 
   /**
    * Rotates the {@code node} (which should be different than the {@link #eye()}) using an arcball
    * interface, from points {@code (pixel1X, pixel1Y)} to {@code (pixel2X, pixel2Y)} pixel positions.
-   * The {@code sensitivity} controls the gesture strength. The center of the rotation is the screen
-   * projected node origin (see {@link Node#position()}).
+   * The {@code inertia} controls the gesture strength and it should be in {@code [0..1]},
+   * 0 no inertia & 1 no friction. The center of the rotation is the screen projected node origin
+   * (see {@link Node#position()}).
    * <p>
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
    * three-dimensional orientation using a mouse.
    *
-   * @see #spinEye(int, int, int, int, float, float)
+   * @see #spinEye(int, int, int, int, float)
    */
-  public void spinNode(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float inertia) {
+  public void spinNode(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
+    float sensitivity = 1;
     if (node == null || node == eye()) {
       System.out.println("Warning: spinNode requires a non-null node different than the eye. Nothing done");
       return;
@@ -4119,25 +4138,27 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 1)}.
+   * Same as {@code spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
    *
-   * @see #spinEye(int, int, int, int, float, float)
+   * @see #spinEye(int, int, int, int, float)
    */
   public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 1, 1.f);
+    spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
   }
 
   /**
    * Rotates the {@link #eye()} using an arcball interface, from points {@code (pixel1X, pixel1Y)} to
-   * {@code (pixel2X, pixel2Y)} pixel positions. The {@code sensitivity} controls the gesture strength.
+   * {@code (pixel2X, pixel2Y)} pixel positions. The {@code inertia} controls the gesture strength
+   * and it should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * The center of the rotation is the screen projected graph {@link #anchor()}.
    * <p>
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
    * three-dimensional orientation using a mouse.
    *
-   * @see #spinNode(Node, int, int, int, int, float, float)
+   * @see #spinNode(Node, int, int, int, int, float)
    */
-  public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float sensitivity, float inertia) {
+  public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
+    float sensitivity = 1;
     Vector center = screenLocation(anchor());
     int centerX = (int) center.x();
     int centerY = (int) center.y();
@@ -4152,12 +4173,12 @@ public class Graph {
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
     //same as:
-    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle), anchor(), inertia);
+    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle), anchor(), friction);
     eye().orbit(new Quaternion(axis, angle), anchor(), inertia);
   }
 
   public void debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.2f);
+    debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
   }
 
   /**
@@ -4183,7 +4204,7 @@ public class Graph {
       myNdc = -myNdc;
     /*
     // Option 1
-    eye()._orbitTask._inertia = inertia;
+    eye()._orbitTask._damp = 1 - friction;
     eye()._orbitTask._center = anchor();
     eye()._orbitTask._y += +dmx * (1.0f - myNdc * myNdc);
     eye()._orbitTask._x += -dmy * (1.0f - mxNdc * mxNdc);
@@ -4195,7 +4216,7 @@ public class Graph {
     // */
     // /*
     // Option 2
-    eye()._orbitTask._inertia = inertia;
+    eye()._orbitTask._inertia = 1 - inertia;
     eye()._orbitTask._center = anchor();
     float y = +dmx * (1.0f - myNdc * myNdc);
     float x = -dmy * (1.0f - mxNdc * mxNdc);
