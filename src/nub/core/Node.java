@@ -74,6 +74,10 @@ import java.util.List;
  * To transform a point from one node to another use {@link #location(Vector, Node)} and
  * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
  * {@link #displacement(Vector, Node)} and {@link #worldDisplacement(Vector)}.
+ * <p>
+ * The methods {@link #translate(Vector, float)}, {@link #rotate(Quaternion), float},
+ * {@link #orbit(Quaternion, Vector, float)} and {@link #scale(float, float)}, locally apply
+ * differential geometry transformations damped with a given {@code inertia}.
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the node hierarchy which automatically apply the local
  * node transformations described above may be achieved with {@link Graph#render()} or
@@ -87,12 +91,12 @@ import java.util.List;
  * a node cannot be attached nor detached, but a copy of it can (see {@link #attach(Graph)}
  * and {@link #detach()}).
  * <h2>Constraints</h2>
- * One interesting feature of a node is that its displacements can be constrained. When a
- * {@link Constraint} is attached to a node, it filters the input of
- * {@link #translate(Vector, float)}, {@link #rotate(Quaternion), float}, and
- * {@link #orbit(Quaternion, Vector, float)} and only the resulting filtered motion is applied
- * to the node. The default {@link #constraint()} is {@code null} resulting in no filtering.
- * Use {@link #setConstraint(Constraint)} to attach a constraint to a node.
+ * One interesting feature of a node is that its displacements can be constrained.
+ * When a {@link Constraint} is attached to a node, it filters the input of
+ * {@link #translate(Vector)}, {@link #rotate(Quaternion)}, and {@link #orbit(Quaternion, Vector)}
+ * and only the resulting filtered motion is applied to the node. The default
+ * {@link #constraint()} is {@code null} resulting in no filtering. Use
+ * {@link #setConstraint(Constraint)} to attach a constraint to a node.
  * <p>
  * Classical constraints are provided for convenience (see
  * {@link nub.core.constraint.LocalConstraint},
