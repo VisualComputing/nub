@@ -88,9 +88,10 @@ import java.util.List;
  * and {@link #detach()}).
  * <h2>Constraints</h2>
  * One interesting feature of a node is that its displacements can be constrained. When a
- * {@link Constraint} is attached to a node, it filters the input of {@link #translate(Vector)}
- * and {@link #rotate(Quaternion)}, and only the resulting filtered motion is applied to the
- * node. The default {@link #constraint()} is {@code null} resulting in no filtering.
+ * {@link Constraint} is attached to a node, it filters the input of
+ * {@link #translate(Vector, float)}, {@link #rotate(Quaternion), float}, and
+ * {@link #orbit(Quaternion, Vector, float)} and only the resulting filtered motion is applied
+ * to the node. The default {@link #constraint()} is {@code null} resulting in no filtering.
  * Use {@link #setConstraint(Constraint)} to attach a constraint to a node.
  * <p>
  * Classical constraints are provided for convenience (see
@@ -1038,7 +1039,8 @@ public class Node {
   public void translate(Vector vector, float inertia) {
     translate(vector);
     if (isDetached()) {
-      System.out.println("Warning: translate(vector, inertia) is only available if node is attached to a Graph. Use translate(vector) instead");
+      if (inertia > 0)
+        System.out.println("Warning: translate(vector, inertia) is only available if node is attached to a Graph. Use translate(vector) instead");
       return;
     }
     _translationTask.setInertia(inertia);
@@ -1051,15 +1053,9 @@ public class Node {
   }
 
   /**
-   * Translates the node according to {@code vector}, locally defined with respect to the
-   * {@link #reference()}.
-   * <p>
-   * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
-   * applied to the node may differ from {@code vector} (since it can be filtered by the
-   * {@link #constraint()}).
+   * Same as {@code translate(vector, 0)}.
    *
-   * @see #rotate(Quaternion)
-   * @see #scale(float)
+   * @see #translate(Vector, float)
    */
   public void translate(Vector vector) {
     translation().add(constraint() != null ? constraint().constrainTranslation(vector, this) : vector);
@@ -1183,7 +1179,8 @@ public class Node {
   public void rotate(Quaternion quaternion, float inertia) {
     rotate(quaternion);
     if (isDetached()) {
-      System.out.println("Warning: rotate(quaternion, inertia) is only available if node is attached to a Graph. Use rotate(quaternion) instead");
+      if (inertia > 0)
+        System.out.println("Warning: rotate(quaternion, inertia) is only available if node is attached to a Graph. Use rotate(quaternion) instead");
       return;
     }
     _rotationTask.setInertia(inertia);
@@ -1196,14 +1193,9 @@ public class Node {
   }
 
   /**
-   * Rotates the node by {@code quaternion} (defined in the node coordinate system):
-   * {@code rotation().compose(quaternion)}.
-   * <p>
-   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   * Same as {@code rotate(quaternion, 0)}.
    *
-   * @see #setConstraint(Constraint)
-   * @see #translate(Vector)
+   * @see #rotate(Quaternion, float)
    */
   public void rotate(Quaternion quaternion) {
     rotation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
@@ -1245,7 +1237,8 @@ public class Node {
   public void orbit(Quaternion quaternion, Vector center, float inertia) {
     orbit(quaternion, center);
     if (isDetached()) {
-      System.out.println("Warning: orbit(quaternion, center, inertia) is only available if node is attached to a Graph. Use orbit(quaternion, center) instead");
+      if (inertia > 0)
+        System.out.println("Warning: orbit(quaternion, center, inertia) is only available if node is attached to a Graph. Use orbit(quaternion, center) instead");
       return;
     }
     _orbitTask.setInertia(inertia);
@@ -1259,15 +1252,9 @@ public class Node {
   }
 
   /**
-   * Rotates the node by the {@code quaternion} (defined in the node coordinate system)
-   * around {@code center} defined in the world coordinate system.
-   * <p>
-   * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   * Same as {@code orbit(quaternion, center, 0)}.
    *
-   * @see #orbit(Vector, float, Vector)
-   * @see #orbit(Vector, float)
-   * @see #setConstraint(Constraint)
+   * @see #orbit(Quaternion, Vector, float)
    */
   public void orbit(Quaternion quaternion, Vector center) {
     rotation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
@@ -1406,7 +1393,8 @@ public class Node {
   public void scale(float scaling, float inertia) {
     scale(scaling);
     if (isDetached()) {
-      System.out.println("Warning: scale(scaling, inertia) is only available if node is attached to a Graph. Use scale(scaling) instead");
+      if (inertia > 0)
+        System.out.println("Warning: scale(scaling, inertia) is only available if node is attached to a Graph. Use scale(scaling) instead");
       return;
     }
     _scalingTask._inertia = inertia;
@@ -1417,11 +1405,9 @@ public class Node {
   }
 
   /**
-   * Scales the node according to {@code scaling}, locally defined with respect to the
-   * {@link #reference()}.
+   * Same as {@code scale(scaling, 0)}.
    *
-   * @see #rotate(Quaternion)
-   * @see #translate(Vector)
+   * @see #scale(float, float)
    */
   public void scale(float scaling) {
     setScaling(scaling() * scaling);
