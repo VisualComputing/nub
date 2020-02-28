@@ -1045,7 +1045,7 @@ public class Node {
   /**
    * Translates the node according to {@code vector}, locally defined with respect to the
    * {@link #reference()} and with an impulse defined with {@code inertia} which should
-   * be in {@code [0..1], 0 no inertia & 1 no friction}.
+   * be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
    * applied to the node may differ from {@code vector} (since it can be filtered by the
@@ -1191,7 +1191,7 @@ public class Node {
   /**
    * Rotates the node by {@code quaternion} (defined in the node coordinate system):
    * {@code rotation().compose(quaternion)} and with an impulse defined with
-   * {@code inertia} which should be in {@code [0..1], 0 no inertia & 1 no friction}.
+   * {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * <p>
    * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
@@ -1253,7 +1253,7 @@ public class Node {
   /**
    * Rotates the node by the {@code quaternion} (defined in the node coordinate system)
    * around {@code center} defined in the world coordinate system, and with an impulse
-   * defined with {@code inertia} which should be in {@code [0..1], 0 no inertia & 1 no friction}.
+   * defined with {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
@@ -1417,7 +1417,7 @@ public class Node {
   /**
    * Scales the node according to {@code scaling}, locally defined with respect to the
    * {@link #reference()}  and with an impulse defined with {@code inertia} which should
-   * be in {@code [0..1], 0 no inertia & 1 no friction}.
+   * be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
    * @see #translate(Vector, float)
    * @see #rotate(Quaternion, float)
