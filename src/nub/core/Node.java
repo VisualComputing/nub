@@ -451,7 +451,6 @@ public class Node {
         rotate(new Quaternion(_x, _y, _z));
       }
     };
-    // TODO how to deal with center, maybe removing anchor?
     _orbitTask = new InertialTask(graph()) {
       @Override
       public void action() {

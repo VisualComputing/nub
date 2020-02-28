@@ -20,6 +20,7 @@ import nub.timing.Task;
  * in turn based on a "damned clever and aesthetic idea by David Bollinger".
  */
 abstract class InertialTask extends Task {
+  // TODO how to deal with center, maybe removing anchor?
   protected Vector _center = new Vector();
   // original friction is 0.16
   protected float _inertia;// 1 - friction

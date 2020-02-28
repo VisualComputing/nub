@@ -12,11 +12,6 @@ import processing.core.PFont;
 import processing.event.MouseEvent;
 
 public class ConstrainedFrame extends PApplet {
-
-  public void settings() {
-    size(800, 800, P3D);
-  }
-
   Scene scene;
   boolean mouseTracking = true;
   PFont myFont;
@@ -30,8 +25,11 @@ public class ConstrainedFrame extends PApplet {
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
 
-  public void setup() {
+  public void settings() {
     size(800, 800, renderer);
+  }
+
+  public void setup() {
     myFont = loadFont("FreeSans-16.vlw");
     textFont(myFont);
 
