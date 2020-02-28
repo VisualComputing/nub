@@ -15,7 +15,6 @@ import nub.core.constraint.Constraint;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.timing.Task;
 import nub.timing.TimingHandler;
 
 import java.util.ArrayList;
@@ -152,33 +151,7 @@ public class Node {
   protected long _bypass;
 
   // Tasks
-  protected InertialTask _translationTask, _rotationTask, _orbitTask;
-
-  class InertialScalingTask extends Task {
-    // original friction is 0.16f
-    protected float _inertia = 0.8f; // 1 - friction
-    protected float _x;
-
-    InertialScalingTask(Graph graph) {
-      super(graph.timingHandler());
-    }
-
-    @Override
-    public void execute() {
-      _x *= _inertia;
-      if (Math.abs(_x) < .001)
-        _x = 0;
-      if (_x == 0)
-        stop();
-      else {
-        float factor = 1 + Math.abs(_x) / graph().height();
-        scale(_x >= 0 ? factor : 1 / factor);
-      }
-    }
-  }
-
-  // TODO pending
-  protected InertialScalingTask _scalingTask;
+  protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
 
   /**
    * Creates a detached node.
@@ -457,7 +430,13 @@ public class Node {
         orbit(new Quaternion(_x, _y, _z), _center);
       }
     };
-    _scalingTask = new InertialScalingTask(graph());
+    _scalingTask = new InertialTask(graph()) {
+      @Override
+      public void action() {
+        float factor = 1 + Math.abs(_x) / graph().height();
+        scale(_x >= 0 ? factor : 1 / factor);
+      }
+    };
   }
 
   /**
