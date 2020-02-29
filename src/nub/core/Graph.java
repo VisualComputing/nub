@@ -840,6 +840,22 @@ public class Graph {
   }
 
   /**
+   * Returns the look-around inertial task.
+   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
+   */
+  public Task lookAroundInertialTask() {
+    return _lookAroundTask;
+  }
+
+  /**
+   * Returns the cad-rotate inertial task.
+   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
+   */
+  public Task cadRotateInertialTask() {
+    return _cadRotateTask;
+  }
+
+  /**
    * Init the interpolator task. Call by interpolator constructor.
    * This method should overridden to change the task type.
    */
