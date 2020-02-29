@@ -15,6 +15,7 @@ import nub.core.constraint.Constraint;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.timing.Task;
 import nub.timing.TimingHandler;
 
 import java.util.ArrayList;
@@ -445,6 +446,38 @@ public class Node {
   }
 
   /**
+   * Returns the translation inertial task.
+   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
+   */
+  public Task translationInertialTask() {
+    return _translationTask;
+  }
+
+  /**
+   * Returns the rotation inertial task.
+   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
+   */
+  public Task rotationInertialTask() {
+    return _rotationTask;
+  }
+
+  /**
+   * Returns the orbit inertial task.
+   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
+   */
+  public Task orbitInertialTask() {
+    return _orbitTask;
+  }
+
+  /**
+   * Returns the scaling inertial task.
+   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
+   */
+  public Task scalingInertialTask() {
+    return _scalingTask;
+  }
+
+  /**
    * println this node components.
    */
   public void println() {
@@ -461,6 +494,7 @@ public class Node {
   /**
    * Return this node components as a String.
    */
+  @Override
   public String toString() {
     return "Position: " + position().toString() + " Orientation: " + orientation().toString() + " Magnitude: " + Float.toString(magnitude());
   }

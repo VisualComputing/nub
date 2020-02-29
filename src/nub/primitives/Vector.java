@@ -831,6 +831,7 @@ public class Vector {
   /**
    * Return this vector components as a String.
    */
+  @Override
   public String toString() {
     return "[ " + this._vector[0] + ", " + this._vector[1] + ", " + this._vector[2] + " ]";
   }

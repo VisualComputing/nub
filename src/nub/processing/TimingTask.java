@@ -12,6 +12,7 @@
 package nub.processing;
 
 import nub.timing.Task;
+import nub.timing.TimingHandler;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -39,6 +40,14 @@ public abstract class TimingTask extends Task {
    */
   public TimingTask(Scene scene) {
     super(scene.timingHandler());
+  }
+
+  /**
+   * Constructs a sequential recurrent task with a {@link #period()} of 40ms
+   * (i.e., a {@link #frequency()} of 25 Hz).
+   */
+  public TimingTask(TimingHandler timingHandler) {
+    super(timingHandler);
   }
 
   @Override

@@ -12,18 +12,18 @@
 package nub.core;
 
 import nub.primitives.Vector;
-import nub.timing.Task;
 
 /**
  * Translate, Orbit & Rotate (Euler angles) damped task based on PeasyCam, see
  * <a href="https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java">DampedAction</a.
  * in turn based on a "damned clever and aesthetic idea by David Bollinger".
  */
-abstract class InertialTask extends Task {
-  // TODO how to deal with center, maybe removing anchor?
+// JS should just go:
+// class InertialTask extends Task {
+abstract class InertialTask extends nub.processing.TimingTask {
+  // orbit center:
   protected Vector _center = new Vector();
-  // original friction is 0.16
-  protected float _inertia;// 1 - friction
+  protected float _inertia;
   protected float _x, _y, _z;
 
   /**

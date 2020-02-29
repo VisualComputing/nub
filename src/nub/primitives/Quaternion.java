@@ -1084,6 +1084,7 @@ public class Quaternion {
   /**
    * Return this quaternion components as a String.
    */
+  @Override
   public String toString() {
     return "Axis : " + axis().toString() + " Angle: " + Float.toString(angle());
   }
