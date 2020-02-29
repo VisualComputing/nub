@@ -855,19 +855,6 @@ public class Graph {
     return _cadRotateTask;
   }
 
-  /**
-   * Init the interpolator task. Call by interpolator constructor.
-   * This method should overridden to change the task type.
-   */
-  protected Task _initTask(Interpolator interpolator) {
-    return new Task(this.timingHandler()) {
-      @Override
-      public void execute() {
-        interpolator.execute();
-      }
-    };
-  }
-
   // Matrix and transformations stuff
 
   /**

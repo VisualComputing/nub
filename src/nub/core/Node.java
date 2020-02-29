@@ -417,6 +417,9 @@ public class Node {
     this._initTasks();
   }
 
+  /**
+   * Init tasks. Internal use.
+   */
   protected void _initTasks() {
     _translationTask = new InertialTask(graph()) {
       @Override
