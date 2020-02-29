@@ -241,10 +241,6 @@ public class Graph {
    * @see #setRightHanded()
    * @see #setEye(Node)
    */
-  // TODO
-  // 1. Calibrate friction for all damped methods -> fine tune damped methods API
-  // 2. Interpolator should have a Task by default and a setTask method to change it
-  // Maybe Node should go in the same way if models are unified
   public Graph(Object context, Type type, int width, int height) {
     _fb = context;
     setMatrixHandler(matrixHandler(_fb));
@@ -256,7 +252,9 @@ public class Graph {
     _seeds = new ArrayList<Node>();
     _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
-    setEye(new Node(this));
+    Node eye = new Node(this);
+    eye.disableTagging();
+    setEye(eye);
     _lookAroundTask = new InertialTask(this) {
       @Override
       public void action() {
@@ -4362,8 +4360,8 @@ public class Graph {
       _eyeUp = upVector;
       _rotateCAD();
       _cadRotateTask.setInertia(inertia);
-      _cadRotateTask._x += roll / 5;
-      _cadRotateTask._y += pitch / 5;
+      _cadRotateTask._x += roll;
+      _cadRotateTask._y += pitch;
       if (!_cadRotateTask.isActive())
         _cadRotateTask.run();
     }

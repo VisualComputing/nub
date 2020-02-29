@@ -2861,7 +2861,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseRADX(float)
    */
   public float mouseRADX() {
-    return mouseRADX(PI / width());
+    return mouseRADX(HALF_PI / width());
   }
 
   /**
@@ -2885,7 +2885,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseRADY(float)
    */
   public float mouseRADY() {
-    return mouseRADY(PI / height());
+    return mouseRADY(HALF_PI / height());
   }
 
   /**
