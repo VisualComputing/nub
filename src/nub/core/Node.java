@@ -447,7 +447,7 @@ public class Node {
 
   /**
    * Returns the translation inertial task.
-   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
+   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
    */
   public Task translationInertialTask() {
     return _translationTask;
@@ -455,7 +455,7 @@ public class Node {
 
   /**
    * Returns the rotation inertial task.
-   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
+   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
    */
   public Task rotationInertialTask() {
     return _rotationTask;
@@ -463,7 +463,7 @@ public class Node {
 
   /**
    * Returns the orbit inertial task.
-   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
+   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
    */
   public Task orbitInertialTask() {
     return _orbitTask;
@@ -471,7 +471,7 @@ public class Node {
 
   /**
    * Returns the scaling inertial task.
-   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
+   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
    */
   public Task scalingInertialTask() {
     return _scalingTask;
