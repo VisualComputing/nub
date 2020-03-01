@@ -39,7 +39,7 @@ public class Joint extends Node {
   }
 
   public Joint(Scene scene, int color) {
-    this(scene, color, 5);
+    this(scene, color, scene.radius() * 0.01f);
   }
 
   public Joint(Scene scene) {
