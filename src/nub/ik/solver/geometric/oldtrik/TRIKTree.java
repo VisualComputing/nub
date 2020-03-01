@@ -26,7 +26,7 @@ public class TRIKTree extends Solver {
 
         public TreeNode(SimpleTRIK solver) {
             this._solver = solver;
-            _solver.setTimesPerFrame(1);
+            _solver.setTimesPerFrame(5);
 
             _children = new ArrayList<TreeNode>();
         }
@@ -58,12 +58,18 @@ public class TRIKTree extends Solver {
     }
 
     protected TreeNode _root;
+    protected SimpleTRIK.HeuristicMode _mode = SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL;
     protected float _current = 10e10f, _best = 10e10f;
     protected HashMap<Node, Node> _endEffectorMap = new HashMap<>();
 
     public TRIKTree(Node root){
+        this(root, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL);
+    }
+
+    public TRIKTree(Node root, SimpleTRIK.HeuristicMode mode){
         super();
         TreeNode dummy = new TreeNode(); //Dummy TreeNode to Keep Reference
+        _mode = mode;
         _setup(dummy, root, new ArrayList<Node>());
         //dummy must have only a child,
         this._root = dummy._children().get(0);
@@ -75,11 +81,11 @@ public class TRIKTree extends Solver {
         if(node == null) return;
         if(node.children().isEmpty()) { //Is a leaf node, hence we've found a chain of the structure
             list.add(node);
-            SimpleTRIK solver = new SimpleTRIK(list, SimpleTRIK.HeuristicMode.BACK_AND_FORTH_T);
+            SimpleTRIK solver = new SimpleTRIK(list, _mode);
             new TreeNode(parent, solver);
         } else if(node.children().size() > 1){
             list.add(node);
-            SimpleTRIK solver = new SimpleTRIK(list, SimpleTRIK.HeuristicMode.BACK_AND_FORTH_T);
+            SimpleTRIK solver = new SimpleTRIK(list, _mode);
             TreeNode treeNode = new TreeNode(parent, solver);
             for(Node child : node.children()){
                 List<Node> newList = new ArrayList<>();
@@ -114,10 +120,12 @@ public class TRIKTree extends Solver {
                 Vector eff = solver.context().chain().get(solver.context().chain().size() - 1).location(child._solver.context().chain().get(child._solver.context().chain().size() - 1));
                 Vector t = solver.context().chain().get(solver.context().chain().size() - 1).location(child._solver.target());
                 Vector diff = Vector.subtract(t, eff);
-                current_coords.add(o);
+                //current_coords.add(o);
                 //current_coords[c] = Vector.subtract(current_coords[c],o);
-                desired_coords.add(Vector.add(o,diff));
+                //desired_coords.add(Vector.add(o,diff));
                 //desired_coords[c] = Vector.subtract(local_t,o);
+                current_coords.add(eff.get());
+                desired_coords.add(t.get());
             }
         }
 
@@ -128,17 +136,18 @@ public class TRIKTree extends Solver {
         solver.context().chain().get(solver.context().chain().size() - 1).rotate(rotation);
         Node target = new Node();
         //solve ik for current chain
-        if(solver.context().chain().size() >= 2){//If the solver has only a node we require to update manually
-            //Set the target position
-            Vector translation = new Vector();
-            for(int i = 0; i < current_coords.size(); i++){
-                Vector o = rotation.rotate(current_coords.get(i));
-                translation.add(Vector.subtract(desired_coords.get(i), o)); //TODO: consider weights
-            }
-            translation.multiply(1f/current_coords.size());
-            target.setPosition(solver.context().chain().get(solver.context().chain().size() - 1).worldLocation(translation));
+        //Set the target position
+        Vector translation = new Vector();
+        for(int i = 0; i < current_coords.size(); i++){
+            Vector o = rotation.rotate(current_coords.get(i));
+            translation.add(Vector.subtract(desired_coords.get(i), o)); //TODO: consider weights
+        }
+        translation.multiply(1f/current_coords.size());
+        target.setPosition(solver.context().chain().get(solver.context().chain().size() - 1).worldLocation(translation));
 
-            solver.setTarget(target);
+        solver.setTarget(target);
+        if(solver.context().chain().size() >= 2){//If the solver has only a node we require to update manually
+            solver.reset();
             solver.solve(); //Perform a given number of iterations
         }
         return true;
@@ -223,6 +232,19 @@ public class TRIKTree extends Solver {
 
     public boolean addTarget(Node endEffector, Node target) {
         return _addTarget(_root, endEffector, target);
+    }
+
+
+    public void setMaxError(float maxError) {
+        super.setMaxError(maxError);
+        _setMaxError(maxError, _root);
+    }
+
+    protected void _setMaxError(float maxError, TreeNode node){
+        node._solver.setMaxError(maxError);
+        for(TreeNode child : node._children()){
+            _setMaxError(maxError, child);
+        }
     }
 
 
