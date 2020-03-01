@@ -21,6 +21,7 @@ public class Target extends Node {
     protected PShape _redBall;
     protected Vector _desiredTranslation;
     protected ArrayList<Vector> _last = new ArrayList<>();
+    protected float _radius;
 
     public Interpolator interpolator(){
         return _interpolator;
@@ -32,6 +33,7 @@ public class Target extends Node {
                 scene.context().createShape(PConstants.ELLIPSE, 0,0, radius * 4f, radius * 4f);
         _redBall.setStroke(false);
         _redBall.setFill(scene.pApplet().color(255, 0, 0));
+        _radius = radius;
 
         _interpolator = new Interpolator(this);
         //setShape(_redBall);
@@ -58,6 +60,7 @@ public class Target extends Node {
     public void graphics(processing.core.PGraphics pGraphics){
         pGraphics.hint(PConstants.DISABLE_DEPTH_TEST);
         pGraphics.shape(_redBall);
+        ((Scene) graph()).drawAxes(pGraphics, _radius * 4);
         pGraphics.hint(PConstants.ENABLE_DEPTH_TEST);
     }
 

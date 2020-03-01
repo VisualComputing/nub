@@ -55,6 +55,7 @@ public class SkeletonBuilder extends PApplet{
     }
 
     public void setup(){
+        Joint.axes = true;
         //canvas1 = createGraphics((int)(0.7f*w), h, renderer);
         //canvas1 = createGraphics(w, h, renderer);
         //canvas1 = this.g;

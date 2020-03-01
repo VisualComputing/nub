@@ -40,7 +40,7 @@ public class HeuristicBenchmark extends PApplet {
 
     //Util.SolverType solversType [] = {Util.SolverType.CCD, Util.SolverType.CCD_TRIK, Util.SolverType.BACK_AND_FORTH_TRIK, Util.SolverType.FINAL_TRIK, Util.SolverType.EXPRESSIVE_FINAL_TRIK, Util.SolverType.FABRIK};
 
-    Util.SolverType solversType [] = {Util.SolverType.EXPRESSIVE_FINAL_TRIK, Util.SolverType.FABRIK, Util.SolverType.FINAL_TRIK, Util.SolverType.CCD_TRIK};
+    Util.SolverType solversType [] = {Util.SolverType.EXPRESSIVE_FINAL_TRIK, Util.SolverType.FABRIK, Util.SolverType.FINAL_TRIK, Util.SolverType.CCD_TRIK, Util.SolverType.TRIK_V2, Util.SolverType.TRIK_V4};
     //Util.SolverType solversType [] = {Util.SolverType.FINAL_TRIK, Util.SolverType.FORWARD_TRIANGULATION_TRIK};
     ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Node> idleSkeleton;
@@ -98,7 +98,7 @@ public class HeuristicBenchmark extends PApplet {
             solvers.get(i).setMaxError(-10f);
             solvers.get(i).setMinDistance(-10f);
             solvers.get(i).setTimesPerFrame(1);
-            solvers.get(i).setMaxIterations(50);
+            solvers.get(i).setMaxIterations(200);
 
             if(solversType[i] == Util.SolverType.CCD ){
                 solvers.get(i).setMaxError(-10f);
@@ -140,6 +140,7 @@ public class HeuristicBenchmark extends PApplet {
     }
 
     boolean showPath = true;
+    boolean showContours = false;
     public void draw() {
         background(0);
         if(scene.is3D()) lights();
@@ -160,6 +161,7 @@ public class HeuristicBenchmark extends PApplet {
                 if(((SimpleTRIK) s).mainHeuristic() instanceof FinalHeuristic){
                     FinalHeuristic hig = (FinalHeuristic) ((SimpleTRIK) s).mainHeuristic();
                     hig.drawVectors(scene);
+                    if(showContours) hig.drawPositionContourMap(scene);
                 }
             }
         }
@@ -255,6 +257,19 @@ public class HeuristicBenchmark extends PApplet {
                     ((SimpleTRIK) s).enableSmooth(!((SimpleTRIK) s).enableSmooth());
             }
         }
+
+        if(key == 'o' || key == 'O'){
+            showContours = !showContours;
+        }
+
+        if(key == '0'){
+            for(Solver s: solvers){
+                if(s instanceof SimpleTRIK)
+                    ((SimpleTRIK) s).context().setDirection(!((SimpleTRIK) s).context().direction());
+            }
+
+        }
+
 
         if(key == 'p' || key == 'P'){
             generatePath(idleSkeleton);

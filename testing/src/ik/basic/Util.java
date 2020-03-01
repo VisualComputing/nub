@@ -86,7 +86,7 @@ public class Util {
             case TRIK_V2:{
                 TRIK solver = new TRIK(structure);
                 solver.enableWeight(true);
-                //solver.enableDirection(true);
+                solver.enableDirection(true);
                 return solver;
             }
             case TRIK_V3:{
@@ -101,7 +101,7 @@ public class Util {
                 solver.setLookAhead(5);
                 solver.enableWeight(true);
                 solver.smooth(true);
-                //solver.enableDirection(true);
+                solver.enableDirection(true);
                 return solver;
             }
 

@@ -15,14 +15,14 @@ import processing.event.MouseEvent;
 import java.util.List;
 
 public class ExpressiveTest extends PApplet {
-    int numJoints = 20;
+    int numJoints = 10;
     float boneLength = 50;
     float targetRadius = 10;
 
     SimpleTRIK solver;
     Scene delegationScene, mainScene, focus;
     DelegationPanel panel;
-    boolean solve = false, enableTask = false;
+    boolean solve = true, enableTask = false;
 
 
     public void settings() {
@@ -40,7 +40,7 @@ public class ExpressiveTest extends PApplet {
         Node target = Util.createTarget(mainScene, targetRadius);
         List<Node> structure = Util.generateChain(mainScene, numJoints, targetRadius * 0.7f, boneLength, new Vector(), color(0,255, 0));
 
-        Util.generateConstraints(structure, Util.ConstraintType.CONE_CIRCLE, 0, true);
+        //Util.generateConstraints(structure, Util.ConstraintType.CONE_CIRCLE, 0, true);
 
         solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL);
         solver.setTarget(structure.get(numJoints - 1), target);

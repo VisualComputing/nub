@@ -27,6 +27,7 @@ public class DrawingConstraint  extends PApplet {
     BaseControl base;
     Joint j0, j1;
     SimpleTRIK solver;
+    boolean solve = false;
 
     static PFont font;
 
@@ -52,14 +53,14 @@ public class DrawingConstraint  extends PApplet {
         j1 = new Joint(sceneConstraint, color(255), 0.1f * sceneConstraint.radius());
         j1.setReference(j0);
 
-        Vector v = new Vector(1f,0.3f,0);
+        Vector v = new Vector(1f,0.f,0);
         v.normalize();
         v.multiply(sceneConstraint.radius());
         j1.translate(v);
         j1.enableTagging(false);
 
         //Add constraint to joint j0
-        BallAndSocket constraint = new BallAndSocket(radians(30), radians(30));
+        BallAndSocket constraint = new BallAndSocket(radians(5), radians(34), radians(5), radians(84));
         constraint.setRestRotation(j0.rotation(), new Vector(0,1,0), new Vector(1,0,0), j1.translation());
         j0.setConstraint(constraint);
 
@@ -96,6 +97,7 @@ public class DrawingConstraint  extends PApplet {
         drawScene(sceneTheta, "Side / Top View");
         drawScene(sceneBase, "Front View");
         updateCostraint((BallAndSocket) j0.constraint(), t_lr, t_ud, base);
+        if(solve) solver.solve();
     }
 
     public void updateCostraint(BallAndSocket constraint, ThetaControl lr, ThetaControl ud, BaseControl b){
@@ -151,8 +153,8 @@ public class DrawingConstraint  extends PApplet {
 
     static class BaseControl extends Node{
         int _color;
-        float _left = 80, _right = 80, _up = 80, _down = 80;
-        float _pleft = 80, _pright = 80, _pup = 80, _pdown = 80;
+        float _left = 74, _right = 0, _up = 0, _down = 32;
+        float _pleft = 74, _pright = 0, _pup = 0, _pdown = 32;
         Vector _initial, _end;
         boolean _modified = false;
         float _max;
@@ -722,6 +724,9 @@ public class DrawingConstraint  extends PApplet {
     public void keyPressed(){
         if(key == 's' || key == 'S'){
             solver.solve();
+        }
+        if(key == 'w' || key == 'W'){
+            solve = !solve;
         }
     }
 
