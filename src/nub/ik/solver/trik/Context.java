@@ -61,6 +61,20 @@ public class Context {
 
     protected boolean _singleStep = false;
 
+    protected float _positionWeight;
+
+    public float positionWeight(){
+        return _positionWeight;
+    }
+
+    public void setPositionWeight(float positionWeight){
+        _positionWeight = positionWeight;
+    }
+
+    public void setDirection(boolean direction){
+        _direction = direction;
+    }
+
 
     public int deadlockCounter(){
         return _deadlockCounter;
@@ -288,4 +302,66 @@ public class Context {
     public boolean topToBottom(){
         return  _topToBottom;
     }
+
+
+    /*Error measures*/
+    public static float positionError(Vector eff, Vector target){
+        return Vector.distance(eff, target);
+    }
+
+    public static float positionError(NodeInformation eff, Node target){
+        return positionError(eff.positionCache(), target.position());
+    }
+
+    public static float orientationError(Quaternion eff, Quaternion target, boolean angles){
+        float s1 = 1, s2 = 1;
+        if(eff.w() < 0) s1 = -1;
+        if(target.w() < 0) s2 = - 1;
+        float dot = s1 * eff._quaternion[0] * s2 * target._quaternion[0] +
+                s1 * eff._quaternion[1] * s2 * target._quaternion[1] +
+                s1 * eff._quaternion[2] * s2 * target._quaternion[2] +
+                s1 * eff._quaternion[3] * s2 * target._quaternion[3];
+
+        //clamp dot product
+        dot = Math.min(Math.max(dot, -1), 1);
+        if(angles) return (float) Math.toDegrees(Math.acos(Math.min(Math.max(2 * dot * dot - 1, -1), 1)));
+        return  (float) (1 - dot * dot);
+    }
+
+
+    public static float quaternionDistance(Quaternion a, Quaternion b){
+        float s1 = 1, s2 = 1;
+        if(a.w() < 0) s1 = -1;
+        if(b.w() < 0) s2 = - 1;
+        float dot = s1 * a._quaternion[0] * s2 * b._quaternion[0] + s1 * a._quaternion[1] * s2 * b._quaternion[1] + s1 * a._quaternion[2] * s2 * b._quaternion[2] + s1 * a._quaternion[3] * s2 * b._quaternion[3];
+        return (float) (1 - Math.pow(dot, 2));
+    }
+
+    public float error(NodeInformation eff, Node target, float w1, float w2){
+        return error(eff.positionCache(), target.position(), eff.orientationCache(), target.orientation(), w1, w2);
+    }
+
+    public float error(NodeInformation eff, Node target){
+        return error(eff.positionCache(), target.position(), eff.orientationCache(), target.orientation(), 1, 1);
+    }
+
+    public float error(Vector effPosition, Vector targetPosition, Quaternion effRotation, Quaternion targetRotation, float w1, float w2){
+        float error = positionError(effPosition, targetPosition);
+        if(_direction){
+            //float length = Vector.distance(chain.get(chain.size() - 1).position(), chain.get(0).position());
+            //Add orientation error
+            float orientationError = orientationError(effRotation, targetRotation, false) * _positionWeight;
+            //orientationError *= orientationError / 0.05f;
+            //if(debug()) System.out.println("error " + error + " ori" + orientationError);
+            //error is the weighted sum
+            //error = error +  orientationError;
+            float weighted_error = error / _positionWeight;
+            float c_k = (float) Math.floor(weighted_error);
+            error =  c_k + 0.5f * orientationError + 0.5f * (weighted_error - c_k);
+        }
+        return error;
+    }
+
+
+
 }
