@@ -1,12 +1,13 @@
-/******************************************************************************************
+/***************************************************************************************
  * nub
- * Copyright (c) 2019 Universidad Nacional de Colombia, https://visualcomputing.github.io/
+ * Copyright (c) 2019-2020 Universidad Nacional de Colombia
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
- * handling to a third party (real or non-real time) renderer. Released under the terms
- * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ******************************************************************************************/
+ * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
+ * computing library, featuring interaction, visualization and animation frameworks and
+ * supporting advanced (onscreen/offscreen) (real/non-real time) rendering techniques.
+ * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
+ ***************************************************************************************/
 
 package nub.core;
 
@@ -14,6 +15,7 @@ import nub.core.constraint.Constraint;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.timing.Task;
 import nub.timing.TimingHandler;
 
 import java.util.ArrayList;
@@ -73,6 +75,10 @@ import java.util.List;
  * To transform a point from one node to another use {@link #location(Vector, Node)} and
  * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
  * {@link #displacement(Vector, Node)} and {@link #worldDisplacement(Vector)}.
+ * <p>
+ * The methods {@link #translate(Vector, float)}, {@link #rotate(Quaternion), float},
+ * {@link #orbit(Quaternion, Vector, float)} and {@link #scale(float, float)}, locally apply
+ * differential geometry transformations damped with a given {@code inertia}.
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the node hierarchy which automatically apply the local
  * node transformations described above may be achieved with {@link Graph#render()} or
@@ -86,11 +92,12 @@ import java.util.List;
  * a node cannot be attached nor detached, but a copy of it can (see {@link #attach(Graph)}
  * and {@link #detach()}).
  * <h2>Constraints</h2>
- * One interesting feature of a node is that its displacements can be constrained. When a
- * {@link Constraint} is attached to a node, it filters the input of {@link #translate(Vector)}
- * and {@link #rotate(Quaternion)}, and only the resulting filtered motion is applied to the
- * node. The default {@link #constraint()} is {@code null} resulting in no filtering.
- * Use {@link #setConstraint(Constraint)} to attach a constraint to a node.
+ * One interesting feature of a node is that its displacements can be constrained.
+ * When a {@link Constraint} is attached to a node, it filters the input of
+ * {@link #translate(Vector)}, {@link #rotate(Quaternion)}, and {@link #orbit(Quaternion, Vector)}
+ * and only the resulting filtered motion is applied to the node. The default
+ * {@link #constraint()} is {@code null} resulting in no filtering. Use
+ * {@link #setConstraint(Constraint)} to attach a constraint to a node.
  * <p>
  * Classical constraints are provided for convenience (see
  * {@link nub.core.constraint.LocalConstraint},
@@ -147,6 +154,10 @@ public class Node {
   // Rendering
   protected Object _shape;
   protected float _highlight;
+  protected long _bypass;
+
+  // Tasks
+  protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
 
   /**
    * Creates a detached node.
@@ -370,6 +381,7 @@ public class Node {
     // attached nodes:
     _children = new ArrayList<Node>();
     _culled = false;
+    _initTasks();
   }
 
   /**
@@ -402,6 +414,92 @@ public class Node {
 
     this._shape = node._shape;
     this._highlight = node._highlight;
+    this._initTasks();
+  }
+
+  /**
+   * Init tasks. Internal use.
+   */
+  protected void _initTasks() {
+    _translationTask = new InertialTask(graph()) {
+      @Override
+      public void action() {
+        translate(_x, _y, _z);
+      }
+    };
+    _rotationTask = new InertialTask(graph()) {
+      @Override
+      public void action() {
+        rotate(new Quaternion(_x, _y, _z));
+      }
+    };
+    _orbitTask = new InertialTask(graph()) {
+      @Override
+      public void action() {
+        orbit(new Quaternion(_x, _y, _z), _center);
+      }
+    };
+    _scalingTask = new InertialTask(graph()) {
+      @Override
+      public void action() {
+        float factor = 1 + Math.abs(_x) / graph().height();
+        scale(_x >= 0 ? factor : 1 / factor);
+      }
+    };
+  }
+
+  /**
+   * Returns the translation inertial task.
+   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
+   */
+  public Task translationInertialTask() {
+    return _translationTask;
+  }
+
+  /**
+   * Returns the rotation inertial task.
+   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
+   */
+  public Task rotationInertialTask() {
+    return _rotationTask;
+  }
+
+  /**
+   * Returns the orbit inertial task.
+   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
+   */
+  public Task orbitInertialTask() {
+    return _orbitTask;
+  }
+
+  /**
+   * Returns the scaling inertial task.
+   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
+   */
+  public Task scalingInertialTask() {
+    return _scalingTask;
+  }
+
+  /**
+   * println this node components.
+   */
+  public void println() {
+    System.out.println(toString() + "\n");
+  }
+
+  /**
+   * print this node components.
+   */
+  public void print() {
+    System.out.print(toString());
+  }
+
+  /**
+   * Return this node components as a String.
+   */
+  @Override
+  public String toString() {
+    return "Position: " + position().toString() + " Orientation: " + orientation().toString() + " Magnitude: " + Float.toString(magnitude());
   }
 
   /**
@@ -967,14 +1065,38 @@ public class Node {
 
   /**
    * Translates the node according to {@code vector}, locally defined with respect to the
-   * {@link #reference()}.
+   * {@link #reference()} and with an impulse defined with {@code inertia} which should
+   * be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
    * applied to the node may differ from {@code vector} (since it can be filtered by the
    * {@link #constraint()}).
    *
-   * @see #rotate(Quaternion)
-   * @see #scale(float)
+   * @see #rotate(Quaternion, float)
+   * @see #scale(float, float)
+   * @see #orbit(Quaternion, Vector, float)
+   * @see #setConstraint(Constraint)
+   */
+  public void translate(Vector vector, float inertia) {
+    translate(vector);
+    if (isDetached()) {
+      if (inertia > 0)
+        System.out.println("Warning: translate(vector, inertia) is only available if node is attached to a Graph. Use translate(vector) instead");
+      return;
+    }
+    _translationTask.setInertia(inertia);
+    _translationTask._x += vector.x();
+    _translationTask._y += vector.y();
+    _translationTask._z += vector.z();
+    if (!_translationTask.isActive()) {
+      _translationTask.run();
+    }
+  }
+
+  /**
+   * Same as {@code translate(vector, 0)}.
+   *
+   * @see #translate(Vector, float)
    */
   public void translate(Vector vector) {
     translation().add(constraint() != null ? constraint().constrainTranslation(vector, this) : vector);
@@ -1084,13 +1206,37 @@ public class Node {
 
   /**
    * Rotates the node by {@code quaternion} (defined in the node coordinate system):
-   * {@code rotation().compose(quaternion)}.
+   * {@code rotation().compose(quaternion)} and with an impulse defined with
+   * {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * <p>
    * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
+   * @see #translate(Vector, float)
+   * @see #orbit(Quaternion, Vector, float)
+   * @see #scale(float, float)
    * @see #setConstraint(Constraint)
-   * @see #translate(Vector)
+   */
+  public void rotate(Quaternion quaternion, float inertia) {
+    rotate(quaternion);
+    if (isDetached()) {
+      if (inertia > 0)
+        System.out.println("Warning: rotate(quaternion, inertia) is only available if node is attached to a Graph. Use rotate(quaternion) instead");
+      return;
+    }
+    _rotationTask.setInertia(inertia);
+    Vector e = quaternion.eulerAngles();
+    _rotationTask._x += e.x();
+    _rotationTask._y += e.y();
+    _rotationTask._z += e.z();
+    if (!_rotationTask.isActive())
+      _rotationTask.run();
+  }
+
+  /**
+   * Same as {@code rotate(quaternion, 0)}.
+   *
+   * @see #rotate(Quaternion, float)
    */
   public void rotate(Quaternion quaternion) {
     rotation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
@@ -1117,21 +1263,43 @@ public class Node {
   }
 
   /**
-   * Rotates the node by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
-   * passes through {@code point}. The {@code quaternion} {@link Quaternion#axis()} is
-   * defined in this node coordinate system, while {@code point} is defined in the world
-   * coordinate system).
+   * Rotates the node by the {@code quaternion} (defined in the node coordinate system)
+   * around {@code center} defined in the world coordinate system, and with an impulse
+   * defined with {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
+   * @see #translate(Vector, float)
+   * @see #rotate(Quaternion, float)
+   * @see #scale(float, float)
    * @see #setConstraint(Constraint)
    */
-  protected void _orbit(Quaternion quaternion, Vector center) {
-    if (constraint() != null)
-      quaternion = constraint().constrainRotation(quaternion, this);
-    this.rotation().compose(quaternion);
-    this.rotation().normalize(); // Prevents numerical drift
+  public void orbit(Quaternion quaternion, Vector center, float inertia) {
+    orbit(quaternion, center);
+    if (isDetached()) {
+      if (inertia > 0)
+        System.out.println("Warning: orbit(quaternion, center, inertia) is only available if node is attached to a Graph. Use orbit(quaternion, center) instead");
+      return;
+    }
+    _orbitTask.setInertia(inertia);
+    _orbitTask._center = center;
+    Vector e = quaternion.eulerAngles();
+    _orbitTask._x += e.x();
+    _orbitTask._y += e.y();
+    _orbitTask._z += e.z();
+    if (!_orbitTask.isActive())
+      _orbitTask.run();
+  }
+
+  /**
+   * Same as {@code orbit(quaternion, center, 0)}.
+   *
+   * @see #orbit(Quaternion, Vector, float)
+   */
+  public void orbit(Quaternion quaternion, Vector center) {
+    rotation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
+    rotation().normalize(); // Prevents numerical drift
 
     // Original in nodes-0.1.x and proscene:
     //Vector vector = Vector.add(center, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), center)));
@@ -1152,55 +1320,25 @@ public class Node {
   }
 
   /**
-   * Same as { orbit(new Quaternion(axis, angle))}.
+   * Rotates the node around {@code axis} passing through the origin, both defined in the world
+   * coordinate system. Same as {@code orbit(axis, angle, new Vector())}.
    *
-   * @see #orbit(Quaternion)
+   * @see #orbit(Vector, float, Vector)
+   * @see #orbit(Quaternion, Vector)
    */
   public void orbit(Vector axis, float angle) {
-    orbit(new Quaternion(axis, angle));
+    orbit(axis, angle, new Vector());
   }
 
   /**
-   * Same as {@code orbit(new Quaternion(axis, angle), node)}.
+   * Rotates the node around {@code axis} passing through {@code center}, both defined in the world
+   * coordinate system. Same as {@code orbit(new Quaternion(displacement(axis), angle), center)}.
    *
-   * @see #orbit(Quaternion, Node)
+   * @see #orbit(Quaternion, Vector)
+   * @see #orbit(Vector, float)
    */
-  public void orbit(Vector axis, float angle, Node node) {
-    orbit(new Quaternion(axis, angle), node);
-  }
-
-  /**
-   * Same as {@code orbit(quaternion, null)}.
-   *
-   * @see #orbit(Quaternion, Node)
-   */
-  public void orbit(Quaternion quaternion) {
-    orbit(quaternion, null);
-  }
-
-  /**
-   * Rotates this node around {@code node} (which may be null for the world coordinate system)
-   * according to {@code quaternion}.
-   * <p>
-   * The {@code quaternion} axis (see {@link Quaternion#axis()}) is defined in the {@code node}
-   * coordinate system.
-   * <p>
-   * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
-   */
-  public void orbit(Quaternion quaternion, Node node) {
-    Quaternion localQuaternion = new Quaternion(displacement(quaternion.axis(), node), quaternion.angle());
-    _orbit(localQuaternion, node == null ? new Vector() : node.position());
-
-    // Note that the 'easy way' to do it (not relying on the _orbit() method)
-    // by-passes the node constraint (kept for the curious):
-    /*
-    Node reference = node == null ? new Node() : node.detach();
-    Node copy = new Node(reference);
-    copy.set(this);
-    reference.rotate(quaternion);
-    set(copy);
-    // */
+  public void orbit(Vector axis, float angle, Vector center) {
+    orbit(new Quaternion(displacement(axis), angle), center);
   }
 
   // ORIENTATION
@@ -1286,10 +1424,32 @@ public class Node {
 
   /**
    * Scales the node according to {@code scaling}, locally defined with respect to the
-   * {@link #reference()}.
+   * {@link #reference()}  and with an impulse defined with {@code inertia} which should
+   * be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
-   * @see #rotate(Quaternion)
-   * @see #translate(Vector)
+   * @see #translate(Vector, float)
+   * @see #rotate(Quaternion, float)
+   * @see #orbit(Quaternion, Vector, float)
+   * @see #setConstraint(Constraint)
+   */
+  public void scale(float scaling, float inertia) {
+    scale(scaling);
+    if (isDetached()) {
+      if (inertia > 0)
+        System.out.println("Warning: scale(scaling, inertia) is only available if node is attached to a Graph. Use scale(scaling) instead");
+      return;
+    }
+    _scalingTask._inertia = inertia;
+    _scalingTask._x += scaling > 1 ? graph().height() * (scaling - 1) : graph().height() * (scaling - 1) / scaling;
+    if (!_scalingTask.isActive()) {
+      _scalingTask.run();
+    }
+  }
+
+  /**
+   * Same as {@code scale(scaling, 0)}.
+   *
+   * @see #scale(float, float)
    */
   public void scale(float scaling) {
     setScaling(scaling() * scaling);
@@ -2307,22 +2467,34 @@ public class Node {
    * <pre>
    * {@code
    * node = new Node(graph) {
-   *   @Override
    *   public void visit() {
    *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
-   *     // (which should be implemented by you) is true, scene.traverse() will prune the branch
+   *     // (which should be implemented by you) is true, scene.render() will prune the branch
    *     // at the node
    *     cull(cullingCondition);
    *   }
    * }
    * }
    * </pre>
+   * Bypassing rendering of the node may also be decided here, according to a bypassCondition
+   * (which should be implemented by you):
+   * <pre>
+   * {@code
+   * node = new Node(graph) {
+   *   public void visit() {
+   *     if(bypassCondition)
+   *       // this will bypass node rendering without culling its children
+   *       bypass();
+   *   }
+   * }
+   * }
+   * </pre>
    *
    * @see Graph#render()
-   * @see Graph#render()
+   * @see Graph#draw(Object, Node)
    * @see #cull(boolean)
    * @see #isCulled()
-   * @see Graph#draw(Object, Node)
+   * @see #bypass()
    */
   public void visit() {
   }
@@ -2333,6 +2505,7 @@ public class Node {
    *
    * @see #cull(boolean)
    * @see #isCulled()
+   * @see #bypass()
    */
   public void cull() {
     cull(true);
@@ -2344,6 +2517,7 @@ public class Node {
    * Only meaningful if the node is attached to a {@code graph}.
    *
    * @see #isCulled()
+   * @see #bypass()
    */
   public void cull(boolean cull) {
     if (isDetached())
@@ -2357,9 +2531,20 @@ public class Node {
    * {@code false} if the node {@link #isDetached()}.
    *
    * @see #cull(boolean)
+   * @see #bypass()
    */
   public boolean isCulled() {
     return !isDetached() && _culled;
+  }
+
+  /**
+   * Bypass rendering the node for the current frame. Set it before calling {@link Graph#render()}
+   * or any rendering algorithm. Note that the node nor its children get culled.
+   *
+   * @see #cull(boolean)
+   */
+  public void bypass() {
+    _bypass = TimingHandler.frameCount;
   }
 
   /**

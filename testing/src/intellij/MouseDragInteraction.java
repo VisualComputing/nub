@@ -93,30 +93,21 @@ public class MouseDragInteraction extends PApplet {
   @Override
   public void mouseMoved() {
     scene.mouseTag();
-    //scene.track();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
       if (cad) {
-        //scene.mouseCAD(randomVector);
         scene.mouseRotateCAD(randomVector);
       } else if (lookAround) {
-        //scene.lookAround();
         scene.mouseLookAround();
       } else {
-        //scene.spin();
         scene.mouseSpin();
       }
     else if (mouseButton == RIGHT) {
-      //scene.translate();
-      //scene.translate(scene.mouseDX(), scene.mouseDY(), scene.defaultNode());
       scene.mouseTranslate();
     } else {
-      //scene.mouseZoom(mouseX - pmouseX);
-      //scene.zoom(scene.mouseDX(), scene.defaultNode());
       scene.scale(scene.mouseDX());
-      //scene.scale(mouseX - pmouseX);
     }
   }
 

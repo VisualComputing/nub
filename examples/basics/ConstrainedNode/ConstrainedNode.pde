@@ -73,14 +73,12 @@ void mouseMoved() {
 
 void mouseDragged() {
   if (mouseButton == LEFT) {
-    if(!scene.mouseSpinTag("key"))
+    if (!scene.mouseSpinTag("key"))
       scene.mouseSpin();
-  }
-  else if (mouseButton == RIGHT) {
-    if(!scene.mouseTranslateTag("key"))
+  } else if (mouseButton == RIGHT) {
+    if (!scene.mouseTranslateTag("key"))
       scene.mouseTranslate();
-  }
-  else
+  } else
     scene.scale(mouseX - pmouseX);
 }
 

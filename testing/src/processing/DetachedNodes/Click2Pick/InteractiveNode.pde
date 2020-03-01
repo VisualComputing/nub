@@ -18,7 +18,7 @@ class InteractiveNode extends Node {
     pushStyle();
     scn.drawAxes(40);
     stroke(_c);
-    scn.drawShooterTarget(this);
+    scn.drawBullsEye(this);
     strokeWeight(10);
     point(pnt.x(), pnt.y(), pnt.z());
     popStyle();

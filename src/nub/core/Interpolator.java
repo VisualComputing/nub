@@ -1,12 +1,13 @@
-/******************************************************************************************
+/***************************************************************************************
  * nub
- * Copyright (c) 2019 Universidad Nacional de Colombia, https://visualcomputing.github.io/
+ * Copyright (c) 2019-2020 Universidad Nacional de Colombia
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
- * handling to a third party (real or non-real time) renderer. Released under the terms
- * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ******************************************************************************************/
+ * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
+ * computing library, featuring interaction, visualization and animation frameworks and
+ * supporting advanced (onscreen/offscreen) (real/non-real time) rendering techniques.
+ * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
+ ***************************************************************************************/
 
 package nub.core;
 
@@ -181,7 +182,14 @@ public class Interpolator {
     setNode(node);
     _t = 0.0f;
     _speed = 1.0f;
-    _task = _graph._initTask(this);
+    //JS should just go:
+    //_task = new Task(_graph.timingHandler()) {
+    _task = new nub.processing.TimingTask(_graph.timingHandler()) {
+      @Override
+      public void execute() {
+        Interpolator.this._execute();
+      }
+    };
     _recurrent = false;
     _pathIsValid = false;
     _valuesAreValid = false;
@@ -202,7 +210,14 @@ public class Interpolator {
     this.setNode(other.node());
     this._t = other._t;
     this._speed = other._speed;
-    this._task = _graph._initTask(this);
+    //JS should just go:
+    //_task = new Task(this._graph.timingHandler()) {
+    this._task = new nub.processing.TimingTask(this._graph.timingHandler()) {
+      @Override
+      public void execute() {
+        Interpolator.this._execute();
+      }
+    };
     this._task.setPeriod(other.task().period());
     this._task.enableConcurrence(other._task.isConcurrent());
     this._recurrent = other._recurrent;
@@ -270,17 +285,10 @@ public class Interpolator {
   }
 
   /**
-   * Sets the interpolator {@link #task()}. Useful if for example you need to
-   * customize the timing task to enable concurrency on it.
-   */
-  public void setTask(Task task) {
-    _task = task;
-  }
-
-  /**
    * Returns the low-level timing task. Prefer the high-level-api instead:
    * {@link #run()}, {@link #reset()}, {@link #time()} ({@link #setTime(float)})
-   * and {@link #toggle()}.
+   * and {@link #toggle()}. Useful if you need to customize the low-level
+   * timing-task, e.g., to enable concurrency on it.
    */
   public Task task() {
     return _task;
@@ -306,7 +314,7 @@ public class Interpolator {
    * @see #run(int, float)
    * @see #time()
    */
-  public void execute() {
+  protected void _execute() {
     if ((_list.isEmpty()) || (node() == null))
       return;
     if ((_speed > 0.0) && (time() >= _list.get(_list.size() - 1)._time))

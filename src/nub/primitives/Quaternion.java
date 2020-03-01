@@ -1,12 +1,13 @@
-/******************************************************************************************
+/***************************************************************************************
  * nub
- * Copyright (c) 2019 Universidad Nacional de Colombia, https://visualcomputing.github.io/
+ * Copyright (c) 2019-2020 Universidad Nacional de Colombia
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
- * handling to a third party (real or non-real time) renderer. Released under the terms
- * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ******************************************************************************************/
+ * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
+ * computing library, featuring interaction, visualization and animation frameworks and
+ * supporting advanced (onscreen/offscreen) (real/non-real time) rendering techniques.
+ * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
+ ***************************************************************************************/
 
 // Thanks goes to the great Gilles Debunne Quaternion API reference
 // http://libqglviewer.com/refManual/classqglviewer_1_1Quaternion.html
@@ -200,6 +201,9 @@ public class Quaternion {
     fromRotatedBasis(X, Y, Z);
   }
 
+  /**
+   * Copy constructor.
+   */
   protected Quaternion(Quaternion quaternion) {
     set(quaternion);
   }
@@ -615,6 +619,10 @@ public class Quaternion {
    *
    * @param axis  the Vector representing the axis
    * @param angle the angle in radians
+   * @see #fromTo(Vector, Vector)
+   * @see #fromMatrix(Matrix)
+   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #fromEulerAngles(float, float, float)
    */
   public void fromAxisAngle(Vector axis, float angle) {
     float norm = axis.magnitude();
@@ -634,44 +642,10 @@ public class Quaternion {
   }
 
   /**
-   * Same as {@code fromAxisAngle(new Vector(x,y,z), angle)}.
-   *
-   * @see #fromAxisAngle(Vector, float)
-   */
-  public void fromAxisAngle(float x, float y, float z, float angle) {
-    fromAxisAngle(new Vector(x, y, z), angle);
-  }
-
-  /**
-   * Same as {@link #fromEulerAngles(Vector)}.
-   */
-  public void fromTaitBryan(Vector angles) {
-    fromEulerAngles(angles);
-  }
-
-  /**
-   * Same as {@link #fromEulerAngles(float, float, float)}.
-   */
-  public void fromTaitBryan(float roll, float pitch, float yaw) {
-    fromEulerAngles(roll, pitch, yaw);
-  }
-
-  /**
-   * Convenience function that simply calls
-   * {@code fromEulerAngles(angles.vec[0], angles.vec[1], angles.vec[2])}.
-   *
-   * @see #fromEulerAngles(float, float, float)
-   * @see #eulerAngles()
-   */
-  public void fromEulerAngles(Vector angles) {
-    fromEulerAngles(angles._vector[0], angles._vector[1], angles._vector[2]);
-  }
-
-  /**
    * Converts Euler rotation angles {@code roll}, {@code pitch} and {@code yaw},
    * respectively defined to the x, y and z axes, to this quaternion. In the convention used
    * here these angles represent a composition of extrinsic rotations (rotations about the
-   * reference node axes), which is also known as {@link #taitBryanAngles()} (See
+   * reference node axes), which is also known as Tait-Bryan angles (See
    * http://en.wikipedia.org/wiki/Euler_angles and
    * http://en.wikipedia.org/wiki/Tait-Bryan_angles). {@link #eulerAngles()} performs the
    * inverse operation.
@@ -680,7 +654,12 @@ public class Quaternion {
    * to one of the Euclidean axes. The axis-angle pairs are converted to quaternions and
    * multiplied together. The order of the rotations is: y,z,x which follows the
    * convention found here:
-   * http://www.euclideanspace.com/maths/geometry/rotations/euler/index.htm.
+   * http://www.euclideanspace.com/maths/geometry/rotations/euler/index.htm
+   *
+   * @see #fromTo(Vector, Vector)
+   * @see #fromMatrix(Matrix)
+   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #fromAxisAngle(Vector, float)
    *
    * @see #eulerAngles()
    */
@@ -691,13 +670,6 @@ public class Quaternion {
     set(qy);
     multiply(qz);
     multiply(qx);
-  }
-
-  /**
-   * Same as {@link #eulerAngles()}.
-   */
-  public Vector taitBryanAngles() {
-    return eulerAngles();
   }
 
   /**
@@ -747,6 +719,9 @@ public class Quaternion {
    * orthogonal to {@code from} and {@code to}, minimizing the rotation angle. This method
    * is robust and can handle small or almost identical vectors.
    *
+   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #fromEulerAngles(float, float, float)
+   * @see #fromMatrix(Matrix)
    * @see #fromAxisAngle(Vector, float)
    */
   public void fromTo(Vector from, Vector to) {
@@ -758,35 +733,25 @@ public class Quaternion {
       this._quaternion[3] = 1.0f;
     } else {
       Vector axis = from.cross(to);
-
       float axisSqNorm = axis.squaredNorm();
-
       // Aligned vectors, pick any axis, not aligned with from or to
       if (axisSqNorm == 0)
         axis = from.orthogonalVector();
-
       float angle = (float) Math.asin((float) Math.sqrt(axisSqNorm / (fromSqNorm * toSqNorm)));
-
       if (from.dot(to) < 0.0)
         angle = (float) Math.PI - angle;
-
       fromAxisAngle(axis, angle);
     }
-  }
-
-  /**
-   * Same as {@code fromTo(new Vector(x1,y1,z1), new Vector(x2,y2,z2))}.
-   *
-   * @see #fromTo(Vector, Vector)
-   */
-  public void fromTo(float x1, float y1, float z1, float x2, float y2, float z2) {
-    fromTo(new Vector(x1, y1, z1), new Vector(x2, y2, z2));
   }
 
   /**
    * Set the quaternion from a (supposedly correct) 3x3 rotation matrix given in the upper left
    * 3x3 sub-matrix of the Matrix.
    *
+   * @see #fromTo(Vector, Vector)
+   * @see #fromEulerAngles(float, float, float)
+   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #fromAxisAngle(Vector, float)
    * @see #fromRotatedBasis(Vector, Vector, Vector)
    */
   public void fromMatrix(Matrix matrix) {
@@ -801,6 +766,11 @@ public class Quaternion {
    * <p>
    * The three vectors do not have to be normalized but must be orthogonal and direct
    * (i,e., {@code X^Y=k*Z, with k>0}).
+   *
+   * @see #fromTo(Vector, Vector)
+   * @see #fromEulerAngles(float, float, float)
+   * @see #fromMatrix(Matrix)
+   * @see #fromAxisAngle(Vector, float)
    *
    * @param X the first Vector
    * @param Y the second Vector
@@ -1097,8 +1067,25 @@ public class Quaternion {
     return (quaternion._quaternion[0] * quaternion._quaternion[0]) + (quaternion._quaternion[1] * quaternion._quaternion[1]) + (quaternion._quaternion[2] * quaternion._quaternion[2]) + (quaternion._quaternion[3] * quaternion._quaternion[3]);
   }
 
+  /**
+   * println this quaternion components.
+   */
+  public void println() {
+    System.out.println(toString() + "\n");
+  }
+
+  /**
+   * print this quaternion components.
+   */
   public void print() {
-    axis().print();
-    System.out.println(angle());
+    System.out.print(toString());
+  }
+
+  /**
+   * Return this quaternion components as a String.
+   */
+  @Override
+  public String toString() {
+    return "Axis : " + axis().toString() + " Angle: " + Float.toString(angle());
   }
 }

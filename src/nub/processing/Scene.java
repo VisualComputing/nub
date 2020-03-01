@@ -1,12 +1,13 @@
-/******************************************************************************************
+/***************************************************************************************
  * nub
- * Copyright (c) 2019 Universidad Nacional de Colombia, https://visualcomputing.github.io/
+ * Copyright (c) 2019-2020 Universidad Nacional de Colombia
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
- * handling to a third party (real or non-real time) renderer. Released under the terms
- * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ******************************************************************************************/
+ * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
+ * computing library, featuring interaction, visualization and animation frameworks and
+ * supporting advanced (onscreen/offscreen) (real/non-real time) rendering techniques.
+ * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
+ ***************************************************************************************/
 
 // Thanks goes to Andres Colubri, https://www.sabetilab.org/andres-colubri/
 // for implementing the first off-screen scene working example
@@ -20,12 +21,6 @@ import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.timing.Task;
-import nub.core.constraint.BallAndSocket;
-import nub.core.constraint.Hinge;
-import nub.core.constraint.PlanarPolygon;
-import nub.core.constraint.SphericalPolygon;
-
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -119,8 +114,8 @@ import java.util.Map;
  * @see TimingTask
  */
 public class Scene extends Graph implements PConstants {
-  public static String prettyVersion = "0.3.0";
-  public static String version = "3";
+  public static String prettyVersion = "0.5.0";
+  public static String version = "5";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
@@ -250,18 +245,6 @@ public class Scene extends Graph implements PConstants {
     setLeftHanded();
   }
 
-  // Tasks
-
-  @Override
-  protected Task _initTask(Interpolator interpolator) {
-    return new TimingTask(this) {
-      @Override
-      public void execute() {
-        interpolator.execute();
-      }
-    };
-  }
-
   // P5 STUFF
 
   /**
@@ -363,6 +346,28 @@ public class Scene extends Graph implements PConstants {
   // OPENGL
 
   /**
+   * Same as {@code pixelToLine(mouseX(), mouseY(), origin, direction)}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #pixelToLine(int, int, Vector, Vector)
+   */
+  public void mouseToLine(Vector origin, Vector direction) {
+    pixelToLine(mouseX(), mouseY(), origin, direction);
+  }
+
+  /**
+   * Same as {@code return setCenter(mouseX(), mouseY())}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #setCenter(int, int)
+   */
+  public boolean mouseSetCenter() {
+    return setCenter(mouseX(), mouseY());
+  }
+
+  /**
    * The {@link #center()} is set to the point located under {@code pixel} on screen.
    * <p>
    * 2D windows always returns true.
@@ -370,8 +375,8 @@ public class Scene extends Graph implements PConstants {
    * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
    * {@code false} if none was found (in this case no {@link #center()} is set).
    */
-  public boolean setCenterFromPixel(int pixelX, int pixelY) {
-    Vector pup = pointUnderPixel(pixelX, pixelY);
+  public boolean setCenter(int pixelX, int pixelY) {
+    Vector pup = location(pixelX, pixelY);
     if (pup != null) {
       setCenter(pup);
       return true;
@@ -380,15 +385,26 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code return pixelDepth(mouseX(), mouseY())}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #pixelDepth(int, int)
+   */
+  public float mouseDepth() {
+    return pixelDepth(mouseX(), mouseY());
+  }
+
+  /**
    * Returns the depth (z-value) of the object under the {@code pixel}. Used by
-   * {@link #pointUnderPixel(int, int)}.
+   * {@link #location(int, int)}.
    * <p>
    * The z-value ranges in [0..1] (near and far plane respectively). In 3D note that this
    * value is not a linear interpolation between {@link #zNear()} and {@link #zFar()}:
    * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z')} where {@code z'} is
    * the distance from the point you project to the eye, along the {@link #viewDirection()}.
    *
-   * @see #pointUnderPixel(int, int)
+   * @see #location(int, int)
    */
   public float pixelDepth(int pixelX, int pixelY) {
     PGraphicsOpenGL pggl;
@@ -398,17 +414,27 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
     float[] depth = new float[1];
     PGL pgl = pggl.beginPGL();
-    pgl.readPixels(pixelX, (height() - pixelY), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
-        FloatBuffer.wrap(depth));
+    pgl.readPixels(pixelX, (height() - pixelY), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT, FloatBuffer.wrap(depth));
     pggl.endPGL();
     return depth[0];
   }
 
   /**
-   * Returns the world coordinates of the 3D point located at {@code pixel} (x,y) on
+   * Same as {@code return location(mouseX(), mouseY())}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #location(int, int)
+   */
+  public Vector mouseLocation() {
+    return location(mouseX(), mouseY());
+  }
+
+  /**
+   * Returns the world coordinates of the 3D point located at {@code (pixelX, pixelY)} on
    * screen. May be null if no object is under pixel.
    */
-  public Vector pointUnderPixel(int pixelX, int pixelY) {
+  public Vector location(int pixelX, int pixelY) {
     float depth = pixelDepth(pixelX, pixelY);
     Vector point = location(new Vector(pixelX, pixelY, depth));
     return (depth < 1.0f) ? point : null;
@@ -455,7 +481,7 @@ public class Scene extends Graph implements PConstants {
    * {@code false} if none was found (in this case no {@link #anchor()} is set).
    */
   public boolean setAnchorFromPixel(int pixelX, int pixelY) {
-    Vector pup = pointUnderPixel(pixelX, pixelY);
+    Vector pup = location(pixelX, pixelY);
     if (pup != null) {
       setAnchor(pup);
       // new animation
@@ -822,12 +848,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  protected boolean _tracks(Node node, int x, int y) {
+  protected boolean _tracks(Node node, int pixelX, int pixelY) {
     if (node == null || isEye(node))
       return false;
     if (!node.isTaggingEnabled())
       return false;
-    int index = y * width() + x;
+    int index = pixelY * width() + pixelX;
     if (_backBuffer().pixels != null)
       if ((0 <= index) && (index < _backBuffer().pixels.length))
         return _backBuffer().pixels[index] == node.colorID();
@@ -2896,7 +2922,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseRADX(float)
    */
   public float mouseRADX() {
-    return mouseRADX(PI / width());
+    return mouseRADX(HALF_PI / width());
   }
 
   /**
@@ -2920,7 +2946,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseRADY(float)
    */
   public float mouseRADY() {
-    return mouseRADY(PI / height());
+    return mouseRADY(HALF_PI / height());
   }
 
   /**
@@ -3057,69 +3083,130 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code super.translate(mouseDX(), mouseDY())}.
+   * Same as {@code mouseTranslate(null)}.
    *
-   * @see #translate(float, float)
+   * @see #mouseTranslate(String)
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslate() {
-    super.translate(mouseDX(), mouseDY());
+    mouseTranslate(null);
   }
 
   /**
-   * Same as {@code super.translate(tag, mouseDX(), mouseDY())}.
+   * Same as {@code if (!mouseTranslateTag(tag)) mouseTranslateEye()}.
    *
-   * @see #translate(String, float, float)
+   * @see #mouseTranslateTag(String)
+   * @see #mouseTranslateEye()
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslate(String tag) {
-    super.translate(tag, mouseDX(), mouseDY());
+    if (!mouseTranslateTag(tag))
+      mouseTranslateEye();
   }
 
   /**
-   * Same as {@code return super.translateTag(tag, mouseDX(), mouseDY())}.
+   * Same as {@code return mouseTranslateTag(null)}.
    *
-   * @see #translateTag(String, float, float)
-   * @see #mouseDX()
-   * @see #mouseDY()
-   */
-  public boolean mouseTranslateTag(String tag) {
-    return super.translateTag(tag, mouseDX(), mouseDY());
-  }
-
-  /**
-   * Same as {@code return super.translate(mouseDX(), mouseDY())}.
-   *
-   * @see #translate(float, float)
+   * @see #mouseTranslateTag(String)
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public boolean mouseTranslateTag() {
-    return super.translateTag(mouseDX(), mouseDY());
+    return mouseTranslateTag(null);
   }
 
   /**
-   * Same as {@code super.translateNode(node, mouseDX(), mouseDY())}.
+   * Same as {@code return mouseTranslateTag(null, inertia)}.
    *
-   * @see #translateNode(Node, float, float)
+   * @see #mouseTranslateTag(String, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
+   */
+  public boolean mouseTranslateTag(float inertia) {
+    return mouseTranslateTag(null, inertia);
+  }
+
+  /**
+   * Same as {@code return mouseTranslateTag(tag, 0.6f)}.
+   *
+   * @see #mouseTranslateTag(String, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
+   */
+  public boolean mouseTranslateTag(String tag) {
+    return mouseTranslateTag(tag, 0.6f);
+  }
+
+  /**
+   * Same as {@code mouseTranslateNode(node(tag), inertia)}. Returns {@code true} if succeeded
+   * and {@code false} otherwise.
+   *
+   * @see #mouseTranslateNode(Node, float)
+   */
+  public boolean mouseTranslateTag(String tag, float inertia) {
+    if (node(tag) != null) {
+      mouseTranslateNode(node(tag), inertia);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Same as {@code super.translateNode(node,mouseDX() * inertia, mouseDY() * inertia, 0, inertia)}.
+   * It tries to keep the node under the mouse cursor independently of {@code inertia}.
+   *
+   * @see #translateEye(float, float, float, float)
+   */
+  public void mouseTranslateNode(Node node, float inertia) {
+    float i = Math.abs(inertia);
+    while (i > 1)
+      i /= 10;
+    if (i != inertia)
+      System.out.println("Warning: inertia should be in [0..1]. Setting it as " + i);
+    // hack: idea is to have node always under the cursor
+    //super.translateNode(node, mouseDX(), mouseDY(), 0, i);
+    super.translateNode(node, mouseDX() * (1 - i), mouseDY() * (1 - i), 0, i);
+  }
+
+  /**
+   * Same as {@code mouseTranslateNode(node, 0.6f)}.
+   *
+   * @see #mouseTranslateNode(Node, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslateNode(Node node) {
-    super.translateNode(node, mouseDX(), mouseDY());
+    mouseTranslateNode(node, 0.6f);
   }
 
   /**
-   * Same as {@code super.translateEye(mouseDX(), mouseDY())}.
+   * Same as {@code super.translateEye(mouseDX() * inertia, mouseDY() * inertia, 0, inertia)}.
+   * It tries to keep the world axes under the mouse cursor independently of {@code inertia}.
    *
-   * @see #translateEye(float, float)
+   * @see #translateEye(float, float, float, float)
+   */
+  public void mouseTranslateEye(float inertia) {
+    float i = Math.abs(inertia);
+    while (i > 1)
+      i /= 10;
+    if (i != inertia)
+      System.out.println("Warning: inertia should be in [0..1]. Setting it as " + i);
+    // hack: idea is to have the world axes under the cursor
+    //super.translateEye(mouseDX(), mouseDY(), 0, inertia);
+    super.translateEye(mouseDX() * (1 - i), mouseDY() * (1 - i), 0, i);
+  }
+
+  /**
+   * Same as {@code mouseTranslateEye(0.7f)}.
+   *
+   * @see #mouseTranslateEye()
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslateEye() {
-    super.translateEye(mouseDX(), mouseDY());
+    mouseTranslateEye(0.7f);
   }
 
   /**
@@ -3143,6 +3230,19 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
+   *
+   * @see #spinTag(int, int, int, int, float)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public boolean mouseSpinTag(float inertia) {
+    return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
+  }
+
+  /**
    * Same as {@code return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY())}.
    *
    * @see #spinTag(int, int, int, int)
@@ -3153,6 +3253,19 @@ public class Scene extends Graph implements PConstants {
    */
   public boolean mouseSpinTag() {
     return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
+   *
+   * @see #spinTag(String, int, int, int, int, float)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public boolean mouseSpinTag(String tag, float inertia) {
+    return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   /**
@@ -3169,6 +3282,19 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
+   *
+   * @see #spinNode(Node, int, int, int, int, float)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public void mouseSpinNode(Node node, float inertia) {
+    super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
+  }
+
+  /**
    * Same as {@code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY())}.
    *
    * @see #spinNode(Node, int, int, int, int)
@@ -3179,6 +3305,19 @@ public class Scene extends Graph implements PConstants {
    */
   public void mouseSpinNode(Node node) {
     super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
+   *
+   * @see #spinEye(int, int, int, int, float)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public void mouseSpinEye(float inertia) {
+    super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   /**
@@ -3196,6 +3335,23 @@ public class Scene extends Graph implements PConstants {
 
   // only eye
 
+  public void mouseDebugSpinEye(float friction) {
+    super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), friction);
+  }
+
+  public void mouseDebugSpinEye() {
+    super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code super.lookAround(mouseRADX(), mouseRADY(), inertia)}.
+   *
+   * @see #lookAround(float, float, float)
+   */
+  public void mouseLookAround(float inertia) {
+    super.lookAround(mouseRADX(), mouseRADY(), inertia);
+  }
+
   /**
    * Same as {@code super.lookAround(mouseRADX(), mouseRADY())}.
    *
@@ -3208,6 +3364,15 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY(), new Vector(0, 1, 0), inertia)}.
+   *
+   * @see #rotateCAD(float, float, Vector, float)
+   */
+  public void mouseRotateCAD(float inertia) {
+    super.rotateCAD(mouseRADX(), mouseRADY(), new Vector(0, 1, 0), inertia);
+  }
+
+  /**
    * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY())}.
    *
    * @see #rotateCAD(float, float)
@@ -3216,6 +3381,15 @@ public class Scene extends Graph implements PConstants {
    */
   public void mouseRotateCAD() {
     super.rotateCAD(mouseRADX(), mouseRADY());
+  }
+
+  /**
+   * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY(), up, inertia)}.
+   *
+   * @see #rotateCAD(float, float, Vector, float)
+   */
+  public void mouseRotateCAD(Vector up, float inertia) {
+    super.rotateCAD(mouseRADX(), mouseRADY(), up, inertia);
   }
 
   /**

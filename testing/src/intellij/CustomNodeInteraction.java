@@ -90,9 +90,9 @@ public class CustomNodeInteraction extends PApplet {
       scene.removeTag("key");
     if (key == CODED)
       if (keyCode == UP)
-        scene.translate("key", 0, -10);
+        scene.translate("key", 0, -10, 0);
       else if (keyCode == DOWN)
-        scene.translate("key", 0, 10);
+        scene.translate("key", 0, 10, 0);
       else if (keyCode == LEFT)
         scene.interactTag("key", "menos");
       else if (keyCode == RIGHT)

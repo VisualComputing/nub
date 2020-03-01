@@ -54,7 +54,7 @@ public class MouseMoveInteraction extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == 'f')
+    if (key == 'p')
       scene.flip();
     if (key == 's')
       scene.fit(1);

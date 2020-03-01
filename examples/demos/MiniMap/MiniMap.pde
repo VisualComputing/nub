@@ -37,9 +37,6 @@ void settings() {
 
 void setup() {
   scene = onScreen ? new Scene(this) : new Scene(this, renderer);
-  // eye only should belong only to the scene
-  // so set a detached 'node' instance as the eye
-  scene.setEye(new Node());
   scene.setRadius(1000);
   rectMode(CENTER);
   scene.fit(1);
@@ -65,13 +62,9 @@ void setup() {
     models[i].setPickingThreshold(0);
     scene.randomize(models[i]);
   }
-
   // Note that we pass the upper left corner coordinates where the minimap
   // is to be drawn (see drawing code below) to its constructor.
   minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
-  // eye only should belong only to the minimap
-  // so set a detached 'node' instance as the eye
-  minimap.setEye(new Node());
   minimap.setRadius(2000);
   if (renderer == P3D)
     minimap.togglePerspective();

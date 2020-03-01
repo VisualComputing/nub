@@ -21,7 +21,7 @@ public class CajasOrientadas extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.setRadius(200);
-    //scene.togglePerspective();
+    scene.togglePerspective();
     scene.fit();
     esfera = new Sphere();
     esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
@@ -31,7 +31,7 @@ public class CajasOrientadas extends PApplet {
     for (int i = 0; i < cajas.length; i++)
       cajas[i] = new Box();
 
-    scene.fit(1);
+    scene.fit();
     scene.tag("keyboard", esfera.iNode);
   }
 
@@ -48,12 +48,14 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void mouseDragged() {
-    if (mouseButton == LEFT)
-      scene.mouseSpin();
-    else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
-    else
-      scene.scale(mouseX - pmouseX);
+    if (mouseButton == LEFT) {
+      if (!scene.mouseSpinTag())
+        scene.mouseSpinEye();
+    } else if (mouseButton == RIGHT)
+      if (!scene.mouseTranslateTag())
+        scene.mouseTranslateEye();
+      else
+        scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -85,13 +87,13 @@ public class CajasOrientadas extends PApplet {
         scene.removeTag("keyboard");
     if (key == CODED)
       if (keyCode == UP)
-        scene.translate("keyboard", 0, -10);
+        scene.translate("keyboard", 0, -10, 0);
       else if (keyCode == DOWN)
-        scene.translate("keyboard", 0, 10);
+        scene.translate("keyboard", 0, 10, 0);
       else if (keyCode == LEFT)
-        scene.translate("keyboard", -10, 0);
+        scene.translate("keyboard", -10, 0, 0);
       else if (keyCode == RIGHT)
-        scene.translate("keyboard", 10, 0);
+        scene.translate("keyboard", 10, 0, 0);
   }
 
   public class Box {

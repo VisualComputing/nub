@@ -24,27 +24,25 @@ public class DOF extends PApplet {
 
   @Override
   public void setup() {
-    colorMode(HSB, 255);
     scene = new Scene(this, P3D, width, height);
     scene.setRadius(1000);
     scene.fit(1);
-
     models = new Node[100];
-
     for (int i = 0; i < models.length; i++) {
-      //models[i] = new Node(scene, boxShape());
       models[i] = new Node(scene, boxShape());
       models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
 
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/depth.glsl");
-    //depthShader.set("maxDepth", scene.radius() * 2);
+    // Depth shader
+    // Test all the different versions
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
     //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_nonlinear.glsl");
     depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_frag.glsl");
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
+    // DOF shader
     dofShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/dof.glsl");
     dofShader.set("aspect", width / (float) height);
     dofShader.set("maxBlur", (float) 0.015);
@@ -59,8 +57,6 @@ public class DOF extends PApplet {
   public void draw() {
     // 1. Draw into main buffer
     scene.beginDraw();
-    for (int i = 0; i < models.length; i++)
-      scene.drawSquaredBullsEye(models[i]);
     scene.context().background(0);
     scene.render();
     scene.endDraw();
@@ -68,6 +64,8 @@ public class DOF extends PApplet {
     // 2. Draw into depth buffer
     depthPGraphics.beginDraw();
     depthPGraphics.background(0);
+    // only for depth_linear shader
+    // Don't pay attention to the doesn't have a uniform called "far/near" message
     depthShader.set("near", scene.zNear());
     depthShader.set("far", scene.zFar());
     scene.render(depthPGraphics);

@@ -7,19 +7,15 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
-public class ViewFrustumCulling extends PApplet {
-  OctreeNode root;
-  static Scene scene1, scene2, focus;
+public class LowLevelViewFrustumCulling extends PApplet {
+  LowLevelOctreeNode root;
+  Scene scene1, scene2, focus;
   PGraphics canvas1, canvas2;
 
   //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
   int w = 1200;
   int h = 800;
-  static float a = 100;
-  static float b = 70;
-  static float c = 130;
-  static final int levels = 4;
 
   public void settings() {
     size(w, h, renderer);
@@ -27,30 +23,25 @@ public class ViewFrustumCulling extends PApplet {
 
   @Override
   public void setup() {
+    // declare and build the octree hierarchy
+    Vector p = new Vector(100, 70, 130);
+    root = new LowLevelOctreeNode(p, Vector.multiply(p, -1.0f));
+    root.buildBoxHierarchy(4);
+
     canvas1 = createGraphics(w, h / 2, P3D);
     scene1 = new Scene(this, canvas1);
     scene1.setType(Graph.Type.ORTHOGRAPHIC);
     scene1.enableBoundaryEquations();
-    //scene1.setRadius(150);
+    scene1.setRadius(150);
     scene1.fit(1);
-
-    // declare and build the octree hierarchy
-    root = new OctreeNode(scene1);
-    buildBoxHierarchy(root);
 
     canvas2 = createGraphics(w, h / 2, P3D);
     // Note that we pass the upper left corner coordinates where the scene
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(this, canvas2, 0, h / 2);
     scene2.setType(Graph.Type.ORTHOGRAPHIC);
-    scene2.setRadius(200);
+    scene2.setRadius(600);
     scene2.fit();
-  }
-
-  public void buildBoxHierarchy(OctreeNode parent) {
-    if (parent.level() < levels)
-      for (int i = 0; i < 8; ++i)
-        buildBoxHierarchy(new OctreeNode(parent, new Vector((i & 4) == 0 ? a : -a, (i & 2) == 0 ? b : -b, (i & 1) == 0 ? c : -c)));
   }
 
   @Override
@@ -59,16 +50,13 @@ public class ViewFrustumCulling extends PApplet {
     background(255);
     scene1.beginDraw();
     canvas1.background(255);
-    scene1.drawAxes();
-    root.cull(false);
-    scene1.render();
+    root.drawIfAllChildrenAreVisible(scene1.context(), scene1);
     scene1.endDraw();
     scene1.display();
 
-    scene1.shift(scene2);
     scene2.beginDraw();
     canvas2.background(255);
-    scene2.render();
+    root.drawIfAllChildrenAreVisible(scene2.context(), scene1);
     scene2.context().pushStyle();
     scene2.context().strokeWeight(2);
     scene2.context().stroke(255, 0, 255);
@@ -77,28 +65,29 @@ public class ViewFrustumCulling extends PApplet {
     scene2.context().popStyle();
     scene2.endDraw();
     scene2.display();
-    scene2.shift(scene1);
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.mouseSpinEye();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.mouseTranslateEye();
+      focus.mouseTranslate();
     else
-      focus.scaleEye(mouseX - pmouseX);
+      //focus.zoom(mouseX - pmouseX);
+      focus.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
+    //focus.scale(event.getCount() * 20);
     focus.moveForward(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        focus.focusEye();
+        focus.focus();
       else
-        focus.alignEye();
+        focus.alignTag();
   }
 
   public void keyPressed() {
@@ -125,6 +114,6 @@ public class ViewFrustumCulling extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.ViewFrustumCulling"});
+    PApplet.main(new String[]{"intellij.LowLevelViewFrustumCulling"});
   }
 }

@@ -14,6 +14,8 @@ out/
 .classpath
 # code-oss + processing
 examples/**/.vscode
+testing/src/processing/**/.vscode
 # nub config
 data/config.json
 examples/**/config.json
+testing/src/processing/**/config.json

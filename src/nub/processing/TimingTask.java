@@ -1,16 +1,18 @@
-/******************************************************************************************
+/***************************************************************************************
  * nub
- * Copyright (c) 2019 Universidad Nacional de Colombia, https://visualcomputing.github.io/
+ * Copyright (c) 2019-2020 Universidad Nacional de Colombia
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
- * handling to a third party (real or non-real time) renderer. Released under the terms
- * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ******************************************************************************************/
+ * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
+ * computing library, featuring interaction, visualization and animation frameworks and
+ * supporting advanced (onscreen/offscreen) (real/non-real time) rendering techniques.
+ * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
+ ***************************************************************************************/
 
 package nub.processing;
 
 import nub.timing.Task;
+import nub.timing.TimingHandler;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -38,6 +40,14 @@ public abstract class TimingTask extends Task {
    */
   public TimingTask(Scene scene) {
     super(scene.timingHandler());
+  }
+
+  /**
+   * Constructs a sequential recurrent task with a {@link #period()} of 40ms
+   * (i.e., a {@link #frequency()} of 25 Hz).
+   */
+  public TimingTask(TimingHandler timingHandler) {
+    super(timingHandler);
   }
 
   @Override

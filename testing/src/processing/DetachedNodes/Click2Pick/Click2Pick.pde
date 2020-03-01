@@ -287,16 +287,16 @@ void keyPressed() {
   if (key == '-')
     scene.eye().setScaling(scene.eye().scaling() / 1.1f);
   if (key == 'e')
-    f1.enableTracking(!f1.isTrackingEnabled());
+    f1.enableTagging(!f1.isTaggingEnabled());
 }
 
 void mouseMoved(MouseEvent event) {
   if (event.isControlDown())
-    scene.lookAround();
+    scene.mouseLookAround();
   else if (event.isShiftDown())
-    scene.translate();
+    scene.mouseTranslate();
   else
-    scene.spin();
+    scene.mouseSpin();
 }
 
 void mouseWheel(MouseEvent event) {
@@ -305,7 +305,7 @@ void mouseWheel(MouseEvent event) {
 
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1) {
-    scene.track(new Node[]{f1, f2, f3, f4, f5});
+    scene.updateMouseTag(new Node[]{f1, f2, f3, f4, f5});
   }
   if (event.getCount() == 2)
     if (event.getButton() == LEFT)

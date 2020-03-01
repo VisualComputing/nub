@@ -1,64 +1,53 @@
-class OctreeNode {
-  Vector p1, p2;
-  OctreeNode child[];
-  int level;
-
-  OctreeNode(Vector P1, Vector P2) {
-    p1 = P1;
-    p2 = P2;
-    child = new OctreeNode[8];
+class OctreeNode extends Node {
+  OctreeNode(Scene scene) {
+    super(scene);
+    disableTagging();
   }
 
-  void draw(PGraphics pg) {
+  OctreeNode(OctreeNode node, Vector vector) {
+    super(node);
+    scale(0.5);
+    translate(Vector.multiply(vector, scaling() / 2));
+    disableTagging();
+  }
+
+  float level() {
+    return 1 - log(magnitude()) / log(2);
+  }
+
+  @Override
+  public void graphics(PGraphics pg) {
+    float level = level();
     pg.stroke(color(0.3 * level * 255, 0.2 * 255, (1 - 0.3 * level) * 255));
-    pg.strokeWeight(level + 1);
-
-    pg.beginShape();
-    pg.vertex(p1.x(), p1.y(), p1.z());
-    pg.vertex(p1.x(), p2.y(), p1.z());
-    pg.vertex(p2.x(), p2.y(), p1.z());
-    pg.vertex(p2.x(), p1.y(), p1.z());
-    pg.vertex(p1.x(), p1.y(), p1.z());
-    pg.vertex(p1.x(), p1.y(), p2.z());
-    pg.vertex(p1.x(), p2.y(), p2.z());
-    pg.vertex(p2.x(), p2.y(), p2.z());
-    pg.vertex(p2.x(), p1.y(), p2.z());
-    pg.vertex(p1.x(), p1.y(), p2.z());
-    pg.endShape();
-
-    pg.beginShape(PApplet.LINES);
-    pg.vertex(p1.x(), p2.y(), p1.z());
-    pg.vertex(p1.x(), p2.y(), p2.z());
-    pg.vertex(p2.x(), p2.y(), p1.z());
-    pg.vertex(p2.x(), p2.y(), p2.z());
-    pg.vertex(p2.x(), p1.y(), p1.z());
-    pg.vertex(p2.x(), p1.y(), p2.z());
-    pg.endShape();
+    pg.strokeWeight(pow(2, levels - 1));
+    pg.noFill();
+    pg.box(a, b, c);
   }
 
-  void drawIfAllChildrenAreVisible(PGraphics pg, Graph camera) {
-    Graph.Visibility vis = camera.boxVisibility(p1, p2);
-    if (vis == Graph.Visibility.VISIBLE)
-      draw(pg);
-    else if (vis == Graph.Visibility.SEMIVISIBLE)
-      if (child[0] != null)
-        for (int i = 0; i < 8; ++i)
-          child[i].drawIfAllChildrenAreVisible(pg, camera);
-      else
-        draw(pg);
-  }
-
-  void buildBoxHierarchy(int l) {
-    level = l;
-    Vector middle = Vector.multiply(Vector.add(p1, p2), 0.5);
-    for (int i = 0; i < 8; ++i) {
-      // point in one of the 8 box corners
-      Vector point = new Vector(((i & 4) != 0) ? p1.x() : p2.x(), ((i & 2) != 0) ? p1.y() : p2.y(), ((i & 1) != 0) ? p1.z() : p2.z());
-      if (level > 0) {
-        child[i] = new OctreeNode(point, middle);
-        child[i].buildBoxHierarchy(level - 1);
-      } else
-        child[i] = null;
+  // The visit() method is called just before the graphics(PGraphics) method
+  @Override
+  public void visit() {
+    // cull only against main scene
+    if (graph() != mainScene)
+      return;
+    switch (mainScene.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
+                                    worldLocation(new Vector( a / 2,  b / 2,  c / 2)))) {
+    case VISIBLE:
+      for (Node node : children())
+        node.cull();
+      break;
+    case SEMIVISIBLE:
+      if (!children().isEmpty()) {
+        // don't render the node...
+        bypass();
+        // ... but don't cull its children either
+        for (Node node : children())
+          node.cull(false);
+      }
+      break;
+    case INVISIBLE:
+      cull();
+      break;
     }
   }
 }

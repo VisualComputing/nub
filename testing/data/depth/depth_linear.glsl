@@ -1,3 +1,5 @@
+// Warning: This shader is used to display the z-Buffer in a color meaningful way
+// To actually implement effects based on the z-Buffer use the other shader versions
 // The fragment eye depth is obtained by solving z_e in terms z_n from here:
 // http://visualcomputing.github.io/Transformations/#/7/14 and:
 // http://visualcomputing.github.io/Transformations/#/7/15
