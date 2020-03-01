@@ -56,7 +56,21 @@ public class CCDHeuristic extends Heuristic{
             delta.normalize();
         }
 
-        j_i.rotateAndUpdateCache(delta, false, endEffector); //Apply local rotation
+
+        //if(_context.direction()) delta = Quaternion.slerp(delta, applyOrientationalCCD(i, (float) Math.toRadians(600)), 0.2f);
+        j_i.rotateAndUpdateCache(delta, true, endEffector); //Apply local rotation
+
+        if(_context.direction()) {
+            float posError = _context.positionError(endEffector, _context.worldTarget());
+            float c_k = (float) Math.floor(posError / _context.positionWeight());
+            float max_dist = (c_k + 1) * _context.positionWeight() - posError;
+            float radius = Vector.distance(_context.worldTarget().position(), j_i.positionCache());
+            //find max theta allowed
+            float max_theta = (float) Math.acos(Math.max(Math.min(1 - (max_dist * max_dist) / (2 * radius * radius), 1), - 1)) * 0.5f;
+            j_i.rotateAndUpdateCache(applyOrientationalCCD(i, max_theta), false, endEffector);
+        }
+
+        //j_i.rotateAndUpdateCache(, false,  _context.endEffectorInformation());
     }
 
     @Override
@@ -80,4 +94,27 @@ public class CCDHeuristic extends Heuristic{
         }
         return rotation;
     }
+
+    protected Quaternion applyOrientationalCCD(int i, float maxAngle){
+        NodeInformation j_i = _context.usableChainInformation().get(i);
+        Quaternion O_i = j_i.orientationCache();
+        Quaternion O_i_inv = O_i.inverse();
+        Quaternion O_eff = _context.usableChainInformation().get(_context.last()).orientationCache();
+        Quaternion target = _context.worldTarget().orientation();
+        Quaternion O_i1_to_eff = Quaternion.compose(O_i.inverse(), O_eff);
+        O_i1_to_eff.normalize();
+        Quaternion delta = Quaternion.compose(O_i_inv, target);
+        delta.normalize();
+        delta.compose(O_i1_to_eff.inverse());
+        delta.normalize();
+        if(j_i.node().constraint() != null){
+            delta = j_i.node().constraint().constrainRotation(delta, j_i.node());
+            delta.normalize();
+        }
+        //clamp rotation
+        delta = _clampRotation(delta, maxAngle);
+        return delta;
+    }
+
+
 }
