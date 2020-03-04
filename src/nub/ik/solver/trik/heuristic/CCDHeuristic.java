@@ -34,7 +34,7 @@ public class CCDHeuristic extends Heuristic{
             Quaternion quat = Quaternion.compose(j_i.node().rotation().inverse(), h.idleRotation());
             Vector tw = h.restRotation().rotate(new Vector(0,0,1));
             tw = quat.rotate(tw);
-            //Project b & c on the plane of rot
+            //Project p & q on the axis of rotation plane
             p = Vector.projectVectorOnPlane(p, tw);
             q = Vector.projectVectorOnPlane(q, tw);
         }
@@ -42,35 +42,20 @@ public class CCDHeuristic extends Heuristic{
         //Apply desired rotation removing twist component
         Quaternion delta = new Quaternion(p, q);
         delta.normalize();
-        float weight = 1;
-        /*if(_context.enableWeight()) {
-            weight = _calculateWeight(p.magnitude(), q.magnitude());
-            if(_context.singleStep())System.out.println("weight : " + weight);
-            delta = new Quaternion(delta.axis(), delta.angle() * weight);
-        }*/
-        //_smoothAngle = (float) Math.pow((i + 1.f) / (_context.last()) , 1f / (_context.solver().iteration() + 1 ));
-        if(_smooth) delta = _clampRotation(delta, _smoothAngle);
 
         if(j_i.node().constraint() != null){
             delta = j_i.node().constraint().constrainRotation(delta, j_i.node());
             delta.normalize();
         }
 
-
-        //if(_context.direction()) delta = Quaternion.slerp(delta, applyOrientationalCCD(i, (float) Math.toRadians(600)), 0.2f);
         j_i.rotateAndUpdateCache(delta, true, endEffector); //Apply local rotation
 
         if(_context.direction()) {
-            float posError = _context.positionError(endEffector, _context.worldTarget());
-            float c_k = (float) Math.floor(posError / _context.positionWeight());
-            float max_dist = (c_k + 1) * _context.positionWeight() - posError;
-            float radius = Vector.distance(_context.worldTarget().position(), j_i.positionCache());
-            //find max theta allowed
-            float max_theta = (float) Math.acos(Math.max(Math.min(1 - (max_dist * max_dist) / (2 * radius * radius), 1), - 1)) * 0.5f;
+            float max_dist = _context.positionWeight();
+            float radius = Vector.distance(_context.endEffectorInformation().positionCache(), j_i.positionCache());
+            float max_theta = (float) Math.acos(Math.max(Math.min(1 - (max_dist * max_dist) / (2 * radius * radius), 1), - 1));
             j_i.rotateAndUpdateCache(applyOrientationalCCD(i, max_theta), false, endEffector);
         }
-
-        //j_i.rotateAndUpdateCache(, false,  _context.endEffectorInformation());
     }
 
     @Override
@@ -79,18 +64,17 @@ public class CCDHeuristic extends Heuristic{
     }
 
 
-    //IMPORTANT: THE FOLLOWING METHODS USE THE CACHE POSITION/ORIENTATION IT IS AND ASSUMED THAT THEY ARE UPDATE
-    protected static float _calculateWeight(float boneLength, float distToDesired){
-        float dist = distToDesired - boneLength;
-        dist = dist < 0 ? -1f / dist : dist;
-        float d_i = dist / boneLength;
-        return (float) Math.pow(1.5, -d_i);
-    }
-
-    protected static Quaternion _clampRotation(Quaternion rotation, float maxAngle){
+    protected static Quaternion _clampRotation(Quaternion rotation, float maxAngle) {
         float angle = rotation.angle();
-        if(Math.abs(angle) > maxAngle ){
-            rotation = new Quaternion(rotation.axis(), (Math.signum(angle) * maxAngle));
+        float angleVal = Math.abs(angle);
+        float angleSign = Math.signum(angle);
+        Vector axis = rotation.axis();
+        if(Math.abs(angle) > Math.PI){
+            axis.multiply(-1);
+            angle = angleSign * (float)(2 * Math.PI - angleVal);
+        }
+        if (Math.abs(angle) > maxAngle) {
+            rotation = new Quaternion(axis, angleSign * maxAngle);
         }
         return rotation;
     }
