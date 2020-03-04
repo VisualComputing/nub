@@ -22,8 +22,6 @@ public class FinalHeuristic extends Heuristic {
      */
 
     HashMap<String, Pair<Vector, Vector>> vectors = new HashMap<>();
-    protected float _proximityWeight = 1f;
-    protected float _lengthWeight = 1f;
     protected int _smoothingIterations = 10;
     protected Quaternion[] _initialRotations;
     protected boolean _checkHinge = true;
@@ -44,7 +42,6 @@ public class FinalHeuristic extends Heuristic {
     @Override
     public void prepare() {
         //Update cache of usable chain
-        _smoothAngle = (float)Math.toRadians(40);
         NodeInformation._updateCache(_context.usableChainInformation());
         for(int i = 0; i < _initialRotations.length; i++){
             _initialRotations[i] = _context.usableChainInformation().get(i).node().rotation().get();
@@ -54,108 +51,44 @@ public class FinalHeuristic extends Heuristic {
     protected boolean _log;
     protected int _times = 2;
 
-    protected float _delegationParameter = 0;
-    protected float _iterationParameter = 1;
-
-
     @Override
     public void applyActions(int i) {
         if(_context.debug()) vectors.clear();
         Vector target = _context.worldTarget().position();
-
         if(_smooth || _context.enableDelegation()){
             _context.usableChainInformation().get(i + 1).updateCacheUsingReference();
-            //Apply delegation
-            _delegationParameter = _context.delegationAtJoint(i);
-            //If smooth is enable calculate smooth parameters
             int currentIteration = _context._currentIteration();
             if(_context.singleStep()){
                 currentIteration = currentIteration / _context.chain().size();
             }
 
-            _iterationParameter = 1f/Math.max(_smoothingIterations - currentIteration, 1);
-
             if(_log){
-                System.out.println("Delegation parameter : " + _delegationParameter);
-                System.out.println("Iteration parameter : " + _iterationParameter);
                 System.out.println("t : " + target + "mag" + target.magnitude());
             }
 
-            float k = Math.min(1,_delegationParameter);
-            k += (1.f - k) * _iterationParameter;
-            _delegationParameter = k;
-            float remaining_work = 1 - k;
-            if(_log)System.out.println("Final Delegation parameter : " + _delegationParameter);
-
-            Vector t = Vector.subtract(target, _context.usableChainInformation().get(0).positionCache());
-            Vector eff = Vector.subtract(_context.endEffectorInformation().positionCache(), _context.usableChainInformation().get(0).positionCache());
-            float t_m = t.magnitude(), eff_m = eff.magnitude();
-
-            float length_diff = t_m - eff_m;
-            Quaternion rot_diff = new Quaternion(eff, t);
-
-            float smooth_length = t_m - length_diff * remaining_work;
-            Quaternion smooth_rot = new Quaternion(rot_diff.axis(), rot_diff.angle() * k);
-            smooth_rot = Quaternion.slerp(new Quaternion(rot_diff.axis(), 0), rot_diff, k);
-
-
-
-            Vector error = Vector.subtract(eff, t);
-            Vector smooth_error = Vector.multiply(error,remaining_work);
-            t.add(smooth_error);
-
-
-            t = smooth_rot.rotate(eff);
-            t.normalize();
-            t.multiply(smooth_length);
-
-            //Use TRIK heuristic
-            /*Vector v = Vector.subtract(_context.usableChainInformation().get(i).positionCache(), _context.worldTarget().position());
-            v.subtract(_context.usableChainInformation().get(i+1).positionCache());
-            v.add(_context.endEffectorInformation().positionCache());
-            v.normalize();
-            v.multiply(-Vector.subtract(_context.usableChainInformation().get(i).positionCache(), _context.usableChainInformation().get(i + 1).positionCache()).magnitude());
-            Vector t_des = Vector.subtract(_context.endEffectorInformation().positionCache(), _context.usableChainInformation().get(i + 1).positionCache());
-            t_des.add(v);
-            t_des.add(_context.usableChainInformation().get(i).positionCache());
-            target = t_des;*/
-
-            Vector eff_to_j_i1 = Vector.subtract(_context.endEffectorInformation().positionCache(), _context.usableChainInformation().get(i + 1).positionCache());
-            float eff_to_j_i1_m = eff_to_j_i1.magnitude();
-            Vector j_i1_proj = Vector.subtract(_context.worldTarget().position(), eff_to_j_i1);
-            Vector j_i_proj = Vector.subtract(j_i1_proj, _context.usableChainInformation().get(i).positionCache());
-            j_i_proj.normalize();
-            j_i_proj.multiply(Vector.distance(_context.usableChainInformation().get(i).positionCache(), _context.usableChainInformation().get(i + 1).positionCache()));
-            j_i_proj.add(_context.usableChainInformation().get(i).positionCache());
-
-            Vector aux = Vector.subtract(target, j_i_proj);
-            //aux = eff_to_j_i1;
-            aux.normalize();
-            aux.multiply(eff_to_j_i1_m);
-            target = Vector.add(j_i_proj, aux);
-
-            vectors.put("j_i_proj ", new Pair<>(_context.usableChainInformation().get(i).positionCache(), j_i_proj));
-            vectors.put("j_i1_proj ", new Pair<>(_context.usableChainInformation().get(i).positionCache(), j_i1_proj));
-            vectors.put("eff_ji1 ", new Pair<>(_context.usableChainInformation().get(i + 1).positionCache(), _context.endEffectorInformation().positionCache()));
+            //FABRIK - LIKE HEURISTIC
+            if(currentIteration < _smoothingIterations) {
+                Vector eff_to_j_i1 = Vector.subtract(_context.endEffectorInformation().positionCache(), _context.usableChainInformation().get(i + 1).positionCache());
+                Vector j_i1_proj = Vector.subtract(_context.worldTarget().position(), eff_to_j_i1);
+                Vector j_i_proj = Vector.subtract(j_i1_proj, _context.usableChainInformation().get(i).positionCache());
+                j_i_proj.normalize();
+                j_i_proj.multiply(Vector.distance(_context.usableChainInformation().get(i).positionCache(), _context.usableChainInformation().get(i + 1).positionCache()));
+                j_i_proj.add(_context.usableChainInformation().get(i).positionCache());
+                target = Vector.add(j_i_proj, eff_to_j_i1);
+                target = Vector.subtract(target, _context.target().position());
+                if (_context._currentIteration() == _smoothingIterations) target.multiply(0);
+                target.add(_context.target().position());
+            }
 
             if(_log) {
-                System.out.println(" t_m " + t_m + " p0" + _context.usableChainInformation().get(0).positionCache() + " rem " + remaining_work + " k " + k);
                 System.out.println(" t : " + target + "mag" + target.magnitude());
                 System.out.println("smooth t : " + target + "mag" + target.magnitude());
                 System.out.println("J_i pos : " + _context.usableChainInformation().get(i).positionCache() + " vs " + _context.usableChainInformation().get(i).node().position());
                 System.out.println("J_i1 pos : " + _context.usableChainInformation().get(i + 1).positionCache() + " vs " + _context.usableChainInformation().get(i + 1).node().position());
             }
 
-            //target = Vector.add(t, _context.chainInformation().get(0).positionCache());
-
-
             if(_log) {
-                System.out.println("delegation factor : " + k);
-                System.out.println("Error : " + error);
-                System.out.println("Error covered by current joint: " + smooth_error);
                 System.out.println("smooth t : " + target + "mag" + target.magnitude());
-                System.out.println("smooth t : " + target + "mag" + target.magnitude());
-                System.out.println("Eff length " + eff_m + " target length " + t_m + " t des length " + smooth_length);
             }
 
             if(_context.debug()){
@@ -163,8 +96,6 @@ public class FinalHeuristic extends Heuristic {
                 vectors.put("t_des ", new Pair<>(_context.usableChainInformation().get(0).positionCache(), target));
             }
         }
-
-
 
         NodeInformation j_i = _context.usableChainInformation().get(i);
         Vector eff_wrt_j_i = j_i.locationWithCache(_context.endEffectorInformation().positionCache());
@@ -177,22 +108,14 @@ public class FinalHeuristic extends Heuristic {
 
         if(i == _context.last() - 1){
             Quaternion q_i = applyCCD(i, j_i, eff_wrt_j_i, target_wrt_j_i, true);
-            if(_smooth || _context.enableDelegation()) {
-                q_i = new Quaternion(q_i.axis(), q_i.angle() * _delegationParameter);
-                if(_smooth) q_i = _clampRotation(j_i.node().rotation(), _initialRotations[i], Quaternion.compose(j_i.node().rotation(), q_i), _smoothAngle); //clamp
-            }
-            j_i.rotateAndUpdateCache(q_i, false, _context.endEffectorInformation()); //Apply local rotation //TODO: Enable constraint?
-
+            j_i.rotateAndUpdateCache(q_i, false, _context.endEffectorInformation()); //Apply local rotation
             if(_context.direction()) {
-                float posError = _context.positionError(_context.endEffectorInformation(), _context.worldTarget());
-                float c_k = (float) Math.floor(posError / _context.positionWeight());
-                float max_dist = (c_k + 1) * _context.positionWeight() - posError;
-                float radius = Vector.distance(_context.worldTarget().position(), j_i.positionCache());
+                float max_dist = _context.positionWeight();
+                float radius = Vector.distance(_context.endEffectorInformation().positionCache(), j_i.positionCache());
                 //find max theta allowed
-                float max_theta = (float) Math.acos(Math.max(Math.min(1 - (max_dist * max_dist) / (2 * radius * radius), 1), - 1)) * 0.8f;
+                float max_theta = (float) Math.acos(Math.max(Math.min(1 - (max_dist * max_dist) / (2 * radius * radius), 1), - 1));
                 j_i.rotateAndUpdateCache(applyOrientationalCCD(i, max_theta), false, _context.endEffectorInformation());
             }
-
             return;
         }
 
@@ -203,9 +126,6 @@ public class FinalHeuristic extends Heuristic {
         //Find the two solutions of the triangulation problem on joint j_i1
         Solution[] solutions;
         solutions = applyTriangulation(i, j_i, j_i1, eff_wrt_j_i1, target_wrt_j_i1, _checkHinge);
-
-        //if(!_smooth) solutions = applyTriangulation(i, j_i, j_i1, eff_wrt_j_i1, target_wrt_j_i1, true);
-        //else solutions = new Solution[]{new Solution(new Quaternion(), 0)};
 
         //Keep original State of J_i and J_i1
         NodeInformation endEffector =_context.endEffectorInformation();
@@ -221,21 +141,15 @@ public class FinalHeuristic extends Heuristic {
         int best = 0; // keep track of best solution
         float best_dist = Float.MAX_VALUE, best_angle = Float.MAX_VALUE;
         for(int s = 0; s < solutions.length; s++){
-            float a  = 0; //amount or rotation applied
+            float a; //amount or rotation applied
             j_i1.updateCacheUsingReference();
             //Apply solution find by triangulation
-            j_i1.rotateAndUpdateCache(solutions[s].quaternion(), false, endEffector);
-
-            if(!(j_i.node().constraint() instanceof Hinge)) {
-                //Quaternion tw = applyCCDTwist(j_i, j_i1, j_i.locationWithCache(endEffector.positionCache()), j_i.locationWithCache(target), (float) Math.PI);
-                //j_i.rotateAndUpdateCache(tw, false, endEffector);
-            }
-
-
+            Quaternion q;
+            q = solutions[s].quaternion();
+            j_i1.rotateAndUpdateCache(q, false, endEffector);
             //Apply CCD t times (best local action if joint rotation constraints are quite different)
             j_i.rotateAndUpdateCache(applyCCD(i,j_i,j_i.locationWithCache(endEffector.positionCache()), j_i.locationWithCache(target), true), true, endEffector);
-            //Apply twisting if possible
-
+            j_i1.updateCacheUsingReference();
 
             for(int t = 0; t < _times; t++){
                 j_i1.updateCacheUsingReference();
@@ -252,13 +166,10 @@ public class FinalHeuristic extends Heuristic {
             }
 
             if(_context.direction()) {
-                float posError = _context.positionError(endEffector, _context.worldTarget());
-                float c_k = (float) Math.floor(posError / _context.positionWeight());
-                float max_dist = (c_k + 1) * _context.positionWeight() - posError;
-                float radius = Vector.distance(_context.worldTarget().position(), j_i1.positionCache());
+                float max_dist = _context.positionWeight();
+                float radius = Vector.distance(endEffector.positionCache(), j_i1.positionCache());
                 //find max theta allowed
-                float max_theta = (float) Math.acos(Math.max(Math.min(1 - (max_dist * max_dist) / (2 * radius * radius), 1), - 1)) * 0.5f;
-
+                float max_theta = (float) Math.acos(Math.max(Math.min(1 - (max_dist * max_dist) / (2 * radius * radius), 1), - 1));
                 j_i1.rotateAndUpdateCache(applyOrientationalCCD(i + 1, max_theta), false, endEffector);
             }
 
@@ -267,8 +178,8 @@ public class FinalHeuristic extends Heuristic {
             final_j_i1[s] = new NodeState(j_i1);
             final_eff[s] = new NodeState(endEffector);
 
-            a = 0.5f * Math.abs(_context.quaternionDistance(_initialRotations[i], final_j_i[s].rotation()) + _context.quaternionDistance(_initialRotations[i + 1], final_j_i1[s].rotation()));
-            a += 0.5f * Math.abs(_context.quaternionDistance(_initialRotations[i], final_j_i[s].rotation()) - _context.quaternionDistance(_initialRotations[i + 1], final_j_i1[s].rotation()));
+            a = Math.abs(_context.quaternionDistance(initial_j_i.rotation(), j_i.node().rotation()) + _context.quaternionDistance(initial_j_i1.rotation(), j_i1.node().rotation()));
+            //a += 0.5f * Math.abs(_context.quaternionDistance(_initialRotations[i], j_i.node().rotation()) - _context.quaternionDistance(_initialRotations[i + 1], j_i1.node().rotation()));
 
             if(_log) {
                 System.out.println("---> a : " + a);
@@ -281,32 +192,31 @@ public class FinalHeuristic extends Heuristic {
                 System.out.println("---> sol : " + (s + 1) + "work by angle 2 " + _context.quaternionDistance(_initialRotations[i + 1], final_j_i1[s].rotation()));
             }
 
-
-            float dist = _context.error(endEffector, _context.worldTarget());
-
-
-            float desired_length = Vector.distance(target, _context.usableChain().get(0).position());
-            float current_length = Vector.distance(final_eff[s].position(), _context.usableChain().get(0).position());
-            float length_distance = Math.abs(desired_length - current_length);
-            length_distance = (float) Math.min(Math.pow(length_distance / (_context.avgLength() * _context.chain().size()), 2), 1); //distance normalized
+            float dist;
+            if(!_context.enableDelegation()) {
+                dist = _context.error(endEffector, _context.worldTarget());
+                dist /= _context.positionWeight();
+            } else {
+                float error = _context.positionError(endEffector.positionCache(), target);
+                float orientationError = _context.orientationError(endEffector.orientationCache(), _context.worldTarget().orientation(), false);
+                float weighted_error = error / _context.positionWeight();
+                float c_k = (float) Math.floor(weighted_error);
+                error =  c_k + 0.2f * orientationError + 0.8f * (weighted_error - c_k);
+                dist = error;
+            }
 
             if(_log) {
-                System.out.println("---> length distance : " + length_distance);
                 System.out.println("---> dist : " + dist);
                 System.out.println("---> constraint error : " + solutions[s].value());
             }
 
-            if(_log)System.out.println("iteration_ param " + _iterationParameter);
-
-            //if(_iterationParameter < 1) dist = solutions.get(s).getValue();
-            dist =  dist + 0.1f*a;// + solutions[s].value();// + length_distance * _lengthWeight;
-            //dist = _iterationParameter * dist + solutions[s].value() + a * 0.5f;// + length_distance * _lengthWeight;
-
+            dist =  dist + 0.1f * a;// + solutions[s].value();// + length_distance * _lengthWeight;
 
             if(dist < best_dist){
                 best_dist = dist;
                 best = s;
             }
+
             //reset state
             j_i.setCache(initial_j_i.position().get(), initial_j_i.orientation().get());
             j_i.node().setRotation(initial_j_i.rotation().get());
@@ -325,72 +235,20 @@ public class FinalHeuristic extends Heuristic {
             System.out.println("best i + 1 :" + final_j_i1[best].rotation().axis() + " a : " + final_j_i1[best].rotation().angle());
             System.out.println("best i :" + j_i.node().rotation().axis() + " a : " + j_i.node().rotation().angle());
             System.out.println("best i + 1 :" + j_i1.node().rotation().axis() + " a : " + j_i1.node().rotation().angle());
-
         }
 
-        //Apply best solution and smooth if required
-        if(_smooth){
-            applySmoothing(i, final_j_i[best].rotation(), final_j_i1[best].rotation());
-        }else {
-            j_i.setCache(final_j_i[best].position().get(), final_j_i[best].orientation().get());
-            Constraint c_i = j_i.node().constraint();
-            j_i.node().setConstraint(null);
-            j_i.node().setRotation(final_j_i[best].rotation().get());
-            j_i.node().setConstraint(c_i);
-            j_i1.setCache(final_j_i1[best].position().get(), final_j_i1[best].orientation().get());
-            Constraint c_i1 = j_i1.node().constraint();
-            j_i1.node().setConstraint(null);
-            j_i1.node().setRotation(final_j_i1[best].rotation().get());
-            j_i1.node().setConstraint(c_i1);
-            endEffector.setCache(final_eff[best].position().get(), final_eff[best].orientation().get());
-        }
-    }
-
-    protected float smoothDistance(Vector v, Vector u){
-        float dist = Vector.distance(u, v);
-        dist = Math.min(dist / (_context.avgLength() * _context.chain().size()), 0.99f); //normalize distance
-        return 1 - dist;
-    }
-
-    protected void applySmoothing(int i, Quaternion final_j_i, Quaternion final_j_i1){
-        //Apply best solution and smooth if required
-        if(_smooth){
-            NodeInformation j_i = _context.usableChainInformation().get(i);
-            NodeInformation j_i1 = _context.usableChainInformation().get(i + 1);
-            NodeInformation endEffector = _context.endEffectorInformation();
-
-            //Apply smoothing based on distance to target
-            //float dist = Vector.distance(endEffector.positionCache(), _context.worldTarget().position());
-            //dist = Math.min(dist / (_context.avgLength() * _context.chain().size()), 0.8f);
-            //float w = 1 - dist;
-            //w = 1;
-            //Apply delegation
-            //float k = _context.delegationAtJoint(i);
-            //k = k/Math.max(1, _smoothingIterations - _context._currentIteration());
-            //k += (_context._currentIteration())*(1.f - k)/_smoothingIterations;
-            //k = Math.min(1,k);
-            //w = w * k;
-
-            //if(_log) System.out.println("i : " +  i +  " w " + w + " delegation factor " + k);
-
-            //Quaternion q_i = Quaternion.compose(j_i.node().rotation().inverse(), final_j_i);
-            //q_i = new Quaternion(q_i.axis(), q_i.angle() * w);
-            //Quaternion q_i1 = Quaternion.compose(j_i1.node().rotation().inverse(), final_j_i1);
-            //q_i1 = new Quaternion(q_i1.axis(), q_i1.angle() * w);
-            //clamp
-            System.out.println("ENTRA!!!!");
-            Quaternion q_i = _clampRotation(j_i.node().rotation(), _initialRotations[i], final_j_i, _smoothAngle);
-            Quaternion q_i1 = _clampRotation(j_i1.node().rotation(), _initialRotations[i + 1], final_j_i1, _smoothAngle);
-
-            //q_i = Quaternion.compose(j_i.node().rotation().inverse(), q_i);
-            //q_i.normalize();
-            //q_i1 = Quaternion.compose(j_i1.node().rotation().inverse(), q_i1);
-            //q_i1.normalize();
-
-            j_i.rotateAndUpdateCache(q_i, true, endEffector);
-            j_i1.updateCacheUsingReference();
-            j_i1.rotateAndUpdateCache(q_i1, true, endEffector);
-        }
+        //Apply best solution
+        j_i.setCache(final_j_i[best].position().get(), final_j_i[best].orientation().get());
+        Constraint c_i = j_i.node().constraint();
+        j_i.node().setConstraint(null);
+        j_i.node().setRotation(final_j_i[best].rotation().get());
+        j_i.node().setConstraint(c_i);
+        j_i1.setCache(final_j_i1[best].position().get(), final_j_i1[best].orientation().get());
+        Constraint c_i1 = j_i1.node().constraint();
+        j_i1.node().setConstraint(null);
+        j_i1.node().setRotation(final_j_i1[best].rotation().get());
+        j_i1.node().setConstraint(c_i1);
+        endEffector.setCache(final_eff[best].position().get(), final_eff[best].orientation().get());
     }
 
 
@@ -693,6 +551,7 @@ public class FinalHeuristic extends Heuristic {
         if (Math.abs(angle) > maxAngle){
             diff = new Quaternion(axis, angleSign * maxAngle);
         }
+
         Quaternion delta = Quaternion.compose(q_cur.inverse(), q_i);
         delta.compose(diff);
         return delta;
