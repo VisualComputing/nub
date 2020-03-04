@@ -54,7 +54,6 @@ public class Context {
 
 
     protected boolean _debug = false;
-    protected Random _random = new Random(0);
     protected float _weightRatio = 3f, _weightRatioNear = 1.2f; //how many times is position more important than orientation
     protected float _weightThreshold = 0.1f; //change error measurement when the chain is near the target
     protected int _last = -1;
@@ -348,16 +347,10 @@ public class Context {
     public float error(Vector effPosition, Vector targetPosition, Quaternion effRotation, Quaternion targetRotation, float w1, float w2){
         float error = positionError(effPosition, targetPosition);
         if(_direction){
-            //float length = Vector.distance(chain.get(chain.size() - 1).position(), chain.get(0).position());
-            //Add orientation error
-            float orientationError = orientationError(effRotation, targetRotation, false) * _positionWeight;
-            //orientationError *= orientationError / 0.05f;
-            //if(debug()) System.out.println("error " + error + " ori" + orientationError);
-            //error is the weighted sum
-            //error = error +  orientationError;
+            float orientationError = orientationError(effRotation, targetRotation, false);
             float weighted_error = error / _positionWeight;
             float c_k = (float) Math.floor(weighted_error);
-            error =  c_k + 0.5f * orientationError + 0.5f * (weighted_error - c_k);
+            error =  c_k + 0.2f * orientationError + 0.8f * (weighted_error - c_k);
         }
         return error;
     }
