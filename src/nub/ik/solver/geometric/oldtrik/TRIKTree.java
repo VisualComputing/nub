@@ -15,9 +15,7 @@ public class TRIKTree extends Solver {
     protected static class TreeNode {
         protected TreeNode _parent;
         protected List<TreeNode> _children;
-
         protected SimpleTRIK _solver;
-        protected boolean _modified;
         protected float _weight = 1.f;
 
         public TreeNode() {
@@ -27,7 +25,6 @@ public class TRIKTree extends Solver {
         public TreeNode(SimpleTRIK solver) {
             this._solver = solver;
             _solver.setTimesPerFrame(5);
-
             _children = new ArrayList<TreeNode>();
         }
 
@@ -89,7 +86,6 @@ public class TRIKTree extends Solver {
             TreeNode treeNode = new TreeNode(parent, solver);
             for(Node child : node.children()){
                 List<Node> newList = new ArrayList<>();
-                //newList.add(node);
                 _setup(treeNode, child, newList);
             }
         } else{
@@ -97,8 +93,7 @@ public class TRIKTree extends Solver {
             _setup(parent, node.children().get(0), list);
         }
     }
-    Vector[] _current_coords;
-    Vector[] _desired_coords;
+
     protected boolean _solve(TreeNode treeNode){
         if(treeNode._children == null || treeNode._children.isEmpty()){
             SimpleTRIK solver = treeNode._solver;
@@ -116,14 +111,8 @@ public class TRIKTree extends Solver {
         for(TreeNode child : treeNode._children()){
             if( _solve(child)){
                 childrenModified++;
-                Vector o = solver.context().chain().get(solver.context().last()).location(child._solver.context().chain().get(0));
                 Vector eff = solver.context().chain().get(solver.context().chain().size() - 1).location(child._solver.context().chain().get(child._solver.context().chain().size() - 1));
                 Vector t = solver.context().chain().get(solver.context().chain().size() - 1).location(child._solver.target());
-                Vector diff = Vector.subtract(t, eff);
-                //current_coords.add(o);
-                //current_coords[c] = Vector.subtract(current_coords[c],o);
-                //desired_coords.add(Vector.add(o,diff));
-                //desired_coords[c] = Vector.subtract(local_t,o);
                 current_coords.add(eff.get());
                 desired_coords.add(t.get());
             }
@@ -187,6 +176,17 @@ public class TRIKTree extends Solver {
         }
     }
 
+    public void setDirection(boolean direction){
+        _setDirection(direction, _root);
+    }
+
+    protected void _setDirection(boolean direction, TreeNode treeNode){
+        if (treeNode == null) return;
+        treeNode._solver.context().setDirection(direction);
+        for (TreeNode child : treeNode._children()) {
+            _setDirection(direction, child);
+        }
+    }
 
     @Override
     protected void _reset() {
@@ -247,6 +247,16 @@ public class TRIKTree extends Solver {
         }
     }
 
+    public void setChainTimesPerFrame(int timesPerFrame){
+        _setChainTimesPerFrame(timesPerFrame, _root);
+    }
 
+    protected void _setChainTimesPerFrame(int timesPerFrame, TreeNode node){
+        if(node == null) return;
+        node._solver().setTimesPerFrame(timesPerFrame);
+        for(TreeNode child : node._children()){
+            _setChainTimesPerFrame(timesPerFrame, child);
+        }
 
+    }
 }

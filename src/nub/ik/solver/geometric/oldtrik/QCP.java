@@ -239,9 +239,6 @@ public class QCP {
                 break;
         }
 
-        if (i == 50)
-            System.err.println("\nMore than " + i + " iterations needed!\n");
-
         rms = (float) Math.sqrt(Math.abs(2.0f * (E0 - mxEigenV)/len));
 
         if (minScore > 0)
