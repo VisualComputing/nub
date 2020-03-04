@@ -300,20 +300,8 @@ public class SimpleTRIK extends Solver {
         NodeInformation._copyCache(_context.chainInformation(), _context.usableChainInformation());
 
         _iterations = 0;
-        //Set values of worldTarget and worldEndEffector
-        _context.worldTarget().setRotation( _context.target().orientation().get());
-        _context.worldTarget().setPosition(_context.target().position().get());
 
-        //find maxLength
-        float maxLength = 0;
-        for(int i = 0; i < _context.chain().size() - 1; i++){
-            maxLength += Vector.distance(_context.chainInformation().get(i).positionCache(), _context.chainInformation().get(i + 1).positionCache());
-        }
-        _context.setMaxLength(maxLength);
-        _context.setAvgLength(maxLength / _context.chain().size());
-
-        _context.setPositionWeight(_context.avgLength() * 0.5f);
-
+        _context.update();
 
         if (_context.target() != null) {
             _best = context().error(_context.chainInformation().get(_context.last()), _context.target());

@@ -43,10 +43,16 @@ public class Context {
     protected Node _target, _worldTarget, _previousTarget; //Target to reach
 
     protected boolean _direction = false;
+    //Important parameters for orientation solution
+    protected float _searchingAreaRadius = 0.5f;
+    protected boolean _radiusRelativeToBoneAverage = true;
+    protected float _orientationWeight = 0.2f;
+
     protected boolean _topToBottom = true;
 
     protected boolean _enableWeight, _explore;
     protected int _lockTimes = 0, _lockTimesCriteria = 4;
+
 
     //Error attributes
     protected float _maxLength = 0, _avgLength = 0;
@@ -60,14 +66,31 @@ public class Context {
 
     protected boolean _singleStep = false;
 
-    protected float _positionWeight;
 
-    public float positionWeight(){
-        return _positionWeight;
+    public float searchingAreaRadius(){
+        if(_radiusRelativeToBoneAverage) return _searchingAreaRadius * _avgLength;
+        return _searchingAreaRadius;
     }
 
-    public void setPositionWeight(float positionWeight){
-        _positionWeight = positionWeight;
+    public void setSearchingAreaRadius(float searchingAreaRadius, boolean relativeToBoneAverage){
+        _radiusRelativeToBoneAverage = relativeToBoneAverage;
+        _searchingAreaRadius = searchingAreaRadius;
+    }
+
+    public void setSearchingAreaRadius(float searchingAreaRadius){
+        setSearchingAreaRadius(searchingAreaRadius, false);
+    }
+
+    public void setRadiusRelativeToBoneAverage(boolean relativeToBoneAverage){
+        _radiusRelativeToBoneAverage = relativeToBoneAverage;
+    }
+
+    public void setOrientationWeight(float orientationWeight){
+        _orientationWeight = orientationWeight;
+    }
+
+    public float orientationWeight(){
+        return _orientationWeight;
     }
 
     public void setDirection(boolean direction){
@@ -113,6 +136,7 @@ public class Context {
         this._worldTarget = target == null ? new Node() : new Node(_target.position(), _target.orientation(), 1);
         this._last = _chain.size() - 1;
         _delegationAtJoint = new float[chain.size() - 1];
+        update();
     }
 
     public void setSolver(Solver solver){
@@ -346,15 +370,29 @@ public class Context {
 
     public float error(Vector effPosition, Vector targetPosition, Quaternion effRotation, Quaternion targetRotation, float w1, float w2){
         float error = positionError(effPosition, targetPosition);
+        float radius = _radiusRelativeToBoneAverage ? _searchingAreaRadius * _avgLength : _searchingAreaRadius;
         if(_direction){
             float orientationError = orientationError(effRotation, targetRotation, false);
-            float weighted_error = error / _positionWeight;
+            float weighted_error = error / radius;
             float c_k = (float) Math.floor(weighted_error);
-            error =  c_k + 0.2f * orientationError + 0.8f * (weighted_error - c_k);
+            error =  c_k + _orientationWeight * orientationError + (1 - _orientationWeight) * (weighted_error - c_k);
         }
         return error;
     }
 
+    public void update(){
+        //find maxLength
+        float maxLength = 0;
+        for(int i = 0; i < chain().size() - 1; i++){
+            maxLength += Vector.distance(chainInformation().get(i).positionCache(), chainInformation().get(i + 1).positionCache());
+        }
+        _maxLength = maxLength;
+        _avgLength = maxLength / chain().size();
 
-
+        //Set values of worldTarget and worldEndEffector
+        if(_target != null){
+            worldTarget().setRotation(target().orientation().get());
+            worldTarget().setPosition(target().position().get());
+        }
+    }
 }

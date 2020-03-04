@@ -51,7 +51,7 @@ public class CCDHeuristic extends Heuristic{
         j_i.rotateAndUpdateCache(delta, true, endEffector); //Apply local rotation
 
         if(_context.direction()) {
-            float max_dist = _context.positionWeight();
+            float max_dist = _context.searchingAreaRadius();
             float radius = Vector.distance(_context.endEffectorInformation().positionCache(), j_i.positionCache());
             float max_theta = (float) Math.acos(Math.max(Math.min(1 - (max_dist * max_dist) / (2 * radius * radius), 1), - 1));
             j_i.rotateAndUpdateCache(applyOrientationalCCD(i, max_theta), false, endEffector);

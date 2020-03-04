@@ -110,7 +110,7 @@ public class FinalHeuristic extends Heuristic {
             Quaternion q_i = applyCCD(i, j_i, eff_wrt_j_i, target_wrt_j_i, true);
             j_i.rotateAndUpdateCache(q_i, false, _context.endEffectorInformation()); //Apply local rotation
             if(_context.direction()) {
-                float max_dist = _context.positionWeight();
+                float max_dist = _context.searchingAreaRadius();
                 float radius = Vector.distance(_context.endEffectorInformation().positionCache(), j_i.positionCache());
                 //find max theta allowed
                 float max_theta = (float) Math.acos(Math.max(Math.min(1 - (max_dist * max_dist) / (2 * radius * radius), 1), - 1));
@@ -166,7 +166,7 @@ public class FinalHeuristic extends Heuristic {
             }
 
             if(_context.direction()) {
-                float max_dist = _context.positionWeight();
+                float max_dist = _context.searchingAreaRadius();
                 float radius = Vector.distance(endEffector.positionCache(), j_i1.positionCache());
                 //find max theta allowed
                 float max_theta = (float) Math.acos(Math.max(Math.min(1 - (max_dist * max_dist) / (2 * radius * radius), 1), - 1));
@@ -195,13 +195,13 @@ public class FinalHeuristic extends Heuristic {
             float dist;
             if(!_context.enableDelegation()) {
                 dist = _context.error(endEffector, _context.worldTarget());
-                dist /= _context.positionWeight();
+                dist /= _context.searchingAreaRadius();
             } else {
                 float error = _context.positionError(endEffector.positionCache(), target);
                 float orientationError = _context.orientationError(endEffector.orientationCache(), _context.worldTarget().orientation(), false);
-                float weighted_error = error / _context.positionWeight();
+                float weighted_error = error / _context.searchingAreaRadius();
                 float c_k = (float) Math.floor(weighted_error);
-                error =  c_k + 0.2f * orientationError + 0.8f * (weighted_error - c_k);
+                error =  c_k + _context.orientationWeight() * orientationError + (1 - _context.orientationWeight()) * (weighted_error - c_k);
                 dist = error;
             }
 
@@ -604,7 +604,7 @@ public class FinalHeuristic extends Heuristic {
         PGraphics pg = scene.context();
         //Draw as much contours as the number of bones of the structure
         for(int i = 1; i < 5; i++){
-            float r = _context.positionWeight() * i;
+            float r = _context.searchingAreaRadius() * i;
             pg.pushStyle();
             pg.noStroke();
             pg.noLights();
