@@ -27,8 +27,6 @@ public class SimpleTRIK extends Solver {
     protected float _current = 10e10f, _best = 10e10f, _previous = 10e10f;
     protected int _stepCounter;
     protected boolean  _enableTwist = true;
-    protected float[] _delegationPerJoint;
-
 
 
     public SimpleTRIK(List<? extends Node> chain, HeuristicMode mode) {
@@ -37,13 +35,13 @@ public class SimpleTRIK extends Solver {
 
     public SimpleTRIK(List<? extends Node> chain, Node target, HeuristicMode mode) {
         super();
-        this._context = new Context(chain, target, true);
+        this._context = new Context(chain, target, false);
         _context.setSolver(this);
         _setHeuristicMode(mode);
         this._twistHeuristic = new TwistHeuristic(_context);
         _enableTwist = false;
         enableSmooth(false);
-        _context.setSingleStep(true);
+        _context.setSingleStep(false);
     }
 
     protected void _setHeuristicMode(HeuristicMode mode){
@@ -62,7 +60,7 @@ public class SimpleTRIK extends Solver {
                 _mainHeuristic = new FinalHeuristic(_context);
                 _context.setTopToBottom(false);
                 context().enableDelegation(true);
-                context().setDelegationFactor(0.5f);
+                context().setDelegationFactor(0.1f);
                 ((FinalHeuristic)_mainHeuristic).checkHinge(false);
                 _secondaryHeuristic = _mainHeuristic;
                 break;
@@ -223,7 +221,7 @@ public class SimpleTRIK extends Solver {
 
         //Define dead lock if eff does not move to a better position
         if(Math.abs(_previous - _current) <= 0.001f){
-            context().incrementDeadlockCounter();
+            //context().incrementDeadlockCounter();
         }
         else {
             context().resetDeadlockCounter();
