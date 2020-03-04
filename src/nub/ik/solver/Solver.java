@@ -104,18 +104,22 @@ public abstract class Solver {
 
     _frameCounter += _timesPerFrame;
 
+    int counter = 0;
     while (Math.floor(_frameCounter) > 0) {
+      counter++;
       //Returns a boolean that indicates if a termination condition has been accomplished
       if (_iterate()) {
         _last_iteration = _iterations + 1;
         _iterations = _maxIterations;
-        break;
+        _frameCounter = 0;
       } else {
         _iterations += 1;
         _last_iteration = _iterations;
+        _frameCounter -= 1;
       }
-      _frameCounter -= 1;
     }
+
+    System.out.println(counter);
 
     if (_iterations >= _maxIterations) {
       if (_accumulate) {
