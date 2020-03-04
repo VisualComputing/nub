@@ -116,7 +116,7 @@ public class AuxiliaryViews extends PApplet {
         if (mouseButton == LEFT)
             scene.spin((int)previous.x(), (int)previous.y(), (int)point.x(), (int)point.y());
         else if (mouseButton == RIGHT)
-            scene.translate(point.x() - previous.x(), point.y() - previous.y());
+            scene.translate(point.x() - previous.x(), point.y() - previous.y(), 0);
         else
             scene.moveForward(mouseX - pmouseX);
         if(current != null){

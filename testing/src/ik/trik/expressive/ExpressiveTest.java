@@ -46,7 +46,7 @@ public class ExpressiveTest extends PApplet {
         solver.setTarget(structure.get(numJoints - 1), target);
         //solver.enableSmooth(true);
         solver.context().setSingleStep(!solve);
-        solver.setTimesPerFrame(1);
+        solver.setTimesPerFrame(5);
         solver.setMaxIterations(100);
         solver.setMaxError(0.1f);
 

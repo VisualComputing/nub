@@ -111,7 +111,7 @@ public class Target extends Node {
     public static void multipleTranslate(){
         for(Target target : _selectedTargets){
             if(target.graph().node() != target)
-                ((Scene)target.graph()).translateNode(target, ((Scene) target.graph()).mouseDX(), ((Scene) target.graph()).mouseDY());
+                ((Scene)target.graph()).translateNode(target, ((Scene) target.graph()).mouseDX(), ((Scene) target.graph()).mouseDY(), 0);
         }
     }
 

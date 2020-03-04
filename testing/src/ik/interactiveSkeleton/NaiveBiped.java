@@ -192,8 +192,10 @@ public class NaiveBiped extends PApplet {
             }
 
             case SIMPLETRIK:{
-                solver = new SimpleTRIK(limb, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL);
+                solver = new SimpleTRIK(limb, SimpleTRIK.HeuristicMode.FINAL);
+                //((SimpleTRIK) solver).context().setDirection(true);
                 solver.setTarget(limb.get(limb.size() - 1), target);
+
                 break;
             }
 
@@ -204,8 +206,8 @@ public class NaiveBiped extends PApplet {
 
         //solver.setMaxError(0f);
         if (!debug){
-            solver.setTimesPerFrame(10);
-            solver.setMaxIterations(10);
+            solver.setTimesPerFrame(20);
+            solver.setMaxIterations(20);
             solver.setMaxError(0.5f);
         }
         else{

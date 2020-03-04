@@ -1,5 +1,6 @@
 package ik.mocap;
 
+import ik.basic.Util;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.Hinge;
@@ -64,11 +65,11 @@ public class Viewer extends PApplet{
         scene.fit(1);
 
         //Add a target per limb
-        targets.put("LEFTHAND",  createTarget(targetRadius));
-        targets.put("RIGHTHAND", createTarget(targetRadius));
-        targets.put("LEFTFOOT",  createTarget(targetRadius));
-        targets.put("RIGHTFOOT", createTarget(targetRadius));
-        targets.put("HEAD",      createTarget(targetRadius));
+        targets.put("LEFTHAND", Util.createTarget(scene, targetRadius));
+        targets.put("RIGHTHAND", Util.createTarget(scene, targetRadius));
+        targets.put("LEFTFOOT",  Util.createTarget(scene, targetRadius));
+        targets.put("RIGHTFOOT", Util.createTarget(scene, targetRadius));
+        targets.put("HEAD",      Util.createTarget(scene, targetRadius));
 
         parser = new BVHLoader(sketchPath() + path, scene, null);
         root = parser.root();
@@ -204,7 +205,7 @@ public class Viewer extends PApplet{
 
             //BioIk chain = new BioIk(fr, 10, 4);
             //ChainSolver chain = new ChainSolver((ArrayList) fr);
-            SimpleTRIK chain = new SimpleTRIK((ArrayList) fr, SimpleTRIK.HeuristicMode.CCD);
+            SimpleTRIK chain = new SimpleTRIK((ArrayList) fr, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL);
             //SimpleTRIK chain = new TRIK((ArrayList) fr);
             //chain.setLookAhead(3);
             //chain.enableWeight(true);
@@ -239,15 +240,6 @@ public class Viewer extends PApplet{
         //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
         //rootIK.cull(true);
         root.cull(true);
-    }
-
-    public Node createTarget(float radius){
-        PShape redBall = createShape(SPHERE, radius);
-        redBall.setStroke(false);
-        redBall.setFill(color(255,0,0));
-        Node target = new Node(scene, redBall);
-        target.setPickingThreshold(0);
-        return target;
     }
 
     public void draw() {
@@ -295,8 +287,8 @@ public class Viewer extends PApplet{
         }
 
         if(solve) {
-            ccd_solver.solve();
-            chain_solver.solve();
+            //ccd_solver.solve();
+            //chain_solver.solve();
         }
     }
 
@@ -361,6 +353,7 @@ public class Viewer extends PApplet{
         for (Map.Entry<String, Node> entry : originalLimbs.entrySet()) {
             if(targets.containsKey(entry.getKey())) {
                 targets.get(entry.getKey()).setPosition(entry.getValue().position());
+                targets.get(entry.getKey()).setOrientation(entry.getValue().orientation());
             }
         }
     }

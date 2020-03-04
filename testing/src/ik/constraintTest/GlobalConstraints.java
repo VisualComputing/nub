@@ -243,7 +243,7 @@ public class GlobalConstraints extends PApplet {
             scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
             if(targets.contains(scene.node())){
-                for(Node target : targets) scene.translateNode(target, scene.mouseDX(), scene.mouseDY());
+                for(Node target : targets) scene.translateNode(target, scene.mouseDX(), scene.mouseDY(), 0);
             }else{
                 scene.mouseTranslate();
             }

@@ -394,10 +394,10 @@ public class Util {
                 }
                 case CONE_ELLIPSE:{
                     if(!is3D) break;
-                    float down = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 60, 0), 80));
-                    float up = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 60, 0), 80));
-                    float left = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 60, 0), 80));
-                    float right = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 60, 0), 80));
+                    float down = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 30, 0), 80));
+                    float up = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 30, 0), 80));
+                    float left = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 30, 0), 80));
+                    float right = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 30, 0), 80));
 
                     //down = left = right = up = radians(40);
                     constraint = new BallAndSocket(down, up, left, right);
@@ -407,7 +407,7 @@ public class Util {
                 }
                 case CONE_CIRCLE:{
                     if(!is3D) break;
-                    float r = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 60, 0), 80));
+                    float r = radians((float) Math.min(Math.max(random.nextGaussian()*30 + 30, 0), 80));
                     //r = radians(40);
                     constraint = new BallAndSocket(r,r,r,r);
                     Quaternion rest = Quaternion.compose(structure.get(i).rotation().get(), offset);
@@ -437,8 +437,8 @@ public class Util {
                     if(Vector.squaredNorm(vector) == 0) {
                         constraint = null;
                     }
-                    float min = (float) Math.min(Math.max(random.nextGaussian()*30 + 60, 10), 120);
-                    float max = (float) Math.min(Math.max(random.nextGaussian()*30 + 60, 10), 120);
+                    float min = (float) Math.min(Math.max(random.nextGaussian()*30 + 30, 10), 120);
+                    float max = (float) Math.min(Math.max(random.nextGaussian()*30 + 30, 10), 120);
 
                     constraint = new Hinge(radians(min),
                             radians(max),
@@ -446,8 +446,8 @@ public class Util {
                     break;
                 }
                 case HINGE_ALIGNED:{
-                    float min = (float) Math.min(Math.max(random.nextGaussian()*30 + 60, 10), 120);
-                    float max = (float) Math.min(Math.max(random.nextGaussian()*30 + 60, 10), 120);
+                    float min = (float) Math.min(Math.max(random.nextGaussian()*30 + 30, 10), 120);
+                    float max = (float) Math.min(Math.max(random.nextGaussian()*30 + 30, 10), 120);
                     Vector vector = new Vector(0,0,1);
 
                     constraint = new Hinge(radians(min),

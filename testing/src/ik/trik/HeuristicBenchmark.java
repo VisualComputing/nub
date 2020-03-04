@@ -122,11 +122,11 @@ public class HeuristicBenchmark extends PApplet {
 
         interpolator = new Interpolator(scene);
         //define the interpolator task
-        task = new Task(scene.timingHandler()) {
+        task = new Task(scene.timingHandler()) { //TODO : Make this task work
             @Override
             public void execute() {
                 Vector pos = targets.get(0).position().get();
-                interpolator.execute();
+                //interpolator.execute();
                 //update other targets
                 for(Node target : targets){
                     if(target == targets.get(0)) continue;
@@ -136,7 +136,8 @@ public class HeuristicBenchmark extends PApplet {
                 }
             }
         };
-        interpolator.setTask(task);
+
+
     }
 
     boolean showPath = true;
@@ -300,7 +301,7 @@ public class HeuristicBenchmark extends PApplet {
             scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
             if(targets.contains(scene.node())){
-                for(Node target : targets) scene.translateNode(target, scene.mouseDX(), scene.mouseDY());
+                for(Node target : targets) scene.translateNode(target, scene.mouseDX(), scene.mouseDY(), 0);
             }else{
                 scene.mouseTranslate();
             }

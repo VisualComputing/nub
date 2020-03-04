@@ -216,7 +216,7 @@ public class InteractiveSpider extends PApplet {
 
         public void start(){
             for(int i = 0; i < interpolator.length; i++){
-                interpolator[i].execute();
+                interpolator[i].run();
             }
         }
 

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Viewer extends PApplet{
-    String path =  "/testing/data/bvh/0007_Cartwheel001.bvh";
+    String path =  "/testing/data/bvh/0005_JumpRope001.bvh";
     Scene scene;
     BVHLoader parser;
     Skeleton skeleton;
@@ -41,6 +41,7 @@ public class Viewer extends PApplet{
     }
 
     public void setup() {
+        Joint.axes = true;
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(100);
@@ -51,17 +52,8 @@ public class Viewer extends PApplet{
         skeleton = new Skeleton(parser, SimpleTRIK.HeuristicMode.FINAL, scene, color(0,255,0), scene.radius() * 0.01f);
         //skeleton = new Skeleton(parser, SimpleTRIK.HeuristicMode.CCD,  scene, color(0,0,255), scene.radius() * 0.01f);
         skeleton._reference.translate(100,0,0);
-        parser.root().cull(true);
+        //parser.root().cull(true);
         //skeleton._root.cull(true);
-    }
-
-    public Node createTarget(float radius){
-        PShape redBall = createShape(SPHERE, radius);
-        redBall.setStroke(false);
-        redBall.setFill(color(255,0,0));
-        Node target = new Node(scene, redBall);
-        target.setPickingThreshold(0);
-        return target;
     }
 
     public void draw() {
@@ -187,9 +179,9 @@ public class Viewer extends PApplet{
 
         protected void _createSolver(SimpleTRIK.HeuristicMode mode){
             _solver = new TRIKTree(_root, mode);
-            _solver.setMaxError(0.1f);
-            _solver.setTimesPerFrame(5);
-            _solver.setMaxIterations(5);
+            _solver.setMaxError(0.01f);
+            _solver.setTimesPerFrame(10);
+            _solver.setMaxIterations(10);
             //add task to scene
             TimingTask task = new TimingTask(_scene) {
                 @Override
@@ -206,7 +198,7 @@ public class Viewer extends PApplet{
                 Node node = entry.getValue();
                 if(node.children() == null || node.children().isEmpty()){
                     node.enableTagging(false);
-                    Node target = createTarget(_radius );
+                    Node target = Util.createTarget(scene, _radius);
                     target.setReference(_reference);
                     target.setPosition( node.position().get());
                     target.setOrientation( node.orientation().get());

@@ -139,7 +139,7 @@ public class TRIKTREETest extends PApplet{
         } else if (mouseButton == LEFT) {
             scene.spin(scene.pmouseX(), scene.pmouseY(), scene.mouseX(), scene.mouseY());
         } else if (mouseButton == RIGHT) {
-            scene.translate(scene.mouseX() - scene.pmouseX(), scene.mouseY() - scene.pmouseY());
+            scene.translate(scene.mouseX() - scene.pmouseX(), scene.mouseY() - scene.pmouseY(), 0);
             Target.multipleTranslate();
         } else if (mouseButton == CENTER){
             scene.scale(scene.mouseDX());

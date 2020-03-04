@@ -224,7 +224,7 @@ public class SkeletonBuilder extends PApplet{
                 focus.spin(focus.pmouseX(), focus.pmouseY(), focus.mouseX(), focus.mouseY());
             }
         } else if (mouseButton == RIGHT) {
-            focus.translate(focus.mouseX() - focus.pmouseX(), focus.mouseY() - focus.pmouseY());
+            focus.translate(focus.mouseX() - focus.pmouseX(), focus.mouseY() - focus.pmouseY(), 0);
             Target.multipleTranslate();
         } else if (mouseButton == CENTER){
             focus.scale(focus.mouseDX());
@@ -391,6 +391,24 @@ public class SkeletonBuilder extends PApplet{
             fixTwisting = !fixTwisting;
             for(Solver solver : scene.treeSolvers()){
                 if(solver instanceof TreeSolver) ((TreeSolver)solver).setFixTwisting(fixTwisting);
+            }
+        }
+
+        if(key == CODED){
+            if(keyCode == SHIFT){
+                for(Solver solver : scene.treeSolvers()){
+                    if(solver instanceof TRIKTree) ((TRIKTree)solver).setDirection(true);
+                }
+            }
+        }
+    }
+
+    public void keyReleased(){
+        if(key == CODED) {
+            if (keyCode == SHIFT) {
+                for (Solver solver : scene.treeSolvers()) {
+                    if (solver instanceof TRIKTree) ((TRIKTree) solver).setDirection(false);
+                }
             }
         }
     }
