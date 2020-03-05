@@ -87,7 +87,7 @@ public class ParticleSystem extends PApplet {
       speed = new PVector();
       pos = new PVector();
       init();
-      task = new TimingTask(scene) {
+      task = new TimingTask() {
         @Override
         public void execute() {
           speed.z -= 0.05f;

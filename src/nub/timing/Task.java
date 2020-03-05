@@ -66,7 +66,7 @@ abstract public class Task {
     boolean result = false;
     if (_active) {
       long elapsedTime = System.currentTimeMillis() - _startTime;
-      float timePerFrame = (1 / _timingHandler.frameRate()) * 1000;
+      float timePerFrame = (1 / _timingHandler.frameRate) * 1000;
       long threshold = _counter * _period;
       if (threshold >= elapsedTime) {
         long diff = elapsedTime + (long) timePerFrame - threshold;
@@ -173,10 +173,10 @@ abstract public class Task {
     }
     _period = period;
     float target = frequency();
-    if (_timingHandler.frameRate() < target) {
+    if (_timingHandler.frameRate < target) {
       System.out.println("Warning: Your task period of " + period + " ms requires at least a " + target + " Hz frameRate, " +
-          "but currently it just achieves " + _timingHandler.frameRate() + " Hz." + '\n' + "Either set a period of at least "
-          + 1000 / _timingHandler.frameRate() + " ms or call enableConcurrence() to execute the task concurrently.");
+          "but currently it just achieves " + _timingHandler.frameRate + " Hz." + '\n' + "Either set a period of at least "
+          + 1000 / _timingHandler.frameRate + " ms or call enableConcurrence() to execute the task concurrently.");
     }
   }
 

@@ -69,7 +69,7 @@ public class TaskTesting extends PApplet {
     interpolator.run();
 
     //frameRate(100);
-    task = new TimingTask(scene) {
+    task = new TimingTask() {
       @Override
       public void execute() {
         long current = System.currentTimeMillis();
@@ -86,7 +86,7 @@ public class TaskTesting extends PApplet {
     //task.run(60);
 
     ///*
-    task2 = new TimingTask(scene) {
+    task2 = new TimingTask() {
       @Override
       public void execute() {
         println("one timer seq");
@@ -95,7 +95,7 @@ public class TaskTesting extends PApplet {
     task2.enableRecurrence();
     //task2.run(3000);
 
-    task3 = new TimingTask(scene) {
+    task3 = new TimingTask() {
       @Override
       public void execute() {
         println("recurrent timer parallel");

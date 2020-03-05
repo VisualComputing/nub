@@ -421,25 +421,25 @@ public class Node {
    * Init tasks. Internal use.
    */
   protected void _initTasks() {
-    _translationTask = new InertialTask(graph()) {
+    _translationTask = new InertialTask() {
       @Override
       public void action() {
         translate(_x, _y, _z);
       }
     };
-    _rotationTask = new InertialTask(graph()) {
+    _rotationTask = new InertialTask() {
       @Override
       public void action() {
         rotate(new Quaternion(_x, _y, _z));
       }
     };
-    _orbitTask = new InertialTask(graph()) {
+    _orbitTask = new InertialTask() {
       @Override
       public void action() {
         orbit(new Quaternion(_x, _y, _z), _center);
       }
     };
-    _scalingTask = new InertialTask(graph()) {
+    _scalingTask = new InertialTask() {
       @Override
       public void action() {
         float factor = 1 + Math.abs(_x) / graph().height();

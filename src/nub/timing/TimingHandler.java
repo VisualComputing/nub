@@ -16,24 +16,32 @@ import java.util.ArrayList;
 /**
  * A timing handler holds a {@link #taskPool()} with all the tasks
  * scheduled to be performed in the future (one single time or periodically).
+ * <p>
+ * A timing handler should be used as a static scene instance.
  */
 public class TimingHandler {
+  /**
+   * Returns the approximate frame rate of the software as it executes. The initial value
+   * is 10 fps and is updated with each frame. The value is averaged (integrated) over
+   * several frames. As such, this value won't be valid until after 5-10 frames.
+   */
   static public long frameCount;
-  protected float _frameRate;
+  /**
+   * Returns the number of frames displayed since this timing handler was instantiated.
+   */
+  static public float frameRate;
 
-  protected long _deltaCount;
+  //protected long _deltaCount;
   // T i m e r P o o l
   protected ArrayList<Task> _taskPool;
   protected long _frameRateLastNanos;
-  protected long _localCount;
+  //protected long _localCount;
 
   /**
    * Main constructor.
    */
   public TimingHandler() {
-    _localCount = 0;
-    _deltaCount = frameCount;
-    _frameRate = 60;
+    frameRate = 60;
     _frameRateLastNanos = 0;
     _taskPool = new ArrayList<Task>();
   }
@@ -94,34 +102,13 @@ public class TimingHandler {
    */
   protected void _updateFrameRate() {
     long now = System.nanoTime();
-    if (_localCount > 1) {
+    if (frameCount > 1) {
       float frameTimeSecs = (float) (now - this._frameRateLastNanos) / 1.0E9f;
-      float avgFrameTimeSecs = 1.0f / _frameRate;
+      float avgFrameTimeSecs = 1.0f / frameRate;
       avgFrameTimeSecs = 0.95f * avgFrameTimeSecs + 0.05f * frameTimeSecs;
-      _frameRate = (1.0f / avgFrameTimeSecs);
+      frameRate = (1.0f / avgFrameTimeSecs);
     }
     _frameRateLastNanos = now;
-    _localCount++;
-    //TODO needs testing but I think is also safe and simpler
-    //if (TimingHandler.frameCount < frameCount())
-    //TimingHandler.frameCount = frameCount();
-    if (frameCount < frameCount() + _deltaCount)
-      frameCount = frameCount() + _deltaCount;
-  }
-
-  /**
-   * Returns the approximate frame rate of the software as it executes. The initial value
-   * is 10 fps and is updated with each frame. The value is averaged (integrated) over
-   * several frames. As such, this value won't be valid until after 5-10 frames.
-   */
-  public float frameRate() {
-    return _frameRate;
-  }
-
-  /**
-   * Returns the number of frames displayed since this timing handler was instantiated.
-   */
-  public long frameCount() {
-    return _localCount;
+    frameCount++;
   }
 }

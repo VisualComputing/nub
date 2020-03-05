@@ -176,7 +176,9 @@ public class Graph {
     }
   }
 
-  protected TimingHandler _timingHandler;
+  protected static TimingHandler _timingHandler = new TimingHandler();
+  protected static boolean _seeded;
+  protected boolean _seededGraph;
   protected HashMap<String, Node> _tags;
   protected ArrayList<Ray> _rays;
 
@@ -242,6 +244,10 @@ public class Graph {
    * @see #setEye(Node)
    */
   public Graph(Object context, Type type, int width, int height) {
+    if (!_seeded) {
+      _seededGraph = true;
+      _seeded = true;
+    }
     _fb = context;
     setMatrixHandler(matrixHandler(_fb));
     setWidth(width);
@@ -250,18 +256,17 @@ public class Graph {
     _rays = new ArrayList<Ray>();
     cacheProjectionViewInverse(false);
     _seeds = new ArrayList<Node>();
-    _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
     Node eye = new Node(this);
     eye.disableTagging();
     setEye(eye);
-    _lookAroundTask = new InertialTask(this) {
+    _lookAroundTask = new InertialTask() {
       @Override
       public void action() {
         _lookAround();
       }
     };
-    _cadRotateTask = new InertialTask(this) {
+    _cadRotateTask = new InertialTask() {
       @Override
       public void action() {
         _rotateCAD();
@@ -789,25 +794,22 @@ public class Graph {
   /**
    * Returns the graph {@link TimingHandler}.
    */
-  public TimingHandler timingHandler() {
+  public static TimingHandler timingHandler() {
     return _timingHandler;
   }
 
   /**
    * Returns the current frame-rate.
    */
-  public float frameRate() {
-    return timingHandler().frameRate();
+  public static float frameRate() {
+    return TimingHandler.frameRate;
   }
 
   /**
-   * Returns the number of nodes displayed since the graph was instantiated.
-   * <p>
-   * Use {@code TimingHandler.frameCount} to retrieve the number of nodes displayed since
-   * the first graph was instantiated.
+   * Returns the number of frames displayed since the first graph was instantiated.
    */
-  public long frameCount() {
-    return timingHandler().frameCount();
+  public static long frameCount() {
+    return TimingHandler.frameCount;
   }
 
   /**
@@ -2667,7 +2669,8 @@ public class Graph {
    * @see Node#view()
    */
   public void preDraw() {
-    timingHandler().handle();
+    if (_seededGraph)
+      timingHandler().handle();
     _projection = eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded());
     _view = eye().view();
     _projectionView = Matrix.multiply(_projection, _view);
