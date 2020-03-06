@@ -182,7 +182,7 @@ public class TRIKTree extends Solver {
 
     protected void _setDirection(boolean direction, TreeNode treeNode){
         if (treeNode == null) return;
-        treeNode._solver.context().setDirection(direction);
+        if(treeNode._children().isEmpty())treeNode._solver.context().setDirection(direction);
         for (TreeNode child : treeNode._children()) {
             _setDirection(direction, child);
         }
@@ -251,12 +251,49 @@ public class TRIKTree extends Solver {
         _setChainTimesPerFrame(timesPerFrame, _root);
     }
 
-    protected void _setChainTimesPerFrame(int timesPerFrame, TreeNode node){
+    protected void _setChainTimesPerFrame(float timesPerFrame, TreeNode node){
         if(node == null) return;
         node._solver().setTimesPerFrame(timesPerFrame);
         for(TreeNode child : node._children()){
             _setChainTimesPerFrame(timesPerFrame, child);
         }
+    }
 
+    public void setChainMaxIterations(int maxIterations){
+        _setChainMaxIterations(maxIterations, _root);
+    }
+
+    protected void _setChainMaxIterations(int maxIterations, TreeNode node){
+        if(node == null) return;
+        node._solver().setMaxIterations(maxIterations);
+        for(TreeNode child : node._children()){
+            _setChainMaxIterations(maxIterations, child);
+        }
+    }
+
+    public void setSearchingAreaRadius(float radius, boolean relativeToBoneAvg){
+        _setSearchingAreaRadius(radius, relativeToBoneAvg, _root);
+    }
+
+    protected void _setSearchingAreaRadius(float radius, boolean relativeToBoneAvg, TreeNode node) {
+        if(node == null) return;
+        node._solver.context().setSearchingAreaRadius(radius, relativeToBoneAvg);
+        for(TreeNode child : node._children()){
+            _setSearchingAreaRadius(radius, relativeToBoneAvg, child);
+        }
+
+    }
+
+
+    public void setOrientationWeight(float orientationWeight){
+        setOrientationWeight(orientationWeight, _root);
+    }
+
+    protected void setOrientationWeight(float orientationWeight, TreeNode node) {
+        if(node == null) return;
+        node._solver.context().setOrientationWeight(orientationWeight);
+        for(TreeNode child : node._children()){
+            setOrientationWeight(orientationWeight, child);
+        }
     }
 }
