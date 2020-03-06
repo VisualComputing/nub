@@ -134,7 +134,6 @@ public class ShiftViewers extends PApplet {
     }
 
     if (displayAuxiliarViewers) {
-      scene1.shift(scene2);
       if (!scene1.isOffscreen())
         scene1.beginHUD();
       scene2.beginDraw();
@@ -146,7 +145,6 @@ public class ShiftViewers extends PApplet {
       if (!scene1.isOffscreen())
         scene1.endHUD();
 
-      scene2.shift(scene3);
       if (!scene1.isOffscreen())
         scene1.beginHUD();
       scene3.beginDraw();
@@ -157,8 +155,6 @@ public class ShiftViewers extends PApplet {
       scene3.display();
       if (!scene1.isOffscreen())
         scene1.endHUD();
-
-      scene3.shift(scene1);
     }
   }
 

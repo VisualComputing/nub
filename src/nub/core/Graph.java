@@ -183,7 +183,7 @@ public class Graph {
   protected ArrayList<Ray> _rays;
 
   // 4. Graph
-  protected List<Node> _seeds;
+  protected static List<Node> _seeds = new ArrayList<Node>();
   protected long _lastNonEyeUpdate = 0;
 
   // 5. Interaction methods
@@ -255,7 +255,6 @@ public class Graph {
     _tags = new HashMap<String, Node>();
     _rays = new ArrayList<Ray>();
     cacheProjectionViewInverse(false);
-    _seeds = new ArrayList<Node>();
     setFrustum(new Vector(), 100);
     Node eye = new Node(this);
     eye.disableTagging();
@@ -624,14 +623,14 @@ public class Graph {
    * @see #isReachable(Node)
    * @see #prune(Node)
    */
-  protected List<Node> _leadingNodes() {
+  protected static List<Node> _leadingNodes() {
     return _seeds;
   }
 
   /**
    * Returns {@code true} if the node is top-level.
    */
-  protected boolean _isLeadingNode(Node node) {
+  protected static boolean _isLeadingNode(Node node) {
     for (Node leadingNode : _leadingNodes())
       if (leadingNode == node)
         return true;
@@ -639,34 +638,9 @@ public class Graph {
   }
 
   /**
-   * Transfers the graph nodes to the {@code target} graph. Useful to display auxiliary
-   * viewers of the main graph. Use it in your drawing code such as:
-   * <p>
-   * <pre>
-   * {@code
-   * Graph graph graph, auxiliaryGraph;
-   * void draw() {
-   *   graph.render();
-   *   // shift nodes to the auxiliaryGraph
-   *   scene.shift(auxiliaryGraph);
-   *   auxiliaryGraph.render();
-   *   // shift nodes back to the main graph
-   *   auxiliaryGraph.shift(graph);
-   * }
-   * }
-   * </pre>
-   */
-  public void shift(Graph target) {
-    for (Node leadingNode : _leadingNodes()) {
-      leadingNode._graph = target;
-      target._addLeadingNode(leadingNode);
-    }
-  }
-
-  /**
    * Add the node as top-level if its reference node is null and it isn't already added.
    */
-  protected boolean _addLeadingNode(Node node) {
+  protected static boolean _addLeadingNode(Node node) {
     if (node == null || node.reference() != null)
       return false;
     if (_isLeadingNode(node))
@@ -677,7 +651,7 @@ public class Graph {
   /**
    * Removes the leading node if present. Typically used when re-parenting the node.
    */
-  protected boolean _removeLeadingNode(Node node) {
+  protected static boolean _removeLeadingNode(Node node) {
     boolean result = false;
     Iterator<Node> it = _leadingNodes().iterator();
     while (it.hasNext()) {
@@ -695,7 +669,7 @@ public class Graph {
    *
    * @see #prune(Node)
    */
-  public void clear() {
+  public static void clear() {
     for (Node node : _leadingNodes())
       prune(node);
   }
@@ -715,7 +689,7 @@ public class Graph {
    * @see #isReachable(Node)
    * @see Node#setReference(Node)
    */
-  public boolean prune(Node node) {
+  public static boolean prune(Node node) {
     if (!isReachable(node))
       return false;
     if (node.reference() != null) {
@@ -737,7 +711,7 @@ public class Graph {
    * @see #render()
    * @see #nodes()
    */
-  public boolean isReachable(Node node) {
+  public static boolean isReachable(Node node) {
     if (node == null)
       return false;
     for (Node n : nodes())
@@ -756,7 +730,7 @@ public class Graph {
    * @see #isReachable(Node)
    * @see #isEye(Node)
    */
-  public List<Node> nodes() {
+  public static List<Node> nodes() {
     ArrayList<Node> list = new ArrayList<Node>();
     for (Node node : _leadingNodes())
       _collect(list, node);
@@ -769,7 +743,7 @@ public class Graph {
    *
    * @see #isReachable(Node)
    */
-  public List<Node> branch(Node node) {
+  public static List<Node> branch(Node node) {
     ArrayList<Node> list = new ArrayList<Node>();
     _collect(list, node);
     return list;
@@ -781,7 +755,7 @@ public class Graph {
    *
    * @see #isReachable(Node)
    */
-  protected void _collect(List<Node> list, Node node) {
+  protected static void _collect(List<Node> list, Node node) {
     if (node == null)
       return;
     list.add(node);

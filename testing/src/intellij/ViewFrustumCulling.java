@@ -65,7 +65,6 @@ public class ViewFrustumCulling extends PApplet {
     scene1.endDraw();
     scene1.display();
 
-    scene1.shift(scene2);
     scene2.beginDraw();
     canvas2.background(255);
     scene2.render();
@@ -77,7 +76,6 @@ public class ViewFrustumCulling extends PApplet {
     scene2.context().popStyle();
     scene2.endDraw();
     scene2.display();
-    scene2.shift(scene1);
   }
 
   public void mouseDragged() {

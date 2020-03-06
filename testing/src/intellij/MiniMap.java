@@ -135,8 +135,6 @@ public class MiniMap extends PApplet {
       scene.render();
     }
     if (displayMinimap) {
-      // shift scene attached nodes to minimap
-      scene.shift(minimap);
       if (!scene.isOffscreen())
         scene.beginHUD();
       minimap.beginDraw();
@@ -152,8 +150,6 @@ public class MiniMap extends PApplet {
       minimap.display();
       if (!scene.isOffscreen())
         scene.endHUD();
-      // shift back minimap attached nodes to the scene
-      minimap.shift(scene);
     }
   }
 
