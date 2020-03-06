@@ -2657,7 +2657,7 @@ public class Graph {
     }
   }
 
-  // 2b caches
+  // caches
 
   /**
    * Returns the cached projection matrix computed at {@link #preDraw()}.
@@ -2715,6 +2715,62 @@ public class Graph {
    */
   public void cacheProjectionViewInverse(boolean optimise) {
     _isProjectionViewInverseCached = optimise;
+  }
+
+  // get matrices
+
+  /**
+   * Same as {return node.projection(type, width, height, zNear, zFar, isLeftHanded())}.
+   *
+   * @see Node#projection(Type, float, float, float, float, boolean)
+   */
+  public Matrix projection(Node node, Graph.Type type, float width, float height, float zNear, float zFar) {
+    return node.projection(type, width, height, zNear, zFar, isLeftHanded());
+  }
+
+  /**
+   * Same as {@code return node.orthographic(width, height, zNear, zFar, isLeftHanded())}.
+   *
+   * @see Node#orthographic(float, float, float, float, boolean)
+   */
+  public Matrix orthographic(Node node, float width, float height, float zNear, float zFar) {
+    return node.orthographic(width, height, zNear, zFar, isLeftHanded());
+  }
+
+  /**
+   * Same as {@code return node.perspective(aspectRatio, zNear, zFar, isLeftHanded())}.
+   *
+   * @see Node#perspective(float, float, float, boolean)
+   */
+  public Matrix perspective(Node node, float aspectRatio, float zNear, float zFar) {
+    return node.perspective(aspectRatio, zNear, zFar, isLeftHanded());
+  }
+
+  /**
+   * Same as {@code return node.projectionView(type, width, height, zNear, zFar, isLeftHanded())}.
+   *
+   * @see Node#projectionView(Type, float, float, float, float, boolean)
+   */
+  public Matrix projectionView(Node node, Graph.Type type, float width, float height, float zNear, float zFar) {
+    return node.projectionView(type, width, height, zNear, zFar, isLeftHanded());
+  }
+
+  /**
+   * Same as {@code return node.orthographicView(width, height, zNear, zFar, isLeftHanded())}.
+   *
+   * @see Node#orthographicView(float, float, float, float, boolean)
+   */
+  public Matrix orthographicView(Node node, float width, float height, float zNear, float zFar) {
+    return node.orthographicView(width, height, zNear, zFar, isLeftHanded());
+  }
+
+  /**
+   * Same as {@code return node.perspectiveView(width, height, zNear, zFar, isLeftHanded())}.
+   *
+   * @see Node#perspectiveView(float, float, float, float, boolean)
+   */
+  public Matrix perspectiveView(Node node, float width, float height, float zNear, float zFar) {
+    return node.perspectiveView(width, height, zNear, zFar, isLeftHanded());
   }
 
   /**

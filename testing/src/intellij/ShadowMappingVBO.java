@@ -105,7 +105,7 @@ public class ShadowMappingVBO extends PApplet {
     // 2. Render the scene from the scene.eye() node
     background(0xff222222);
     if (!debug) {
-      Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+      Matrix projectionView = scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
       Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
       Vector lightDirection = scene.eye().displacement(light.zAxis(false));

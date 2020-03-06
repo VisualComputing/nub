@@ -1971,21 +1971,6 @@ public class Node {
   }
 
   /**
-   * Same as {@code return projection(type, width, height, zNear, zFar, graph().isLeftHanded())}. To use it, node must me
-   * attached to a graph.
-   *
-   * @see #isDetached()
-   * @see #projection(Graph.Type, float, float, float, float, boolean)
-   */
-  public Matrix projection(Graph.Type type, float width, float height, float zNear, float zFar) {
-    if (!isDetached())
-      return projection(type, width, height, zNear, zFar, graph().isLeftHanded());
-    else
-      throw new RuntimeException("To call node.projection(type, width, height, zNear, zFar) the node should be attached to a graph." +
-          "Use node.projection(type, width, height, zNear, zFar, leftHanded), instead");
-  }
-
-  /**
    * Returns either {@code perspective(width / height, zNear, zFar, lefTHanded)} if
    * the {@link Graph.Type} is {@link Graph.Type#PERSPECTIVE} or
    * {@code orthographic(width, height, zNear, zFar, lefTHanded)}, if the
@@ -2006,21 +1991,6 @@ public class Node {
   }
 
   /**
-   * Same as {@code return orthographic(width, height, zNear, zFar, graph().isLeftHanded())}. To use it, node must me
-   * attached to a graph.
-   *
-   * @see #isDetached()
-   * @see #orthographic(float, float, float, float, boolean)
-   */
-  public Matrix orthographic(float width, float height, float zNear, float zFar) {
-    if (!isDetached())
-      return orthographic(width, height, zNear, zFar, graph().isLeftHanded());
-    else
-      throw new RuntimeException("To call node.orthographic(width, height, zNear, zFar) the node should be attached to a graph." +
-          "Use node.orthographic(float width, float height, float zNear, float zFar, boolean leftHanded), instead");
-  }
-
-  /**
    * Same as {@code return Matrix.orthographic(width * magnitude(), (leftHanded ? -height : height) * magnitude(), zNear, zFar}.
    * <p>
    * Note that to compute the orthographic matrix the node {@link #magnitude()} scales the viewing volume width and height.
@@ -2032,21 +2002,6 @@ public class Node {
    */
   public Matrix orthographic(float width, float height, float zNear, float zFar, boolean leftHanded) {
     return Matrix.orthographic(width * magnitude(), (leftHanded ? -height : height) * magnitude(), zNear, zFar);
-  }
-
-  /**
-   * Same as {@code return perspective(aspectRatio, zNear, zFar, graph().isLeftHanded())}. To use it, node must me
-   * attached to a graph.
-   *
-   * @see #isDetached()
-   * @see #perspective(float, float, float, boolean)
-   */
-  public Matrix perspective(float aspectRatio, float zNear, float zFar) {
-    if (!isDetached())
-      return perspective(aspectRatio, zNear, zFar, graph().isLeftHanded());
-    else
-      throw new RuntimeException("To call node.perspective(float aspectRatio, float zNear, float zFar) the node should be attached to a graph." +
-          "Use node.perspective(aspectRatio, zNear, zFar, leftHanded), instead");
   }
 
   /**
@@ -2065,16 +2020,6 @@ public class Node {
   }
 
   /**
-   * Same as {@code return Matrix.multiply(projection(type, width, height, zNear, zFar), view())}.
-   *
-   * @see #projection(Graph.Type, float, float, float, float)
-   * @see #view()
-   */
-  public Matrix projectionView(Graph.Type type, float width, float height, float zNear, float zFar) {
-    return Matrix.multiply(projection(type, width, height, zNear, zFar), view());
-  }
-
-  /**
    * Same as {@code return Matrix.multiply(projection(type, width, height, zNear, zFar, leftHanded), view())}.
    *
    * @see #projection(Graph.Type, float, float, float, float, boolean)
@@ -2085,16 +2030,6 @@ public class Node {
   }
 
   /**
-   * Same as {@code return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar), view())}.
-   *
-   * @see #projection(Graph.Type, float, float, float, float)
-   * @see #view()
-   */
-  public Matrix orthographicView(float width, float height, float zNear, float zFar) {
-    return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar), view());
-  }
-
-  /**
    * Same as {code return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar, leftHanded), view())}.
    *
    * @see #projection(Graph.Type, float, float, float, float, boolean)
@@ -2102,16 +2037,6 @@ public class Node {
    */
   public Matrix orthographicView(float width, float height, float zNear, float zFar, boolean leftHanded) {
     return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar, leftHanded), view());
-  }
-
-  /**
-   * Same as {@code return Matrix.multiply(projection(Graph.Type.PERSPECTIVE, width, height, zNear, zFar), view())}.
-   *
-   * @see #projection(Graph.Type, float, float, float, float)
-   * @see #view()
-   */
-  public Matrix perspectiveView(float width, float height, float zNear, float zFar) {
-    return Matrix.multiply(projection(Graph.Type.PERSPECTIVE, width, height, zNear, zFar), view());
   }
 
   /**
