@@ -9,14 +9,17 @@ import processing.core.PGraphics;
 
 public class OctreeNode extends Node {
   Graph.Visibility visibility;
+  Scene scn;
 
-  OctreeNode(Scene scene) {
-    super(scene);
+  OctreeNode(Scene s) {
+    super();
+    scn = s;
     disableTagging();
   }
 
-  OctreeNode(OctreeNode node, Vector vector) {
+  OctreeNode(Scene s, OctreeNode node, Vector vector) {
     super(node);
+    scn = s;
     scale(0.5f);
     translate(Vector.multiply(vector, scaling() / 2));
     disableTagging();
@@ -38,9 +41,9 @@ public class OctreeNode extends Node {
   // customize traversal
   @Override
   public void visit() {
-    if (graph() != ViewFrustumCulling.scene1)
+    if (scn != ViewFrustumCulling.scene1)
       return;
-    visibility = graph().boxVisibility(worldLocation(new Vector(-ViewFrustumCulling.a / 2f, -ViewFrustumCulling.b / 2f, -ViewFrustumCulling.c / 2f)),
+    visibility = scn.boxVisibility(worldLocation(new Vector(-ViewFrustumCulling.a / 2f, -ViewFrustumCulling.b / 2f, -ViewFrustumCulling.c / 2f)),
         worldLocation(new Vector(ViewFrustumCulling.a / 2f, ViewFrustumCulling.b / 2f, ViewFrustumCulling.c / 2f)));
     switch (visibility) {
       case VISIBLE:

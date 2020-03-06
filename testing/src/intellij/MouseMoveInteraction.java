@@ -25,7 +25,7 @@ public class MouseMoveInteraction extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    Node shape1 = new Node(scene) {
+    Node shape1 = new Node() {
       @Override
       public void graphics(PGraphics pGraphics) {
         pGraphics.pushStyle();

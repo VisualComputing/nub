@@ -23,7 +23,7 @@ public class Basics extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    node = new Node(scene) {
+    node = new Node() {
       @Override
       public void visit() {
         scene.drawAxes(scene.radius() / 3);
@@ -41,7 +41,7 @@ public class Basics extends PApplet {
     };
     node.setRotation(Quaternion.random());
     //shape = new Node(scene, shape());
-    shape = new Node(scene);
+    shape = new Node();
     shape.setShape(shape());
     shape.setRotation(Quaternion.random());
     shape.translate(275, 275, 275);

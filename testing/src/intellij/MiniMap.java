@@ -37,12 +37,13 @@ public class MiniMap extends PApplet {
     models = new Node[30];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
-        models[i] = new Node(scene, shape());
+        models[i] = new Node(shape());
       } else {
-        models[i] = new Node(scene) {
+        models[i] = new Node() {
           int _faces = (int) MiniMap.this.random(3, 15);
           // We need to call the PApplet random function instead of the node random version
           int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
+
           @Override
           public void graphics(PGraphics pg) {
             pg.pushStyle();

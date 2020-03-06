@@ -45,7 +45,7 @@ public class TaskTesting extends PApplet {
 
     // interpolation 3. Custom (arbitrary) node interpolations
 
-    shape = new Node(scene) {
+    shape = new Node() {
       // Note that within render() geometry is defined at the
       // node local coordinate system.
       @Override

@@ -750,7 +750,7 @@ public class Scene extends Graph implements PConstants {
   protected Interpolator _toInterpolator(JSONArray jsonInterpolator) {
     Interpolator interpolator = new Interpolator();
     for (int j = 0; j < jsonInterpolator.size(); j++) {
-      Node node = new Node(this);
+      Node node = new Node();
       prune(node);
       node.set(_toNode(jsonInterpolator.getJSONObject(j)));
       node.setPickingThreshold(20);

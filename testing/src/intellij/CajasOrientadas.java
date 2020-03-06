@@ -102,7 +102,7 @@ public class CajasOrientadas extends PApplet {
     int c;
 
     public Box() {
-      iNode = new Node(scene) {
+      iNode = new Node() {
         // note that within visit() geometry is defined
         // at the node local coordinate system
         @Override
@@ -126,7 +126,7 @@ public class CajasOrientadas extends PApplet {
       iNode.setPickingThreshold(-25);
       setSize();
       setColor();
-      iNode.randomize();
+      scene.randomize(iNode);
     }
 
     public void setSize() {
@@ -178,7 +178,7 @@ public class CajasOrientadas extends PApplet {
     int c;
 
     public Sphere() {
-      iNode = new Node(scene) {
+      iNode = new Node() {
         // note that within visit() geometry is defined
         // at the node local coordinate system
         @Override

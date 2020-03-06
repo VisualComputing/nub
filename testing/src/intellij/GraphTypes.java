@@ -43,7 +43,7 @@ public class GraphTypes extends PApplet {
     auxScene.setRadius(400);
     //scene2.fit(1);
     auxScene.fit();
-    boxNode = new Node(auxScene);
+    boxNode = new Node();
     boxNode.rotate(new Quaternion(new Vector(0, 1, 0), QUARTER_PI));
   }
 

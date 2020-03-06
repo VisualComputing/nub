@@ -57,7 +57,7 @@ public class ShadowMappingTutorial extends PApplet {
     shapes = new Node[50];
     for (int i = 0; i < shapes.length; i++) {
       tint(random(0, 255), random(0, 255), random(0, 255), random(150, 255));
-      shapes[i] = new Node(scene, loadShape("/home/pierre/IdeaProjects/nub/testing/data/interaction/rocket.obj")) {
+      shapes[i] = new Node(loadShape("/home/pierre/IdeaProjects/nub/testing/data/interaction/rocket.obj")) {
         @Override
         public void graphics(PGraphics pg) {
           pg.pushStyle();
@@ -70,7 +70,7 @@ public class ShadowMappingTutorial extends PApplet {
       shapes[i].setPickingThreshold(0);
       shapes[i].scale(0.2f);
     }
-    light = new Node(scene) {
+    light = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();
@@ -96,7 +96,7 @@ public class ShadowMappingTutorial extends PApplet {
     //PShape box = createShape(RECT, 0, 0, 360, 360);
     box.setFill(0xff222222);
     box.setStroke(false);
-    floor = new Node(scene);
+    floor = new Node();
     floor.setShape(box);
 
     // initShadowPass

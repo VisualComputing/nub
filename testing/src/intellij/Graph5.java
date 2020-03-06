@@ -27,7 +27,7 @@ public class Graph5 extends PApplet {
     graph.fit(1);
     nodes = new Node[50];
     for (int i = 0; i < nodes.length; i++) {
-      nodes[i] = new Node(graph) {
+      nodes[i] = new Node() {
         @Override
         public void visit() {
           pushStyle();
@@ -36,7 +36,7 @@ public class Graph5 extends PApplet {
           popStyle();
         }
       };
-      nodes[i].randomize();
+      graph.randomize(nodes[i]);
     }
     //discard Processing matrices
     resetMatrix();

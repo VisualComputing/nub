@@ -26,7 +26,7 @@ public class CustomNodeInteraction extends PApplet {
     scene.fit(1);
     shapes = new Node[10];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Node(scene) {
+      shapes[i] = new Node() {
         int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
 
         @Override
@@ -63,7 +63,7 @@ public class CustomNodeInteraction extends PApplet {
       };
       // set picking precision to the pixels of the node projection
       shapes[i].setPickingThreshold(0);
-      shapes[i].randomize();
+      scene.randomize(shapes[i]);
     }
     font36 = loadFont("FreeSans-36.vlw");
   }

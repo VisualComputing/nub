@@ -26,7 +26,7 @@ public class ParticleSystem extends PApplet {
     nbPart = 2000;
     particles = new Particle[nbPart];
     for (int i = 0; i < particles.length; i++)
-      particles[i] = new Particle(scene);
+      particles[i] = new Particle();
   }
 
   public void draw() {
@@ -82,8 +82,7 @@ public class ParticleSystem extends PApplet {
     int age;
     int ageMax;
 
-    public Particle(Scene scene) {
-      super(scene);
+    public Particle() {
       speed = new PVector();
       pos = new PVector();
       init();

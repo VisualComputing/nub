@@ -139,8 +139,7 @@ public class Node {
   protected static int _counter;
   protected int _id;
 
-  // Attached nodes
-  protected Graph _graph;
+  // tree
   protected List<Node> _children;
   protected boolean _culled;
   protected boolean _tagging;
@@ -154,84 +153,32 @@ public class Node {
   protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
 
   /**
-   * Creates a detached node.
-   * Same as {@code this(null, null, null, null, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Object)
-   * @see #Node(Graph)
-   * @see #Node(Node)
-   * @see #Node(Constraint)
+   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
   public Node() {
-    this(null, null, null, null, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Creates a node attached to {@code graph}.
-   * Same as {@code this(graph, null, null, null, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node()
-   * @see #Node(Object)
-   * @see #Node(Node)
-   * @see #Node(Constraint)
-   */
-  public Node(Graph graph) {
-    this(graph, null, null, null, new Vector(), new Quaternion(), 1);
+    this(null, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
    * Creates a child node with {@code reference} as {@link #reference()}.
-   * Same as {@code this(reference.graph(), reference, null, null, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(reference, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node()
-   * @see #Node(Graph)
-   * @see #Node(Object)
-   * @see #Node(Constraint)
+   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
   public Node(Node reference) {
-    this(reference.graph(), reference, null, null, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Creates a detached node with {@code constraint} as {@link #constraint()}.
-   * Same as {@code this(null, null, constraint, null, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Graph)
-   * @see #Node(Object)
-   * @see #Node()
-   * @see #Node(Node)
-   */
-  public Node(Constraint constraint) {
-    this(null, null, constraint, null, new Vector(), new Quaternion(), 1);
+    this(reference, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
    * Creates a detached node with {@code shape}.
-   * Same as {@code this(null, null, null, shape, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, null, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node()
-   * @see #Node(Graph)
-   * @see #Node(Node)
-   * @see #Node(Constraint)
-   */
-  public Node(Object shape) {
-    this(null, null, null, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Constructs a shapeless node, attached to {@code graph}, having {@code translation},
-   * {@code rotation} and {@code scaling} as the node {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()}, respectively.
-   * The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(graph, null, null, null, translation, rotation, scaling)}.
-   *
-   * @see #Node(Node, Vector, Quaternion, float)
-   * @see #Node(Vector, Quaternion, float)
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
    * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Node(Graph graph, Vector translation, Quaternion rotation, float scaling) {
-    this(graph, null, null, null, translation, rotation, scaling);
+  public Node(processing.core.PShape shape) {
+    this(null, null, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
@@ -239,15 +186,12 @@ public class Node {
    * {@code rotation} and {@code scaling} as the node {@link #reference()},
    * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(reference.graph(), reference, null, null, translation, rotation, scaling)}.
+   * Same as {@code this(reference, null, null, translation, rotation, scaling)}.
    *
-   * @see #Node(Graph, Vector, Quaternion, float)
-   * @see #Node(Vector, Quaternion, float)
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
    * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
   public Node(Node reference, Vector translation, Quaternion rotation, float scaling) {
-    this(reference.graph(), reference, null, null, translation, rotation, scaling);
+    this(reference, null, null, translation, rotation, scaling);
   }
 
   /**
@@ -255,62 +199,48 @@ public class Node {
    * {@code rotation} and {@code scaling} as the node {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    * The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(null, null, null, null, translation, rotation, scaling)}.
+   * Same as {@code this(null, null, null, translation, rotation, scaling)}.
    *
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
    * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
   public Node(Vector translation, Quaternion rotation, float scaling) {
-    this(null, null, null, null, translation, rotation, scaling);
+    this(null, null, null, translation, rotation, scaling);
   }
 
   /**
-   * Same as {@code this(graph, null, shape)}.
+   * Same as {@code this(null, constraint, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Graph, Constraint, Object)
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Node(Graph graph, Object shape) {
-    this(graph, null, shape);
+  public Node(Constraint constraint) {
+    this(null, constraint, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(graph, constraint, null)}.
+   * Same as {@code this(null, constraint, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Graph, Constraint, Object)
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Node(Graph graph, Constraint constraint) {
-    this(graph, constraint, null);
+  public Node(Constraint constraint, Object shape) {
+    this(null, constraint, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(graph, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(reference, null, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
-   */
-  public Node(Graph graph, Constraint constraint, Object shape) {
-    this(graph, constraint, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(reference, null, shape)}.
-   *
-   * @see #Node(Node, Constraint, Object)
    * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
   public Node(Node reference, Object shape) {
-    this(reference, null, shape);
+    this(reference, null, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(reference, constraint, null)}.
+   * Same as {@code this(reference, constraint, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Object)
    * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
   public Node(Node reference, Constraint constraint) {
-    this(reference, constraint, null);
+    this(reference, constraint, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
@@ -326,24 +256,12 @@ public class Node {
    * Creates a node attached to {@code graph} with {@code constraint} as {@link #constraint()},
    * having {@code translation}, {@code rotation} and {@code scaling} as the node {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(graph, null, constraint, shape, translation, rotation, scaling)}.
+   * Same as {@code this(null, constraint, shape, translation, rotation, scaling)}.
    *
-   * @see #Node(Graph, Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Node(Graph graph, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
-    this(graph, null, constraint, shape, translation, rotation, scaling);
-  }
-
-  /**
-   * Creates a child node of {@code reference} with {@code constraint} as {@link #constraint()},
-   * having {@code translation}, {@code rotation} and {@code scaling} as the node {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(reference.graph(), reference, constraint, shape, translation, rotation, scaling)}.
-   *
-   * @see #Node(Graph, Node, Constraint, Object, Vector, Quaternion, float)
-   */
-  public Node(Node reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
-    this(reference.graph(), reference, constraint, shape, translation, rotation, scaling);
+  public Node(Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
+    this(null, constraint, shape, translation, rotation, scaling);
   }
 
   /**
@@ -354,8 +272,7 @@ public class Node {
    * The {@link #pickingThreshold()} is set to {@code 0.2} and the {@link #highlighting()}
    * magnitude to {@code 0.15}.
    */
-  protected Node(Graph graph, Node reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
-    _graph = graph;
+  public Node(Node reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
     setReference(reference);
     setConstraint(constraint);
     setShape(shape);
@@ -370,9 +287,7 @@ public class Node {
     _threshold = .2f;
     _tagging = true;
     _highlight = 0.15f;
-    if (graph() == null)
-      return;
-    // attached nodes:
+    // tree
     _children = new ArrayList<Node>();
     _culled = false;
     _initTasks();
@@ -381,8 +296,8 @@ public class Node {
   /**
    * Copy constructor.
    */
+  /*
   protected Node(Graph graph, Node node) {
-    this._graph = graph;
     this.setPosition(node.position());
     this.setOrientation(node.orientation());
     this.setMagnitude(node.magnitude());
@@ -395,15 +310,15 @@ public class Node {
     _lastUpdate = node.lastUpdate();
     this._threshold = node._threshold;
     this._tagging = node._tagging;
-    if (graph() == null)
-      return;
-    // attached nodes:
+    // tree
     this._children = new ArrayList<Node>();
     this._culled = node._culled;
     this._shape = node._shape;
     this._highlight = node._highlight;
     this._initTasks();
   }
+
+   */
 
   /**
    * Init tasks. Internal use.
@@ -430,7 +345,9 @@ public class Node {
     _scalingTask = new InertialTask() {
       @Override
       public void action() {
-        float factor = 1 + Math.abs(_x) / graph().height();
+        // TODO testing
+        //float factor = 1 + Math.abs(_x) / graph().height();
+        float factor = 1 + Math.abs(_x) / 800;
         scale(_x >= 0 ? factor : 1 / factor);
       }
     };
@@ -495,7 +412,9 @@ public class Node {
    */
   // TODO pending
   public Node get() {
-    return new Node((Graph) null, this);
+    Node node = new Node();
+    node.set(this);
+    return node;
   }
 
   /**
@@ -510,8 +429,8 @@ public class Node {
 
   /**
    * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
-   * those of the {@code node}. The node {@link #graph()}, {@link #reference()} and
-   * {@link #constraint()} are not affected by this call.
+   * those of the {@code node}. The node {@link #reference()} and {@link #constraint()}
+   * are not affected by this call.
    * <p>
    * After calling {@code set(node)} a call to {@code this.matches(node)} should
    * return {@code true}.
@@ -532,10 +451,10 @@ public class Node {
 
   /**
    * Sets an identity node by resetting its {@link #translation()}, {@link #rotation()}
-   * and {@link #scaling()}. The node {@link #graph()}, {@link #reference()} and
-   * {@link #constraint()} are not affected by this call. Call {@code set(null)} if you
-   * want to reset the global {@link #position()}, {@link #orientation()} and
-   * {@link #magnitude()} node parameters instead.
+   * and {@link #scaling()}. The node {@link #reference()} and {@link #constraint()}
+   * are not affected by this call. Call {@code set(null)} if you want to reset the
+   * global {@link #position()}, {@link #orientation()} and {@link #magnitude()} node
+   * parameters instead.
    *
    * @see #set(Node)
    */
@@ -710,8 +629,8 @@ public class Node {
     // 2a. before assigning new reference node
     if (reference() != null) // old
       reference()._removeChild(this);
-    else if (graph() != null)
-      graph()._removeLeadingNode(this);
+    else
+      Graph._removeLeadingNode(this);
     // finally assign the reference node
     _reference = node;// reference() returns now the new value
     // 2b. after assigning new reference node
@@ -724,8 +643,7 @@ public class Node {
    */
   protected void _restorePath(Node parent, Node child) {
     if (parent == null) {
-      if (graph() != null)
-        graph()._addLeadingNode(child);
+      Graph._addLeadingNode(child);
     } else {
       if (!parent._hasChild(child)) {
         parent._addChild(child);
@@ -786,29 +704,12 @@ public class Node {
   }
 
   /**
-   * Same as {@code randomize(graph().center(), graph().radius(), graph().is3D())}.
-   *
-   * @see #randomize(Vector, float, boolean)
-   * @see Vector#randomize()
-   * @see Quaternion#randomize()
-   * @see #random(Graph)
-   * @see #random(Vector, float, boolean)
-   */
-  public void randomize() {
-    if (graph() != null)
-      randomize(graph().center(), graph().radius(), graph().is3D());
-    else
-      System.out.println("randomize() is only available for attached nodes, nothing done! Use randomize(center, radius, is3D) instead");
-  }
-
-  /**
    * Randomized this node. The node is randomly re-positioned inside the ball
    * defined by {@code center} and {@code radius}, which in 2D is a
    * circumference parallel to the x-y plane. The {@link #orientation()} is
    * randomized by {@link Quaternion#randomize()}. The new magnitude is a random
    * in old-magnitude * [0,5...2].
    *
-   * @see #randomize()
    * @see Vector#randomize()
    * @see Quaternion#randomize()
    * @see #random(Graph)
@@ -840,11 +741,10 @@ public class Node {
    * @see #random(Vector, float, boolean)
    * @see Vector#random()
    * @see Quaternion#random()
-   * @see #randomize()
    * @see #randomize(Vector, float, boolean)
    */
   public static Node random(Graph graph) {
-    Node node = new Node(graph);
+    Node node = new Node();
     node.randomize(graph.center(), graph.radius(), graph.is3D());
     return node;
   }
@@ -858,7 +758,6 @@ public class Node {
    * @see #random(Graph)
    * @see Vector#random()
    * @see Quaternion#random()
-   * @see #randomize()
    * @see #randomize(Vector, float, boolean)
    */
   public static Node random(Vector center, float radius, boolean is3D) {
@@ -1353,7 +1252,9 @@ public class Node {
   public void scale(float scaling, float inertia) {
     scale(scaling);
     _scalingTask._inertia = inertia;
-    _scalingTask._x += scaling > 1 ? graph().height() * (scaling - 1) : graph().height() * (scaling - 1) / scaling;
+    // TODO testing
+    //_scalingTask._x += scaling > 1 ? graph().height() * (scaling - 1) : graph().height() * (scaling - 1) / scaling;
+    _scalingTask._x += scaling > 1 ? 800 * (scaling - 1) : 800 * (scaling - 1) / scaling;
     if (!_scalingTask.isActive()) {
       _scalingTask.run();
     }
@@ -2220,13 +2121,6 @@ public class Node {
   }
 
   // Attached nodes
-
-  /**
-   * Returns the {@code graph} this node is attached to.
-   */
-  public Graph graph() {
-    return _graph;
-  }
 
   /**
    * Returns {@code true} if tagging is enabled.

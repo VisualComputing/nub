@@ -33,11 +33,12 @@ public class ShiftViewers extends PApplet {
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
         //models[i] = new Node(scene1, boxShape());
-        models[i] = new Node(scene1);
+        models[i] = new Node();
         models[i].setShape(boxShape());
       } else {
-        models[i] = new Node(scene1) {
+        models[i] = new Node() {
           int _faces = (int) ShiftViewers.this.random(3, 15), _color = color(ShiftViewers.this.random(255), ShiftViewers.this.random(255), ShiftViewers.this.random(255));
+
           @Override
           public void graphics(PGraphics pg) {
             pg.pushStyle();

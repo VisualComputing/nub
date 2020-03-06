@@ -256,7 +256,7 @@ public class Graph {
     _rays = new ArrayList<Ray>();
     cacheProjectionViewInverse(false);
     setFrustum(new Vector(), 100);
-    Node eye = new Node(this);
+    Node eye = new Node();
     eye.disableTagging();
     setEye(eye);
     _lookAroundTask = new InertialTask() {

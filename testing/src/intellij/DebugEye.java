@@ -21,7 +21,7 @@ public class DebugEye extends PApplet {
   public void setup() {
     scene = new Scene(this);
     //scene.togglePerspective();
-    Node box1 = new Node(scene) {
+    Node box1 = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();

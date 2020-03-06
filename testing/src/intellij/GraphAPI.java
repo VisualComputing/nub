@@ -38,7 +38,7 @@ public class GraphAPI extends PApplet {
     // red
     p1 = createShape(BOX, 30);
     p1.setFill(color(255, 0, 0));
-    n1 = new Node(scene, p1);
+    n1 = new Node(p1);
     //n1.randomize();
     n1.setPickingThreshold(0);
 
@@ -46,7 +46,7 @@ public class GraphAPI extends PApplet {
     p2 = createShape(BOX, 30);
     p2.setFill(color(0, 255, 0));
     n2 = new Node(n1, p2);
-    n2.randomize();
+    scene.randomize(n2);
     n2.scale(0.5f);
     n2.setPickingThreshold(0);
 
@@ -54,21 +54,21 @@ public class GraphAPI extends PApplet {
     p3 = createShape(BOX, 30);
     p3.setFill(color(0, 0, 255));
     n3 = new Node(n1, p3);
-    n3.randomize();
+    scene.randomize(n3);
     n3.setPickingThreshold(0);
 
     //yellow
     p4 = createShape(BOX, 30);
     p4.setFill(color(255, 255, 0));
     n4 = new Node(n2, p4);
-    n4.randomize();
+    scene.randomize(n4);
     n4.setPickingThreshold(0);
 
     // magenta
     p5 = createShape(BOX, 30);
     p5.setFill(color(255, 0, 255));
     n5 = new Node(n4, p5);
-    n5.randomize();
+    scene.randomize(n5);
     n5.setPickingThreshold(0);
   }
 

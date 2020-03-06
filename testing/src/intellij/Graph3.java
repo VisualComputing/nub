@@ -28,7 +28,7 @@ public class Graph3 extends PApplet {
     framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/vertex.glsl");
     nodes = new Node[50];
     for (int i = 0; i < nodes.length; i++) {
-      nodes[i] = new Node(graph) {
+      nodes[i] = new Node() {
         @Override
         public void visit() {
           shader(framesShader);
@@ -46,7 +46,7 @@ public class Graph3 extends PApplet {
           popStyle();
         }
       };
-      nodes[i].randomize();
+      graph.randomize(nodes[i]);
     }
     //discard Processing matrices
     resetMatrix();

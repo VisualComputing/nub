@@ -21,7 +21,7 @@ public class DebugCam extends PApplet {
   public void setup() {
     scene = new Scene(this);
     //scene.togglePerspective();
-    Node box1 = new Node(scene) {
+    Node box1 = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();
@@ -30,6 +30,7 @@ public class DebugCam extends PApplet {
         pg.box(30);
         pg.popStyle();
       }
+
       @Override
       public void interact(Object... gesture) {
         if (gesture.length == 1) {

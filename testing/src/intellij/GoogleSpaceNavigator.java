@@ -82,7 +82,7 @@ public class GoogleSpaceNavigator extends PApplet {
     Vector pos = scene.eye().position();
     Quaternion o = scene.eye().orientation();
     Node oldRef = scene.eye().reference();
-    Node rFrame = new Node(scene);
+    Node rFrame = new Node();
     rFrame.setPosition(scene.anchor());
     rFrame.setZAxis(Vector.subtract(pos, scene.anchor()));
     rFrame.setXAxis(scene.eye().xAxis());

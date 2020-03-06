@@ -50,7 +50,7 @@ public class ViewFrustumCulling extends PApplet {
   public void buildBoxHierarchy(OctreeNode parent) {
     if (parent.level() < levels)
       for (int i = 0; i < 8; ++i)
-        buildBoxHierarchy(new OctreeNode(parent, new Vector((i & 4) == 0 ? a : -a, (i & 2) == 0 ? b : -b, (i & 1) == 0 ? c : -c)));
+        buildBoxHierarchy(new OctreeNode(scene1, parent, new Vector((i & 4) == 0 ? a : -a, (i & 2) == 0 ? b : -b, (i & 1) == 0 ? c : -c)));
   }
 
   @Override
