@@ -99,8 +99,8 @@ import java.util.List;
  * {@link nub.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
  * <h2>Shapes</h2>
- * A node shape can be set from a retained-mode rendering object, see {@link #setShape(Object)};
- * or from an immediate-mode rendering procedure, see {@link #graphics(Object)}.
+ * A node shape can be set from a retained-mode rendering object, see {@link #setShape(processing.core.PShape)};
+ * or from an immediate-mode rendering procedure, see {@link #graphics(processing.core.PGraphics)}.
  * Picking a node is done according to a {@link #pickingThreshold()}. When a node is tagged
  * it will be highlighted (scaled) according to a {@link #highlighting()} magnitude.
  * See also {@link #enableTagging(boolean)}.
@@ -145,7 +145,9 @@ public class Node {
   protected boolean _tagging;
 
   // Rendering
-  protected Object _shape;
+  // js should go:
+  //protected Object _shape;
+  protected processing.core.PShape _shape;
   protected float _highlight;
   protected long _bypass;
 
@@ -155,7 +157,7 @@ public class Node {
   /**
    * Same as {@code this(null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
   public Node() {
     this(null, null, null, new Vector(), new Quaternion(), 1);
@@ -165,7 +167,7 @@ public class Node {
    * Creates a child node with {@code reference} as {@link #reference()}.
    * Same as {@code this(reference, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
   public Node(Node reference) {
     this(reference, null, null, new Vector(), new Quaternion(), 1);
@@ -175,7 +177,7 @@ public class Node {
    * Creates a detached node with {@code shape}.
    * Same as {@code this(null, null, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
   public Node(processing.core.PShape shape) {
     this(null, null, shape, new Vector(), new Quaternion(), 1);
@@ -188,7 +190,7 @@ public class Node {
    * The {@link #pickingThreshold()} is set to {@code 0.2}.
    * Same as {@code this(reference, null, null, translation, rotation, scaling)}.
    *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
   public Node(Node reference, Vector translation, Quaternion rotation, float scaling) {
     this(reference, null, null, translation, rotation, scaling);
@@ -201,7 +203,7 @@ public class Node {
    * The {@link #pickingThreshold()} is set to {@code 0.2}.
    * Same as {@code this(null, null, null, translation, rotation, scaling)}.
    *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
   public Node(Vector translation, Quaternion rotation, float scaling) {
     this(null, null, null, translation, rotation, scaling);
@@ -210,7 +212,7 @@ public class Node {
   /**
    * Same as {@code this(null, constraint, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
   public Node(Constraint constraint) {
     this(null, constraint, null, new Vector(), new Quaternion(), 1);
@@ -219,25 +221,25 @@ public class Node {
   /**
    * Same as {@code this(null, constraint, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
-  public Node(Constraint constraint, Object shape) {
+  public Node(Constraint constraint, processing.core.PShape shape) {
     this(null, constraint, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
    * Same as {@code this(reference, null, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
-  public Node(Node reference, Object shape) {
+  public Node(Node reference, processing.core.PShape shape) {
     this(reference, null, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
    * Same as {@code this(reference, constraint, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
   public Node(Node reference, Constraint constraint) {
     this(reference, constraint, null, new Vector(), new Quaternion(), 1);
@@ -246,9 +248,9 @@ public class Node {
   /**
    * Same as {@code this(reference, constraint, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
-  public Node(Node reference, Constraint constraint, Object shape) {
+  public Node(Node reference, Constraint constraint, processing.core.PShape shape) {
     this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
   }
 
@@ -258,9 +260,9 @@ public class Node {
    * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
    * Same as {@code this(null, constraint, shape, translation, rotation, scaling)}.
    *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
-  public Node(Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
+  public Node(Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
     this(null, constraint, shape, translation, rotation, scaling);
   }
 
@@ -272,7 +274,7 @@ public class Node {
    * The {@link #pickingThreshold()} is set to {@code 0.2} and the {@link #highlighting()}
    * magnitude to {@code 0.15}.
    */
-  public Node(Node reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
+  public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
     setReference(reference);
     setConstraint(constraint);
     setShape(shape);
@@ -620,7 +622,7 @@ public class Node {
       System.out.println("A Node descendant cannot be set as its reference.");
       return;
     }
-    // 1. no need to re-parent, just check this needs to be added as leadingnode
+    // 1. no need to re-parent, just check this needs to be added as a leading node
     if (reference() == node) {
       _restorePath(reference(), this);
       return;
@@ -784,8 +786,8 @@ public class Node {
    * Picking a node is done with ray casting against a screen-space shape defined according
    * to a {@link #pickingThreshold()} as follows:
    * <ul>
-   * <li>The projected pixels of the node visual representation (see {@link #graphics(Object)}
-   * and {@link #setShape(Object)}). Set it with {@code threshold = 0}.</li>
+   * <li>The projected pixels of the node visual representation (see {@link #graphics(processing.core.PGraphics)}
+   * and {@link #setShape(processing.core.PShape)}). Set it with {@code threshold = 0}.</li>
    * <li>A node bounding box whose length is defined as percentage of the graph diameter
    * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
    * <li>A squared 'bullseye' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
@@ -2296,20 +2298,20 @@ public class Node {
     return _highlight;
   }
 
-  // JS version of the rendering methods
+  // js go:
+  // public void graphics(Object context) {}
 
   /**
-   * Override this method to set an immediate mode graphics procedure on {@code context}.
-   *
-   * @see #setShape(Object)
+   * Override this method to set an immediate mode graphics procedure on the Processing
+   * {@code PGraphics}. Return {@code true} if succeeded and {@code false} otherwise.
    */
-  public void graphics(Object context) {
+  public void graphics(processing.core.PGraphics pGraphics) {
   }
 
   /**
    * Same as {@code setShape(null)}.
    *
-   * @see #setShape(Object)
+   * @see #setShape(processing.core.PShape)
    */
   public void resetShape() {
     setShape(null);
@@ -2318,10 +2320,10 @@ public class Node {
   /**
    * Sets the node retained mode shape.
    *
-   * @see #graphics(Object)
+   * @see #graphics(processing.core.PGraphics)
    * @see #resetShape()
    */
-  public void setShape(Object shape) {
+  public void setShape(processing.core.PShape shape) {
     _shape = shape;
   }
 
@@ -2330,19 +2332,9 @@ public class Node {
    *
    * @see #resetShape()
    * @see #shape()
-   * @see #graphics(Object)
+   * @see #graphics(processing.core.PGraphics)
    */
-  public Object shape() {
+  public processing.core.PShape shape() {
     return _shape;
-  }
-
-
-  // Java version of the immediate mode rendering methods
-
-  /**
-   * Override this method to set an immediate mode graphics procedure on the Processing
-   * {@code PGraphics}. Return {@code true} if succeeded and {@code false} otherwise.
-   */
-  public void graphics(processing.core.PGraphics pGraphics) {
   }
 }
