@@ -25,7 +25,7 @@ public class ChainSolver extends FABRIKSolver {
   //TODO: Enable Translation of Head (Skip Backward Step)
   protected List<Node> _chain;
   protected List<? extends Node> _original;
-  protected float _current = 10e10f, _best = 10e10f, _previous = 10e10f;
+  protected float _current = 10e10f, _best = 10e10f, _previousBest = 10e10f;
   protected Node _target;
   protected Node _prevTarget;
   protected boolean _is3D = true;
@@ -247,7 +247,7 @@ public class ChainSolver extends FABRIKSolver {
 
     _current = Vector.distance(target, _chain.get(_chain.size() - 1).position());
 
-    if(Math.abs(_previous - _current) <= 0.001f){
+    if(Math.abs(_best - _previousBest) < Float.MIN_VALUE){ //DeadLock
       _deadlockCounter++;
     }
     else {
@@ -255,7 +255,7 @@ public class ChainSolver extends FABRIKSolver {
     }
 
     if(_deadlockCounter == 5){ //apply random perturbation
-      for(int i = 0; i < _chain.size(); i++){
+      for(int i = 0; i < _chain.size() - 1; i++){
         Node j_i = _chain.get(i);
         Quaternion q = Quaternion.random();
         if(j_i.constraint() != null) j_i.constraint().constrainRotation(q, j_i);
@@ -267,7 +267,7 @@ public class ChainSolver extends FABRIKSolver {
 
     _update();
 
-    _previous = _current;
+    _previousBest = _best;
     //if(debug) addIterationRecord(_positions);
     //Check total position change
     return false;
@@ -323,7 +323,7 @@ public class ChainSolver extends FABRIKSolver {
       _best = 10e10f;
     }
     _deadlockCounter = 0;
-    _previous = 10e10f;
+    _previousBest = 10e10f;
   }
 
   @Override

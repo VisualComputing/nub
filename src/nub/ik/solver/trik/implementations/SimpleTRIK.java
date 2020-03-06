@@ -24,7 +24,7 @@ public class SimpleTRIK extends Solver {
     protected Heuristic _mainHeuristic, _secondaryHeuristic, _twistHeuristic;
 
     //Steady state algorithm
-    protected float _current = 10e10f, _best = 10e10f, _previous = 10e10f;
+    protected float _current = 10e10f, _best = 10e10f, _previousBest = 10e10f;
     protected int _stepCounter;
     protected boolean  _enableTwist = true;
 
@@ -219,9 +219,9 @@ public class SimpleTRIK extends Solver {
 
         _update(); //update if required
 
-        //Define dead lock if eff does not move to a better position
-        if(Math.abs(_previous - _current) <= 0.001f){
-            //context().incrementDeadlockCounter();
+        //Define dead lock if eff does not move to a better position after a given number of iterations
+        if(Math.abs(_best - _previousBest) < Float.MIN_VALUE){ //DeadLock
+            context().incrementDeadlockCounter();
         }
         else {
             context().resetDeadlockCounter();
@@ -244,7 +244,7 @@ public class SimpleTRIK extends Solver {
                 //_orientationError(_context.chainInformation().get(_context.last()).orientationCache(), _context.worldTarget().orientation(), true) < 1) {
         //if(_positionError(_context.chainInformation().get(_context.last()).positionCache(), _context.worldTarget().position()) <= _maxError){
 
-        _previous = _current;
+        _previousBest = _best;
 
         if(error() <= _maxError){
             return true;
@@ -308,7 +308,7 @@ public class SimpleTRIK extends Solver {
         } else {
             _best = 10e10f;
         }
-        _previous = 10e10f;
+        _previousBest = 10e10f;
 
         if(_context.singleStep()) _stepCounter = 0;
 
