@@ -64,12 +64,12 @@ public class MouseDragInteraction extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == 'f')
+    if (key == 'i')
       scene.flip();
     if (key == 's')
-      scene.fit(1);
-    if (key == 'f')
       scene.fit();
+    if (key == 'f')
+      scene.fit(1);
     if (key == 'c') {
       cad = !cad;
       if (cad) {

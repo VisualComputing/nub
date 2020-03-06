@@ -83,14 +83,8 @@ import java.util.List;
  * Hierarchical traversals of the node hierarchy which automatically apply the local
  * node transformations described above may be achieved with {@link Graph#render()} or
  * {@link Graph#render()}.
- * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Node)}
- * and to instantiate a node attached to a graph which is referred to as attached node (see
- * {@link #isAttached(Graph)} and {@link #isDetached()}).
- * <p>
- * To instantiate an attached node use the node constructors that take a {@code graph}
- * parameter or a (reference) node which in turn is attached to a graph. Once instantiated,
- * a node cannot be attached nor detached, but a copy of it can (see {@link #attach(Graph)}
- * and {@link #detach()}).
+ * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Node)}.
+ * // TODO detach
  * <h2>Constraints</h2>
  * One interesting feature of a node is that its displacements can be constrained.
  * When a {@link Constraint} is attached to a node, it filters the input of
@@ -393,10 +387,7 @@ public class Node {
     this.setOrientation(node.orientation());
     this.setMagnitude(node.magnitude());
     this.setConstraint(node.constraint());
-
-    if ((this.isDetached() && node.isDetached()) || !(this.isDetached() && !node.isDetached()))
-      setReference(node.reference());
-
+    this.setReference(node.reference());
     this._id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -404,14 +395,11 @@ public class Node {
     _lastUpdate = node.lastUpdate();
     this._threshold = node._threshold;
     this._tagging = node._tagging;
-
     if (graph() == null)
       return;
-
     // attached nodes:
     this._children = new ArrayList<Node>();
     this._culled = node._culled;
-
     this._shape = node._shape;
     this._highlight = node._highlight;
     this._initTasks();
@@ -503,63 +491,21 @@ public class Node {
   }
 
   /**
-   * Performs a deep copy of this node into {@code graph}.
-   * <p>
-   * Same as {@code return new Node(graph, this)}.
-   *
-   * @see #Node(Graph, Node)
-   */
-  public Node attach(Graph graph) {
-    return new Node(graph, this);
-  }
-
-  /**
    * Performs a deep copy of this node.
-   * <p>
-   * Same as {@code return attach(graph())}.
-   *
-   * @see #attach(Graph)
    */
+  // TODO pending
   public Node get() {
-    return attach(graph());
+    return new Node((Graph) null, this);
   }
 
   /**
    * Returns a detached deep copy of this node.
-   * <p>
-   * Same as {@code return attach(null)}.
-   *
-   * @see #attach(Graph)
    */
-  public Node detach() {
-    return attach(null);
-  }
-
-  /**
-   * Tells whether or not this node belongs to the {@graph} hierarchy (see {@link Graph#render()}).
-   * To test if the node is detach from any graph hierarchy call {@code isAttached(null)}.
-   * <p>
-   * Note that a call to {@link #children()} never returns {@code null} if the node is attached to
-   * a graph, i.e., that graph will visit the node during traversal.
-   *
-   * @see #isDetached()
-   * @see Graph#render()
-   */
-  public boolean isAttached(Graph graph) {
-    return _graph == graph;
-  }
-
-  /**
-   * Same as {@code return isAttached(null)}.
-   * <p>
-   * Note that a call to {@link #children()} always returns {@code null} if the node is detached,
-   * i.e., the node is not available for graph traversal (see {@link Graph#render()}).
-   *
-   * @see #isAttached(Graph)
-   * @see Graph#render()
-   */
-  public boolean isDetached() {
-    return isAttached(null);
+  // TODO test
+  protected Node detach() {
+    Node node = this.get();
+    Graph._removeLeadingNode(node);
+    return node;
   }
 
   /**
@@ -745,6 +691,7 @@ public class Node {
    * {@link #reference()}). No action is performed if setting {@code reference} as the
    * {@link #reference()} would create a loop in the hierarchy.
    */
+  // TODO needs testing
   public void setReference(Node node) {
     if (node == this) {
       System.out.println("A Node cannot be a reference of itself.");
@@ -754,32 +701,21 @@ public class Node {
       System.out.println("A Node descendant cannot be set as its reference.");
       return;
     }
-    if (node != null)
-      if ((isDetached() && !node.isDetached()) || !node.isAttached(graph())) {
-        System.out.println("Both node and its reference should be detached, or attached to the same graph.");
-        return;
-      }
-    if (isDetached()) {
-      if (reference() == node)
-        return;
-      _reference = node;
-    } else {
-      // 1. no need to re-parent, just check this needs to be added as leadingnode
-      if (reference() == node) {
-        _restorePath(reference(), this);
-        return;
-      }
-      // 2. else re-parenting
-      // 2a. before assigning new reference node
-      if (reference() != null) // old
-        reference()._removeChild(this);
-      else if (graph() != null)
-        graph()._removeLeadingNode(this);
-      // finally assign the reference node
-      _reference = node;// reference() returns now the new value
-      // 2b. after assigning new reference node
+    // 1. no need to re-parent, just check this needs to be added as leadingnode
+    if (reference() == node) {
       _restorePath(reference(), this);
+      return;
     }
+    // 2. else re-parenting
+    // 2a. before assigning new reference node
+    if (reference() != null) // old
+      reference()._removeChild(this);
+    else if (graph() != null)
+      graph()._removeLeadingNode(this);
+    // finally assign the reference node
+    _reference = node;// reference() returns now the new value
+    // 2b. after assigning new reference node
+    _restorePath(reference(), this);
     _modified();
   }
 
@@ -833,9 +769,9 @@ public class Node {
   }
 
   /**
-   * Returns the list a child nodes of this node. Only meaningful if this node {@link #isAttached(Graph)}
-   * to a graph. Returns {@code null} if this node {@link #isDetached()}.
+   * Returns the list a child nodes of this node.
    */
+  // TODO test detach!
   public List<Node> children() {
     return _children;
   }
@@ -851,8 +787,6 @@ public class Node {
 
   /**
    * Same as {@code randomize(graph().center(), graph().radius(), graph().is3D())}.
-   * <p>
-   * Does nothing if the node {@link #isDetached()}.
    *
    * @see #randomize(Vector, float, boolean)
    * @see Vector#randomize()
@@ -1079,11 +1013,6 @@ public class Node {
    */
   public void translate(Vector vector, float inertia) {
     translate(vector);
-    if (isDetached()) {
-      if (inertia > 0)
-        System.out.println("Warning: translate(vector, inertia) is only available if node is attached to a Graph. Use translate(vector) instead");
-      return;
-    }
     _translationTask.setInertia(inertia);
     _translationTask._x += vector.x();
     _translationTask._y += vector.y();
@@ -1219,11 +1148,6 @@ public class Node {
    */
   public void rotate(Quaternion quaternion, float inertia) {
     rotate(quaternion);
-    if (isDetached()) {
-      if (inertia > 0)
-        System.out.println("Warning: rotate(quaternion, inertia) is only available if node is attached to a Graph. Use rotate(quaternion) instead");
-      return;
-    }
     _rotationTask.setInertia(inertia);
     Vector e = quaternion.eulerAngles();
     _rotationTask._x += e.x();
@@ -1277,11 +1201,6 @@ public class Node {
    */
   public void orbit(Quaternion quaternion, Vector center, float inertia) {
     orbit(quaternion, center);
-    if (isDetached()) {
-      if (inertia > 0)
-        System.out.println("Warning: orbit(quaternion, center, inertia) is only available if node is attached to a Graph. Use orbit(quaternion, center) instead");
-      return;
-    }
     _orbitTask.setInertia(inertia);
     _orbitTask._center = center;
     Vector e = quaternion.eulerAngles();
@@ -1433,11 +1352,6 @@ public class Node {
    */
   public void scale(float scaling, float inertia) {
     scale(scaling);
-    if (isDetached()) {
-      if (inertia > 0)
-        System.out.println("Warning: scale(scaling, inertia) is only available if node is attached to a Graph. Use scale(scaling) instead");
-      return;
-    }
     _scalingTask._inertia = inertia;
     _scalingTask._x += scaling > 1 ? graph().height() * (scaling - 1) : graph().height() * (scaling - 1) / scaling;
     if (!_scalingTask.isActive()) {
@@ -2308,8 +2222,7 @@ public class Node {
   // Attached nodes
 
   /**
-   * Returns the {@code graph} this node is attached to. Always returns {@code false} if
-   * the node {@link #isDetached()}.
+   * Returns the {@code graph} this node is attached to.
    */
   public Graph graph() {
     return _graph;
@@ -2444,21 +2357,18 @@ public class Node {
    * @see #bypass()
    */
   public void cull(boolean cull) {
-    if (isDetached())
-      System.out.println("Warning: culling a detached node does nothing");
     _culled = cull;
   }
 
   /**
    * Returns whether or not the node culled or not. Culled nodes (and their children)
-   * will not be visited by the {@link Graph#render()} algorithm. Always returns
-   * {@code false} if the node {@link #isDetached()}.
+   * will not be visited by the {@link Graph#render()} algorithm.
    *
    * @see #cull(boolean)
    * @see #bypass()
    */
   public boolean isCulled() {
-    return !isDetached() && _culled;
+    return _culled;
   }
 
   /**
