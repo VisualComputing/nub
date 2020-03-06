@@ -239,6 +239,8 @@ public class BVHLoader {
       }
     }
     _root = root;
+    if(root instanceof Joint) ((Joint) root).setRoot(true);
+
     _branch = scene.branch(_root);
     return root;
   }
@@ -401,6 +403,7 @@ public class BVHLoader {
 
   public void generateConstraints(){
     for(Node node : _branch){
+      if(node == _root) continue;
       generateConstraint(node);
     }
   }
