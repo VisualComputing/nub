@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.Map;
 
 public class Viewer extends PApplet{
-    String path =  "/testing/data/bvh/0005_JumpRope001.bvh";
+    String path =  "/testing/data/bvh/80_64.bvh";
     Scene scene;
     BVHLoader parser;
-    Skeleton skeleton;
+    List<Skeleton> skeletons;
 
     boolean readNext = false;
     boolean solve = false;
@@ -49,10 +49,12 @@ public class Viewer extends PApplet{
         scene.fit(1);
         parser = new BVHLoader(sketchPath() + path, scene, null);
         parser.generateConstraints();
-        skeleton = new Skeleton(parser, SimpleTRIK.HeuristicMode.FINAL, scene, color(0,255,0), scene.radius() * 0.01f);
-        //skeleton = new Skeleton(parser, SimpleTRIK.HeuristicMode.CCD,  scene, color(0,0,255), scene.radius() * 0.01f);
-        skeleton._reference.translate(100,0,0);
-        //parser.root().cull(true);
+
+        skeletons = new ArrayList<Skeleton>();
+
+        skeletons.add(new Skeleton(parser, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL, scene, color(0,255,0), scene.radius() * 0.01f));
+        //skeletons.add(new Skeleton(parser, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL, scene, color(255,0,0), scene.radius() * 0.01f));
+        parser.root().cull(true);
         //skeleton._root.cull(true);
     }
 
@@ -66,7 +68,7 @@ public class Viewer extends PApplet{
         //Draw Constraints
         scene.drawAxes();
         scene.render();
-        skeleton.renderNames();
+        //skeleton.renderNames();
 
         if(readNext) {
             readNextPose();
@@ -76,20 +78,23 @@ public class Viewer extends PApplet{
 
     public void readNextPose(){
         parser.nextPose();
-        Constraint c = skeleton._root.constraint();
-        skeleton._root.setConstraint(null);
-        skeleton._root.setPosition(parser.root().position().get());
-        skeleton._root.setOrientation(parser.root().orientation().get());
-        skeleton._root.setConstraint(c);
 
-
-        //update targets
-
-        for (Node node : parser.branch()) {
-            if (node.children() == null || node.children().isEmpty()) {
-                Node target = skeleton._targets.get(parser.joint().get(node.id()).name());
-                target.setPosition(node.position().get());
-                target.setOrientation(node.orientation().get());
+        for(Skeleton skeleton: skeletons){
+            Constraint c = skeleton._root.constraint();
+            skeleton._root.setConstraint(null);
+            skeleton._root.setPosition(parser.root().position().get());
+            skeleton._root.setOrientation(parser.root().orientation().get());
+            skeleton._root.setConstraint(c);
+            //update targets
+            for(Node joint : scene.branch(skeleton._root)){
+                if (joint.children() == null || joint.children().isEmpty()) {
+                    Node node = skeleton._jointToNode.get(joint);
+                    Node target = skeleton._targets.get(parser.joint().get(node.id()).name());
+                    target.setPosition(node.position().get());
+                    target.setOrientation(node.orientation().get());
+                    //modify end effector rotation
+                    joint.setRotation(node.rotation());
+                }
             }
         }
     }
@@ -150,6 +155,7 @@ public class Viewer extends PApplet{
             _scene = scene;
             _radius = radius;
             _reference = new Node(scene);
+            _reference.enableTagging(false);
             _createSkeleton(loader, color, radius);
             _createSolver(mode);
         }
@@ -172,16 +178,22 @@ public class Viewer extends PApplet{
                 _jointToNode.put(joint, node);
             }
             _root = pairs.get(loader.root());
-            _root.setRoot(true);
             _root.setReference(_reference);
-
+            _root.setRoot(true);
         }
 
         protected void _createSolver(SimpleTRIK.HeuristicMode mode){
             _solver = new TRIKTree(_root, mode);
-            _solver.setMaxError(0.01f);
+            _solver.setMaxError(0.1f);
+            _solver.setDirection(false);
+            _solver.setSearchingAreaRadius(0.3f, true);
+            _solver.setOrientationWeight(0.5f);
+
             _solver.setTimesPerFrame(10);
+            _solver.setChainTimesPerFrame(20);
+            _solver.setChainMaxIterations(20);
             _solver.setMaxIterations(10);
+
             //add task to scene
             TimingTask task = new TimingTask(_scene) {
                 @Override

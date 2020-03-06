@@ -31,7 +31,7 @@ public class NaiveBiped extends PApplet {
     float boneLength = 50;
     float radius = 10;
 
-    int segments = 5;
+    int segments = 8;
     float stepHeight = boneLength/2 * segments/3f, stepWidth = boneLength * segments/3f;
 
     public void settings() {
@@ -60,7 +60,7 @@ public class NaiveBiped extends PApplet {
         scene.fit(1);
 
         if(!debug) {
-            createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(-boneLength*3, 0,0), IKMode.SIMPLETRIK, 60 , 0);
+            createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(-boneLength*3, 0,0), IKMode.SIMPLETRIK, 70 , 0);
             //createStructure(scene, segments, boneLength, radius, color(255, 0, 0), new Vector(-boneLength * 3, 0, 0), IKMode.BIOIK, 40, 0);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK,40, 0);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
@@ -192,8 +192,10 @@ public class NaiveBiped extends PApplet {
             }
 
             case SIMPLETRIK:{
-                solver = new SimpleTRIK(limb, SimpleTRIK.HeuristicMode.FINAL);
-                //((SimpleTRIK) solver).context().setDirection(true);
+                solver = new SimpleTRIK(limb, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL);
+                ((SimpleTRIK) solver).context().setDirection(true);
+                ((SimpleTRIK) solver).context().setSearchingAreaRadius(1f, true);
+                ((SimpleTRIK) solver).context().setOrientationWeight(0.5f);
                 solver.setTarget(limb.get(limb.size() - 1), target);
 
                 break;
@@ -206,9 +208,9 @@ public class NaiveBiped extends PApplet {
 
         //solver.setMaxError(0f);
         if (!debug){
-            solver.setTimesPerFrame(20);
-            solver.setMaxIterations(20);
-            solver.setMaxError(0.5f);
+            solver.setTimesPerFrame(30);
+            solver.setMaxIterations(30);
+            solver.setMaxError(0f);
         }
         else{
             solver.setTimesPerFrame(1);
@@ -457,7 +459,7 @@ public class NaiveBiped extends PApplet {
                     Cycle.this.run();
                 }
             };
-            task.run(40);
+            task.run(20);
         }
     }
     public static void main(String args[]) {

@@ -5,10 +5,12 @@ import nub.core.Graph;
 import nub.core.Interpolator;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.oldtrik.TRIKTree;
 import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.ik.visual.Joint;
+import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -81,10 +83,12 @@ public class MultipleLimbs extends PApplet {
 
 
     public TRIKTree createSolver(Scene scene, Node root, float radius){
-        TRIKTree solver = new TRIKTree(root);
-        solver.setTimesPerFrame(5);
-        solver.setMaxIterations(5);
-        solver.setMaxError(1);
+        TRIKTree solver = new TRIKTree(root, SimpleTRIK.HeuristicMode.FINAL);
+        solver.setTimesPerFrame(10);
+        solver.setMaxIterations(10);
+        solver.setChainTimesPerFrame(15);
+        solver.setChainMaxIterations(15);
+        solver.setMaxError(20);
         for(Node node : scene.branch(root)){
             if(node.children() == null || node.children().isEmpty()){
                 node.enableTagging(false);
@@ -111,6 +115,17 @@ public class MultipleLimbs extends PApplet {
         //Create root
         Joint root = new Joint(scene, color, radius);
         root.setReference(reference);
+        root.setConstraint(new Constraint() {
+            @Override
+            public Vector constrainTranslation(Vector translation, Node node) {
+                return new Vector();
+            }
+
+            @Override
+            public Quaternion constrainRotation(Quaternion rotation, Node node) {
+                return new Quaternion();
+            }
+        });
         root.setRoot(true);
         skeleton.put("ROOT", root);
 

@@ -29,7 +29,7 @@ public class HeuristicBenchmark extends PApplet {
     float boneLength = 50; //Define length of segments (bones)
 
     //Benchmark Parameters
-    Util.ConstraintType constraintType = Util.ConstraintType.NONE; //Choose what kind of constraints apply to chain
+    Util.ConstraintType constraintType = Util.ConstraintType.HINGE_ALIGNED; //Choose what kind of constraints apply to chain
     Random random = new Random();
     ArrayList<Solver> solvers; //Will store Solvers
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
