@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Viewer extends PApplet{
-    String path =  "/testing/data/bvh/80_64.bvh";
+    String path =  "/testing/data/bvh/0008_ChaCha001.bvh";
     Scene scene;
     BVHLoader parser;
     List<Skeleton> skeletons;

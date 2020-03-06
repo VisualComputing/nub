@@ -25,7 +25,7 @@ public class GeneralizedDistanceVSIterations {
     //Benchmark Parameters
     static boolean continuousPath = false;
     static int numStructures = 100;
-    static int numPostures = 100; //Set the number of different postures to solve
+    static int numPostures = 1000; //Set the number of different postures to solve
     static int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
     static int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
     static float boneLength = 50; //Define length of segments (bones)
