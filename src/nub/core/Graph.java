@@ -929,7 +929,7 @@ public class Graph {
     prune(_eye);
     _eye = eye;
     if (_interpolator == null)
-      _interpolator = new Interpolator(this, _eye);
+      _interpolator = new Interpolator(_eye);
     else
       _interpolator.setNode(_eye);
     _modified();
@@ -2776,9 +2776,6 @@ public class Graph {
   /**
    * Renders the scene onto the {@link #context()}. Calls {@link Node#visit()} on each visited node
    * (refer to the {@link Node} documentation).
-   * <p>
-   * Note that only reachable nodes (nodes attached to this graph, see
-   * {@link Node#isAttached(Graph)}) are rendered by this algorithm.
    *
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
@@ -2821,9 +2818,6 @@ public class Graph {
 
   /**
    * Renders the scene onto {@code context}.
-   * <p>
-   * Note that only reachable nodes (nodes attached to this graph, see
-   * {@link Node#isAttached(Graph)}) are rendered by this algorithm.
    *
    * @see #render()
    * @see #render(Object, Matrix, Matrix)

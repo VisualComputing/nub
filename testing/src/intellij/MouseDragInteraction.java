@@ -49,6 +49,7 @@ public class MouseDragInteraction extends PApplet {
     Node shape2 = new Node(shape1);
     shape2.setShape(shape());
     shape2.translate(275, 275);
+    shape2.setPickingThreshold(0);
 
     randomVector = Vector.random();
     randomVector.setMagnitude(scene.radius() * 0.5f);

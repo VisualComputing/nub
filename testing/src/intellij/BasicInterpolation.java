@@ -32,7 +32,7 @@ public class BasicInterpolation extends PApplet {
     // interpolation 1. Default eye interpolations
     scene.fit(1);
 
-    interpolator = new Interpolator(scene);
+    interpolator = new Interpolator();
     interpolator.enableRecurrence();
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
