@@ -97,35 +97,31 @@ void keyPressed(KeyEvent event) {
     }
   }
   if (keyMode) {
-    if (key == 'u')
-      scene.eye().translate(0, 0, 10);
-    if (key == 'd')
-      scene.eye().translate(0, 0, -10);
     if (key == CODED) {
       switch (keyCode) {
       case UP:
         if (event.isShiftDown())
-          scene.eye().rotate(new Vector(1, 0, 0), -step);
+          scene.eye().rotate(new Vector(1, 0, 0), -step, 0.85);
         else
-          scene.eye().orbit(xAxis(), step);
+          scene.eye().orbit(xAxis(), step, 0.85);
         break;
       case DOWN:
         if (event.isShiftDown())
-          scene.eye().rotate(new Vector(1, 0, 0), step);
+          scene.eye().rotate(new Vector(1, 0, 0), step, 0.85);
         else
-          scene.eye().orbit(xAxis(), -step);
+          scene.eye().orbit(xAxis(), -step, 0.85);
         break;
       case LEFT:
         if (event.isShiftDown())
-          scene.eye().orbit(zAxis(), -step);
+          scene.eye().orbit(zAxis(), -step, 0.85);
         else
-          scene.eye().orbit(yAxis(), -step);
+          scene.eye().orbit(yAxis(), -step, 0.85);
         break;
       case RIGHT:
         if (event.isShiftDown())
-          scene.eye().orbit(zAxis(), step);
+          scene.eye().orbit(zAxis(), step, 0.85);
         else
-          scene.eye().orbit(yAxis(), step);
+          scene.eye().orbit(yAxis(), step, 0.85);
         break;
       }
     }

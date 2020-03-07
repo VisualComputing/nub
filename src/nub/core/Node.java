@@ -862,6 +862,15 @@ public class Node {
   }
 
   /**
+   * Same as {@code translate(new Vector(x, y, z), inertia)}.
+   *
+   * @see #translate(Vector, float)
+   */
+  public void translate(float x, float y, float z, float inertia) {
+    translate(new Vector(x, y, z), inertia);
+  }
+
+  /**
    * Same as {@link #translate(Vector)} but with {@code float} parameters.
    */
   public void translate(float x, float y, float z) {
@@ -871,6 +880,7 @@ public class Node {
   /**
    * Same as {@link #translate(Vector)} but with {@code float} parameters.
    */
+  // TODO discard me?
   public void translate(float x, float y) {
     translate(new Vector(x, y));
   }
@@ -1048,12 +1058,30 @@ public class Node {
   }
 
   /**
+   * Same as {@code rotate(new Quaternion(axis, angle), inertia)}.
+   *
+   * @see #rotate(Quaternion, float)
+   */
+  public void rotate(Vector axis, float angle, float inertia) {
+    rotate(new Quaternion(axis, angle), inertia);
+  }
+
+  /**
    * Same as {@code rotate(new Quaternion(axis, angle))}.
    *
    * @see #rotate(Quaternion)
    */
   public void rotate(Vector axis, float angle) {
     rotate(new Quaternion(axis, angle));
+  }
+
+  /**
+   * Same as {@code rotate(new Vector(x, y, z), angle, inertia)}.
+   *
+   * @see #rotate(Vector, float, float)
+   */
+  public void rotate(float x, float y, float z, float angle, float inertia) {
+    rotate(new Vector(x, y, z), angle, inertia);
   }
 
   /**
@@ -1118,6 +1146,15 @@ public class Node {
   }
 
   /**
+   * Same as {@code orbit(axis, angle, new Vector(), inertia)}.
+   *
+   * @see #orbit(Vector, float, Vector, float)
+   */
+  public void orbit(Vector axis, float angle, float inertia) {
+    orbit(axis, angle, new Vector(), inertia);
+  }
+
+  /**
    * Rotates the node around {@code axis} passing through the origin, both defined in the world
    * coordinate system. Same as {@code orbit(axis, angle, new Vector())}.
    *
@@ -1126,6 +1163,15 @@ public class Node {
    */
   public void orbit(Vector axis, float angle) {
     orbit(axis, angle, new Vector());
+  }
+
+  /**
+   * Same as {@code orbit(new Quaternion(displacement(axis), angle), center, inertia)}.
+   *
+   * @see #orbit(Quaternion, Vector, float)
+   */
+  public void orbit(Vector axis, float angle, Vector center, float inertia) {
+    orbit(new Quaternion(displacement(axis), angle), center, inertia);
   }
 
   /**
