@@ -1,6 +1,5 @@
 class OctreeNode extends Node {
-  OctreeNode(Scene scene) {
-    super(scene);
+  OctreeNode() {
     disableTagging();
   }
 
@@ -28,7 +27,7 @@ class OctreeNode extends Node {
   @Override
   public void visit() {
     // cull only against main scene
-    if (graph() != mainScene)
+    if (bypass)
       return;
     switch (mainScene.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
                                     worldLocation(new Vector( a / 2,  b / 2,  c / 2)))) {

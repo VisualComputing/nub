@@ -152,6 +152,15 @@ public class Interpolator {
   }
 
   /**
+   * Convenience constructor that simply calls {@code this(graph.eye())}.
+   *
+   * @see #Interpolator(Node)
+   */
+  public Interpolator(Graph graph) {
+    this(graph.eye());
+  }
+
+  /**
    * Creates an interpolator, with {@code node} as associated {@link #node()}.
    * <p>
    * The {@link #node()} can be set or changed using {@link #setNode(Node)}.

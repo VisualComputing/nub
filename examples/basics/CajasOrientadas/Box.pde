@@ -3,13 +3,12 @@ public class Box extends Node {
   int _color;
 
   public Box(int tint, float w, float h, float d) {
-    super(scene);
     _color = tint;
     _w = w;
     _h = h;
     _d = d;
     setPickingThreshold(PApplet.max(_w, _h, _d)/scene.radius());
-    randomize();
+    scene.randomize(this);
   }
 
   // note that within render() geometry is defined

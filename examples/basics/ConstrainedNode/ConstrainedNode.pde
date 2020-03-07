@@ -41,7 +41,7 @@ void setup() {
   rotDir = 0;
   activeConstraint = 0;
 
-  iNode = new Node(scene) {
+  iNode = new Node() {
     // Note that within render() geometry is defined at the
     // node local coordinate system.
     @Override

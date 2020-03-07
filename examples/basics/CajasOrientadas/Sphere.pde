@@ -3,7 +3,6 @@ class Sphere extends Node {
   int _color;
 
   public Sphere(int tint, float radius) {
-    super(scene);
     _color = tint;
     _radius = radius;
   }

@@ -35,12 +35,12 @@ void setup() {
   scene.fit(1);
 
   // interpolation 2. Custom eye interpolations
-  eyeInterpolator1 = new Interpolator(scene.eye());
-  eyeInterpolator2 = new Interpolator(scene.eye());
+  eyeInterpolator1 = new Interpolator(scene);
+  eyeInterpolator2 = new Interpolator(scene);
 
   // interpolation 3. Custom (arbitrary) node interpolations
 
-  shape = new Node(scene) {
+  shape = new Node() {
     // Note that within render() geometry is defined at the
     // node local coordinate system.
     @Override
@@ -56,7 +56,7 @@ void setup() {
       pg.popStyle();
     }
   };
-  interpolator = new Interpolator();
+  interpolator = new Interpolator(shape);
   interpolator.enableRecurrence();
   // Create an initial path
   for (int i = 0; i < random(4, 10); i++)

@@ -32,10 +32,10 @@ void setup() {
 
   shapes = new Node[100];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Node(scene, caja());
+    shapes[i] = new Node(caja());
     // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
-    shapes[i].randomize();
+    scene.randomize(shapes[i]);
   }
   scene.fit(1);
 }

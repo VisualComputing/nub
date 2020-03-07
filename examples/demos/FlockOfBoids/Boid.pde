@@ -12,14 +12,13 @@ class Boid extends Node {
   float t = 0;
 
   Boid(Vector inPos) {
-    super(scene);
     position = new Vector();
     position.set(inPos);
     setPosition(new Vector(position.x(), position.y(), position.z()));
     velocity = new Vector(FlockOfBoids.this.random(-1, 1), FlockOfBoids.this.random(-1, 1), FlockOfBoids.this.random(1, -1));
     acceleration = new Vector(0, 0, 0);
     neighborhoodRadius = 100;
-    task = new TimingTask(scene) {
+    task = new TimingTask() {
       @Override
       public void execute() {
         t += 0.1;
