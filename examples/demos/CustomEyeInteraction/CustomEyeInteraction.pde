@@ -98,6 +98,8 @@ void keyPressed(KeyEvent event) {
   }
   if (keyMode) {
     if (key == CODED) {
+      // note that the last parameter in the below
+      // methods is the inertia which should be in [0..1]
       switch (keyCode) {
       case UP:
         if (event.isShiftDown())
