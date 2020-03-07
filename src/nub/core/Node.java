@@ -121,7 +121,7 @@ public class Node {
    */
   public boolean matches(Node node) {
     if (node == null)
-      node = new Node();
+      node = Node.detach(new Vector(), new Quaternion(), 1);
     return translation().matches(node.translation()) && rotation().matches(node.rotation()) && scaling() == node.scaling();
   }
 
@@ -296,31 +296,32 @@ public class Node {
   }
 
   /**
-   * Copy constructor.
+   * Same as {@code return detach(this)}.
+   *
+   * @see #detach(Node)
+   * @see #get()
    */
-  /*
-  protected Node(Graph graph, Node node) {
-    this.setPosition(node.position());
-    this.setOrientation(node.orientation());
-    this.setMagnitude(node.magnitude());
-    this.setConstraint(node.constraint());
-    this.setReference(node.reference());
-    this._id = ++_counter;
-    // unlikely but theoretically possible
-    if (_id == 16777216)
-      throw new RuntimeException("Maximum node instances reached. Exiting now!");
-    _lastUpdate = node.lastUpdate();
-    this._threshold = node._threshold;
-    this._tagging = node._tagging;
-    // tree
-    this._children = new ArrayList<Node>();
-    this._culled = node._culled;
-    this._shape = node._shape;
-    this._highlight = node._highlight;
-    this._initTasks();
+  public Node detach() {
+    return detach(this);
   }
 
+  /**
+   * Same as {@code return Node.detach(node.position(), node.orientation(), node.magnitude())}.
+   *
+   * @see #detach(Vector, Quaternion, float)
    */
+  public static Node detach(Node node) {
+    return Node.detach(node.position(), node.orientation(), node.magnitude());
+  }
+
+  /**
+   * Returns a detached Node instance for the given params. Mostly used internally.
+   */
+  public static Node detach(Vector position, Quaternion orientation, float magnitude) {
+    Node node = new Node(position, orientation, magnitude);
+    Graph.prune(node);
+    return node;
+  }
 
   /**
    * Init tasks. Internal use.
@@ -410,22 +411,14 @@ public class Node {
   }
 
   /**
-   * Performs a deep copy of this node.
+   * Performs a deep copy of this node. Only the {@link #position()}, {@link #orientation()}
+   * and {@link #magnitude()} of the node are copied.
+   *
+   * @see #detach()
    */
-  // TODO pending
   public Node get() {
     Node node = new Node();
     node.set(this);
-    return node;
-  }
-
-  /**
-   * Returns a detached deep copy of this node.
-   */
-  // TODO test
-  protected Node detach() {
-    Node node = this.get();
-    Graph._removeLeadingNode(node);
     return node;
   }
 
@@ -444,11 +437,9 @@ public class Node {
    * @see #setMagnitude(Node)
    */
   public void set(Node node) {
-    if (node == null)
-      node = new Node();
-    setPosition(node.position());
-    setOrientation(node.orientation());
-    setMagnitude(node.magnitude());
+    setPosition(node);
+    setOrientation(node);
+    setMagnitude(node);
   }
 
   /**
@@ -955,8 +946,9 @@ public class Node {
    */
   public void setPosition(Node node) {
     if (node == null)
-      node = new Node();
-    setPosition(node.position());
+      setPosition(new Vector());
+    else
+      setPosition(node.position());
   }
 
   /**
@@ -1189,8 +1181,9 @@ public class Node {
    */
   public void setOrientation(Node node) {
     if (node == null)
-      node = new Node();
-    setOrientation(node.orientation());
+      setOrientation(new Quaternion());
+    else
+      setOrientation(node.orientation());
   }
 
   /**
@@ -1301,8 +1294,9 @@ public class Node {
    */
   public void setMagnitude(Node node) {
     if (node == null)
-      node = new Node();
-    setMagnitude(node.magnitude());
+      setMagnitude(1);
+    else
+      setMagnitude(node.magnitude());
   }
 
   /**
@@ -1688,7 +1682,7 @@ public class Node {
    */
   public Matrix worldMatrix() {
     if (reference() != null)
-      return new Node(position(), orientation(), magnitude()).matrix();
+      return detach().matrix();
     else
       return matrix();
   }
@@ -1722,10 +1716,9 @@ public class Node {
    * @see #matrix()
    * @see #worldMatrix()
    * @see #set(Node)
-   * @see #set(Node)
    */
   public Matrix viewInverse() {
-    return new Node(position(), orientation(), 1).matrix();
+    return Node.detach(position(), orientation(), 1).matrix();
   }
 
   /**

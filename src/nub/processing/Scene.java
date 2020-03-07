@@ -895,7 +895,6 @@ public class Scene extends Graph implements PConstants {
     Interpolator interpolator = new Interpolator();
     for (int j = 0; j < jsonInterpolator.size(); j++) {
       Node node = new Node();
-      prune(node);
       node.set(_toNode(jsonInterpolator.getJSONObject(j)));
       node.setPickingThreshold(20);
       interpolator.addKeyFrame(node, jsonInterpolator.getJSONObject(j).getFloat("time"));
@@ -939,19 +938,16 @@ public class Scene extends Graph implements PConstants {
    * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONObject into a node.
    */
   protected Node _toNode(JSONObject jsonNode) {
-    Node node = new Node();
-    float x, y, z, w;
+    float x, y, z;
     x = jsonNode.getJSONArray("position").getFloat(0);
     y = jsonNode.getJSONArray("position").getFloat(1);
     z = jsonNode.getJSONArray("position").getFloat(2);
-    node.setPosition(new Vector(x, y, z));
-    x = jsonNode.getJSONArray("orientation").getFloat(0);
-    y = jsonNode.getJSONArray("orientation").getFloat(1);
-    z = jsonNode.getJSONArray("orientation").getFloat(2);
-    w = jsonNode.getJSONArray("orientation").getFloat(3);
-    node.setOrientation(new Quaternion(x, y, z, w));
-    node.setMagnitude(jsonNode.getFloat("magnitude"));
-    return node;
+    float qx, qy, qz, qw;
+    qx = jsonNode.getJSONArray("orientation").getFloat(0);
+    qy = jsonNode.getJSONArray("orientation").getFloat(1);
+    qz = jsonNode.getJSONArray("orientation").getFloat(2);
+    qw = jsonNode.getJSONArray("orientation").getFloat(3);
+    return Node.detach(new Vector(x, y, z), new Quaternion(qx, qy, qz, qw), jsonNode.getFloat("magnitude"));
   }
 
   /**
