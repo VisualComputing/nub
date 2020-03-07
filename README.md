@@ -96,9 +96,8 @@ void setup() {
   size(720, 480, P3D);
   // the scene object creates a default eye node
   scene = new Scene(this);
-  // To create a node as a leading one (those whose parent is the world,
-  // such as n1) the scene parameter is passed to the Node constructor:
-  n1 = new Node(scene);
+  // Create a top-level node (i.e., a node whose reference is null) with:
+  n1 = new Node();
   // whereas for the remaining nodes we pass any constructor taking a
   // reference node parameter, such as Node(Node referenceNode)
   n2 = new Node(n1) {
@@ -556,7 +555,7 @@ Node shape;
 Interpolator interpolator;
 void setup() {
   ...
-  shape = new Node(scene, pshape);
+  shape = new Node(pshape);
   interpolator = new Interpolator(shape);
   for (int i = 0; i < random(4, 10); i++)
     // addKeyFrame(node, elapsedTime) where elapsedTime is defined respect
