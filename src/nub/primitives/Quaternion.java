@@ -1068,20 +1068,6 @@ public class Quaternion {
   }
 
   /**
-   * println this quaternion components.
-   */
-  public void println() {
-    System.out.println(toString() + "\n");
-  }
-
-  /**
-   * print this quaternion components.
-   */
-  public void print() {
-    System.out.print(toString());
-  }
-
-  /**
    * Return this quaternion components as a String.
    */
   @Override

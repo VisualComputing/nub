@@ -102,7 +102,7 @@ public class Interaction2D extends PApplet {
       shape3.setReference(null);
     }
     if (key == 'p') {
-      scene.screenLocation(shape1.position()).print();
+      print(scene.screenLocation(shape1.position()).toString());
       println(mouseX + " " + mouseY);
     }
   }

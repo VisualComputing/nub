@@ -389,20 +389,6 @@ public class Node {
   }
 
   /**
-   * println this node components.
-   */
-  public void println() {
-    System.out.println(toString() + "\n");
-  }
-
-  /**
-   * print this node components.
-   */
-  public void print() {
-    System.out.print(toString());
-  }
-
-  /**
    * Return this node components as a String.
    */
   @Override

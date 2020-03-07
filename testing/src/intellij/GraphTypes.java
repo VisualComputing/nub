@@ -68,7 +68,7 @@ public class GraphTypes extends PApplet {
       println("2*radius*sqrt(3): " + 2 * scene.radius() * sqrt(3));
       println(version1() + " " + version2() + " eye magnitude: " + scene.eye().magnitude());
       println((scene.type() == Graph.Type.ORTHOGRAPHIC ? "ORTHO" : "PERSP") + " zNear: " + scene.zNear() + " zFar: " + scene.zFar());
-      scene.eye().position().print();
+      print(scene.eye().position().toString());
     }
     if (key == 'n')
       scene.setFOV(1);

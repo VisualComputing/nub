@@ -815,20 +815,6 @@ public class Vector {
   }
 
   /**
-   * println this vector components.
-   */
-  public void println() {
-    System.out.println(toString() + "\n");
-  }
-
-  /**
-   * print this vector components.
-   */
-  public void print() {
-    System.out.print(toString());
-  }
-
-  /**
    * Return this vector components as a String.
    */
   @Override
