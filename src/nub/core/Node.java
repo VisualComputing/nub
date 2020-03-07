@@ -2199,7 +2199,7 @@ public class Node {
    *
    * <pre>
    * {@code
-   * node = new Node(graph) {
+   * node = new Node() {
    *   public void visit() {
    *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
    *     // (which should be implemented by you) is true, scene.render() will prune the branch
@@ -2213,7 +2213,7 @@ public class Node {
    * (which should be implemented by you):
    * <pre>
    * {@code
-   * node = new Node(graph) {
+   * node = new Node() {
    *   public void visit() {
    *     if(bypassCondition)
    *       // this will bypass node rendering without culling its children

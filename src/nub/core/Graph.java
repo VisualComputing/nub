@@ -213,12 +213,30 @@ public class Graph {
   private float _zClippingCoefficient;
 
   /**
-   * Same as {@code this(Type.PERSPECTIVE, w, h)}
+   * Same as {@code this(Type.PERSPECTIVE, null, w, h)}
    *
-   * @see #Graph(Object, Type, int, int)
+   * @see #Graph(Object, Type, Node, int, int)
    */
   public Graph(Object context, int width, int height) {
-    this(context, Type.PERSPECTIVE, width, height);
+    this(context, Type.PERSPECTIVE, null, width, height);
+  }
+
+  /**
+   * Same as {@code this(context, Type.PERSPECTIVE, eye, width, height)}.
+   *
+   * @see #Graph(Object, Type, Node, int, int)
+   */
+  public Graph(Object context, Node eye, int width, int height) {
+    this(context, Type.PERSPECTIVE, eye, width, height);
+  }
+
+  /**
+   * Same as {@code this(context, type, null, width, height)}.
+   *
+   * @see #Graph(Object, Type, Node, int, int)
+   */
+  public Graph(Object context, Type type, int width, int height) {
+    this(context, type, null, width, height);
   }
 
   /**
@@ -243,7 +261,7 @@ public class Graph {
    * @see #setRightHanded()
    * @see #setEye(Node)
    */
-  public Graph(Object context, Type type, int width, int height) {
+  public Graph(Object context, Type type, Node eye, int width, int height) {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
@@ -256,8 +274,10 @@ public class Graph {
     _rays = new ArrayList<Ray>();
     cacheProjectionViewInverse(false);
     setFrustum(new Vector(), 100);
-    Node eye = new Node();
-    eye.disableTagging();
+    if (eye == null) {
+      eye = new Node();
+      eye.disableTagging();
+    }
     setEye(eye);
     _lookAroundTask = new InertialTask() {
       @Override
@@ -791,7 +811,7 @@ public class Graph {
    *
    * @see TimingHandler#registerTask(Task)
    */
-  public void registerTask(Task task) {
+  public static void registerTask(Task task) {
     timingHandler().registerTask(task);
   }
 
@@ -800,7 +820,7 @@ public class Graph {
    *
    * @see TimingHandler#unregisterTask(Task)
    */
-  public void unregisterTask(Task task) {
+  public static void unregisterTask(Task task) {
     timingHandler().unregisterTask(task);
   }
 
@@ -809,7 +829,7 @@ public class Graph {
    *
    * @see TimingHandler#isTaskRegistered(Task)
    */
-  public boolean isTaskRegistered(Task task) {
+  public static boolean isTaskRegistered(Task task) {
     return timingHandler().isTaskRegistered(task);
   }
 

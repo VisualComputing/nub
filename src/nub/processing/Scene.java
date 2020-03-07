@@ -76,7 +76,7 @@ import java.util.Map;
  * static ones), such as {@link #beginHUD(PGraphics)},
  * {@link #endHUD(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
- * among others, can be used to set a {@link Node#setShape(Object)} (see
+ * among others, can be used to set a {@link Node#setShape(PShape)} (see
  * also {@link Node#graphics(PGraphics)}).
  * <p>
  * Another scene's eye (different than the graph {@link Graph#eye()}) can be drawn with
@@ -138,9 +138,34 @@ public class Scene extends Graph implements PConstants {
    * @see #Scene(PApplet, String, int, int)
    * @see #Scene(PApplet, String, int, int, int, int)
    * @see #Scene(PApplet, String)
+   * @see #Scene(PApplet, Node)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, PGraphics, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int, int, int)
+   * @see #Scene(PApplet, String, Node)
    */
   public Scene(PApplet pApplet) {
     this(pApplet, pApplet.g);
+  }
+
+  /**
+   * Same as {@code this(pApplet, pApplet.g, eye)}.
+   *
+   * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, PGraphics, int, int)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, String)
+   * @see #Scene(PApplet)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, PGraphics, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int, int, int)
+   * @see #Scene(PApplet, String, Node)
+   */
+  public Scene(PApplet pApplet, Node eye) {
+    this(pApplet, pApplet.g, eye);
   }
 
   /**
@@ -151,9 +176,34 @@ public class Scene extends Graph implements PConstants {
    * @see #Scene(PApplet, String, int, int)
    * @see #Scene(PApplet, String, int, int, int, int)
    * @see #Scene(PApplet, String)
+   * @see #Scene(PApplet, Node)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, PGraphics, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int, int, int)
+   * @see #Scene(PApplet, String, Node)
    */
   public Scene(PApplet pApplet, PGraphics pGraphics) {
     this(pApplet, pGraphics, 0, 0);
+  }
+
+  /**
+   * Same as {@code this(pApplet, pGraphics, eye, 0, 0);}.
+   *
+   * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, PGraphics, int, int)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, String)
+   * @see #Scene(PApplet)
+   * @see #Scene(PApplet, Node)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, String, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int, int, int)
+   * @see #Scene(PApplet, String, Node)
+   */
+  public Scene(PApplet pApplet, PGraphics pGraphics, Node eye) {
+    this(pApplet, pGraphics, eye, 0, 0);
   }
 
   /**
@@ -161,12 +211,35 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #Scene(PApplet)
    * @see #Scene(PApplet, PGraphics, int, int)
-   * @see #Scene(PApplet, String, int, int)
    * @see #Scene(PApplet, String, int, int, int, int)
    * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, Node)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, PGraphics, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int, int, int)
+   * @see #Scene(PApplet, String, Node)
    */
   public Scene(PApplet pApplet, String renderer) {
     this(pApplet, renderer, pApplet.width, pApplet.height);
+  }
+
+  /**
+   * Same as {@code this(pApplet, renderer, eye, pApplet.width, pApplet.height)}.
+   *
+   * @see #Scene(PApplet)
+   * @see #Scene(PApplet, PGraphics, int, int)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, Node)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, PGraphics, Node, int, int)
+   * @see #Scene(PApplet, String)
+   * @see #Scene(PApplet, String, Node, int, int, int, int)
+   * @see #Scene(PApplet, String, Node, int, int)
+   */
+  public Scene(PApplet pApplet, String renderer, Node eye) {
+    this(pApplet, renderer, eye, pApplet.width, pApplet.height);
   }
 
   /**
@@ -177,9 +250,32 @@ public class Scene extends Graph implements PConstants {
    * @see #Scene(PApplet, PGraphics)
    * @see #Scene(PApplet, String, int, int, int, int)
    * @see #Scene(PApplet, String)
+   * @see #Scene(PApplet, Node)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, PGraphics, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int, int, int)
+   * @see #Scene(PApplet, String, Node)
    */
   public Scene(PApplet pApplet, String renderer, int width, int height) {
     this(pApplet, renderer, width, height, 0, 0);
+  }
+
+  /**
+   * Same as {@code this(pApplet, renderer, eye, width, height, 0, 0)}.
+   *
+   * @see #Scene(PApplet)
+   * @see #Scene(PApplet, PGraphics, int, int)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, Node)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, PGraphics, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int, int, int)
+   * @see #Scene(PApplet, String, Node)
+   */
+  public Scene(PApplet pApplet, String renderer, Node eye, int width, int height) {
+    this(pApplet, renderer, eye, width, height, 0, 0);
   }
 
   /**
@@ -190,9 +286,52 @@ public class Scene extends Graph implements PConstants {
    * @see #Scene(PApplet, PGraphics)
    * @see #Scene(PApplet, String, int, int, int, int)
    * @see #Scene(PApplet, String)
+   * @see #Scene(PApplet, Node)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, PGraphics, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int, int, int)
+   * @see #Scene(PApplet, String, Node)
    */
   public Scene(PApplet pApplet, String renderer, int width, int height, int x, int y) {
     this(pApplet, pApplet.createGraphics(width, height, renderer), x, y);
+  }
+
+  /**
+   * Same as {@code this(pApplet, pApplet.createGraphics(width, height, renderer), eye, x, y)}.
+   *
+   * @see #Scene(PApplet)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, String)
+   * @see #Scene(PApplet, Node)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, PGraphics, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int)
+   * @see #Scene(PApplet, String, Node)
+   */
+  public Scene(PApplet pApplet, String renderer, Node eye, int width, int height, int x, int y) {
+    this(pApplet, pApplet.createGraphics(width, height, renderer), eye, x, y);
+  }
+
+  /**
+   * Same as {@code this(pApplet, pGraphics, null, x, y)}.
+   *
+   * @see #Scene(PApplet)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, String)
+   * @see #Scene(PApplet, Node)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, PGraphics, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int, int, int)
+   * @see #Scene(PApplet, String, Node)
+   */
+  public Scene(PApplet pApplet, PGraphics pGraphics, int x, int y) {
+    this(pApplet, pGraphics, null, x, y);
   }
 
   /**
@@ -216,9 +355,14 @@ public class Scene extends Graph implements PConstants {
    * @see #Scene(PApplet, String, int, int)
    * @see #Scene(PApplet, String, int, int, int, int)
    * @see #Scene(PApplet, String)
+   * @see #Scene(PApplet, Node)
+   * @see #Scene(PApplet, PGraphics, Node)
+   * @see #Scene(PApplet, String, Node, int, int)
+   * @see #Scene(PApplet, String, Node, int, int, int, int)
+   * @see #Scene(PApplet, String, Node)
    */
-  public Scene(PApplet pApplet, PGraphics pGraphics, int x, int y) {
-    super(pGraphics, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
+  public Scene(PApplet pApplet, PGraphics pGraphics, Node eye, int x, int y) {
+    super(pGraphics, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, eye, pGraphics.width, pGraphics.height);
     // 1. P5 objects
     _parent = pApplet;
     _offscreen = pGraphics != pApplet.g;
