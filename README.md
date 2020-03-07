@@ -239,16 +239,12 @@ see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/exampl
 void draw() {
   // 1. render onto the scene
   scene.render();
-  // shift the scene nodes to the offScreenScene
-  scene.shift(offScreenScene);
   // 2. render onto the off-screen scene
   offScreenScene.beginDraw();
   offScreenScene.render();
   offScreenScene.endDraw();
   // display the rendered offScreenScene
   offScreenScene.display();
-  // shift back the offScreenScene nodes to the scene
-  offScreenScene.shift(scene);
 }
 ```
 
