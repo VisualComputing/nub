@@ -12,7 +12,7 @@ public class MiniMap extends PApplet {
   Node[] models;
   boolean displayMinimap = true;
   // whilst scene is either on-screen or not, the minimap is always off-screen
-// test both cases here:
+  // test both cases here:
   boolean onScreen = true;
   boolean interactiveEye;
 
@@ -20,7 +20,7 @@ public class MiniMap extends PApplet {
   int h = 1200;
 
   //Choose FX2D, JAVA2D, P2D or P3D
-  String renderer = P3D;
+  String renderer = P2D;
 
   public void settings() {
     size(w, h, renderer);
@@ -28,9 +28,6 @@ public class MiniMap extends PApplet {
 
   public void setup() {
     scene = onScreen ? new Scene(this) : new Scene(this, renderer);
-    // eye only should belong only to the scene
-    // so set a detached 'node' instance as the eye
-    scene.setEye(new Node());
     scene.setRadius(1000);
     rectMode(CENTER);
     scene.fit(1);
@@ -43,7 +40,6 @@ public class MiniMap extends PApplet {
           int _faces = (int) MiniMap.this.random(3, 15);
           // We need to call the PApplet random function instead of the node random version
           int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
-
           @Override
           public void graphics(PGraphics pg) {
             pg.pushStyle();
@@ -57,13 +53,9 @@ public class MiniMap extends PApplet {
       models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
-
     // Note that we pass the upper left corner coordinates where the minimap
     // is to be drawn (see drawing code below) to its constructor.
     minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
-    // eye only should belong only to the minimap
-    // so set a detached 'node' instance as the eye
-    minimap.setEye(new Node());
     minimap.setRadius(2000);
     if (renderer == P3D)
       minimap.togglePerspective();
@@ -84,7 +76,7 @@ public class MiniMap extends PApplet {
       if (interactiveEye)
         minimap.tag(scene.eye());
       else
-        minimap.removeTag();
+        minimap.untag(scene.eye());
     }
     if (key == 'f')
       focus.fit(1);
@@ -108,7 +100,7 @@ public class MiniMap extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     if (renderer == P3D)
-      focus.moveForward(event.getCount() * 10);
+      focus.moveForward(event.getCount() * 40);
     else
       focus.scale(event.getCount() * 40);
   }
