@@ -3948,8 +3948,6 @@ public class Graph {
     float d1 = 1, d2;
     if (type() == Type.ORTHOGRAPHIC)
       d1 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
-    // we negate z which targets the Processing mouse wheel
-    //translateEye(0, 0, delta / (zNear() - zFar()), inertia);
 
     Node node = eye().get();
     node.setPosition(anchor().get());
