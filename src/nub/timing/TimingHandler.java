@@ -21,28 +21,25 @@ import java.util.ArrayList;
  */
 public class TimingHandler {
   /**
+   * Returns the number of frames displayed since this timing handler was instantiated.
+   */
+  static public long frameCount;
+
+  /**
    * Returns the approximate frame rate of the software as it executes. The initial value
    * is 10 fps and is updated with each frame. The value is averaged (integrated) over
    * several frames. As such, this value won't be valid until after 5-10 frames.
    */
-  static public long frameCount;
-  /**
-   * Returns the number of frames displayed since this timing handler was instantiated.
-   */
-  static public float frameRate;
+  static public float frameRate = 60;
+  protected long _frameRateLastNanos;
 
-  //protected long _deltaCount;
   // T i m e r P o o l
   protected ArrayList<Task> _taskPool;
-  protected long _frameRateLastNanos;
-  //protected long _localCount;
 
   /**
    * Main constructor.
    */
   public TimingHandler() {
-    frameRate = 60;
-    _frameRateLastNanos = 0;
     _taskPool = new ArrayList<Task>();
   }
 
