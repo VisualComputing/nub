@@ -102,11 +102,11 @@ public class TimingHandler {
    */
   protected void _updateFrameRate() {
     long now = System.nanoTime();
-    if (frameCount > 1) {
-      float frameTimeSecs = (float) (now - this._frameRateLastNanos) / 1.0E9f;
+    if (frameCount > 0) {
+      float frameTimeSecs = (now - this._frameRateLastNanos) / 1e9f;
       float avgFrameTimeSecs = 1.0f / frameRate;
       avgFrameTimeSecs = 0.95f * avgFrameTimeSecs + 0.05f * frameTimeSecs;
-      frameRate = (1.0f / avgFrameTimeSecs);
+      frameRate = 1.0f / avgFrameTimeSecs;
     }
     _frameRateLastNanos = now;
     frameCount++;
