@@ -3945,11 +3945,24 @@ public class Graph {
    * @see #displacement(Vector, Node)
    */
   public void translateEye(float dx, float dy, float dz, float inertia) {
+    float d1 = 1, d2;
+    if (type() == Type.ORTHOGRAPHIC)
+      d1 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
+    // we negate z which targets the Processing mouse wheel
+    //translateEye(0, 0, delta / (zNear() - zFar()), inertia);
+
     Node node = eye().get();
     node.setPosition(anchor().get());
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     vector.multiply(-1);
     eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()), inertia);
+
+    if (type() == Type.ORTHOGRAPHIC) {
+      d2 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
+      if (d1 != 0)
+        if (d2 / d1 > 0)
+          eye().scale(d2 / d1, inertia);
+    }
   }
 
   // 5. Rotate
@@ -4310,17 +4323,8 @@ public class Graph {
    * @see #translateEye(float, float, float)
    */
   public void moveForward(float delta, float inertia) {
-    float d1 = 1, d2;
-    if (type() == Type.ORTHOGRAPHIC)
-      d1 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
     // we negate z which targets the Processing mouse wheel
     translateEye(0, 0, delta / (zNear() - zFar()), inertia);
-    if (type() == Type.ORTHOGRAPHIC) {
-      d2 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
-      if (d1 != 0)
-        if (d2 / d1 > 0)
-          eye().scale(d2 / d1);
-    }
   }
 
   // 8. lookAround

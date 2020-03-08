@@ -82,8 +82,10 @@ public class SpaceNavigator extends PApplet {
   }
 
   void spaceNavigatorInteraction() {
-    scene.translate("SPCNAV", 10 * snXPos.getValue(), 10 * snYPos.getValue(), 10 * snZPos.getValue());
-    scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
+    // translate(x, y, z) expects params in screen-space
+    // which has dimensions width * height * 1
+    scene.translate("SPCNAV", 20 * snXPos.getValue(), 20 * snYPos.getValue(), snZPos.getValue() / 50);
+    //scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
   }
 
   /*
@@ -127,6 +129,8 @@ public class SpaceNavigator extends PApplet {
       scene.setRightHanded();
     if (key == 'l')
       scene.setLeftHanded();
+    if (key == 'p')
+      scene.togglePerspective();
     // enables/disables picking with the space navigator
     if (key == 'i')
       snPicking = !snPicking;
