@@ -837,6 +837,14 @@ public class Graph {
   }
 
   /**
+   * Returns the translation inertial task.
+   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
+   */
+  public Task translationInertialTask() {
+    return _translationTask;
+  }
+
+  /**
    * Returns the look-around inertial task.
    * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
    */
