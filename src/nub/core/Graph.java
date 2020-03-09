@@ -266,6 +266,12 @@ public class Graph {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
+      for (Node node : nodes()) {
+        node._translationTask.disableConcurrence();
+        node._rotationTask.disableConcurrence();
+        node._orbitTask.disableConcurrence();
+        node._scalingTask.disableConcurrence();
+      }
     }
     _fb = context;
     setMatrixHandler(matrixHandler(_fb));

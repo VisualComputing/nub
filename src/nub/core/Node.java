@@ -333,18 +333,21 @@ public class Node {
         translate(_x, _y, _z);
       }
     };
+    _translationTask.enableConcurrence();
     _rotationTask = new InertialTask() {
       @Override
       public void action() {
         rotate(new Quaternion(_x, _y, _z));
       }
     };
+    _rotationTask.enableConcurrence();
     _orbitTask = new InertialTask() {
       @Override
       public void action() {
         orbit(new Quaternion(_x, _y, _z), _center);
       }
     };
+    _orbitTask.enableConcurrence();
     _scalingTask = new InertialTask() {
       @Override
       public void action() {
@@ -354,6 +357,7 @@ public class Node {
         scale(_x >= 0 ? factor : 1 / factor);
       }
     };
+    _scalingTask.enableConcurrence();
   }
 
   /**
