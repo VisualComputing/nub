@@ -142,7 +142,8 @@ public class Graph {
   protected Vector _center;
   protected float _radius;
   protected Vector _anchor;
-  // Damped
+  // Inertial
+  protected InertialTask _translationTask;
   protected InertialTask _lookAroundTask;
   protected InertialTask _cadRotateTask;
   protected Vector _eyeUp;
@@ -275,6 +276,12 @@ public class Graph {
     cacheProjectionViewInverse(false);
     setFrustum(new Vector(), 100);
     setEye(eye == null ? new Node() : eye);
+    _translationTask = new InertialTask() {
+      @Override
+      public void action() {
+        _translate(_x, _y, _z);
+      }
+    };
     _lookAroundTask = new InertialTask() {
       @Override
       public void action() {
@@ -3945,21 +3952,37 @@ public class Graph {
    * @see #displacement(Vector, Node)
    */
   public void translateEye(float dx, float dy, float dz, float inertia) {
-    float d1 = 1, d2;
-    if (type() == Type.ORTHOGRAPHIC)
-      d1 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
-
     Node node = eye().get();
     node.setPosition(anchor().get());
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     vector.multiply(-1);
-    eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()), inertia);
+    // Option 1: don't compensate orthographic, i.e., use Node.translate(vector, inertia)
+    //eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()), inertia);
+    // Option 2: compensate orthographic, i.e., use Graph inertial translation task
+    Vector translation = eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye());
+    _translate(translation.x(), translation.y(), translation.z());
+    _translationTask.setInertia(inertia);
+    _translationTask._x += translation.x();
+    _translationTask._y += translation.y();
+    _translationTask._z += translation.z();
+    if (!_translationTask.isActive()) {
+      _translationTask.run();
+    }
+  }
 
+  /**
+   * Internally by the _translationTask to compensate orthographic projection eye translation.
+   */
+  protected void _translate(float x, float y, float z) {
+    float d1 = 1, d2;
+    if (type() == Type.ORTHOGRAPHIC)
+      d1 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
+    eye().translate(x, y, z);
     if (type() == Type.ORTHOGRAPHIC) {
       d2 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
       if (d1 != 0)
         if (d2 / d1 > 0)
-          eye().scale(d2 / d1, inertia);
+          eye().scale(d2 / d1);
     }
   }
 

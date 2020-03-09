@@ -36,7 +36,6 @@ public class SpaceNavigator extends PApplet {
   public void setup() {
     success = openSpaceNavigator();
     scene = new Scene(this);
-    //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1500);
     scene.fit(1);
     Node[] shapes = new Node[50];
@@ -85,7 +84,7 @@ public class SpaceNavigator extends PApplet {
     // translate(x, y, z) expects params in screen-space
     // which has dimensions width * height * 1
     scene.translate("SPCNAV", 20 * snXPos.getValue(), 20 * snYPos.getValue(), snZPos.getValue() / 50);
-    //scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
+    scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
   }
 
   /*

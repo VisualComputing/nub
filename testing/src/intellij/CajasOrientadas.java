@@ -37,9 +37,6 @@ public class CajasOrientadas extends PApplet {
 
   public void draw() {
     background(0);
-    // calls visit() on all scene attached nodes
-    // automatically applying all the node transformations
-    //scene.traverse();
     scene.render();
   }
 
@@ -59,7 +56,7 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.moveForward(event.getCount() * 20, 0);
+    scene.moveForward(event.getCount() * 20, 0.8f);
   }
 
   public void keyPressed() {
