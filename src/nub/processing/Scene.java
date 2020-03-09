@@ -451,12 +451,26 @@ public class Scene extends Graph implements PConstants {
    */
   public static void applyWorldTransformation(PGraphics pGraphics, Node node) {
     Node reference = node.reference();
-    if (reference != null) {
+    if (reference != null)
       applyWorldTransformation(pGraphics, reference);
-      applyTransformation(pGraphics, node);
-    } else {
-      applyTransformation(pGraphics, node);
-    }
+    applyTransformation(pGraphics, node);
+  }
+
+  /**
+   * Draw the node onto {@code pGraphics}.
+   * <p>
+   * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
+   * the node {@link Node#shape()} context is different than {@code pGraphics}.
+   */
+  public static void draw(PGraphics pGraphics, Node node) {
+    pGraphics.pushStyle();
+    pGraphics.pushMatrix();
+    if (node.shape() != null)
+      pGraphics.shape(node.shape());
+    else
+      node.graphics(pGraphics);
+    pGraphics.popStyle();
+    pGraphics.popMatrix();
   }
 
   // PICKING BUFFER
@@ -1012,7 +1026,7 @@ public class Scene extends Graph implements PConstants {
     if (node.shape() != null)
       pGraphics.shapeMode(context().shapeMode);
     if (node.shape() != null)
-      pGraphics.shape((PShape) node.shape());
+      pGraphics.shape(node.shape());
     else
       node.graphics(pGraphics);
 
@@ -1032,7 +1046,7 @@ public class Scene extends Graph implements PConstants {
     if (node.shape() != null)
       pGraphics.shapeMode(context().shapeMode);
     if (node.shape() != null)
-      pGraphics.shape((PShape) node.shape());
+      pGraphics.shape(node.shape());
     else
       node.graphics(pGraphics);
 
@@ -1066,7 +1080,7 @@ public class Scene extends Graph implements PConstants {
       if (node.shape() != null)
         pGraphics.shapeMode(context().shapeMode);
       if (node.shape() != null)
-        pGraphics.shape((PShape) node.shape());
+        pGraphics.shape(node.shape());
       else
         node.graphics(pGraphics);
 

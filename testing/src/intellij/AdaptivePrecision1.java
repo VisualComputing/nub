@@ -39,8 +39,10 @@ public class AdaptivePrecision1 extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       //scene.draw(shapes[i]);
       pushMatrix();
-      scene.applyTransformation(shapes[i]);
-      scene.draw(shapes[i]);
+      //scene.applyTransformation(shapes[i]);
+      //scene.draw(shapes[i]);
+      Scene.applyTransformation(g, shapes[i]);
+      Scene.draw(g, shapes[i]);
       popMatrix();
       pushStyle();
       stroke(255);
@@ -56,28 +58,19 @@ public class AdaptivePrecision1 extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpinNode(defaultShape());
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslateNode(defaultShape());
+      scene.mouseTranslate();
     else
-      scene.scaleNode(defaultShape(), mouseX - pmouseX);
+      scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.moveForward(event.getCount() * 50);
+    scene.moveForward(event.getCount() * 10);
   }
 
   public void mouseClicked() {
-    trackedShape = null;
-    for (int i = 0; i < shapes.length; i++)
-      if (scene.tracks(shapes[i], mouseX, mouseY)) {
-        trackedShape = shapes[i];
-        break;
-      }
-  }
-
-  Node defaultShape() {
-    return trackedShape == null ? scene.eye() : trackedShape;
+    scene.updateMouseTag();
   }
 
   PShape shape() {

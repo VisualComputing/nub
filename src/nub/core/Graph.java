@@ -3002,6 +3002,11 @@ public class Graph {
       _drawOntoBuffer(context, node);
   }
 
+  /**
+   * Renders the node onto the front buffer. Used by the rendering algorithms.
+   * <p>
+   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   */
   protected void _drawFrontBuffer(Node node) {
   }
 
@@ -3021,6 +3026,11 @@ public class Graph {
   protected void _drawBackBuffer(Node node) {
   }
 
+  /**
+   * Renders the node onto context. Used by the rendering algorithms.
+   * <p>
+   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   */
   protected void _drawOntoBuffer(Object context, Node node) {
   }
 
