@@ -955,12 +955,10 @@ public class Graph {
   public void setEye(Node eye) {
     if (eye == null || _eye == eye)
       return;
-    //TODO experimental
     if (isTagged(eye)) {
       untag(eye);
-      System.out.println("Warning: node was untaged since it was set as the eye");
+      System.out.println("Warning: node was untagged since it was set as the eye");
     }
-    prune(_eye);
     _eye = eye;
     if (_interpolator == null)
       _interpolator = new Interpolator(_eye);

@@ -60,6 +60,7 @@ public class MiniMap extends PApplet {
     if (renderer == P3D)
       minimap.togglePerspective();
     minimap.fit(1);
+    scene.eye().setPickingThreshold(30);
   }
 
   PShape shape() {
@@ -139,6 +140,7 @@ public class MiniMap extends PApplet {
       minimap.context().strokeWeight(2);
       minimap.context().stroke(0, 0, 255);
       minimap.drawFrustum(scene);
+      minimap.drawBullsEye(scene.eye());
       minimap.endDraw();
       minimap.display();
       if (!scene.isOffscreen())
