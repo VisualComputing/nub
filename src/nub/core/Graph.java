@@ -267,12 +267,8 @@ public class Graph {
       _seededGraph = true;
       _seeded = true;
       // only Java disable concurrence
-      for (Node node : nodes()) {
-        node._translationTask.disableConcurrence();
-        node._rotationTask.disableConcurrence();
-        node._orbitTask.disableConcurrence();
-        node._scalingTask.disableConcurrence();
-      }
+      for (Task task : timingHandler().taskPool())
+        task.disableConcurrence();
     }
     _fb = context;
     setMatrixHandler(matrixHandler(_fb));

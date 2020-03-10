@@ -462,6 +462,7 @@ public class Scene extends Graph implements PConstants {
    * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
    * the node {@link Node#shape()} context is different than {@code pGraphics}.
    */
+  // TODO naming conventions
   public static void draw(PGraphics pGraphics, Node node) {
     pGraphics.pushStyle();
     pGraphics.pushMatrix();

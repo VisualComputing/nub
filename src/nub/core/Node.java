@@ -355,10 +355,12 @@ public class Node {
       }
     };
     // only Java enable concurrence
-    _translationTask.enableConcurrence();
-    _rotationTask.enableConcurrence();
-    _orbitTask.enableConcurrence();
-    _scalingTask.enableConcurrence();
+    if (!Graph._seeded) {
+      _translationTask.enableConcurrence();
+      _rotationTask.enableConcurrence();
+      _orbitTask.enableConcurrence();
+      _scalingTask.enableConcurrence();
+    }
   }
 
   /**
