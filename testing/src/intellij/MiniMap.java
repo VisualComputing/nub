@@ -27,6 +27,17 @@ public class MiniMap extends PApplet {
   }
 
   public void setup() {
+    /*
+    Node eye = new Node() {
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+        Scene.drawFrustum(pg, scene);
+        pg.popStyle();
+      }
+    };
+    scene = onScreen ? new Scene(this, eye) : new Scene(this, renderer, eye);
+    // */
     scene = onScreen ? new Scene(this) : new Scene(this, renderer);
     scene.setRadius(1000);
     rectMode(CENTER);
@@ -135,12 +146,14 @@ public class MiniMap extends PApplet {
       minimap.context().background(125, 80, 90);
       minimap.drawAxes();
       minimap.render();
+      // /*
       // draw scene eye
       minimap.context().fill(minimap.isTagged(scene.eye()) ? 255 : 25, minimap.isTagged(scene.eye()) ? 0 : 255, 255, 125);
       minimap.context().strokeWeight(2);
       minimap.context().stroke(0, 0, 255);
       minimap.drawFrustum(scene);
       minimap.drawBullsEye(scene.eye());
+      // */
       minimap.endDraw();
       minimap.display();
       if (!scene.isOffscreen())

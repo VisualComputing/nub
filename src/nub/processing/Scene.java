@@ -2208,7 +2208,7 @@ public class Scene extends Graph implements PConstants {
    * @see #drawFrustum(PGraphics, PGraphics, Type, Node, float, float)
    * @see #drawFrustum(PGraphics, PGraphics, Type, Node, float, float, boolean)
    */
-  public void drawFrustum(PGraphics pGraphics, Graph graph) {
+  public static void drawFrustum(PGraphics pGraphics, Graph graph) {
     if (pGraphics == graph.context())
       return;
     // texturing requires graph.isOffscreen() (third condition) otherwise got

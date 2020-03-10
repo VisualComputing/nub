@@ -36,7 +36,20 @@ void settings() {
 }
 
 void setup() {
-  scene = onScreen ? new Scene(this) : new Scene(this, renderer);
+  Node eye = new Node() {
+    @Override
+    public void graphics(PGraphics pg) {
+      pg.pushStyle();
+      pg.fill(isTagged(minimap) ? 255 : 25, isTagged(minimap) ? 0 : 255, 255, 125);
+      pg.strokeWeight(2);
+      pg.stroke(0, 0, 255);
+      Scene.drawFrustum(pg, scene);
+      pg.popStyle();
+    }
+  };
+  eye.setPickingThreshold(50);
+  eye.setHighlighting(0);
+  scene = onScreen ? new Scene(this, eye) : new Scene(this, renderer, eye);
   scene.setRadius(1000);
   rectMode(CENTER);
   scene.fit(1);
@@ -50,7 +63,7 @@ void setup() {
         // We need to call the PApplet random function instead of the node random version
         int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
         @Override
-        public void graphics(PGraphics pg) {
+          public void graphics(PGraphics pg) {
           pg.pushStyle();
           pg.fill(_color);
           Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
@@ -143,11 +156,8 @@ void draw() {
     minimap.context().background(125, 80, 90);
     minimap.drawAxes();
     minimap.render();
-    // draw scene eye
-    minimap.context().fill(minimap.isTagged(scene.eye()) ? 255 : 25, minimap.isTagged(scene.eye()) ? 0 : 255, 255, 125);
-    minimap.context().strokeWeight(2);
-    minimap.context().stroke(0, 0, 255);
-    minimap.drawFrustum(scene);
+    minimap.context().stroke(255);
+    minimap.drawBullsEye(scene.eye());
     minimap.endDraw();
     minimap.display();
     if (!scene.isOffscreen())
