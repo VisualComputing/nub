@@ -66,7 +66,7 @@ void mouseDragged() {
 
 void mouseWheel(MouseEvent event) {
   if (scene.is3D())
-    scene.moveForward(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 30);
   else
     scene.scaleEye(event.getCount() * 20);
 }

@@ -145,8 +145,7 @@ public class Node {
   protected boolean _tagging;
 
   // Rendering
-  // js should go:
-  //protected Object _shape;
+  // PShape is only available in Java
   protected processing.core.PShape _shape;
   protected float _highlight;
   protected long _bypass;
@@ -157,127 +156,103 @@ public class Node {
   /**
    * Same as {@code this(null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
   public Node() {
-    this(null, null, null, new Vector(), new Quaternion(), 1);
+    this(null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Creates a child node with {@code reference} as {@link #reference()}.
-   * Same as {@code this(reference, null, null, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, null, translation, new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Node reference) {
-    this(reference, null, null, new Vector(), new Quaternion(), 1);
+  public Node(Vector translation) {
+    this(null, null, translation, new Quaternion(), 1);
   }
 
   /**
-   * Creates a detached node with {@code shape}.
-   * Same as {@code this(null, null, shape, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, null, translation, rotation, 1)}.
    *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(processing.core.PShape shape) {
-    this(null, null, shape, new Vector(), new Quaternion(), 1);
+  public Node(Vector translation, Quaternion rotation) {
+    this(null, null, translation, rotation, 1);
   }
 
   /**
-   * Constructs a shapeless node, having {@code reference}, {@code translation},
-   * {@code rotation} and {@code scaling} as the node {@link #reference()},
-   * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
-   * The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(reference, null, null, translation, rotation, scaling)}.
+   * Same as {@code this(null, null, translation, rotation, scaling)}.
    *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
-   */
-  public Node(Node reference, Vector translation, Quaternion rotation, float scaling) {
-    this(reference, null, null, translation, rotation, scaling);
-  }
-
-  /**
-   * Constructs a shapeless detached node, having {@code translation},
-   * {@code rotation} and {@code scaling} as the node {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()}, respectively.
-   * The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(null, null, null, translation, rotation, scaling)}.
-   *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
   public Node(Vector translation, Quaternion rotation, float scaling) {
-    this(null, null, null, translation, rotation, scaling);
+    this(null, null, translation, rotation, scaling);
   }
 
   /**
-   * Same as {@code this(null, constraint, null, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(reference, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   */
+  public Node(Node reference) {
+    this(reference, null, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(reference, null, translation, new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   */
+  public Node(Node reference, Vector translation) {
+    this(reference, null, translation, new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(reference, null, translation, rotation, 1)}.
+   *
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   */
+  public Node(Node reference, Vector translation, Quaternion rotation) {
+    this(reference, null, translation, rotation, 1);
+  }
+
+  /**
+   * Same as {@code this(reference, null, translation, rotation, scaling)}.
+   *
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   */
+  public Node(Node reference, Vector translation, Quaternion rotation, float scaling) {
+    this(reference, null, translation, rotation, scaling);
+  }
+
+  /**
+   * Same as {@code this(null, constraint, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
   public Node(Constraint constraint) {
-    this(null, constraint, null, new Vector(), new Quaternion(), 1);
+    this(null, constraint, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(null, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(reference, constraint, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
-   */
-  public Node(Constraint constraint, processing.core.PShape shape) {
-    this(null, constraint, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(reference, null, shape, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
-   */
-  public Node(Node reference, processing.core.PShape shape) {
-    this(reference, null, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(reference, constraint, null, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
   public Node(Node reference, Constraint constraint) {
-    this(reference, constraint, null, new Vector(), new Quaternion(), 1);
+    this(reference, constraint, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(reference, constraint, shape, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
-   */
-  public Node(Node reference, Constraint constraint, processing.core.PShape shape) {
-    this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Creates a node attached to {@code graph} with {@code constraint} as {@link #constraint()},
-   * having {@code translation}, {@code rotation} and {@code scaling} as the node {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(null, constraint, shape, translation, rotation, scaling)}.
-   *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
-   */
-  public Node(Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
-    this(null, constraint, shape, translation, rotation, scaling);
-  }
-
-  /**
-   * Creates a node attached to {@code graph} with {@code constraint} as {@link #constraint()},
-   * having {@code reference} as {@link #reference()}, {@code translation},
-   * {@code rotation} and {@code scaling} as the node {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()}, respectively.
+   * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
+   * as {@link #constraint()}, having {@code translation}, {@code rotation} and {@code scaling} as
+   * the {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * The {@link #pickingThreshold()} is set to {@code 0.2} and the {@link #highlighting()}
    * magnitude to {@code 0.15}.
    */
-  public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
+  public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     setReference(reference);
     setConstraint(constraint);
-    setShape(shape);
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
@@ -293,6 +268,56 @@ public class Node {
     _children = new ArrayList<Node>();
     _culled = false;
     _initTasks();
+  }
+
+  // From here only Java constructors
+
+  /**
+   * Same as {@code this(null, null, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   */
+  public Node(processing.core.PShape shape) {
+    this(null, null, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(reference, null, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   */
+  public Node(Node reference, processing.core.PShape shape) {
+    this(reference, null, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(null, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   */
+  public Node(Constraint constraint, processing.core.PShape shape) {
+    this(null, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(reference, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   */
+  public Node(Node reference, Constraint constraint, processing.core.PShape shape) {
+    this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
+   * as {@link #constraint()}, {@code shape} as {@link #shape()}, having {@code translation},
+   * {@code rotation} and {@code scaling} as the {@link #translation()}, {@link #rotation()}
+   * and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to
+   * {@code 0.2} and the {@link #highlighting()} magnitude to {@code 0.15}.
+   */
+  public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
+    this(reference, constraint, translation, rotation, scaling);
+    setShape(shape);
   }
 
   /**
