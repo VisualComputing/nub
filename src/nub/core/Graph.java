@@ -266,6 +266,7 @@ public class Graph {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
+      // only Java disable concurrence
       for (Node node : nodes()) {
         node._translationTask.disableConcurrence();
         node._rotationTask.disableConcurrence();
