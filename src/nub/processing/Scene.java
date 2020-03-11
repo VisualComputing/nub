@@ -429,9 +429,8 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Applies the {@code node} transformation on {@code pGraphics}.
-   *
-   * @see #applyWorldTransformation(PGraphics, Node)
    */
+  /*
   public static void applyTransformation(PGraphics pGraphics, Node node) {
     if (pGraphics.is3D()) {
       pGraphics.translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
@@ -443,36 +442,19 @@ public class Scene extends Graph implements PConstants {
       pGraphics.scale(node.scaling(), node.scaling());
     }
   }
+   */
 
   /**
    * Applies the {@code node} world transformation on {@code pGraphics}.
-   *
-   * @see #applyTransformation(PGraphics, Node)
    */
+  /*
   public static void applyWorldTransformation(PGraphics pGraphics, Node node) {
     Node reference = node.reference();
     if (reference != null)
       applyWorldTransformation(pGraphics, reference);
     applyTransformation(pGraphics, node);
   }
-
-  /**
-   * Draw the node onto {@code pGraphics}.
-   * <p>
-   * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
-   * the node {@link Node#shape()} context is different than {@code pGraphics}.
    */
-  // TODO naming conventions
-  public static void draw(PGraphics pGraphics, Node node) {
-    pGraphics.pushStyle();
-    pGraphics.pushMatrix();
-    if (node.shape() != null)
-      pGraphics.shape(node.shape());
-    else
-      node.graphics(pGraphics);
-    pGraphics.popStyle();
-    pGraphics.popMatrix();
-  }
 
   // PICKING BUFFER
 
@@ -1038,7 +1020,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popMatrix();
   }
 
-  @Override
+  /*
   protected void _drawOntoBuffer(Object context, Node node) {
     PGraphics pGraphics = (PGraphics) context;
     pGraphics.pushStyle();
@@ -1051,6 +1033,26 @@ public class Scene extends Graph implements PConstants {
     else
       node.graphics(pGraphics);
 
+    pGraphics.popStyle();
+    pGraphics.popMatrix();
+  }
+  // */
+
+  /**
+   * Draw the node onto {@code pGraphics}.
+   * <p>
+   * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
+   * the node {@link Node#shape()} context is different than {@code pGraphics}.
+   */
+  // TODO naming conventions: simply draw (only if graph.draw(context, node) is discarded)
+  public static void _drawOntoBuffer(Object context, Node node) {
+    PGraphics pGraphics = (PGraphics) context;
+    pGraphics.pushStyle();
+    pGraphics.pushMatrix();
+    if (node.shape() != null)
+      pGraphics.shape(node.shape());
+    else
+      node.graphics(pGraphics);
     pGraphics.popStyle();
     pGraphics.popMatrix();
   }
@@ -1099,7 +1101,7 @@ public class Scene extends Graph implements PConstants {
    * @see #render(PGraphics, Type, Node, float, float, boolean)
    * @see #render()
    */
-  public void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar) {
+  public static void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar) {
     render(pGraphics, type, eye, zNear, zFar, true);
   }
 
@@ -1114,17 +1116,17 @@ public class Scene extends Graph implements PConstants {
    * @see #render(PGraphics, Type, Node, float, float)
    * @see #render()
    */
-  public void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar, boolean leftHanded) {
+  public static void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar, boolean leftHanded) {
     if (pGraphics instanceof PGraphicsOpenGL)
       render(pGraphics, type, eye, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded);
     else
       System.out.println("Nothing done: pg should be instance of PGraphicsOpenGL in render()");
   }
 
-  @Override
-  public MatrixHandler matrixHandler(Object context) {
+  // TODO visibility and naming convention KEY Pierre
+  public static MatrixHandler matrixHandler(Object context) {
     if (!(context instanceof PGraphicsOpenGL))
-      return new Java2DMatrixHandler(this);
+      throw new RuntimeException("Only OpenGL renderers are currently supported");
     return new GLMatrixHandler((PGraphicsOpenGL) context);
   }
 
