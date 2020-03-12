@@ -14,7 +14,10 @@
 
 package nub.processing;
 
-import nub.core.*;
+import nub.core.Graph;
+import nub.core.Interpolator;
+import nub.core.MatrixHandler;
+import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -334,8 +337,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Main constructor defining a left-handed Processing compatible scene. Calls
    * {@link #setMatrixHandler(MatrixHandler)} using a customized
-   * {@link MatrixHandler} depending on the {@link #context()} type (see
-   * {@link GLMatrixHandler}).
+   * {@link MatrixHandler} depending on the {@link #context()} type.
    * <p>
    * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. In this
    * case the {@code x} and {@code y} parameters define the position of the upper-left corner
