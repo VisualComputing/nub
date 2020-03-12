@@ -428,33 +428,18 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Applies the {@code node} transformation on {@code pGraphics}.
+   * Applies the {@code node} transformation on {@code pApplet}.
    */
-  /*
-  public static void applyTransformation(PGraphics pGraphics, Node node) {
-    if (pGraphics.is3D()) {
-      pGraphics.translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
-      pGraphics.rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
-      pGraphics.scale(node.scaling(), node.scaling(), node.scaling());
-    } else {
-      pGraphics.translate(node.translation().x(), node.translation().y());
-      pGraphics.rotate(node.rotation().angle2D());
-      pGraphics.scale(node.scaling(), node.scaling());
-    }
+  public static void applyTransformation(PApplet pApplet, Node node) {
+    applyTransformation(pApplet.g, node);
   }
-   */
 
   /**
-   * Applies the {@code node} world transformation on {@code pGraphics}.
+   * Applies the {@code node} world transformation on {@code pApplet}.
    */
-  /*
-  public static void applyWorldTransformation(PGraphics pGraphics, Node node) {
-    Node reference = node.reference();
-    if (reference != null)
-      applyWorldTransformation(pGraphics, reference);
-    applyTransformation(pGraphics, node);
+  public static void applyWorldTransformation(PApplet pApplet, Node node) {
+    applyWorldTransformation(pApplet.g, node);
   }
-   */
 
   // PICKING BUFFER
 
