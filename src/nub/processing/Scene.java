@@ -1091,7 +1091,7 @@ public class Scene extends Graph implements PConstants {
    * as the light point-of-view. Same as
    * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}.
    *
-   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
    * @see #render(Object)
    * @see #render(PGraphics, Type, Node, float, float)
    * @see #render()

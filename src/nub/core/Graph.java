@@ -2805,9 +2805,9 @@ public class Graph {
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #render(MatrixHandler, Object)
-   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
-   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see #_render(MatrixHandler, Object)
+   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
@@ -2847,14 +2847,14 @@ public class Graph {
    * @see #render()
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #render(MatrixHandler, Object)
-   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
-   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see #_render(MatrixHandler, Object)
+   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
    * @see Node#graphics(processing.core.PGraphics)
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Object context) {
-    render(MatrixHandler.matrixHandler(context), context);
+    _render(MatrixHandler.matrixHandler(context), context);
   }
 
   /**
@@ -2865,12 +2865,12 @@ public class Graph {
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
-   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
    * @see Node#graphics(processing.core.PGraphics)
    * @see Node#setShape(processing.core.PShape)
    */
-  public void render(MatrixHandler matrixHandler, Object context) {
+  protected void _render(MatrixHandler matrixHandler, Object context) {
     if (context == _fb)
       throw new RuntimeException("Cannot render into context, use render() instead of render(context, view, projection)");
     else {
@@ -2883,17 +2883,17 @@ public class Graph {
   /**
    * Same as {@code render(matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded)}.
    *
-   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
-   * @see #render(MatrixHandler, Object, Matrix, Matrix)
-   * @see #render(MatrixHandler, Object)
+   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
+   * @see #_render(MatrixHandler, Object)
    * @see Node#graphics(processing.core.PGraphics)
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    render(MatrixHandler.matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
+    _render(MatrixHandler.matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
   }
 
   /**
@@ -2901,33 +2901,33 @@ public class Graph {
    *
    * @see Node#view()
    * @see Node#projection(Type, float, float, float, float, boolean)
-   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #render(MatrixHandler, Object)
+   * @see #_render(MatrixHandler, Object)
    * @see Node#graphics(processing.core.PGraphics)
    * @see Node#setShape(processing.core.PShape)
    */
-  public static void render(MatrixHandler matrixHandler, Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    render(matrixHandler, context, eye.projection(type, width, height, zNear, zFar, leftHanded), eye.view());
+  protected static void _render(MatrixHandler matrixHandler, Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
+    _render(matrixHandler, context, eye.projection(type, width, height, zNear, zFar, leftHanded), eye.view());
   }
 
   /**
    * Same as {@code render(matrixHandler(context), context, projection, view)}.
    *
-   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
-   * @see #render(MatrixHandler, Object)
+   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #_render(MatrixHandler, Object)
    * @see Node#graphics(processing.core.PGraphics)
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Matrix projection, Matrix view) {
-    render(MatrixHandler.matrixHandler(context), context, projection, view);
+    _render(MatrixHandler.matrixHandler(context), context, projection, view);
   }
 
   /**
@@ -2939,12 +2939,12 @@ public class Graph {
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
-   * @see #render(MatrixHandler, Object)
+   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #_render(MatrixHandler, Object)
    * @see Node#graphics(processing.core.PGraphics)
    * @see Node#setShape(processing.core.PShape)
    */
-  public static void render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
+  protected static void _render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
     /*
     // TODO needs testing
     if (context == _fb)
@@ -2961,7 +2961,7 @@ public class Graph {
   }
 
   /**
-   * Used by the {@link #render(MatrixHandler, Object)} algorithm.
+   * Used by the {@link #_render(MatrixHandler, Object)} algorithm.
    */
   protected static void _render(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushMatrix();
