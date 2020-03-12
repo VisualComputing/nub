@@ -984,20 +984,16 @@ public class Scene extends Graph implements PConstants {
     PGraphics pGraphics = context();
     pGraphics.pushStyle();
     pGraphics.pushMatrix();
-
     if (isTagged(node))
       pGraphics.scale(1 + node.highlighting());
-
     if (node.shape() != null)
       pGraphics.shapeMode(context().shapeMode);
     if (node.shape() != null)
       pGraphics.shape(node.shape());
     else
       node.graphics(pGraphics);
-
     if (node.pickingThreshold() == 0 && node.isTaggingEnabled())
       _bbNeed = frameCount();
-
     pGraphics.popStyle();
     pGraphics.popMatrix();
   }
@@ -1045,11 +1041,9 @@ public class Scene extends Graph implements PConstants {
     if (node.pickingThreshold() == 0) {
       pGraphics.pushStyle();
       pGraphics.pushMatrix();
-
       float r = (float) (node.id() & 255) / 255.f;
       float g = (float) ((node.id() >> 8) & 255) / 255.f;
       float b = (float) ((node.id() >> 16) & 255) / 255.f;
-
       // TODO How to deal with these commands: breaks picking in Luxo when they're moved to the constructor
       // Seems related to: PassiveTransformations
       // funny, only safe way. Otherwise break things horribly when setting node shapes
@@ -1057,18 +1051,15 @@ public class Scene extends Graph implements PConstants {
       pGraphics.shader(_triangleShader);
       pGraphics.shader(_lineShader, PApplet.LINES);
       pGraphics.shader(_pointShader, PApplet.POINTS);
-
       _triangleShader.set("id", new PVector(r, g, b));
       _lineShader.set("id", new PVector(r, g, b));
       _pointShader.set("id", new PVector(r, g, b));
-
       if (node.shape() != null)
         pGraphics.shapeMode(context().shapeMode);
       if (node.shape() != null)
         pGraphics.shape(node.shape());
       else
         node.graphics(pGraphics);
-
       pGraphics.popStyle();
       pGraphics.popMatrix();
     }
@@ -1093,7 +1084,6 @@ public class Scene extends Graph implements PConstants {
    * as the light point-of-view. Same as
    * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}.
    *
-   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
    * @see #render(Object)
    * @see #render(PGraphics, Type, Node, float, float)
    * @see #render()

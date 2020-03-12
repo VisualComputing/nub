@@ -44,8 +44,7 @@ void setup() {
 
 void draw() {
   background(0);
-  // calls render() on all scene attached nodes
-  // automatically applying all the node transformations
+  // calls render() on all scene nodes applying all their transformations
   scene.render();
   drawRay();
 }

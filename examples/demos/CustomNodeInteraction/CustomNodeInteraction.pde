@@ -24,7 +24,7 @@ Node[] shapes;
 PFont font36;
 int totalShapes;
 
-//Choose FX2D, JAVA2D, P2D or P3D
+//Choose P2D or P3D
 String renderer = P3D;
 
 void settings() {

@@ -15,7 +15,7 @@ import nub.processing.*;
 Scene scene;
 Node[] shapes;
 
-//Choose one of P3D for a 3D scene or P2D for a 2D one.
+//Choose P2D or P3D
 String renderer = P3D;
 int w = 1000;
 int h = 1000;

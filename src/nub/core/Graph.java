@@ -2805,9 +2805,6 @@ public class Graph {
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #_render(MatrixHandler, Object)
-   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
-   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
@@ -2847,9 +2844,6 @@ public class Graph {
    * @see #render()
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #_render(MatrixHandler, Object)
-   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
-   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
    * @see Node#graphics(processing.core.PGraphics)
    * @see Node#setShape(processing.core.PShape)
    */
@@ -2858,17 +2852,7 @@ public class Graph {
   }
 
   /**
-   * Renders the scene onto {@code context} from the {@link #eye()}
-   * point-of-view, using {@code matrixHandler}.
-   *
-   * @see #render()
-   * @see #render(Object)
-   * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
-   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
-   * @see Node#graphics(processing.core.PGraphics)
-   * @see Node#setShape(processing.core.PShape)
+   * Used by {@link #render(Object)}.
    */
   protected void _render(MatrixHandler matrixHandler, Object context) {
     if (context == _fb)
@@ -2883,12 +2867,9 @@ public class Graph {
   /**
    * Same as {@code render(matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded)}.
    *
-   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
-   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
-   * @see #_render(MatrixHandler, Object)
    * @see Node#graphics(processing.core.PGraphics)
    * @see Node#setShape(processing.core.PShape)
    */
@@ -2897,18 +2878,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code render(matrixHandler, context, eye.projection(type, width, height, zNear, zFar, leftHanded), eye.view())}.
-   *
-   * @see Node#view()
-   * @see Node#projection(Type, float, float, float, float, boolean)
-   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
-   * @see #render()
-   * @see #render(Object)
-   * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #_render(MatrixHandler, Object)
-   * @see Node#graphics(processing.core.PGraphics)
-   * @see Node#setShape(processing.core.PShape)
+   * used by {@link #render(Object, Type, Node, int, int, float, float, boolean)}.
    */
   protected static void _render(MatrixHandler matrixHandler, Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
     _render(matrixHandler, context, eye.projection(type, width, height, zNear, zFar, leftHanded), eye.view());
@@ -2917,12 +2887,9 @@ public class Graph {
   /**
    * Same as {@code render(matrixHandler(context), context, projection, view)}.
    *
-   * @see #_render(MatrixHandler, Object, Matrix, Matrix)
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
-   * @see #_render(MatrixHandler, Object)
    * @see Node#graphics(processing.core.PGraphics)
    * @see Node#setShape(processing.core.PShape)
    */
@@ -2931,18 +2898,7 @@ public class Graph {
   }
 
   /**
-   * Renders the scene onto {@code context}, using {@code matrixHandler} to
-   * bind the {@code projection} and {@code view} matrices.
-   *
-   * @see MatrixHandler
-   * @see #render()
-   * @see #render(Object)
-   * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see #_render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
-   * @see #_render(MatrixHandler, Object)
-   * @see Node#graphics(processing.core.PGraphics)
-   * @see Node#setShape(processing.core.PShape)
+   * Used by {@link #render(Object, Matrix, Matrix)}.
    */
   protected static void _render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
     /*

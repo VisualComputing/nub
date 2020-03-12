@@ -83,7 +83,7 @@ void draw() {
   if (scene.isTagValid("light")) {
     shadowMap.beginDraw();
     shadowMap.background(140, 160, 125);
-    scene.render(shadowMap, shadowMapType, scene.node("light"), zNear, zFar);
+    Scene.render(shadowMap, shadowMapType, scene.node("light"), zNear, zFar);
     shadowMap.endDraw();
     // 3. Display shadow map
     scene.beginHUD();

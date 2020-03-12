@@ -28,7 +28,7 @@ boolean interactiveEye;
 int w = 1200;
 int h = 1200;
 
-//Choose FX2D, JAVA2D, P2D or P3D
+//Choose P2D or P3D
 String renderer = P2D;
 
 void settings() {

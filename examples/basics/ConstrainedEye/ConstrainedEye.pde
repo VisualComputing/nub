@@ -21,7 +21,7 @@ int rotDir;
 AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[2];
 int activeConstraint;
 
-//Choose FX2D, JAVA2D, P2D or P3D
+//P2D or P3D
 String renderer = P3D;
 
 void setup() {

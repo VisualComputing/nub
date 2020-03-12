@@ -14,7 +14,6 @@
  *
  * The eye key mode has the following bindings:
  *
- * 'u' and 'd': translate the eye along its Z-axis.
  * UP and DOWN arrows: translate the eye forward-backward
  * LEFT and RIGHT arrows: translate the eye left-right
  * UP and DOWN + SHIFT: rotate the eye up and down
@@ -56,8 +55,6 @@ void setup() {
 
 void draw() {
   background(0);
-  scene.drawAxes();
-  //lights();
   fill(200);
   noStroke();
   textureMode(IMAGE);

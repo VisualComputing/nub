@@ -22,7 +22,7 @@ Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
 Node shape;
 boolean showEyePath = true;
 
-//Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
+//Choose P2D or P3D
 String renderer = P3D;
 
 void setup() {

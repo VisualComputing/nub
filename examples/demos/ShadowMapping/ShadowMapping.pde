@@ -158,7 +158,7 @@ void draw() {
   shadowMap.beginDraw();
   shadowMap.noStroke();
   shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
-  scene.render(shadowMap, shadowMapType, light, zNear, zFar);
+  Scene.render(shadowMap, shadowMapType, light, zNear, zFar);
   shadowMap.endDraw();
 
   // 2. Render the scene from the scene.eye() node

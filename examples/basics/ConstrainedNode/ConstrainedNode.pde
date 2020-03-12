@@ -22,7 +22,7 @@ AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[3];
 int activeConstraint;
 boolean wC = true;
 
-//Choose FX2D, JAVA2D, P2D or P3D
+//Choose P2D or P3D
 String renderer = P3D;
 
 void setup() {
@@ -51,6 +51,7 @@ void setup() {
       Scene.drawTorusSolenoid(pg);
     }
   };
+  scene.randomize(iNode);
   iNode.setPickingThreshold(0);
   iNode.translate(new Vector(20, 20, 0));
   iNode.setConstraint(constraints[activeConstraint]);
