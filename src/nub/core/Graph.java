@@ -271,7 +271,7 @@ public class Graph {
         task.disableConcurrence();
     }
     _fb = context;
-    setMatrixHandler(nub.processing.Scene.matrixHandler(_fb));
+    setMatrixHandler(MatrixHandler.matrixHandler(_fb));
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
@@ -2291,7 +2291,7 @@ public class Graph {
    * @see #applyWorldTransformation(Object, Node)
    */
   public static void applyTransformation(Object context, Node node) {
-    nub.processing.Scene.matrixHandler(context).applyTransformation(node);
+    MatrixHandler.matrixHandler(context).applyTransformation(node);
   }
 
   /**
@@ -2315,7 +2315,7 @@ public class Graph {
    * @see #applyWorldTransformation(Node)
    */
   public static void applyWorldTransformation(Object context, Node node) {
-    nub.processing.Scene.matrixHandler(context).applyWorldTransformation(node);
+    MatrixHandler.matrixHandler(context).applyWorldTransformation(node);
   }
 
   // Other stuff
@@ -2854,7 +2854,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Object context) {
-    render(nub.processing.Scene.matrixHandler(context), context);
+    render(MatrixHandler.matrixHandler(context), context);
   }
 
   /**
@@ -2893,7 +2893,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    render(nub.processing.Scene.matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
+    render(MatrixHandler.matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
   }
 
   /**
@@ -2927,7 +2927,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Matrix projection, Matrix view) {
-    render(nub.processing.Scene.matrixHandler(context), context, projection, view);
+    render(MatrixHandler.matrixHandler(context), context, projection, view);
   }
 
   /**

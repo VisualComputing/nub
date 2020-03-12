@@ -14,10 +14,7 @@
 
 package nub.processing;
 
-import nub.core.Graph;
-import nub.core.Interpolator;
-import nub.core.MatrixHandler;
-import nub.core.Node;
+import nub.core.*;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -363,21 +360,19 @@ public class Scene extends Graph implements PConstants {
    */
   public Scene(PApplet pApplet, PGraphics pGraphics, Node eye, int x, int y) {
     super(pGraphics, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, eye, pGraphics.width, pGraphics.height);
+    if (!(context() instanceof PGraphicsOpenGL))
+      throw new RuntimeException("Only OpenGL renderers are currently supported");
     // 1. P5 objects
     _parent = pApplet;
     _offscreen = pGraphics != pApplet.g;
     _upperLeftCornerX = _offscreen ? x : 0;
     _upperLeftCornerY = _offscreen ? y : 0;
     // 2. Back buffer
-    _bb = (context() instanceof processing.opengl.PGraphicsOpenGL) ?
-        pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D) :
-        null;
-    if (_bb != null) {
-      _bbMatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb);
-      _triangleShader = pApplet().loadShader("PickingBuffer.frag");
-      _lineShader = pApplet().loadShader("PickingBuffer.frag");
-      _pointShader = pApplet().loadShader("PickingBuffer.frag");
-    }
+    _bb = pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D);
+    _bbMatrixHandler = MatrixHandler.matrixHandler(_bb);
+    _triangleShader = pApplet().loadShader("PickingBuffer.frag");
+    _lineShader = pApplet().loadShader("PickingBuffer.frag");
+    _pointShader = pApplet().loadShader("PickingBuffer.frag");
     // 3. Register P5 methods
     if (!isOffscreen()) {
       pApplet().registerMethod("pre", this);
@@ -1108,13 +1103,6 @@ public class Scene extends Graph implements PConstants {
       System.out.println("Nothing done: pg should be instance of PGraphicsOpenGL in render()");
   }
 
-  // TODO visibility and naming convention KEY Pierre
-  public static MatrixHandler matrixHandler(Object context) {
-    if (!(context instanceof PGraphicsOpenGL))
-      throw new RuntimeException("Only OpenGL renderers are currently supported");
-    return new GLMatrixHandler((PGraphicsOpenGL) context);
-  }
-
   // HUD
 
   /**
@@ -1157,7 +1145,7 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == context())
       _matrixHandler.beginHUD(width(), height());
     else
-      matrixHandler(pGraphics).beginHUD(pGraphics.width, pGraphics.height);
+      MatrixHandler.matrixHandler(pGraphics).beginHUD(pGraphics.width, pGraphics.height);
   }
 
   /**
@@ -1188,7 +1176,7 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == context())
       _matrixHandler.endHUD();
     else
-      matrixHandler(pGraphics).endHUD();
+      MatrixHandler.matrixHandler(pGraphics).endHUD();
     enableDepthTest(pGraphics);
     // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
     if (is3D())
@@ -2506,7 +2494,7 @@ public class Scene extends Graph implements PConstants {
       Vector o = new Vector();
       if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
         pGraphics.pushMatrix();
-        matrixHandler(pGraphics).applyTransformation(graph.eye());
+        MatrixHandler.matrixHandler(pGraphics).applyTransformation(graph.eye());
       }
       // in PERSPECTIVE cache the transformed origin
       else

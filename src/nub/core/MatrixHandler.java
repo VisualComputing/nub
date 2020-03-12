@@ -36,6 +36,13 @@ public class MatrixHandler {
   protected float[][] _projectionStack = new float[STACK_DEPTH][16];
   protected int _projectionStackDepth;
 
+  // TODO visibility and naming convention KEY Pierre
+  public static MatrixHandler matrixHandler(Object context) {
+    if (context instanceof processing.opengl.PGraphicsOpenGL)
+      return new GLMatrixHandler((processing.opengl.PGraphicsOpenGL) context);
+    return new MatrixHandler();
+  }
+
   // 1. May be overridden
 
   // bind

@@ -9,11 +9,10 @@
  * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
  ***************************************************************************************/
 
-package nub.processing;
+package nub.core;
 
-import nub.core.MatrixHandler;
-import nub.core.Node;
 import nub.primitives.Matrix;
+import nub.processing.Scene;
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
