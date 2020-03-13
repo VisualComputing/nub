@@ -83,7 +83,7 @@ import java.util.List;
  * Hierarchical traversals of the node hierarchy which automatically apply the local
  * node transformations described above may be achieved with {@link Graph#render()} or
  * {@link Graph#render()}.
- * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Node)}.
+ * Automatic traversals require overriding {@link #visit()} or {@link Graph#drawDiscard(Object, Node)}.
  * // TODO detach
  * <h2>Constraints</h2>
  * One interesting feature of a node is that its displacements can be constrained.
@@ -2202,7 +2202,7 @@ public class Node {
    * </pre>
    *
    * @see Graph#render()
-   * @see Graph#draw(Object, Node)
+   * @see Graph#drawDiscard(Object, Node)
    * @see #cull(boolean)
    * @see #isCulled()
    * @see #bypass()

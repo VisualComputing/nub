@@ -352,6 +352,27 @@ public class Graph {
   }
 
   /**
+   * Renders the node onto context. Used by the rendering algorithms.
+   * <p>
+   * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
+   * the node {@link Node#shape()} context is different than {@code pGraphics}.
+   * <p>
+   * Together with {@link MatrixHandler#matrixHandler(Object)} are the methods
+   * that should be re-implemented in js.
+   */
+  public static void draw(Object context, Node node) {
+    processing.opengl.PGraphicsOpenGL pGraphics = (processing.opengl.PGraphicsOpenGL) context;
+    pGraphics.pushStyle();
+    pGraphics.pushMatrix();
+    if (node.shape() != null)
+      pGraphics.shape(node.shape());
+    else
+      node.graphics(pGraphics);
+    pGraphics.popStyle();
+    pGraphics.popMatrix();
+  }
+
+  /**
    * Same as {@code return Node.random(this)}. Creates a random node attached to this graph.
    *
    * @see Node#random(Graph)
@@ -764,7 +785,6 @@ public class Graph {
       return false;
     if (node.reference() != null) {
       node.reference()._removeChild(node);
-      // TODO testing, maybe not necessary
       node._reference = null;
     } else
       _removeLeadingNode(node);
@@ -1980,7 +2000,6 @@ public class Graph {
   public void fit(Vector center, float radius) {
     switch (type()) {
       case TWO_D:
-        //TODO test 2d case since I swapped the calling order with the above lookAt
         lookAt(center);
         fitFOV();
         break;
@@ -2958,16 +2977,6 @@ public class Graph {
    * Used by {@link #render(Object, Matrix, Matrix)}.
    */
   protected static void _render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
-    /*
-    // TODO needs testing
-    if (context == _fb)
-      throw new RuntimeException("Cannot render into context, use render() instead of render(context, view, projection)");
-    else {
-      matrixHandler.bind(projection, view);
-      for (Node node : _leadingNodes())
-        _render(matrixHandler, context, node);
-    }
-    // */
     matrixHandler.bind(projection, view);
     for (Node node : _leadingNodes())
       _render(matrixHandler, context, node);
@@ -2981,32 +2990,11 @@ public class Graph {
     matrixHandler.applyTransformation(node);
     if (!node.isCulled()) {
       if (node._bypass != TimingHandler.frameCount)
-        _drawOntoBuffer(context, node);
+        draw(context, node);
       for (Node child : node.children())
         _render(matrixHandler, context, child);
     }
     matrixHandler.popMatrix();
-  }
-
-  /**
-   * Renders the node onto context. Used by the rendering algorithms.
-   * <p>
-   * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
-   * the node {@link Node#shape()} context is different than {@code pGraphics}.
-   * <p>
-   * Together with {@link MatrixHandler#matrixHandler(Object)} are the methods
-   * that should be re-implemented in js.
-   */
-  public static void _drawOntoBuffer(Object context, Node node) {
-    processing.opengl.PGraphicsOpenGL pGraphics = (processing.opengl.PGraphicsOpenGL) context;
-    pGraphics.pushStyle();
-    pGraphics.pushMatrix();
-    if (node.shape() != null)
-      pGraphics.shape(node.shape());
-    else
-      node.graphics(pGraphics);
-    pGraphics.popStyle();
-    pGraphics.popMatrix();
   }
 
   /**
@@ -3016,25 +3004,6 @@ public class Graph {
    */
   public void draw(Node node) {
     draw(_fb, node);
-  }
-
-  /**
-   * Renders the node onto {@code context}, provided that it holds a visual
-   * representation (see {@link Node#graphics(processing.core.PGraphics)} and
-   * {@link Node#setShape(processing.core.PShape)}).
-   * <p>
-   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
-   *
-   * @see #render()
-   */
-  // TODO discard me?
-  public void draw(Object context, Node node) {
-    if (context == _bb)
-      return;
-    if (context == _fb)
-      _drawFrontBuffer(node);
-    else
-      _drawOntoBuffer(context, node);
   }
 
   /**

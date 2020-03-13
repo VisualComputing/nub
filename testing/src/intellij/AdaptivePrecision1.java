@@ -42,7 +42,7 @@ public class AdaptivePrecision1 extends PApplet {
       //scene.applyTransformation(shapes[i]);
       //scene.draw(shapes[i]);
       Scene.applyTransformation(g, shapes[i]);
-      Scene._drawOntoBuffer(g, shapes[i]);
+      Scene.draw(g, shapes[i]);
       popMatrix();
       pushStyle();
       stroke(255);

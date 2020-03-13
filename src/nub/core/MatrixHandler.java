@@ -27,7 +27,6 @@ import nub.primitives.Matrix;
  */
 public class MatrixHandler {
   protected Matrix _projection, _view, _model;
-
   public static int STACK_DEPTH = 32;
   public static String ERROR_PUSHMATRIX_OVERFLOW = "Too many calls to pushMatrix().";
   public static String ERROR_PUSHMATRIX_UNDERFLOW = "Too many calls to popMatrix(), and not enough to pushMatrix().";
@@ -39,7 +38,7 @@ public class MatrixHandler {
   /**
    * Returns a {@code MatrixHandler} instance according to the default target renderer context.
    * <p>
-   * Together with {@link Graph#_drawOntoBuffer(Object, Node)} are the methods that should be
+   * Together with {@link Graph#draw(Object, Node)} are the methods that should be
    * re-implemented in js.
    */
   public static MatrixHandler matrixHandler(Object context) {
