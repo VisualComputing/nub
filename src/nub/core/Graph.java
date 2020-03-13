@@ -225,7 +225,7 @@ public class Graph {
    *
    * @see #Graph(Object, Object, Type, Node, int, int)
    */
-  public Graph(Object front, Object back, int width, int height) {
+  protected Graph(Object front, Object back, int width, int height) {
     this(front, back, Type.PERSPECTIVE, null, width, height);
   }
 
@@ -243,7 +243,7 @@ public class Graph {
    *
    * @see #Graph(Object, Object, Type, Node, int, int)
    */
-  public Graph(Object front, Object back, Node eye, int width, int height) {
+  protected Graph(Object front, Object back, Node eye, int width, int height) {
     this(front, back, Type.PERSPECTIVE, eye, width, height);
   }
 
@@ -261,13 +261,27 @@ public class Graph {
    *
    * @see #Graph(Object, Object, Type, Node, int, int)
    */
-  public Graph(Object front, Object back, Type type, int width, int height) {
+  protected Graph(Object front, Object back, Type type, int width, int height) {
     this(front, back, type, null, width, height);
   }
 
   /**
+   * Default constructor defines a right-handed graph with the specified {@code width} and
+   * {@code height} screen window dimensions. The graph {@link #center()} and
+   * {@link #anchor()} are set to {@code (0,0,0)} and its {@link #radius()} to {@code 100}.
+   * <p>
+   * The constructor sets a {@link Node} instance as the graph {@link #eye()} and then
+   * calls {@link #fit()}, so that the entire scene fits the screen dimensions.
+   * <p>
+   * The constructor also instantiates the graph main {@link #context()} and {@code back-buffer}
+   * matrix-handlers (see {@link MatrixHandler}) and {@link #timingHandler()}.
+   * <p>
    * Same as {@code this(context, null, type, eye, width, height)}.
    *
+   * @see #timingHandler()
+   * @see #setMatrixHandler(MatrixHandler)
+   * @see #setRightHanded()
+   * @see #setEye(Node)
    * @see #Graph(Object, Object, Type, Node, int, int)
    */
   public Graph(Object context, Type type, Node eye, int width, int height) {
@@ -290,7 +304,7 @@ public class Graph {
    * @see #setRightHanded()
    * @see #setEye(Node)
    */
-  public Graph(Object front, Object back, Type type, Node eye, int width, int height) {
+  protected Graph(Object front, Object back, Type type, Node eye, int width, int height) {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
