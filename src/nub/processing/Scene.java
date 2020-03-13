@@ -361,17 +361,13 @@ public class Scene extends Graph implements PConstants {
    * @see #Scene(PApplet, String, Node)
    */
   public Scene(PApplet pApplet, PGraphics pGraphics, Node eye, int x, int y) {
-    super(pGraphics, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, eye, pGraphics.width, pGraphics.height);
-    if (!(context() instanceof PGraphicsOpenGL))
-      throw new RuntimeException("Only OpenGL renderers are currently supported");
+    super(pGraphics, pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? P3D : P2D), pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, eye, pGraphics.width, pGraphics.height);
     // 1. P5 objects
     _parent = pApplet;
     _offscreen = pGraphics != pApplet.g;
     _upperLeftCornerX = _offscreen ? x : 0;
     _upperLeftCornerY = _offscreen ? y : 0;
     // 2. Back buffer
-    _bb = pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D);
-    _bbMatrixHandler = MatrixHandler.matrixHandler(_bb);
     _triangleShader = pApplet().loadShader("PickingBuffer.frag");
     _lineShader = pApplet().loadShader("PickingBuffer.frag");
     _pointShader = pApplet().loadShader("PickingBuffer.frag");

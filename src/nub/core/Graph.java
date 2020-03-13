@@ -111,9 +111,7 @@ import java.util.List;
  * boundary equations are disabled by default (see {@link #enableBoundaryEquations()} and
  * {@link #areBoundaryEquationsEnabled()}).
  * <h1>7. Matrix handling</h1>
- * The graph performs matrix handling through a {@link #matrixHandler()} (see also
- * {@link #setMatrixHandler(MatrixHandler)}) which should be overridden according to how your
- * renderer handles the matrix shader uniform variables. Refer to the {@link MatrixHandler}
+ * The graph performs matrix handling through a matrix-handler. Refer to the {@link MatrixHandler}
  * documentation for details.
  * <p>
  * To apply the transformation defined by a node call {@link #applyTransformation(Node)}
@@ -214,30 +212,66 @@ public class Graph {
   private float _zClippingCoefficient;
 
   /**
-   * Same as {@code this(Type.PERSPECTIVE, null, w, h)}
+   * Same as {@code this(Type.PERSPECTIVE, null, w, h)}.
    *
-   * @see #Graph(Object, Type, Node, int, int)
+   * @see #Graph(Object, Object, Type, Node, int, int)
    */
   public Graph(Object context, int width, int height) {
-    this(context, Type.PERSPECTIVE, null, width, height);
+    this(context, null, Type.PERSPECTIVE, null, width, height);
   }
 
   /**
-   * Same as {@code this(context, Type.PERSPECTIVE, eye, width, height)}.
+   * Same as {@code this(front, back, Type.PERSPECTIVE, null, width, height)}.
    *
-   * @see #Graph(Object, Type, Node, int, int)
+   * @see #Graph(Object, Object, Type, Node, int, int)
+   */
+  public Graph(Object front, Object back, int width, int height) {
+    this(front, back, Type.PERSPECTIVE, null, width, height);
+  }
+
+  /**
+   * Same as {@code this(context, null, Type.PERSPECTIVE, eye, width, height)}.
+   *
+   * @see #Graph(Object, Object, Type, Node, int, int)
    */
   public Graph(Object context, Node eye, int width, int height) {
-    this(context, Type.PERSPECTIVE, eye, width, height);
+    this(context, null, Type.PERSPECTIVE, eye, width, height);
   }
 
   /**
-   * Same as {@code this(context, type, null, width, height)}.
+   * Same as {@code this(front, back, Type.PERSPECTIVE, eye, width, height)}.
    *
-   * @see #Graph(Object, Type, Node, int, int)
+   * @see #Graph(Object, Object, Type, Node, int, int)
+   */
+  public Graph(Object front, Object back, Node eye, int width, int height) {
+    this(front, back, Type.PERSPECTIVE, eye, width, height);
+  }
+
+  /**
+   * Same as {@code this(context, null, type, null, width, height)}.
+   *
+   * @see #Graph(Object, Object, Type, Node, int, int)
    */
   public Graph(Object context, Type type, int width, int height) {
-    this(context, type, null, width, height);
+    this(context, null, type, null, width, height);
+  }
+
+  /**
+   * Same as {@code this(front, back, type, null, width, height)}.
+   *
+   * @see #Graph(Object, Object, Type, Node, int, int)
+   */
+  public Graph(Object front, Object back, Type type, int width, int height) {
+    this(front, back, type, null, width, height);
+  }
+
+  /**
+   * Same as {@code this(context, null, type, eye, width, height)}.
+   *
+   * @see #Graph(Object, Object, Type, Node, int, int)
+   */
+  public Graph(Object context, Type type, Node eye, int width, int height) {
+    this(context, null, type, eye, width, height);
   }
 
   /**
@@ -248,21 +282,15 @@ public class Graph {
    * The constructor sets a {@link Node} instance as the graph {@link #eye()} and then
    * calls {@link #fit()}, so that the entire scene fits the screen dimensions.
    * <p>
-   * The constructor also instantiates the graph {@link #matrixHandler()} and
-   * {@link #timingHandler()}.
-   * <p>
-   * Third party graphs should additionally:
-   * <ol>
-   * <li>(Optionally) Define a custom {@link #matrixHandler()}. Only if the target platform
-   * (such as Processing) provides its own matrix handling.</li>
-   * </ol>
+   * The constructor also instantiates the graph main {@link #context()} and {@code back-buffer}
+   * matrix-handlers (see {@link MatrixHandler}) and {@link #timingHandler()}.
    *
    * @see #timingHandler()
    * @see #setMatrixHandler(MatrixHandler)
    * @see #setRightHanded()
    * @see #setEye(Node)
    */
-  public Graph(Object context, Type type, Node eye, int width, int height) {
+  public Graph(Object front, Object back, Type type, Node eye, int width, int height) {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
@@ -270,8 +298,10 @@ public class Graph {
       for (Task task : timingHandler().taskPool())
         task.disableConcurrence();
     }
-    _fb = context;
-    setMatrixHandler(MatrixHandler.matrixHandler(_fb));
+    _fb = front;
+    _matrixHandler = MatrixHandler.matrixHandler(_fb);
+    _bb = back;
+    _bbMatrixHandler = _bb == null ? null : MatrixHandler.matrixHandler(_bb);
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();

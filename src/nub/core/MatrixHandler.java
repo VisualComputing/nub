@@ -43,8 +43,11 @@ public class MatrixHandler {
    * re-implemented in js.
    */
   public static MatrixHandler matrixHandler(Object context) {
-    if (context instanceof processing.opengl.PGraphicsOpenGL)
-      return new GLMatrixHandler((processing.opengl.PGraphicsOpenGL) context);
+    if (context instanceof processing.core.PGraphics)
+      if (context instanceof processing.opengl.PGraphicsOpenGL)
+        return new GLMatrixHandler((processing.opengl.PGraphicsOpenGL) context);
+      else
+        throw new RuntimeException("Only OpenGL renderers are currently supported");
     return new MatrixHandler();
   }
 
@@ -68,7 +71,7 @@ public class MatrixHandler {
    * implementing them in terms of that renderer.
    *
    * @see Graph#render()
-   * @see Node#projection(Graph.Type, float, float, float, float, boolean)
+   * @see Graph#projection(Node, Graph.Type, float, float, float, float, boolean)
    * @see Node#view()
    */
   public void bind(Matrix projection, Matrix view) {
