@@ -2924,11 +2924,32 @@ public class Graph {
     matrixHandler.applyTransformation(node);
     if (!node.isCulled()) {
       if (node._bypass != TimingHandler.frameCount)
-        nub.processing.Scene._drawOntoBuffer(context, node);
+        _drawOntoBuffer(context, node);
       for (Node child : node.children())
         _render(matrixHandler, context, child);
     }
     matrixHandler.popMatrix();
+  }
+
+  /**
+   * Renders the node onto context. Used by the rendering algorithms.
+   * <p>
+   * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
+   * the node {@link Node#shape()} context is different than {@code pGraphics}.
+   * <p>
+   * Together with {@link MatrixHandler#matrixHandler(Object)} are the methods
+   * that should be re-implemented in js.
+   */
+  public static void _drawOntoBuffer(Object context, Node node) {
+    processing.opengl.PGraphicsOpenGL pGraphics = (processing.opengl.PGraphicsOpenGL) context;
+    pGraphics.pushStyle();
+    pGraphics.pushMatrix();
+    if (node.shape() != null)
+      pGraphics.shape(node.shape());
+    else
+      node.graphics(pGraphics);
+    pGraphics.popStyle();
+    pGraphics.popMatrix();
   }
 
   /**
@@ -2956,7 +2977,7 @@ public class Graph {
     if (context == _fb)
       _drawFrontBuffer(node);
     else
-      nub.processing.Scene._drawOntoBuffer(context, node);
+      _drawOntoBuffer(context, node);
   }
 
   /**
@@ -2964,7 +2985,6 @@ public class Graph {
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
-  // TODO rename it as draw
   protected void _drawFrontBuffer(Node node) {
   }
 
@@ -2983,16 +3003,6 @@ public class Graph {
    */
   protected void _drawBackBuffer(Node node) {
   }
-
-  /**
-   * Renders the node onto context. Used by the rendering algorithms.
-   * <p>
-   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
-   */
-  /*
-  protected void _drawOntoBuffer(Object context, Node node) {
-  }
-   */
 
   /**
    * Internally used by {@link #_render(Node)}.

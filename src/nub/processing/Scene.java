@@ -998,43 +998,6 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popMatrix();
   }
 
-  /*
-  protected void _drawOntoBuffer(Object context, Node node) {
-    PGraphics pGraphics = (PGraphics) context;
-    pGraphics.pushStyle();
-    pGraphics.pushMatrix();
-
-    if (node.shape() != null)
-      pGraphics.shapeMode(context().shapeMode);
-    if (node.shape() != null)
-      pGraphics.shape(node.shape());
-    else
-      node.graphics(pGraphics);
-
-    pGraphics.popStyle();
-    pGraphics.popMatrix();
-  }
-  // */
-
-  /**
-   * Draw the node onto {@code pGraphics}.
-   * <p>
-   * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
-   * the node {@link Node#shape()} context is different than {@code pGraphics}.
-   */
-  // TODO naming conventions: simply draw (only if graph.draw(context, node) is discarded)
-  public static void _drawOntoBuffer(Object context, Node node) {
-    PGraphics pGraphics = (PGraphics) context;
-    pGraphics.pushStyle();
-    pGraphics.pushMatrix();
-    if (node.shape() != null)
-      pGraphics.shape(node.shape());
-    else
-      node.graphics(pGraphics);
-    pGraphics.popStyle();
-    pGraphics.popMatrix();
-  }
-
   @Override
   protected void _drawBackBuffer(Node node) {
     PGraphics pGraphics = _backBuffer();

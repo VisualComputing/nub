@@ -36,7 +36,12 @@ public class MatrixHandler {
   protected float[][] _projectionStack = new float[STACK_DEPTH][16];
   protected int _projectionStackDepth;
 
-  // TODO visibility and naming convention KEY Pierre
+  /**
+   * Returns a {@code MatrixHandler} instance according to the default target renderer context.
+   * <p>
+   * Together with {@link Graph#_drawOntoBuffer(Object, Node)} are the methods that should be
+   * re-implemented in js.
+   */
   public static MatrixHandler matrixHandler(Object context) {
     if (context instanceof processing.opengl.PGraphicsOpenGL)
       return new GLMatrixHandler((processing.opengl.PGraphicsOpenGL) context);
