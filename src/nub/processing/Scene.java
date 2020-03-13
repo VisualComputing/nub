@@ -1058,6 +1058,60 @@ public class Scene extends Graph implements PConstants {
       System.out.println("Nothing done: pg should be instance of PGraphicsOpenGL in render()");
   }
 
+  /**
+   * Same as {@code return projection(eye, type, width, height, zNear, zFar, true)}.
+   *
+   * @see #projection(Node, Type, float, float, float, float, boolean)
+   */
+  public static Matrix projection(Node eye, Graph.Type type, float width, float height, float zNear, float zFar) {
+    return projection(eye, type, width, height, zNear, zFar, true);
+  }
+
+  /**
+   * Same as {@code return perspective(eye, aspectRatio, zNear, zFar, true)}.
+   *
+   * @see #perspective(Node, float, float, float, boolean)
+   */
+  public static Matrix perspective(Node eye, float aspectRatio, float zNear, float zFar) {
+    return perspective(eye, aspectRatio, zNear, zFar, true);
+  }
+
+  /**
+   * Same as {@code return orthographic(eye, width, height, zNear, zFar, true)}.
+   *
+   * @see #orthographic(Node, float, float, float, float, boolean)
+   */
+  public static Matrix orthographic(Node eye, float width, float height, float zNear, float zFar) {
+    return orthographic(eye, width, height, zNear, zFar, true);
+  }
+
+  /**
+   * Same as {@code return projectionView(eye, type, width, height, zNear, zFar, true)}.
+   *
+   * @see #projectionView(Node, Type, float, float, float, float, boolean)
+   */
+  public static Matrix projectionView(Node eye, Graph.Type type, float width, float height, float zNear, float zFar) {
+    return projectionView(eye, type, width, height, zNear, zFar, true);
+  }
+
+  /**
+   * Same as {@code return perspectiveView(eye, aspectRatio, zNear, zFar, true)}.
+   *
+   * @see #perspectiveView(Node, float, float, float, boolean)
+   */
+  public static Matrix perspectiveView(Node eye, float aspectRatio, float zNear, float zFar) {
+    return perspectiveView(eye, aspectRatio, zNear, zFar, true);
+  }
+
+  /**
+   * Same as {@code return orthographicView(eye, width, height, zNear, zFar, true)}.
+   *
+   * @see #orthographicView(Node, float, float, float, float, boolean)
+   */
+  public static Matrix orthographicView(Node eye, float width, float height, float zNear, float zFar) {
+    return orthographicView(eye, width, height, zNear, zFar, true);
+  }
+
   // HUD
 
   /**

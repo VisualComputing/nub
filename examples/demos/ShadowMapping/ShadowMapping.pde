@@ -164,7 +164,7 @@ void draw() {
   // 2. Render the scene from the scene.eye() node
   background(0);
   if (!debug) {
-    Matrix projectionView = scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+    Matrix projectionView = Scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
     Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
     Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, scene.eye().viewInverse()));
     Vector lightDirection = scene.eye().displacement(light.zAxis(false));
