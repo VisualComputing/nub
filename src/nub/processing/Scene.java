@@ -422,6 +422,9 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Applies the {@code node} transformation on {@code pApplet}.
+   * Same as {@code applyTransformation(pApplet.g, node)}.
+   *
+   * @see #applyTransformation(Object, Node)
    */
   public static void applyTransformation(PApplet pApplet, Node node) {
     applyTransformation(pApplet.g, node);
@@ -429,9 +432,22 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Applies the {@code node} world transformation on {@code pApplet}.
+   * Same as {@code applyWorldTransformation(pApplet.g, node)}.
+   *
+   * @see #applyWorldTransformation(Object, Node)
    */
   public static void applyWorldTransformation(PApplet pApplet, Node node) {
     applyWorldTransformation(pApplet.g, node);
+  }
+
+  /**
+   * Renders the node onto the main {@code pApplet} context.
+   * Same as {@code draw(pApplet.g, node)}.
+   *
+   * @see #draw(Object, Node)
+   */
+  public static void draw(PApplet pApplet, Node node) {
+    draw(pApplet.g, node);
   }
 
   // PICKING BUFFER
