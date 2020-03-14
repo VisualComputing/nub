@@ -68,7 +68,7 @@ import java.util.List;
  * {@code // Draw your object here, in the local node coordinate system.} <br>
  * {@code popMatrix();} <br>
  * <p>
- * Use {@link #view()} and {@link #projection(Graph.Type, float, float, float, float, boolean)}
+ * Use {@link #view()} and {@link Graph#projection(Node, Graph.Type, float, float, float, float, boolean)}
  * when rendering the scene from the node point-of-view. Note that these methods are used by
  * the graph when a node is set as its eye, see {@link Graph#preDraw()}.
  * <p>
@@ -83,7 +83,7 @@ import java.util.List;
  * Hierarchical traversals of the node hierarchy which automatically apply the local
  * node transformations described above may be achieved with {@link Graph#render()} or
  * {@link Graph#render()}.
- * Automatic traversals require overriding {@link #visit()} or {@link Graph#drawDiscard(Object, Node)}.
+ * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Node)}.
  * // TODO detach
  * <h2>Constraints</h2>
  * One interesting feature of a node is that its displacements can be constrained.
@@ -1334,14 +1334,14 @@ public class Node {
    * Returns the magnitude of the node, defined in the world coordinate system.
    * <p>
    * Note that the magnitude is used to compute the node
-   * {@link #projection(Graph.Type, float, float, float, float, boolean)} which is useful to render a
+   * {@link Graph#projection(Node, Graph.Type, float, float, float, float, boolean)} which is useful to render a
    * scene from the node point-of-view.
    *
    * @see #orientation()
    * @see #position()
    * @see #setPosition(Vector)
    * @see #translation()
-   * @see #projection(Graph.Type, float, float, float, float, boolean)
+   * @see Graph#projection(Node, Graph.Type, float, float, float, float, boolean)
    */
   public float magnitude() {
     if (reference() != null)
@@ -2202,7 +2202,7 @@ public class Node {
    * </pre>
    *
    * @see Graph#render()
-   * @see Graph#drawDiscard(Object, Node)
+   * @see Graph#draw(Object, Node)
    * @see #cull(boolean)
    * @see #isCulled()
    * @see #bypass()
