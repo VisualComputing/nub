@@ -148,7 +148,7 @@ public class Node {
   // PShape is only available in Java
   protected processing.core.PShape _shape;
   protected float _highlight;
-  protected long _bypass;
+  protected long _bypass = -1;
 
   // Tasks
   protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;

@@ -1,31 +1,29 @@
-package intellij;
-
-import nub.core.Graph;
-import nub.core.Node;
-import nub.primitives.Vector;
-import processing.core.PApplet;
-import processing.core.PGraphics;
-
 /**
- * Created by pierre on 11/15/16.
+ * Sceneless.
+ * by Jean Pierre Charalambos.
+ *
+ * This example illustrates the use of nub without even instantiating a
+ * Scene object.
+ *
+ * Just define an eye-node and some nodes with torus shapes.
  */
-public class Sceneless extends PApplet {
-  Node eye;
-  Node[] nodes;
-  boolean leftHanded = false;
-  Graph.Type type = Graph.Type.PERSPECTIVE;
-  float zNear = 80;
-  float zFar = 800;
 
-  //Choose P2D or P3D
-  String renderer = P3D;
+import nub.primitives.*;
+import nub.core.*;
 
-  public void settings() {
-    size(800, 800, renderer);
-  }
+Node eye;
+Node[] nodes;
+boolean leftHanded = false;
+Graph.Type type = Graph.Type.PERSPECTIVE;
+float zNear = 80;
+float zFar = 800;
 
-  public void setup() {
-    eye = new Node();
+//Choose P2D or P3D
+String renderer = P3D;
+
+void setup() {
+  size(800, 800, renderer);
+  eye = new Node();
     float fov = PI / 3;
     eye.setMagnitude(tan(fov/2));
     eye.setPosition(0, 0, 400);
@@ -64,15 +62,10 @@ public class Sceneless extends PApplet {
       nodes[i].randomize(new Vector(), 400, g.is3D());
     }
     rectMode(CENTER);
-  }
+}
 
-  public void draw() {
-    background(0);
-    eye.orbit(new Vector(0, g.is3D() ? 1 : 0, g.is3D() ? 0 : 1), 0.01f);
-    Graph.render(g, type, eye, g.width, g.height, zNear, zFar, leftHanded);
-  }
-
-  public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.Sceneless"});
-  }
+void draw() {
+  background(0);
+  eye.orbit(new Vector(0, g.is3D() ? 1 : 0, g.is3D() ? 0 : 1), 0.01);
+  Graph.render(g, type, eye, g.width, g.height, zNear, zFar, leftHanded);
 }
