@@ -10,11 +10,8 @@
  * boxes (by dragging them with the mouse right button) and still they
  * will be oriented towards the sphere.
  *
- * Both the sphere and the boxes are implemented as detached-nodes
- * specializations and hence they require to apply the local node
- * transformations, check their drawing routines.
- *
- * Contrast this example with the attached-node version with the same name.
+ * Note that the hierarchy is traversed manually. Check the Box and Sphere
+ * drawing routines.
  */
 
 import nub.primitives.*;
@@ -107,11 +104,11 @@ void keyPressed() {
       scene.removeTag("keyboard");
   if (key == CODED)
     if (keyCode == UP)
-      scene.translate("keyboard", 0, -10);
+      scene.translate("keyboard", 0, -10, 0);
     else if (keyCode == DOWN)
-      scene.translate("keyboard", 0, 10);
+      scene.translate("keyboard", 0, 10, 0);
     else if (keyCode == LEFT)
-      scene.translate("keyboard", -10, 0);
+      scene.translate("keyboard", -10, 0, 0);
     else if (keyCode == RIGHT)
-      scene.translate("keyboard", 10, 0);
+      scene.translate("keyboard", 10, 0, 0);
 }
