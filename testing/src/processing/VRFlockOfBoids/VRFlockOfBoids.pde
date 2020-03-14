@@ -113,7 +113,7 @@ void resetEye() {
 void mousePressed() {
   // two options to update the boid avatar:
   // 1. Synchronously
-  updateAvatar(scene.track("mouseClicked", mouseX, mouseY));
+  updateAvatar(scene.updateTag("mouseClicked", mouseX, mouseY));
   // which is the same as these two lines:
   // scene.track("mouseClicked", mouseX, mouseY);
   // updateAvatar(scene.trackedNode("mouseClicked"));

@@ -12,9 +12,9 @@ class Boid extends TimingTask {
   float t = 0;
 
   Boid(Vector inPos) {
-    super(scene);
+    super();
     // the boid node just holds the boid appearance for rendering
-    node = new Node(scene) {
+    node = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();
@@ -27,7 +27,7 @@ class Boid extends TimingTask {
         pg.fill(color(0, 255, 0, 125));
 
         // highlight boids under the mouse
-        if (scene.trackedNode("mouseMoved") == this) {
+        if (scene.node("mouseMoved") == this) {
           pg.stroke(color(0, 0, 255));
           pg.fill(color(0, 0, 255));
         }
