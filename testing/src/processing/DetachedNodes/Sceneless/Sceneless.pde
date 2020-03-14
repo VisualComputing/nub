@@ -17,7 +17,7 @@ boolean leftHanded = false;
 float zNear = 80;
 float zFar = 800;
 
-//Choose FX2D, JAVA2D, P2D or P3D
+//Choose P2D or P3D
 String renderer = P3D;
 
 void setup() {
@@ -29,6 +29,7 @@ void setup() {
   nodes = new Node[50];
   for (int i = 0; i < nodes.length; i++)
     nodes[i] = Node.random(new Vector(), 400, g.is3D());
+  g.rectMode(CENTER);
 }
 
 void draw() {
@@ -36,7 +37,7 @@ void draw() {
   if (g.is3D()) {
     // 1. Define a projection
     // horrible cast. Yep that's Java :p
-    ((PGraphicsOpenGL)g).setProjection(toPMatrix(eye.projection(Graph.Type.PERSPECTIVE, width, height, zNear, zFar, leftHanded)));
+    ((PGraphicsOpenGL)g).setProjection(toPMatrix(Graph.projection(eye, Graph.Type.PERSPECTIVE, width, height, zNear, zFar, leftHanded)));
     // 2. Render from the eye point-of-view
     eye.orbit(new Vector(0, 1, 0), 0.01);
     // 3. Apply the 3D eye transformation
@@ -58,12 +59,18 @@ void draw() {
       g.strokeWeight(3);
       g.stroke(255, 255, 0);
       g.fill(0, 255, 0);
-      g.box(20);
+      if(g.is3D())
+        g.box(20);
+      else
+        g.square(0, 0, 20);
     }
     else {
       g.noStroke();
       g.fill(255, 0, 255);
-      g.sphere(20);
+      if(g.is3D())
+        g.sphere(20);
+      else
+        g.circle(0, 0, 20);
     }
     g.pop();
   }
