@@ -153,6 +153,7 @@ public class Node {
 
   // Tasks
   protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
+  protected final float _scalingFactor = 800;
 
   /**
    * Same as {@code this(null, null, null, new Vector(), new Quaternion(), 1)}.
@@ -374,8 +375,7 @@ public class Node {
     _scalingTask = new InertialTask() {
       @Override
       public void action() {
-        // scaling factor is encoded in _center.x() :p
-        float factor = 1 + Math.abs(_x) / _center.x();
+        float factor = 1 + Math.abs(_x) / _scalingFactor;
         scale(_x >= 0 ? factor : 1 / factor);
       }
     };
@@ -1301,9 +1301,7 @@ public class Node {
   public void scale(float scaling, float inertia) {
     scale(scaling);
     _scalingTask._inertia = inertia;
-    // TODO testing
-    //_scalingTask._x += scaling > 1 ? graph().height() * (scaling - 1) : graph().height() * (scaling - 1) / scaling;
-    _scalingTask._x += scaling > 1 ? 800 * (scaling - 1) : 800 * (scaling - 1) / scaling;
+    _scalingTask._x += scaling > 1 ? _scalingFactor * (scaling - 1) : _scalingFactor * (scaling - 1) / scaling;
     if (!_scalingTask.isActive()) {
       _scalingTask.run();
     }

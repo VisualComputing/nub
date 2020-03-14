@@ -3831,7 +3831,6 @@ public class Graph {
       System.out.println("Warning: scaleNode requires a non-null node different than the eye. Nothing done");
       return;
     }
-    node._scalingTask._center.setX(Math.max(width(), height()));
     float factor = 1 + Math.abs(delta) / height();
     node.scale(delta >= 0 ? factor : 1 / factor, inertia);
   }
@@ -3852,7 +3851,6 @@ public class Graph {
    * @see #scaleNode(Node, float)
    */
   public void scaleEye(float delta, float inertia) {
-    eye()._scalingTask._center.setX(-Math.max(width(), height()));
     float factor = 1 + Math.abs(delta) / (float) -height();
     eye().scale(delta >= 0 ? factor : 1 / factor, inertia);
   }
