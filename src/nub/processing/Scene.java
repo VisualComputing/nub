@@ -127,6 +127,9 @@ public class Scene extends Graph implements PConstants {
   protected long _bbNeed, _bbCount;
   protected PShader _triangleShader, _lineShader, _pointShader;
 
+  // mouse speed
+  long _timestamp;
+
   // CONSTRUCTORS
 
   /**
@@ -3076,6 +3079,21 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Returns the mouse speed expressed in pixels per milliseconds.
+   */
+  public float mouseSpeed() {
+    float distance = Vector.distance(new Vector(pmouseX(), pmouseY()), new Vector(mouseX(), mouseY()));
+    long now = System.nanoTime();
+    //long now = System.currentTimeMillis();
+    long delay = now - _timestamp;
+    float speed = delay == 0 ? distance : distance / (float) delay;
+    speed *= 1e6; // only if nanos are used
+    //System.out.println(speed);
+    _timestamp = now;
+    return speed;
+  }
+
+  /**
    * Same as {@code return super.tracks(node, mouseX(), mouseY())}.
    *
    * @see #tracks(Node, int, int)
@@ -3320,55 +3338,73 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
+   * Same as {@code return mouseSpinTag(null, 0.84f)}.
    *
-   * @see #spinTag(int, int, int, int, float)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
-   */
-  public boolean mouseSpinTag(float inertia) {
-    return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
-  }
-
-  /**
-   * Same as {@code return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY())}.
-   *
-   * @see #spinTag(int, int, int, int)
+   * @see #mouseSpinTag(String, float)
    * @see #pmouseX()
    * @see #pmouseY()
    * @see #mouseX()
    * @see #mouseY()
    */
   public boolean mouseSpinTag() {
-    return super.spinTag(pmouseX(), pmouseY(), mouseX(), mouseY());
+    return mouseSpinTag(null, 0.84f);
   }
 
   /**
-   * Same as {@code return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
+   * Same as {@code return mouseSpinTag(null, inertia)}.
    *
-   * @see #spinTag(String, int, int, int, int, float)
+   * @see #mouseSpinTag(String, float)
    * @see #pmouseX()
    * @see #pmouseY()
    * @see #mouseX()
    * @see #mouseY()
    */
-  public boolean mouseSpinTag(String tag, float inertia) {
-    return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
+  public boolean mouseSpinTag(float inertia) {
+    return mouseSpinTag(null, inertia);
   }
 
   /**
-   * Same as {@code return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   * Same as {@code return mouseSpinTag(tag, 0.84f)}.
    *
-   * @see #spinTag(String, int, int, int, int)
+   * @see #mouseSpinTag(String, float)
    * @see #pmouseX()
    * @see #pmouseY()
    * @see #mouseX()
    * @see #mouseY()
    */
   public boolean mouseSpinTag(String tag) {
-    return super.spinTag(tag, pmouseX(), pmouseY(), mouseX(), mouseY());
+    return mouseSpinTag(tag, 0.84f);
+  }
+
+  /**
+   * Same as {@code mouseSpinNode(node(tag), inertia)}. Returns
+   * {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #mouseSpinNode(Node, float)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public boolean mouseSpinTag(String tag, float inertia) {
+    if (node(tag) != null) {
+      mouseSpinNode(node(tag), inertia);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Same as {@code mouseSpinNode(node, 0.84f)}.
+   *
+   * @see #mouseSpinNode(Node, float)
+   * @see #pmouseX()
+   * @see #pmouseY()
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public void mouseSpinNode(Node node) {
+    mouseSpinNode(node, 0.84f);
   }
 
   /**
@@ -3381,20 +3417,25 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseY()
    */
   public void mouseSpinNode(Node node, float inertia) {
-    super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
+    if (inertia == 1) {
+      // Sensitivity is expressed in pixels per milliseconds. Default value is 30 (300 pixels per second).
+      float sensitivity = 30;
+      super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.84f);
+    } else
+      super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   /**
-   * Same as {@code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY())}.
+   * Same as {@code mouseSpinEye(0.84f)}.
    *
-   * @see #spinNode(Node, int, int, int, int)
+   * @see #mouseSpinEye(float)
    * @see #pmouseX()
    * @see #pmouseY()
    * @see #mouseX()
    * @see #mouseY()
    */
-  public void mouseSpinNode(Node node) {
-    super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY());
+  public void mouseSpinEye() {
+    mouseSpinEye(0.84f);
   }
 
   /**
@@ -3407,30 +3448,23 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseY()
    */
   public void mouseSpinEye(float inertia) {
-    super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
-  }
-
-  /**
-   * Same as {@code super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY())}.
-   *
-   * @see #spinEye(int, int, int, int)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
-   */
-  public void mouseSpinEye() {
-    super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
+    if (inertia == 1) {
+      // Sensitivity is expressed in pixels per milliseconds. Default value is 30 (300 pixels per second).
+      float sensitivity = 30;
+      super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.84f);
+    } else
+      super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   // only eye
 
+  // TODO discard these two
   public void mouseDebugSpinEye(float friction) {
-    super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), friction);
+    super._debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), friction);
   }
 
   public void mouseDebugSpinEye() {
-    super.debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
+    super._debugSpinEye(pmouseX(), pmouseY(), mouseX(), mouseY());
   }
 
   /**

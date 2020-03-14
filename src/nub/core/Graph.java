@@ -4270,15 +4270,18 @@ public class Graph {
     eye().orbit(new Quaternion(axis, angle), anchor(), inertia);
   }
 
-  public void debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f);
+  /**
+   * Same as {_debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f)}.
+   */
+  protected void _debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    _debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f);
   }
 
   /**
    * @see #spinEye(int, int, int, int). Debug. Idea took from peasycam. See mouseRotate():
    * https://github.com/jdf/peasycam/blob/master/src/peasy/PeasyCam.java
    */
-  public void debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
+  protected void _debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
     int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
     if (isRightHanded())
       dy = -dy;
