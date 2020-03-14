@@ -373,9 +373,8 @@ public class Node {
     _scalingTask = new InertialTask() {
       @Override
       public void action() {
-        // TODO testing
-        //float factor = 1 + Math.abs(_x) / graph().height();
-        float factor = 1 + Math.abs(_x) / 800;
+        // scaling factor is encoded in _center.x() :p
+        float factor = 1 + Math.abs(_x) / _center.x();
         scale(_x >= 0 ? factor : 1 / factor);
       }
     };
