@@ -17,6 +17,7 @@ public class MouseDragInteraction extends PApplet {
   Scene scene;
   Vector randomVector;
   boolean cad, lookAround;
+  Node node, shape1, shape2;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -29,7 +30,7 @@ public class MouseDragInteraction extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    Node shape1 = new Node() {
+    shape1 = new Node() {
       @Override
       public void graphics(PGraphics pGraphics) {
         Scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -44,11 +45,11 @@ public class MouseDragInteraction extends PApplet {
       }
     };
     shape1.setRotation(Quaternion.random());
-    shape1.translate(-375, 175);
+    shape1.translate(-375, 175, 0);
 
-    Node shape2 = new Node(shape1);
+    shape2 = new Node(shape1);
     shape2.setShape(shape());
-    shape2.translate(275, 275);
+    shape2.translate(275, 275, 0);
     shape2.setPickingThreshold(0);
 
     randomVector = Vector.random();
@@ -65,6 +66,26 @@ public class MouseDragInteraction extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == 'd') {
+      if (node == null) {
+        node = shape1.detach();
+        node.setPickingThreshold(0);
+        scene.randomize(node);
+        node.setShape(shape());
+        node.setReference(shape2);
+      }
+    }
+    if (key == 'e') {
+      if (node != null)
+        node.setReference(shape1);
+    }
+    if (key == 'x') {
+      Scene.prune(node);
+    }
+    if (key == 'y') {
+      if (node != null)
+        node.resetReference();
+    }
     if (key == 'i')
       scene.flip();
     if (key == 's')
@@ -81,9 +102,7 @@ public class MouseDragInteraction extends PApplet {
     if (key == 'a')
       lookAround = !lookAround;
     if (key == 'r')
-      scene.setRightHanded();
-    if (key == 'l')
-      scene.setLeftHanded();
+      scene.flip();
     if (key == 'p')
       if (scene.type() == Graph.Type.PERSPECTIVE)
         scene.setType(Graph.Type.ORTHOGRAPHIC);

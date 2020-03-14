@@ -81,10 +81,11 @@ import java.util.List;
  * differential geometry transformations damped with a given {@code inertia}.
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the node hierarchy which automatically apply the local
- * node transformations described above may be achieved with {@link Graph#render()} or
- * {@link Graph#render()}.
- * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Node)}.
- * // TODO detach
+ * node transformations described above may be achieved with {@link Graph#render()},
+ * {@link Graph#render(Object)}, {@link Graph#render(Object, Matrix, Matrix)} and
+ * {@link Graph#render(Object, Graph.Type, Node, int, int, float, float, boolean)}.
+ * Customize the rendering traversal algorithm by overriding {@link #visit()} (see
+ * also {@link #cull(boolean)} and {@link #bypass()}).
  * <h2>Constraints</h2>
  * One interesting feature of a node is that its displacements can be constrained.
  * When a {@link Constraint} is attached to a node, it filters the input of
@@ -620,7 +621,6 @@ public class Node {
    * {@link #reference()}). No action is performed if setting {@code reference} as the
    * {@link #reference()} would create a loop in the hierarchy.
    */
-  // TODO needs testing
   public void setReference(Node node) {
     if (node == this) {
       System.out.println("A Node cannot be a reference of itself.");
@@ -699,7 +699,6 @@ public class Node {
   /**
    * Returns the list a child nodes of this node.
    */
-  // TODO test detach!
   public List<Node> children() {
     return _children;
   }
@@ -906,14 +905,6 @@ public class Node {
    */
   public void translate(float x, float y, float z) {
     translate(new Vector(x, y, z));
-  }
-
-  /**
-   * Same as {@link #translate(Vector)} but with {@code float} parameters.
-   */
-  // TODO discard me?
-  public void translate(float x, float y) {
-    translate(new Vector(x, y));
   }
 
   /**
@@ -1465,7 +1456,6 @@ public class Node {
    */
   public void align(boolean move, float threshold, Node node) {
     Vector[][] directions = new Vector[2][3];
-
     for (int d = 0; d < 3; ++d) {
       Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
       if (node != null)
@@ -1474,12 +1464,10 @@ public class Node {
         directions[0][d] = dir;
       directions[1][d] = orientation().rotate(dir);
     }
-
     float maxProj = 0.0f;
     float proj;
     short[] index = new short[2];
     index[0] = index[1] = 0;
-
     Vector vector = new Vector(0.0f, 0.0f, 0.0f);
     for (int i = 0; i < 3; ++i) {
       for (int j = 0; j < 3; ++j) {
@@ -1492,14 +1480,9 @@ public class Node {
         }
       }
     }
-    //TODO needs testing
-    Node old = detach(); // correct line
-    // Vnode old = this.get();// this call the get overloaded method and
-    // hence add the node to the mouse _grabber
-
+    Node old = detach();
     vector.set(directions[0][index[0]]);
     float coef = vector.dot(directions[1][index[1]]);
-
     if (Math.abs(coef) >= threshold) {
       vector.set(directions[0][index[0]]);
       Vector axis = vector.cross(directions[1][index[1]]);
@@ -1511,12 +1494,10 @@ public class Node {
       q = Quaternion.multiply(rotation().inverse(), q);
       q = Quaternion.multiply(q, orientation());
       rotate(q);
-
       // Try to align an other axis direction
       short d = (short) ((index[1] + 1) % 3);
       Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
       dir = orientation().rotate(dir);
-
       float max = 0.0f;
       for (int i = 0; i < 3; ++i) {
         vector.set(directions[0][i]);
@@ -1526,7 +1507,6 @@ public class Node {
           max = proj;
         }
       }
-
       if (max >= threshold) {
         vector.set(directions[0][index[0]]);
         axis = vector.cross(dir);
@@ -1545,7 +1525,6 @@ public class Node {
       Vector center = new Vector(0.0f, 0.0f, 0.0f);
       if (node != null)
         center = node.position();
-
       vector = Vector.subtract(center, worldDisplacement(old.location(center)));
       vector.subtract(translation());
       translate(vector);
