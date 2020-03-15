@@ -83,10 +83,7 @@ public class DebugCam extends PApplet {
     switch (mouseButton) {
       case LEFT:
         if (!scene.mouseSpinTag(inertia))
-          if (peasy)
-            scene.mouseDebugSpinEye(inertia);
-          else
-            scene.mouseSpinEye(inertia);
+          scene.mouseSpinEye(inertia);
         break;
       case RIGHT:
         if (!scene.mouseTranslateTag(inertia))

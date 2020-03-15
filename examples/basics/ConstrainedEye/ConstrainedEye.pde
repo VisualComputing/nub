@@ -48,7 +48,7 @@ void draw() {
   scene.drawDottedGrid();
   fill(204, 102, 0, 150);
   scene.drawTorusSolenoid();
-  fill(0, 0, 255);
+  fill(0, 255, 255);
   scene.beginHUD();
   displayText();
   scene.endHUD();

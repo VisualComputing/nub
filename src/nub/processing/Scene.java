@@ -3456,7 +3456,7 @@ public class Scene extends Graph implements PConstants {
     if (inertia == 1) {
       // Sensitivity is expressed in pixels per milliseconds. Default value is 30 (300 pixels per second).
       float sensitivity = 30;
-      super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.8f);
+      super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.9f);
     } else
       super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
@@ -3487,7 +3487,7 @@ public class Scene extends Graph implements PConstants {
     if (inertia == 1) {
       // Sensitivity is expressed in pixels per milliseconds. Default value is 30 (300 pixels per second).
       float sensitivity = 30;
-      super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.8f);
+      super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.9f);
     } else
       super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
