@@ -84,7 +84,7 @@ public class SpaceNavigator extends PApplet {
     // translate(x, y, z) expects params in screen-space
     // which has dimensions width * height * 1
     scene.translate("SPCNAV", 20 * snXPos.getValue(), 20 * snYPos.getValue(), snZPos.getValue() / 50);
-    //scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
+    scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
   }
 
   /*
@@ -120,7 +120,7 @@ public class SpaceNavigator extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.moveForward(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 70);
   }
 
   public void keyPressed() {
