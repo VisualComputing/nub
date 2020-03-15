@@ -2864,8 +2864,8 @@ public class Graph {
   }
 
   /**
-   * Renders the scene onto the {@link #context()}. Calls {@link Node#visit()} on each visited node
-   * (refer to the {@link Node} documentation).
+   * Renders the node tree onto the {@link #context()} from the {@link #eye()} viewpoint.
+   * Calls {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
    *
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
@@ -2904,7 +2904,7 @@ public class Graph {
   }
 
   /**
-   * Renders the scene onto {@code context}.
+   * Renders the node tree onto {@code context} from the {@link #eye()} viewpoint.
    *
    * @see #render()
    * @see #render(Object, Matrix, Matrix)
@@ -2930,7 +2930,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code render(matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded)}.
+   * Renders the node tree onto context from the {@code eye} viewpoint with the given frustum parameters.
    *
    * @see #render()
    * @see #render(Object)
@@ -2950,7 +2950,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code render(matrixHandler(context), context, projection, view)}.
+   * Renders the node tree onto context with the given {@code projection} and {@code view} matrices.
    *
    * @see #render()
    * @see #render(Object)

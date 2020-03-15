@@ -1044,7 +1044,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Renders the scene onto {@code pGraphics} using the {@code eye} node point of view and
+   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and
    * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye} as
    * the light point-of-view. Same as {@code render(pGraphics, type, eye, zNear, zFar, true)}.
    *
@@ -1057,7 +1057,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Renders the scene onto {@code pGraphics} using the {@code eye} node point of view and
+   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and
    * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye}
    * as the light point-of-view. Same as
    * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}.
