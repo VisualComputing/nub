@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Viewer extends PApplet{
-    String path =  "/testing/data/bvh/0008_ChaCha001.bvh";
+    String path =  "/testing/data/bvh/mocap.bvh";
     Scene scene;
     BVHLoader parser;
     List<Skeleton> skeletons;
@@ -47,6 +47,7 @@ public class Viewer extends PApplet{
         scene.setRadius(100);
         scene.eye().rotate(new Quaternion(0,0,PI));
         scene.fit(1);
+        scene.setRadius(400);
         parser = new BVHLoader(sketchPath() + path, scene, null);
         parser.generateConstraints();
 
@@ -175,11 +176,37 @@ public class Viewer extends PApplet{
                 joint.setConstraint(node.constraint());
                 pairs.put(node, joint);
                 _structure.put(loader.joint().get(node.id()).name(),joint);
+
+                if(node.reference() != null && node.reference().children().size() == 1){
+                    //duplicateBone((Joint) joint.reference(), joint);
+                }
+
                 _jointToNode.put(joint, node);
             }
             _root = pairs.get(loader.root());
             _root.setReference(_reference);
             _root.setRoot(true);
+        }
+
+
+        protected void duplicateBone(Joint j_i, Joint j_i1){
+            Joint j_mid = new Joint(scene, j_i.color(), j_i.radius());
+            Vector v = j_i1.translation().get();
+            j_mid.setReference(j_i);
+            j_mid.setTranslation(Vector.multiply(v, 0.5f));
+            BallAndSocket bs = new BallAndSocket(radians(20), radians(20));
+            bs.setRestRotation(j_mid.rotation().get(), v.orthogonalVector(), v);
+            j_mid.setConstraint(bs);
+            //Set j_i1
+            Constraint c_i1 = j_i1.constraint();
+            Vector pos = j_i1.position();
+            Quaternion or = j_i1.orientation();
+            j_i1.setConstraint(null);
+            j_i1.setReference(j_mid);
+            j_i1.setPosition(pos);
+            j_i1.setOrientation(or);
+            j_i1.setConstraint(c_i1);
+
         }
 
         protected void _createSolver(SimpleTRIK.HeuristicMode mode){

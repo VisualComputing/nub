@@ -377,7 +377,7 @@ public class NaiveBiped extends PApplet {
             @Override
             public void execute(){
                 //Follow a sin trajectory
-                float y = stepHeight * sin(radians(angle));
+                float y = stepHeight * skewedSine(radians(angle), 10);
                 target2.setTranslation(new Vector(initial.x(), initial.y() - y, initial.z() + w*angle));
                 angle +=  step;
             }
@@ -466,4 +466,28 @@ public class NaiveBiped extends PApplet {
         PApplet.main(new String[]{"ik.interactiveSkeleton.NaiveBiped"});
     }
 
+
+    //Based on this https://math.stackexchange.com/questions/2430564/equation-of-a-tilted-sine/2430662 post
+
+    public static float skewedSine(float t, int n){
+        int double_n = 2 * n;
+        float res = 0;
+        for(int k = 1; k <= n; k++){
+            res += (float) comb(double_n, n - k) / comb(double_n, n) * Math.sin(k * t) / (float)(k);
+        }
+        return res;
+    }
+
+    public static float fact(int n){
+        if(n == 0) return 1;
+        float res = 1;
+        for(int i = 2; i <= n; i++){
+            res *= i;
+        }
+        return res;
+    }
+
+    public static float comb(int n, int k){
+        return fact(n) / (fact(k) * fact(n - k));
+    }
 }
