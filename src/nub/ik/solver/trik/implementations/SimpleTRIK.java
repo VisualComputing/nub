@@ -19,6 +19,8 @@ public class SimpleTRIK extends Solver {
     }
 
     protected boolean _disable_order_swapping = false; //TODO : REMOVE!
+    protected boolean _enableDeadLockResolution = false;
+
     protected Context _context;
     protected HeuristicMode _heuristicMode;
     protected Heuristic _mainHeuristic, _secondaryHeuristic, _twistHeuristic;
@@ -27,6 +29,11 @@ public class SimpleTRIK extends Solver {
     protected float _current = 10e10f, _best = 10e10f, _previousBest = 10e10f;
     protected int _stepCounter;
     protected boolean  _enableTwist = true;
+
+
+    public void enableDeadLockResolution(boolean enable){
+        _enableDeadLockResolution = enable;
+    }
 
 
     public SimpleTRIK(List<? extends Node> chain, HeuristicMode mode) {
@@ -220,23 +227,24 @@ public class SimpleTRIK extends Solver {
         _update(); //update if required
 
         //Define dead lock if eff does not move to a better position after a given number of iterations
-        if(Math.abs(_best - _previousBest) < Float.MIN_VALUE){ //DeadLock
-            context().incrementDeadlockCounter();
-        }
-        else {
-            context().resetDeadlockCounter();
-        }
-
-        if(context().deadlockCounter() == 5){ //apply random perturbation
-            for(int i = 0; i < _context.usableChainInformation().size() - 1; i++){
-                NodeInformation j_i = _context.usableChainInformation().get(i);
-                Quaternion q = Quaternion.random();
-                if(j_i.node().constraint() != null) j_i.node().constraint().constrainRotation(q, j_i.node());
-                j_i.node().rotate(q);
+        if(_enableDeadLockResolution) {
+            if (Math.abs(_best - _previousBest) < Float.MIN_VALUE) { //DeadLock
+                context().incrementDeadlockCounter();
+            } else {
+                context().resetDeadlockCounter();
             }
-            NodeInformation._updateCache(_context.usableChainInformation());
-            context().resetDeadlockCounter();
-            _current = 10e10f;
+
+            if (context().deadlockCounter() == 5) { //apply random perturbation
+                for (int i = 0; i < _context.usableChainInformation().size() - 1; i++) {
+                    NodeInformation j_i = _context.usableChainInformation().get(i);
+                    Quaternion q = Quaternion.random();
+                    if (j_i.node().constraint() != null) j_i.node().constraint().constrainRotation(q, j_i.node());
+                    j_i.node().rotate(q);
+                }
+                NodeInformation._updateCache(_context.usableChainInformation());
+                context().resetDeadlockCounter();
+                _current = 10e10f;
+            }
         }
 
 
