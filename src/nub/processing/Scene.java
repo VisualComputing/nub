@@ -3194,24 +3194,41 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code mouseTranslate(null)}.
    *
    * @see #mouseTranslate(String)
-   * @see #mouseDX()
-   * @see #mouseDY()
    */
   public void mouseTranslate() {
     mouseTranslate(null);
   }
 
   /**
-   * Same as {@code if (!mouseTranslateTag(tag)) mouseTranslateEye()}.
+   * Same as {@code mouseTranslate(tag, 0.8f)}.
+   *
+   * @see #mouseTranslate(String, float)
+   */
+  public void mouseTranslate(String tag) {
+    mouseTranslate(tag, 0.8f);
+  }
+
+  /**
+   * Same as {@code mouseTranslate(null, inertia)}.
+   *
+   * @see #mouseTranslate(String, float)
+   */
+  public void mouseTranslate(float inertia) {
+    mouseTranslate(null, inertia);
+  }
+
+  /**
+   * Calls {@code mouseTranslateTag(tag, inertia)} if {@code node(tag)} is non-null and
+   * {@code mouseTranslateEye(inertia)} otherwise.
    *
    * @see #mouseTranslateTag(String)
    * @see #mouseTranslateEye()
    * @see #mouseDX()
    * @see #mouseDY()
    */
-  public void mouseTranslate(String tag) {
-    if (!mouseTranslateTag(tag))
-      mouseTranslateEye();
+  public void mouseTranslate(String tag, float inertia) {
+    if (!mouseTranslateTag(tag, inertia))
+      mouseTranslateEye(inertia);
   }
 
   /**
@@ -3237,14 +3254,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return mouseTranslateTag(tag, 0.6f)}.
+   * Same as {@code return mouseTranslateTag(tag, 0.8f)}.
    *
    * @see #mouseTranslateTag(String, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public boolean mouseTranslateTag(String tag) {
-    return mouseTranslateTag(tag, 0.6f);
+    return mouseTranslateTag(tag, 0.8f);
   }
 
   /**
@@ -3279,14 +3296,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code mouseTranslateNode(node, 0.6f)}.
+   * Same as {@code mouseTranslateNode(node, 0.8f)}.
    *
    * @see #mouseTranslateNode(Node, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslateNode(Node node) {
-    mouseTranslateNode(node, 0.6f);
+    mouseTranslateNode(node, 0.8f);
   }
 
   /**
@@ -3307,14 +3324,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code mouseTranslateEye(0.7f)}.
+   * Same as {@code mouseTranslateEye(0.8f)}.
    *
    * @see #mouseTranslateEye()
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslateEye() {
-    mouseTranslateEye(0.7f);
+    mouseTranslateEye(0.8f);
   }
 
   /**
@@ -3327,18 +3344,37 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Calls {@code mouseSpinTag(tag)} if {@code node(tag)} is non-null and {@code mouseSpinEye()} otherwise.
+   * Same as {@code mouseSpin(tag, 0.8f)}.
+   *
+   * @see #mouseSpin(String, float)
+   */
+  public void mouseSpin(String tag) {
+    mouseSpin(tag, 0.8f);
+  }
+
+  /**
+   * Same as {@code mouseSpin(null, inertia)}.
+   *
+   * @see #mouseSpin(String, float)
+   */
+  public void mouseSpin(float inertia) {
+    mouseSpin(null, inertia);
+  }
+
+  /**
+   * Calls {@code mouseSpinTag(tag, inertia)} if {@code node(tag)}
+   * is non-null and {@code mouseSpinEye(inertia)} otherwise.
    *
    * @see #mouseSpinTag(String)
    * @see #mouseSpinEye()
    */
-  public void mouseSpin(String tag) {
-    if (!mouseSpinTag(tag))
-      mouseSpinEye();
+  public void mouseSpin(String tag, float inertia) {
+    if (!mouseSpinTag(tag, inertia))
+      mouseSpinEye(inertia);
   }
 
   /**
-   * Same as {@code return mouseSpinTag(null, 0.84f)}.
+   * Same as {@code return mouseSpinTag(null, 0.8f)}.
    *
    * @see #mouseSpinTag(String, float)
    * @see #pmouseX()
@@ -3347,7 +3383,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseY()
    */
   public boolean mouseSpinTag() {
-    return mouseSpinTag(null, 0.84f);
+    return mouseSpinTag(null, 0.8f);
   }
 
   /**
@@ -3364,7 +3400,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return mouseSpinTag(tag, 0.84f)}.
+   * Same as {@code return mouseSpinTag(tag, 0.8f)}.
    *
    * @see #mouseSpinTag(String, float)
    * @see #pmouseX()
@@ -3373,7 +3409,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseY()
    */
   public boolean mouseSpinTag(String tag) {
-    return mouseSpinTag(tag, 0.84f);
+    return mouseSpinTag(tag, 0.8f);
   }
 
   /**
@@ -3395,7 +3431,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code mouseSpinNode(node, 0.84f)}.
+   * Same as {@code mouseSpinNode(node, 0.8f)}.
    *
    * @see #mouseSpinNode(Node, float)
    * @see #pmouseX()
@@ -3404,7 +3440,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseY()
    */
   public void mouseSpinNode(Node node) {
-    mouseSpinNode(node, 0.84f);
+    mouseSpinNode(node, 0.8f);
   }
 
   /**
@@ -3420,13 +3456,13 @@ public class Scene extends Graph implements PConstants {
     if (inertia == 1) {
       // Sensitivity is expressed in pixels per milliseconds. Default value is 30 (300 pixels per second).
       float sensitivity = 30;
-      super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.84f);
+      super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.8f);
     } else
       super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   /**
-   * Same as {@code mouseSpinEye(0.84f)}.
+   * Same as {@code mouseSpinEye(0.8f)}.
    *
    * @see #mouseSpinEye(float)
    * @see #pmouseX()
@@ -3435,7 +3471,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseY()
    */
   public void mouseSpinEye() {
-    mouseSpinEye(0.84f);
+    mouseSpinEye(0.8f);
   }
 
   /**
@@ -3451,7 +3487,7 @@ public class Scene extends Graph implements PConstants {
     if (inertia == 1) {
       // Sensitivity is expressed in pixels per milliseconds. Default value is 30 (300 pixels per second).
       float sensitivity = 30;
-      super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.84f);
+      super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.8f);
     } else
       super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }

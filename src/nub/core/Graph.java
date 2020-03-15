@@ -3750,14 +3750,33 @@ public class Graph {
   }
 
   /**
-   * Calls {@code scaleTag(tag, delta)} if {@code node(tag)} is non-null and {@code scaleEye(delta)} otherwise.
+   * Same as {@code scale(tag, delta, 0.8f)}.
    *
-   * @see #scaleEye(float)
-   * @see #scaleTag(String, float)
+   * @see #scale(String, float, float)
    */
   public void scale(String tag, float delta) {
-    if (!scaleTag(tag, delta))
-      scaleEye(delta);
+    scale(tag, delta, 0.8f);
+  }
+
+  /**
+   * Same as {@code scale(null, delta, inertia)}.
+   *
+   * @see #scale(String, float, float)
+   */
+  public void scale(float delta, float inertia) {
+    scale(null, delta, inertia);
+  }
+
+  /**
+   * Calls {@code scaleTag(tag, delta, inertia)} if {@code node(tag)} is non-null and
+   * {@code scaleEye(delta, inertia)} otherwise.
+   *
+   * @see #scaleEye(float, float)
+   * @see #scaleTag(String, float, float)
+   */
+  public void scale(String tag, float delta, float inertia) {
+    if (!scaleTag(tag, delta, inertia))
+      scaleEye(delta, inertia);
   }
 
   /**
@@ -3856,14 +3875,33 @@ public class Graph {
   }
 
   /**
-   * Calls {@code translateTag(tag, dx, dy, dz)} if {@code node(tag)} is non-null and {@code translateEye(dx, dy, dz)} otherwise.
+   * Same as {@code translate(tag, dx, dy, dz, 0.8f)}.
    *
-   * @see #translateTag(String, float, float, float)
-   * @see #translateEye(float, float, float)
+   * @see #translate(String, float, float, float, float)
    */
   public void translate(String tag, float dx, float dy, float dz) {
-    if (!translateTag(tag, dx, dy, dz))
-      translateEye(dx, dy, dz);
+    translate(tag, dx, dy, dz, 0.8f);
+  }
+
+  /**
+   * Same as {@code translate(null, dx, dy, dz, inertia)}.
+   *
+   * @see #translate(String, float, float, float, float)
+   */
+  public void translate(float dx, float dy, float dz, float inertia) {
+    translate(null, dx, dy, dz, inertia);
+  }
+
+  /**
+   * Calls {@code translateTag(tag, dx, dy, dz, inertia)} if {@code node(tag)} is non-null
+   * and {@code translateEye(dx, dy, dz, inertia)} otherwise.
+   *
+   * @see #translateTag(String, float, float, float, float)
+   * @see #translateEye(float, float, float, float)
+   */
+  public void translate(String tag, float dx, float dy, float dz, float inertia) {
+    if (!translateTag(tag, dx, dy, dz, inertia))
+      translateEye(dx, dy, dz, inertia);
   }
 
   /**
@@ -3885,12 +3923,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return translateTag(tag, dx, dy, dz, 0)}.
+   * Same as {@code return translateTag(tag, dx, dy, dz, 0.8f)}.
    *
    * @see #translateTag(String, float, float, float, float)
    */
   public boolean translateTag(String tag, float dx, float dy, float dz) {
-    return translateTag(tag, dx, dy, dz, 0);
+    return translateTag(tag, dx, dy, dz, 0.8f);
   }
 
   /**
@@ -3907,12 +3945,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translateNode(node, dx, dy, dz, 0)}.
+   * Same as {@code translateNode(node, dx, dy, dz, 0.8f)}.
    *
    * @see #translateNode(Node, float, float, float, float)
    */
   public void translateNode(Node node, float dx, float dy, float dz) {
-    translateNode(node, dx, dy, dz, 0);
+    translateNode(node, dx, dy, dz, 0.8f);
   }
 
   /**
@@ -3935,12 +3973,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translateEye(dx, dy, dz, 0)}.
+   * Same as {@code translateEye(dx, dy, dz, 0.8f)}.
    *
    * @see #translateEye(float, float, float, float)
    */
   public void translateEye(float dx, float dy, float dz) {
-    translateEye(dx, dy, dz, 0);
+    translateEye(dx, dy, dz, 0.8f);
   }
 
   /**
@@ -4001,14 +4039,33 @@ public class Graph {
   }
 
   /**
-   * Calls {@code rotateTag(tag, roll, pitch, yaw)} if {@code node(tag)} is non-null and {@code rotateEye(roll, pitch, yaw)} otherwise.
+   * Same as {@code rotate(tag, roll, pitch, yaw, 0.8f)}.
    *
-   * @see #rotateTag(String, float, float, float)
-   * @see #rotateEye(float, float, float)
+   * @see #rotate(String, float, float, float, float)
    */
   public void rotate(String tag, float roll, float pitch, float yaw) {
-    if (!rotateTag(tag, roll, pitch, yaw))
-      rotateEye(roll, pitch, yaw);
+    rotate(tag, roll, pitch, yaw, 0.8f);
+  }
+
+  /**
+   * Same as {@code rotate(null, roll, pitch, yaw, inertia)}.
+   *
+   * @see #rotate(String, float, float, float, float)
+   */
+  public void rotate(float roll, float pitch, float yaw, float inertia) {
+    rotate(null, roll, pitch, yaw, inertia);
+  }
+
+  /**
+   * Calls {@code rotateTag(tag, roll, pitch, yaw, inertia)} if {@code node(tag)} is non-null
+   * and {@code rotateEye(roll, pitch, yaw, inertia)} otherwise.
+   *
+   * @see #rotateTag(String, float, float, float, float)
+   * @see #rotateEye(float, float, float, float)
+   */
+  public void rotate(String tag, float roll, float pitch, float yaw, float inertia) {
+    if (!rotateTag(tag, roll, pitch, yaw, inertia))
+      rotateEye(roll, pitch, yaw, inertia);
   }
 
   /**
@@ -4021,12 +4078,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return rotateTag(tag, roll, pitch, yaw, 0.84f)}.
+   * Same as {@code return rotateTag(tag, roll, pitch, yaw, 0.8f)}.
    *
    * @see #rotateTag(String, float, float, float, float)
    */
   public boolean rotateTag(String tag, float roll, float pitch, float yaw) {
-    return rotateTag(tag, roll, pitch, yaw, 0.84f);
+    return rotateTag(tag, roll, pitch, yaw, 0.8f);
   }
 
   /**
@@ -4045,12 +4102,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code rotateNode(node, roll, pitch, yaw, 0.84f)}.
+   * Same as {@code rotateNode(node, roll, pitch, yaw, 0.8f)}.
    *
    * @see #rotateNode(Node, float, float, float, float)
    */
   public void rotateNode(Node node, float roll, float pitch, float yaw) {
-    rotateNode(node, roll, pitch, yaw, 0.84f);
+    rotateNode(node, roll, pitch, yaw, 0.8f);
   }
 
   /**
@@ -4082,12 +4139,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code rotateEye(roll, pitch, yaw, 0.84f)}.
+   * Same as {@code rotateEye(roll, pitch, yaw, 0.8f)}.
    *
    * @see #rotateEye(float, float, float, float)
    */
   public void rotateEye(float roll, float pitch, float yaw) {
-    rotateEye(roll, pitch, yaw, 0.84f);
+    rotateEye(roll, pitch, yaw, 0.8f);
   }
 
   /**
@@ -4119,15 +4176,33 @@ public class Graph {
   }
 
   /**
-   * Same as {@code if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y))
-   * spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}
+   * Same as {@code spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
+   *
+   * @see #spin(String, int, int, int, int, float)
+   */
+  public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
+  }
+
+  /**
+   * Same as {@code spin(null, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}.
+   *
+   * @see #spin(String, int, int, int, int, float)
+   */
+  public void spin(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
+    spin(null, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
+  }
+
+  /**
+   * Calls {@code (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia))} if {@code node(tag)}
+   * is non-null and spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)} otherwise.
    *
    * @see #spinTag(String, int, int, int, int, float)
    * @see #spinEye(int, int, int, int, float)
    */
-  public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y))
-      spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y);
+  public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
+    if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia))
+      spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
   }
 
   /**
@@ -4149,12 +4224,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f)}.
+   * Same as {@code return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
    *
    * @see #spinTag(String, int, int, int, int, float)
    */
   public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f);
+    return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
   }
 
   /**
@@ -4173,12 +4248,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f)}.
+   * Same as {@code spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
    *
    * @see #spinNode(Node, int, int, int, int, float)
    */
   public void spinNode(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f);
+    spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
   }
 
   /**
@@ -4220,12 +4295,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f)}.
+   * Same as {@code spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
    *
    * @see #spinEye(int, int, int, int, float)
    */
   public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f);
+    spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
   }
 
   /**
@@ -4260,10 +4335,10 @@ public class Graph {
   }
 
   /**
-   * Same as {_debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f)}.
+   * Same as {_debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
    */
   protected void _debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    _debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.84f);
+    _debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
   }
 
   /**
