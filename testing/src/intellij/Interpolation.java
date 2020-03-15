@@ -141,6 +141,9 @@ public class Interpolation extends PApplet {
       scene.fit(1);
     if (key == 'f')
       scene.fit();
+
+    if (key == 'p')
+      println(Scene.nodes().size());
   }
 
   public static void main(String[] args) {

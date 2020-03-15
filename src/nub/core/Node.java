@@ -436,10 +436,10 @@ public class Node {
    * @see #detach()
    */
   public Node get() {
+    // Copying the shape (node.setShape(this.shape())) is incompatible with js
+    // and it also would affect Interpolator addKeyFrame(eye)
     Node node = new Node();
     node.set(this);
-    // TODO should shape be copied?
-    //node.setShape(this.shape());
     return node;
   }
 

@@ -538,37 +538,39 @@ public class Interpolator {
   }
 
   /**
-   * Appends a shapeless copy of the current {@code #graph} {@link Graph#eye()}
+   * Appends a copy of the current {@code #graph} {@link Graph#eye()}
    * one second after the previously added keyframe.
    *
    * @see #addKeyFrame(Graph, float)
    * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
-   * @see Node#Node()
-   * @see Node#set(Node)
+   * @see Node#get()
    * @see Graph#eye()
    */
   public void addKeyFrame(Graph graph) {
-    Node node = new Node();
-    node.set(graph.eye());
+    // Warning: if get copies the node shape, go like this:
+    // Node node = new Node();
+    // node.set(graph.eye());
+    Node node = graph.eye().get();
     node.setPickingThreshold(20);
     addKeyFrame(node);
   }
 
   /**
-   * Appends a shapeless copy of the current {@code graph} {@link Graph#eye()}
+   * Appends a copy of the current {@code graph} {@link Graph#eye()}
    * {@code time} seconds after the previously added keyframe.
    *
    * @see #addKeyFrame(Graph)
    * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
-   * @see Node#Node()
-   * @see Node#set(Node)
+   * @see Node#get()
    * @see Graph#eye()
    */
   public void addKeyFrame(Graph graph, float time) {
-    Node node = new Node();
-    node.set(graph.eye());
+    // Warning: if get copies the node shape, go like this:
+    // Node node = new Node();
+    // node.set(graph.eye());
+    Node node = graph.eye().get();
     node.setPickingThreshold(20);
     addKeyFrame(node, time);
   }
