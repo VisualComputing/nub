@@ -342,7 +342,8 @@ public class Node {
   }
 
   /**
-   * Returns a detached Node instance for the given params. Mostly used internally.
+   * Returns a detached node (i.e., a pruned non-reachable node from the graph,
+   * see {@link Graph#prune(Node)}) for the given params. Mostly used internally.
    */
   public static Node detach(Vector position, Quaternion orientation, float magnitude) {
     Node node = new Node(position, orientation, magnitude);
@@ -437,6 +438,8 @@ public class Node {
   public Node get() {
     Node node = new Node();
     node.set(this);
+    // TODO should shape be copied?
+    //node.setShape(this.shape());
     return node;
   }
 
@@ -759,7 +762,7 @@ public class Node {
   }
 
   /**
-   * Returns a random detached node. The node is randomly positioned inside the ball defined
+   * Returns a random node. The node is randomly positioned inside the ball defined
    * by {@code center} and {@code radius} (see {@link Vector#random()}), which in 2D is a
    * circumference parallel to the x-y plane. The {@link #orientation()} is set by
    * {@link Quaternion#random()}. The magnitude is a random in [0,5...2].

@@ -538,33 +538,37 @@ public class Interpolator {
   }
 
   /**
-   * Appends the current {@code #graph} {@link Graph#eye()}
+   * Appends a shapeless copy of the current {@code #graph} {@link Graph#eye()}
    * one second after the previously added keyframe.
    *
    * @see #addKeyFrame(Graph, float)
    * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
-   * @see Node#get()
+   * @see Node#Node()
+   * @see Node#set(Node)
    * @see Graph#eye()
    */
   public void addKeyFrame(Graph graph) {
-    Node node = graph.eye().get();
+    Node node = new Node();
+    node.set(graph.eye());
     node.setPickingThreshold(20);
     addKeyFrame(node);
   }
 
   /**
-   * Appends the current {@code graph} {@link Graph#eye()}
+   * Appends a shapeless copy of the current {@code graph} {@link Graph#eye()}
    * {@code time} seconds after the previously added keyframe.
    *
    * @see #addKeyFrame(Graph)
    * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
-   * @see Node#get()
+   * @see Node#Node()
+   * @see Node#set(Node)
    * @see Graph#eye()
    */
   public void addKeyFrame(Graph graph, float time) {
-    Node node = graph.eye().get();
+    Node node = new Node();
+    node.set(graph.eye());
     node.setPickingThreshold(20);
     addKeyFrame(node, time);
   }

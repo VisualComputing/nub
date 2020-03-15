@@ -36,7 +36,7 @@ import java.util.List;
  * graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC} for 3d graphs and {@link Type#TWO_D}
  * for a 2d graph.
  * <h1>2. Scene-graph handling</h1>
- * A graph forms a tree of (attached) {@link Node}s whose visual representations may be
+ * A graph forms a tree of {@link Node}s whose visual representations may be
  * {@link #render()}. Note that {@link #render()} should be called within your main-event loop.
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
@@ -60,9 +60,8 @@ import java.util.List;
  * Picking a node to interact with it is a two-step process:
  * <ol>
  * <li>Tag the node using an arbitrary name (which may be {@code null}) either with
- * {@link #tag(String, Node)}) or ray-casting: {@link #updateTag(String, int, int, Node[])}
- * (detached or attached nodes), {@link #updateTag(String, int, int)} (only attached nodes) or
- * {@link #tag(String, int, int)} (only for attached nodes too). While
+ * {@link #tag(String, Node)}) or ray-casting: {@link #updateTag(String, int, int, Node[])},
+ * {@link #updateTag(String, int, int)} or {@link #tag(String, int, int)}. While
  * {@link #updateTag(String, int, int, Node[])} and {@link #updateTag(String, int, int)} update the
  * tagged node synchronously (i.e., they return the tagged node immediately),
  * {@link #tag(String, int, int)} updates it asynchronously (i.e., it optimally updates the tagged
@@ -373,7 +372,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return Node.random(this)}. Creates a random node attached to this graph.
+   * Same as {@code return Node.random(this)}. Creates a random node.
    *
    * @see Node#random(Graph)
    * @see #randomize(Node)
@@ -2457,8 +2456,6 @@ public class Graph {
 
   // traversal
 
-  // detached nodes
-
   /**
    * Same as {@code return track(null, pixelX, pixelY, nodeArray)}.
    *
@@ -2471,9 +2468,6 @@ public class Graph {
   /**
    * Tags (with {@code tag} which may be {@code null}) the node in {@code nodeArray} picked with ray-casting
    * at pixel {@code pixelX, pixelY} and returns it (see {@link #node(String)}).
-   * <p>
-   * Use this version of the method instead of {@link #updateTag(String, int, int)} when dealing with
-   * detached nodes.
    *
    * @see #updateTag(String, int, int)
    * @see #updateTag(String, int, int, List)
@@ -2523,8 +2517,6 @@ public class Graph {
     return node(tag);
   }
 
-  // attached nodes
-
   /**
    * Same as {@code return track(null, pixelX, pixelY)}.
    *
@@ -2538,9 +2530,6 @@ public class Graph {
    * Tags (with {@code tag} which may be {@code null}) the node in {@link #nodes()} picked with ray-casting at pixel
    * {@code pixelX, pixelY} and returns it (see {@link #node(String)}). May return {@code null} if no node is intersected by
    * the ray. Not that the {@link #eye()} is never tagged.
-   * <p>
-   * Use this version of the method instead of {@link #updateTag(String, int, int, Node[])} when dealing with
-   * attached nodes to the graph.
    *
    * @see #updateTag(String, int, int, Node[])
    * @see #render()
@@ -3966,7 +3955,7 @@ public class Graph {
    * @see #displacement(Vector, Node)
    */
   public void translateEye(float dx, float dy, float dz, float inertia) {
-    Node node = eye().get();
+    Node node = eye().detach();
     node.setPosition(anchor().get());
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     vector.multiply(-1);
