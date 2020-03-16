@@ -4333,58 +4333,6 @@ public class Graph {
   }
 
   /**
-   * Same as {_debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
-   */
-  protected void _debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    _debugSpinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
-  }
-
-  /**
-   * @see #spinEye(int, int, int, int). Debug. Idea took from peasycam. See mouseRotate():
-   * https://github.com/jdf/peasycam/blob/master/src/peasy/PeasyCam.java
-   */
-  protected void _debugSpinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
-    int dx = pixel2X - pixel1X, dy = pixel2Y - pixel1Y;
-    if (isRightHanded())
-      dy = -dy;
-    float distance = Vector.subtract(eye().position(), anchor()).magnitude();
-    float mult = (float) -Math.pow((float) Math.log10(1 + distance), 0.5f) * 0.00125f;
-    float dmx = dx * mult;
-    float dmy = dy * mult;
-    float viewX = _upperLeftCornerX;
-    float viewY = _upperLeftCornerY;
-    float viewW = _width;
-    float viewH = _height;
-    // mouse [-1, +1]
-    float mxNdc = Math.min(Math.max((pixel1X - viewX) / viewW, 0f), 1f) * 2f - 1f;
-    float myNdc = Math.min(Math.max((pixel1Y - viewY) / viewH, 0f), 1f) * 2f - 1f;
-    if (isRightHanded())
-      myNdc = -myNdc;
-    /*
-    // Option 1
-    eye()._orbitTask._inertia = inertia;
-    eye()._orbitTask._center = anchor();
-    eye()._orbitTask._y += +dmx * (1.0f - myNdc * myNdc);
-    eye()._orbitTask._x += -dmy * (1.0f - mxNdc * mxNdc);
-    eye()._orbitTask._z += -dmx * myNdc;
-    eye()._orbitTask._z += +dmy * mxNdc;
-    eye().orbit(new Quaternion(eye()._orbitTask._x, eye()._orbitTask._y, eye()._orbitTask._z), eye()._orbitTask._center);
-    if (!eye()._orbitTask.isActive())
-      eye()._orbitTask.run();
-    // */
-    // /*
-    // Option 2
-    eye()._orbitTask._inertia = inertia;
-    eye()._orbitTask._center = anchor();
-    float y = +dmx * (1.0f - myNdc * myNdc);
-    float x = -dmy * (1.0f - mxNdc * mxNdc);
-    float z = -dmx * myNdc;
-    z += +dmy * mxNdc;
-    eye().orbit(new Quaternion(x, y, z), anchor(), inertia);
-    // */
-  }
-
-  /**
    * Returns "pseudo-_distance" from (x,y) to ball of radius size. For a point inside the
    * ball, it is proportional to the euclidean distance to the ball. For a point outside
    * the ball, it is proportional to the inverse of this distance (tends to zero) on the
