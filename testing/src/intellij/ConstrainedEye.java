@@ -48,7 +48,7 @@ public class ConstrainedEye extends PApplet {
     scene.drawDottedGrid();
     fill(204, 102, 0, 150);
     scene.drawTorusSolenoid();
-    fill(0, 0, 255);
+    fill(0, 255, 255);
     scene.beginHUD();
     displayText();
     scene.endHUD();
@@ -56,11 +56,11 @@ public class ConstrainedEye extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.mouseSpinEye();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.mouseTranslateEye();
     else
-      scene.scale(mouseX - pmouseX);
+      scene.scaleEye(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
