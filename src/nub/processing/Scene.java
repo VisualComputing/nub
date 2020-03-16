@@ -3209,26 +3209,26 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code mouseTranslate(null, inertia)}.
+   * Same as {@code mouseTranslate(null, lag)}.
    *
    * @see #mouseTranslate(String, float)
    */
-  public void mouseTranslate(float inertia) {
-    mouseTranslate(null, inertia);
+  public void mouseTranslate(float lag) {
+    mouseTranslate(null, lag);
   }
 
   /**
-   * Calls {@code mouseTranslateTag(tag, inertia)} if {@code node(tag)} is non-null and
-   * {@code mouseTranslateEye(inertia)} otherwise.
+   * Calls {@code mouseTranslateTag(tag, lag)} if {@code node(tag)} is non-null and
+   * {@code mouseTranslateEye(lag)} otherwise.
    *
    * @see #mouseTranslateTag(String)
    * @see #mouseTranslateEye()
    * @see #mouseDX()
    * @see #mouseDY()
    */
-  public void mouseTranslate(String tag, float inertia) {
-    if (!mouseTranslateTag(tag, inertia))
-      mouseTranslateEye(inertia);
+  public void mouseTranslate(String tag, float lag) {
+    if (!mouseTranslateTag(tag, lag))
+      mouseTranslateEye(lag);
   }
 
   /**
@@ -3243,14 +3243,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return mouseTranslateTag(null, inertia)}.
+   * Same as {@code return mouseTranslateTag(null, lag)}.
    *
    * @see #mouseTranslateTag(String, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
-  public boolean mouseTranslateTag(float inertia) {
-    return mouseTranslateTag(null, inertia);
+  public boolean mouseTranslateTag(float lag) {
+    return mouseTranslateTag(null, lag);
   }
 
   /**
@@ -3265,34 +3265,17 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code mouseTranslateNode(node(tag), inertia)}. Returns {@code true} if succeeded
+   * Same as {@code mouseTranslateNode(node(tag), lag)}. Returns {@code true} if succeeded
    * and {@code false} otherwise.
    *
    * @see #mouseTranslateNode(Node, float)
    */
-  public boolean mouseTranslateTag(String tag, float inertia) {
+  public boolean mouseTranslateTag(String tag, float lag) {
     if (node(tag) != null) {
-      mouseTranslateNode(node(tag), inertia);
+      mouseTranslateNode(node(tag), lag);
       return true;
     }
     return false;
-  }
-
-  /**
-   * Same as {@code super.translateNode(node,mouseDX() * inertia, mouseDY() * inertia, 0, inertia)}.
-   * It tries to keep the node under the mouse cursor independently of {@code inertia}.
-   *
-   * @see #translateEye(float, float, float, float)
-   */
-  public void mouseTranslateNode(Node node, float inertia) {
-    float i = Math.abs(inertia);
-    while (i > 1)
-      i /= 10;
-    if (i != inertia)
-      System.out.println("Warning: inertia should be in [0..1]. Setting it as " + i);
-    // hack: idea is to have node always under the cursor
-    //super.translateNode(node, mouseDX(), mouseDY(), 0, i);
-    super.translateNode(node, mouseDX() * (1 - i), mouseDY() * (1 - i), 0, i);
   }
 
   /**
@@ -3307,20 +3290,20 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code super.translateEye(mouseDX() * inertia, mouseDY() * inertia, 0, inertia)}.
-   * It tries to keep the world axes under the mouse cursor independently of {@code inertia}.
+   * Same as {@code super.translateNode(node, mouseDX() * (1 - lag), mouseDY() * (1 - lag), 0, lag)}.
+   * It tries to keep the node under the mouse cursor independently of {@code lag} which should
+   * be in [0..1], 0 responds immediately and 1 no response at all.
    *
    * @see #translateEye(float, float, float, float)
    */
-  public void mouseTranslateEye(float inertia) {
-    float i = Math.abs(inertia);
-    while (i > 1)
-      i /= 10;
-    if (i != inertia)
-      System.out.println("Warning: inertia should be in [0..1]. Setting it as " + i);
-    // hack: idea is to have the world axes under the cursor
-    //super.translateEye(mouseDX(), mouseDY(), 0, inertia);
-    super.translateEye(mouseDX() * (1 - i), mouseDY() * (1 - i), 0, i);
+  public void mouseTranslateNode(Node node, float lag) {
+    float l = Math.abs(lag);
+    while (l > 1)
+      l /= 10;
+    if (l != lag)
+      System.out.println("Warning: lag should be in [0..1]. Setting it as " + l);
+    // hack: idea is to have node always under the cursor
+    super.translateNode(node, mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
   }
 
   /**
@@ -3332,6 +3315,23 @@ public class Scene extends Graph implements PConstants {
    */
   public void mouseTranslateEye() {
     mouseTranslateEye(0.8f);
+  }
+
+  /**
+   * Same as {@code super.translateEye(mouseDX() * (1 - lag), mouseDY() * (1 - lag), 0, lag)}.
+   * It tries to keep the world axes under the mouse cursor independently of {@code lag} which
+   * should be in [0..1], 0 responds immediately and 1 no response at all.
+   *
+   * @see #translateEye(float, float, float, float)
+   */
+  public void mouseTranslateEye(float lag) {
+    float l = Math.abs(lag);
+    while (l > 1)
+      l /= 10;
+    if (l != lag)
+      System.out.println("Warning: lag should be in [0..1]. Setting it as " + l);
+    // hack: idea is to have the world axes under the cursor
+    super.translateEye(mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
   }
 
   /**
