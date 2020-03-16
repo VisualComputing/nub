@@ -4329,8 +4329,6 @@ public class Graph {
     Vector axis = p2.cross(p1);
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
-    //same as:
-    //eye().orbit(new Quaternion(eye().worldDisplacement(axis), angle), anchor(), friction);
     eye().orbit(new Quaternion(axis, angle), anchor(), inertia);
   }
 
@@ -4522,9 +4520,6 @@ public class Graph {
    */
   protected void _rotateCAD() {
     Vector _up = eye().displacement(_eyeUp);
-    //same as:
-    //Quaternion quaternion = Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_cadRotateTask._y : _cadRotateTask._y));
-    //eye().orbit(eye().worldDisplacement(quaternion.axis()), quaternion.angle(), anchor());
     eye().orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_cadRotateTask._y : _cadRotateTask._y)), anchor());
   }
 }
