@@ -1149,7 +1149,9 @@ public class Node {
    * @see #orbit(Quaternion, Vector, float)
    */
   public void orbit(Quaternion quaternion, Vector center) {
-    rotation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
+    if (constraint() != null)
+      quaternion = constraint().constrainRotation(quaternion, this);
+    rotation().compose(quaternion);
     rotation().normalize(); // Prevents numerical drift
 
     // Original in nodes-0.1.x and proscene:
