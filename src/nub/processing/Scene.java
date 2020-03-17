@@ -3200,12 +3200,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code mouseTranslate(tag, 0.8f)}.
+   * Same as {@code mouseTranslate(tag, Graph.inertia)}.
    *
    * @see #mouseTranslate(String, float)
    */
   public void mouseTranslate(String tag) {
-    mouseTranslate(tag, 0.8f);
+    mouseTranslate(tag, Graph.inertia);
   }
 
   /**
@@ -3254,14 +3254,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return mouseTranslateTag(tag, 0.8f)}.
+   * Same as {@code return mouseTranslateTag(tag, Graph.inertia)}.
    *
    * @see #mouseTranslateTag(String, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public boolean mouseTranslateTag(String tag) {
-    return mouseTranslateTag(tag, 0.8f);
+    return mouseTranslateTag(tag, Graph.inertia);
   }
 
   /**
@@ -3279,14 +3279,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code mouseTranslateNode(node, 0.8f)}.
+   * Same as {@code mouseTranslateNode(node, Graph.inertia)}.
    *
    * @see #mouseTranslateNode(Node, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslateNode(Node node) {
-    mouseTranslateNode(node, 0.8f);
+    mouseTranslateNode(node, Graph.inertia);
   }
 
   /**
@@ -3307,14 +3307,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code mouseTranslateEye(0.8f)}.
+   * Same as {@code mouseTranslateEye(Graph.inertia)}.
    *
    * @see #mouseTranslateEye()
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void mouseTranslateEye() {
-    mouseTranslateEye(0.8f);
+    mouseTranslateEye(Graph.inertia);
   }
 
   /**
@@ -3344,12 +3344,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code mouseSpin(tag, 0.8f)}.
+   * Same as {@code mouseSpin(tag, Graph.inertia)}.
    *
    * @see #mouseSpin(String, float)
    */
   public void mouseSpin(String tag) {
-    mouseSpin(tag, 0.8f);
+    mouseSpin(tag, Graph.inertia);
   }
 
   /**
@@ -3374,7 +3374,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return mouseSpinTag(null, 0.8f)}.
+   * Same as {@code return mouseSpinTag(null, Graph.inertia)}.
    *
    * @see #mouseSpinTag(String, float)
    * @see #pmouseX()
@@ -3383,7 +3383,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseY()
    */
   public boolean mouseSpinTag() {
-    return mouseSpinTag(null, 0.8f);
+    return mouseSpinTag(null, Graph.inertia);
   }
 
   /**
@@ -3400,7 +3400,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return mouseSpinTag(tag, 0.8f)}.
+   * Same as {@code return mouseSpinTag(tag, Graph.inertia)}.
    *
    * @see #mouseSpinTag(String, float)
    * @see #pmouseX()
@@ -3409,7 +3409,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseY()
    */
   public boolean mouseSpinTag(String tag) {
-    return mouseSpinTag(tag, 0.8f);
+    return mouseSpinTag(tag, Graph.inertia);
   }
 
   /**
@@ -3431,7 +3431,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code mouseSpinNode(node, 0.8f)}.
+   * Same as {@code mouseSpinNode(node, Graph.inertia)}.
    *
    * @see #mouseSpinNode(Node, float)
    * @see #pmouseX()
@@ -3440,7 +3440,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseY()
    */
   public void mouseSpinNode(Node node) {
-    mouseSpinNode(node, 0.8f);
+    mouseSpinNode(node, Graph.inertia);
   }
 
   /**
@@ -3462,7 +3462,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code mouseSpinEye(0.8f)}.
+   * Same as {@code mouseSpinEye(Graph.inertia)}.
    *
    * @see #mouseSpinEye(float)
    * @see #pmouseX()
@@ -3471,7 +3471,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseY()
    */
   public void mouseSpinEye() {
-    mouseSpinEye(0.8f);
+    mouseSpinEye(Graph.inertia);
   }
 
   /**

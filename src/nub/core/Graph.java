@@ -139,7 +139,8 @@ public class Graph {
   protected Vector _center;
   protected float _radius;
   protected Vector _anchor;
-  // Inertial
+  // Inertial stuff
+  public static float inertia = 0.8f;
   protected InertialTask _translationTask;
   protected InertialTask _lookAroundTask;
   protected InertialTask _cadRotateTask;
@@ -3750,12 +3751,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code scale(tag, delta, 0.8f)}.
+   * Same as {@code scale(tag, delta, Graph.inertia)}.
    *
    * @see #scale(String, float, float)
    */
   public void scale(String tag, float delta) {
-    scale(tag, delta, 0.8f);
+    scale(tag, delta, Graph.inertia);
   }
 
   /**
@@ -3798,12 +3799,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return scaleTag(tag, delta, 0.8f)}.
+   * Same as {@code return scaleTag(tag, delta, Graph.inertia)}.
    *
    * @see #scaleTag(String, float, float)
    */
   public boolean scaleTag(String tag, float delta) {
-    return scaleTag(tag, delta, 0.8f);
+    return scaleTag(tag, delta, Graph.inertia);
   }
 
   /**
@@ -3820,12 +3821,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code scaleNode(node, delta, 0.8f)}.
+   * Same as {@code scaleNode(node, delta, Graph.inertia)}.
    *
    * @see #scaleNode(Node, float, float)
    */
   public void scaleNode(Node node, float delta) {
-    scaleNode(node, delta, 0.8f);
+    scaleNode(node, delta, Graph.inertia);
   }
 
   /**
@@ -3844,12 +3845,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code scaleEye(delta, 0.8f)}.
+   * Same as {@code scaleEye(delta, Graph.inertia)}.
    *
    * @see #scaleEye(float, float)
    */
   public void scaleEye(float delta) {
-    scaleEye(delta, 0.8f);
+    scaleEye(delta, Graph.inertia);
   }
 
   /**
@@ -3875,12 +3876,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translate(tag, dx, dy, dz, 0.8f)}.
+   * Same as {@code translate(tag, dx, dy, dz, Graph.inertia)}.
    *
    * @see #translate(String, float, float, float, float)
    */
   public void translate(String tag, float dx, float dy, float dz) {
-    translate(tag, dx, dy, dz, 0.8f);
+    translate(tag, dx, dy, dz, Graph.inertia);
   }
 
   /**
@@ -3923,12 +3924,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return translateTag(tag, dx, dy, dz, 0.8f)}.
+   * Same as {@code return translateTag(tag, dx, dy, dz, Graph.inertia)}.
    *
    * @see #translateTag(String, float, float, float, float)
    */
   public boolean translateTag(String tag, float dx, float dy, float dz) {
-    return translateTag(tag, dx, dy, dz, 0.8f);
+    return translateTag(tag, dx, dy, dz, Graph.inertia);
   }
 
   /**
@@ -3945,12 +3946,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translateNode(node, dx, dy, dz, 0.8f)}.
+   * Same as {@code translateNode(node, dx, dy, dz, Graph.inertia)}.
    *
    * @see #translateNode(Node, float, float, float, float)
    */
   public void translateNode(Node node, float dx, float dy, float dz) {
-    translateNode(node, dx, dy, dz, 0.8f);
+    translateNode(node, dx, dy, dz, Graph.inertia);
   }
 
   /**
@@ -3973,12 +3974,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translateEye(dx, dy, dz, 0.8f)}.
+   * Same as {@code translateEye(dx, dy, dz, Graph.inertia)}.
    *
    * @see #translateEye(float, float, float, float)
    */
   public void translateEye(float dx, float dy, float dz) {
-    translateEye(dx, dy, dz, 0.8f);
+    translateEye(dx, dy, dz, Graph.inertia);
   }
 
   /**
@@ -4039,12 +4040,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code rotate(tag, roll, pitch, yaw, 0.8f)}.
+   * Same as {@code rotate(tag, roll, pitch, yaw, Graph.inertia)}.
    *
    * @see #rotate(String, float, float, float, float)
    */
   public void rotate(String tag, float roll, float pitch, float yaw) {
-    rotate(tag, roll, pitch, yaw, 0.8f);
+    rotate(tag, roll, pitch, yaw, Graph.inertia);
   }
 
   /**
@@ -4078,12 +4079,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return rotateTag(tag, roll, pitch, yaw, 0.8f)}.
+   * Same as {@code return rotateTag(tag, roll, pitch, yaw, Graph.inertia)}.
    *
    * @see #rotateTag(String, float, float, float, float)
    */
   public boolean rotateTag(String tag, float roll, float pitch, float yaw) {
-    return rotateTag(tag, roll, pitch, yaw, 0.8f);
+    return rotateTag(tag, roll, pitch, yaw, Graph.inertia);
   }
 
   /**
@@ -4102,12 +4103,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code rotateNode(node, roll, pitch, yaw, 0.8f)}.
+   * Same as {@code rotateNode(node, roll, pitch, yaw, Graph.inertia)}.
    *
    * @see #rotateNode(Node, float, float, float, float)
    */
   public void rotateNode(Node node, float roll, float pitch, float yaw) {
-    rotateNode(node, roll, pitch, yaw, 0.8f);
+    rotateNode(node, roll, pitch, yaw, Graph.inertia);
   }
 
   /**
@@ -4139,12 +4140,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code rotateEye(roll, pitch, yaw, 0.8f)}.
+   * Same as {@code rotateEye(roll, pitch, yaw, Graph.inertia)}.
    *
    * @see #rotateEye(float, float, float, float)
    */
   public void rotateEye(float roll, float pitch, float yaw) {
-    rotateEye(roll, pitch, yaw, 0.8f);
+    rotateEye(roll, pitch, yaw, Graph.inertia);
   }
 
   /**
@@ -4176,12 +4177,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
+   * Same as {@code spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
    *
    * @see #spin(String, int, int, int, int, float)
    */
   public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
+    spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
   }
 
   /**
@@ -4224,12 +4225,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
+   * Same as {@code return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
    *
    * @see #spinTag(String, int, int, int, int, float)
    */
   public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
+    return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
   }
 
   /**
@@ -4248,12 +4249,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
+   * Same as {@code spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
    *
    * @see #spinNode(Node, int, int, int, int, float)
    */
   public void spinNode(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
+    spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
   }
 
   /**
@@ -4295,12 +4296,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f)}.
+   * Same as {@code spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
    *
    * @see #spinEye(int, int, int, int, float)
    */
   public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, 0.8f);
+    spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
   }
 
   /**
@@ -4354,12 +4355,12 @@ public class Graph {
   // 7. move forward
 
   /**
-   * Same as {@code moveForward(delta, 0.8f)}.
+   * Same as {@code moveForward(delta, Graph.inertia)}.
    *
    * @see #moveForward(float, float)
    */
   public void moveForward(float delta) {
-    moveForward(delta, 0.8f);
+    moveForward(delta, Graph.inertia);
   }
 
   /**
@@ -4378,10 +4379,10 @@ public class Graph {
   // 8. lookAround
 
   /**
-   * Same as {@code lookAround(deltaX, deltaY, 0.8f)}.
+   * Same as {@code lookAround(deltaX, deltaY, Graph.inertia)}.
    */
   public void lookAround(float deltaX, float deltaY) {
-    lookAround(deltaX, deltaY, 0.8f);
+    lookAround(deltaX, deltaY, Graph.inertia);
   }
 
   /**
@@ -4420,21 +4421,21 @@ public class Graph {
   // 9. rotate CAD
 
   /**
-   * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0), 0.8f)}.
+   * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0), Graph.inertia)}.
    *
    * @see #rotateCAD(float, float, Vector, float)
    */
   public void rotateCAD(float roll, float pitch) {
-    rotateCAD(roll, pitch, new Vector(0, 1, 0), 0.8f);
+    rotateCAD(roll, pitch, new Vector(0, 1, 0), Graph.inertia);
   }
 
   /**
-   * Same as {@code rotateCAD(roll, pitch, upVector, 0.8f)}.
+   * Same as {@code rotateCAD(roll, pitch, upVector, Graph.inertia)}.
    *
    * @see #rotateCAD(float, float, Vector, float)
    */
   public void rotateCAD(float roll, float pitch, Vector upVector) {
-    rotateCAD(roll, pitch, upVector, 0.8f);
+    rotateCAD(roll, pitch, upVector, Graph.inertia);
   }
 
   /**
