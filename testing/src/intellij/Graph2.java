@@ -1,8 +1,9 @@
 package intellij;
 
 import nub.core.Graph;
+import nub.core.MatrixHandler;
 import nub.core.Node;
-import nub.primitives.Matrix;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PMatrix3D;
 import processing.event.MouseEvent;
@@ -11,11 +12,8 @@ import processing.opengl.PShader;
 /**
  * Created by pierre on 11/15/16.
  */
-public class Graph4 extends PApplet {
+public class Graph2 extends PApplet {
   Graph graph;
-  PShader framesShader;
-  Matrix pmv;
-  PMatrix3D pmatrix = new PMatrix3D();
   Node[] nodes;
 
   public void settings() {
@@ -23,20 +21,10 @@ public class Graph4 extends PApplet {
   }
 
   public void setup() {
-    graph = new Graph(g, width, height) {
-      // Note that within visit() geometry is defined
-      // at the node local coordinate system.
-      @Override
-      public void applyTransformation(Node node) {
-        super.applyTransformation(node);
-        shader(framesShader);
-        pmv = Matrix.multiply(matrixHandler().projection(), matrixHandler().model());
-        pmatrix.set(pmv.get(new float[16]));
-        framesShader.set("nub_transform", pmatrix);
-      }
-    };
+    graph = new Graph(g, width, height);
+    GLSLMatrixHandler mh = new GLSLMatrixHandler();
+    graph.setMatrixHandler(mh);
     graph.fit(1);
-    framesShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nub/testing/data/matrix_handler/vertex.glsl");
     nodes = new Node[50];
     for (int i = 0; i < nodes.length; i++) {
       nodes[i] = new Node() {
@@ -56,8 +44,12 @@ public class Graph4 extends PApplet {
   }
 
   public void draw() {
-    graph.preDraw();
     background(0);
+    graph.preDraw();
+    pushStyle();
+    fill(0, 255, 0);
+    Scene.drawTorusSolenoid(g);
+    popStyle();
     graph.render();
   }
 
@@ -79,6 +71,25 @@ public class Graph4 extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.Graph4"});
+    PApplet.main(new String[]{"intellij.Graph2"});
+  }
+
+  public class GLSLMatrixHandler extends MatrixHandler {
+    PShader framesShader;
+    PMatrix3D pmatrix = new PMatrix3D();
+
+    public GLSLMatrixHandler() {
+      framesShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nub/testing/data/matrix_handler/vertex.glsl");
+    }
+
+    @Override
+    protected void _setUniforms() {
+      shader(framesShader);
+      // same as:
+      //pmatrix.set(Scene.toPMatrix(transform()));
+      //pmatrix.transpose();
+      pmatrix.set(transform().get(new float[16]));
+      framesShader.set("nub_transform", pmatrix);
+    }
   }
 }
