@@ -56,7 +56,7 @@ import java.util.List;
  * from/to screen space to/from node space use {@link #location(Vector, Node)} and
  * {@link #screenLocation(Vector, Node)}. To transform vectors from/to screen space to/from node space
  * use {@link #displacement(Vector, Node)} and {@link #screenDisplacement(Vector, Node)}.
- * <h1>4. Picking and interaction</h1>
+ * <h1>3. Picking and interaction</h1>
  * Picking a node to interact with it is a two-step process:
  * <ol>
  * <li>Tag the node using an arbitrary name (which may be {@code null}) either with
@@ -67,9 +67,9 @@ import java.util.List;
  * {@link #tag(String, int, int)} updates it asynchronously (i.e., it optimally updates the tagged
  * node during the next call to the {@link #render()} algorithm); and, </li>
  * <li>Interact with your tagged nodes by calling any of the following methods: {@link #alignTag(String)},
- * {@link #focusTag(String)}, {@link #translateTag(String, float, float, float)},
- * {@link #rotateTag(String, float, float, float)}, {@link #scaleTag(String, float)},
- * or {@link #spinTag(String, int, int, int, int)}).
+ * {@link #focusTag(String)}, {@link #translateTag(String, float, float, float, float)},
+ * {@link #rotateTag(String, float, float, float, float)}, {@link #scaleTag(String, float, float)},
+ * or {@link #spinTag(String, int, int, int, int, float)}).
  * </li>
  * </ol>
  * Observations:
@@ -79,23 +79,25 @@ import java.util.List;
  * <li>To check if a given node would be picked with a ray casted at a given screen position,
  * call {@link #tracks(Node, int, int)}.</li>
  * <li>To interact with the node that is referred with the {@code null} tag, call any of the following methods:
- * {@link #alignTag()}, {@link #focusTag()}, {@link #translateTag(float, float, float)},
- * {@link #rotateTag(float, float, float)}, {@link #scaleTag(float)} and
- * {@link #spinTag(int, int, int, int)}), allow </li>
+ * {@link #alignTag()}, {@link #focusTag()}, {@link #translateTag(float, float, float, float)},
+ * {@link #rotateTag(float, float, float, float)}, {@link #scaleTag(float, float)} and
+ * {@link #spinTag(int, int, int, int, float)}).</li>
  * <li>To directly interact with a given node, call any of the following methods: {@link #alignNode(Node)},
- * {@link #focusNode(Node)}, {@link #translateNode(Node, float, float, float)},
- * {@link #rotateNode(Node, float, float, float)},
- * {@link #scaleNode(Node, float)} and {@link #spinNode(Node, int, int, int, int)}).</li>
+ * {@link #focusNode(Node)}, {@link #translateNode(Node, float, float, float, float)},
+ * {@link #rotateNode(Node, float, float, float, float)},
+ * {@link #scaleNode(Node, float, float)} and {@link #spinNode(Node, int, int, int, int, float)}).</li>
  * <li>To either interact with the node referred with a given tag or the eye, when that tag is not in use,
  * call any of the following methods: {@link #align(String)}, {@link #focus(String)},
- * {@link #translate(String, float, float, float)}, {@link #rotate(String, float, float, float)},
- * {@link #scale(String, float)} and {@link #spin(String, int, int, int, int)}.</li>
+ * {@link #translate(String, float, float, float, float)}, {@link #rotate(String, float, float, float, float)},
+ * {@link #scale(String, float, float)} and {@link #spin(String, int, int, int, int, float)}.</li>
+ * <li>Set {@code Scene.inertia} in  [0..1] (0 no inertia & 1 no friction) to change the default inertia
+ * value globally, instead of setting it on a per method call basis. Note that it is initially set to 0.8.</li>
  * <li>Customize node behaviors by overridden {@link Node#interact(Object...)}
  * and then invoke them by either calling: {@link #interactTag(Object...)},
  * {@link #interactTag(String, Object...)} or {@link #interactNode(Node, Object...)}.
  * </li>
  * </ol>
- * <h1>5. Timing handling</h1>
+ * <h1>4. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
  * {@link TimingHandler} wrapper functions, such as {@link #registerTask(Task)}
  * are provided for convenience.
@@ -103,13 +105,13 @@ import java.util.List;
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
  * such as {@link #fit(float)}, {@link #fit(int, int, int, int)}, {@link #fit(Node)} and {@link #fit(Node, float)}.
  * Refer to the {@link Interpolator} documentation for details.
- * <h1>6. Visibility and culling techniques</h1>
+ * <h1>5. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
  * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}. Make sure
  * to call {@link #enableBoundaryEquations()} first, since update of the viewing volume
  * boundary equations are disabled by default (see {@link #enableBoundaryEquations()} and
  * {@link #areBoundaryEquationsEnabled()}).
- * <h1>7. Matrix handling</h1>
+ * <h1>6. Matrix handling</h1>
  * The graph performs matrix handling through a matrix-handler. Refer to the {@link MatrixHandler}
  * documentation for details.
  * <p>
@@ -4059,6 +4061,15 @@ public class Graph {
    */
   public boolean rotateTag(String tag, float roll, float pitch, float yaw) {
     return rotateTag(tag, roll, pitch, yaw, Graph.inertia);
+  }
+
+  /**
+   * Same as {@code return rotateTag(null, roll, pitch, yaw, inertia)}.
+   *
+   * @see #rotateTag(String, float, float, float, float)
+   */
+  public boolean rotateTag(float roll, float pitch, float yaw, float inertia) {
+    return rotateTag(null, roll, pitch, yaw, inertia);
   }
 
   /**
