@@ -122,10 +122,10 @@ Note that the hierarchy of nodes may be modified with [setReference(Node)](https
 
 A node [position](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#position--), [orientation](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#orientation--) and [magnitude]() may be set with the following methods:
 
-|Node localization|Position                          |Orientation                        |Magnitude                     |
-|-----------------|----------------------------------|-----------------------------------|------------------------------|
-|Globally         |```setPosition(vector)```         |```setOrientation(quaternion)```   |```setMagnitude(mag)```       |
-|Locally          |```setTranslation(vector)```      |```setRotation(quaternion)```      |```setScaling(scl)```         |
+|Node localization|Position                          |Orientation                                                                    |Magnitude                     |
+|-----------------|----------------------------------|-------------------------------------------------------------------------------|------------------------------|
+|Globally         |```setPosition(vector)```         |```setOrientation(quaternion)```                                               |```setMagnitude(mag)```       |
+|Locally          |```setTranslation(vector)```      |```setRotation(quaternion)```                                                  |```setScaling(scl)```         |
 |Incrementally    |```translate(vector, [inertia])```|```rotate(quaternion, [inertia])```, ```orbit(quaternion, center, [inertia])```|```scale(amount, [inertia])```|
 
 The optional `inertia` parameter should be a value in [0..1], 0 no inertia & 1 no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of [TimingTasks](https://visualcomputing.github.io/nub-javadocs/nub/processing/TimingTask.html).
@@ -313,17 +313,17 @@ The scene has several methods to position and orient the _eye_ node, such as: [l
 
 The following scene methods implement _eye_ motion actions particularly suited for input devices, possibly having several degrees-of-freedom ([DOFs](https://en.wikipedia.org/wiki/Degrees_of_freedom_(mechanics))):
 
-| Action       | Generic input device                              | Mouse                     |
-|--------------|---------------------------------------------------|---------------------------|
-| Align        | ```alignEye()```                                  | n.a.                      |
-| Focus        | ```focusEye()```                                  | n.a.                      |
-| Translate    | ```translateEye(dx, dy, dz)```                    | ```mouseTranslateEye()``` |
-| Rotate       | ```rotateEye(roll, pitch, yaw)```                 | n.a.                      |
-| Scale        | ```scaleEye(delta)```                             | n.a.                      |
-| Spin         | ```spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```mouseSpinEye()```      |
-| Move forward | ```moveForward(dz)```                             | n.a.                      |
-| Rotate CAD   | ```rotateCAD(roll, pitch)```                      | ```mouseRotateCAD()```    |
-| Look around  | ```lookAround(deltaX, deltaY)```                  | ```mouseLookAround()```   |
+| Action       | Generic input device                                         | Mouse                              |
+|--------------|--------------------------------------------------------------|------------------------------------|
+| Align        | ```alignEye()```                                             | n.a.                               |
+| Focus        | ```focusEye()```                                             | n.a.                               |
+| Translate    | ```translateEye(dx, dy, dz, [inertia])```                    | ```mouseTranslateEye([inertia])``` |
+| Rotate       | ```rotateEye(roll, pitch, yaw, [inertia])```                 | n.a.                               |
+| Scale        | ```scaleEye(delta, [inertia])```                             | n.a.                               |
+| Spin         | ```spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` | ```mouseSpinEye([inertia])```      |
+| Move forward | ```moveForward(dz, [inertia])```                             | n.a.                               |
+| Rotate CAD   | ```rotateCAD(roll, pitch, [inertia])```                      | ```mouseRotateCAD([inertia])```    |
+| Look around  | ```lookAround(deltaX, deltaY, [inertia])```                  | ```mouseLookAround([inertia])```   |
 
 **n.a.** doesn't mean the mouse action isn't available, but that it can be implemented in several ways (see the code snippets below). The provided mouse actions got _non-ambiguously_ implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts (e.g., `mouseTranslateEye()` is the same as `translateEye(pmouseX - mouseX, pmouseY - mouseY, 0)` and `mouseSpinEye()` is the same as `spinEye(pmouseX, pmouseY, mouseX, mouseY)`), and hence their simpler signatures. 
 
@@ -390,14 +390,14 @@ The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples
 
 To directly interact with a given node, call any of the following scene methods:
 
-| Action       | Generic input device                                     | Mouse                          |
-|--------------|----------------------------------------------------------|--------------------------------|
-| Align        | ```alignNode(node)```                                    | n.a.                           |
-| Focus        | ```focusNode(node)```                                    | n.a.                           |
-| Translate    | ```translateNode(node, dx, dy, dz)```                    | ```mouseTranslateNode(node)``` |
-| Rotate       | ```rotateNode(node, roll, pitch, yaw)```                 | n.a.                           |
-| Scale        | ```scaleNode(node, delta)```                             | n.a.                           |
-| Spin         | ```spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```mouseSpinNode(node)```      |
+| Action    | Generic input device                                                | Mouse                                     |
+|-----------|---------------------------------------------------------------------|-------------------------------------------|
+| Align     | ```alignNode(node)```                                               | n.a.                                      |
+| Focus     | ```focusNode(node)```                                               | n.a.                                      |
+| Translate | ```translateNode(node, dx, dy, dz, [inertia])```                    | ```mouseTranslateNode(node, [inertia])``` |
+| Rotate    | ```rotateNode(node, roll, pitch, yaw, [inertia])```                 | n.a.                                      |
+| Scale     | ```scaleNode(node, delta, [inertia])```                             | n.a.                                      |
+| Spin      | ```spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` | ```mouseSpinNode(node, [inertia])```      |
 
 Note that the mouse actions are implemented in a similar manner as it has been done with the [eye](#eye).
 
@@ -450,21 +450,21 @@ Picking a node (which should be different than the scene eye) to interact with i
    
    Generic actions:
 
-   | Action    | Tagged node                                            | Tagged node or `eye`                                |
-   |-----------|--------------------------------------------------------|-----------------------------------------------------|
-   | Align     | ```alignTag(tag)```                                    | ```align(tag)```                                    |
-   | Focus     | ```focusTag(tag)```                                    | ```focus(tag)```                                    |
-   | Translate | ```translateTag(tag, dx, dy, dz)```                    | ```translate(tag, dx, dy, dz)```                    |
-   | Rotate    | ```rotateTag(tag, roll, pitch, yaw)```                 | ```rotate(tag, roll, pitch, yaw)```                 |
-   | Scale     | ```scaleTag(tag, delta)```                             | ```scale(tag, delta)```                             |
-   | Spin      | ```spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y)``` |
+   | Action    | Tagged node                                                       | Tagged node or `eye`                                           |
+   |-----------|-------------------------------------------------------------------|----------------------------------------------------------------|
+   | Align     | ```alignTag(tag)```                                               | ```align(tag)```                                               |
+   | Focus     | ```focusTag(tag)```                                               | ```focus(tag)```                                               |
+   | Translate | ```translateTag(tag, dx, dy, dz, [inertia])```                    | ```translate(tag, dx, dy, dz, [inertia])```                    |
+   | Rotate    | ```rotateTag(tag, roll, pitch, yaw, [inertia])```                 | ```rotate(tag, roll, pitch, yaw, [inertia])```                 |
+   | Scale     | ```scaleTag(tag, delta, [inertia])```                             | ```scale(tag, delta, [inertia])```                             |
+   | Spin      | ```spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` | ```spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` |
 
    Mouse actions:
 
-   | Action    | Tagged nodes                 | Tagged node or `eye`      |
-   |-----------|------------------------------|---------------------------|
-   | Translate | ```mouseTranslateTag(tag)``` | ```mouseTranslate(tag)``` |
-   | Spin      | ```mouseSpinTag(tag)```      | ```mouseSpin(tag)```      |
+   | Action    | Tagged nodes                            | Tagged node or `eye`                 |
+   |-----------|-----------------------------------------|--------------------------------------|
+   | Translate | ```mouseTranslateTag(tag, [inertia])``` | ```mouseTranslate(tag, [inertia])``` |
+   | Spin      | ```mouseSpinTag(tag, [inertia])```      | ```mouseSpin(tag, [inertia])```      |
 
 Observations:
 
