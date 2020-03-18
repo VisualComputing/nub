@@ -126,7 +126,7 @@ A node [position](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.h
 |-----------------|----------------------------------|-----------------------------------|------------------------------|
 |Globally         |```setPosition(vector)```         |```setOrientation(quaternion)```   |```setMagnitude(mag)```       |
 |Locally          |```setTranslation(vector)```      |```setRotation(quaternion)```      |```setScaling(scl)```         |
-|Incrementally    |```translate(vector, [inertia])```|```rotate(quaternion, [inertia])```, ```orbit(quaternion, center, [inertia])|```scale(amount, [inertia])```|
+|Incrementally    |```translate(vector, [inertia])```|```rotate(quaternion, [inertia])```, ```orbit(quaternion, center, [inertia])```|```scale(amount, [inertia])```|
 
 The optional `inertia` parameter should be a value in [0..1], 0 no inertia & 1 no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of [TimingTasks](https://visualcomputing.github.io/nub-javadocs/nub/processing/TimingTask.html).
 
