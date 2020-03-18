@@ -76,7 +76,7 @@ import java.util.List;
  * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
  * {@link #displacement(Vector, Node)} and {@link #worldDisplacement(Vector)}.
  * <p>
- * The methods {@link #translate(Vector, float)}, {@link #rotate(Quaternion), float},
+ * The methods {@link #translate(Vector, float)}, {@link #rotate(Quaternion, float)},
  * {@link #orbit(Quaternion, Vector, float)} and {@link #scale(float, float)}, locally apply
  * differential geometry transformations damped with a given {@code inertia}.
  * <h2>Hierarchical traversals</h2>
