@@ -279,7 +279,6 @@ public class Graph {
    * Same as {@code this(context, null, type, eye, width, height)}.
    *
    * @see #timingHandler()
-   * @see #setMatrixHandler(MatrixHandler)
    * @see #setRightHanded()
    * @see #setEye(Node)
    * @see #Graph(Object, Object, Type, Node, int, int)
@@ -300,7 +299,6 @@ public class Graph {
    * matrix-handlers (see {@link MatrixHandler}) and {@link #timingHandler()}.
    *
    * @see #timingHandler()
-   * @see #setMatrixHandler(MatrixHandler)
    * @see #setRightHanded()
    * @see #setEye(Node)
    */
@@ -313,9 +311,9 @@ public class Graph {
         task.disableConcurrence();
     }
     _fb = front;
-    _matrixHandler = MatrixHandler.matrixHandler(_fb);
+    _matrixHandler = nub.processing.Scene.matrixHandler(_fb);
     _bb = back;
-    _bbMatrixHandler = _bb == null ? null : MatrixHandler.matrixHandler(_bb);
+    _bbMatrixHandler = _bb == null ? null : nub.processing.Scene.matrixHandler(_bb);
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
@@ -349,27 +347,6 @@ public class Graph {
     enableBoundaryEquations(false);
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
-  }
-
-  /**
-   * Renders the node onto context. Used by the rendering algorithms.
-   * <p>
-   * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
-   * the node {@link Node#shape()} context is different than {@code pGraphics}.
-   * <p>
-   * Together with {@link MatrixHandler#matrixHandler(Object)} are the methods
-   * that should be re-implemented in js.
-   */
-  public static void draw(Object context, Node node) {
-    processing.opengl.PGraphicsOpenGL pGraphics = (processing.opengl.PGraphicsOpenGL) context;
-    pGraphics.pushStyle();
-    pGraphics.pushMatrix();
-    if (node.shape() != null)
-      pGraphics.shape(node.shape());
-    else
-      node.graphics(pGraphics);
-    pGraphics.popStyle();
-    pGraphics.popMatrix();
   }
 
   /**
@@ -966,6 +943,8 @@ public class Graph {
           + "endHUD() and they cannot be nested. Check your implementation!");
     _matrixHandler.endHUD();
   }
+
+  // TODO remove this getter and setter for matrixHandler
 
   /**
    * Sets the {@link MatrixHandler} defining how matrices are to be handled.
@@ -2354,7 +2333,7 @@ public class Graph {
    * @see #applyWorldTransformation(Object, Node)
    */
   public static void applyTransformation(Object context, Node node) {
-    MatrixHandler.matrixHandler(context).applyTransformation(node);
+    nub.processing.Scene.matrixHandler(context).applyTransformation(node);
   }
 
   /**
@@ -2378,7 +2357,7 @@ public class Graph {
    * @see #applyWorldTransformation(Node)
    */
   public static void applyWorldTransformation(Object context, Node node) {
-    MatrixHandler.matrixHandler(context).applyWorldTransformation(node);
+    nub.processing.Scene.matrixHandler(context).applyWorldTransformation(node);
   }
 
   // Other stuff
@@ -2905,32 +2884,6 @@ public class Graph {
   }
 
   /**
-   * Renders the node tree onto {@code context} from the {@link #eye()} viewpoint.
-   *
-   * @see #render()
-   * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see Node#graphics(processing.core.PGraphics)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public void render(Object context) {
-    _render(MatrixHandler.matrixHandler(context), context);
-  }
-
-  /**
-   * Used by {@link #render(Object)}.
-   */
-  protected void _render(MatrixHandler matrixHandler, Object context) {
-    if (context == _fb)
-      throw new RuntimeException("Cannot render into context, use render() instead of render(context, view, projection)");
-    else {
-      matrixHandler.bind(projection(), view());
-      for (Node node : _leadingNodes())
-        _render(matrixHandler, context, node);
-    }
-  }
-
-  /**
    * Renders the node tree onto context from the {@code eye} viewpoint with the given frustum parameters.
    *
    * @see #render()
@@ -2940,7 +2893,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    _render(MatrixHandler.matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
+    _render(nub.processing.Scene.matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
   }
 
   /**
@@ -2948,6 +2901,27 @@ public class Graph {
    */
   protected static void _render(MatrixHandler matrixHandler, Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
     _render(matrixHandler, context, projection(eye, type, width, height, zNear, zFar, leftHanded), eye.view());
+  }
+
+  /**
+   * Renders the node tree onto {@code context} from the {@link #eye()} viewpoint.
+   *
+   * @see #render()
+   * @see #render(Object, Matrix, Matrix)
+   * @see #render(Object, Type, Node, int, int, float, float, boolean)
+   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(processing.core.PShape)
+   */
+  public void render(Object context) {
+    /*
+    if (context == _fb && !_rays.isEmpty())
+      System.out.println("Warning called render() instead of render(context) for precise picking precision to work");
+    render(context, projection(), view());
+    // */
+    if (context == _fb && !_rays.isEmpty())
+      render();
+    else
+      render(context, projection(), view());
   }
 
   /**
@@ -2960,7 +2934,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Matrix projection, Matrix view) {
-    _render(MatrixHandler.matrixHandler(context), context, projection, view);
+    _render(nub.processing.Scene.matrixHandler(context), context, projection, view);
   }
 
   /**
@@ -2973,14 +2947,14 @@ public class Graph {
   }
 
   /**
-   * Used by the {@link #_render(MatrixHandler, Object)} algorithm.
+   * Used by the {@link #_render(MatrixHandler, Object, Matrix, Matrix)} algorithm.
    */
   protected static void _render(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushMatrix();
     matrixHandler.applyTransformation(node);
     if (!node.isCulled()) {
       if (node._bypass != TimingHandler.frameCount)
-        draw(context, node);
+        nub.processing.Scene.draw(context, node);
       for (Node child : node.children())
         _render(matrixHandler, context, child);
     }
@@ -2990,10 +2964,10 @@ public class Graph {
   /**
    * Renders the node onto {@link #context()}. Same as {@code draw(context(), node)}.
    *
-   * @see #draw(Object, Node)
+   * @see nub.processing.Scene#draw(Object, Node)
    */
   public void draw(Node node) {
-    draw(_fb, node);
+    nub.processing.Scene.draw(_fb, node);
   }
 
   /**

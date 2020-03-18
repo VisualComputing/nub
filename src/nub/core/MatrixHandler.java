@@ -35,21 +35,6 @@ public class MatrixHandler {
   protected float[][] _projectionStack = new float[STACK_DEPTH][16];
   protected int _projectionStackDepth;
 
-  /**
-   * Returns a {@code MatrixHandler} instance according to the default target renderer context.
-   * <p>
-   * Together with {@link Graph#draw(Object, Node)} are the methods that should be
-   * re-implemented in js.
-   */
-  public static MatrixHandler matrixHandler(Object context) {
-    if (context instanceof processing.core.PGraphics)
-      if (context instanceof processing.opengl.PGraphicsOpenGL)
-        return new GLMatrixHandler((processing.opengl.PGraphicsOpenGL) context);
-      else
-        throw new RuntimeException("Only OpenGL renderers are currently supported");
-    return new MatrixHandler();
-  }
-
   // 1. May be overridden
 
   // bind

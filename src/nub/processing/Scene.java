@@ -338,9 +338,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Main constructor defining a left-handed Processing compatible scene. Calls
-   * {@link #setMatrixHandler(MatrixHandler)} using a customized
-   * {@link MatrixHandler} depending on the {@link #context()} type.
+   * Main constructor defining a left-handed Processing compatible scene.
    * <p>
    * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. In this
    * case the {@code x} and {@code y} parameters define the position of the upper-left corner
@@ -383,6 +381,42 @@ public class Scene extends Graph implements PConstants {
     pApplet().registerMethod("dispose", this);
     // 4. Handed
     setLeftHanded();
+  }
+
+  /**
+   * Returns a {@code MatrixHandler} instance according to the default target renderer context.
+   * <p>
+   * Together with {@link Scene#draw(Object, Node)} are the methods that should be
+   * re-implemented in js.
+   */
+  public static MatrixHandler matrixHandler(Object context) {
+    if (context instanceof PGraphics)
+      if (context instanceof PGraphicsOpenGL)
+        return new GLMatrixHandler((PGraphicsOpenGL) context);
+      else
+        throw new RuntimeException("Only OpenGL renderers are currently supported");
+    return new MatrixHandler();
+  }
+
+  /**
+   * Renders the node onto context. Used by the rendering algorithms.
+   * <p>
+   * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
+   * the node {@link Node#shape()} context is different than {@code pGraphics}.
+   * <p>
+   * Together with {@link Scene#matrixHandler(Object)} are the methods
+   * that should be re-implemented in js.
+   */
+  public static void draw(Object context, Node node) {
+    PGraphicsOpenGL pGraphics = (PGraphicsOpenGL) context;
+    pGraphics.pushStyle();
+    pGraphics.pushMatrix();
+    if (node.shape() != null)
+      pGraphics.shape(node.shape());
+    else
+      node.graphics(pGraphics);
+    pGraphics.popStyle();
+    pGraphics.popMatrix();
   }
 
   // P5 STUFF
@@ -1169,7 +1203,7 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == context())
       _matrixHandler.beginHUD(width(), height());
     else
-      MatrixHandler.matrixHandler(pGraphics).beginHUD(pGraphics.width, pGraphics.height);
+      matrixHandler(pGraphics).beginHUD(pGraphics.width, pGraphics.height);
   }
 
   /**
@@ -1200,7 +1234,7 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == context())
       _matrixHandler.endHUD();
     else
-      MatrixHandler.matrixHandler(pGraphics).endHUD();
+      matrixHandler(pGraphics).endHUD();
     enableDepthTest(pGraphics);
     // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
     if (is3D())
@@ -2518,7 +2552,7 @@ public class Scene extends Graph implements PConstants {
       Vector o = new Vector();
       if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
         pGraphics.pushMatrix();
-        MatrixHandler.matrixHandler(pGraphics).applyTransformation(graph.eye());
+        matrixHandler(pGraphics).applyTransformation(graph.eye());
       }
       // in PERSPECTIVE cache the transformed origin
       else

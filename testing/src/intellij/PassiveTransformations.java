@@ -19,6 +19,7 @@ public class PassiveTransformations extends PApplet {
 
   public void setup() {
     graph = new Graph(g, width, height);
+    // TODO pending
     graph.setMatrixHandler(new MatrixHandler() {
       @Override
       protected void _setUniforms() {

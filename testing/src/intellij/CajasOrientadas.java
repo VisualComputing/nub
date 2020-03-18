@@ -38,10 +38,12 @@ public class CajasOrientadas extends PApplet {
   public void draw() {
     background(0);
     scene.render();
+    //scene.render(g);
   }
 
   public void mouseMoved() {
     scene.mouseTag();
+    //scene.updateMouseTag();
   }
 
   public void mouseDragged() {
@@ -120,7 +122,7 @@ public class CajasOrientadas extends PApplet {
           pg.popStyle();
         }
       };
-      iNode.setPickingThreshold(-25);
+      iNode.setPickingThreshold(0.15f);
       setSize();
       setColor();
       scene.randomize(iNode);
@@ -198,8 +200,7 @@ public class CajasOrientadas extends PApplet {
           pg.popStyle();
         }
       };
-      //iNode.setPickingThreshold(0.15f);
-      iNode.setPickingThreshold(0);
+      iNode.setPickingThreshold(0.15f);
       setRadius(10);
     }
 

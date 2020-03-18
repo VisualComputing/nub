@@ -41,6 +41,7 @@ public class ShadowMappingTutorial extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
+    // TODO pending
     scene.setMatrixHandler(new MatrixHandler() {
       @Override
       protected void _setUniforms() {

@@ -2183,7 +2183,7 @@ public class Node {
    * </pre>
    *
    * @see Graph#render()
-   * @see Graph#draw(Object, Node)
+   * @see nub.processing.Scene#draw(Object, Node)
    * @see #cull(boolean)
    * @see #isCulled()
    * @see #bypass()
