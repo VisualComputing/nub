@@ -122,11 +122,14 @@ Note that the hierarchy of nodes may be modified with [setReference(Node)](https
 
 A node [position](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#position--), [orientation](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#orientation--) and [magnitude]() may be set with the following methods:
 
-| Node localization | Position                     | Orientation                      | Magnitude               |
-|-------------------|------------------------------|----------------------------------|-------------------------|
-| Globally          | ```setPosition(vector)```    | ```setOrientation(quaternion)``` | ```setMagnitude(mag)``` |
-| Locally           | ```setTranslation(vector)``` | ```setRotation(quaternion)```    | ```setScaling(scl)```   |
-| Incrementally     | ```translate(vector)```      | ```rotate(quaternion)```         | ```scale(amount)```     |
+|Node localization|Position                          |Orientation                        |Magnitude                     |
+|-----------------|----------------------------------|-----------------------------------|------------------------------|
+|Globally         |```setPosition(vector)```         |```setOrientation(quaternion)```   |```setMagnitude(mag)```       |
+|Locally          |```setTranslation(vector)```      |```setRotation(quaternion)```      |```setScaling(scl)```         |
+|Incrementally    |```translate(vector, [inertia])```|```rotate(quaternion, [inertia])```|```scale(amount, [inertia])```|
+
+
+The optional `inertia` parameter which should be a value in [0..1], 0 no inertia & 1 no friction. It was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and implemented in terms of [TimingTasks](https://visualcomputing.github.io/nub-javadocs/nub/processing/TimingTask.html).
 
 #### Shapes
 
