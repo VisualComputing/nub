@@ -48,6 +48,7 @@ public class Graph4 extends PApplet {
           popStyle();
         }
       };
+      nodes[i].setPickingThreshold(.05f);
       graph.randomize(nodes[i]);
     }
     //discard Processing matrices
@@ -68,7 +69,7 @@ public class Graph4 extends PApplet {
     if (mouseButton == LEFT)
       graph.spin(pmouseX, pmouseY, mouseX, mouseY);
     else if (mouseButton == RIGHT)
-      graph.translate(mouseX - pmouseX, mouseY - pmouseY, 0);
+      graph.translate(mouseX - pmouseX, mouseY - pmouseY, 0, 0);
     else
       graph.scale(mouseX - pmouseX);
   }
