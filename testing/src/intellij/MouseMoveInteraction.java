@@ -13,7 +13,7 @@ import processing.event.MouseEvent;
  */
 public class MouseMoveInteraction extends PApplet {
   Scene scene;
-  boolean lookAround = true;
+  boolean lookAround;
 
   public void settings() {
     size(1600, 800, P3D);

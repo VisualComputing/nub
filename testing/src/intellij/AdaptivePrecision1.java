@@ -12,7 +12,6 @@ import processing.event.MouseEvent;
 public class AdaptivePrecision1 extends PApplet {
   Scene scene;
   Node[] shapes;
-  Node trackedShape;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -24,10 +23,8 @@ public class AdaptivePrecision1 extends PApplet {
     scene.fit(1);
     shapes = new Node[25];
     for (int i = 0; i < shapes.length; i++) {
-      //shapes[i] = new Node(scene, shape());
       shapes[i] = new Node();
       shapes[i].setShape(shape());
-
       scene.randomize(shapes[i]);
       shapes[i].setPickingThreshold(0.25f);
     }
@@ -37,10 +34,7 @@ public class AdaptivePrecision1 extends PApplet {
     background(0);
     scene.drawAxes();
     for (int i = 0; i < shapes.length; i++) {
-      //scene.draw(shapes[i]);
       pushMatrix();
-      //scene.applyTransformation(shapes[i]);
-      //scene.draw(shapes[i]);
       Scene.applyTransformation(g, shapes[i]);
       Scene.draw(g, shapes[i]);
       popMatrix();

@@ -23,7 +23,6 @@ public class AdaptivePrecision2 extends PApplet {
     scene.fit(1);
     shapes = new Node[25];
     for (int i = 0; i < shapes.length; i++) {
-      //shapes[i] = new Node(scene, shape());
       shapes[i] = new Node();
       shapes[i].setShape(shape());
       scene.randomize(shapes[i]);
@@ -35,7 +34,6 @@ public class AdaptivePrecision2 extends PApplet {
     background(0);
     scene.drawAxes();
     for (int i = 0; i < shapes.length; i++) {
-      //scene.draw(shapes[i]);
       pushMatrix();
       scene.applyTransformation(shapes[i]);
       scene.draw(shapes[i]);

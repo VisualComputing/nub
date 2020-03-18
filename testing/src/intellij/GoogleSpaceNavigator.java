@@ -68,8 +68,8 @@ public class GoogleSpaceNavigator extends PApplet {
   }
 
   void spaceNavigatorInteraction() {
-    scene.translateEye(10 * snXPos.getValue(), 10 * snYPos.getValue(), 10 * snZPos.getValue());
-    scene.rotateEye(-snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
+    scene.translate("SPCNAV", 20 * snXPos.getValue(), 20 * snYPos.getValue(), snZPos.getValue() / 50);
+    scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
   }
 
   float computeAngle(float dx) {
