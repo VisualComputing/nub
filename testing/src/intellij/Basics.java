@@ -4,6 +4,7 @@ import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PShape;
 
 /**
@@ -25,18 +26,18 @@ public class Basics extends PApplet {
 
     node = new Node() {
       @Override
-      public void visit() {
-        scene.drawAxes(scene.radius() / 3);
-        pushStyle();
-        rectMode(CENTER);
-        fill(255, 0, 255);
+      public void graphics(PGraphics pg) {
+        Scene.drawAxes(pg, scene.radius() / 3);
+        pg.pushStyle();
+        pg.rectMode(CENTER);
+        pg.fill(255, 0, 255);
         if (scene.is3D())
-          scene.drawCylinder(30, scene.radius() / 4, 200);
+          Scene.drawCylinder(pg, 30, scene.radius() / 4, 200);
         else
-          rect(10, 10, 200, 200);
-        stroke(255, 255, 0);
+          pg.rect(10, 10, 200, 200);
+        pg.stroke(255, 255, 0);
         scene.drawSquaredBullsEye(this);
-        popStyle();
+        pg.popStyle();
       }
     };
     node.setRotation(Quaternion.random());
