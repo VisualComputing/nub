@@ -181,9 +181,6 @@ public class Interpolator {
         Interpolator.this._execute();
       }
     };
-    // only Java enable concurrence
-    if (!Graph._seeded)
-      _task.enableConcurrence();
     _recurrent = false;
     _pathIsValid = false;
     _valuesAreValid = false;

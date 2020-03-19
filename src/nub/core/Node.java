@@ -380,13 +380,6 @@ public class Node {
         scale(_x >= 0 ? factor : 1 / factor);
       }
     };
-    // only Java enable concurrence
-    if (!Graph._seeded) {
-      _translationTask.enableConcurrence();
-      _rotationTask.enableConcurrence();
-      _orbitTask.enableConcurrence();
-      _scalingTask.enableConcurrence();
-    }
   }
 
   /**

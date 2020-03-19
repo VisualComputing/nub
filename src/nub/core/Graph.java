@@ -178,7 +178,7 @@ public class Graph {
   }
 
   protected static TimingHandler _timingHandler = new TimingHandler();
-  protected static boolean _seeded;
+  public static boolean _seeded;
   protected boolean _seededGraph;
   protected HashMap<String, Node> _tags;
   protected ArrayList<Ray> _rays;
@@ -309,8 +309,14 @@ public class Graph {
       _seededGraph = true;
       _seeded = true;
       // only Java disable concurrence
-      for (Task task : timingHandler().taskPool())
+      boolean message = false;
+      for (Task task : timingHandler().taskPool()) {
+        if (task.isConcurrent())
+          message = true;
         task.disableConcurrence();
+      }
+      if (message)
+        System.out.println("Warning: all timing-tasks made non-concurrent");
     }
     _fb = front;
     _matrixHandler = nub.processing.Scene.matrixHandler(_fb);

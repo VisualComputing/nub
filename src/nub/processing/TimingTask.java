@@ -40,6 +40,8 @@ public abstract class TimingTask extends Task {
    */
   public TimingTask() {
     super(Graph.timingHandler());
+    if (!Graph._seeded)
+      enableConcurrence();
   }
 
   @Override
@@ -100,6 +102,10 @@ public abstract class TimingTask extends Task {
 
   @Override
   public void enableConcurrence(boolean enable) {
+    if (!Graph._seeded && !enable) {
+      System.out.println("Warning: instantiate a Scene to disable concurrence on the timing-task. Nothing done!");
+      return;
+    }
     boolean isActive = isActive();
     stop();
     _concurrence = enable;
