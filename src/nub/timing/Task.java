@@ -66,7 +66,7 @@ abstract public class Task {
     boolean result = false;
     if (_active) {
       long elapsedTime = System.currentTimeMillis() - _startTime;
-      float timePerFrame = (1 / _timingHandler.frameRate) * 1000;
+      float timePerFrame = (1 / TimingHandler.frameRate) * 1000;
       long threshold = _counter * _period;
       if (threshold >= elapsedTime) {
         long diff = elapsedTime + (long) timePerFrame - threshold;
@@ -173,10 +173,10 @@ abstract public class Task {
     }
     _period = period;
     float target = frequency();
-    if (_timingHandler.frameRate < target) {
+    if (TimingHandler.frameRate < target) {
       System.out.println("Warning: Your task period of " + period + " ms requires at least a " + target + " Hz frameRate, " +
-          "but currently it just achieves " + _timingHandler.frameRate + " Hz." + '\n' + "Either set a period of at least "
-          + 1000 / _timingHandler.frameRate + " ms or call enableConcurrence() to execute the task concurrently.");
+          "but currently it just achieves " + TimingHandler.frameRate + " Hz." + '\n' + "Either set a period of at least "
+          + 1000 / TimingHandler.frameRate + " ms or call enableConcurrence() to execute the task concurrently.");
     }
   }
 
@@ -197,7 +197,7 @@ abstract public class Task {
    * @see #period()
    */
   public float frequency() {
-    return 1000 / _period;
+    return 1000 / (float) _period;
   }
 
   /**
@@ -244,11 +244,10 @@ abstract public class Task {
   /**
    * Returns whether or not the task is scheduled to be executed recurrently.
    * <p>
-   * A recurrent task (see {@link #isRecurrent()}) is periodically executed
-   * at fixed duration time intervals (see {@link #period()} and
-   * {@link #setPeriod(long)}). A non-recurrent task will only be executed once
-   * just after a delay of {@link #period()} ms.
-   *
+   * A recurrent task is periodically executed at fixed duration time intervals
+   * (see {@link #period()} and {@link #setPeriod(long)}). A non-recurrent task
+   * will only be executed once just after a delay of {@link #period()} ms.
+   * <p>
    * Tasks are recurrent by default, see {@link #Task(TimingHandler)}.
    *
    * @see #enableRecurrence(boolean)
