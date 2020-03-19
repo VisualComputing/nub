@@ -78,7 +78,8 @@ import java.util.List;
  * <p>
  * The methods {@link #translate(Vector, float)}, {@link #rotate(Quaternion, float)},
  * {@link #orbit(Quaternion, Vector, float)} and {@link #scale(float, float)}, locally apply
- * differential geometry transformations damped with a given {@code inertia}.
+ * differential geometry transformations damped with a given {@code inertia}. Note that
+ * when the inertial parameter is omitted its value is defaulted to 0.
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the node hierarchy which automatically apply the local
  * node transformations described above may be achieved with {@link Graph#render()},

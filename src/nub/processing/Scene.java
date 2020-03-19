@@ -102,11 +102,11 @@ import java.util.Map;
  * {@link PApplet#pmouseX} and {@link PApplet#pmouseY} Processing variables and thus simplify
  * the method signatures provide by the {@link Graph} counterparts. Refer to the method signatures
  * beginning with {@code mouse*}, such as: {@link #mouseTag(String)} and {@link #mouseTag()} for
- * node tagging; {@link #mouseTranslate()}, {@link #mouseTranslate(String)},
- * {@link #mouseTranslateTag(String)} and {@link #mouseTranslateEye()} for translation;
- * {@link #mouseSpin()}, {@link #mouseSpin(String)}, {@link #mouseSpinTag(String)} and
- * {@link #mouseSpinEye()} for spinning; {@link #mouseLookAround()} and {@link #mouseRotateCAD()}
- * for eye look-around and rotate-cad, to name a few.
+ * node tagging; {@link #mouseTranslate(float)}, {@link #mouseTranslate(String, float)},
+ * {@link #mouseTranslateTag(String, float)} and {@link #mouseTranslateEye(float)} for translation;
+ * {@link #mouseSpin(float)}, {@link #mouseSpin(String, float)}, {@link #mouseSpinTag(String, float)}
+ * and {@link #mouseSpinEye(float)} for spinning; {@link #mouseLookAround(float)} and
+ * {@link #mouseRotateCAD(float)} for eye look-around and rotate-cad, to name a few.
  *
  * @see Graph
  * @see Node
