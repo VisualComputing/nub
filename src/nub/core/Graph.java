@@ -90,7 +90,7 @@ import java.util.List;
  * call any of the following methods: {@link #align(String)}, {@link #focus(String)},
  * {@link #translate(String, float, float, float, float)}, {@link #rotate(String, float, float, float, float)},
  * {@link #scale(String, float, float)} and {@link #spin(String, int, int, int, int, float)}.</li>
- * <li>Set {@code Scene.inertia} in  [0..1] (0 no inertia & 1 no friction) to change the default inertia
+ * <li>Set {@code Graph.inertia} in  [0..1] (0 no inertia & 1 no friction) to change the default inertia
  * value globally, instead of setting it on a per method call basis. Note that it is initially set to 0.8.</li>
  * <li>Customize node behaviors by overridden {@link Node#interact(Object...)}
  * and then invoke them by either calling: {@link #interactTag(Object...)},
