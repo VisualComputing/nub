@@ -920,6 +920,10 @@ public class Node {
    */
   public void translate(Vector vector, float inertia) {
     translate(vector);
+    if (_translationTask == null) {
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use translate(vector) instead");
+      return;
+    }
     _translationTask.setInertia(inertia);
     _translationTask._x += vector.x();
     _translationTask._y += vector.y();
@@ -1056,6 +1060,10 @@ public class Node {
    */
   public void rotate(Quaternion quaternion, float inertia) {
     rotate(quaternion);
+    if (_rotationTask == null) {
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use rotate(quaternion) instead");
+      return;
+    }
     _rotationTask.setInertia(inertia);
     Vector e = quaternion.eulerAngles();
     _rotationTask._x += e.x();
@@ -1127,6 +1135,10 @@ public class Node {
    */
   public void orbit(Quaternion quaternion, Vector center, float inertia) {
     orbit(quaternion, center);
+    if (_orbitTask == null) {
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use orbit(quaternion, center) instead");
+      return;
+    }
     _orbitTask.setInertia(inertia);
     _orbitTask._center = center;
     Vector e = quaternion.eulerAngles();
@@ -1299,6 +1311,10 @@ public class Node {
    */
   public void scale(float scaling, float inertia) {
     scale(scaling);
+    if (_scalingTask == null) {
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use scale(scaling) instead");
+      return;
+    }
     _scalingTask._inertia = inertia;
     _scalingTask._x += scaling > 1 ? _scalingFactor * (scaling - 1) : _scalingFactor * (scaling - 1) / scaling;
     if (!_scalingTask.isActive()) {
