@@ -3,6 +3,7 @@ package intellij;
 import nub.core.Interpolator;
 import nub.core.Node;
 import nub.processing.Scene;
+import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -89,6 +90,7 @@ public class Interpolation extends PApplet {
       scene.drawCatmullRom(eyeInterpolator2);
       popStyle();
     }
+    println(frameRate);
   }
 
   public void mouseMoved() {
@@ -142,6 +144,12 @@ public class Interpolation extends PApplet {
     if (key == 'f')
       scene.fit();
 
+    if (key == 'x')
+      for(Task task : Scene.timingHandler().taskPool())
+        task.enableConcurrence();
+    if (key == 'y')
+      for(Task task : Scene.timingHandler().taskPool())
+        task.disableConcurrence();
     if (key == 'p')
       println(Scene.nodes().size());
   }
