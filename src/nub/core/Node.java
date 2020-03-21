@@ -920,7 +920,7 @@ public class Node {
    */
   public void translate(Vector vector, float inertia) {
     translate(vector);
-    if (_translationTask == null) {
+    if (!Graph.isTaskRegistered(_translationTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use translate(vector) instead");
       return;
     }
@@ -1060,7 +1060,7 @@ public class Node {
    */
   public void rotate(Quaternion quaternion, float inertia) {
     rotate(quaternion);
-    if (_rotationTask == null) {
+    if (!Graph.isTaskRegistered(_rotationTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use rotate(quaternion) instead");
       return;
     }
@@ -1135,7 +1135,7 @@ public class Node {
    */
   public void orbit(Quaternion quaternion, Vector center, float inertia) {
     orbit(quaternion, center);
-    if (_orbitTask == null) {
+    if (!Graph.isTaskRegistered(_orbitTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use orbit(quaternion, center) instead");
       return;
     }
@@ -1311,7 +1311,7 @@ public class Node {
    */
   public void scale(float scaling, float inertia) {
     scale(scaling);
-    if (_scalingTask == null) {
+    if (!Graph.isTaskRegistered(_scalingTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use scale(scaling) instead");
       return;
     }
