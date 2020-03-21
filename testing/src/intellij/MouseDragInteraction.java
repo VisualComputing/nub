@@ -17,7 +17,7 @@ public class MouseDragInteraction extends PApplet {
   Scene scene;
   Vector randomVector;
   boolean cad, lookAround;
-  Node node, shape1, shape2;
+  Node node, shape1;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -47,11 +47,6 @@ public class MouseDragInteraction extends PApplet {
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, 0);
 
-    shape2 = new Node(shape1);
-    shape2.setShape(shape());
-    shape2.translate(275, 275, 0);
-    shape2.setPickingThreshold(0);
-
     randomVector = Vector.random();
     randomVector.setMagnitude(scene.radius() * 0.5f);
   }
@@ -71,8 +66,6 @@ public class MouseDragInteraction extends PApplet {
         node = shape1.detach();
         node.setPickingThreshold(0);
         scene.randomize(node);
-        node.setShape(shape());
-        node.setReference(shape2);
       }
     }
     if (key == 'e') {

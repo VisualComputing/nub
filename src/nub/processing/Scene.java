@@ -21,6 +21,7 @@ import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.timing.Task;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -76,8 +77,7 @@ import java.util.Map;
  * static ones), such as {@link #beginHUD(PGraphics)},
  * {@link #endHUD(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
- * among others, can be used to set a {@link Node#setShape(PShape)} (see
- * also {@link Node#graphics(PGraphics)}).
+ * among others, can be used in {@link Node#graphics(PGraphics)}).
  * <p>
  * Another scene's eye (different than the graph {@link Graph#eye()}) can be drawn with
  * {@link #drawFrustum(Graph)}. Typical usage include interactive minimaps and
@@ -401,9 +401,6 @@ public class Scene extends Graph implements PConstants {
   /**
    * Renders the node onto context. Used by the rendering algorithms.
    * <p>
-   * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
-   * the node {@link Node#shape()} context is different than {@code pGraphics}.
-   * <p>
    * Together with {@link Scene#matrixHandler(Object)} are the methods
    * that should be re-implemented in js.
    */
@@ -411,10 +408,7 @@ public class Scene extends Graph implements PConstants {
     PGraphicsOpenGL pGraphics = (PGraphicsOpenGL) context;
     pGraphics.pushStyle();
     pGraphics.pushMatrix();
-    if (node.shape() != null)
-      pGraphics.shape(node.shape());
-    else
-      node.graphics(pGraphics);
+    node.graphics(pGraphics);
     pGraphics.popStyle();
     pGraphics.popMatrix();
   }
@@ -1035,12 +1029,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushMatrix();
     if (isTagged(node))
       pGraphics.scale(1 + node.highlighting());
-    if (node.shape() != null)
-      pGraphics.shapeMode(context().shapeMode);
-    if (node.shape() != null)
-      pGraphics.shape(node.shape());
-    else
-      node.graphics(pGraphics);
+    node.graphics(pGraphics);
     if (node.pickingThreshold() == 0 && node.isTaggingEnabled())
       _bbNeed = frameCount();
     pGraphics.popStyle();
@@ -1066,12 +1055,7 @@ public class Scene extends Graph implements PConstants {
       _triangleShader.set("id", new PVector(r, g, b));
       _lineShader.set("id", new PVector(r, g, b));
       _pointShader.set("id", new PVector(r, g, b));
-      if (node.shape() != null)
-        pGraphics.shapeMode(context().shapeMode);
-      if (node.shape() != null)
-        pGraphics.shape(node.shape());
-      else
-        node.graphics(pGraphics);
+      node.graphics(pGraphics);
       pGraphics.popStyle();
       pGraphics.popMatrix();
     }

@@ -1,9 +1,10 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
-import processing.core.PShape;
+import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 /*
@@ -32,44 +33,74 @@ public class GraphAPI extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this);
-
-    // red
-    n1 = new Node(shape(color(255, 0, 0)));
-    n1.setPickingThreshold(0);
-
+    scene = new Scene(this);// red
+    n1 = new Node() {
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+        pg.fill(255, 0, 0);
+        pg.box(30);
+        pg.popStyle();
+      }
+    };
     // green
-    n2 = new Node(n1, shape(color(0, 255, 0)));
-    scene.randomize(n2);
+    n2 = new Node(n1) {
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+        pg.fill(0, 255, 0);
+        pg.box(30);
+        pg.popStyle();
+      }
+    };
     n2.scale(0.5f);
-    n2.setPickingThreshold(0);
-
-    // blue
-    n3 = new Node(n1, shape(color(0, 0, 255)));
+    scene.randomize(n2);
+    //blue
+    n3 = new Node(n1) {
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+        pg.fill(0, 0, 255);
+        pg.box(30);
+        pg.popStyle();
+      }
+    };
     scene.randomize(n3);
-    n3.setPickingThreshold(0);
-
-    // yellow
-    n4 = new Node(n2, shape(color(255, 255, 0)));
+    //yellow
+    n4 = new Node(n2) {
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+        pg.fill(255, 255, 0);
+        pg.box(30);
+        pg.popStyle();
+      }
+    };
     scene.randomize(n4);
-    n4.setPickingThreshold(0);
-
     // magenta
-    n5 = new Node(n4, shape(color(255, 0, 255)));
+    n5 = new Node(n4) {
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+        pg.fill(255, 0, 255);
+        pg.box(30);
+        pg.popStyle();
+      }
+    };
     scene.randomize(n5);
-    n5.setPickingThreshold(0);
 
     // cyan
-    detached = Node.detach(n1);
-    detached.setPickingThreshold(0);
-    detached.setShape(shape(color(0, 255, 255)));
+    detached = new Node() {
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+        pg.fill(0, 255, 255);
+        pg.box(30);
+        pg.popStyle();
+      }
+    };
     scene.randomize(detached);
-  }
-
-  PShape shape(int c) {
-    PShape pShape = createShape(BOX, 30);
-    pShape.setFill(c);
-    return pShape;
+    Graph.prune(detached);
   }
 
   public void draw() {

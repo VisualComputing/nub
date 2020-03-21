@@ -10,7 +10,7 @@ import processing.event.MouseEvent;
 
 public class OFFScreen extends PApplet {
   Scene scene;
-  Node shape1, shape2;
+  Node shape1;
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
@@ -41,10 +41,6 @@ public class OFFScreen extends PApplet {
     };
     shape1.setRotation(Quaternion.random());
     shape1.translate(-55, -55, -55);
-
-    shape2 = new Node(shape1);
-    shape2.setShape(shape());
-    shape2.translate(-55, -85, 135);
   }
 
   public void draw() {

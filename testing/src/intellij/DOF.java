@@ -29,8 +29,22 @@ public class DOF extends PApplet {
     scene.fit(1);
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
-      models[i] = new Node(boxShape());
-      models[i].setPickingThreshold(0);
+      models[i] = new Node() {
+        @Override
+        public void graphics(PGraphics pg) {
+          Scene.drawAxes(pg, scene.radius() / 3);
+          pg.pushStyle();
+          pg.rectMode(CENTER);
+          pg.fill(255, 0, 255);
+          if (scene.is3D())
+            Scene.drawCylinder(pg, 30, scene.radius() / 4, 200);
+          else
+            pg.rect(10, 10, 200, 200);
+          pg.stroke(255, 255, 0);
+          scene.drawSquaredBullsEye(this);
+          pg.popStyle();
+        }
+      };
       scene.randomize(models[i]);
     }
 
