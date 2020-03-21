@@ -1,16 +1,17 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.processing.TimingTask;
+import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 
 import java.util.ArrayList;
 
-class Boid extends TimingTask {
+class Boid extends Task {
   Scene scene;
   ArrayList<Boid> flock;
   // render
@@ -26,7 +27,7 @@ class Boid extends TimingTask {
   float t = 0;
 
   Boid(Scene scn, ArrayList<Boid> f, Vector inPos) {
-    super();
+    super(Graph.timingHandler());
     scene = scn;
     flock = f;
     // the boid node just holds the boid appearance for rendering

@@ -1,10 +1,11 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.processing.TimingTask;
+import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -188,7 +189,7 @@ public class StereoFlock extends PApplet {
   }
 
   class Boid extends Node {
-    TimingTask animation;
+    Task animation;
     // fields
     Vector position, velocity, acceleration, alignment, cohesion, separation; // position, velocity, and acceleration in
     // a vector datatype
@@ -206,7 +207,7 @@ public class StereoFlock extends PApplet {
       velocity = new Vector(StereoFlock.this.random(-1, 1), StereoFlock.this.random(-1, 1), StereoFlock.this.random(1, -1));
       acceleration = new Vector(0, 0, 0);
       neighborhoodRadius = 100;
-      animation = new TimingTask() {
+      animation = new Task(Graph.timingHandler()) {
         @Override
         public void execute() {
           t += 0.1;
