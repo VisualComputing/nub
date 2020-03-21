@@ -310,7 +310,7 @@ public class Graph {
       _seeded = true;
       // only Java disable concurrence
       boolean message = false;
-      for (Task task : timingHandler().taskSet()) {
+      for (Task task : timingHandler().tasks()) {
         if (task.isConcurrent())
           message = true;
         task.disableConcurrence();

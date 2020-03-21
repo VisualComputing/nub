@@ -271,7 +271,7 @@ public class Node {
     _children = new ArrayList<Node>();
     _culled = false;
     // TODO experimental
-    // _initTasks();
+    // _registerTasks();
   }
 
   // From here only Java constructors
@@ -356,7 +356,7 @@ public class Node {
   /**
    * Init tasks. Internal use.
    */
-  protected void _initTasks() {
+  protected void _registerTasks() {
     if (!Graph.isTaskRegistered(_translationTask)) {
       _translationTask = new InertialTask() {
         @Override
@@ -639,7 +639,7 @@ public class Node {
     // 1. no need to re-parent, just check this needs to be added as a leading node
     if (reference() == node) {
       _restorePath(reference(), this);
-      _initTasks();
+      _registerTasks();
       return;
     }
     // 2. else re-parenting
@@ -652,7 +652,7 @@ public class Node {
     _reference = node;// reference() returns now the new value
     // 2b. after assigning new reference node
     _restorePath(reference(), this);
-    _initTasks();
+    _registerTasks();
     _modified();
   }
 

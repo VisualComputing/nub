@@ -145,10 +145,10 @@ public class Interpolation extends PApplet {
       scene.fit();
 
     if (key == 'x')
-      for (Task task : Scene.timingHandler().taskSet())
+      for (Task task : Scene.timingHandler().tasks())
         task.enableConcurrence();
     if (key == 'y')
-      for (Task task : Scene.timingHandler().taskSet())
+      for (Task task : Scene.timingHandler().tasks())
         task.disableConcurrence();
     if (key == 'p')
       println(Scene.nodes().size());

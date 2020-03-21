@@ -14,7 +14,7 @@ package nub.timing;
 import java.util.HashSet;
 
 /**
- * A timing handler holds a {@link #taskSet()} with all the tasks
+ * A timing handler holds a {@link #tasks()} with all the tasks
  * scheduled to be performed in the future (one single time or periodically).
  * <p>
  * A timing handler should be used as a static scene instance.
@@ -46,7 +46,7 @@ public class TimingHandler {
   /**
    * Handler's main method. It should be called from within your main event loop.
    * It recomputes the frame rate, and executes all non-concurrent tasks found in
-   * the {@link #taskSet()}.
+   * the {@link #tasks()}.
    */
   public void handle() {
     _updateFrameRate();
@@ -58,7 +58,7 @@ public class TimingHandler {
   /**
    * Returns the task set.
    */
-  public HashSet<Task> taskSet() {
+  public HashSet<Task> tasks() {
     return _taskSet;
   }
 
