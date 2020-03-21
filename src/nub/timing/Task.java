@@ -65,9 +65,9 @@ abstract public class Task {
   protected boolean _execute() {
     boolean result = false;
     if (_active) {
-      long elapsedTime = System.currentTimeMillis() - _startTime;
-      float timePerFrame = (1 / TimingHandler.frameRate) * 1000;
-      long threshold = _counter * _period;
+      long elapsedTime = System.nanoTime() - _startTime;
+      float timePerFrame = (1 / TimingHandler.frameRate) * 1e9f;
+      long threshold = _counter * _period * (long) 1e6;
       if (threshold >= elapsedTime) {
         long diff = elapsedTime + (long) timePerFrame - threshold;
         if (diff >= 0)
@@ -111,7 +111,7 @@ abstract public class Task {
   public void run() {
     _active = true;
     _counter = 1;
-    _startTime = System.currentTimeMillis();
+    _startTime = System.nanoTime();
   }
 
   /**
