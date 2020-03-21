@@ -11,10 +11,10 @@
 
 package nub.timing;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
- * A timing handler holds a {@link #taskPool()} with all the tasks
+ * A timing handler holds a {@link #taskSet()} with all the tasks
  * scheduled to be performed in the future (one single time or periodically).
  * <p>
  * A timing handler should be used as a static scene instance.
@@ -34,47 +34,43 @@ public class TimingHandler {
   protected long _frameRateLastNanos;
 
   // T i m e r P o o l
-  protected ArrayList<Task> _taskPool;
+  protected HashSet<Task> _taskSet;
 
   /**
    * Main constructor.
    */
   public TimingHandler() {
-    _taskPool = new ArrayList<Task>();
+    _taskSet = new HashSet<Task>();
   }
 
   /**
    * Handler's main method. It should be called from within your main event loop.
    * It recomputes the frame rate, and executes all non-concurrent tasks found in
-   * the {@link #taskPool()}.
+   * the {@link #taskSet()}.
    */
   public void handle() {
     _updateFrameRate();
-    for (Task task : _taskPool)
+    for (Task task : _taskSet)
       if (!task.isConcurrent())
         task._execute();
   }
 
   /**
-   * Returns the task pool.
+   * Returns the task set.
    */
-  public ArrayList<Task> taskPool() {
-    return _taskPool;
+  public HashSet<Task> taskSet() {
+    return _taskSet;
   }
 
   /**
-   * Register a task in the pool.
+   * Register a task in the set.
    */
   public void registerTask(Task task) {
-    if (isTaskRegistered(task)) {
-      System.out.println("Nothing done. Task is already registered");
-      return;
-    }
     if (task == null) {
       System.out.println("Nothing done. Task is null");
       return;
     }
-    _taskPool.add(task);
+    _taskSet.add(task);
   }
 
   /**
@@ -83,7 +79,7 @@ public class TimingHandler {
   public void unregisterTask(Task task) {
     if (isTaskRegistered(task)) {
       task.stop();
-      _taskPool.remove(task);
+      _taskSet.remove(task);
     }
   }
 
@@ -91,7 +87,7 @@ public class TimingHandler {
    * Returns {@code true} if the task is registered and {@code false} otherwise.
    */
   public boolean isTaskRegistered(Task task) {
-    return _taskPool.contains(task);
+    return _taskSet.contains(task);
   }
 
   /**

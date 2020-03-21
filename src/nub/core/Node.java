@@ -270,7 +270,8 @@ public class Node {
     // tree
     _children = new ArrayList<Node>();
     _culled = false;
-    _initTasks();
+    // TODO experimental
+    // _initTasks();
   }
 
   // From here only Java constructors
