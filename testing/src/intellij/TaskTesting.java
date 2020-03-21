@@ -1,9 +1,9 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Interpolator;
 import nub.core.Node;
 import nub.processing.Scene;
-import nub.processing.TimingTask;
 import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -69,7 +69,7 @@ public class TaskTesting extends PApplet {
     interpolator.run();
 
     //frameRate(100);
-    task = new TimingTask() {
+    task = new Task(Graph.timingHandler()) {
       @Override
       public void execute() {
         long current = System.currentTimeMillis();
@@ -86,7 +86,7 @@ public class TaskTesting extends PApplet {
     //task.run(60);
 
     ///*
-    task2 = new TimingTask() {
+    task2 = new Task(Graph.timingHandler()) {
       @Override
       public void execute() {
         println("one timer seq");
@@ -95,7 +95,7 @@ public class TaskTesting extends PApplet {
     task2.enableRecurrence();
     //task2.run(3000);
 
-    task3 = new TimingTask() {
+    task3 = new Task(Graph.timingHandler()) {
       @Override
       public void execute() {
         println("recurrent timer parallel");

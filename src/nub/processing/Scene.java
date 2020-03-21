@@ -111,7 +111,7 @@ import java.util.Map;
  * @see Graph
  * @see Node
  * @see Interpolator
- * @see TimingTask
+ * @see Task
  */
 public class Scene extends Graph implements PConstants {
   public static String prettyVersion = "0.5.0";

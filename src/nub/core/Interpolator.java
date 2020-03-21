@@ -173,9 +173,7 @@ public class Interpolator {
     setNode(node);
     _t = 0.0f;
     _speed = 1.0f;
-    //JS should just go:
-    //_task = new Task(Graph.timingHandler()) {
-    _task = new nub.processing.TimingTask() {
+    _task = new Task(Graph.timingHandler()) {
       @Override
       public void execute() {
         Interpolator.this._execute();
@@ -201,8 +199,7 @@ public class Interpolator {
     this._t = other._t;
     this._speed = other._speed;
     //JS should just go:
-    //this._task = new Task(Graph.timingHandler()) {
-    this._task = new nub.processing.TimingTask() {
+    this._task = new Task(Graph.timingHandler()) {
       @Override
       public void execute() {
         Interpolator.this._execute();
