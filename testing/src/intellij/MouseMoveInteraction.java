@@ -40,10 +40,6 @@ public class MouseMoveInteraction extends PApplet {
     };
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, -275);
-
-    Node shape2 = new Node(shape1);
-    shape2.setShape(shape());
-    shape2.translate(275, 275, 275);
   }
 
   public void draw() {

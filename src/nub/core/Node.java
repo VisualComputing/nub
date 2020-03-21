@@ -101,8 +101,7 @@ import java.util.List;
  * {@link nub.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
  * <h2>Shapes</h2>
- * A node shape can be set from a retained-mode rendering object, see {@link #setShape(processing.core.PShape)};
- * or from an immediate-mode rendering procedure, see {@link #graphics(processing.core.PGraphics)}.
+ * A node shape can be set from an immediate-mode rendering procedure, see {@link #graphics(processing.core.PGraphics)}.
  * Picking a node is done according to a {@link #pickingThreshold()}. When a node is tagged
  * it will be highlighted (scaled) according to a {@link #highlighting()} magnitude.
  * See also {@link #enableTagging(boolean)}.
@@ -147,8 +146,6 @@ public class Node {
   protected boolean _tagging;
 
   // Rendering
-  // PShape is only available in Java
-  protected processing.core.PShape _shape;
   protected float _highlight;
   protected long _bypass = -1;
 
@@ -277,56 +274,6 @@ public class Node {
     _highlight = 0.15f;
     _culled = false;
     _children = new ArrayList<Node>();
-  }
-
-  // From here only Java constructors
-
-  /**
-   * Same as {@code this(null, null, shape, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
-   */
-  public Node(processing.core.PShape shape) {
-    this(null, null, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(reference, null, shape, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
-   */
-  public Node(Node reference, processing.core.PShape shape) {
-    this(reference, null, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(null, constraint, shape, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
-   */
-  public Node(Constraint constraint, processing.core.PShape shape) {
-    this(null, constraint, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(reference, constraint, shape, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
-   */
-  public Node(Node reference, Constraint constraint, processing.core.PShape shape) {
-    this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
-   * as {@link #constraint()}, {@code shape} as {@link #shape()}, having {@code translation},
-   * {@code rotation} and {@code scaling} as the {@link #translation()}, {@link #rotation()}
-   * and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to
-   * {@code 0.2} and the {@link #highlighting()} magnitude to {@code 0.15}.
-   */
-  public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
-    this(reference, constraint, translation, rotation, scaling);
-    setShape(shape);
   }
 
   /**
@@ -2324,35 +2271,5 @@ public class Node {
    * {@code PGraphics}. Return {@code true} if succeeded and {@code false} otherwise.
    */
   public void graphics(processing.core.PGraphics pGraphics) {
-  }
-
-  /**
-   * Same as {@code setShape(null)}.
-   *
-   * @see #setShape(processing.core.PShape)
-   */
-  public void resetShape() {
-    setShape(null);
-  }
-
-  /**
-   * Sets the node retained mode shape.
-   *
-   * @see #graphics(processing.core.PGraphics)
-   * @see #resetShape()
-   */
-  public void setShape(processing.core.PShape shape) {
-    _shape = shape;
-  }
-
-  /**
-   * Returns the node retained mode shape. Maybe null.
-   *
-   * @see #resetShape()
-   * @see #shape()
-   * @see #graphics(processing.core.PGraphics)
-   */
-  public processing.core.PShape shape() {
-    return _shape;
   }
 }
