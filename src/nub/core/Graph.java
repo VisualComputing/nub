@@ -134,7 +134,7 @@ public class Graph {
   protected boolean _offscreen;
 
   // 0. Contexts
-  protected Object _bb, _fb;
+  protected Object _fb;
   // 1. Eye
   protected Node _eye;
   protected long _lastEqUpdate;
@@ -161,7 +161,7 @@ public class Graph {
 
   // 2. Matrix handler
   protected int _width, _height;
-  protected MatrixHandler _matrixHandler, _bbMatrixHandler;
+  protected MatrixHandler _matrixHandler;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected boolean _isProjectionViewInverseCached;
 
@@ -216,77 +216,28 @@ public class Graph {
   /**
    * Same as {@code this(Type.PERSPECTIVE, null, w, h)}.
    *
-   * @see #Graph(Object, Object, Type, Node, int, int)
+   * @see #Graph(Object, Type, Node, int, int)
    */
   public Graph(Object context, int width, int height) {
-    this(context, null, Type.PERSPECTIVE, null, width, height);
-  }
-
-  /**
-   * Same as {@code this(front, back, Type.PERSPECTIVE, null, width, height)}.
-   *
-   * @see #Graph(Object, Object, Type, Node, int, int)
-   */
-  protected Graph(Object front, Object back, int width, int height) {
-    this(front, back, Type.PERSPECTIVE, null, width, height);
+    this(context, Type.PERSPECTIVE, null, width, height);
   }
 
   /**
    * Same as {@code this(context, null, Type.PERSPECTIVE, eye, width, height)}.
    *
-   * @see #Graph(Object, Object, Type, Node, int, int)
+   * @see #Graph(Object, Type, Node, int, int)
    */
   public Graph(Object context, Node eye, int width, int height) {
-    this(context, null, Type.PERSPECTIVE, eye, width, height);
-  }
-
-  /**
-   * Same as {@code this(front, back, Type.PERSPECTIVE, eye, width, height)}.
-   *
-   * @see #Graph(Object, Object, Type, Node, int, int)
-   */
-  protected Graph(Object front, Object back, Node eye, int width, int height) {
-    this(front, back, Type.PERSPECTIVE, eye, width, height);
-  }
-
-  /**
-   * Same as {@code this(context, null, type, null, width, height)}.
-   *
-   * @see #Graph(Object, Object, Type, Node, int, int)
-   */
-  public Graph(Object context, Type type, int width, int height) {
-    this(context, null, type, null, width, height);
+    this(context, Type.PERSPECTIVE, eye, width, height);
   }
 
   /**
    * Same as {@code this(front, back, type, null, width, height)}.
    *
-   * @see #Graph(Object, Object, Type, Node, int, int)
+   * @see #Graph(Object, Type, Node, int, int)
    */
-  protected Graph(Object front, Object back, Type type, int width, int height) {
-    this(front, back, type, null, width, height);
-  }
-
-  /**
-   * Default constructor defines a right-handed graph with the specified {@code width} and
-   * {@code height} screen window dimensions. The graph {@link #center()} and
-   * {@link #anchor()} are set to {@code (0,0,0)} and its {@link #radius()} to {@code 100}.
-   * <p>
-   * The constructor sets a {@link Node} instance as the graph {@link #eye()} and then
-   * calls {@link #fit()}, so that the entire scene fits the screen dimensions.
-   * <p>
-   * The constructor also instantiates the graph main {@link #context()} and {@code back-buffer}
-   * matrix-handlers (see {@link MatrixHandler}) and {@link #timingHandler()}.
-   * <p>
-   * Same as {@code this(context, null, type, eye, width, height)}.
-   *
-   * @see #timingHandler()
-   * @see #setRightHanded()
-   * @see #setEye(Node)
-   * @see #Graph(Object, Object, Type, Node, int, int)
-   */
-  public Graph(Object context, Type type, Node eye, int width, int height) {
-    this(context, null, type, eye, width, height);
+  protected Graph(Object front, Type type, int width, int height) {
+    this(front, type, null, width, height);
   }
 
   /**
@@ -304,7 +255,7 @@ public class Graph {
    * @see #setRightHanded()
    * @see #setEye(Node)
    */
-  protected Graph(Object front, Object back, Type type, Node eye, int width, int height) {
+  protected Graph(Object front, Type type, Node eye, int width, int height) {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
@@ -320,8 +271,6 @@ public class Graph {
     }
     _fb = front;
     _matrixHandler = nub.processing.Scene.matrixHandler(_fb);
-    _bb = back;
-    _bbMatrixHandler = _bb == null ? null : nub.processing.Scene.matrixHandler(_bb);
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
@@ -2581,25 +2530,7 @@ public class Graph {
    * @see Node#setPickingThreshold(float)
    */
   public boolean tracks(Node node, int pixelX, int pixelY) {
-    if (node.pickingThreshold() == 0 && _bb != null)
-      return _tracks(node, pixelX, pixelY);
-    else
-      return _tracks(node, pixelX, pixelY, screenLocation(node.position()));
-  }
-
-  /**
-   * A shape may be picked using
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
-   * color buffer. This method
-   * compares the color of a back-buffer at {@code (pixelX,pixelY)} against the {@link Node#id()}.
-   * Returns true if both colors are the same, and false otherwise.
-   * <p>
-   * This method should be overridden. Default implementation simply return {@code false}.
-   *
-   * @see Node#setPickingThreshold(float)
-   */
-  protected boolean _tracks(Node node, int pixelX, int pixelY) {
-    return false;
+    return _tracks(node, pixelX, pixelY, screenLocation(node.position()));
   }
 
   /**
@@ -2666,43 +2597,6 @@ public class Graph {
    */
   public Object context() {
     return _fb;
-  }
-
-  /**
-   * Returns the back buffer, used for
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>. Maybe {@code null}
-   */
-  protected Object _backBuffer() {
-    return _bb;
-  }
-
-  /**
-   * Render the scene into the back-buffer used for picking.
-   */
-  protected void _renderBackBuffer() {
-    _bbMatrixHandler.bind(projection(), view());
-    for (Node node : _leadingNodes())
-      _renderBackBuffer(node);
-    if (isOffscreen())
-      _rays.clear();
-  }
-
-  /**
-   * Used by the {@link #_renderBackBuffer()} algorithm.
-   */
-  protected void _renderBackBuffer(Node node) {
-    _bbMatrixHandler.pushMatrix();
-    _bbMatrixHandler.applyTransformation(node);
-    if (!node.isCulled()) {
-      if (node._bypass != TimingHandler.frameCount) {
-        _drawBackBuffer(node);
-        if (!isOffscreen())
-          _trackBackBuffer(node);
-      }
-      for (Node child : node.children())
-        _renderBackBuffer(child);
-    }
-    _bbMatrixHandler.popMatrix();
   }
 
   /**
@@ -2879,7 +2773,6 @@ public class Graph {
    * @see Node#isCulled()
    * @see Node#bypass()
    * @see Node#graphics(processing.core.PGraphics)
-   * @see Node#setShape(processing.core.PShape)
    */
   public void render() {
     for (Node node : _leadingNodes())
@@ -2897,8 +2790,6 @@ public class Graph {
     if (!node.isCulled()) {
       if (node._bypass != TimingHandler.frameCount) {
         _trackFrontBuffer(node);
-        if (isOffscreen())
-          _trackBackBuffer(node);
         _drawFrontBuffer(node);
       }
       for (Node child : node.children())
@@ -2914,7 +2805,6 @@ public class Graph {
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
    * @see Node#graphics(processing.core.PGraphics)
-   * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
     _render(nub.processing.Scene.matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
@@ -2934,7 +2824,6 @@ public class Graph {
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
    * @see Node#graphics(processing.core.PGraphics)
-   * @see Node#setShape(processing.core.PShape)
    */
   public void render(Object context) {
     if (context == _fb && !_rays.isEmpty())
@@ -2950,7 +2839,6 @@ public class Graph {
    * @see #render(Object)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
    * @see Node#graphics(processing.core.PGraphics)
-   * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Matrix projection, Matrix view) {
     _render(nub.processing.Scene.matrixHandler(context), context, projection, view);
@@ -2999,22 +2887,6 @@ public class Graph {
   }
 
   /**
-   * Renders the node onto the back-buffer.
-   * <p>
-   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
-   *
-   * @see #render()
-   * @see Node#cull(boolean)
-   * @see Node#isCulled()
-   * @see Node#bypass()
-   * @see Node#visit()
-   * @see Node#graphics(processing.core.PGraphics)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  protected void _drawBackBuffer(Node node) {
-  }
-
-  /**
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
@@ -3025,23 +2897,6 @@ public class Graph {
         Ray ray = it.next();
         removeTag(ray._tag);
         if (_tracks(node, ray._pixelX, ray._pixelY, projection)) {
-          tag(ray._tag, node);
-          it.remove();
-        }
-      }
-    }
-  }
-
-  /**
-   * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
-   */
-  protected void _trackBackBuffer(Node node) {
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingThreshold() == 0 && _bb != null) {
-      Iterator<Ray> it = _rays.iterator();
-      while (it.hasNext()) {
-        Ray ray = it.next();
-        removeTag(ray._tag);
-        if (_tracks(node, ray._pixelX, ray._pixelY)) {
           tag(ray._tag, node);
           it.remove();
         }
