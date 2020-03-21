@@ -68,8 +68,13 @@ public class TimingHandler {
   public void registerTask(Task task) {
     if (isTaskRegistered(task)) {
       System.out.println("Nothing done. Task is already registered");
+      return;
     }
-    _taskPool.add((Task) task);
+    if (task == null) {
+      System.out.println("Nothing done. Task is null");
+      return;
+    }
+    _taskPool.add(task);
   }
 
   /**
