@@ -123,10 +123,6 @@ public class Scene extends Graph implements PConstants {
   // E X C E P T I O N H A N D L I N G
   protected int _beginOffScreenDrawingCalls;
 
-  // _bb : picking buffer
-  protected long _bbNeed, _bbCount;
-  protected PShader _triangleShader, _lineShader, _pointShader;
-
   // mouse speed
   long _timestamp;
 
@@ -362,24 +358,20 @@ public class Scene extends Graph implements PConstants {
    * @see #Scene(PApplet, String, Node)
    */
   public Scene(PApplet pApplet, PGraphics pGraphics, Node eye, int x, int y) {
-    super(pGraphics, pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? P3D : P2D), pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, eye, pGraphics.width, pGraphics.height);
+    super(pGraphics, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, eye, pGraphics.width, pGraphics.height);
     // 1. P5 objects
     _parent = pApplet;
     _offscreen = pGraphics != pApplet.g;
     _upperLeftCornerX = _offscreen ? x : 0;
     _upperLeftCornerY = _offscreen ? y : 0;
-    // 2. Back buffer
-    _triangleShader = pApplet().loadShader("PickingBuffer.frag");
-    _lineShader = pApplet().loadShader("PickingBuffer.frag");
-    _pointShader = pApplet().loadShader("PickingBuffer.frag");
-    // 3. Register P5 methods
+    // 2. Register P5 methods
     if (!isOffscreen()) {
       pApplet().registerMethod("pre", this);
       pApplet().registerMethod("draw", this);
     }
     // TODO buggy
     pApplet().registerMethod("dispose", this);
-    // 4. Handed
+    // 3. Handed
     setLeftHanded();
   }
 
@@ -479,34 +471,6 @@ public class Scene extends Graph implements PConstants {
    */
   public static void draw(PApplet pApplet, Node node) {
     draw(pApplet.g, node);
-  }
-
-  // PICKING BUFFER
-
-  @Override
-  protected PGraphics _backBuffer() {
-    return (PGraphics) _bb;
-  }
-
-  /**
-   * Internal use. Traverse the scene {@link #nodes()}) into the
-   * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
-   * <p>
-   * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
-   * scenes).
-   */
-  @Override
-  protected void _renderBackBuffer() {
-    if (_bb != null && _bbCount < _bbNeed) {
-      _backBuffer().beginDraw();
-      _backBuffer().pushStyle();
-      _backBuffer().background(0);
-      super._renderBackBuffer();
-      _backBuffer().popStyle();
-      _backBuffer().endDraw();
-      _backBuffer().loadPixels();
-      _bbCount = _bbNeed;
-    }
   }
 
   // OPENGL
@@ -705,7 +669,6 @@ public class Scene extends Graph implements PConstants {
    */
   public void draw() {
     _matrixHandler.popMatrix();
-    _renderBackBuffer();
   }
 
   /**
@@ -765,7 +728,6 @@ public class Scene extends Graph implements PConstants {
           + "endDraw() and they cannot be nested. Check your implementation!");
     _matrixHandler.popMatrix();
     context().endDraw();
-    _renderBackBuffer();
   }
 
   /**
@@ -785,15 +747,6 @@ public class Scene extends Graph implements PConstants {
   public void display(PGraphics pgraphics) {
     if (isOffscreen())
       pApplet().image(pgraphics, _upperLeftCornerX, _upperLeftCornerY);
-  }
-
-  /**
-   * Display the {@link #_backBuffer()} used for picking at screen coordinates
-   * {@code (x, y)}. Mainly for debugging.
-   */
-  public void displayBackBuffer(int x, int y) {
-    if (_backBuffer() != null)
-      pApplet().image(_backBuffer(), x, y);
   }
 
   /**
@@ -1010,19 +963,6 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  protected boolean _tracks(Node node, int pixelX, int pixelY) {
-    if (node == null || isEye(node))
-      return false;
-    if (!node.isTaggingEnabled())
-      return false;
-    int index = pixelY * width() + pixelX;
-    if (_backBuffer().pixels != null)
-      if ((0 <= index) && (index < _backBuffer().pixels.length))
-        return _backBuffer().pixels[index] == node.colorID();
-    return false;
-  }
-
-  @Override
   protected void _drawFrontBuffer(Node node) {
     PGraphics pGraphics = context();
     pGraphics.pushStyle();
@@ -1030,35 +970,8 @@ public class Scene extends Graph implements PConstants {
     if (isTagged(node))
       pGraphics.scale(1 + node.highlighting());
     node.graphics(pGraphics);
-    if (node.pickingThreshold() == 0 && node.isTaggingEnabled())
-      _bbNeed = frameCount();
     pGraphics.popStyle();
     pGraphics.popMatrix();
-  }
-
-  @Override
-  protected void _drawBackBuffer(Node node) {
-    PGraphics pGraphics = _backBuffer();
-    if (node.pickingThreshold() == 0) {
-      pGraphics.pushStyle();
-      pGraphics.pushMatrix();
-      float r = (float) (node.id() & 255) / 255.f;
-      float g = (float) ((node.id() >> 8) & 255) / 255.f;
-      float b = (float) ((node.id() >> 16) & 255) / 255.f;
-      // TODO How to deal with these commands: breaks picking in Luxo when they're moved to the constructor
-      // Seems related to: PassiveTransformations
-      // funny, only safe way. Otherwise break things horribly when setting node shapes
-      // and there are more than one node holding a shape
-      pGraphics.shader(_triangleShader);
-      pGraphics.shader(_lineShader, PApplet.LINES);
-      pGraphics.shader(_pointShader, PApplet.POINTS);
-      _triangleShader.set("id", new PVector(r, g, b));
-      _lineShader.set("id", new PVector(r, g, b));
-      _pointShader.set("id", new PVector(r, g, b));
-      node.graphics(pGraphics);
-      pGraphics.popStyle();
-      pGraphics.popMatrix();
-    }
   }
 
   /**
