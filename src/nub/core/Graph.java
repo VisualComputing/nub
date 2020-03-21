@@ -770,15 +770,18 @@ public class Graph {
   public static boolean prune(Node node) {
     if (!isReachable(node))
       return false;
+    List<Node> branch = branch(node);
+    for (Node nodeBranch : branch) {
+      unregisterTask(nodeBranch._translationTask);
+      unregisterTask(nodeBranch._rotationTask);
+      unregisterTask(nodeBranch._orbitTask);
+      unregisterTask(nodeBranch._scalingTask);
+    }
     if (node.reference() != null) {
       node.reference()._removeChild(node);
       node._reference = null;
     } else
       _removeLeadingNode(node);
-    unregisterTask(node._translationTask);
-    unregisterTask(node._rotationTask);
-    unregisterTask(node._orbitTask);
-    unregisterTask(node._scalingTask);
     return true;
   }
 

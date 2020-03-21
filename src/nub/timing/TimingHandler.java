@@ -34,13 +34,13 @@ public class TimingHandler {
   protected long _frameRateLastNanos;
 
   // T i m e r P o o l
-  protected HashSet<Task> _taskSet;
+  protected HashSet<Task> _tasks;
 
   /**
    * Main constructor.
    */
   public TimingHandler() {
-    _taskSet = new HashSet<Task>();
+    _tasks = new HashSet<Task>();
   }
 
   /**
@@ -50,7 +50,7 @@ public class TimingHandler {
    */
   public void handle() {
     _updateFrameRate();
-    for (Task task : _taskSet)
+    for (Task task : _tasks)
       if (!task.isConcurrent())
         task._execute();
   }
@@ -59,7 +59,7 @@ public class TimingHandler {
    * Returns the task set.
    */
   public HashSet<Task> tasks() {
-    return _taskSet;
+    return _tasks;
   }
 
   /**
@@ -70,7 +70,7 @@ public class TimingHandler {
       System.out.println("Nothing done. Task is null");
       return;
     }
-    _taskSet.add(task);
+    _tasks.add(task);
   }
 
   /**
@@ -79,7 +79,7 @@ public class TimingHandler {
   public void unregisterTask(Task task) {
     if (isTaskRegistered(task)) {
       task.stop();
-      _taskSet.remove(task);
+      _tasks.remove(task);
     }
   }
 
@@ -87,7 +87,7 @@ public class TimingHandler {
    * Returns {@code true} if the task is registered and {@code false} otherwise.
    */
   public boolean isTaskRegistered(Task task) {
-    return _taskSet.contains(task);
+    return _tasks.contains(task);
   }
 
   /**

@@ -254,6 +254,7 @@ public class Node {
    * magnitude to {@code 0.15}.
    */
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
+    _children = new ArrayList<Node>();
     setReference(reference);
     setConstraint(constraint);
     setTranslation(translation);
@@ -267,11 +268,7 @@ public class Node {
     _threshold = .2f;
     _tagging = true;
     _highlight = 0.15f;
-    // tree
-    _children = new ArrayList<Node>();
     _culled = false;
-    // TODO experimental
-    // _registerTasks();
   }
 
   // From here only Java constructors
@@ -351,45 +348,6 @@ public class Node {
     Node node = new Node(position, orientation, magnitude);
     Graph.prune(node);
     return node;
-  }
-
-  /**
-   * Init tasks. Internal use.
-   */
-  protected void _registerTasks() {
-    if (!Graph.isTaskRegistered(_translationTask)) {
-      _translationTask = new InertialTask() {
-        @Override
-        public void action() {
-          translate(_x, _y, _z);
-        }
-      };
-    }
-    if (!Graph.isTaskRegistered(_rotationTask)) {
-      _rotationTask = new InertialTask() {
-        @Override
-        public void action() {
-          rotate(new Quaternion(_x, _y, _z));
-        }
-      };
-    }
-    if (!Graph.isTaskRegistered(_orbitTask)) {
-      _orbitTask = new InertialTask() {
-        @Override
-        public void action() {
-          orbit(new Quaternion(_x, _y, _z), _center);
-        }
-      };
-    }
-    if (!Graph.isTaskRegistered(_scalingTask)) {
-      _scalingTask = new InertialTask() {
-        @Override
-        public void action() {
-          float factor = 1 + Math.abs(_x) / _scalingFactor;
-          scale(_x >= 0 ? factor : 1 / factor);
-        }
-      };
-    }
   }
 
   /**
@@ -518,7 +476,7 @@ public class Node {
         child._modified();
   }
 
-  // REFERENCE_node
+  // reference
 
   /**
    * Returns {@code true} if {@code node} is {@link #reference()} {@code this} node.
@@ -626,6 +584,11 @@ public class Node {
    * tree, which root is the world coordinate system (i.e., {@code null}
    * {@link #reference()}). No action is performed if setting {@code reference} as the
    * {@link #reference()} would create a loop in the hierarchy.
+   * <p>
+   * To make all the nodes in the {@code node} branch eligible for garbage collection
+   * call {@link Graph#prune(Node)}.
+   *
+   * @see Graph#prune(Node)
    */
   public void setReference(Node node) {
     if (node == this) {
@@ -639,7 +602,7 @@ public class Node {
     // 1. no need to re-parent, just check this needs to be added as a leading node
     if (reference() == node) {
       _restorePath(reference(), this);
-      _registerTasks();
+      _restoredTasks(this);
       return;
     }
     // 2. else re-parenting
@@ -652,8 +615,56 @@ public class Node {
     _reference = node;// reference() returns now the new value
     // 2b. after assigning new reference node
     _restorePath(reference(), this);
-    _registerTasks();
+    _restoredTasks(this);
     _modified();
+  }
+
+  /**
+   * Used by {@link #setReference(Node)}.
+   */
+  protected void _restoredTasks(Node node) {
+    List<Node> branch = Graph.branch(node);
+    for (Node nodeBranch : branch)
+      nodeBranch._registerTasks();
+  }
+
+  /**
+   * Used by {@link #_restoredTasks(Node)}.
+   */
+  protected void _registerTasks() {
+    if (!Graph.isTaskRegistered(_translationTask)) {
+      _translationTask = new InertialTask() {
+        @Override
+        public void action() {
+          translate(_x, _y, _z);
+        }
+      };
+    }
+    if (!Graph.isTaskRegistered(_rotationTask)) {
+      _rotationTask = new InertialTask() {
+        @Override
+        public void action() {
+          rotate(new Quaternion(_x, _y, _z));
+        }
+      };
+    }
+    if (!Graph.isTaskRegistered(_orbitTask)) {
+      _orbitTask = new InertialTask() {
+        @Override
+        public void action() {
+          orbit(new Quaternion(_x, _y, _z), _center);
+        }
+      };
+    }
+    if (!Graph.isTaskRegistered(_scalingTask)) {
+      _scalingTask = new InertialTask() {
+        @Override
+        public void action() {
+          float factor = 1 + Math.abs(_x) / _scalingFactor;
+          scale(_x >= 0 ? factor : 1 / factor);
+        }
+      };
+    }
   }
 
   /**
