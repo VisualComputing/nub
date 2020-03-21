@@ -356,31 +356,39 @@ public class Node {
    * Init tasks. Internal use.
    */
   protected void _initTasks() {
-    _translationTask = new InertialTask() {
-      @Override
-      public void action() {
-        translate(_x, _y, _z);
-      }
-    };
-    _rotationTask = new InertialTask() {
-      @Override
-      public void action() {
-        rotate(new Quaternion(_x, _y, _z));
-      }
-    };
-    _orbitTask = new InertialTask() {
-      @Override
-      public void action() {
-        orbit(new Quaternion(_x, _y, _z), _center);
-      }
-    };
-    _scalingTask = new InertialTask() {
-      @Override
-      public void action() {
-        float factor = 1 + Math.abs(_x) / _scalingFactor;
-        scale(_x >= 0 ? factor : 1 / factor);
-      }
-    };
+    if (!Graph.isTaskRegistered(_translationTask)) {
+      _translationTask = new InertialTask() {
+        @Override
+        public void action() {
+          translate(_x, _y, _z);
+        }
+      };
+    }
+    if (!Graph.isTaskRegistered(_rotationTask)) {
+      _rotationTask = new InertialTask() {
+        @Override
+        public void action() {
+          rotate(new Quaternion(_x, _y, _z));
+        }
+      };
+    }
+    if (!Graph.isTaskRegistered(_orbitTask)) {
+      _orbitTask = new InertialTask() {
+        @Override
+        public void action() {
+          orbit(new Quaternion(_x, _y, _z), _center);
+        }
+      };
+    }
+    if (!Graph.isTaskRegistered(_scalingTask)) {
+      _scalingTask = new InertialTask() {
+        @Override
+        public void action() {
+          float factor = 1 + Math.abs(_x) / _scalingFactor;
+          scale(_x >= 0 ? factor : 1 / factor);
+        }
+      };
+    }
   }
 
   /**
@@ -630,6 +638,7 @@ public class Node {
     // 1. no need to re-parent, just check this needs to be added as a leading node
     if (reference() == node) {
       _restorePath(reference(), this);
+      _initTasks();
       return;
     }
     // 2. else re-parenting
@@ -642,6 +651,7 @@ public class Node {
     _reference = node;// reference() returns now the new value
     // 2b. after assigning new reference node
     _restorePath(reference(), this);
+    _initTasks();
     _modified();
   }
 

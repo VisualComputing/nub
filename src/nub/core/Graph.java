@@ -758,6 +758,8 @@ public class Graph {
    * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #render()} algorithm.
    * <p>
+   * Note that all the node inertial tasks are unregistered from the {@link #timingHandler()}.
+   * <p>
    * To make all the nodes in the branch reachable again, call {@link Node#setReference(Node)}
    * on the pruned node.
    *
@@ -773,6 +775,10 @@ public class Graph {
       node._reference = null;
     } else
       _removeLeadingNode(node);
+    unregisterTask(node._translationTask);
+    unregisterTask(node._rotationTask);
+    unregisterTask(node._orbitTask);
+    unregisterTask(node._scalingTask);
     return true;
   }
 
