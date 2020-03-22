@@ -254,8 +254,16 @@ public class Node {
    * magnitude to {@code 0.15}.
    */
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
-    _children = new ArrayList<Node>();
+    this(constraint, translation, rotation, scaling);
     setReference(reference);
+  }
+
+  /**
+   * Internally used by both {@link #Node(Node, Constraint, Vector, Quaternion, float)}
+   * (attached nodes) and {@link #detach(Constraint, Vector, Quaternion, float)} (detached nodes).
+   */
+  protected Node(Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
+    _children = new ArrayList<Node>();
     setConstraint(constraint);
     setTranslation(translation);
     setRotation(rotation);
@@ -341,13 +349,20 @@ public class Node {
   }
 
   /**
-   * Returns a detached node (i.e., a pruned non-reachable node from the graph,
-   * see {@link Graph#prune(Node)}) for the given params. Mostly used internally.
+   * Same as {@code return detach(null, position, orientation, magnitude)}.
+   *
+   * @see #detach(Constraint, Vector, Quaternion, float)
    */
   public static Node detach(Vector position, Quaternion orientation, float magnitude) {
-    Node node = new Node(position, orientation, magnitude);
-    Graph.prune(node);
-    return node;
+    return detach(null, position, orientation, magnitude);
+  }
+
+  /**
+   * Returns a detached node (i.e., a pruned non-reachable node from the graph, see {@link Graph#prune(Node)})
+   * whose {@link #reference()} is {@code null} for the given params. Mostly used internally.
+   */
+  public static Node detach(Constraint constraint, Vector position, Quaternion orientation, float magnitude) {
+    return new Node(constraint, position, orientation, magnitude);
   }
 
   /**
