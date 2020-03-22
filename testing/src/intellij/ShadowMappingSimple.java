@@ -113,12 +113,15 @@ public class ShadowMappingSimple extends PApplet {
         } else {
           pg.fill(0, 255, 255);
           Scene.drawCone(pg, 150f, 60, 240);
+          pg.stroke(0, 255, 0);
+          scene.drawBullsEye(this);
+          pg.noStroke();
         }
         Scene.drawAxes(pg, 300);
         pg.pushStyle();
       }
     };
-    light.setPickingThreshold(0);
+    light.setPickingThreshold(0.6f);
     light.setMagnitude(400f / 2048f);
     // initShadowPass
     //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_frag.glsl");
