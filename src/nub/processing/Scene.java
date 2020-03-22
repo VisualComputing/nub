@@ -101,7 +101,7 @@ import java.util.Map;
  * The scene just provides additional methods to pick and interact with the mouse that wrap the
  * {@link PApplet#pmouseX} and {@link PApplet#pmouseY} Processing variables and thus simplify
  * the method signatures provide by the {@link Graph} counterparts. Refer to the method signatures
- * beginning with {@code mouse*}, such as: {@link #mouseTag(String)} and {@link #mouseTag()} for
+ * beginning with {@code mouse*}, such as: {@link #updateMouseTag(String)} and {@link #updateMouseTag()} for
  * node tagging; {@link #mouseTranslate(float)}, {@link #mouseTranslate(String, float)},
  * {@link #mouseTranslateTag(String, float)} and {@link #mouseTranslateEye(float)} for translation;
  * {@link #mouseSpin(float)}, {@link #mouseSpin(String, float)}, {@link #mouseSpinTag(String, float)}
@@ -962,26 +962,12 @@ public class Scene extends Graph implements PConstants {
     return jsonRot;
   }
 
-  @Override
-  protected void _drawFrontBuffer(Node node) {
-    PGraphics pGraphics = context();
-    pGraphics.pushStyle();
-    pGraphics.pushMatrix();
-    if (isTagged(node))
-      pGraphics.scale(1 + node.highlighting());
-    node.graphics(pGraphics);
-    pGraphics.popStyle();
-    pGraphics.popMatrix();
-  }
-
   /**
    * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and
    * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye} as
    * the light point-of-view. Same as {@code render(pGraphics, type, eye, zNear, zFar, true)}.
    *
-   * @see #render(Object)
    * @see #render(PGraphics, Type, Node, float, float, boolean)
-   * @see #render()
    */
   public static void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar) {
     render(pGraphics, type, eye, zNear, zFar, true);
@@ -993,7 +979,6 @@ public class Scene extends Graph implements PConstants {
    * as the light point-of-view. Same as
    * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}.
    *
-   * @see #render(Object)
    * @see #render(PGraphics, Type, Node, float, float)
    * @see #render()
    */
@@ -3097,28 +3082,6 @@ public class Scene extends Graph implements PConstants {
    */
   public Node updateMouseTag() {
     return super.updateTag(mouseX(), mouseY());
-  }
-
-  /**
-   * Same as {@code super.tag(tag, mouseX(), mouseY())}.
-   *
-   * @see Graph#tag(String, int, int)
-   * @see #mouseX()
-   * @see #mouseY()
-   */
-  public void mouseTag(String tag) {
-    super.tag(tag, mouseX(), mouseY());
-  }
-
-  /**
-   * Same as {@code super.tag(mouseX(), mouseY())}.
-   *
-   * @see #tag(int, int)
-   * @see #mouseX()
-   * @see #mouseY()
-   */
-  public void mouseTag() {
-    super.tag(mouseX(), mouseY());
   }
 
   /**

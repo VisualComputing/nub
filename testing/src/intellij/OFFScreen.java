@@ -55,7 +55,7 @@ public class OFFScreen extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.updateMouseTag();
   }
 
   public void mouseDragged() {

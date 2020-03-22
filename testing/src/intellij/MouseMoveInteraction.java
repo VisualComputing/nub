@@ -77,7 +77,7 @@ public class MouseMoveInteraction extends PApplet {
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
       //scene.track();
-      scene.mouseTag();
+      scene.updateMouseTag();
     else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         scene.focus();
