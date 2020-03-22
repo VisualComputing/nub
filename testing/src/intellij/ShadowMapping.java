@@ -107,9 +107,9 @@ public class ShadowMapping extends PApplet {
 
   public void mouseMoved(MouseEvent event) {
     if (event.isShiftDown())
-      scene.mouseTag("light");
+      scene.updateMouseTag("light");
     else
-      scene.mouseTag();
+      scene.updateMouseTag();
   }
 
   public void mouseDragged() {

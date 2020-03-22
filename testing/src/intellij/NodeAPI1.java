@@ -323,7 +323,7 @@ public class NodeAPI1 extends PApplet {
   @Override
   public void mouseMoved() {
     //scene.track();
-    scene.mouseTag();
+    scene.updateMouseTag();
   }
 
   @Override

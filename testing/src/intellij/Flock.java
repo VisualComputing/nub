@@ -117,7 +117,7 @@ public class Flock extends PApplet {
   // highlighting and 'third-person' interaction
   public void mouseMoved(MouseEvent event) {
     // 1. highlighting
-    scene.mouseTag("mouseMoved");
+    scene.updateMouseTag("mouseMoved");
     // 2. third-person interaction
     if (scene.eye().reference() != null)
       // press shift to move the mouse without looking around

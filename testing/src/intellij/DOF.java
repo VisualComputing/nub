@@ -130,7 +130,7 @@ public class DOF extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.updateMouseTag();
   }
 
   @Override

@@ -116,7 +116,7 @@ public class CustomNodeInteraction extends PApplet {
     if (event.getCount() == 1)
       scene.interactTag("key");
     if (event.getCount() == 2)
-      scene.mouseTag("key");
+      scene.updateMouseTag("key");
   }
 
   public static void main(String[] args) {

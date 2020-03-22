@@ -183,7 +183,7 @@ public class ShadowMappingSimple extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.updateMouseTag();
     //scene.track();
   }
 

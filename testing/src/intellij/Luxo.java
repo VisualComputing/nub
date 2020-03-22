@@ -54,7 +54,7 @@ public class Luxo extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.updateMouseTag();
   }
 
   public void mouseDragged() {

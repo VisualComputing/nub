@@ -37,7 +37,7 @@ import java.util.List;
  * for a 2d graph.
  * <h1>2. Scene-graph handling</h1>
  * A graph forms a tree of {@link Node}s whose visual representations may be
- * {@link #render()}. Note that {@link #render()} should be called within your main-event loop.
+ * {@link #render()}.
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
@@ -60,12 +60,9 @@ import java.util.List;
  * Picking a node to interact with it is a two-step process:
  * <ol>
  * <li>Tag the node using an arbitrary name (which may be {@code null}) either with
- * {@link #tag(String, Node)}) or ray-casting: {@link #updateTag(String, int, int, Node[])},
- * {@link #updateTag(String, int, int)} or {@link #tag(String, int, int)}. While
- * {@link #updateTag(String, int, int, Node[])} and {@link #updateTag(String, int, int)} update the
- * tagged node synchronously (i.e., they return the tagged node immediately),
- * {@link #tag(String, int, int)} updates it asynchronously (i.e., it optimally updates the tagged
- * node during the next call to the {@link #render()} algorithm); and, </li>
+ * {@link #tag(String, Node)}) or ray-casting: {@link #updateTag(String, int, int, Node[])}
+ * or {@link #updateTag(String, int, int)} which update the
+ * tagged node synchronously (i.e., they return the tagged node immediately).; and, </li>
  * <li>Interact with your tagged nodes by calling any of the following methods: {@link #alignTag(String)},
  * {@link #focusTag(String)}, {@link #translateTag(String, float, float, float, float)},
  * {@link #rotateTag(String, float, float, float, float)}, {@link #scaleTag(String, float, float)},
@@ -117,8 +114,8 @@ import java.util.List;
  * <p>
  * To apply the transformation defined by a node call {@link #applyTransformation(Node)}
  * (see also {@link #applyWorldTransformation(Node)}). Note that the node transformations are
- * applied automatically by the {@link #render()} (together with all its variants) algorithm
- * (in this case you don't need to call them).
+ * applied automatically by the {@link #render(Object, Matrix, Matrix)} (together with all its variants)
+ * algorithm (in this case you don't need to call them).
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
  * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
@@ -181,7 +178,6 @@ public class Graph {
   public static boolean _seeded;
   protected boolean _seededGraph;
   protected HashMap<String, Node> _tags;
-  protected ArrayList<Ray> _rays;
 
   // 4. Graph
   protected static List<Node> _seeds = new ArrayList<Node>();
@@ -274,7 +270,6 @@ public class Graph {
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
-    _rays = new ArrayList<Ray>();
     cacheProjectionViewInverse(false);
     setFrustum(new Vector(), 100);
     setEye(eye == null ? new Node() : eye);
@@ -642,7 +637,8 @@ public class Graph {
   /**
    * Returns the top-level nodes (those which reference is null).
    * <p>
-   * All leading nodes are also reachable by the {@link #render()} algorithm for which they are the seeds.
+   * All leading nodes are also reachable by the {@link #render(Object, Matrix, Matrix)}
+   * algorithm for which they are the seeds.
    *
    * @see #nodes()
    * @see #isReachable(Node)
@@ -705,7 +701,7 @@ public class Graph {
    * A call to {@link #isReachable(Node)} on all {@code node} descendants
    * (including {@code node}) will return false, after issuing this method. It also means
    * that all nodes in the {@code node} branch will become unreachable by the
-   * {@link #render()} algorithm.
+   * {@link #render(Object, Matrix, Matrix)} algorithm.
    * <p>
    * Note that all the node inertial tasks are unregistered from the {@link #timingHandler()}.
    * <p>
@@ -742,13 +738,14 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if the node is reachable by the {@link #render()}
+   * Returns {@code true} if the node is reachable by the {@link #render(Object, Matrix, Matrix)}
    * algorithm and {@code false} otherwise.
    * <p>
    * Nodes are made unreachable with {@link #prune(Node)} and reachable
    * again with {@link Node#setReference(Node)}.
    *
    * @see #render()
+   * @see #render(Object, Matrix, Matrix)
    * @see #nodes()
    */
   public static boolean isReachable(Node node) {
@@ -761,7 +758,7 @@ public class Graph {
   }
 
   /**
-   * Returns a list of all the nodes that are reachable by the {@link #render()}
+   * Returns a list of all the nodes that are reachable by the {@link #render(Object, Matrix, Matrix)}
    * algorithm.
    * <p>
    * The method render the hierarchy to collect. Node collections should thus be kept at user space
@@ -2285,6 +2282,7 @@ public class Graph {
    * the geometry transformations on all nodes.
    *
    * @see #render()
+   * @see #render(Object, Matrix, Matrix)
    * @see #applyTransformation(Object, Node)
    * @see #applyWorldTransformation(Node)
    * @see #applyWorldTransformation(Object, Node)
@@ -2297,10 +2295,11 @@ public class Graph {
    * Apply the local transformation defined by the {@code node} on {@code context}.
    * Needed by {@link #applyWorldTransformation(Object, Node)}.
    * <p>
-   * Note that {@link #render(Object)} traverses the scene-graph hierarchy and automatically
+   * Note that {@link #render()} traverses the scene-graph hierarchy and automatically
    * applies all the node geometry transformations on a given context.
    *
-   * @see #render(Object)
+   * @see #render()
+   * @see #render(Object, Matrix, Matrix)
    * @see #applyTransformation(Node)
    * @see #applyWorldTransformation(Node)
    * @see #applyWorldTransformation(Object, Node)
@@ -2424,7 +2423,6 @@ public class Graph {
    *
    * @see #updateTag(String, int, int)
    * @see #updateTag(String, int, int, List)
-   * @see #render()
    * @see #node(String)
    * @see #removeTag(String)
    * @see #tracks(Node, int, int)
@@ -2433,8 +2431,6 @@ public class Graph {
    * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #tag(String, int, int)
-   * @see #tag(String, int, int)
    */
   public Node updateTag(String tag, int pixelX, int pixelY, Node[] nodeArray) {
     removeTag(tag);
@@ -2485,7 +2481,6 @@ public class Graph {
    * the ray. Not that the {@link #eye()} is never tagged.
    *
    * @see #updateTag(String, int, int, Node[])
-   * @see #render()
    * @see #node(String)
    * @see #removeTag(String)
    * @see #tracks(Node, int, int)
@@ -2494,7 +2489,6 @@ public class Graph {
    * @see Node#enableTagging(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #tag(String, int, int)
    */
   public Node updateTag(String tag, int pixelX, int pixelY) {
     removeTag(tag);
@@ -2547,41 +2541,6 @@ public class Graph {
         (float) Math.sqrt((float) Math.pow((projection._vector[0] - pixelX), 2.0) + (float) Math.pow((projection._vector[1] - pixelY), 2.0)) < -threshold;
   }
 
-  /**
-   * Same as {@code tag(null, pixelX, pixelY)}.
-   *
-   * @see #tag(String, int, int)
-   */
-  public void tag(int pixelX, int pixelY) {
-    tag(null, pixelX, pixelY);
-  }
-
-  /**
-   * Same as {@link #updateTag(String, int, int)} but doesn't return immediately the tagged node.
-   * The algorithm schedules an updated of the node to be tagged for the next traversal and hence
-   * should be always be used in conjunction with {@link #render()}.
-   * <p>
-   * The tagged node (see {@link #node(String)}) would be available after the next call to
-   * {@link #render()}. It may be {@code null} if no node is intersected by the ray. Not that
-   * the {@link #eye()} is never tagged.
-   * <p>
-   * This method is optimal since it tags the nodes at traversal time. Prefer this method over
-   * {@link #updateTag(String, int, int)} when dealing with several tags.
-   *
-   * @see #render()
-   * @see #node(String)
-   * @see #removeTag(String)
-   * @see #tracks(Node, int, int)
-   * @see #tag(String, Node)
-   * @see #hasTag(String, Node)
-   * @see Node#enableTagging(boolean)
-   * @see Node#pickingThreshold()
-   * @see Node#setPickingThreshold(float)
-   * @see #tag(int, int)
-   */
-  public void tag(String tag, int pixelX, int pixelY) {
-    _rays.add(new Ray(tag, pixelX, pixelY));
-  }
 
   // Off-screen
 
@@ -2765,9 +2724,8 @@ public class Graph {
    * Renders the node tree onto the {@link #context()} from the {@link #eye()} viewpoint.
    * Calls {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
    *
-   * @see #render(Object)
-   * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(Object, Matrix, Matrix)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
@@ -2775,35 +2733,14 @@ public class Graph {
    * @see Node#graphics(processing.core.PGraphics)
    */
   public void render() {
-    for (Node node : _leadingNodes())
-      _render(node);
-    _rays.clear();
-  }
-
-  /**
-   * Used by the {@link #render()} algorithm.
-   */
-  protected void _render(Node node) {
-    _matrixHandler.pushMatrix();
-    _matrixHandler.applyTransformation(node);
-    node.visit();
-    if (!node.isCulled()) {
-      if (node._bypass != TimingHandler.frameCount) {
-        _trackFrontBuffer(node);
-        _drawFrontBuffer(node);
-      }
-      for (Node child : node.children())
-        _render(child);
-    }
-    _matrixHandler.popMatrix();
+    render(context(), type(), eye(), width(), height(), zNear(), zFar(), isLeftHanded());
   }
 
   /**
    * Renders the node tree onto context from the {@code eye} viewpoint with the given frustum parameters.
    *
-   * @see #render()
-   * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
+   * @see #render()
    * @see Node#graphics(processing.core.PGraphics)
    */
   public static void render(Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
@@ -2826,18 +2763,14 @@ public class Graph {
    * @see Node#graphics(processing.core.PGraphics)
    */
   public void render(Object context) {
-    if (context == _fb && !_rays.isEmpty())
-      render();
-    else
-      render(context, projection(), view());
+    render(context, projection(), view());
   }
 
   /**
    * Renders the node tree onto context with the given {@code projection} and {@code view} matrices.
    *
-   * @see #render()
-   * @see #render(Object)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
+   * @see #render()
    * @see Node#graphics(processing.core.PGraphics)
    */
   public static void render(Object context, Matrix projection, Matrix view) {
@@ -2856,6 +2789,7 @@ public class Graph {
   /**
    * Used by the {@link #_render(MatrixHandler, Object, Matrix, Matrix)} algorithm.
    */
+  // TODO call visit!
   protected static void _render(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushMatrix();
     matrixHandler.applyTransformation(node);
@@ -2879,32 +2813,6 @@ public class Graph {
   }
 
   /**
-   * Renders the node onto the front buffer. Used by the rendering algorithms.
-   * <p>
-   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
-   */
-  protected void _drawFrontBuffer(Node node) {
-  }
-
-  /**
-   * Internally used by {@link #_render(Node)}.
-   */
-  protected void _trackFrontBuffer(Node node) {
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingThreshold() != 0) {
-      Vector projection = screenLocation(node.position());
-      Iterator<Ray> it = _rays.iterator();
-      while (it.hasNext()) {
-        Ray ray = it.next();
-        removeTag(ray._tag);
-        if (_tracks(node, ray._pixelX, ray._pixelY, projection)) {
-          tag(ray._tag, node);
-          it.remove();
-        }
-      }
-    }
-  }
-
-  /**
    * Same as {@code tag(null, node)}.
    *
    * @see #tag(String, Node)
@@ -2916,8 +2824,7 @@ public class Graph {
   /**
    * Tags the {@code node} (with {@code tag} which may be {@code null})
    * (see {@link #node(String)}). Tagging the {@link #eye()} is not allowed.
-   * Call {@link #updateTag(String, int, int)} or
-   * {@link #tag(String, int, int)} to tag the node with ray casting.
+   * Call {@link #updateTag(String, int, int)} to tag the node with ray casting.
    *
    * @see #tracks(Node, int, int)
    * @see #updateTag(String, int, int)

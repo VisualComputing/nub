@@ -42,7 +42,7 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.updateMouseTag();
     //scene.updateMouseTag();
   }
 

@@ -76,7 +76,7 @@ public class DebugCam extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.updateMouseTag();
   }
 
   public void mouseDragged(MouseEvent event) {

@@ -93,7 +93,7 @@ public class MiniMap extends PApplet {
 
   public void mouseMoved() {
     if (!interactiveEye || focus == scene)
-      focus.mouseTag();
+      focus.updateMouseTag();
   }
 
   public void mouseDragged() {
