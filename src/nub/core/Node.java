@@ -405,7 +405,7 @@ public class Node {
 
   /**
    * Returns the unique sequential node id assigned at instantiation time.
-   * Used by {@link #colorID()} and {@link Graph#_drawBackBuffer(Node)}.
+   * Used by {@link #colorID()} and a back-buffer.
    */
   public int id() {
     return _id;
@@ -786,8 +786,8 @@ public class Node {
    * Picking a node is done with ray casting against a screen-space shape defined according
    * to a {@link #pickingThreshold()} as follows:
    * <ul>
-   * <li>The projected pixels of the node visual representation (see {@link #graphics(processing.core.PGraphics)}
-   * and {@link #setShape(processing.core.PShape)}). Set it with {@code threshold = 0}.</li>
+   * <li>The projected pixels of the node visual representation (see
+   * {@link #graphics(processing.core.PGraphics)}. Set it with {@code threshold = 0}.</li>
    * <li>A node bounding box whose length is defined as percentage of the graph diameter
    * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
    * <li>A squared 'bullseye' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
