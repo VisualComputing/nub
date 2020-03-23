@@ -2937,11 +2937,6 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Object context) {
-    /*
-    if (context == _fb && !_rays.isEmpty())
-      System.out.println("Warning called render() instead of render(context) for precise picking precision to work");
-    render(context, projection(), view());
-    // */
     if (context == _fb && !_rays.isEmpty())
       render();
     else
@@ -2976,6 +2971,7 @@ public class Graph {
   protected static void _render(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushMatrix();
     matrixHandler.applyTransformation(node);
+    node.visit();
     if (!node.isCulled()) {
       if (node._bypass != TimingHandler.frameCount)
         nub.processing.Scene.draw(context, node);
