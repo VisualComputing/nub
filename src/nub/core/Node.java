@@ -607,11 +607,23 @@ public class Node {
    */
   public void setReference(Node node) {
     if (node == this) {
-      System.out.println("A Node cannot be a reference of itself.");
+      System.out.println("A node cannot be a reference of itself.");
       return;
     }
     if (_isSuccessor(node)) {
-      System.out.println("A Node descendant cannot be set as its reference.");
+      System.out.println("A node descendant cannot be set as its reference.");
+      return;
+    }
+    // 0. reference is detached
+    if (node != null && !Graph.isReachable(node)) {
+      if (Graph.isReachable(this))
+        Graph.prune(this);
+      if (reference() != node) {
+        if (reference() != null)
+          reference()._removeChild(this);
+        _reference = node;// reference() returns now the new value
+        reference()._addChild(this);
+      }
       return;
     }
     // 1. no need to re-parent, just check this needs to be added as a leading node

@@ -768,21 +768,28 @@ public class Graph {
    * @see Node#setReference(Node)
    */
   public static boolean prune(Node node) {
-    if (!isReachable(node))
-      return false;
-    List<Node> branch = branch(node);
-    for (Node nodeBranch : branch) {
-      unregisterTask(nodeBranch._translationTask);
-      unregisterTask(nodeBranch._rotationTask);
-      unregisterTask(nodeBranch._orbitTask);
-      unregisterTask(nodeBranch._scalingTask);
+    if (isReachable(node)) {
+      List<Node> branch = branch(node);
+      for (Node nodeBranch : branch) {
+        unregisterTask(nodeBranch._translationTask);
+        unregisterTask(nodeBranch._rotationTask);
+        unregisterTask(nodeBranch._orbitTask);
+        unregisterTask(nodeBranch._scalingTask);
+      }
+      if (node.reference() != null) {
+        node.reference()._removeChild(node);
+        node._reference = null;
+      } else
+        _removeLeadingNode(node);
+      return true;
+    } else {
+      if (node.reference() != null) {
+        node.reference()._removeChild(node);
+        node._reference = null;
+        return true;
+      }
     }
-    if (node.reference() != null) {
-      node.reference()._removeChild(node);
-      node._reference = null;
-    } else
-      _removeLeadingNode(node);
-    return true;
+    return false;
   }
 
   /**
