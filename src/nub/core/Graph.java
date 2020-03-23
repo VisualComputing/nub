@@ -2789,7 +2789,6 @@ public class Graph {
   /**
    * Used by the {@link #_render(MatrixHandler, Object, Matrix, Matrix)} algorithm.
    */
-  // TODO call visit!
   protected static void _render(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushMatrix();
     matrixHandler.applyTransformation(node);
