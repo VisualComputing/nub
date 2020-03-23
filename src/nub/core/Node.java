@@ -263,7 +263,6 @@ public class Node {
    * (attached nodes) and {@link #detach(Constraint, Vector, Quaternion, float)} (detached nodes).
    */
   protected Node(Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
-    _children = new ArrayList<Node>();
     setConstraint(constraint);
     setTranslation(translation);
     setRotation(rotation);
@@ -277,6 +276,7 @@ public class Node {
     _tagging = true;
     _highlight = 0.15f;
     _culled = false;
+    _children = new ArrayList<Node>();
   }
 
   // From here only Java constructors
