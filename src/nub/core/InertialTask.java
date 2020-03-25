@@ -18,20 +18,20 @@ import nub.primitives.Vector;
  * <a href="https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java">DampedAction</a.
  * in turn based on a "damned clever and aesthetic idea by David Bollinger".
  */
-// JS should just go:
-// class InertialTask extends Task {
+// JS should go:
+//class InertialTask extends Task {
 abstract class InertialTask extends nub.processing.TimingTask {
   // orbit center:
   protected Vector _center = new Vector();
   protected float _inertia;
   protected float _x, _y, _z;
 
-  /**
-   * Just register the timing task at the graph timing handler.
-   */
-  InertialTask(Graph graph) {
-    super(graph.timingHandler());
+  // JS should go:
+  /*
+  InertialTask() {
+    super(Graph.timingHandler());
   }
+  */
 
   /**
    * Sets inertia in [0..1].

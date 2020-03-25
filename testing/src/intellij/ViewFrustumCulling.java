@@ -1,6 +1,6 @@
 package intellij;
 
-import nub.core.Graph;
+import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
@@ -9,75 +9,70 @@ import processing.event.MouseEvent;
 
 public class ViewFrustumCulling extends PApplet {
   OctreeNode root;
-  static Scene scene1, scene2, focus;
-  PGraphics canvas1, canvas2;
+  Scene mainScene, secondaryScene, focus;
+  boolean bypass;
 
-  //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
-  String renderer = P3D;
-  int w = 1200;
+  int w = 1000;
   int h = 800;
-  static float a = 100;
-  static float b = 70;
-  static float c = 130;
-  static final int levels = 4;
+  //octree
+  float a = 220, b = 100, c = 280;
+  int levels = 4;
 
   public void settings() {
-    size(w, h, renderer);
+    size(w, h, P3D);
   }
 
-  @Override
   public void setup() {
-    canvas1 = createGraphics(w, h / 2, P3D);
-    scene1 = new Scene(this, canvas1);
-    scene1.setType(Graph.Type.ORTHOGRAPHIC);
-    scene1.enableBoundaryEquations();
-    //scene1.setRadius(150);
-    scene1.fit(1);
+    // main scene
+    mainScene = new Scene(this, P3D, w, h / 2);
+    mainScene.togglePerspective();
+    mainScene.enableBoundaryEquations();
+    mainScene.fit(1);
 
     // declare and build the octree hierarchy
-    root = new OctreeNode(scene1);
-    buildBoxHierarchy(root);
+    root = new OctreeNode();
+    buildOctree(root);
 
-    canvas2 = createGraphics(w, h / 2, P3D);
-    // Note that we pass the upper left corner coordinates where the scene
-    // is to be drawn (see drawing code below) to its constructor.
-    scene2 = new Scene(this, canvas2, 0, h / 2);
-    scene2.setType(Graph.Type.ORTHOGRAPHIC);
-    scene2.setRadius(200);
-    scene2.fit();
+    // secondary scene
+    secondaryScene = new Scene(this, P3D, w, h / 2, 0, h / 2);
+    secondaryScene.togglePerspective();
+    secondaryScene.setRadius(200);
+    secondaryScene.fit();
   }
 
-  public void buildBoxHierarchy(OctreeNode parent) {
+  public void buildOctree(OctreeNode parent) {
     if (parent.level() < levels)
       for (int i = 0; i < 8; ++i)
-        buildBoxHierarchy(new OctreeNode(parent, new Vector((i & 4) == 0 ? a : -a, (i & 2) == 0 ? b : -b, (i & 1) == 0 ? c : -c)));
+        buildOctree(new OctreeNode(parent, new Vector((i & 4) == 0 ? a : -a, (i & 2) == 0 ? b : -b, (i & 1) == 0 ? c : -c)));
   }
 
-  @Override
   public void draw() {
     handleMouse();
     background(255);
-    scene1.beginDraw();
-    canvas1.background(255);
-    scene1.drawAxes();
+    mainScene.beginDraw();
+    mainScene.context().background(255);
+    // culling condition should be retested every frame
     root.cull(false);
-    scene1.render();
-    scene1.endDraw();
-    scene1.display();
+    bypass = false;
+    mainScene.render();
+    mainScene.endDraw();
+    mainScene.display();
+    bypass = true;
+    secondaryScene.beginDraw();
+    secondaryScene.context().background(185);
+    secondaryScene.render();
+    secondaryScene.context().pushStyle();
+    secondaryScene.context().strokeWeight(2);
+    secondaryScene.context().stroke(255, 0, 255);
+    secondaryScene.context().fill(255, 0, 255, 160);
+    secondaryScene.drawFrustum(mainScene);
+    secondaryScene.context().popStyle();
+    secondaryScene.endDraw();
+    secondaryScene.display();
+  }
 
-    scene1.shift(scene2);
-    scene2.beginDraw();
-    canvas2.background(255);
-    scene2.render();
-    scene2.context().pushStyle();
-    scene2.context().strokeWeight(2);
-    scene2.context().stroke(255, 0, 255);
-    scene2.context().fill(255, 0, 255, 160);
-    scene2.drawFrustum(scene1);
-    scene2.context().popStyle();
-    scene2.endDraw();
-    scene2.display();
-    scene2.shift(scene1);
+  void handleMouse() {
+    focus = mouseY < h / 2 ? mainScene : secondaryScene;
   }
 
   public void mouseDragged() {
@@ -103,25 +98,64 @@ public class ViewFrustumCulling extends PApplet {
 
   public void keyPressed() {
     if (key == ' ')
-      if (focus.type() == Graph.Type.PERSPECTIVE)
-        focus.setType(Graph.Type.ORTHOGRAPHIC);
-      else
-        focus.setType(Graph.Type.PERSPECTIVE);
+      focus.togglePerspective();
     if (key == 'f') {
-      scene1.flip();
-      scene2.flip();
-    }
-    if (key == '1')
-      scene1.fitFOV();
-    if (key == '2')
-      scene2.fitFOV();
-    if (key == 'p') {
-      println(Vector.distance(scene1.eye().position(), scene1.anchor()));
+      mainScene.flip();
+      secondaryScene.flip();
     }
   }
 
-  void handleMouse() {
-    focus = mouseY < h / 2 ? scene1 : scene2;
+  class OctreeNode extends Node {
+    OctreeNode() {
+      disableTagging();
+    }
+
+    OctreeNode(OctreeNode node, Vector vector) {
+      super(node);
+      scale(0.5f);
+      translate(Vector.multiply(vector, scaling() / 2));
+      disableTagging();
+    }
+
+    float level() {
+      return 1 - log(magnitude()) / log(2);
+    }
+
+    @Override
+    public void graphics(PGraphics pg) {
+      float level = level();
+      pg.stroke(color(0.3f * level * 255, 0.2f * 255, (1 - 0.3f * level) * 255));
+      pg.strokeWeight(pow(2, levels - 1));
+      pg.noFill();
+      pg.box(a, b, c);
+    }
+
+    // The visit() method is called just before the graphics(PGraphics) method
+    @Override
+    public void visit() {
+      // cull only against main scene
+      if (bypass)
+        return;
+      switch (mainScene.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
+          worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
+        case VISIBLE:
+          for (Node node : children())
+            node.cull();
+          break;
+        case SEMIVISIBLE:
+          if (!children().isEmpty()) {
+            // don't render the node...
+            bypass();
+            // ... but don't cull its children either
+            for (Node node : children())
+              node.cull(false);
+          }
+          break;
+        case INVISIBLE:
+          cull();
+          break;
+      }
+    }
   }
 
   public static void main(String args[]) {

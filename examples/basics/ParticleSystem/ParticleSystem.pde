@@ -32,8 +32,10 @@ void setup() {
 
 void draw() {
   background(0);
+  stroke(255, 0, 0);
+  scene.drawGrid();
   pushStyle();
-  strokeWeight(3); // Default
+  strokeWeight(3);
   beginShape(POINTS);
   for (Particle particle : particles)
     particle.draw();

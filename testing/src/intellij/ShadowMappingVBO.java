@@ -46,12 +46,12 @@ public class ShadowMappingVBO extends PApplet {
     shapes = new Node[50];
     for (int i = 0; i < shapes.length; i++) {
       tint(random(0, 255), random(0, 255), random(0, 255), random(150, 255));
-      shapes[i] = new Node(scene, loadShape("/home/pierre/IdeaProjects/nub/testing/data/interaction/rocket.obj"));
+      shapes[i] = new Node(loadShape("/home/pierre/IdeaProjects/nub/testing/data/interaction/rocket.obj"));
       scene.randomize(shapes[i]);
       shapes[i].setPickingThreshold(0);
       shapes[i].scale(0.2f);
     }
-    light = new Node(scene) {
+    light = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();
@@ -77,7 +77,7 @@ public class ShadowMappingVBO extends PApplet {
     //PShape box = createShape(RECT, 0, 0, 360, 360);
     box.setFill(0xff222222);
     box.setStroke(false);
-    floor = new Node(scene);
+    floor = new Node();
     floor.setShape(box);
 
     // initShadowPass
@@ -105,7 +105,7 @@ public class ShadowMappingVBO extends PApplet {
     // 2. Render the scene from the scene.eye() node
     background(0xff222222);
     if (!debug) {
-      Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+      Matrix projectionView = scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
       //Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
       Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, scene.eye().viewInverse()));

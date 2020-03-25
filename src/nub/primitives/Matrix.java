@@ -829,13 +829,13 @@ public class Matrix {
   }
 
   /**
-   * Print this matrix contents onto the console.
+   * Return this matrix components as a String.
    */
-  public void print() {
-    System.out.println(
-        _matrix[0] + " " + _matrix[4] + " " + _matrix[8] + " " + _matrix[12] + "\n" + _matrix[1] + " " + _matrix[5] + " " + _matrix[9] + " " + _matrix[13]
-            + "\n" + _matrix[2] + " " + _matrix[6] + " " + _matrix[10] + " " + _matrix[14] + "\n" + _matrix[3] + " " + _matrix[7] + " " + _matrix[11]
-            + " " + _matrix[15] + "\n");
+  @Override
+  public String toString() {
+    return new String(_matrix[0] + " " + _matrix[4] + " " + _matrix[8] + " " + _matrix[12] + "\n" + _matrix[1] + " " + _matrix[5] + " " + _matrix[9] + " " + _matrix[13]
+        + "\n" + _matrix[2] + " " + _matrix[6] + " " + _matrix[10] + " " + _matrix[14] + "\n" + _matrix[3] + " " + _matrix[7] + " " + _matrix[11]
+        + " " + _matrix[15]);
   }
 
   /**

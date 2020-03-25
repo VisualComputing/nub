@@ -31,7 +31,7 @@ public class ShadowMap extends PApplet {
     scene.fit(1);
     shapes = new Node[20];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Node(scene) {
+      shapes[i] = new Node() {
         @Override
         public void graphics(PGraphics pg) {
           pg.pushStyle();
@@ -53,7 +53,7 @@ public class ShadowMap extends PApplet {
         }
       };
       shapes[i].setPickingThreshold(0);
-      shapes[i].randomize();
+      scene.randomize(shapes[i]);
       // set picking precision to the pixels of the node projection
       shapes[i].setPickingThreshold(0);
       shapes[i].setHighlighting(0);

@@ -19,6 +19,7 @@ public class PassiveTransformations extends PApplet {
 
   public void setup() {
     graph = new Graph(g, width, height);
+    // TODO pending
     graph.setMatrixHandler(new MatrixHandler() {
       @Override
       protected void _setUniforms() {
@@ -31,7 +32,7 @@ public class PassiveTransformations extends PApplet {
     graph.fit(1);
     nodes = new Node[50];
     for (int i = 0; i < nodes.length; i++) {
-      nodes[i] = new Node(graph) {
+      nodes[i] = new Node() {
         @Override
         public void visit() {
           pushStyle();
@@ -40,7 +41,7 @@ public class PassiveTransformations extends PApplet {
           popStyle();
         }
       };
-      nodes[i].randomize();
+      graph.randomize(nodes[i]);
       nodes[i].setPickingThreshold(20);
     }
     //discard Processing matrices

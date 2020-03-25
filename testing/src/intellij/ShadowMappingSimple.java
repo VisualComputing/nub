@@ -40,7 +40,7 @@ public class ShadowMappingSimple extends PApplet {
     scene.togglePerspective();
     scene.setRadius(max(w, h) / 3);
     scene.fit(1);
-    landscape1 = new Node(scene) {
+    landscape1 = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         if (!isCulled()) {
@@ -57,7 +57,7 @@ public class ShadowMappingSimple extends PApplet {
       }
     };
     landscape1.setPickingThreshold(0);
-    landscape2 = new Node(scene) {
+    landscape2 = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         if (!isCulled()) {
@@ -76,7 +76,7 @@ public class ShadowMappingSimple extends PApplet {
     };
     landscape2.setPickingThreshold(0);
     landscape2.cull();
-    landscape3 = new Node(scene) {
+    landscape3 = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         if (!isCulled()) {
@@ -95,7 +95,7 @@ public class ShadowMappingSimple extends PApplet {
     };
     landscape3.cull();
     landscape3.setPickingThreshold(0);
-    floor = new Node(scene) {
+    floor = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         pg.fill(0xff222222);
@@ -103,7 +103,7 @@ public class ShadowMappingSimple extends PApplet {
       }
     };
     floor.disableTagging();
-    light = new Node(scene) {
+    light = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();
@@ -153,7 +153,7 @@ public class ShadowMappingSimple extends PApplet {
     // 3. Render the scene from the scene.eye() node
     background(0);
     if (!debug) {
-      Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+      Matrix projectionView = scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
       //Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
       Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, scene.eye().viewInverse()));

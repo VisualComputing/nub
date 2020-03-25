@@ -35,7 +35,7 @@ import java.util.ListIterator;
  * {@code
  * void init() {
  *   Graph graph = new Graph(1200, 800);
- *   Interpolator interpolator = new Interpolator(graph);
+ *   Interpolator interpolator = new Interpolator();
  *   for (int i = 0; i < 10; i++)
  *     interpolator.addKeyFrame(Node.random(graph));
  *   interpolator.start();
@@ -139,9 +139,6 @@ public class Interpolator {
   protected boolean _splineCacheIsValid;
   protected Vector _vector1, _vector2;
 
-  // Graph
-  protected Graph _graph;
-
   /**
    * Convenience constructor that simply calls {@code this(graph, new Node())}.
    * <p>
@@ -149,21 +146,18 @@ public class Interpolator {
    * interpolator.
    *
    * @see #Interpolator(Node)
-   * @see #Interpolator(Graph, Node)
    */
-  public Interpolator(Graph graph) {
-    this(graph, new Node());
+  public Interpolator() {
+    this(new Node());
   }
 
   /**
-   * Same as {@code this(node.graph(), node)}. Note that {@code node} should be attached to
-   * a {@link Graph}.
+   * Convenience constructor that simply calls {@code this(graph.eye())}.
    *
-   * @see #Interpolator(Graph)
-   * @see #Interpolator(Graph, Node)
+   * @see #Interpolator(Node)
    */
-  public Interpolator(Node node) {
-    this(node.graph(), node);
+  public Interpolator(Graph graph) {
+    this(graph.eye());
   }
 
   /**
@@ -173,18 +167,15 @@ public class Interpolator {
    * <p>
    * {@link #time()}, {@link #speed()} are set to their default values.
    */
-  public Interpolator(Graph graph, Node node) {
-    if (graph == null)
-      throw new RuntimeException("Warning: no interpolator instantiated");
-    _graph = graph;
+  public Interpolator(Node node) {
     _list = new ArrayList<KeyFrame>();
     _path = new ArrayList<Node>();
     setNode(node);
     _t = 0.0f;
     _speed = 1.0f;
     //JS should just go:
-    //_task = new Task(_graph.timingHandler()) {
-    _task = new nub.processing.TimingTask(_graph.timingHandler()) {
+    //_task = new Task(Graph.timingHandler()) {
+    _task = new nub.processing.TimingTask() {
       @Override
       public void execute() {
         Interpolator.this._execute();
@@ -200,7 +191,6 @@ public class Interpolator {
   }
 
   protected Interpolator(Interpolator other) {
-    this._graph = other._graph;
     this._list = new ArrayList<KeyFrame>();
     for (KeyFrame element : other._list) {
       KeyFrame keyFrame = element.get();
@@ -211,8 +201,8 @@ public class Interpolator {
     this._t = other._t;
     this._speed = other._speed;
     //JS should just go:
-    //_task = new Task(this._graph.timingHandler()) {
-    this._task = new nub.processing.TimingTask(this._graph.timingHandler()) {
+    //this._task = new Task(Graph.timingHandler()) {
+    this._task = new nub.processing.TimingTask() {
       @Override
       public void execute() {
         Interpolator.this._execute();
@@ -237,13 +227,6 @@ public class Interpolator {
   }
 
   /**
-   * Returns the graph this interpolator belongs to.
-   */
-  public Graph graph() {
-    return _graph;
-  }
-
-  /**
    * Internal use. Called by {@link #_checkValidity()}.
    */
   protected long _lastUpdate() {
@@ -251,15 +234,11 @@ public class Interpolator {
   }
 
   /**
-   * Sets the interpolator {@link #node()}. If node {@link Node#isDetached()},
-   * the node graph ({@link Node#graph()}) and {@link #graph()} should match.
+   * Sets the interpolator {@link #node()}.
    */
   public void setNode(Node node) {
     if (node == _node)
       return;
-    if (node.graph() != null)
-      if (graph() != node.graph())
-        throw new RuntimeException("Node and Interpolator graphs should match");
     _node = node;
   }
 
@@ -556,35 +535,39 @@ public class Interpolator {
   }
 
   /**
-   * Appends the current {@link #graph()} {@link Graph#eye()}
+   * Appends a copy of the current {@code #graph} {@link Graph#eye()}
    * one second after the previously added keyframe.
    *
-   * @see #addKeyFrame(float)
+   * @see #addKeyFrame(Graph, float)
    * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
-   * @see #graph()
    * @see Node#get()
    * @see Graph#eye()
    */
-  public void addKeyFrame() {
-    Node node = graph().eye().get();
+  public void addKeyFrame(Graph graph) {
+    // Warning: if get copies the node shape, go like this:
+    // Node node = new Node();
+    // node.set(graph.eye());
+    Node node = graph.eye().get();
     node.setPickingThreshold(20);
     addKeyFrame(node);
   }
 
   /**
-   * Appends the current {@link #graph()} {@link Graph#eye()}
+   * Appends a copy of the current {@code graph} {@link Graph#eye()}
    * {@code time} seconds after the previously added keyframe.
    *
-   * @see #addKeyFrame()
+   * @see #addKeyFrame(Graph)
    * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
-   * @see #graph()
    * @see Node#get()
    * @see Graph#eye()
    */
-  public void addKeyFrame(float time) {
-    Node node = graph().eye().get();
+  public void addKeyFrame(Graph graph, float time) {
+    // Warning: if get copies the node shape, go like this:
+    // Node node = new Node();
+    // node.set(graph.eye());
+    Node node = graph.eye().get();
     node.setPickingThreshold(20);
     addKeyFrame(node, time);
   }
@@ -592,8 +575,8 @@ public class Interpolator {
   /**
    * Appends a new keyframe one second after the previously added one.
    *
-   * @see #addKeyFrame(float)
-   * @see #addKeyFrame()
+   * @see #addKeyFrame(Graph, float)
+   * @see #addKeyFrame(Graph)
    * @see #addKeyFrame(Node, float)
    */
   public void addKeyFrame(Node node) {
@@ -609,9 +592,9 @@ public class Interpolator {
    * <p>
    * {@code null} node references are silently ignored.
    *
-   * @see #addKeyFrame(float)
+   * @see #addKeyFrame(Graph, float)
    * @see #addKeyFrame(Node)
-   * @see #addKeyFrame()
+   * @see #addKeyFrame(Graph)
    */
   public void addKeyFrame(Node node, float time) {
     if (_list.size() == 0) {
@@ -621,10 +604,6 @@ public class Interpolator {
       return;
     if (node == null)
       return;
-    if (node.graph() != null)
-      if (graph() != node.graph()) {
-        throw new RuntimeException("Node and Interpolator graphs should match");
-      }
     _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time));
     _valuesAreValid = false;
     _pathIsValid = false;
@@ -649,7 +628,7 @@ public class Interpolator {
         _currentKeyFrameValid = false;
         if (_task.isActive())
           _task.stop();
-        _graph.prune(keyFrame._node);
+        Graph.prune(keyFrame._node);
         setTime(firstTime());
         listIterator.remove();
         result = true;
@@ -668,7 +647,7 @@ public class Interpolator {
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
-      _graph.prune(keyFrame._node);
+      Graph.prune(keyFrame._node);
     }
     _list.clear();
     _pathIsValid = false;
@@ -782,8 +761,7 @@ public class Interpolator {
       if (!_valuesAreValid)
         _updateModifiedKeyFrames();
       if (_list.get(0) == _list.get(_list.size() - 1))
-        _path.add(
-            new Node(_list.get(0)._node.position(), _list.get(0)._node.orientation(), _list.get(0)._node.magnitude()));
+        _path.add(Node.detach(_list.get(0)._node.position(), _list.get(0)._node.orientation(), _list.get(0)._node.magnitude()));
       else {
         KeyFrame[] keyFrames = new KeyFrame[4];
         keyFrames[0] = _list.get(0);
@@ -800,7 +778,7 @@ public class Interpolator {
           pvec2 = Vector.add(pvec2, keyFrames[2]._tangentVector);
           for (int step = 0; step < nbSteps; ++step) {
             float alpha = step / (float) nbSteps;
-            _path.add(new Node(
+            _path.add(Node.detach(
                 Vector.add(keyFrames[1]._node.position(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector, Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
                 Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion, keyFrames[2]._tangentQuaternion, keyFrames[2]._node.orientation(), alpha),
                 Vector.lerp(keyFrames[1]._node.magnitude(), keyFrames[2]._node.magnitude(), alpha))
@@ -814,7 +792,7 @@ public class Interpolator {
           keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         }
         // Add last KeyFrame
-        _path.add(new Node(keyFrames[1]._node.position(), keyFrames[1]._node.orientation(), keyFrames[1]._node.magnitude()));
+        _path.add(Node.detach(keyFrames[1]._node.position(), keyFrames[1]._node.orientation(), keyFrames[1]._node.magnitude()));
       }
       _pathIsValid = true;
     }

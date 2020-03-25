@@ -22,8 +22,7 @@ World
 
 public class GraphAPI extends PApplet {
   Scene scene;
-  PShape p1, p2, p3, p4, p5;
-  Node n1, n2, n3, n4, n5;
+  Node n1, n2, n3, n4, n5, detached;
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
@@ -36,40 +35,41 @@ public class GraphAPI extends PApplet {
     scene = new Scene(this);
 
     // red
-    p1 = createShape(BOX, 30);
-    p1.setFill(color(255, 0, 0));
-    n1 = new Node(scene, p1);
-    //n1.randomize();
+    n1 = new Node(shape(color(255, 0, 0)));
     n1.setPickingThreshold(0);
 
     // green
-    p2 = createShape(BOX, 30);
-    p2.setFill(color(0, 255, 0));
-    n2 = new Node(n1, p2);
-    n2.randomize();
+    n2 = new Node(n1, shape(color(0, 255, 0)));
+    scene.randomize(n2);
     n2.scale(0.5f);
     n2.setPickingThreshold(0);
 
-    //blue
-    p3 = createShape(BOX, 30);
-    p3.setFill(color(0, 0, 255));
-    n3 = new Node(n1, p3);
-    n3.randomize();
+    // blue
+    n3 = new Node(n1, shape(color(0, 0, 255)));
+    scene.randomize(n3);
     n3.setPickingThreshold(0);
 
-    //yellow
-    p4 = createShape(BOX, 30);
-    p4.setFill(color(255, 255, 0));
-    n4 = new Node(n2, p4);
-    n4.randomize();
+    // yellow
+    n4 = new Node(n2, shape(color(255, 255, 0)));
+    scene.randomize(n4);
     n4.setPickingThreshold(0);
 
     // magenta
-    p5 = createShape(BOX, 30);
-    p5.setFill(color(255, 0, 255));
-    n5 = new Node(n4, p5);
-    n5.randomize();
+    n5 = new Node(n4, shape(color(255, 0, 255)));
+    scene.randomize(n5);
     n5.setPickingThreshold(0);
+
+    // cyan
+    detached = Node.detach(n1);
+    detached.setPickingThreshold(0);
+    detached.setShape(shape(color(0, 255, 255)));
+    scene.randomize(detached);
+  }
+
+  PShape shape(int c) {
+    PShape pShape = createShape(BOX, 30);
+    pShape.setFill(c);
+    return pShape;
   }
 
   public void draw() {
@@ -79,6 +79,12 @@ public class GraphAPI extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == 'x')
+      detached.resetReference();
+    if (key == 'y')
+      n4.setReference(detached);
+    if (key == 'z')
+      detached.setReference(n1);
     if (key == 'p')
       scene.prune(n4);
     if (key == 'a')

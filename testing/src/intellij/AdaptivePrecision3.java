@@ -23,8 +23,7 @@ public class AdaptivePrecision3 extends PApplet {
     scene.fit(1);
     shapes = new Node[25];
     for (int i = 0; i < shapes.length; i++) {
-      //shapes[i] = new Node(scene, shape(shapes[i]));
-      shapes[i] = new Node(scene);
+      shapes[i] = new Node();
       shapes[i].setShape(shape());
       scene.randomize(shapes[i]);
       shapes[i].setPickingThreshold(0.25f);
@@ -56,7 +55,6 @@ public class AdaptivePrecision3 extends PApplet {
   }
 
   public void mouseClicked(MouseEvent event) {
-    //scene.track();
     scene.mouseTag();
   }
 

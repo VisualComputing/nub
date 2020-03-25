@@ -19,6 +19,7 @@ import nub.processing.*;
 
 OctreeNode root;
 Scene mainScene, secondaryScene, focus;
+boolean bypass;
 
 int w = 1000;
 int h = 800;
@@ -38,7 +39,7 @@ void setup() {
   mainScene.fit(1);
 
   // declare and build the octree hierarchy
-  root = new OctreeNode(mainScene);
+  root = new OctreeNode();
   buildOctree(root);
 
   // secondary scene
@@ -61,11 +62,11 @@ void draw() {
   mainScene.context().background(255);
   // culling condition should be retested every frame
   root.cull(false);
+  bypass = false;
   mainScene.render();
   mainScene.endDraw();
   mainScene.display();
-  // shift octreenodes to the secondary scene
-  mainScene.shift(secondaryScene);
+  bypass = true;
   secondaryScene.beginDraw();
   secondaryScene.context().background(185);
   secondaryScene.render();
@@ -77,8 +78,6 @@ void draw() {
   secondaryScene.context().popStyle();
   secondaryScene.endDraw();
   secondaryScene.display();
-  // shift back octreenodes to the main scene
-  secondaryScene.shift(mainScene);
 }
 
 void handleMouse() {

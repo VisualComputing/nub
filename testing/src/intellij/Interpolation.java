@@ -3,6 +3,7 @@ package intellij;
 import nub.core.Interpolator;
 import nub.core.Node;
 import nub.processing.Scene;
+import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -39,7 +40,7 @@ public class Interpolation extends PApplet {
 
     // interpolation 3. Custom (arbitrary) node interpolations
 
-    shape = new Node(scene) {
+    shape = new Node() {
       // Note that within render() geometry is defined at the
       // node local coordinate system.
       @Override
@@ -89,6 +90,7 @@ public class Interpolation extends PApplet {
       scene.drawCatmullRom(eyeInterpolator2);
       popStyle();
     }
+    println(frameRate);
   }
 
   public void mouseMoved() {
@@ -116,14 +118,14 @@ public class Interpolation extends PApplet {
       showEyePath = !showEyePath;
 
     if (key == '1')
-      eyeInterpolator1.addKeyFrame();
+      eyeInterpolator1.addKeyFrame(scene);
     if (key == 'a')
       eyeInterpolator1.toggle();
     if (key == 'b')
       eyeInterpolator1.clear();
 
     if (key == '2')
-      eyeInterpolator2.addKeyFrame();
+      eyeInterpolator2.addKeyFrame(scene);
     if (key == 'c')
       eyeInterpolator2.toggle();
     if (key == 'd')
@@ -141,6 +143,15 @@ public class Interpolation extends PApplet {
       scene.fit(1);
     if (key == 'f')
       scene.fit();
+
+    if (key == 'x')
+      for (Task task : Scene.timingHandler().tasks())
+        task.enableConcurrence();
+    if (key == 'y')
+      for (Task task : Scene.timingHandler().tasks())
+        task.disableConcurrence();
+    if (key == 'p')
+      println(Scene.nodes().size());
   }
 
   public static void main(String[] args) {

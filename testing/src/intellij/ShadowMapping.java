@@ -41,7 +41,7 @@ public class ShadowMapping extends PApplet {
     scene.fit(1);
     shapes = new Node[20];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Node(scene) {
+      shapes[i] = new Node() {
         @Override
         public void graphics(PGraphics pg) {
           pg.pushStyle();
@@ -59,7 +59,7 @@ public class ShadowMapping extends PApplet {
           pg.popStyle();
         }
       };
-      shapes[i].randomize();
+      scene.randomize(shapes[i]);
       // set picking precision to the pixels of the node projection
       shapes[i].setPickingThreshold(debug ? 0 : 20);
       //shapes[i].setHighlighting(Node.Highlighting.NONE);
@@ -93,7 +93,7 @@ public class ShadowMapping extends PApplet {
       // 2. Render the scene from the scene.eye() node
       background(0xff222222);
       if (!debug) {
-        Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+        Matrix projectionView = scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
         Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
         Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
         Vector lightDirection = scene.eye().displacement(light.zAxis(false));

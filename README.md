@@ -25,7 +25,7 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
 
 [nub](http://visualcomputing.github.io/Transformations/#/6) is a simple, expressive, language-agnostic, and extensible [visual computing](https://en.wikipedia.org/wiki/Visual_computing) library, featuring interaction, visualization and animation frameworks and supporting advanced (onscreen/offscreen) rendering techniques, such as [view frustum culling](http://cgvr.informatik.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html).
 
-_nub_ is meant to be coupled with third party real and non-real time [renderers](https://en.wikipedia.org/wiki/3D_rendering). Our current [release](https://github.com/VisualComputing/nub/releases) supports all major [Processing](https://processing.org/) desktop renderers: [2D and 3D PGraphicsOpenGL (a.k.a. P2D and P3D, respectively)](https://processing.github.io/processing-javadocs/core/processing/opengl/PGraphicsOpenGL.html), [PGraphicsJava2D (a.k.a. JAVA2D)](https://processing.github.io/processing-javadocs/core/processing/awt/PGraphicsJava2D.html) and [PGraphicsFX2D (a.k.a. FX2D)](https://processing.github.io/processing-javadocs/core/processing/javafx/PGraphicsFX2D.html).
+_nub_ is meant to be coupled with third party real and non-real time [renderers](https://en.wikipedia.org/wiki/3D_rendering). Our current [release](https://github.com/VisualComputing/nub/releases) supports the [2D and 3D PGraphicsOpenGL (a.k.a. P2D and P3D, respectively)](https://processing.github.io/processing-javadocs/core/processing/opengl/PGraphicsOpenGL.html) [Processing](https://processing.org/) renderers.
 
 If looking for the API docs, check them [here](https://visualcomputing.github.io/nub-javadocs/).
 
@@ -96,9 +96,8 @@ void setup() {
   size(720, 480, P3D);
   // the scene object creates a default eye node
   scene = new Scene(this);
-  // To create a node as a leading one (those whose parent is the world,
-  // such as n1) the scene parameter is passed to the Node constructor:
-  n1 = new Node(scene);
+  // Create a top-level node (i.e., a node whose reference is null) with:
+  n1 = new Node();
   // whereas for the remaining nodes we pass any constructor taking a
   // reference node parameter, such as Node(Node referenceNode)
   n2 = new Node(n1) {
@@ -123,11 +122,13 @@ Note that the hierarchy of nodes may be modified with [setReference(Node)](https
 
 A node [position](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#position--), [orientation](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#orientation--) and [magnitude]() may be set with the following methods:
 
-| Node localization | Position                     | Orientation                      | Magnitude               |
-|-------------------|------------------------------|----------------------------------|-------------------------|
-| Globally          | ```setPosition(vector)```    | ```setOrientation(quaternion)``` | ```setMagnitude(mag)``` |
-| Locally           | ```setTranslation(vector)``` | ```setRotation(quaternion)```    | ```setScaling(scl)```   |
-| Incrementally     | ```translate(vector)```      | ```rotate(quaternion)```         | ```scale(amount)```     |
+|Node localization|Position                          |Orientation                                                                    |Magnitude                     |
+|-----------------|----------------------------------|-------------------------------------------------------------------------------|------------------------------|
+|Globally         |```setPosition(vector)```         |```setOrientation(quaternion)```                                               |```setMagnitude(mag)```       |
+|Locally          |```setTranslation(vector)```      |```setRotation(quaternion)```                                                  |```setScaling(scl)```         |
+|Incrementally    |```translate(vector, [inertia])```|```rotate(quaternion, [inertia])```, ```orbit(quaternion, center, [inertia])```|```scale(amount, [inertia])```|
+
+The optional `inertia` parameter should be a value in [0..1], `0` no inertia (which is the default value) & `1` no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of [TimingTasks](https://visualcomputing.github.io/nub-javadocs/nub/processing/TimingTask.html).
 
 #### Shapes
 
@@ -207,7 +208,7 @@ Scene.Type frustumType = Scene.Type.PERSPECTIVE;
 float zNear, zFar;
 
 void draw() {
-  scene.render(pg, frustumType, viewPoint, zNear, zFar);
+  Scene.render(pg, frustumType, viewPoint, zNear, zFar);
 }
 ```
 
@@ -218,7 +219,7 @@ PGraphics pg;
 Matrix projection, view;
 
 void draw() {
-  scene.render(pg, projection, view);
+  Scene.render(pg, projection, view);
 }
 ```
 
@@ -240,16 +241,12 @@ see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/exampl
 void draw() {
   // 1. render onto the scene
   scene.render();
-  // shift the scene nodes to the offScreenScene
-  scene.shift(offScreenScene);
   // 2. render onto the off-screen scene
   offScreenScene.beginDraw();
   offScreenScene.render();
   offScreenScene.endDraw();
   // display the rendered offScreenScene
   offScreenScene.display();
-  // shift back the offScreenScene nodes to the scene
-  offScreenScene.shift(scene);
 }
 ```
 
@@ -316,17 +313,17 @@ The scene has several methods to position and orient the _eye_ node, such as: [l
 
 The following scene methods implement _eye_ motion actions particularly suited for input devices, possibly having several degrees-of-freedom ([DOFs](https://en.wikipedia.org/wiki/Degrees_of_freedom_(mechanics))):
 
-| Action       | Generic input device                              | Mouse                     |
-|--------------|---------------------------------------------------|---------------------------|
-| Align        | ```alignEye()```                                  | n.a.                      |
-| Focus        | ```focusEye()```                                  | n.a.                      |
-| Translate    | ```translateEye(dx, dy, dz)```                    | ```mouseTranslateEye()``` |
-| Rotate       | ```rotateEye(roll, pitch, yaw)```                 | n.a.                      |
-| Scale        | ```scaleEye(delta)```                             | n.a.                      |
-| Spin         | ```spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```mouseSpinEye()```      |
-| Move forward | ```moveForward(dz)```                             | n.a.                      |
-| Rotate CAD   | ```rotateCAD(roll, pitch)```                      | ```mouseRotateCAD()```    |
-| Look around  | ```lookAround(deltaX, deltaY)```                  | ```mouseLookAround()```   |
+| Action       | Generic input device                                         | Mouse                              |
+|--------------|--------------------------------------------------------------|------------------------------------|
+| Align        | ```alignEye()```                                             | n.a.                               |
+| Focus        | ```focusEye()```                                             | n.a.                               |
+| Translate    | ```translateEye(dx, dy, dz, [inertia])```                    | ```mouseTranslateEye([inertia])``` |
+| Rotate       | ```rotateEye(roll, pitch, yaw, [inertia])```                 | n.a.                               |
+| Scale        | ```scaleEye(delta, [inertia])```                             | n.a.                               |
+| Spin         | ```spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` | ```mouseSpinEye([inertia])```      |
+| Move forward | ```moveForward(dz, [inertia])```                             | n.a.                               |
+| Rotate CAD   | ```rotateCAD(roll, pitch, [inertia])```                      | ```mouseRotateCAD([inertia])```    |
+| Look around  | ```lookAround(deltaX, deltaY, [inertia])```                  | ```mouseLookAround([inertia])```   |
 
 **n.a.** doesn't mean the mouse action isn't available, but that it can be implemented in several ways (see the code snippets below). The provided mouse actions got _non-ambiguously_ implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts (e.g., `mouseTranslateEye()` is the same as `translateEye(pmouseX - mouseX, pmouseY - mouseY, 0)` and `mouseSpinEye()` is the same as `spinEye(pmouseX, pmouseY, mouseX, mouseY)`), and hence their simpler signatures. 
 
@@ -393,14 +390,14 @@ The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples
 
 To directly interact with a given node, call any of the following scene methods:
 
-| Action       | Generic input device                                     | Mouse                          |
-|--------------|----------------------------------------------------------|--------------------------------|
-| Align        | ```alignNode(node)```                                    | n.a.                           |
-| Focus        | ```focusNode(node)```                                    | n.a.                           |
-| Translate    | ```translateNode(node, dx, dy, dz)```                    | ```mouseTranslateNode(node)``` |
-| Rotate       | ```rotateNode(node, roll, pitch, yaw)```                 | n.a.                           |
-| Scale        | ```scaleNode(node, delta)```                             | n.a.                           |
-| Spin         | ```spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```mouseSpinNode(node)```      |
+| Action    | Generic input device                                                | Mouse                                     |
+|-----------|---------------------------------------------------------------------|-------------------------------------------|
+| Align     | ```alignNode(node)```                                               | n.a.                                      |
+| Focus     | ```focusNode(node)```                                               | n.a.                                      |
+| Translate | ```translateNode(node, dx, dy, dz, [inertia])```                    | ```mouseTranslateNode(node, [inertia])``` |
+| Rotate    | ```rotateNode(node, roll, pitch, yaw, [inertia])```                 | n.a.                                      |
+| Scale     | ```scaleNode(node, delta, [inertia])```                             | n.a.                                      |
+| Spin      | ```spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` | ```mouseSpinNode(node, [inertia])```      |
 
 Note that the mouse actions are implemented in a similar manner as it has been done with the [eye](#eye).
 
@@ -453,21 +450,21 @@ Picking a node (which should be different than the scene eye) to interact with i
    
    Generic actions:
 
-   | Action    | Tagged node                                            | Tagged node or `eye`                                |
-   |-----------|--------------------------------------------------------|-----------------------------------------------------|
-   | Align     | ```alignTag(tag)```                                    | ```align(tag)```                                    |
-   | Focus     | ```focusTag(tag)```                                    | ```focus(tag)```                                    |
-   | Translate | ```translateTag(tag, dx, dy, dz)```                    | ```translate(tag, dx, dy, dz)```                    |
-   | Rotate    | ```rotateTag(tag, roll, pitch, yaw)```                 | ```rotate(tag, roll, pitch, yaw)```                 |
-   | Scale     | ```scaleTag(tag, delta)```                             | ```scale(tag, delta)```                             |
-   | Spin      | ```spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y)``` | ```spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y)``` |
+   | Action    | Tagged node                                                       | Tagged node or `eye`                                           |
+   |-----------|-------------------------------------------------------------------|----------------------------------------------------------------|
+   | Align     | ```alignTag(tag)```                                               | ```align(tag)```                                               |
+   | Focus     | ```focusTag(tag)```                                               | ```focus(tag)```                                               |
+   | Translate | ```translateTag(tag, dx, dy, dz, [inertia])```                    | ```translate(tag, dx, dy, dz, [inertia])```                    |
+   | Rotate    | ```rotateTag(tag, roll, pitch, yaw, [inertia])```                 | ```rotate(tag, roll, pitch, yaw, [inertia])```                 |
+   | Scale     | ```scaleTag(tag, delta, [inertia])```                             | ```scale(tag, delta, [inertia])```                             |
+   | Spin      | ```spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` | ```spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` |
 
    Mouse actions:
 
-   | Action    | Tagged nodes                 | Tagged node or `eye`      |
-   |-----------|------------------------------|---------------------------|
-   | Translate | ```mouseTranslateTag(tag)``` | ```mouseTranslate(tag)``` |
-   | Spin      | ```mouseSpinTag(tag)```      | ```mouseSpin(tag)```      |
+   | Action    | Tagged nodes                        | Tagged node or `eye`            |
+   |-----------|-------------------------------------|---------------------------------|
+   | Translate | ```mouseTranslateTag(tag, [lag])``` | ```mouseTranslate(tag, [lag])```|
+   | Spin      | ```mouseSpinTag(tag, [inertia])```  | ```mouseSpin(tag, [inertia])``` |
 
 Observations:
 
@@ -475,7 +472,9 @@ Observations:
 2. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
 3. To check if a given node would be picked with a ray cast at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-) or [mouseTracks(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTracks-nub.core.Node-).
 4. To tag the nodes in a given array with ray casting use [updateTag(String, int, int, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-nub.core.Node:A-) and [updateMouseTag(String, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#updateMouseTag-java.lang.String-nub.core.Node:A-).
-5. Invoke custom node behaviors by either calling the scene [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-) methods. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
+5. In the case of `mouseTranslateTag(tag, [lag])` and `mouseTranslate(tag, [lag])` a `lag` is used (instead of `inertia`), `0` responds immediately and `1` no response at all.
+6. Set `Scene.inertia` in  [0..1] (`0` no inertia & `1` no friction) to change the default `inertia` value globally. It is initially set to `0.8` and it also affects the `lag` in `mouseTranslateTag(tag, [lag])` and `mouseTranslate(tag, [lag])`. See the [CajasOrientadas](https://github.com/VisualComputing/nub/tree/master/examples/basics/CajasOrientadas) example.
+7. Invoke custom node behaviors by either calling the scene [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-) methods. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
 
 Mouse and keyboard examples:
 
@@ -556,7 +555,7 @@ Node shape;
 Interpolator interpolator;
 void setup() {
   ...
-  shape = new Node(scene, pshape);
+  shape = new Node(pshape);
   interpolator = new Interpolator(shape);
   for (int i = 0; i < random(4, 10); i++)
     // addKeyFrame(node, elapsedTime) where elapsedTime is defined respect

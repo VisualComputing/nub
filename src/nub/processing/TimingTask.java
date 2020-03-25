@@ -11,8 +11,8 @@
 
 package nub.processing;
 
+import nub.core.Graph;
 import nub.timing.Task;
-import nub.timing.TimingHandler;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -38,16 +38,10 @@ public abstract class TimingTask extends Task {
    * Constructs a sequential recurrent task with a {@link #period()} of 40ms
    * (i.e., a {@link #frequency()} of 25 Hz).
    */
-  public TimingTask(Scene scene) {
-    super(scene.timingHandler());
-  }
-
-  /**
-   * Constructs a sequential recurrent task with a {@link #period()} of 40ms
-   * (i.e., a {@link #frequency()} of 25 Hz).
-   */
-  public TimingTask(TimingHandler timingHandler) {
-    super(timingHandler);
+  public TimingTask() {
+    super(Graph.timingHandler());
+    if (!Graph._seeded)
+      enableConcurrence();
   }
 
   @Override
@@ -108,6 +102,10 @@ public abstract class TimingTask extends Task {
 
   @Override
   public void enableConcurrence(boolean enable) {
+    if (!Graph._seeded && !enable) {
+      System.out.println("Warning: instantiate a Scene to disable concurrence on the timing-task. Nothing done!");
+      return;
+    }
     boolean isActive = isActive();
     stop();
     _concurrence = enable;

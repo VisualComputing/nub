@@ -206,7 +206,7 @@ public class StereoFlock extends PApplet {
       velocity = new Vector(StereoFlock.this.random(-1, 1), StereoFlock.this.random(-1, 1), StereoFlock.this.random(1, -1));
       acceleration = new Vector(0, 0, 0);
       neighborhoodRadius = 100;
-      animation = new TimingTask(leftEye) {
+      animation = new TimingTask() {
         @Override
         public void execute() {
           t += 0.1;

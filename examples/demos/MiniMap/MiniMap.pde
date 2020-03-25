@@ -28,7 +28,7 @@ boolean interactiveEye;
 int w = 1200;
 int h = 1200;
 
-//Choose FX2D, JAVA2D, P2D or P3D
+//Choose P2D or P3D
 String renderer = P2D;
 
 void settings() {
@@ -36,21 +36,34 @@ void settings() {
 }
 
 void setup() {
-  scene = onScreen ? new Scene(this) : new Scene(this, renderer);
+  Node eye = new Node() {
+    @Override
+    public void graphics(PGraphics pg) {
+      pg.pushStyle();
+      pg.fill(isTagged(minimap) ? 255 : 25, isTagged(minimap) ? 0 : 255, 255, 125);
+      pg.strokeWeight(2);
+      pg.stroke(0, 0, 255);
+      Scene.drawFrustum(pg, scene);
+      pg.popStyle();
+    }
+  };
+  eye.setPickingThreshold(50);
+  eye.setHighlighting(0);
+  scene = onScreen ? new Scene(this, eye) : new Scene(this, renderer, eye);
   scene.setRadius(1000);
   rectMode(CENTER);
   scene.fit(1);
   models = new Node[30];
   for (int i = 0; i < models.length; i++) {
     if ((i & 1) == 0) {
-      models[i] = new Node(scene, shape());
+      models[i] = new Node(shape());
     } else {
-      models[i] = new Node(scene) {
+      models[i] = new Node() {
         int _faces = (int) MiniMap.this.random(3, 15);
         // We need to call the PApplet random function instead of the node random version
         int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
         @Override
-        public void graphics(PGraphics pg) {
+          public void graphics(PGraphics pg) {
           pg.pushStyle();
           pg.fill(_color);
           Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
@@ -109,7 +122,7 @@ void mouseDragged() {
 
 void mouseWheel(MouseEvent event) {
   if (renderer == P3D)
-    focus.moveForward(event.getCount() * 10);
+    focus.moveForward(event.getCount() * 40);
   else
     focus.scale(event.getCount() * 40);
 }
@@ -137,24 +150,17 @@ void draw() {
     scene.render();
   }
   if (displayMinimap) {
-    // shift scene attached nodes to minimap
-    scene.shift(minimap);
     if (!scene.isOffscreen())
       scene.beginHUD();
     minimap.beginDraw();
     minimap.context().background(125, 80, 90);
     minimap.drawAxes();
     minimap.render();
-    // draw scene eye
-    minimap.context().fill(minimap.isTagged(scene.eye()) ? 255 : 25, minimap.isTagged(scene.eye()) ? 0 : 255, 255, 125);
-    minimap.context().strokeWeight(2);
-    minimap.context().stroke(0, 0, 255);
-    minimap.drawFrustum(scene);
+    minimap.context().stroke(255);
+    minimap.drawBullsEye(scene.eye());
     minimap.endDraw();
     minimap.display();
     if (!scene.isOffscreen())
       scene.endHUD();
-    // shift back minimap attached nodes to the scene
-    minimap.shift(scene);
   }
 }

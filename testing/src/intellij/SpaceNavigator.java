@@ -36,13 +36,12 @@ public class SpaceNavigator extends PApplet {
   public void setup() {
     success = openSpaceNavigator();
     scene = new Scene(this);
-    //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1500);
     scene.fit(1);
     Node[] shapes = new Node[50];
     for (int i = 0; i < shapes.length; i++) {
       PShape pshape = rocket ? loadShape("/home/pierre/IdeaProjects/nub/testing/data/interaction/rocket.obj") : shape();
-      shapes[i] = new Node(scene, pshape);
+      shapes[i] = new Node(pshape);
       scene.randomize(shapes[i]);
       shapes[i].setPickingThreshold(0);
     }
@@ -82,7 +81,9 @@ public class SpaceNavigator extends PApplet {
   }
 
   void spaceNavigatorInteraction() {
-    scene.translate("SPCNAV", 10 * snXPos.getValue(), 10 * snYPos.getValue(), 10 * snZPos.getValue());
+    // translate(x, y, z) expects params in screen-space
+    // which has dimensions width * height * 1
+    scene.translate("SPCNAV", 20 * snXPos.getValue(), 20 * snYPos.getValue(), snZPos.getValue() / 50);
     scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
   }
 
@@ -119,7 +120,7 @@ public class SpaceNavigator extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.moveForward(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 70);
   }
 
   public void keyPressed() {
@@ -127,6 +128,8 @@ public class SpaceNavigator extends PApplet {
       scene.setRightHanded();
     if (key == 'l')
       scene.setLeftHanded();
+    if (key == 'p')
+      scene.togglePerspective();
     // enables/disables picking with the space navigator
     if (key == 'i')
       snPicking = !snPicking;

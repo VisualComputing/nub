@@ -12,7 +12,7 @@ import processing.opengl.PShader;
 /**
  * Created by pierre on 11/15/16.
  */
-public class Graph5 extends PApplet {
+public class Graph2 extends PApplet {
   Graph graph;
   Node[] nodes;
 
@@ -27,7 +27,7 @@ public class Graph5 extends PApplet {
     graph.fit(1);
     nodes = new Node[50];
     for (int i = 0; i < nodes.length; i++) {
-      nodes[i] = new Node(graph) {
+      nodes[i] = new Node() {
         @Override
         public void visit() {
           pushStyle();
@@ -36,7 +36,8 @@ public class Graph5 extends PApplet {
           popStyle();
         }
       };
-      nodes[i].randomize();
+      nodes[i].setPickingThreshold(.05f);
+      graph.randomize(nodes[i]);
     }
     //discard Processing matrices
     resetMatrix();
@@ -60,7 +61,7 @@ public class Graph5 extends PApplet {
     if (mouseButton == LEFT)
       graph.spin(pmouseX, pmouseY, mouseX, mouseY);
     else if (mouseButton == RIGHT)
-      graph.translate(mouseX - pmouseX, mouseY - pmouseY, 0);
+      graph.translate(mouseX - pmouseX, mouseY - pmouseY, 0, 0);
     else
       graph.scale(mouseX - pmouseX);
   }
@@ -70,7 +71,7 @@ public class Graph5 extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.Graph5"});
+    PApplet.main(new String[]{"intellij.Graph2"});
   }
 
   public class GLSLMatrixHandler extends MatrixHandler {
@@ -78,7 +79,7 @@ public class Graph5 extends PApplet {
     PMatrix3D pmatrix = new PMatrix3D();
 
     public GLSLMatrixHandler() {
-      framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/vertex.glsl");
+      framesShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nub/testing/data/matrix_handler/vertex.glsl");
     }
 
     @Override

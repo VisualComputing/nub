@@ -45,7 +45,7 @@ public class TaskTesting extends PApplet {
 
     // interpolation 3. Custom (arbitrary) node interpolations
 
-    shape = new Node(scene) {
+    shape = new Node() {
       // Note that within render() geometry is defined at the
       // node local coordinate system.
       @Override
@@ -69,7 +69,7 @@ public class TaskTesting extends PApplet {
     interpolator.run();
 
     //frameRate(100);
-    task = new TimingTask(scene) {
+    task = new TimingTask() {
       @Override
       public void execute() {
         long current = System.currentTimeMillis();
@@ -86,7 +86,7 @@ public class TaskTesting extends PApplet {
     //task.run(60);
 
     ///*
-    task2 = new TimingTask(scene) {
+    task2 = new TimingTask() {
       @Override
       public void execute() {
         println("one timer seq");
@@ -95,7 +95,7 @@ public class TaskTesting extends PApplet {
     task2.enableRecurrence();
     //task2.run(3000);
 
-    task3 = new TimingTask(scene) {
+    task3 = new TimingTask() {
       @Override
       public void execute() {
         println("recurrent timer parallel");
@@ -178,14 +178,14 @@ public class TaskTesting extends PApplet {
         println("task3 is NOT active");
 
     if (key == '1')
-      eyeInterpolator1.addKeyFrame();
+      eyeInterpolator1.addKeyFrame(scene);
     if (key == 'a')
       eyeInterpolator1.toggle();
     if (key == 'b')
       eyeInterpolator1.clear();
 
     if (key == '2')
-      eyeInterpolator2.addKeyFrame();
+      eyeInterpolator2.addKeyFrame(scene);
     if (key == 'c')
       eyeInterpolator2.toggle();
     if (key == 'd')

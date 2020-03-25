@@ -21,7 +21,7 @@ int rotDir;
 AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[2];
 int activeConstraint;
 
-//Choose FX2D, JAVA2D, P2D or P3D
+//P2D or P3D
 String renderer = P3D;
 
 void setup() {
@@ -48,7 +48,7 @@ void draw() {
   scene.drawDottedGrid();
   fill(204, 102, 0, 150);
   scene.drawTorusSolenoid();
-  fill(0, 0, 255);
+  fill(0, 255, 255);
   scene.beginHUD();
   displayText();
   scene.endHUD();

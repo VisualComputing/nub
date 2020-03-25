@@ -22,7 +22,7 @@ Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
 Node shape;
 boolean showEyePath = true;
 
-//Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
+//Choose P2D or P3D
 String renderer = P3D;
 
 void setup() {
@@ -35,12 +35,12 @@ void setup() {
   scene.fit(1);
 
   // interpolation 2. Custom eye interpolations
-  eyeInterpolator1 = new Interpolator(scene.eye());
-  eyeInterpolator2 = new Interpolator(scene.eye());
+  eyeInterpolator1 = new Interpolator(scene);
+  eyeInterpolator2 = new Interpolator(scene);
 
   // interpolation 3. Custom (arbitrary) node interpolations
 
-  shape = new Node(scene) {
+  shape = new Node() {
     // Note that within render() geometry is defined at the
     // node local coordinate system.
     @Override
@@ -110,14 +110,14 @@ void keyPressed() {
     showEyePath = !showEyePath;
 
   if (key == '1')
-    eyeInterpolator1.addKeyFrame();
+    eyeInterpolator1.addKeyFrame(scene);
   if (key == 'a')
     eyeInterpolator1.toggle();
   if (key == 'b')
     eyeInterpolator1.clear();
 
   if (key == '2')
-    eyeInterpolator2.addKeyFrame();
+    eyeInterpolator2.addKeyFrame(scene);
   if (key == 'c')
     eyeInterpolator2.toggle();
   if (key == 'd')

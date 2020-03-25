@@ -68,7 +68,7 @@ import java.util.List;
  * {@code // Draw your object here, in the local node coordinate system.} <br>
  * {@code popMatrix();} <br>
  * <p>
- * Use {@link #view()} and {@link #projection(Graph.Type, float, float, float, float, boolean)}
+ * Use {@link #view()} and {@link Graph#projection(Node, Graph.Type, float, float, float, float, boolean)}
  * when rendering the scene from the node point-of-view. Note that these methods are used by
  * the graph when a node is set as its eye, see {@link Graph#preDraw()}.
  * <p>
@@ -76,21 +76,17 @@ import java.util.List;
  * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
  * {@link #displacement(Vector, Node)} and {@link #worldDisplacement(Vector)}.
  * <p>
- * The methods {@link #translate(Vector, float)}, {@link #rotate(Quaternion), float},
+ * The methods {@link #translate(Vector, float)}, {@link #rotate(Quaternion, float)},
  * {@link #orbit(Quaternion, Vector, float)} and {@link #scale(float, float)}, locally apply
- * differential geometry transformations damped with a given {@code inertia}.
+ * differential geometry transformations damped with a given {@code inertia}. Note that
+ * when the inertial parameter is omitted its value is defaulted to 0.
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the node hierarchy which automatically apply the local
- * node transformations described above may be achieved with {@link Graph#render()} or
- * {@link Graph#render()}.
- * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Node)}
- * and to instantiate a node attached to a graph which is referred to as attached node (see
- * {@link #isAttached(Graph)} and {@link #isDetached()}).
- * <p>
- * To instantiate an attached node use the node constructors that take a {@code graph}
- * parameter or a (reference) node which in turn is attached to a graph. Once instantiated,
- * a node cannot be attached nor detached, but a copy of it can (see {@link #attach(Graph)}
- * and {@link #detach()}).
+ * node transformations described above may be achieved with {@link Graph#render()},
+ * {@link Graph#render(Object)}, {@link Graph#render(Object, Matrix, Matrix)} and
+ * {@link Graph#render(Object, Graph.Type, Node, int, int, float, float, boolean)}.
+ * Customize the rendering traversal algorithm by overriding {@link #visit()} (see
+ * also {@link #cull(boolean)} and {@link #bypass()}).
  * <h2>Constraints</h2>
  * One interesting feature of a node is that its displacements can be constrained.
  * When a {@link Constraint} is attached to a node, it filters the input of
@@ -105,8 +101,8 @@ import java.util.List;
  * {@link nub.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
  * <h2>Shapes</h2>
- * A node shape can be set from a retained-mode rendering object, see {@link #setShape(Object)};
- * or from an immediate-mode rendering procedure, see {@link #graphics(Object)}.
+ * A node shape can be set from a retained-mode rendering object, see {@link #setShape(processing.core.PShape)};
+ * or from an immediate-mode rendering procedure, see {@link #graphics(processing.core.PGraphics)}.
  * Picking a node is done according to a {@link #pickingThreshold()}. When a node is tagged
  * it will be highlighted (scaled) according to a {@link #highlighting()} magnitude.
  * See also {@link #enableTagging(boolean)}.
@@ -127,7 +123,7 @@ public class Node {
    */
   public boolean matches(Node node) {
     if (node == null)
-      node = new Node();
+      node = Node.detach(new Vector(), new Quaternion(), 1);
     return translation().matches(node.translation()) && rotation().matches(node.rotation()) && scaling() == node.scaling();
   }
 
@@ -145,226 +141,129 @@ public class Node {
   protected static int _counter;
   protected int _id;
 
-  // Attached nodes
-  protected Graph _graph;
+  // tree
   protected List<Node> _children;
   protected boolean _culled;
   protected boolean _tagging;
 
   // Rendering
-  protected Object _shape;
+  // PShape is only available in Java
+  protected processing.core.PShape _shape;
   protected float _highlight;
-  protected long _bypass;
+  protected long _bypass = -1;
 
   // Tasks
   protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
+  protected final float _scalingFactor = 800;
 
   /**
-   * Creates a detached node.
-   * Same as {@code this(null, null, null, null, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Object)
-   * @see #Node(Graph)
-   * @see #Node(Node)
-   * @see #Node(Constraint)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
   public Node() {
-    this(null, null, null, null, new Vector(), new Quaternion(), 1);
+    this(null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Creates a node attached to {@code graph}.
-   * Same as {@code this(graph, null, null, null, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, null, translation, new Quaternion(), 1)}.
    *
-   * @see #Node()
-   * @see #Node(Object)
-   * @see #Node(Node)
-   * @see #Node(Constraint)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Graph graph) {
-    this(graph, null, null, null, new Vector(), new Quaternion(), 1);
+  public Node(Vector translation) {
+    this(null, null, translation, new Quaternion(), 1);
   }
 
   /**
-   * Creates a child node with {@code reference} as {@link #reference()}.
-   * Same as {@code this(reference.graph(), reference, null, null, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, null, translation, rotation, 1)}.
    *
-   * @see #Node()
-   * @see #Node(Graph)
-   * @see #Node(Object)
-   * @see #Node(Constraint)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Node reference) {
-    this(reference.graph(), reference, null, null, new Vector(), new Quaternion(), 1);
+  public Node(Vector translation, Quaternion rotation) {
+    this(null, null, translation, rotation, 1);
   }
 
   /**
-   * Creates a detached node with {@code constraint} as {@link #constraint()}.
-   * Same as {@code this(null, null, constraint, null, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, null, translation, rotation, scaling)}.
    *
-   * @see #Node(Graph)
-   * @see #Node(Object)
-   * @see #Node()
-   * @see #Node(Node)
-   */
-  public Node(Constraint constraint) {
-    this(null, null, constraint, null, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Creates a detached node with {@code shape}.
-   * Same as {@code this(null, null, null, shape, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node()
-   * @see #Node(Graph)
-   * @see #Node(Node)
-   * @see #Node(Constraint)
-   */
-  public Node(Object shape) {
-    this(null, null, null, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Constructs a shapeless node, attached to {@code graph}, having {@code translation},
-   * {@code rotation} and {@code scaling} as the node {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()}, respectively.
-   * The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(graph, null, null, null, translation, rotation, scaling)}.
-   *
-   * @see #Node(Node, Vector, Quaternion, float)
-   * @see #Node(Vector, Quaternion, float)
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
-   */
-  public Node(Graph graph, Vector translation, Quaternion rotation, float scaling) {
-    this(graph, null, null, null, translation, rotation, scaling);
-  }
-
-  /**
-   * Constructs a shapeless node, having {@code reference}, {@code translation},
-   * {@code rotation} and {@code scaling} as the node {@link #reference()},
-   * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
-   * The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(reference.graph(), reference, null, null, translation, rotation, scaling)}.
-   *
-   * @see #Node(Graph, Vector, Quaternion, float)
-   * @see #Node(Vector, Quaternion, float)
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
-   */
-  public Node(Node reference, Vector translation, Quaternion rotation, float scaling) {
-    this(reference.graph(), reference, null, null, translation, rotation, scaling);
-  }
-
-  /**
-   * Constructs a shapeless detached node, having {@code translation},
-   * {@code rotation} and {@code scaling} as the node {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()}, respectively.
-   * The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(null, null, null, null, translation, rotation, scaling)}.
-   *
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
   public Node(Vector translation, Quaternion rotation, float scaling) {
-    this(null, null, null, null, translation, rotation, scaling);
+    this(null, null, translation, rotation, scaling);
   }
 
   /**
-   * Same as {@code this(graph, null, shape)}.
+   * Same as {@code this(reference, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Graph, Constraint, Object)
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Graph graph, Object shape) {
-    this(graph, null, shape);
+  public Node(Node reference) {
+    this(reference, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(graph, constraint, null)}.
+   * Same as {@code this(reference, null, translation, new Quaternion(), 1)}.
    *
-   * @see #Node(Graph, Constraint, Object)
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Graph graph, Constraint constraint) {
-    this(graph, constraint, null);
+  public Node(Node reference, Vector translation) {
+    this(reference, null, translation, new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(graph, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(reference, null, translation, rotation, 1)}.
    *
-   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Graph graph, Constraint constraint, Object shape) {
-    this(graph, constraint, shape, new Vector(), new Quaternion(), 1);
+  public Node(Node reference, Vector translation, Quaternion rotation) {
+    this(reference, null, translation, rotation, 1);
   }
 
   /**
-   * Same as {@code this(reference, null, shape)}.
+   * Same as {@code this(reference, null, translation, rotation, scaling)}.
    *
-   * @see #Node(Node, Constraint, Object)
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Node reference, Object shape) {
-    this(reference, null, shape);
+  public Node(Node reference, Vector translation, Quaternion rotation, float scaling) {
+    this(reference, null, translation, rotation, scaling);
   }
 
   /**
-   * Same as {@code this(reference, constraint, null)}.
+   * Same as {@code this(null, constraint, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Object)
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   */
+  public Node(Constraint constraint) {
+    this(null, constraint, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(reference, constraint, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
   public Node(Node reference, Constraint constraint) {
-    this(reference, constraint, null);
+    this(reference, constraint, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(reference, constraint, shape, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
-   */
-  public Node(Node reference, Constraint constraint, Object shape) {
-    this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Creates a node attached to {@code graph} with {@code constraint} as {@link #constraint()},
-   * having {@code translation}, {@code rotation} and {@code scaling} as the node {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(graph, null, constraint, shape, translation, rotation, scaling)}.
-   *
-   * @see #Node(Graph, Node, Constraint, Object, Vector, Quaternion, float)
-   */
-  public Node(Graph graph, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
-    this(graph, null, constraint, shape, translation, rotation, scaling);
-  }
-
-  /**
-   * Creates a child node of {@code reference} with {@code constraint} as {@link #constraint()},
-   * having {@code translation}, {@code rotation} and {@code scaling} as the node {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
-   * Same as {@code this(reference.graph(), reference, constraint, shape, translation, rotation, scaling)}.
-   *
-   * @see #Node(Graph, Node, Constraint, Object, Vector, Quaternion, float)
-   */
-  public Node(Node reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
-    this(reference.graph(), reference, constraint, shape, translation, rotation, scaling);
-  }
-
-  /**
-   * Creates a node attached to {@code graph} with {@code constraint} as {@link #constraint()},
-   * having {@code reference} as {@link #reference()}, {@code translation},
-   * {@code rotation} and {@code scaling} as the node {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()}, respectively.
+   * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
+   * as {@link #constraint()}, having {@code translation}, {@code rotation} and {@code scaling} as
+   * the {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * The {@link #pickingThreshold()} is set to {@code 0.2} and the {@link #highlighting()}
    * magnitude to {@code 0.15}.
    */
-  protected Node(Graph graph, Node reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
-    _graph = graph;
+  public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
+    this(constraint, translation, rotation, scaling);
     setReference(reference);
+  }
+
+  /**
+   * Internally used by both {@link #Node(Node, Constraint, Vector, Quaternion, float)}
+   * (attached nodes) and {@link #detach(Constraint, Vector, Quaternion, float)} (detached nodes).
+   */
+  protected Node(Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     setConstraint(constraint);
-    setShape(shape);
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
@@ -376,76 +275,94 @@ public class Node {
     _threshold = .2f;
     _tagging = true;
     _highlight = 0.15f;
-    if (graph() == null)
-      return;
-    // attached nodes:
-    _children = new ArrayList<Node>();
     _culled = false;
-    _initTasks();
+    _children = new ArrayList<Node>();
+  }
+
+  // From here only Java constructors
+
+  /**
+   * Same as {@code this(null, null, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   */
+  public Node(processing.core.PShape shape) {
+    this(null, null, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Copy constructor.
+   * Same as {@code this(reference, null, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
-  protected Node(Graph graph, Node node) {
-    this._graph = graph;
-    this.setPosition(node.position());
-    this.setOrientation(node.orientation());
-    this.setMagnitude(node.magnitude());
-    this.setConstraint(node.constraint());
-
-    if ((this.isDetached() && node.isDetached()) || !(this.isDetached() && !node.isDetached()))
-      setReference(node.reference());
-
-    this._id = ++_counter;
-    // unlikely but theoretically possible
-    if (_id == 16777216)
-      throw new RuntimeException("Maximum node instances reached. Exiting now!");
-    _lastUpdate = node.lastUpdate();
-    this._threshold = node._threshold;
-    this._tagging = node._tagging;
-
-    if (graph() == null)
-      return;
-
-    // attached nodes:
-    this._children = new ArrayList<Node>();
-    this._culled = node._culled;
-
-    this._shape = node._shape;
-    this._highlight = node._highlight;
-    this._initTasks();
+  public Node(Node reference, processing.core.PShape shape) {
+    this(reference, null, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Init tasks. Internal use.
+   * Same as {@code this(null, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
    */
-  protected void _initTasks() {
-    _translationTask = new InertialTask(graph()) {
-      @Override
-      public void action() {
-        translate(_x, _y, _z);
-      }
-    };
-    _rotationTask = new InertialTask(graph()) {
-      @Override
-      public void action() {
-        rotate(new Quaternion(_x, _y, _z));
-      }
-    };
-    _orbitTask = new InertialTask(graph()) {
-      @Override
-      public void action() {
-        orbit(new Quaternion(_x, _y, _z), _center);
-      }
-    };
-    _scalingTask = new InertialTask(graph()) {
-      @Override
-      public void action() {
-        float factor = 1 + Math.abs(_x) / graph().height();
-        scale(_x >= 0 ? factor : 1 / factor);
-      }
-    };
+  public Node(Constraint constraint, processing.core.PShape shape) {
+    this(null, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(reference, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   */
+  public Node(Node reference, Constraint constraint, processing.core.PShape shape) {
+    this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
+   * as {@link #constraint()}, {@code shape} as {@link #shape()}, having {@code translation},
+   * {@code rotation} and {@code scaling} as the {@link #translation()}, {@link #rotation()}
+   * and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to
+   * {@code 0.2} and the {@link #highlighting()} magnitude to {@code 0.15}.
+   */
+  public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
+    this(reference, constraint, translation, rotation, scaling);
+    setShape(shape);
+  }
+
+  /**
+   * Same as {@code return detach(this)}.
+   *
+   * @see #detach(Node)
+   * @see #get()
+   */
+  public Node detach() {
+    return detach(this);
+  }
+
+  /**
+   * Same as {@code return Node.detach(node.position(), node.orientation(), node.magnitude())}.
+   *
+   * @see #detach(Vector, Quaternion, float)
+   */
+  public static Node detach(Node node) {
+    return Node.detach(node.position(), node.orientation(), node.magnitude());
+  }
+
+  /**
+   * Same as {@code return detach(null, position, orientation, magnitude)}.
+   *
+   * @see #detach(Constraint, Vector, Quaternion, float)
+   */
+  public static Node detach(Vector position, Quaternion orientation, float magnitude) {
+    return detach(null, position, orientation, magnitude);
+  }
+
+  /**
+   * Returns a detached node (i.e., a pruned non-reachable node from the graph, see {@link Graph#prune(Node)})
+   * whose {@link #reference()} is {@code null} for the given params. Mostly used internally.
+   */
+  public static Node detach(Constraint constraint, Vector position, Quaternion orientation, float magnitude) {
+    return new Node(constraint, position, orientation, magnitude);
   }
 
   /**
@@ -481,20 +398,6 @@ public class Node {
   }
 
   /**
-   * println this node components.
-   */
-  public void println() {
-    System.out.println(toString() + "\n");
-  }
-
-  /**
-   * print this node components.
-   */
-  public void print() {
-    System.out.print(toString());
-  }
-
-  /**
    * Return this node components as a String.
    */
   @Override
@@ -503,69 +406,23 @@ public class Node {
   }
 
   /**
-   * Performs a deep copy of this node into {@code graph}.
-   * <p>
-   * Same as {@code return new Node(graph, this)}.
+   * Performs a deep copy of this node. Only the {@link #position()}, {@link #orientation()}
+   * and {@link #magnitude()} of the node are copied.
    *
-   * @see #Node(Graph, Node)
-   */
-  public Node attach(Graph graph) {
-    return new Node(graph, this);
-  }
-
-  /**
-   * Performs a deep copy of this node.
-   * <p>
-   * Same as {@code return attach(graph())}.
-   *
-   * @see #attach(Graph)
+   * @see #detach()
    */
   public Node get() {
-    return attach(graph());
-  }
-
-  /**
-   * Returns a detached deep copy of this node.
-   * <p>
-   * Same as {@code return attach(null)}.
-   *
-   * @see #attach(Graph)
-   */
-  public Node detach() {
-    return attach(null);
-  }
-
-  /**
-   * Tells whether or not this node belongs to the {@graph} hierarchy (see {@link Graph#render()}).
-   * To test if the node is detach from any graph hierarchy call {@code isAttached(null)}.
-   * <p>
-   * Note that a call to {@link #children()} never returns {@code null} if the node is attached to
-   * a graph, i.e., that graph will visit the node during traversal.
-   *
-   * @see #isDetached()
-   * @see Graph#render()
-   */
-  public boolean isAttached(Graph graph) {
-    return _graph == graph;
-  }
-
-  /**
-   * Same as {@code return isAttached(null)}.
-   * <p>
-   * Note that a call to {@link #children()} always returns {@code null} if the node is detached,
-   * i.e., the node is not available for graph traversal (see {@link Graph#render()}).
-   *
-   * @see #isAttached(Graph)
-   * @see Graph#render()
-   */
-  public boolean isDetached() {
-    return isAttached(null);
+    // Copying the shape (node.setShape(this.shape())) is incompatible with js
+    // and it also would affect Interpolator addKeyFrame(eye)
+    Node node = new Node();
+    node.set(this);
+    return node;
   }
 
   /**
    * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
-   * those of the {@code node}. The node {@link #graph()}, {@link #reference()} and
-   * {@link #constraint()} are not affected by this call.
+   * those of the {@code node}. The node {@link #reference()} and {@link #constraint()}
+   * are not affected by this call.
    * <p>
    * After calling {@code set(node)} a call to {@code this.matches(node)} should
    * return {@code true}.
@@ -577,19 +434,17 @@ public class Node {
    * @see #setMagnitude(Node)
    */
   public void set(Node node) {
-    if (node == null)
-      node = new Node();
-    setPosition(node.position());
-    setOrientation(node.orientation());
-    setMagnitude(node.magnitude());
+    setPosition(node);
+    setOrientation(node);
+    setMagnitude(node);
   }
 
   /**
    * Sets an identity node by resetting its {@link #translation()}, {@link #rotation()}
-   * and {@link #scaling()}. The node {@link #graph()}, {@link #reference()} and
-   * {@link #constraint()} are not affected by this call. Call {@code set(null)} if you
-   * want to reset the global {@link #position()}, {@link #orientation()} and
-   * {@link #magnitude()} node parameters instead.
+   * and {@link #scaling()}. The node {@link #reference()} and {@link #constraint()}
+   * are not affected by this call. Call {@code set(null)} if you want to reset the
+   * global {@link #position()}, {@link #orientation()} and {@link #magnitude()} node
+   * parameters instead.
    *
    * @see #set(Node)
    */
@@ -636,7 +491,7 @@ public class Node {
         child._modified();
   }
 
-  // REFERENCE_node
+  // reference
 
   /**
    * Returns {@code true} if {@code node} is {@link #reference()} {@code this} node.
@@ -744,43 +599,99 @@ public class Node {
    * tree, which root is the world coordinate system (i.e., {@code null}
    * {@link #reference()}). No action is performed if setting {@code reference} as the
    * {@link #reference()} would create a loop in the hierarchy.
+   * <p>
+   * To make all the nodes in the {@code node} branch eligible for garbage collection
+   * call {@link Graph#prune(Node)}.
+   *
+   * @see Graph#prune(Node)
    */
   public void setReference(Node node) {
     if (node == this) {
-      System.out.println("A Node cannot be a reference of itself.");
+      System.out.println("A node cannot be a reference of itself.");
       return;
     }
     if (_isSuccessor(node)) {
-      System.out.println("A Node descendant cannot be set as its reference.");
+      System.out.println("A node descendant cannot be set as its reference.");
       return;
     }
-    if (node != null)
-      if ((isDetached() && !node.isDetached()) || !node.isAttached(graph())) {
-        System.out.println("Both node and its reference should be detached, or attached to the same graph.");
-        return;
+    // 0. reference is detached
+    if (node != null && !Graph.isReachable(node)) {
+      if (Graph.isReachable(this))
+        Graph.prune(this);
+      if (reference() != node) {
+        if (reference() != null)
+          reference()._removeChild(this);
+        _reference = node;// reference() returns now the new value
+        reference()._addChild(this);
       }
-    if (isDetached()) {
-      if (reference() == node)
-        return;
-      _reference = node;
-    } else {
-      // 1. no need to re-parent, just check this needs to be added as leadingnode
-      if (reference() == node) {
-        _restorePath(reference(), this);
-        return;
-      }
-      // 2. else re-parenting
-      // 2a. before assigning new reference node
-      if (reference() != null) // old
-        reference()._removeChild(this);
-      else if (graph() != null)
-        graph()._removeLeadingNode(this);
-      // finally assign the reference node
-      _reference = node;// reference() returns now the new value
-      // 2b. after assigning new reference node
-      _restorePath(reference(), this);
+      return;
     }
+    // 1. no need to re-parent, just check this needs to be added as a leading node
+    if (reference() == node) {
+      _restorePath(reference(), this);
+      _restoredTasks(this);
+      return;
+    }
+    // 2. else re-parenting
+    // 2a. before assigning new reference node
+    if (reference() != null) // old
+      reference()._removeChild(this);
+    else
+      Graph._removeLeadingNode(this);
+    // finally assign the reference node
+    _reference = node;// reference() returns now the new value
+    // 2b. after assigning new reference node
+    _restorePath(reference(), this);
+    _restoredTasks(this);
     _modified();
+  }
+
+  /**
+   * Used by {@link #setReference(Node)}.
+   */
+  protected void _restoredTasks(Node node) {
+    List<Node> branch = Graph.branch(node);
+    for (Node nodeBranch : branch)
+      nodeBranch._registerTasks();
+  }
+
+  /**
+   * Used by {@link #_restoredTasks(Node)}.
+   */
+  protected void _registerTasks() {
+    if (!Graph.isTaskRegistered(_translationTask)) {
+      _translationTask = new InertialTask() {
+        @Override
+        public void action() {
+          translate(_x, _y, _z);
+        }
+      };
+    }
+    if (!Graph.isTaskRegistered(_rotationTask)) {
+      _rotationTask = new InertialTask() {
+        @Override
+        public void action() {
+          rotate(new Quaternion(_x, _y, _z));
+        }
+      };
+    }
+    if (!Graph.isTaskRegistered(_orbitTask)) {
+      _orbitTask = new InertialTask() {
+        @Override
+        public void action() {
+          orbit(new Quaternion(_x, _y, _z), _center);
+        }
+      };
+    }
+    if (!Graph.isTaskRegistered(_scalingTask)) {
+      _scalingTask = new InertialTask() {
+        @Override
+        public void action() {
+          float factor = 1 + Math.abs(_x) / _scalingFactor;
+          scale(_x >= 0 ? factor : 1 / factor);
+        }
+      };
+    }
   }
 
   /**
@@ -788,8 +699,7 @@ public class Node {
    */
   protected void _restorePath(Node parent, Node child) {
     if (parent == null) {
-      if (graph() != null)
-        graph()._addLeadingNode(child);
+      Graph._addLeadingNode(child);
     } else {
       if (!parent._hasChild(child)) {
         parent._addChild(child);
@@ -833,8 +743,7 @@ public class Node {
   }
 
   /**
-   * Returns the list a child nodes of this node. Only meaningful if this node {@link #isAttached(Graph)}
-   * to a graph. Returns {@code null} if this node {@link #isDetached()}.
+   * Returns the list a child nodes of this node.
    */
   public List<Node> children() {
     return _children;
@@ -850,31 +759,12 @@ public class Node {
   }
 
   /**
-   * Same as {@code randomize(graph().center(), graph().radius(), graph().is3D())}.
-   * <p>
-   * Does nothing if the node {@link #isDetached()}.
-   *
-   * @see #randomize(Vector, float, boolean)
-   * @see Vector#randomize()
-   * @see Quaternion#randomize()
-   * @see #random(Graph)
-   * @see #random(Vector, float, boolean)
-   */
-  public void randomize() {
-    if (graph() != null)
-      randomize(graph().center(), graph().radius(), graph().is3D());
-    else
-      System.out.println("randomize() is only available for attached nodes, nothing done! Use randomize(center, radius, is3D) instead");
-  }
-
-  /**
    * Randomized this node. The node is randomly re-positioned inside the ball
    * defined by {@code center} and {@code radius}, which in 2D is a
    * circumference parallel to the x-y plane. The {@link #orientation()} is
    * randomized by {@link Quaternion#randomize()}. The new magnitude is a random
    * in old-magnitude * [0,5...2].
    *
-   * @see #randomize()
    * @see Vector#randomize()
    * @see Quaternion#randomize()
    * @see #random(Graph)
@@ -906,17 +796,16 @@ public class Node {
    * @see #random(Vector, float, boolean)
    * @see Vector#random()
    * @see Quaternion#random()
-   * @see #randomize()
    * @see #randomize(Vector, float, boolean)
    */
   public static Node random(Graph graph) {
-    Node node = new Node(graph);
+    Node node = new Node();
     node.randomize(graph.center(), graph.radius(), graph.is3D());
     return node;
   }
 
   /**
-   * Returns a random detached node. The node is randomly positioned inside the ball defined
+   * Returns a random node. The node is randomly positioned inside the ball defined
    * by {@code center} and {@code radius} (see {@link Vector#random()}), which in 2D is a
    * circumference parallel to the x-y plane. The {@link #orientation()} is set by
    * {@link Quaternion#random()}. The magnitude is a random in [0,5...2].
@@ -924,7 +813,6 @@ public class Node {
    * @see #random(Graph)
    * @see Vector#random()
    * @see Quaternion#random()
-   * @see #randomize()
    * @see #randomize(Vector, float, boolean)
    */
   public static Node random(Vector center, float radius, boolean is3D) {
@@ -951,8 +839,8 @@ public class Node {
    * Picking a node is done with ray casting against a screen-space shape defined according
    * to a {@link #pickingThreshold()} as follows:
    * <ul>
-   * <li>The projected pixels of the node visual representation (see {@link #graphics(Object)}
-   * and {@link #setShape(Object)}). Set it with {@code threshold = 0}.</li>
+   * <li>The projected pixels of the node visual representation (see {@link #graphics(processing.core.PGraphics)}
+   * and {@link #setShape(processing.core.PShape)}). Set it with {@code threshold = 0}.</li>
    * <li>A node bounding box whose length is defined as percentage of the graph diameter
    * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
    * <li>A squared 'bullseye' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
@@ -1050,17 +938,19 @@ public class Node {
   }
 
   /**
-   * Same as {@link #translate(Vector)} but with {@code float} parameters.
+   * Same as {@code translate(new Vector(x, y, z), inertia)}.
+   *
+   * @see #translate(Vector, float)
    */
-  public void translate(float x, float y, float z) {
-    translate(new Vector(x, y, z));
+  public void translate(float x, float y, float z, float inertia) {
+    translate(new Vector(x, y, z), inertia);
   }
 
   /**
    * Same as {@link #translate(Vector)} but with {@code float} parameters.
    */
-  public void translate(float x, float y) {
-    translate(new Vector(x, y));
+  public void translate(float x, float y, float z) {
+    translate(new Vector(x, y, z));
   }
 
   /**
@@ -1079,9 +969,8 @@ public class Node {
    */
   public void translate(Vector vector, float inertia) {
     translate(vector);
-    if (isDetached()) {
-      if (inertia > 0)
-        System.out.println("Warning: translate(vector, inertia) is only available if node is attached to a Graph. Use translate(vector) instead");
+    if (!Graph.isTaskRegistered(_translationTask)) {
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use translate(vector) instead");
       return;
     }
     _translationTask.setInertia(inertia);
@@ -1125,8 +1014,9 @@ public class Node {
    */
   public void setPosition(Node node) {
     if (node == null)
-      node = new Node();
-    setPosition(node.position());
+      setPosition(new Vector());
+    else
+      setPosition(node.position());
   }
 
   /**
@@ -1219,9 +1109,8 @@ public class Node {
    */
   public void rotate(Quaternion quaternion, float inertia) {
     rotate(quaternion);
-    if (isDetached()) {
-      if (inertia > 0)
-        System.out.println("Warning: rotate(quaternion, inertia) is only available if node is attached to a Graph. Use rotate(quaternion) instead");
+    if (!Graph.isTaskRegistered(_rotationTask)) {
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use rotate(quaternion) instead");
       return;
     }
     _rotationTask.setInertia(inertia);
@@ -1245,12 +1134,30 @@ public class Node {
   }
 
   /**
+   * Same as {@code rotate(new Quaternion(axis, angle), inertia)}.
+   *
+   * @see #rotate(Quaternion, float)
+   */
+  public void rotate(Vector axis, float angle, float inertia) {
+    rotate(new Quaternion(axis, angle), inertia);
+  }
+
+  /**
    * Same as {@code rotate(new Quaternion(axis, angle))}.
    *
    * @see #rotate(Quaternion)
    */
   public void rotate(Vector axis, float angle) {
     rotate(new Quaternion(axis, angle));
+  }
+
+  /**
+   * Same as {@code rotate(new Vector(x, y, z), angle, inertia)}.
+   *
+   * @see #rotate(Vector, float, float)
+   */
+  public void rotate(float x, float y, float z, float angle, float inertia) {
+    rotate(new Vector(x, y, z), angle, inertia);
   }
 
   /**
@@ -1277,9 +1184,8 @@ public class Node {
    */
   public void orbit(Quaternion quaternion, Vector center, float inertia) {
     orbit(quaternion, center);
-    if (isDetached()) {
-      if (inertia > 0)
-        System.out.println("Warning: orbit(quaternion, center, inertia) is only available if node is attached to a Graph. Use orbit(quaternion, center) instead");
+    if (!Graph.isTaskRegistered(_orbitTask)) {
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use orbit(quaternion, center) instead");
       return;
     }
     _orbitTask.setInertia(inertia);
@@ -1298,7 +1204,9 @@ public class Node {
    * @see #orbit(Quaternion, Vector, float)
    */
   public void orbit(Quaternion quaternion, Vector center) {
-    rotation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
+    if (constraint() != null)
+      quaternion = constraint().constrainRotation(quaternion, this);
+    rotation().compose(quaternion);
     rotation().normalize(); // Prevents numerical drift
 
     // Original in nodes-0.1.x and proscene:
@@ -1320,6 +1228,15 @@ public class Node {
   }
 
   /**
+   * Same as {@code orbit(axis, angle, new Vector(), inertia)}.
+   *
+   * @see #orbit(Vector, float, Vector, float)
+   */
+  public void orbit(Vector axis, float angle, float inertia) {
+    orbit(axis, angle, new Vector(), inertia);
+  }
+
+  /**
    * Rotates the node around {@code axis} passing through the origin, both defined in the world
    * coordinate system. Same as {@code orbit(axis, angle, new Vector())}.
    *
@@ -1328,6 +1245,15 @@ public class Node {
    */
   public void orbit(Vector axis, float angle) {
     orbit(axis, angle, new Vector());
+  }
+
+  /**
+   * Same as {@code orbit(new Quaternion(displacement(axis), angle), center, inertia)}.
+   *
+   * @see #orbit(Quaternion, Vector, float)
+   */
+  public void orbit(Vector axis, float angle, Vector center, float inertia) {
+    orbit(new Quaternion(displacement(axis), angle), center, inertia);
   }
 
   /**
@@ -1370,8 +1296,9 @@ public class Node {
    */
   public void setOrientation(Node node) {
     if (node == null)
-      node = new Node();
-    setOrientation(node.orientation());
+      setOrientation(new Quaternion());
+    else
+      setOrientation(node.orientation());
   }
 
   /**
@@ -1434,13 +1361,12 @@ public class Node {
    */
   public void scale(float scaling, float inertia) {
     scale(scaling);
-    if (isDetached()) {
-      if (inertia > 0)
-        System.out.println("Warning: scale(scaling, inertia) is only available if node is attached to a Graph. Use scale(scaling) instead");
+    if (!Graph.isTaskRegistered(_scalingTask)) {
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use scale(scaling) instead");
       return;
     }
     _scalingTask._inertia = inertia;
-    _scalingTask._x += scaling > 1 ? graph().height() * (scaling - 1) : graph().height() * (scaling - 1) / scaling;
+    _scalingTask._x += scaling > 1 ? _scalingFactor * (scaling - 1) : _scalingFactor * (scaling - 1) / scaling;
     if (!_scalingTask.isActive()) {
       _scalingTask.run();
     }
@@ -1461,14 +1387,14 @@ public class Node {
    * Returns the magnitude of the node, defined in the world coordinate system.
    * <p>
    * Note that the magnitude is used to compute the node
-   * {@link #projection(Graph.Type, float, float, float, float, boolean)} which is useful to render a
+   * {@link Graph#projection(Node, Graph.Type, float, float, float, float, boolean)} which is useful to render a
    * scene from the node point-of-view.
    *
    * @see #orientation()
    * @see #position()
    * @see #setPosition(Vector)
    * @see #translation()
-   * @see #projection(Graph.Type, float, float, float, float, boolean)
+   * @see Graph#projection(Node, Graph.Type, float, float, float, float, boolean)
    */
   public float magnitude() {
     if (reference() != null)
@@ -1485,8 +1411,9 @@ public class Node {
    */
   public void setMagnitude(Node node) {
     if (node == null)
-      node = new Node();
-    setMagnitude(node.magnitude());
+      setMagnitude(1);
+    else
+      setMagnitude(node.magnitude());
   }
 
   /**
@@ -1592,7 +1519,6 @@ public class Node {
    */
   public void align(boolean move, float threshold, Node node) {
     Vector[][] directions = new Vector[2][3];
-
     for (int d = 0; d < 3; ++d) {
       Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
       if (node != null)
@@ -1601,12 +1527,10 @@ public class Node {
         directions[0][d] = dir;
       directions[1][d] = orientation().rotate(dir);
     }
-
     float maxProj = 0.0f;
     float proj;
     short[] index = new short[2];
     index[0] = index[1] = 0;
-
     Vector vector = new Vector(0.0f, 0.0f, 0.0f);
     for (int i = 0; i < 3; ++i) {
       for (int j = 0; j < 3; ++j) {
@@ -1619,14 +1543,9 @@ public class Node {
         }
       }
     }
-    //TODO needs testing
-    Node old = detach(); // correct line
-    // Vnode old = this.get();// this call the get overloaded method and
-    // hence add the node to the mouse _grabber
-
+    Node old = detach();
     vector.set(directions[0][index[0]]);
     float coef = vector.dot(directions[1][index[1]]);
-
     if (Math.abs(coef) >= threshold) {
       vector.set(directions[0][index[0]]);
       Vector axis = vector.cross(directions[1][index[1]]);
@@ -1638,12 +1557,10 @@ public class Node {
       q = Quaternion.multiply(rotation().inverse(), q);
       q = Quaternion.multiply(q, orientation());
       rotate(q);
-
       // Try to align an other axis direction
       short d = (short) ((index[1] + 1) % 3);
       Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
       dir = orientation().rotate(dir);
-
       float max = 0.0f;
       for (int i = 0; i < 3; ++i) {
         vector.set(directions[0][i]);
@@ -1653,7 +1570,6 @@ public class Node {
           max = proj;
         }
       }
-
       if (max >= threshold) {
         vector.set(directions[0][index[0]]);
         axis = vector.cross(dir);
@@ -1672,7 +1588,6 @@ public class Node {
       Vector center = new Vector(0.0f, 0.0f, 0.0f);
       if (node != null)
         center = node.position();
-
       vector = Vector.subtract(center, worldDisplacement(old.location(center)));
       vector.subtract(translation());
       translate(vector);
@@ -1872,7 +1787,7 @@ public class Node {
    */
   public Matrix worldMatrix() {
     if (reference() != null)
-      return new Node(position(), orientation(), magnitude()).matrix();
+      return detach().matrix();
     else
       return matrix();
   }
@@ -1906,10 +1821,9 @@ public class Node {
    * @see #matrix()
    * @see #worldMatrix()
    * @see #set(Node)
-   * @see #set(Node)
    */
   public Matrix viewInverse() {
-    return new Node(position(), orientation(), 1).matrix();
+    return Node.detach(position(), orientation(), 1).matrix();
   }
 
   /**
@@ -1969,160 +1883,6 @@ public class Node {
         new Vector(r[0][1], r[1][1], r[2][1]),
         new Vector(r[0][2], r[1][2], r[2][2]))
     );
-  }
-
-  /**
-   * Same as {@code return projection(type, width, height, zNear, zFar, graph().isLeftHanded())}. To use it, node must me
-   * attached to a graph.
-   *
-   * @see #isDetached()
-   * @see #projection(Graph.Type, float, float, float, float, boolean)
-   */
-  public Matrix projection(Graph.Type type, float width, float height, float zNear, float zFar) {
-    if (!isDetached())
-      return projection(type, width, height, zNear, zFar, graph().isLeftHanded());
-    else
-      throw new RuntimeException("To call node.projection(type, width, height, zNear, zFar) the node should be attached to a graph." +
-          "Use node.projection(type, width, height, zNear, zFar, leftHanded), instead");
-  }
-
-  /**
-   * Returns either {@code perspective(width / height, zNear, zFar, lefTHanded)} if
-   * the {@link Graph.Type} is {@link Graph.Type#PERSPECTIVE} or
-   * {@code orthographic(width, height, zNear, zFar, lefTHanded)}, if the
-   * the {@link Graph.Type} is {@link Graph.Type#ORTHOGRAPHIC} or {@link Graph.Type#TWO_D}.
-   * In both cases it uses the node {@link #magnitude()}.
-   * <p>
-   * Override this method to set a {@link Graph.Type#CUSTOM} projection.
-   *
-   * @see #perspective(float, float, float, boolean)
-   * @see #orthographic(float, float, float, float, boolean)
-   * @see #magnitude()
-   */
-  public Matrix projection(Graph.Type type, float width, float height, float zNear, float zFar, boolean leftHanded) {
-    if (type == Graph.Type.PERSPECTIVE)
-      return perspective(width / height, zNear, zFar, leftHanded);
-    else
-      return orthographic(width, height, zNear, zFar, leftHanded);
-  }
-
-  /**
-   * Same as {@code return orthographic(width, height, zNear, zFar, graph().isLeftHanded())}. To use it, node must me
-   * attached to a graph.
-   *
-   * @see #isDetached()
-   * @see #orthographic(float, float, float, float, boolean)
-   */
-  public Matrix orthographic(float width, float height, float zNear, float zFar) {
-    if (!isDetached())
-      return orthographic(width, height, zNear, zFar, graph().isLeftHanded());
-    else
-      throw new RuntimeException("To call node.orthographic(width, height, zNear, zFar) the node should be attached to a graph." +
-          "Use node.orthographic(float width, float height, float zNear, float zFar, boolean leftHanded), instead");
-  }
-
-  /**
-   * Same as {@code return Matrix.orthographic(width * magnitude(), (leftHanded ? -height : height) * magnitude(), zNear, zFar}.
-   * <p>
-   * Note that to compute the orthographic matrix the node {@link #magnitude()} scales the viewing volume width and height.
-   *
-   * @see Matrix#orthographic(float, float, float, float)
-   * @see #perspective(float, float, float, boolean)
-   * @see #magnitude()
-   * @see #projection(Graph.Type, float, float, float, float, boolean)
-   */
-  public Matrix orthographic(float width, float height, float zNear, float zFar, boolean leftHanded) {
-    return Matrix.orthographic(width * magnitude(), (leftHanded ? -height : height) * magnitude(), zNear, zFar);
-  }
-
-  /**
-   * Same as {@code return perspective(aspectRatio, zNear, zFar, graph().isLeftHanded())}. To use it, node must me
-   * attached to a graph.
-   *
-   * @see #isDetached()
-   * @see #perspective(float, float, float, boolean)
-   */
-  public Matrix perspective(float aspectRatio, float zNear, float zFar) {
-    if (!isDetached())
-      return perspective(aspectRatio, zNear, zFar, graph().isLeftHanded());
-    else
-      throw new RuntimeException("To call node.perspective(float aspectRatio, float zNear, float zFar) the node should be attached to a graph." +
-          "Use node.perspective(aspectRatio, zNear, zFar, leftHanded), instead");
-  }
-
-  /**
-   * Same as {@code return Matrix.perspective(leftHanded ? -magnitude() : magnitude(), aspectRatio, zNear, zFar)}.
-   * <p>
-   * Note that to compute the perspective matrix the node {@link #magnitude()} is taken as: {@code tan(fov / 2)},
-   * where {@code fov} stands for the frustum field-of-view.
-   *
-   * @see Matrix#perspective(float, float, float, float)
-   * @see #orthographic(float, float, float, float, boolean)
-   * @see #magnitude()
-   * @see #projection(Graph.Type, float, float, float, float, boolean)
-   */
-  public Matrix perspective(float aspectRatio, float zNear, float zFar, boolean leftHanded) {
-    return Matrix.perspective(leftHanded ? -magnitude() : magnitude(), aspectRatio, zNear, zFar);
-  }
-
-  /**
-   * Same as {@code return Matrix.multiply(projection(type, width, height, zNear, zFar), view())}.
-   *
-   * @see #projection(Graph.Type, float, float, float, float)
-   * @see #view()
-   */
-  public Matrix projectionView(Graph.Type type, float width, float height, float zNear, float zFar) {
-    return Matrix.multiply(projection(type, width, height, zNear, zFar), view());
-  }
-
-  /**
-   * Same as {@code return Matrix.multiply(projection(type, width, height, zNear, zFar, leftHanded), view())}.
-   *
-   * @see #projection(Graph.Type, float, float, float, float, boolean)
-   * @see #view()
-   */
-  public Matrix projectionView(Graph.Type type, float width, float height, float zNear, float zFar, boolean leftHanded) {
-    return Matrix.multiply(projection(type, width, height, zNear, zFar, leftHanded), view());
-  }
-
-  /**
-   * Same as {@code return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar), view())}.
-   *
-   * @see #projection(Graph.Type, float, float, float, float)
-   * @see #view()
-   */
-  public Matrix orthographicView(float width, float height, float zNear, float zFar) {
-    return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar), view());
-  }
-
-  /**
-   * Same as {code return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar, leftHanded), view())}.
-   *
-   * @see #projection(Graph.Type, float, float, float, float, boolean)
-   * @see #view()
-   */
-  public Matrix orthographicView(float width, float height, float zNear, float zFar, boolean leftHanded) {
-    return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar, leftHanded), view());
-  }
-
-  /**
-   * Same as {@code return Matrix.multiply(projection(Graph.Type.PERSPECTIVE, width, height, zNear, zFar), view())}.
-   *
-   * @see #projection(Graph.Type, float, float, float, float)
-   * @see #view()
-   */
-  public Matrix perspectiveView(float width, float height, float zNear, float zFar) {
-    return Matrix.multiply(projection(Graph.Type.PERSPECTIVE, width, height, zNear, zFar), view());
-  }
-
-  /**
-   * Same as {@code return Matrix.multiply(projection(Graph.Type.PERSPECTIVE, width, height, zNear, zFar, leftHanded), view())}.
-   *
-   * @see #projection(Graph.Type, float, float, float, float, boolean)
-   * @see #view()
-   */
-  public Matrix perspectiveView(float width, float height, float zNear, float zFar, boolean leftHanded) {
-    return Matrix.multiply(projection(Graph.Type.PERSPECTIVE, width, height, zNear, zFar, leftHanded), view());
   }
 
   /**
@@ -2384,14 +2144,6 @@ public class Node {
   // Attached nodes
 
   /**
-   * Returns the {@code graph} this node is attached to. Always returns {@code false} if
-   * the node {@link #isDetached()}.
-   */
-  public Graph graph() {
-    return _graph;
-  }
-
-  /**
    * Returns {@code true} if tagging is enabled.
    *
    * @see #enableTagging(boolean)
@@ -2466,7 +2218,7 @@ public class Node {
    *
    * <pre>
    * {@code
-   * node = new Node(graph) {
+   * node = new Node() {
    *   public void visit() {
    *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
    *     // (which should be implemented by you) is true, scene.render() will prune the branch
@@ -2480,7 +2232,7 @@ public class Node {
    * (which should be implemented by you):
    * <pre>
    * {@code
-   * node = new Node(graph) {
+   * node = new Node() {
    *   public void visit() {
    *     if(bypassCondition)
    *       // this will bypass node rendering without culling its children
@@ -2491,7 +2243,7 @@ public class Node {
    * </pre>
    *
    * @see Graph#render()
-   * @see Graph#draw(Object, Node)
+   * @see nub.processing.Scene#draw(Object, Node)
    * @see #cull(boolean)
    * @see #isCulled()
    * @see #bypass()
@@ -2520,21 +2272,18 @@ public class Node {
    * @see #bypass()
    */
   public void cull(boolean cull) {
-    if (isDetached())
-      System.out.println("Warning: culling a detached node does nothing");
     _culled = cull;
   }
 
   /**
    * Returns whether or not the node culled or not. Culled nodes (and their children)
-   * will not be visited by the {@link Graph#render()} algorithm. Always returns
-   * {@code false} if the node {@link #isDetached()}.
+   * will not be visited by the {@link Graph#render()} algorithm.
    *
    * @see #cull(boolean)
    * @see #bypass()
    */
   public boolean isCulled() {
-    return !isDetached() && _culled;
+    return _culled;
   }
 
   /**
@@ -2568,20 +2317,20 @@ public class Node {
     return _highlight;
   }
 
-  // JS version of the rendering methods
+  // js go:
+  // public void graphics(Object context) {}
 
   /**
-   * Override this method to set an immediate mode graphics procedure on {@code context}.
-   *
-   * @see #setShape(Object)
+   * Override this method to set an immediate mode graphics procedure on the Processing
+   * {@code PGraphics}. Return {@code true} if succeeded and {@code false} otherwise.
    */
-  public void graphics(Object context) {
+  public void graphics(processing.core.PGraphics pGraphics) {
   }
 
   /**
    * Same as {@code setShape(null)}.
    *
-   * @see #setShape(Object)
+   * @see #setShape(processing.core.PShape)
    */
   public void resetShape() {
     setShape(null);
@@ -2590,10 +2339,10 @@ public class Node {
   /**
    * Sets the node retained mode shape.
    *
-   * @see #graphics(Object)
+   * @see #graphics(processing.core.PGraphics)
    * @see #resetShape()
    */
-  public void setShape(Object shape) {
+  public void setShape(processing.core.PShape shape) {
     _shape = shape;
   }
 
@@ -2602,19 +2351,9 @@ public class Node {
    *
    * @see #resetShape()
    * @see #shape()
-   * @see #graphics(Object)
+   * @see #graphics(processing.core.PGraphics)
    */
-  public Object shape() {
+  public processing.core.PShape shape() {
     return _shape;
-  }
-
-
-  // Java version of the immediate mode rendering methods
-
-  /**
-   * Override this method to set an immediate mode graphics procedure on the Processing
-   * {@code PGraphics}. Return {@code true} if succeeded and {@code false} otherwise.
-   */
-  public void graphics(processing.core.PGraphics pGraphics) {
   }
 }

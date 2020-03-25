@@ -124,7 +124,7 @@ public class Luxo extends PApplet {
     int mode;
 
     Piece(Scene scene) {
-      super(scene);
+      super();
       // set picking precision to the pixels of the node projection
       setPickingThreshold(0);
     }

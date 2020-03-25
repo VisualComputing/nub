@@ -11,60 +11,66 @@
 
 package nub.timing;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
- * A timing handler holds a {@link #taskPool()} with all the tasks
+ * A timing handler holds a {@link #tasks()} with all the tasks
  * scheduled to be performed in the future (one single time or periodically).
+ * <p>
+ * A timing handler should be used as a static scene instance.
  */
 public class TimingHandler {
+  /**
+   * Returns the number of frames displayed since this timing handler was instantiated.
+   */
   static public long frameCount;
-  protected float _frameRate;
 
-  protected long _deltaCount;
-  // T i m e r P o o l
-  protected ArrayList<Task> _taskPool;
+  /**
+   * Returns the approximate frame rate of the software as it executes. The initial value
+   * is 10 fps and is updated with each frame. The value is averaged (integrated) over
+   * several frames. As such, this value won't be valid until after 5-10 frames.
+   */
+  static public float frameRate = 60;
   protected long _frameRateLastNanos;
-  protected long _localCount;
+
+  // T i m e r P o o l
+  protected HashSet<Task> _tasks;
 
   /**
    * Main constructor.
    */
   public TimingHandler() {
-    _localCount = 0;
-    _deltaCount = frameCount;
-    _frameRate = 60;
-    _frameRateLastNanos = 0;
-    _taskPool = new ArrayList<Task>();
+    _tasks = new HashSet<Task>();
   }
 
   /**
    * Handler's main method. It should be called from within your main event loop.
    * It recomputes the frame rate, and executes all non-concurrent tasks found in
-   * the {@link #taskPool()}.
+   * the {@link #tasks()}.
    */
   public void handle() {
     _updateFrameRate();
-    for (Task task : _taskPool)
+    for (Task task : _tasks)
       if (!task.isConcurrent())
         task._execute();
   }
 
   /**
-   * Returns the task pool.
+   * Returns the task set.
    */
-  public ArrayList<Task> taskPool() {
-    return _taskPool;
+  public HashSet<Task> tasks() {
+    return _tasks;
   }
 
   /**
-   * Register a task in the pool.
+   * Register a task in the set.
    */
   public void registerTask(Task task) {
-    if (isTaskRegistered(task)) {
-      System.out.println("Nothing done. Task is already registered");
+    if (task == null) {
+      System.out.println("Nothing done. Task is null");
+      return;
     }
-    _taskPool.add((Task) task);
+    _tasks.add(task);
   }
 
   /**
@@ -73,7 +79,7 @@ public class TimingHandler {
   public void unregisterTask(Task task) {
     if (isTaskRegistered(task)) {
       task.stop();
-      _taskPool.remove(task);
+      _tasks.remove(task);
     }
   }
 
@@ -81,7 +87,7 @@ public class TimingHandler {
    * Returns {@code true} if the task is registered and {@code false} otherwise.
    */
   public boolean isTaskRegistered(Task task) {
-    return _taskPool.contains(task);
+    return _tasks.contains(task);
   }
 
   /**
@@ -94,34 +100,13 @@ public class TimingHandler {
    */
   protected void _updateFrameRate() {
     long now = System.nanoTime();
-    if (_localCount > 1) {
-      float frameTimeSecs = (float) (now - this._frameRateLastNanos) / 1.0E9f;
-      float avgFrameTimeSecs = 1.0f / _frameRate;
+    if (frameCount > 0) {
+      float frameTimeSecs = (now - this._frameRateLastNanos) / 1e9f;
+      float avgFrameTimeSecs = 1.0f / frameRate;
       avgFrameTimeSecs = 0.95f * avgFrameTimeSecs + 0.05f * frameTimeSecs;
-      _frameRate = (1.0f / avgFrameTimeSecs);
+      frameRate = 1.0f / avgFrameTimeSecs;
     }
     _frameRateLastNanos = now;
-    _localCount++;
-    //TODO needs testing but I think is also safe and simpler
-    //if (TimingHandler.frameCount < frameCount())
-    //TimingHandler.frameCount = frameCount();
-    if (frameCount < frameCount() + _deltaCount)
-      frameCount = frameCount() + _deltaCount;
-  }
-
-  /**
-   * Returns the approximate frame rate of the software as it executes. The initial value
-   * is 10 fps and is updated with each frame. The value is averaged (integrated) over
-   * several frames. As such, this value won't be valid until after 5-10 frames.
-   */
-  public float frameRate() {
-    return _frameRate;
-  }
-
-  /**
-   * Returns the number of frames displayed since this timing handler was instantiated.
-   */
-  public long frameCount() {
-    return _localCount;
+    frameCount++;
   }
 }

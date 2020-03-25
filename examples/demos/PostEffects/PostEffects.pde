@@ -30,7 +30,7 @@ public void setup() {
   scene.setRadius(1000);
   models = new Node[100];
   for (int i = 0; i < models.length; i++) {
-    models[i] = new Node(scene, shape());
+    models[i] = new Node(shape());
     scene.randomize(models[i]);
     // set picking precision to the pixels of the node projection
     models[i].setPickingThreshold(0);

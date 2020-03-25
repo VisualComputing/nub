@@ -44,7 +44,7 @@ public class ConstrainedFrame extends PApplet {
     rotDir = 0;
     activeConstraint = 0;
 
-    iNode = new Node(scene);
+    iNode = new Node();
     iNode.translate(new Vector(20, 20, 0));
     iNode.setConstraint(constraints[activeConstraint]);
   }

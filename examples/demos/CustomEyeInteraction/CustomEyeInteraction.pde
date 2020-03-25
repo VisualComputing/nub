@@ -14,7 +14,6 @@
  *
  * The eye key mode has the following bindings:
  *
- * 'u' and 'd': translate the eye along its Z-axis.
  * UP and DOWN arrows: translate the eye forward-backward
  * LEFT and RIGHT arrows: translate the eye left-right
  * UP and DOWN + SHIFT: rotate the eye up and down
@@ -56,8 +55,6 @@ void setup() {
 
 void draw() {
   background(0);
-  scene.drawAxes();
-  //lights();
   fill(200);
   noStroke();
   textureMode(IMAGE);
@@ -97,35 +94,33 @@ void keyPressed(KeyEvent event) {
     }
   }
   if (keyMode) {
-    if (key == 'u')
-      scene.eye().translate(0, 0, 10);
-    if (key == 'd')
-      scene.eye().translate(0, 0, -10);
     if (key == CODED) {
+      // note that the last parameter in the below
+      // methods is the inertia which should be in [0..1]
       switch (keyCode) {
       case UP:
         if (event.isShiftDown())
-          scene.eye().rotate(new Vector(1, 0, 0), -step);
+          scene.eye().rotate(new Vector(1, 0, 0), -step, 0.85);
         else
-          scene.eye().orbit(xAxis(), step);
+          scene.eye().orbit(xAxis(), step, 0.85);
         break;
       case DOWN:
         if (event.isShiftDown())
-          scene.eye().rotate(new Vector(1, 0, 0), step);
+          scene.eye().rotate(new Vector(1, 0, 0), step, 0.85);
         else
-          scene.eye().orbit(xAxis(), -step);
+          scene.eye().orbit(xAxis(), -step, 0.85);
         break;
       case LEFT:
         if (event.isShiftDown())
-          scene.eye().orbit(zAxis(), -step);
+          scene.eye().orbit(zAxis(), -step, 0.85);
         else
-          scene.eye().orbit(yAxis(), -step);
+          scene.eye().orbit(yAxis(), -step, 0.85);
         break;
       case RIGHT:
         if (event.isShiftDown())
-          scene.eye().orbit(zAxis(), step);
+          scene.eye().orbit(zAxis(), step, 0.85);
         else
-          scene.eye().orbit(yAxis(), step);
+          scene.eye().orbit(yAxis(), step, 0.85);
         break;
       }
     }

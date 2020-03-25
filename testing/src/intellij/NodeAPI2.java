@@ -69,21 +69,21 @@ public class NodeAPI2 extends PApplet {
     f1.translate(-50, -20, 30);
     f1.scale(1.3f);
 
-    f2 = new InteractiveNode(f1, f2Color);
+    f2 = new InteractiveNode(scene, f1, f2Color);
     f2.translate(60, -40, -30);
     f2.scale(1.2f);
 
-    f3 = new InteractiveNode(f1, f3Color);
+    f3 = new InteractiveNode(scene, f1, f3Color);
     f3.translate(60, 55, -30);
     f3.rotate(new Quaternion(new Vector(0, 1, 0), -HALF_PI));
     f3.scale(1.1f);
 
-    f4 = new InteractiveNode(f2, f4Color);
+    f4 = new InteractiveNode(scene, f2, f4Color);
     f4.translate(60, -55, 30);
     f4.rotate(new Quaternion(new Vector(0, 1, 0), QUARTER_PI));
     f4.scale(0.9f);
 
-    f5 = new InteractiveNode(scene.eye(), f5Color);
+    f5 = new InteractiveNode(scene, scene.eye(), f5Color);
     f5.translate(-100, 0, -250);
 
     font16 = loadFont("FreeSans-16.vlw");
@@ -364,15 +364,15 @@ public class NodeAPI2 extends PApplet {
     Scene scene;
 
     public InteractiveNode(Scene graph, int color) {
-      super(graph);
-      scene = (Scene) graph();
+      super();
+      scene = graph;
       _c = color;
       pnt = new Vector(40, 30, 20);
     }
 
-    public InteractiveNode(Node node, int color) {
+    public InteractiveNode(Scene graph, Node node, int color) {
       super(node);
-      scene = (Scene) graph();
+      scene = graph;
       _c = color;
       pnt = new Vector(40, 30, 20);
     }

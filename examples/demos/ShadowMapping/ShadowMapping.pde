@@ -46,7 +46,7 @@ void setup() {
   scene.togglePerspective();
   scene.setRadius(max(w, h) / 3);
   scene.fit(1);
-  landscape1 = new Node(scene) {
+  landscape1 = new Node() {
     @Override
     public void graphics(PGraphics pg) {
       if (!isCulled()) {
@@ -63,7 +63,7 @@ void setup() {
     }
   };
   landscape1.setPickingThreshold(0);
-  landscape2 = new Node(scene) {
+  landscape2 = new Node() {
     @Override
     public void graphics(PGraphics pg) {
       if (!isCulled()) {
@@ -82,7 +82,7 @@ void setup() {
   };
   landscape2.setPickingThreshold(0);
   landscape2.cull();
-  landscape3 = new Node(scene) {
+  landscape3 = new Node() {
     @Override
     public void graphics(PGraphics pg) {
       if (!isCulled()) {
@@ -101,7 +101,7 @@ void setup() {
   };
   landscape3.setPickingThreshold(0);
   landscape3.cull();
-  floor = new Node(scene) {
+  floor = new Node() {
     @Override
     public void graphics(PGraphics pg) {
       pg.fill(0xff222222);
@@ -109,7 +109,7 @@ void setup() {
     }
   };
   floor.disableTagging();
-  light = new Node(scene) {
+  light = new Node() {
     @Override
     public void graphics(PGraphics pg) {
       pg.pushStyle();
@@ -127,7 +127,7 @@ void setup() {
   light.setPickingThreshold(0);
   light.setMagnitude(0.195);
 
-  animation = new TimingTask(scene) {
+  animation = new TimingTask() {
     @Override
     public void execute() {
       if (!scene.isTagged(light)) {
@@ -158,13 +158,13 @@ void draw() {
   shadowMap.beginDraw();
   shadowMap.noStroke();
   shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
-  scene.render(shadowMap, shadowMapType, light, zNear, zFar);
+  Scene.render(shadowMap, shadowMapType, light, zNear, zFar);
   shadowMap.endDraw();
 
   // 2. Render the scene from the scene.eye() node
   background(0);
   if (!debug) {
-    Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+    Matrix projectionView = Scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
     Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
     Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, scene.eye().viewInverse()));
     Vector lightDirection = scene.eye().displacement(light.zAxis(false));

@@ -41,7 +41,7 @@ public class ShadowMappingSimple3 extends PApplet {
     scene.togglePerspective();
     scene.setRadius(max(w, h) / 3);
     scene.fit(1);
-    landscape1 = new Node(scene) {
+    landscape1 = new Node() {
       /*
       @Override
       public void visit() {
@@ -67,7 +67,7 @@ public class ShadowMappingSimple3 extends PApplet {
           }
       }
     };
-    landscape2 = new Node(scene) {
+    landscape2 = new Node() {
       /*
       @Override
       public void visit() {
@@ -94,7 +94,7 @@ public class ShadowMappingSimple3 extends PApplet {
         pg.sphere(50);
       }
     };
-    landscape3 = new Node(scene) {
+    landscape3 = new Node() {
       /*
       @Override
       public void visit() {
@@ -121,14 +121,14 @@ public class ShadowMappingSimple3 extends PApplet {
         pg.sphere(50);
       }
     };
-    floor = new Node(scene) {
+    floor = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         pg.fill(0xff222222);
         pg.box(360, 5, 360);
       }
     };
-    light = new Node(scene) {
+    light = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();
@@ -172,7 +172,7 @@ public class ShadowMappingSimple3 extends PApplet {
     // 3. Render the scene from the scene.eye() node
     background(0xff222222);
     if (!debug) {
-      Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+      Matrix projectionView = scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
       //Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
       Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, scene.eye().viewInverse()));

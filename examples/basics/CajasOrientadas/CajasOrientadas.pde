@@ -28,6 +28,7 @@ Vector pup;
 
 void setup() {
   size(800, 800, P3D);
+  // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
   scene = new Scene(this);
   scene.setRadius(200);
   scene.togglePerspective();
@@ -44,8 +45,7 @@ void setup() {
 
 void draw() {
   background(0);
-  // calls render() on all scene attached nodes
-  // automatically applying all the node transformations
+  // calls render() on all scene nodes applying all their transformations
   scene.render();
   drawRay();
 }

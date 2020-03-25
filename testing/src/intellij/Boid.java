@@ -26,7 +26,7 @@ class Boid extends TimingTask {
   float t = 0;
 
   Boid(Scene scn, ArrayList<Boid> f, Vector inPos) {
-    super(scn);
+    super();
     scene = scn;
     flock = f;
     // the boid node just holds the boid appearance for rendering

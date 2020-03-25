@@ -37,29 +37,28 @@ public class CajasOrientadas extends PApplet {
 
   public void draw() {
     background(0);
-    // calls visit() on all scene attached nodes
-    // automatically applying all the node transformations
-    //scene.traverse();
     scene.render();
+    //scene.render(g);
   }
 
   public void mouseMoved() {
     scene.mouseTag();
+    //scene.updateMouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT) {
       if (!scene.mouseSpinTag())
         scene.mouseSpinEye();
-    } else if (mouseButton == RIGHT)
+    } else if (mouseButton == RIGHT) {
       if (!scene.mouseTranslateTag())
         scene.mouseTranslateEye();
-      else
-        scene.scale(mouseX - pmouseX);
+    } else
+      scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.moveForward(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 20, 0.8f);
   }
 
   public void keyPressed() {
@@ -102,7 +101,7 @@ public class CajasOrientadas extends PApplet {
     int c;
 
     public Box() {
-      iNode = new Node(scene) {
+      iNode = new Node() {
         // note that within visit() geometry is defined
         // at the node local coordinate system
         @Override
@@ -123,10 +122,10 @@ public class CajasOrientadas extends PApplet {
           pg.popStyle();
         }
       };
-      iNode.setPickingThreshold(-25);
+      iNode.setPickingThreshold(0.15f);
       setSize();
       setColor();
-      iNode.randomize();
+      scene.randomize(iNode);
     }
 
     public void setSize() {
@@ -178,7 +177,7 @@ public class CajasOrientadas extends PApplet {
     int c;
 
     public Sphere() {
-      iNode = new Node(scene) {
+      iNode = new Node() {
         // note that within visit() geometry is defined
         // at the node local coordinate system
         @Override
@@ -201,8 +200,7 @@ public class CajasOrientadas extends PApplet {
           pg.popStyle();
         }
       };
-      //iNode.setPickingThreshold(0.15f);
-      iNode.setPickingThreshold(0);
+      iNode.setPickingThreshold(0.15f);
       setRadius(10);
     }
 

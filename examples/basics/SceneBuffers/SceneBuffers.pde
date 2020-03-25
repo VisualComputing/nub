@@ -15,7 +15,7 @@ import nub.processing.*;
 Scene scene;
 Node[] shapes;
 
-//Choose one of P3D for a 3D scene or P2D for a 2D one.
+//Choose P2D or P3D
 String renderer = P3D;
 int w = 1000;
 int h = 1000;
@@ -32,10 +32,10 @@ void setup() {
 
   shapes = new Node[100];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Node(scene, caja());
+    shapes[i] = new Node(caja());
     // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
-    shapes[i].randomize();
+    scene.randomize(shapes[i]);
   }
   scene.fit(1);
 }
@@ -66,7 +66,7 @@ void mouseDragged() {
 
 void mouseWheel(MouseEvent event) {
   if (scene.is3D())
-    scene.moveForward(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 30);
   else
     scene.scaleEye(event.getCount() * 20);
 }

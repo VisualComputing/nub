@@ -27,7 +27,6 @@ import nub.primitives.Matrix;
  */
 public class MatrixHandler {
   protected Matrix _projection, _view, _model;
-
   public static int STACK_DEPTH = 32;
   public static String ERROR_PUSHMATRIX_OVERFLOW = "Too many calls to pushMatrix().";
   public static String ERROR_PUSHMATRIX_UNDERFLOW = "Too many calls to popMatrix(), and not enough to pushMatrix().";
@@ -56,7 +55,7 @@ public class MatrixHandler {
    * implementing them in terms of that renderer.
    *
    * @see Graph#render()
-   * @see Node#projection(Graph.Type, float, float, float, float, boolean)
+   * @see Graph#projection(Node, Graph.Type, float, float, float, float, boolean)
    * @see Node#view()
    */
   public void bind(Matrix projection, Matrix view) {

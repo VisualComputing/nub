@@ -24,7 +24,7 @@ Node[] shapes;
 PFont font36;
 int totalShapes;
 
-//Choose FX2D, JAVA2D, P2D or P3D
+//Choose P2D or P3D
 String renderer = P3D;
 
 void settings() {
@@ -36,7 +36,7 @@ void setup() {
   scene.fit(1);
   shapes = new Node[10];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Node(scene) {
+    shapes[i] = new Node() {
       int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
 
       @Override
@@ -73,7 +73,7 @@ void setup() {
     };
     // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
-    shapes[i].randomize();
+    scene.randomize(shapes[i]);
   }
   font36 = loadFont("FreeSans-36.vlw");
 }

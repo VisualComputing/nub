@@ -37,7 +37,7 @@ public class PointUnderPixel extends PApplet {
     scene.fit(1);
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
-      models[i] = new Node(scene, boxShape());
+      models[i] = new Node(boxShape());
       models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }

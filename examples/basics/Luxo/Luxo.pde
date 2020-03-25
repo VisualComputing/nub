@@ -53,12 +53,17 @@ void mouseMoved() {
 }
 
 void mouseDragged() {
-  if (mouseButton == LEFT)
-    scene.mouseSpin();
-  else if (mouseButton == RIGHT)
-    scene.mouseTranslate();
-  else
-    scene.scale(mouseX - pmouseX);
+  // no inertia for the nodes, but for the eye
+  if (mouseButton == LEFT) {
+    if (!scene.mouseSpinTag(0))
+      scene.mouseSpinEye(0.85);
+  } else if (mouseButton == RIGHT) {
+    if (!scene.mouseTranslateTag(0))
+      scene.mouseTranslateEye(0.85);
+  } else {
+    if (!scene.scaleTag(mouseX - pmouseX, 0))
+      scene.scaleEye(mouseX - pmouseX, 0.85);
+  }
 }
 
 void mouseWheel(MouseEvent event) {
