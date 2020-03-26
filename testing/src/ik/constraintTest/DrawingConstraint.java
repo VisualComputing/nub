@@ -25,7 +25,7 @@ public class DrawingConstraint  extends PApplet {
 
     ThetaControl t_lr, t_ud;
     BaseControl base;
-    Joint j0, j1;
+    Joint j0, j1, target;
     SimpleTRIK solver;
     boolean solve = false;
 
@@ -69,7 +69,7 @@ public class DrawingConstraint  extends PApplet {
         structure.add(j1);
 
         solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.CCD);
-        Joint target = new Joint(sceneConstraint, color(255,0,0), 0.2f * sceneConstraint.radius());
+        target = new Joint(sceneConstraint, color(255,0,0), 0.2f * sceneConstraint.radius());
         target.setRoot(true);
         solver.setTarget(target);
         target.set(j1);
@@ -91,10 +91,33 @@ public class DrawingConstraint  extends PApplet {
         updateControllers(constraint, t_lr, t_ud, base);
     }
 
+    public void cullThetaControls(boolean cull){
+        t_lr.cull(cull);
+        t_ud.cull(cull);
+    }
+
+    public void cullBaseControl(boolean cull){
+        base.cull(cull);
+    }
+
+    public void cullJoints(boolean cull){
+        j0.cull(cull);
+        target.cull(cull);
+    }
+
     public void draw() {
         handleMouse();
+        cullBaseControl(true);
+        cullThetaControls(true);
+        cullJoints(false);
         drawScene(sceneConstraint, "Constraint View");
+        cullBaseControl(true);
+        cullThetaControls(false);
+        cullJoints(true);
         drawScene(sceneTheta, "Side / Top View");
+        cullBaseControl(false);
+        cullThetaControls(true);
+        cullJoints(true);
         drawScene(sceneBase, "Front View");
         updateCostraint((BallAndSocket) j0.constraint(), t_lr, t_ud, base);
         if(solve) solver.solve();
