@@ -41,7 +41,7 @@ public class SimpleBuilder extends PApplet{
     }
 
     public void setup(){
-        Joint.markers = true;
+        //Joint.markers = true;
         //1. Create a scene
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
@@ -54,7 +54,7 @@ public class SimpleBuilder extends PApplet{
         scene.fit();
         //4. Create a Interactive Joint at the center of the scene
         radius = scene.radius() * 0.01f;
-        InteractiveJoint initial = new InteractiveJoint(scene, radius);
+        InteractiveJoint initial = new InteractiveJoint(radius);
         initial.setRoot(true);
         initial.setPickingThreshold(-0.01f);
     }
@@ -123,7 +123,7 @@ public class SimpleBuilder extends PApplet{
 
     public void keyPressed(){
         if(key == 'J' || key == 'j'){
-            InteractiveJoint initial = new InteractiveJoint(scene, radius);
+            InteractiveJoint initial = new InteractiveJoint(radius);
             initial.setRoot(true);
             initial.setPickingThreshold(-0.01f);
         }else if(key == 'P' || key == 'p'){

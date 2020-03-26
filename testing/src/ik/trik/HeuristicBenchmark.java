@@ -74,8 +74,8 @@ public class HeuristicBenchmark extends PApplet {
         //2. Generate Structures
         for(int i = 0; i < numSolvers; i++){
             float offset = numSolvers == 1 ? 0 : i * 2 * alpha * scene.radius()/(numSolvers - 1) - alpha * scene.radius();
-            int color = color(random(255), random(255), random(255));
-            structures.add(Util.generateChain(scene, numJoints, 0.7f* targetRadius, boneLength, new Vector(offset, 0, 0), color, randRotation, randLength));
+            int r = (int) random(255), g = (int) random(255), b = (int) random(255);
+            structures.add(Util.generateAttachedChain(numJoints, 0.7f* targetRadius, boneLength, new Vector(offset, 0, 0), r, g, b, randRotation, randLength));
         }
 
         //3. Apply constraints
@@ -83,7 +83,7 @@ public class HeuristicBenchmark extends PApplet {
             Util.generateConstraints(structure, constraintType, 0, scene.is3D());
         }
 
-        idleSkeleton = Util.copy(structures.get(0));
+        idleSkeleton = Util.detachedCopy(structures.get(0));
 
         //4. Set eye scene
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
@@ -111,7 +111,7 @@ public class HeuristicBenchmark extends PApplet {
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
             //8. Register task
-            TimingTask task = new TimingTask(scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     if(solve) solver.solve();

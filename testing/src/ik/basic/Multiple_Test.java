@@ -31,7 +31,7 @@ public class Multiple_Test extends PApplet {
         scene.setRadius(2000);
         scene.fit(1);
 
-        Joint root = new Joint(scene);
+        Joint root = new Joint();
         root.setRoot(true);
         generateTree(scene, root, branches, num, depth, 0, 0.5f * scene.radius()/((num + 1) * depth));
 
@@ -75,7 +75,7 @@ public class Multiple_Test extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        Node target = new Node(scene, redBall);
+        Node target = new Node(redBall);
         //Exact picking precision
         target.setPickingThreshold(0);
         return target;
@@ -90,12 +90,12 @@ public class Multiple_Test extends PApplet {
 
         for(int i = 0; i < branches; i++){
             //Add joint
-            Node child = new Joint(scene);
+            Node child = new Joint();
             child.setReference(root);
             child.rotate(new Vector(0,0,1), angle);
             child.translate(root.displacement(new Vector(0,l), child));
             for(int j = 0; j < num; j++){
-                Node next = new Joint(scene);
+                Node next = new Joint();
                 next.setReference(child);
                 next.translate(new Vector(0,l));
                 child = next;

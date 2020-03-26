@@ -38,17 +38,17 @@ public class SimpleCone  extends PApplet {
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
         //Generate a basic structure
-        Joint j1 = new Joint(scene, radius);
-        Joint j2 = new Joint(scene, radius);
+        Joint j1 = new Joint(radius);
+        Joint j2 = new Joint(radius);
         j2.setReference(j1);
         j2.translate(0,50,0);
-        Joint j3 = new Joint(scene, radius);
+        Joint j3 = new Joint(radius);
         j3.setReference(j2);
         j3.translate(30,30,0);
 
-        Joint j4 = new Joint(scene, radius);
+        Joint j4 = new Joint(radius);
         j4.translate(0,-30,0);
-        Joint j5 = new Joint(scene, radius);
+        Joint j5 = new Joint(radius);
         j5.translate(0,-50,0);
         j5.setReference(j4);
         BallAndSocket c4 = new BallAndSocket(radians(20), radians(30), radians(60),radians(40));

@@ -37,7 +37,7 @@ public class ContinuousTrajectoryExample {
 
     public static void generateExperiment(Util.SolverType type, Util.ConstraintType constraintType, int iterations, JSONObject jsonSolver){
         //1. Generate structure
-        List<Node> structure = Util.generateChain(numJoints, boneLength, randRotation, randLength);
+        List<Node> structure = Util.generateDetachedChain(numJoints, boneLength, randRotation, randLength);
         Node endEffector = structure.get(structure.size() - 1);
         //2. Apply constraints
         Util.generateConstraints(structure, constraintType, 0, true);
@@ -48,7 +48,7 @@ public class ContinuousTrajectoryExample {
         solver.setMaxIterations(iterations);
         solver.setMinDistance(-1);
         //5. Set target
-        Node target = new Node();
+        Node target = Node.detach(new Vector(), new Quaternion(), 1f);
         target.setPosition(endEffector.position());
         target.setOrientation(endEffector.orientation());
         solver.setTarget(endEffector, target);
@@ -122,7 +122,7 @@ public class ContinuousTrajectoryExample {
         JSONArray jsonPath = new JSONArray();
         PApplet pa = new PApplet();
         pa.randomSeed(0);
-        List<Node> chain = Util.generateChain(numJoints, boneLength, randRotation, randLength);
+        List<Node> chain = Util.generateDetachedChain(numJoints, boneLength, randRotation, randLength);
         Util.generateConstraints(chain, constraintType, 0, true);
         targetPositions = new ArrayList<Vector>();
         Vector init = chain.get(chain.size() - 1).position();
@@ -155,7 +155,7 @@ public class ContinuousTrajectoryExample {
         JSONArray jsonPath = new JSONArray();
         PApplet pa = new PApplet();
         pa.randomSeed(0);
-        List<Node> chain = Util.generateChain(numJoints, boneLength, randRotation, randLength);
+        List<Node> chain = Util.generateDetachedChain(numJoints, boneLength, randRotation, randLength);
         Util.generateConstraints(chain, constraintType, 0, true);
         targetPositions = new ArrayList<Vector>();
         float step = 0.01f;

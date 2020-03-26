@@ -61,8 +61,6 @@ public class CCDAnim extends PApplet {
     float targetRadius = 7;
     float boneLength = 50;
 
-    int color;
-
     CCDSolver solver; //IK Algorithm that uses Solver template
     CCDVisualizer visualizer; //A Visualizer manages a scene in which the IK algorithm will be animated
     VisualizerMediator mediator; //Since the interaction between a solver and a Visualizer is bidirectional a mediator is required to handle the events
@@ -96,12 +94,11 @@ public class CCDAnim extends PApplet {
         redBall.setFill(color(255,0,0));
 
         //create targets
-        target = new Node(scene, redBall);
+        target = new Node(redBall);
         target.setPickingThreshold(0);
 
         //create skeleton
-        color = color(212,0,255);
-        structure = Util.generateChain(scene, numJoints, targetRadius * 0.8f, boneLength, new Vector(), color);
+        structure = Util.generateAttachedChain(numJoints, targetRadius * 0.8f, boneLength, new Vector(), 212, 0 , 255);
 
         solver = new CCDSolver(structure);
         solver.enableMediator(true);
@@ -120,7 +117,7 @@ public class CCDAnim extends PApplet {
         target.setPosition(structure.get(numJoints - 1).position());
 
         //Defines a task to run the solver each 40 ms
-        TimingTask task = new TimingTask(scene) {
+        TimingTask task = new TimingTask() {
             @Override
             public void execute() {
                 if(solve) {
@@ -131,7 +128,7 @@ public class CCDAnim extends PApplet {
         task.run(40);
 
         //Defines a task to run the animation each 40 ms
-        TimingTask animTask = new TimingTask(scene) {
+        TimingTask animTask = new TimingTask() {
             @Override
             public void execute() {
                 if (anim) {

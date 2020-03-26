@@ -50,7 +50,7 @@ public class Puppet extends PApplet {
         redBall.setFill(color(255,0,0));
 
         for(String key : keys){
-            Node target = new Node(scene, redBall);
+            Node target = new Node(redBall);
             target.setPickingThreshold(0);
             targets.put(key, target);
         }
@@ -94,14 +94,14 @@ public class Puppet extends PApplet {
         ArrayList<Joint> skeleton = new ArrayList<Joint>();
         Vector bone = d1.normalize(null);
         bone.multiply(boneLength);
-        Joint j1 = new Joint(scene);
+        Joint j1 = new Joint();
         j1.setPosition(origin);
-        Joint j2 = new Joint(scene);
+        Joint j2 = new Joint();
         j2.setReference(j1);
         j2.translate(bone);
         bone = d2.normalize(null);
         bone.multiply(boneLength);
-        Joint j3 = new Joint(scene);
+        Joint j3 = new Joint();
         j3.setReference(j2);
         j3.translate(bone);
 

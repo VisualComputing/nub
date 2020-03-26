@@ -33,7 +33,7 @@ public class Multiple_Test2 extends PApplet {
         scene.setRadius(100);
         scene.fit(1);
 
-        Node root = generateStructure(scene);
+        Node root = generateStructure();
 
         //Add IK
         s = new TRIKTree(root);
@@ -76,15 +76,15 @@ public class Multiple_Test2 extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        Node target = new Node(scene, redBall);
+        Node target = new Node(redBall);
         //Exact picking precision
         target.setPickingThreshold(0);
         return target;
     }
 
-    public Node generateStructure(Scene scene){
-        Joint root = new Joint(scene);
-        Node n1 = new Joint(scene);
+    public Node generateStructure(){
+        Joint root = new Joint();
+        Node n1 = new Joint();
         n1.setReference(root);
         n1.setTranslation(-20, 0);
         BallAndSocket b1 = new BallAndSocket(radians(30), radians(30), radians(50), radians(60));
@@ -93,22 +93,22 @@ public class Multiple_Test2 extends PApplet {
         n1.setConstraint(b1);
 
 
-        Node n2 = new Joint(scene);
+        Node n2 = new Joint();
         n2.setReference(n1);
         n2.setTranslation(0, 20);
         Hinge h3 = new Hinge(radians(5), radians(90), n2.rotation().get(), new Vector(0,1,0), new Vector(-1,0,0));
         n2.setConstraint(h3);
 
-        Node n3 = new Joint(scene);
+        Node n3 = new Joint();
         n3.setReference(n2);
         n3.setTranslation(0, 20);
-        Node n4 = new Joint(scene);
+        Node n4 = new Joint();
         n4.setReference(root);
         n4.setTranslation(20, 0);
-        Node n5 = new Joint(scene);
+        Node n5 = new Joint();
         n5.setReference(n4);
         n5.setTranslation(0, 20);
-        Node n6 = new Joint(scene);
+        Node n6 = new Joint();
         n6.setReference(n5);
         n6.setTranslation(0, 20);
         root.setRoot(true);
@@ -116,7 +116,7 @@ public class Multiple_Test2 extends PApplet {
     }
 
 
-    public Node generateTree(Scene scene, Node root, int branches, int num, int depth, int cur, float length){
+    public Node generateTree(Node root, int branches, int num, int depth, int cur, float length){
 
 
 
@@ -127,12 +127,12 @@ public class Multiple_Test2 extends PApplet {
 
         for(int i = 0; i < branches; i++){
             //Add joint
-            Node child = new Joint(scene);
+            Node child = new Joint();
             child.setReference(root);
             child.rotate(new Vector(0,0,1), angle);
             child.translate(root.displacement(new Vector(0,l), child));
             for(int j = 0; j < num; j++){
-                Node next = new Joint(scene);
+                Node next = new Joint();
                 next.setReference(child);
                 next.translate(new Vector(0,l));
                 child = next;
@@ -143,7 +143,7 @@ public class Multiple_Test2 extends PApplet {
             }
 
             //recursive step:
-            generateTree(scene, child, branches, num, depth, cur + 1, length);
+            generateTree(child, branches, num, depth, cur + 1, length);
         }
         return root;
     }

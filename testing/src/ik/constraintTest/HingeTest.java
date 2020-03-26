@@ -49,7 +49,7 @@ public class HingeTest extends PApplet {
         redBall.setFill(color(255,0,0));
 
         for(int i = 0; i < 5; i++) {
-            Node target = new Node(scene, redBall);
+            Node target = new Node( redBall);
             target.setPickingThreshold(0);
             targets.add(target);
         }
@@ -91,7 +91,7 @@ public class HingeTest extends PApplet {
             s.setTarget(targets.get(i));
             if(i != 0)targets.get(i).setReference(targets.get(0));
             targets.get(i++).setPosition(s.endEffector().position());
-            TimingTask task = new TimingTask(scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     if(solve) s.solve();
@@ -107,7 +107,7 @@ public class HingeTest extends PApplet {
             s.setTarget(targets.get(i));
             targets.get(i).setReference(targets.get(0));
             targets.get(i++).setPosition(s.endEffector().position());
-            TimingTask task = new TimingTask(scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     if(solve) s.solve();
@@ -130,24 +130,24 @@ public class HingeTest extends PApplet {
     }
 
     public ArrayList<Node> generateStructure(float boneLength, Vector o){
-        Joint prev = new Joint(scene);
+        Joint prev = new Joint();
         Joint current = prev;
         Joint root = current;
         root.setRoot(true);
         //current.setRotation(Quaternion._random());
-        current = new Joint(scene);
+        current = new Joint();
         current.setReference(prev);
         prev = current;
         //current.setRotation(Quaternion._random());
         current.setPosition(0,boneLength,0);
         setConstraint(current, new Vector(0,1,0), new Vector(0,0,1));
-        current = new Joint(scene);
+        current = new Joint();
         current.setReference(prev);
         prev = current;
         //current.setRotation(Quaternion._random());
         current.setPosition(0,boneLength*2,0);
         setConstraint(current, new Vector(0,0,1), new Vector(1,0,0));
-        current = new Joint(scene);
+        current = new Joint();
         current.setReference(prev);
         //current.setRotation(Quaternion._random());
         current.setPosition(0,boneLength*2,boneLength*2);
@@ -161,7 +161,7 @@ public class HingeTest extends PApplet {
         Joint chainRoot = null;
         for (int i = 0; i < num_joints; i++) {
             Joint joint;
-            joint = new Joint(scene);
+            joint = new Joint();
             if (i == 0)
                 chainRoot = joint;
             if (prevJoint != null) joint.setReference(prevJoint);

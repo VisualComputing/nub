@@ -22,12 +22,13 @@ public class DelegationPanel extends Node {
 
     protected SimpleTRIK _solver;
     protected List<Slider> _sliders = new ArrayList<Slider>();
+    protected Scene _scene;
 
 
     public DelegationPanel(Scene scene, SimpleTRIK solver){
-        super(scene);
+        super();
         enableTagging(false);
-
+        _scene = scene;
         _gray1 = scene.pApplet().color(82,82,82); _gray2 = scene.pApplet().color(65,65,65); _gray3 = scene.pApplet().color(49,49,49); _gray4 = scene.pApplet().color(179,179,179);
         _red = scene.pApplet().color(202,62,71); _blue1 = scene.pApplet().color(23,34,59); _blue2 = scene.pApplet().color(38,56,89); _green1 = scene.pApplet().color(0,129,138);
         _yellow = scene.pApplet().color(249,210,118);
@@ -45,7 +46,7 @@ public class DelegationPanel extends Node {
 
         //set panel dimension
         float rh = scene.radius(), rw = rh*scene.aspectRatio();
-        translate(-rw, -rh);
+        translate(-rw, -rh,0);
 
         _width = 2 * rw;
         _height = 2 * rh;

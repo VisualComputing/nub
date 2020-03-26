@@ -10,11 +10,11 @@ import processing.core.PGraphics;
 
 public class InteractiveJoint extends Joint {
     protected Vector _desiredTranslation;
-    public InteractiveJoint(Scene scene, int color, float radius) {
-        super(scene, color, radius);
+    public InteractiveJoint(int red, int green, int blue, float radius) {
+        super(red, green, blue, radius);
     }
-    public InteractiveJoint(Scene scene, float radius) {
-        super(scene, radius);
+    public InteractiveJoint(float radius) {
+        super(radius);
     }
 
     @Override
@@ -49,14 +49,14 @@ public class InteractiveJoint extends Joint {
     }
 
     public void addChild(Scene scene, Scene focus, Vector mouse){
-        InteractiveJoint joint = new InteractiveJoint(scene, this.radius());
+        InteractiveJoint joint = new InteractiveJoint(this.radius());
         joint.setPickingThreshold(this.pickingThreshold());
         joint.setReference(this);
         joint.setTranslation(joint.translateDesired(focus, mouse));
     }
 
     public void removeChild(){
-        _graph.prune(this);
+        Graph.prune(this);
     }
 
     //------------------------------------

@@ -42,7 +42,7 @@ public class GeneralizedDistanceVSIterations {
 
     public static void generateExperiment(Util.SolverType type, StatisticsPerIteration[] stats, ArrayList<Float> hist, Util.ConstraintType constraintType, int iterations, int seed){
         //1. Generate structure
-        List<Node> structure = Util.generateChain(numJoints, boneLength, randRotation, randLength);
+        List<Node> structure = Util.generateDetachedChain(numJoints, boneLength, randRotation, randLength);
         Node endEffector = structure.get(structure.size() - 1);
         //2. Apply constraints
         Util.generateConstraints(structure, constraintType, seed, true);
@@ -71,7 +71,7 @@ public class GeneralizedDistanceVSIterations {
     }
 
     public static void generateRandomReachablePositions(int n, int seed, Util.ConstraintType constraintType){
-        List<Node> chain = Util.generateChain(numJoints, boneLength, randRotation, randLength);
+        List<Node> chain = Util.generateDetachedChain(numJoints, boneLength, randRotation, randLength);
         Util.generateConstraints(chain, constraintType, seed, true);
 
         targetPositions = new ArrayList<Vector>();
@@ -91,7 +91,7 @@ public class GeneralizedDistanceVSIterations {
     public static void generateRandomPath(int n, int seed, Util.ConstraintType constraintType){
         PApplet pa = new PApplet();
         pa.randomSeed(0);
-        List<Node> chain = Util.generateChain(numJoints, boneLength, randRotation, randLength);
+        List<Node> chain = Util.generateDetachedChain(numJoints, boneLength, randRotation, randLength);
         Util.generateConstraints(chain, constraintType, seed, true);
 
         targetPositions = new ArrayList<Vector>();

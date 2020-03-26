@@ -29,8 +29,8 @@ public class Slider extends Node {
     public void graphics(PGraphics pg) {
         pg.pushStyle();
         pg.stroke(_panel._green1);
-        pg.fill(graph().node() == this ? _panel._colorSliderHighlight : _panel._colorSlider);
-        pg.strokeWeight(graph().node() == this ? 3 : 1);
+        pg.fill(_panel._scene.node() == this ? _panel._colorSliderHighlight : _panel._colorSlider);
+        pg.strokeWeight(_panel._scene.node() == this ? 3 : 1);
         pg.rect(0, -_value * _panel._sliderHeight, _panel._sliderWidth, _value * _panel._sliderHeight);
         pg.fill(_panel._green1);
         pg.ellipse(_panel._sliderWidth * 0.5f, _endPoint.y(), _panel._sliderWidth * 0.1f,_panel._sliderWidth * 0.1f);
@@ -110,7 +110,7 @@ public class Slider extends Node {
 
 
     public Vector translateDesired(Vector point){
-        Vector delta = Vector.subtract(point, graph().screenLocation(position()));
-        return _translateDesired(graph(), delta.x(), delta.y(), 0, Math.min(graph().width(), graph().height()), this);
+        Vector delta = Vector.subtract(point, _panel._scene.screenLocation(position()));
+        return _translateDesired(_panel._scene, delta.x(), delta.y(), 0, Math.min(_panel._scene.width(), _panel._scene.height()), this);
     }
 }

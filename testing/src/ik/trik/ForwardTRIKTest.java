@@ -48,12 +48,18 @@ public class ForwardTRIKTest  extends PApplet {
         if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(280);
         scene.fit(1);
-        int color = color(random(255), random(255), random(255));
-        skeleton1 = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), -scene.radius()/2f), color, -1, 0);
-        color = color(random(255), random(255), random(255));
-        skeleton2 = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), color, -1, 0);
+        int red = (int) random(255);
+        int green = (int) random(255);
+        int blue = (int) random(255);
 
-        idle_sk = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), color(255), -1, 0);
+        skeleton1 = Util.generateAttachedChain(numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), -scene.radius()/2f), red, green, blue, -1, 0);
+
+        red = (int) random(255);
+        green = (int) random(255);
+        blue = (int) random(255);
+        skeleton2 = Util.generateAttachedChain(numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), red, green, blue, -1, 0);
+
+        idle_sk = Util.generateAttachedChain(numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), 255,255,255, -1, 0);
 
         //Util.generateConstraints(skeleton1, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
         //Util.generateConstraints(skeleton2, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
@@ -131,7 +137,7 @@ public class ForwardTRIKTest  extends PApplet {
         //4. relate targets with end effectors
         solver.setTarget(endEffector, target);
         //5. Create a Timing Task such that the solver executes each amount of time
-        TimingTask solverTask = new TimingTask(scene) {
+        TimingTask solverTask = new TimingTask() {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
@@ -155,10 +161,10 @@ public class ForwardTRIKTest  extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        Node target = new Node(scene){
+        Node target = new Node(){
             @Override
             public void graphics(PGraphics pGraphics){
-                scene.drawAxes(pGraphics,radius *1.5f);
+                Scene.drawAxes(pGraphics,radius *1.5f);
                 pGraphics.shape(redBall);
             }
         };
@@ -172,7 +178,7 @@ public class ForwardTRIKTest  extends PApplet {
          * A Joint will be represented as a ball
          * that is joined to its reference Node
          * */
-        Joint joint = new Joint(scene, radius);
+        Joint joint = new Joint(radius);
         joint.setReference(node);
         //Exact picking precision
         joint.setPickingThreshold(0);

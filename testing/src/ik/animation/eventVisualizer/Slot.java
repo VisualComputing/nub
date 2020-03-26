@@ -40,8 +40,8 @@ public class Slot extends Node {
     @Override
     public void graphics(PGraphics pg) {
         pg.pushStyle();
-        pg.stroke(graph().node() == this ? _colorHighLight : _colorLine);
-        pg.strokeWeight(graph().node() == this ? 3 : 1);
+        pg.stroke(_cell._board._scene.node() == this ? _colorHighLight : _colorLine);
+        pg.strokeWeight(_cell._board._scene.node() == this ? 3 : 1);
         pg.line(0,0, _endPoint.x(), _endPoint.y());
         pg.fill(_color);
         pg.ellipse(0,0,_cell._board._pointDiameter, _cell._board._pointDiameter);
@@ -113,8 +113,8 @@ public class Slot extends Node {
 
 
     public Vector translateDesired(Vector point){
-        Vector delta = Vector.subtract(point, graph().screenLocation(position()));
-        return _translateDesired(graph(), delta.x(), delta.y(), 0, Math.min(graph().width(), graph().height()), this);
+        Vector delta = Vector.subtract(point, _cell._board._scene.screenLocation(position()));
+        return _translateDesired(_cell._board._scene, delta.x(), delta.y(), 0, Math.min(_cell._board._scene.width(), _cell._board._scene.height()), this);
     }
 
 }

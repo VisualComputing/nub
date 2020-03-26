@@ -14,12 +14,12 @@ public class KeyFrame extends Node {
     protected Vector _desiredTranslation;
 
     public KeyFrame(Target target){
-        super(target.graph());
+        super();
         _target = target;
     }
 
     public KeyFrame(Target target, Vector translation, Quaternion rotation){
-        super(target.graph(), translation, rotation, 1);
+        super(translation, rotation, 1);
         _target = target;
     }
 
@@ -48,13 +48,13 @@ public class KeyFrame extends Node {
 
     public void remove(){
         _target.removeKeyFrame(this);
-        _graph.prune(this);
+        Graph.prune(this);
     }
 
     //------------------------------------
     //Interactive actions - same method found in Graph Class (duplicated cause of visibility)
     protected Vector _translateDesired(float dx, float dy, float dz, int zMax, Node node) {
-        Scene scene = (Scene) _graph;
+        Scene scene = _target.scene();
         if (scene.is2D() && dz != 0) {
             System.out.println("Warning: graph is 2D. Z-translation reset");
             dz = 0;
@@ -78,7 +78,7 @@ public class KeyFrame extends Node {
 
 
     public Vector translateDesired(Vector mouse){
-        Scene scene = (Scene) _graph;
+        Scene scene = _target.scene();
         float dx = mouse.x() - scene.screenLocation(position()).x();
         float dy = mouse.y() - scene.screenLocation(position()).y();
         return _translateDesired(dx, dy, 0, Math.min(scene.width(), scene.height()), this);

@@ -46,7 +46,7 @@ public class URDFTest extends PApplet {
 
 
         Joint.axes = true;
-        Joint.markers = true;
+        //Joint.markers = true;
         randomSeed(14);
         this.g.textureMode(NORMAL);
         scene = new Scene(this);
@@ -75,7 +75,7 @@ public class URDFTest extends PApplet {
             solver.setMinDistance(scene.radius() * 0.001f);
             solver.setTarget(branch.get(branch.size() - 1), target);
             target.setPosition(branch.get(branch.size() - 1).position().get());
-            TimingTask task = new TimingTask(scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     solver.solve();
@@ -129,7 +129,7 @@ public class URDFTest extends PApplet {
                                  0,   sa,       ca,      d     ,
                                  0,   0,        0,       1     , false);
 
-        Joint child = new Joint(scene, radius);
+        Joint child = new Joint(radius);
         child.setReference(reference);
         child.fromMatrix(mat);
         return child;

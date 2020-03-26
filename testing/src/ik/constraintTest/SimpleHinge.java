@@ -39,11 +39,11 @@ public class SimpleHinge extends PApplet {
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
         //Generate a basic structure
-        Joint j1 = new Joint(scene, radius);
-        Joint j2 = new Joint(scene, radius);
+        Joint j1 = new Joint(radius);
+        Joint j2 = new Joint(radius);
         j2.setReference(j1);
         j2.translate(0,50,0);
-        Joint j3 = new Joint(scene, radius);
+        Joint j3 = new Joint(radius);
         j3.setReference(j2);
         j3.translate(30,30,0);
 

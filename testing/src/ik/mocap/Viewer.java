@@ -218,7 +218,7 @@ public class Viewer extends PApplet{
             //chain.setMaxError(0.1f);
             //chain.setMinDistance(0.1f);
             chain.setTarget(limbs.get(target_names[i]), targets.get(target_names[i]));
-            TimingTask task = new TimingTask(scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     //if(solve) {
@@ -298,7 +298,7 @@ public class Viewer extends PApplet{
         HashMap<Integer, Node> map = new HashMap<Integer, Node>();
         map.put(branch.get(0).id(), reference);
         for (Node joint : branch) {
-            Joint newJoint = new Joint(scene);
+            Joint newJoint = new Joint();
             newJoint.setReference(map.get(joint.id()));
             newJoint.setPosition(joint.position().get());
             newJoint.setOrientation(joint.orientation().get());
@@ -308,7 +308,7 @@ public class Viewer extends PApplet{
             for (Node child : joint.children()) {
                 if(joint.children().size() > 1) {
                     //add a new joint per child
-                    Node dummy = new Node(scene);
+                    Node dummy = new Node();
                     dummy.setReference(newJoint);
                     dummy.setConstraint(newJoint.constraint());
                     dummy.setPosition(newJoint.position().get());

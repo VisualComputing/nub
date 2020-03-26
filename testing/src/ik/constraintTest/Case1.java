@@ -63,7 +63,7 @@ public class Case1 extends PApplet {
 
         //create targets
         for(int i = 0; i < numSolvers; i++) {
-            Node target = new Node(scene, redBall);
+            Node target = new Node(redBall);
             target.setPickingThreshold(0);
             targets.add(target);
         }
@@ -77,9 +77,9 @@ public class Case1 extends PApplet {
             int cols = row == rows - 1 ? solversPerRow - (rows * solversPerRow - numSolvers)  : solversPerRow;
             float xOffset = ((1.f * col)/ (cols - 1)) * scene.radius()  - scene.radius()/2;
             float yOffset = -((1.f * row)/ (rows - 1)) * scene.radius()  + scene.radius()/2;
-            int color = color(random(255), random(255), random(255));
+            int red = (int) random(255), green = (int) random(255), blue = (int) random(255);
 
-            structures.add(generateSkeleton(new Vector(xOffset, yOffset, 0), color));
+            structures.add(generateSkeleton(new Vector(xOffset, yOffset, 0), red, green, blue));
         }
 
         //create solvers
@@ -135,7 +135,7 @@ public class Case1 extends PApplet {
             solver.setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
 
-            TimingTask task = new TimingTask(scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     if(solve) {
@@ -174,14 +174,14 @@ public class Case1 extends PApplet {
 
     }
 
-    public ArrayList<Node> generateSkeleton(Vector position, int color){
+    public ArrayList<Node> generateSkeleton(Vector position, int red, int green, int blue){
         //3-Segment-Arm
         ArrayList<Node> skeleton = new ArrayList<>();
-        Joint j1 = new Joint(scene, color);
-        Joint j2 = new Joint(scene, color);
+        Joint j1 = new Joint(red, green, blue);
+        Joint j2 = new Joint(red, green, blue);
         j2.setReference(j1);
         j2.translate(boneLength, 0, 0);
-        Joint j3 = new Joint(scene);
+        Joint j3 = new Joint();
         j3.setReference(j2);
         Vector v = new Vector(boneLength, -boneLength, 0);
         v.normalize();

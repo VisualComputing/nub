@@ -22,13 +22,15 @@ public class Target extends Node {
     protected Vector _desiredTranslation;
     protected ArrayList<Vector> _last = new ArrayList<>();
     protected float _radius;
+    protected Scene _scene;
 
     public Interpolator interpolator(){
         return _interpolator;
     }
 
     public Target(Scene scene, float radius) {
-        super(scene);
+        super();
+        _scene = scene;
         _redBall = scene.is3D() ? scene.context().createShape(PConstants.SPHERE, radius * 2f) :
                 scene.context().createShape(PConstants.ELLIPSE, 0,0, radius * 4f, radius * 4f);
         _redBall.setStroke(false);
@@ -40,7 +42,7 @@ public class Target extends Node {
         setPickingThreshold(0);
 
         Target t = this;
-        TimingTask task = new TimingTask(scene) {
+        TimingTask task = new TimingTask() {
             @Override
             public void execute() {
                 _last.add(t.position());
@@ -60,14 +62,14 @@ public class Target extends Node {
     public void graphics(processing.core.PGraphics pGraphics){
         pGraphics.hint(PConstants.DISABLE_DEPTH_TEST);
         pGraphics.shape(_redBall);
-        ((Scene) graph()).drawAxes(pGraphics, _radius * 4);
+        Scene.drawAxes(pGraphics, _radius * 4);
         pGraphics.hint(PConstants.ENABLE_DEPTH_TEST);
     }
 
 
     public ArrayList<Vector> last(){ return _last; }
     public void drawPath(){
-        ((Scene) _graph).drawCatmullRom(_interpolator, 5);
+        _scene.drawCatmullRom(_interpolator, 5);
     }
 
     @Override
@@ -75,11 +77,11 @@ public class Target extends Node {
         String command = (String) gesture[0];
         if (command.matches("KeepSelected")) {
             if(!_selectedTargets.contains(this)){
-                _redBall.setFill(((Scene)graph()).pApplet().color(0,255,0));
+                _redBall.setFill(_scene.pApplet().color(0,255,0));
                 _selectedTargets.add(this);
             }
             else{
-                _redBall.setFill(((Scene)graph()).pApplet().color(255,0,0));
+                _redBall.setFill(_scene.pApplet().color(255,0,0));
                 _selectedTargets.remove(this);
             }
         } else if(command.matches("Add")){
@@ -96,7 +98,7 @@ public class Target extends Node {
             _desiredTranslation = null;
         } else if(command.matches("AddCurve")){
             FitCurve fitCurve = (FitCurve) gesture[1];
-            fitCurve.getCatmullRomCurve((Scene)this.graph(), ((Scene)this.graph()).screenLocation(this.position()).z());
+            fitCurve.getCatmullRomCurve(_scene, _scene.screenLocation(this.position()).z());
             _interpolator = fitCurve._interpolator;
             _interpolator.setNode(this);
             _interpolator.setSpeed(5f);
@@ -110,8 +112,8 @@ public class Target extends Node {
 
     public static void multipleTranslate(){
         for(Target target : _selectedTargets){
-            if(target.graph().node() != target)
-                ((Scene)target.graph()).translateNode(target, ((Scene) target.graph()).mouseDX(), ((Scene) target.graph()).mouseDY(), 0);
+            if(target._scene.node() != target)
+                target._scene.translateNode(target, target._scene.mouseDX(), target._scene.mouseDY(), 0);
         }
     }
 
@@ -148,33 +150,35 @@ public class Target extends Node {
     //------------------------------------
     //Interactive actions - same method found in Graph Class (duplicated cause of visibility)
     protected Vector _translateDesired(float dx, float dy, float dz, int zMax, Node node) {
-        Scene scene = (Scene) _graph;
-        if (scene.is2D() && dz != 0) {
+        if (_scene.is2D() && dz != 0) {
             System.out.println("Warning: graph is 2D. Z-translation reset");
             dz = 0;
         }
-        dx = scene.isEye(node) ? -dx : dx;
-        dy = scene.isRightHanded() ^ scene.isEye(node) ? -dy : dy;
-        dz = scene.isEye(node) ? dz : -dz;
+        dx = _scene.isEye(node) ? -dx : dx;
+        dy = _scene.isRightHanded() ^ _scene.isEye(node) ? -dy : dy;
+        dz = _scene.isEye(node) ? dz : -dz;
         // Scale to fit the screen relative vector displacement
-        if (scene.type() == Graph.Type.PERSPECTIVE) {
-            float k = (float) Math.tan(scene.fov() / 2.0f) * Math.abs(
-                    scene.eye().location(scene.isEye(node) ? scene.anchor() : node.position())._vector[2] * scene.eye().magnitude());
+        if (_scene.type() == Graph.Type.PERSPECTIVE) {
+            float k = (float) Math.tan(_scene.fov() / 2.0f) * Math.abs(
+                    _scene.eye().location(_scene.isEye(node) ? _scene.anchor() : node.position())._vector[2] * _scene.eye().magnitude());
             //TODO check me weird to find height instead of width working (may it has to do with fov?)
-            dx *= 2.0 * k / (scene.height() * scene.eye().magnitude());
-            dy *= 2.0 * k / (scene.height() *scene. eye().magnitude());
+            dx *= 2.0 * k / (_scene.height() * _scene.eye().magnitude());
+            dy *= 2.0 * k / (_scene.height() *_scene. eye().magnitude());
         }
         // this expresses the dz coordinate in world units:
         //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
-        Vector eyeVector = new Vector(dx, dy, dz * 2 * scene.radius() / zMax);
-        return node.reference() == null ? scene.eye().worldDisplacement(eyeVector) : node.reference().displacement(eyeVector, scene.eye());
+        Vector eyeVector = new Vector(dx, dy, dz * 2 * _scene.radius() / zMax);
+        return node.reference() == null ? _scene.eye().worldDisplacement(eyeVector) : node.reference().displacement(eyeVector, _scene.eye());
     }
 
 
     public Vector translateDesired(Vector mouse){
-        Scene scene = (Scene) _graph;
-        float dx = mouse.x() - scene.screenLocation(position()).x();
-        float dy = mouse.y() - scene.screenLocation(position()).y();
-        return _translateDesired(dx, dy, 0, Math.min(scene.width(), scene.height()), this);
+        float dx = mouse.x() - _scene.screenLocation(position()).x();
+        float dy = mouse.y() - _scene.screenLocation(position()).y();
+        return _translateDesired(dx, dy, 0, Math.min(_scene.width(), _scene.height()), this);
+    }
+
+    public Scene scene(){
+        return _scene;
     }
 }

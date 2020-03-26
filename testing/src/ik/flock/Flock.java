@@ -179,7 +179,7 @@ public class Flock extends PApplet {
         String  shapeFile = sketchPath() + shapePath + name + ".obj";
         String  textureFile = sketchPath() + shapePath + name + ".jpg";
         //Invert Y Axis and set Fill
-        objShape = new Node(scene);
+        objShape = new Node();
         objShape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
 
         List<Node> skeleton = fishSkeleton(objShape);
@@ -189,7 +189,7 @@ public class Flock extends PApplet {
         //Uncomment to use Linear Blending Skinning with CPU
         skinning.add(new CPULinearBlendSkinning(skeleton, scene.context(), shapeFile, textureFile, 200, true));
         //Adding IK behavior
-        Node target = new Node(scene);
+        Node target = new Node();
         target.setReference(objShape);
         target.setPosition(skeleton.get(skeleton.size() - 1).position());
         //Making a default Path that target must follow
@@ -200,22 +200,22 @@ public class Flock extends PApplet {
     }
 
     public List<Node>  fishSkeleton(Node reference) {
-        Node j1 = new Node(scene);
+        Node j1 = new Node();
         j1.setReference(reference);
         j1.setPosition(0, 10.8f, 93);
-        Node j2 = new Node(scene);
+        Node j2 = new Node();
         j2.setReference(j1);
         j2.setPosition(0, 2.3f, 54.7f);
-        Node j3 = new Node(scene);
+        Node j3 = new Node();
         j3.setReference(j2);
         j3.setPosition(0, 0.4f, 22);
-        Node j4 = new Node(scene);
+        Node j4 = new Node();
         j4.setReference(j3);
         j4.setPosition(0, 0, -18);
-        Node j5 = new Node(scene);
+        Node j5 = new Node();
         j5.setReference(j4);
         j5.setPosition(0, 1.8f, -54);
-        Node j6 = new Node(scene);
+        Node j6 = new Node();
         j6.setReference(j5);
         j6.setPosition(0, -1.1f, -95);
         return scene.branch(j1);
@@ -229,7 +229,7 @@ public class Flock extends PApplet {
         int nbKeyFrames = 10;
         float step = 2.0f * PI / (nbKeyFrames - 1);
         for (int i = 0; i < nbKeyFrames; i++) {
-            Node iFrame = new Node(scene);
+            Node iFrame = new Node();
             iFrame.setReference(reference);
             iFrame.setTranslation(new Vector(140 * sin(step * i), target.translation().y(), target.translation().z()));
             targetInterpolator.addKeyFrame(iFrame);

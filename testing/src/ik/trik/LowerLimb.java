@@ -38,13 +38,13 @@ public class LowerLimb extends PApplet {
         scene.setRadius(boneLength * numJoints);
         scene.fit();
         //Create a kinematic chain
-        target = createTarget(scene, radius * 1.5f);
+        target = createTarget(radius * 1.5f);
         List<Joint> skeleton = createSkeleton(scene, numJoints, boneLength, radius, color(255,0,255));
         //Add target
         //Place target at end effector position
         target.setPosition(skeleton.get(skeleton.size() - 1));
         //Define the target trajectory
-        createPath(scene, target, 9f, 7, 2, boneLength * numJoints * 0.2f, 10);
+        createPath(target, 9f, 7, 2, boneLength * numJoints * 0.2f, 10);
 
         //Create the IK solver
         SimpleTRIK solver = new SimpleTRIK(skeleton, SimpleTRIK.HeuristicMode.FINAL);
@@ -63,7 +63,7 @@ public class LowerLimb extends PApplet {
         solver2.setMaxError(scene.radius() * 0.001f);
         solver2.setTarget(skeleton2.get(skeleton2.size() - 1), target);
 
-        TimingTask task = new TimingTask(scene) {
+        TimingTask task = new TimingTask() {
             @Override
             public void execute() {
                 solver.solve();
@@ -81,21 +81,22 @@ public class LowerLimb extends PApplet {
         scene.drawCatmullRom(pathInterpolator,1);
     }
 
-    public Node createTarget(Scene scene, float radius){
+    public Node createTarget(float radius){
         PShape sphere = createShape(SPHERE, radius);
         sphere.setFill(color(255,0,0));
         sphere.setStroke(false);
-        return new Node(scene, sphere);
+        return new Node(sphere);
     }
 
     public List<Joint> createSkeleton(Scene scene, int numJoints, float boneLength, float radius, int col){
+        int r = (int) red(col), g = (int) green(col), b = (int) blue(col);
         List<Joint> skeleton = new ArrayList<Joint>();
-        Joint root = new Joint(scene, col, radius);
+        Joint root = new Joint(r, g, b, radius);
         root.setRoot(true);
         skeleton.add(root);
         Joint prev = root;
         for(int i = 0; i < numJoints; i++){
-            Joint joint = new Joint(scene, col, radius);
+            Joint joint = new Joint(r, g, b, radius);
             joint.setReference(prev);
             joint.translate(0, -boneLength,0);
             prev = joint;
@@ -106,7 +107,7 @@ public class LowerLimb extends PApplet {
     }
 
     //This part of the code defines a trajectory based on Lissajous curve
-    public void createPath(Scene scene, Node target, float x_speed, float y_speed, float z_speed, float radius, float detail){
+    public void createPath(Node target, float x_speed, float y_speed, float z_speed, float radius, float detail){
         pathInterpolator = new Interpolator(target);
         float step = 360 / detail;
         for(float angle = 0; angle < 360 + step; angle += step){
@@ -114,7 +115,7 @@ public class LowerLimb extends PApplet {
             float x = radius * cos(x_speed * rad);
             float y = radius * sin(y_speed * rad);
             float z = radius * sin(z_speed * rad);
-            Node n = new Node(scene);
+            Node n = new Node();
             n.setPosition(target);
             n.translate(x,y + radius * 1.2f,z);
             pathInterpolator.addKeyFrame(n);

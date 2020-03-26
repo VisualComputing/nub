@@ -68,8 +68,10 @@ public class VisualBenchmark extends PApplet {
 
         //2. Generate Structures
         for(int i = 0; i < numSolvers; i++){
-            int color = color(random(255), random(255), random(255));
-            structures.add(Util.generateChain(scene, numJoints, 0.3f* targetRadius, boneLength, new Vector(i * 2 * alpha * scene.radius()/(numSolvers - 1) - alpha * scene.radius(), 0, 0), color, randRotation, randLength));
+            int red = (int) random(255);
+            int green = (int) random(255);
+            int blue = (int) random(255);
+            structures.add(Util.generateAttachedChain(numJoints, 0.3f* targetRadius, boneLength, new Vector(i * 2 * alpha * scene.radius()/(numSolvers - 1) - alpha * scene.radius(), 0, 0), red, green, blue, randRotation, randLength));
         }
 
         //3. Apply constraints
@@ -95,7 +97,7 @@ public class VisualBenchmark extends PApplet {
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
             //8. Register task
-            TimingTask task = new TimingTask(scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     if(solve) solver.solve();

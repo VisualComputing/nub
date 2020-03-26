@@ -135,7 +135,7 @@ public class RegisterIK extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        Node target = new Node(scene, redBall);
+        Node target = new Node(redBall);
         //Exact picking precision
         target.setPickingThreshold(0);
         return target;
@@ -147,15 +147,14 @@ public class RegisterIK extends PApplet {
         * that is joined to its reference Node
         * */
 
-        Node joint = new Node(scene){
+        Node joint = new Node(){
             @Override
             public void graphics(PGraphics pg){
-                Scene scene = (Scene) this._graph;
                 pg.pushStyle();
                 if (drawLine) {
                     pg.stroke(255);
                     Vector v = location(new Vector(), reference());
-                    if (scene.is2D()) {
+                    if (pg.is2D()) {
                         pg.line(0, 0, v.x(), v.y());
                     } else {
                         pg.line(0, 0, 0,  v.x(), v.y(), v.z());
@@ -163,7 +162,7 @@ public class RegisterIK extends PApplet {
                 }
                 pg.fill(color(0,255,0));
                 pg.noStroke();
-                if (scene.is2D()) pg.ellipse(0, 0, radius*2, radius*2);
+                if (pg.is2D()) pg.ellipse(0, 0, radius*2, radius*2);
                 else pg.sphere(radius);
                 pg.popStyle();
             }

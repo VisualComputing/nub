@@ -38,12 +38,12 @@ public class TargetWithDirection  extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        target = new Node(scene, redBall);
+        target = new Node(redBall);
         target.setPickingThreshold(0);
 
         //Generate a basic structure
         for(int i = 0 ; i < numJoints; i++){
-            Joint j = new Joint(scene,radius);
+            Joint j = new Joint(radius);
             if(i != 0) {
                 j.setReference(joints.get(joints.size() - 1));
                 j.translate(50, 0, 0);
@@ -55,7 +55,7 @@ public class TargetWithDirection  extends PApplet {
         //Define arrow translation based on structure
         target.setPosition(joints.get(numJoints - 1).position());
 
-        Arrow arrow = new Arrow(scene, target, new Vector(50,0,0),  color(255,0,0));
+        Arrow arrow = new Arrow(target, new Vector(50,0,0),  color(255,0,0));
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
@@ -63,7 +63,7 @@ public class TargetWithDirection  extends PApplet {
         solver.setTimesPerFrame(1f);
         solver.setTargetDirection(new Vector(1,0,0));
         solver.setTarget(target);
-        TimingTask task = new TimingTask(scene) {
+        TimingTask task = new TimingTask() {
             @Override
             public void execute() {
                 if(solve) solver.solve();
@@ -108,7 +108,7 @@ public class TargetWithDirection  extends PApplet {
         } else if (mouseButton == RIGHT) {
             if(scene.node() instanceof Arrow){
                 Vector vector = new Vector(scene.mouseX(), scene.mouseY());
-                ((Arrow) scene.node()).applyReferenceRotation(vector);
+                ((Arrow) scene.node()).applyReferenceRotation(scene, vector);
             }else {
                 scene.mouseTranslate();
             }

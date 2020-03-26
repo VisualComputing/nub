@@ -55,7 +55,7 @@ public class ConstrainedTRIK extends PApplet {
         scene.setRadius(280);
         scene.fit(1);
         //Create the Skeleton (chain described above)
-        trik = createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.TRIK);
+        trik = createStructure(scene, segments, boneLength, radius, 0,0,255, new Vector(boneLength*5, 0,0), IKMode.TRIK);
     }
 
     public void draw() {
@@ -67,29 +67,29 @@ public class ConstrainedTRIK extends PApplet {
         scene.endHUD();
     }
 
-    public Solver createStructure(Scene scene, int segments, float length, float radius, int color, Vector translation, IKMode mode){
-        Node reference = new Node(scene);
+    public Solver createStructure(Scene scene, int segments, float length, float radius, int red, int green, int blue, Vector translation, IKMode mode){
+        Node reference = new Node();
         reference.translate(translation);
 
         //1. Create reference Frame
-        Joint root = new Joint(scene, color(255,0,0), radius);
+        Joint root = new Joint(255,0,0, radius);
         root.setRoot(true);
         root.setReference(reference);
 
         //2. Create Targets, Limbs & Solvers
         Node target = createTarget(scene, radius*1.2f);
-        return createLimb(scene, segments, length, radius, color, root, target, new Vector(length,length,0), mode);
+        return createLimb(scene, segments, length, radius, red, green, blue, root, target, new Vector(length,length,0), mode);
     }
 
-    public Solver createLimb(Scene scene, int segments, float length, float radius, int color, Node reference, Node target, Vector translation, IKMode mode){
+    public Solver createLimb(Scene scene, int segments, float length, float radius, int red, int green, int blue, Node reference, Node target, Vector translation, IKMode mode){
         target.setReference(reference.reference());
         ArrayList<Node> joints = new ArrayList<>();
-        Joint root = new Joint(scene, color, radius);
+        Joint root = new Joint(red, green, blue, radius);
         root.setReference(reference);
         joints.add(root);
 
         for(int i = 0; i < max(segments, 2); i++){
-            Joint middle = new Joint(scene, color, radius);
+            Joint middle = new Joint(red, green, blue, radius);
             middle.setReference(joints.get(i));
             middle.translate(0, length, 0);
             if(i < max(segments, 2) - 1) {
@@ -105,7 +105,7 @@ public class ConstrainedTRIK extends PApplet {
         cone.setRestRotation(joints.get(joints.size() - 1).rotation().get(), new Vector(0,-1,0), new Vector(0,0,1));
         //joints.get(joints.size() - 1).setConstraint(cone);
 
-        Joint low = new Joint(scene, color, radius);
+        Joint low = new Joint(red, green, blue, radius);
         low.setReference(joints.get(joints.size() - 1));
         low.translate(0,0,length);
 
@@ -155,7 +155,7 @@ public class ConstrainedTRIK extends PApplet {
         if (!debug) solver.setTimesPerFrame(5);
         else solver.setTimesPerFrame(5f);
         target.setPosition(limb.get(limb.size() - 1).position());
-        TimingTask task = new TimingTask(scene) {
+        TimingTask task = new TimingTask() {
             @Override
             public void execute() {
                 if (solve) solver.solve();
@@ -178,7 +178,7 @@ public class ConstrainedTRIK extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        Node target = new Node(scene){
+        Node target = new Node(){
             @Override
             public void graphics(PGraphics pGraphics){
                 scene.drawAxes(pGraphics,radius *1.5f);
@@ -190,12 +190,12 @@ public class ConstrainedTRIK extends PApplet {
         return target;
     }
 
-    public Node createJoint(Scene scene, Node node, Vector translation, float radius, boolean drawLine){
+    public Node createJoint(Node node, Vector translation, float radius, boolean drawLine){
         /*
          * A Joint will be represented as a ball
          * that is joined to its reference Node
          * */
-        Joint joint = new Joint(scene, radius);
+        Joint joint = new Joint(radius);
         joint.setReference(node);
         //Exact picking precision
         joint.setPickingThreshold(0);

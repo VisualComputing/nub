@@ -225,10 +225,10 @@ public class Util {
 
     public static Node createTarget(Scene scene, PShape shape, float targetRadius){
         PGraphics pg = scene.context();
-        return new Node(scene){
+        return new Node(){
             @Override
             public void visit() {
-                scene.drawAxes(targetRadius * 2);
+                Scene.drawAxes(pg,targetRadius * 2);
                 if(scene.node() == this){
                     shape.setFill(pg.color(0,255,0));
                 }else{
@@ -259,11 +259,11 @@ public class Util {
         return targets;
     }
 
-    public static ArrayList<Node> generateChain(Scene scene, int numJoints, float radius, float boneLength, Vector translation, int color) {
-        return generateChain(scene, numJoints, radius, boneLength, translation, color, -1, 0);
+    public static ArrayList<Node> generateAttachedChain(int numJoints, float radius, float boneLength, Vector translation, int red, int green, int blue) {
+        return generateAttachedChain(numJoints, radius, boneLength, translation, red, green, blue, -1, 0);
     }
 
-    public static ArrayList<Node> generateChain(Scene scene, int numJoints, float radius, float boneLength, Vector translation, int color, int randRotation, int randLength) {
+    public static ArrayList<Node> generateAttachedChain(int numJoints, float radius, float boneLength, Vector translation, int red, int green, int blue, int randRotation, int randLength) {
         Random r1 = randRotation != -1 ? new Random(randRotation) : null;
         Random r2 = randLength != -1 ? new Random(randLength) : null;
 
@@ -271,7 +271,7 @@ public class Util {
         Joint chainRoot = null;
         for (int i = 0; i < numJoints; i++) {
             Joint joint;
-            joint = new Joint(scene, color, radius);
+            joint = new Joint(red, green, blue, radius);
             if (i == 0)
                 chainRoot = joint;
             if (prevJoint != null) joint.setReference(prevJoint);
@@ -299,16 +299,16 @@ public class Util {
         chainRoot.setTranslation(translation);
         //chainRoot.setupHierarchy();
         chainRoot.setRoot(true);
-        return (ArrayList) scene.branch(chainRoot);
+        return (ArrayList) Scene.branch(chainRoot);
     }
 
-    public static List<Node> generateChain(Graph graph, int numJoints, float boneLength, int randRotation, int randLength) {
+    public static List<Node> generateAttachedChain(int numJoints, float boneLength, int randRotation, int randLength) {
         List<Node> chain = new ArrayList<Node>();
         Random r1 = randRotation != -1 ? new Random(randRotation) : null;
         Random r2 = randLength != -1 ? new Random(randLength) : null;
         Node prevJoint = null;
         for (int i = 0; i < numJoints; i++) {
-            Node joint = new Node(graph);
+            Node joint = new Node();
             if (i == 0)
             if (prevJoint != null) joint.setReference(prevJoint);
             float x = 0;
@@ -335,13 +335,13 @@ public class Util {
     }
 
 
-    public static List<Node> generateChain(int numJoints, float boneLength, int randRotation, int randLength) {
+    public static List<Node> generateDetachedChain(int numJoints, float boneLength, int randRotation, int randLength) {
         List<Node> chain = new ArrayList<Node>();
         Random r1 = randRotation != -1 ? new Random(randRotation) : null;
         Random r2 = randLength != -1 ? new Random(randLength) : null;
         Node prevJoint = null;
         for (int i = 0; i < numJoints; i++) {
-            Node joint = new Node();
+            Node joint = Node.detach(new Vector(), new Quaternion(), 1f);
             if (prevJoint != null) joint.setReference(prevJoint);
             float x = 0;
             float y = 1;
@@ -583,14 +583,14 @@ public class Util {
         pg.popStyle();
     }
 
-    public static ArrayList<Node> copy(List<? extends Node> chain) {
+    public static ArrayList<Node> detachedCopy(List<? extends Node> chain) {
         ArrayList<Node> copy = new ArrayList<Node>();
         Node reference = chain.get(0).reference();
         if (reference != null) {
-            reference = new Node(reference.position().get(), reference.orientation().get(), 1);
+            reference = Node.detach(reference.position().get(), reference.orientation().get(), 1);
         }
         for (Node joint : chain) {
-            Node newJoint = new Node();
+            Node newJoint = Node.detach(new Vector(), new Quaternion(), 1f);
             newJoint.setReference(reference);
             newJoint.setPosition(joint.position().get());
             newJoint.setOrientation(joint.orientation().get());

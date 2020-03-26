@@ -53,7 +53,7 @@ public class Viewer extends PApplet{
 
         skeletons = new ArrayList<Skeleton>();
 
-        skeletons.add(new Skeleton(parser, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL, scene, color(0,255,0), scene.radius() * 0.01f));
+        skeletons.add(new Skeleton(parser, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL, scene, 0,255,0, scene.radius() * 0.01f));
         //skeletons.add(new Skeleton(parser, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL, scene, color(255,0,0), scene.radius() * 0.01f));
         parser.root().cull(true);
         //skeleton._root.cull(true);
@@ -152,21 +152,21 @@ public class Viewer extends PApplet{
         HashMap<String, Node> _targets;
         float _radius;
 
-        public Skeleton(BVHLoader loader, SimpleTRIK.HeuristicMode mode, Scene scene, int color, float radius){
+        public Skeleton(BVHLoader loader, SimpleTRIK.HeuristicMode mode, Scene scene, int red, int green, int blue, float radius){
             _scene = scene;
             _radius = radius;
-            _reference = new Node(scene);
+            _reference = new Node();
             _reference.enableTagging(false);
-            _createSkeleton(loader, color, radius);
+            _createSkeleton(loader, red, green, blue, radius);
             _createSolver(mode);
         }
 
-        protected void _createSkeleton(BVHLoader loader, int color, float radius){
+        protected void _createSkeleton(BVHLoader loader, int red, int green, int blue, float radius){
             HashMap<Node, Joint> pairs = new HashMap<>();
             _structure = new HashMap<>();
             _jointToNode = new HashMap<>();
             for(Node node : loader.branch()){
-                Joint joint = new Joint(_scene, color, radius);
+                Joint joint = new Joint(red, green, blue, radius);
                 Joint reference = pairs.get(node.reference());
                 if(reference != null){
                     joint.setReference(reference);
@@ -190,7 +190,7 @@ public class Viewer extends PApplet{
 
 
         protected void duplicateBone(Joint j_i, Joint j_i1){
-            Joint j_mid = new Joint(scene, j_i.color(), j_i.radius());
+            Joint j_mid = new Joint(j_i.red(), j_i.green(), j_i.blue(), j_i.radius());
             Vector v = j_i1.translation().get();
             j_mid.setReference(j_i);
             j_mid.setTranslation(Vector.multiply(v, 0.5f));
@@ -222,7 +222,7 @@ public class Viewer extends PApplet{
             _solver.setMaxIterations(10);
 
             //add task to scene
-            TimingTask task = new TimingTask(_scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     _solver.solve();

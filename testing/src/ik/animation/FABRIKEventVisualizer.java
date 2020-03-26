@@ -73,8 +73,8 @@ public class FABRIKEventVisualizer extends PApplet {
         //Set Kinematic scene
         ikScene = new Scene(this, P3D, width, height , 0, 0);
         //create target
-        Node target = new Node(animScene);
-        structure = Util.generateChain(ikScene, numJoints, targetRadius * 0.8f, boneLength, new Vector(), color(255));
+        Node target = new Node();
+        structure = Util.generateAttachedChain(numJoints, targetRadius * 0.8f, boneLength, new Vector(), 255,255,255);
         solver = new ChainSolver(structure);
         solver.enableMediator(true);
         //Do only on iteration as we care just about plain events

@@ -311,34 +311,34 @@ public class FitCurve {
             Vector v = curve.evaluate(0);
             v.setZ(depth);
             v = scene.location(v);
-            Node f = new Node(scene);
+            Node f = new Node();
             f.setPosition(v);
             _interpolator.addKeyFrame(f);
             if(i == 0) {
                 v = curve.evaluate(0.15f);
                 v.setZ(depth);
                 v = scene.location(v);
-                f = new Node(scene);
+                f = new Node();
                 f.setPosition(v);
                 _interpolator.addKeyFrame(f);
             }
             v = curve.evaluate(0.333f);
             v.setZ(depth);
             v = scene.location(v);
-            f = new Node(scene);
+            f = new Node();
             f.setPosition(v);
             _interpolator.addKeyFrame(f);
             v = curve.evaluate(0.666f);
             v.setZ(depth);
             v = scene.location(v);
-            f = new Node(scene);
+            f = new Node();
             f.setPosition(v);
             _interpolator.addKeyFrame(f);
             if(i == _curves.size() - 1) {
                 v = curve.evaluate(1);
                 v.setZ(depth);
                 v = scene.location(v);
-                f = new Node(scene);
+                f = new Node();
                 f.setPosition(v);
                 _interpolator.addKeyFrame(f);
             }

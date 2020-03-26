@@ -19,7 +19,7 @@ public class Label extends Node {
         setTranslation(0, -_board._offsetHeight);
         _colorLabel = _board._colorBoardBackground;
         _colorText = _board._colorText;
-        _font36 = ((Scene)graph()).pApplet().createFont("Arial", 48, true);//loadFont("FreeSans-36.vlw");
+        _font36 = board._font36;
     }
 
     public Label(EventCell cell){
@@ -28,7 +28,7 @@ public class Label extends Node {
         setTranslation(0, -_board._offsetHeight);
         _colorLabel = cell._colorCell;
         _colorText = cell._board._colorText;
-        _font36 = ((Scene)graph()).pApplet().createFont("Arial", 48, true);//loadFont("FreeSans-36.vlw");
+        _font36 = _board._font36;
     }
 
     public void setText(String text){

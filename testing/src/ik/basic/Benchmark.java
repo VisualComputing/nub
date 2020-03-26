@@ -40,7 +40,7 @@ public class Benchmark {
         Node prevJoint = null;
         for (int i = 0; i < num_joints; i++) {
             Node joint;
-            joint = new Node();
+            joint = Node.detach(new Vector(), new Quaternion(), 1f);
             if (prevJoint != null) joint.setReference(prevJoint);
             float x = 0;
             float z = 1;
@@ -60,10 +60,10 @@ public class Benchmark {
         ArrayList<Node> copy = new ArrayList<Node>();
         Node reference = chain.get(0).reference();
         if (reference != null) {
-            reference = new Node(reference.position().get(), reference.orientation().get(),1);
+            reference = Node.detach(reference.position().get(), reference.orientation().get(),1);
         }
         for (Node joint : chain) {
-            Node newJoint = new Node();
+            Node newJoint = Node.detach(new Vector(), new Quaternion(), 1f);
             newJoint.setReference(reference);
             newJoint.setPosition(joint.position().get());
             newJoint.setOrientation(joint.orientation().get());

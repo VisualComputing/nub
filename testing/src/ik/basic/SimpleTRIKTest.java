@@ -49,12 +49,12 @@ public class SimpleTRIKTest extends PApplet {
         if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(280);
         scene.fit(1);
-        int color = color(random(255), random(255), random(255));
-        skeleton_fabrik = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), -scene.radius()/2f), color, -1, 0);
-        color = color(random(255), random(255), random(255));
-        skeleton_trik = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), color, -1, 0);
+        int red = (int) random(255), green = (int) random(255), blue = (int) random(255);
+        skeleton_fabrik = Util.generateAttachedChain(numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), -scene.radius()/2f), red, green, blue, -1, 0);
+        red = (int) random(255); green = (int) random(255); blue = (int) random(255);
+        skeleton_trik = Util.generateAttachedChain(numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), red, green, blue, -1, 0);
 
-        idle_sk = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), color(255), -1, 0);
+        idle_sk = Util.generateAttachedChain(numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), 255,255,255, -1, 0);
 
         //Util.generateConstraints(skeleton_fabrik, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
         Util.generateConstraints(skeleton_trik, Util.ConstraintType.CONE_ELLIPSE, -1, scene.is3D());
@@ -72,8 +72,8 @@ public class SimpleTRIKTest extends PApplet {
 
     public void draw() {
         if(((TRIK) trik)._singleStep && ((TRIK) trik)._stepCounter > 1){
-            if(((TRIK) trik)._stepCounter > 2) ((Joint)(((TRIK) trik).copyChain().get(((TRIK) trik)._stepCounter - 3))).setColor(color(255,0,0));
-            ((Joint)(((TRIK) trik).copyChain().get(((TRIK) trik)._stepCounter - 2))).setColor(255);
+            if(((TRIK) trik)._stepCounter > 2) ((Joint)(((TRIK) trik).copyChain().get(((TRIK) trik)._stepCounter - 3))).setColor(255,0,0);
+            ((Joint)(((TRIK) trik).copyChain().get(((TRIK) trik)._stepCounter - 2))).setColor(255, 255, 255);
         }
 
         background(0);
@@ -145,7 +145,7 @@ public class SimpleTRIKTest extends PApplet {
         //4. relate targets with end effectors
         solver.setTarget(endEffector, target);
         //5. Create a Timing Task such that the solver executes each amount of time
-        TimingTask solverTask = new TimingTask(scene) {
+        TimingTask solverTask = new TimingTask() {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
@@ -169,10 +169,10 @@ public class SimpleTRIKTest extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        Node target = new Node(scene){
+        Node target = new Node(){
             @Override
             public void graphics(PGraphics pGraphics){
-                scene.drawAxes(pGraphics,radius *1.5f);
+                Scene.drawAxes(pGraphics,radius *1.5f);
                 pGraphics.shape(redBall);
             }
         };
@@ -186,7 +186,7 @@ public class SimpleTRIKTest extends PApplet {
          * A Joint will be represented as a ball
          * that is joined to its reference Node
          * */
-        Joint joint = new Joint(scene, radius);
+        Joint joint = new Joint(radius);
         joint.setReference(node);
         //Exact picking precision
         joint.setPickingThreshold(0);

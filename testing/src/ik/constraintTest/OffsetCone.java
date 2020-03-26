@@ -63,9 +63,9 @@ public class OffsetCone extends PApplet {
             int cols = row == rows - 1 ? solversPerRow - (rows * solversPerRow - numSolvers)  : solversPerRow;
             float xOffset = ((1.f * col)/ (cols - 1)) * scene.radius()  - scene.radius()/2;
             float yOffset = -((1.f * row)/ (rows - 1)) * scene.radius()  + scene.radius()/2;
-            int color = color(random(255), random(255), random(255));
+            int red = (int) random(255), green = (int) random(255), blue = (int) random(255);
 
-            structures.add(createLimb(new Vector(xOffset, yOffset, 0), color));
+            structures.add(createLimb(new Vector(xOffset, yOffset, 0), red, green, blue));
         }
 
         //5. generate solvers
@@ -109,7 +109,7 @@ public class OffsetCone extends PApplet {
             solver.setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
 
-            TimingTask task = new TimingTask(scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     if(solve) {
@@ -135,19 +135,19 @@ public class OffsetCone extends PApplet {
 
     }
 
-    public ArrayList<Node> createLimb(Vector position, int color){
+    public ArrayList<Node> createLimb(Vector position, int red, int green, int blue){
         ArrayList<Node> limb = new ArrayList<>();
 
         //Create a simple limb
-        Joint j1 = new Joint(scene, color, targetRadius * 0.7f);
+        Joint j1 = new Joint(red, green, blue, targetRadius * 0.7f);
         j1.setTranslation(0,90,0);
-        Joint j2 = new Joint(scene, color, targetRadius * 0.7f);
+        Joint j2 = new Joint(red, green, blue, targetRadius * 0.7f);
         j2.setReference(j1);
         j2.setTranslation(50,30,0);
-        Joint j3 = new Joint(scene, color, targetRadius * 0.7f);
+        Joint j3 = new Joint(red, green, blue, targetRadius * 0.7f);
         j3.setReference(j2);
         j3.setTranslation(50,-80,0);
-        Joint j4 = new Joint(scene, color, targetRadius * 0.7f);
+        Joint j4 = new Joint(red, green, blue, targetRadius * 0.7f);
         j4.setReference(j3);
         j4.setTranslation(0,-80,0);
         j1.setRoot(true);

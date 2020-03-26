@@ -116,12 +116,15 @@ public class DrawingHinge  extends PApplet {
         float _min = 20, _max = 20;
         float _pmin = 20, _pmax = 20;
         boolean _modified = false;
+        Scene _scene;
+
 
         Vector _initial, _end;
         String _min_name, _max_name;
 
-        public ThetaControl(Graph graph, int color){
-            super(graph);
+        public ThetaControl(Scene scene, int color){
+            super();
+            _scene = scene;
             _color = color;
             setPickingThreshold(0);
             setHighlighting(0);
@@ -157,15 +160,15 @@ public class DrawingHinge  extends PApplet {
         public void graphics(PGraphics pg) {
             pg.pushStyle();
             //Draw base according to each radius
-            pg.fill(_color, graph().node() == this ? 255 : 100);
+            pg.fill(_color, _scene.node() == this ? 255 : 100);
             pg.noStroke();
-            drawArc(pg, graph().radius()*0.7f, -_min , _max, 30);
+            drawArc(pg, _scene.radius()*0.7f, -_min , _max, 30);
             //draw semi-axe
             pg.fill(255);
             pg.stroke(255);
             pg.strokeWeight(3);
-            pg.line(0,0, graph().radius()*0.7f, 0);
-            pg.ellipse(graph().radius()*0.7f,0, 3,3);
+            pg.line(0,0, _scene.radius()*0.7f, 0);
+            pg.ellipse(_scene.radius()*0.7f,0, 3,3);
 
             pg.fill(255);
             pg.stroke(255);
@@ -181,15 +184,15 @@ public class DrawingHinge  extends PApplet {
                 pg.fill(pg.color(255));
             }
 
-            ((Scene) graph()).beginHUD(pg);
-            Vector min_position = graph().screenLocation(new Vector(graph().radius()*0.7f * (float) Math.cos(-_min), graph().radius()*0.7f * (float) Math.sin(-_min)), this);
-            Vector max_position = graph().screenLocation(new Vector(graph().radius()*0.7f * (float) Math.cos(_max), graph().radius()*0.7f * (float) Math.sin(_max)), this);
+            _scene.beginHUD(pg);
+            Vector min_position = _scene.screenLocation(new Vector(_scene.radius()*0.7f * (float) Math.cos(-_min), _scene.radius()*0.7f * (float) Math.sin(-_min)), this);
+            Vector max_position = _scene.screenLocation(new Vector(_scene.radius()*0.7f * (float) Math.cos(_max), _scene.radius()*0.7f * (float) Math.sin(_max)), this);
             pg.fill(255);
             pg.textAlign(LEFT, CENTER);
             pg.textFont(font, 16);
             pg.text("\u03B8 " + _min_name, min_position.x() + 5, min_position.y() );
             pg.text("\u03B8 " + _max_name, max_position.x() + 5, max_position.y() );
-            ((Scene) graph()).endHUD(pg);
+            _scene.endHUD(pg);
             pg.popStyle();
         }
 
@@ -207,12 +210,12 @@ public class DrawingHinge  extends PApplet {
             } else if(command.matches("OnScaling")){
                 if(_initial == null){
                     //Get initial point
-                    _initial = graph().location((Vector) gesture[1], this);
+                    _initial = _scene.location((Vector) gesture[1], this);
                     _pmin = _min;
                     _pmax = _max;
                 }else{
                     //Get final point
-                    _end = graph().location((Vector) gesture[1], this);
+                    _end = _scene.location((Vector) gesture[1], this);
                     scale();
                 }
             } else if(command.matches("Clear")){
@@ -266,9 +269,11 @@ public class DrawingHinge  extends PApplet {
         public static float constraintFactor = 0.8f;
         //set to true only when the joint is the root (for rendering purposes)
         protected boolean _isRoot = false;
+        protected Scene _scene;
 
         public Joint(Scene scene, int color, float radius){
-            super(scene);
+            super();
+            _scene = scene;
             _color = color;
             _radius = radius;
             setPickingThreshold(-_radius*2);
@@ -289,7 +294,6 @@ public class DrawingHinge  extends PApplet {
 
         @Override
         public void graphics(PGraphics pg){
-            Scene scene = (Scene) this._graph;
             if(!depth)pg.hint(PConstants.DISABLE_DEPTH_TEST);
             pg.pushStyle();
             if (!_isRoot) {
@@ -297,7 +301,7 @@ public class DrawingHinge  extends PApplet {
                 pg.stroke(_color);
                 Vector v = location(new Vector(), reference());
                 float m = v.magnitude();
-                if (scene.is2D()) {
+                if (_scene.is2D()) {
                     pg.line(_radius * v.x() / m, _radius * v.y() / m, (m - _radius) * v.x() / m, (m - _radius) * v.y() / m);
                 } else {
                     pg.line(_radius * v.x() / m, _radius * v.y() / m, _radius * v.z() / m, (m - _radius) * v.x() / m, (m - _radius) * v.y() / m, (m - _radius) * v.z() / m);
@@ -305,7 +309,7 @@ public class DrawingHinge  extends PApplet {
             }
             pg.fill(_color);
             pg.noStroke();
-            if (scene.is2D()) pg.ellipse(0, 0, _radius*2, _radius*2);
+            if (_scene.is2D()) pg.ellipse(0, 0, _radius*2, _radius*2);
             else pg.sphere(_radius);
             pg.strokeWeight(_radius/4f);
             if (constraint() != null) {
@@ -316,7 +320,7 @@ public class DrawingHinge  extends PApplet {
 
             pg.stroke(255);
             //pg.strokeWeight(2);
-            if(markers) scene.drawBullsEye(this);
+            if(markers) _scene.drawBullsEye(this);
 
             pg.popStyle();
 
@@ -350,16 +354,16 @@ public class DrawingHinge  extends PApplet {
                 Hinge constraint = (Hinge) constraint();
                 reference.rotate(constraint.orientation());
                 reference.rotate(new Quaternion(new Vector(1,0,0), new Vector(0,1,0)));
-                graph().applyTransformation(pGraphics,reference);
+                _scene.applyTransformation(pGraphics,reference);
 
-                ((Scene) graph()).drawArc(pGraphics, radius, -constraint.minAngle() , constraint.maxAngle(), 30);
+                _scene.drawArc(pGraphics, radius, -constraint.minAngle() , constraint.maxAngle(), 30);
 
                 //Draw axis
                 pGraphics.pushStyle();
                 pGraphics.fill(255, 154, 31);
-                ((Scene) graph()).drawArrow(new Vector(), new Vector(radius/2,0,0), 1f);
+                _scene.drawArrow(new Vector(), new Vector(radius/2,0,0), 1f);
                 pGraphics.fill(31, 132, 255);
-                ((Scene) graph()).drawArrow(new Vector(), new Vector(0,0,radius/2), 1f);
+                _scene.drawArrow(new Vector(), new Vector(0,0,radius/2), 1f);
                 pGraphics.popStyle();
 
 

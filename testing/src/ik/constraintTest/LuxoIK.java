@@ -17,8 +17,8 @@ public class LuxoIK extends PApplet {
     class Piece extends Node {
         int mode;
 
-        Piece(Scene scene) {
-            super(scene);
+        Piece() {
+            super();
             // set picking precision to the pixels of the frame projection
             setPickingThreshold(0);
         }
@@ -68,15 +68,13 @@ public class LuxoIK extends PApplet {
 
 
     class Lamp implements PConstants {
-        Scene scene;
         Piece[] pieces;
 
-        Lamp(Scene s) {
-            scene = s;
+        Lamp() {
             pieces = new Piece[4];
 
             for (int i = 0; i < 4; ++i) {
-                pieces[i] = new Piece(scene);
+                pieces[i] = new Piece();
                 frame(i).setReference(i > 0 ? pieces[i - 1] : null);
             }
 
@@ -141,19 +139,19 @@ public class LuxoIK extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        Node target = new Node(scene, redBall);
+        Node target = new Node(redBall);
         target.setPickingThreshold(0);
 
-        lamp = new Lamp(scene);
+        lamp = new Lamp();
         target.setPosition(lamp.frame(3).position());
 
-        ChainSolver solver = new ChainSolver(  scene.branch(lamp.frame(0)));
+        ChainSolver solver = new ChainSolver(  Scene.branch(lamp.frame(0)));
         solver.setTarget(target);
         solver.setKeepDirection(true);
         solver.setFixTwisting(true);
         solver.setMaxError(3);
 
-        TimingTask task = new TimingTask(scene) {
+        TimingTask task = new TimingTask() {
             @Override
             public void execute() {
                 solver.solve();

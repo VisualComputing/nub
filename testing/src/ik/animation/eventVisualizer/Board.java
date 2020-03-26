@@ -25,13 +25,15 @@ public class Board extends Node {
     protected int _colorText;
     protected PFont _font36;
 
+    protected Scene _scene;
     protected Label _label;
     protected EventCell[][] _eventMatrix = new EventCell[MAX_ROWS][MAX_COLS];
     protected List<EventCell> _events = new ArrayList<>();
 
     public Board(Scene scene, int rows, int cols){
-        super(scene);
+        super();
         enableTagging(false);
+        _scene = scene;
         _rows = rows;
         _cols = cols;
 
@@ -86,7 +88,7 @@ public class Board extends Node {
     }
 
     public void setDimension(float x, float y, float width, float height){
-        this.translate(x,y);
+        this.translate(x,y, 0);
         _width = width;
         _height = height;
         _setCellDimension();

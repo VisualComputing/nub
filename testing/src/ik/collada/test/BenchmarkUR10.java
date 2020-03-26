@@ -46,7 +46,7 @@ public class BenchmarkUR10 extends PApplet {
 
     public void setup() {
         Joint.axes = true;
-        Joint.markers = true;
+        //Joint.markers = true;
         randomSeed(14);
         this.g.textureMode(NORMAL);
         scene = new Scene(this);
@@ -138,7 +138,7 @@ public class BenchmarkUR10 extends PApplet {
             solver.setMaxError(scene.radius() * 0.01f); solver.setMinDistance(scene.radius() * 0.01f);
             solver.setTarget(branch.get(branch.size() - 1), target);
             target.setPosition(branch.get(branch.size() - 1).position().get());
-            TimingTask task = new TimingTask(scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     solver.solve();

@@ -107,7 +107,7 @@ public class MySolver extends PApplet {
         solver.setTarget(endEffector, target);
 
         //5. Create a Timing Task such that the solver executes each amount of time
-        TimingTask solverTask = new TimingTask(scene) {
+        TimingTask solverTask = new TimingTask() {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
@@ -171,7 +171,7 @@ public class MySolver extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        Node target = new Node(scene, redBall);
+        Node target = new Node(redBall);
         //Exact picking precision
         target.setPickingThreshold(0);
         return target;
@@ -183,7 +183,7 @@ public class MySolver extends PApplet {
          * that is joined to its reference Node
          * */
 
-        Node joint = new Joint(scene);
+        Node joint = new Joint();
         joint.setReference(node);
         //Exact picking precision
         joint.setPickingThreshold(0);

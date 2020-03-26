@@ -60,7 +60,7 @@ public class NaiveBiped extends PApplet {
         scene.fit(1);
 
         if(!debug) {
-            createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(-boneLength*3, 0,0), IKMode.SIMPLETRIK, 70 , 0);
+            createStructure(scene, segments, boneLength, radius, 0 , 255, 0 , new Vector(-boneLength*3, 0,0), IKMode.SIMPLETRIK, 70 , 0);
             //createStructure(scene, segments, boneLength, radius, color(255, 0, 0), new Vector(-boneLength * 3, 0, 0), IKMode.BIOIK, 40, 0);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK,40, 0);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
@@ -227,11 +227,11 @@ public class NaiveBiped extends PApplet {
         return solver;
     }
 
-    public Node createTarget(Scene scene, float radius){
+    public Node createTarget(float radius){
         PShape ball = createShape(SPHERE, radius);
         ball.setFill(color(255,0,0));
         ball.setStroke(false);
-        return new Node(scene){
+        return new Node(){
             @Override
             public void graphics(PGraphics pg){
                 scene.drawAxes(pg, radius * 3);
@@ -240,42 +240,42 @@ public class NaiveBiped extends PApplet {
         };
     }
 
-    public void createStructure(Scene scene, int segments, float length, float radius, int color, Vector translation, IKMode mode, float min , float max){
-        Node reference = new Node(scene);
+    public void createStructure(Scene scene, int segments, float length, float radius, int red, int green, int blue, Vector translation, IKMode mode, float min , float max){
+        Node reference = new Node();
         reference.translate(translation);
 
         //1. Create reference Frame
-        Joint root = new Joint(scene, color(255,0,0), radius);
+        Joint root = new Joint(255,0,0, radius);
         root.setRoot(true);
         root.setReference(reference);
 
         //2. Create Targets, Limbs & Solvers
         if(!debug){
-            Node target1 = createTarget(scene, radius*1.2f);
-            Node target2 = createTarget(scene, radius*1.2f);
+            Node target1 = createTarget(radius*1.2f);
+            Node target2 = createTarget(radius*1.2f);
 
-            solvers.add(createLimb(scene, segments, length, radius, color, root, target1, new Vector(-length,0,0), mode, min, max));
-            solvers.add(createLimb(scene, segments, length, radius, color, root, target2, new Vector(length,0,0), mode, min, max));
+            solvers.add(createLimb(scene, segments, length, radius, red, green, blue, root, target1, new Vector(-length,0,0), mode, min, max));
+            solvers.add(createLimb(scene, segments, length, radius, red, green, blue, root, target2, new Vector(length,0,0), mode, min, max));
 
             //3. Create walking cycle
             createBipedCycle(scene, root, solvers.get(solvers.size() - 1), solvers.get(solvers.size() - 2), target1, target2);
         } else{
-            Node target = createTarget(scene, radius*1.2f);
-            solvers.add(createLimb(scene, segments, length, radius, color, root, target, new Vector(length,length,0), mode, min, max));
+            Node target = createTarget(radius*1.2f);
+            solvers.add(createLimb(scene, segments, length, radius, red, green, blue, root, target, new Vector(length,length,0), mode, min, max));
         }
 
     }
 
 
-    public Solver createLimb(Scene scene, int segments, float length, float radius, int color, Node reference, Node target, Vector translation, IKMode mode, float min, float max){
+    public Solver createLimb(Scene scene, int segments, float length, float radius, int red, int green, int blue, Node reference, Node target, Vector translation, IKMode mode, float min, float max){
         target.setReference(reference.reference());
         ArrayList<Node> joints = new ArrayList<>();
-        Joint root = new Joint(scene, color, radius);
+        Joint root = new Joint(red, green, blue, radius);
         root.setReference(reference);
         joints.add(root);
 
         for(int i = 0; i < max(segments, 2); i++){
-            Joint middle = new Joint(scene, color, radius);
+            Joint middle = new Joint(red, green, blue, radius);
             middle.setReference(joints.get(i));
             middle.translate(0, length, 0);
             if(i < max(segments, 2) - 1) {
@@ -288,7 +288,7 @@ public class NaiveBiped extends PApplet {
         cone.setRestRotation(joints.get(joints.size() - 1).rotation().get(), new Vector(0,-1,0), new Vector(0,0,1));
         joints.get(joints.size() - 1).setConstraint(cone);
 
-        Joint low = new Joint(scene, color, radius);
+        Joint low = new Joint(red, green, blue, radius);
         low.setReference(joints.get(joints.size() - 1));
         low.translate(0,0,length);
 
@@ -395,7 +395,7 @@ public class NaiveBiped extends PApplet {
     public static class Cycle{
         public static abstract class Step{
             public Step(Scene scene){
-                _task = new TimingTask(scene) {
+                _task = new TimingTask() {
                     @Override
                     public void execute() {
                         Step.this.execute();
@@ -453,7 +453,7 @@ public class NaiveBiped extends PApplet {
             _scene = scene;
             this._leg1 = leg1;
             this._leg2 = leg2;
-            TimingTask task = new TimingTask(scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     Cycle.this.run();

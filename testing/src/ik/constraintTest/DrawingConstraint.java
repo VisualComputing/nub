@@ -80,10 +80,10 @@ public class DrawingConstraint  extends PApplet {
 
         //Create controllers
         t_lr = new ThetaControl(sceneTheta, color(255, 154, 31));
-        t_lr.translate(-sceneTheta.radius() * 0.3f, -sceneTheta.radius() * 0.7f);
+        t_lr.translate(-sceneTheta.radius() * 0.3f, -sceneTheta.radius() * 0.7f, 0);
         t_lr.setNames("Right", "Left");
         t_ud = new ThetaControl(sceneTheta, color(31, 132, 255));
-        t_ud.translate(-sceneTheta.radius() * 0.3f, sceneTheta.radius() * 0.8f);
+        t_ud.translate(-sceneTheta.radius() * 0.3f, sceneTheta.radius() * 0.8f, 0);
         t_ud.setNames("Down", "Up");
         base = new BaseControl(sceneBase, color(100,203,30));
 
@@ -160,13 +160,15 @@ public class DrawingConstraint  extends PApplet {
         float _max;
         float _max_tan;
         float _height;
+        Scene _scene;
 
-        public BaseControl(Graph graph, int color){
-            super(graph);
+        public BaseControl(Scene scene, int color){
+            super();
+            _scene = scene;
             _color = color;
             setPickingThreshold(0);
             setHighlighting(0);
-            _max = graph().radius() * 0.8f;
+            _max = _scene.radius() * 0.8f;
             _max_tan = tan(radians(70));
             _height = _max / _max_tan;
         }
@@ -208,10 +210,9 @@ public class DrawingConstraint  extends PApplet {
 
         @Override
         public void graphics(PGraphics pg) {
-            Scene scene = (Scene) graph();
             pg.pushStyle();
             //Draw base according to each radius
-            pg.fill(_color, graph().node() == this ? 255 : 100);
+            pg.fill(_color, _scene.node() == this ? 255 : 100);
             pg.noStroke();
             drawCone(pg, 64, 0,0,0, _left, _up, _right, _down, false);
             //draw semi-axes
@@ -244,11 +245,11 @@ public class DrawingConstraint  extends PApplet {
                 pg.fill(pg.color(255));
             }
 
-            scene.beginHUD(pg);
-            Vector l = scene.screenLocation(this.worldLocation(new Vector(-_left,0)));
-            Vector r = scene.screenLocation(this.worldLocation(new Vector(_right,0)));
-            Vector u = scene.screenLocation(this.worldLocation(new Vector(0, _up)));
-            Vector d = scene.screenLocation(this.worldLocation(new Vector(0,-_down)));
+            _scene.beginHUD(pg);
+            Vector l = _scene.screenLocation(this.worldLocation(new Vector(-_left,0)));
+            Vector r = _scene.screenLocation(this.worldLocation(new Vector(_right,0)));
+            Vector u = _scene.screenLocation(this.worldLocation(new Vector(0, _up)));
+            Vector d = _scene.screenLocation(this.worldLocation(new Vector(0,-_down)));
 
             pg.fill(255);
             pg.textFont(font, 16);
@@ -261,7 +262,7 @@ public class DrawingConstraint  extends PApplet {
             pg.textAlign(CENTER, BOTTOM);
             pg.text("Down", d.x(), d.y());
 
-            scene.endHUD(pg);
+            _scene.endHUD(pg);
             pg.popStyle();
         }
 
@@ -279,14 +280,14 @@ public class DrawingConstraint  extends PApplet {
             } else if(command.matches("OnScaling")){
                 if(_initial == null){
                     //Get initial point
-                    _initial = graph().location((Vector) gesture[1], this);
+                    _initial = _scene.location((Vector) gesture[1], this);
                     _pleft = _left;
                     _pright = _right;
                     _pdown = _down;
                     _pup = _up;
                 }else{
                     //Get final point
-                    _end = graph().location((Vector) gesture[1], this);
+                    _end = _scene.location((Vector) gesture[1], this);
                     scale();
                 }
             } else if(command.matches("Clear")){
@@ -303,21 +304,21 @@ public class DrawingConstraint  extends PApplet {
                 //Scale right radius
                 _right = _pright + horizontal;
                 //Clamp
-                _right = max(min(graph().radius(), _right), 5);
+                _right = max(min(_scene.radius(), _right), 5);
             }else{
                 _left = _pleft - horizontal;
                 //Clamp
-                _left = max(min(graph().radius(), _left), 5);
+                _left = max(min(_scene.radius(), _left), 5);
             }
             if(_initial.y() > 0){
                 //Scale right radius
                 _up = _pup + vertical;
                 //Clamp
-                _up = max(min(graph().radius(), _up), 5);
+                _up = max(min(_scene.radius(), _up), 5);
             }else{
                 _down = _pdown - vertical;
                 //Clamp
-                _down = max(min(graph().radius(), _down), 5);
+                _down = max(min(_scene.radius(), _down), 5);
             }
         }
     }
@@ -367,9 +368,11 @@ public class DrawingConstraint  extends PApplet {
 
         Vector _initial, _end;
         String _min_name, _max_name;
+        Scene _scene;
 
-        public ThetaControl(Graph graph, int color){
-            super(graph);
+        public ThetaControl(Scene scene, int color){
+            super();
+            _scene = scene;
             _color = color;
             setPickingThreshold(0);
             setHighlighting(0);
@@ -405,15 +408,15 @@ public class DrawingConstraint  extends PApplet {
         public void graphics(PGraphics pg) {
             pg.pushStyle();
             //Draw base according to each radius
-            pg.fill(_color, graph().node() == this ? 255 : 100);
+            pg.fill(_color, _scene.node() == this ? 255 : 100);
             pg.noStroke();
-            drawArc(pg, graph().radius()*0.7f, -_min , _max, 30);
+            drawArc(pg, _scene.radius()*0.7f, -_min , _max, 30);
             //draw semi-axe
             pg.fill(255);
             pg.stroke(255);
             pg.strokeWeight(3);
-            pg.line(0,0, graph().radius()*0.7f, 0);
-            pg.ellipse(graph().radius()*0.7f,0, 3,3);
+            pg.line(0,0, _scene.radius()*0.7f, 0);
+            pg.ellipse(_scene.radius()*0.7f,0, 3,3);
 
             pg.fill(255);
             pg.stroke(255);
@@ -429,16 +432,16 @@ public class DrawingConstraint  extends PApplet {
                 pg.fill(pg.color(255));
             }
 
-            ((Scene) graph()).beginHUD(pg);
-            Vector min_position = graph().screenLocation(new Vector(graph().radius()*0.7f * (float) Math.cos(-_min), graph().radius()*0.7f * (float) Math.sin(-_min)), this);
-            Vector max_position = graph().screenLocation(new Vector(graph().radius()*0.7f * (float) Math.cos(_max), graph().radius()*0.7f * (float) Math.sin(_max)), this);
+            _scene.beginHUD(pg);
+            Vector min_position = _scene.screenLocation(new Vector(_scene.radius()*0.7f * (float) Math.cos(-_min), _scene.radius()*0.7f * (float) Math.sin(-_min)), this);
+            Vector max_position = _scene.screenLocation(new Vector(_scene.radius()*0.7f * (float) Math.cos(_max), _scene.radius()*0.7f * (float) Math.sin(_max)), this);
 
             pg.fill(255);
             pg.textAlign(LEFT, CENTER);
             pg.textFont(font, 16);
             pg.text("\u03B8 " + _min_name, min_position.x() + 5, min_position.y() );
             pg.text("\u03B8 " + _max_name, max_position.x() + 5, max_position.y() );
-            ((Scene) graph()).endHUD(pg);
+            _scene.endHUD(pg);
             pg.popStyle();
         }
 
@@ -456,12 +459,12 @@ public class DrawingConstraint  extends PApplet {
             } else if(command.matches("OnScaling")){
                 if(_initial == null){
                     //Get initial point
-                    _initial = graph().location((Vector) gesture[1], this);
+                    _initial = _scene.location((Vector) gesture[1], this);
                     _pmin = _min;
                     _pmax = _max;
                 }else{
                     //Get final point
-                    _end = graph().location((Vector) gesture[1], this);
+                    _end = _scene.location((Vector) gesture[1], this);
                     scale();
                 }
             } else if(command.matches("Clear")){
@@ -515,9 +518,11 @@ public class DrawingConstraint  extends PApplet {
         public static float constraintFactor = 0.8f;
         //set to true only when the joint is the root (for rendering purposes)
         protected boolean _isRoot = false;
+        protected Scene _scene;
 
         public Joint(Scene scene, int color, float radius){
-            super(scene);
+            super();
+            _scene = scene;
             _color = color;
             _radius = radius;
             setPickingThreshold(-_radius*2);
@@ -538,7 +543,6 @@ public class DrawingConstraint  extends PApplet {
 
         @Override
         public void graphics(PGraphics pg){
-            Scene scene = (Scene) this._graph;
             if(!depth)pg.hint(PConstants.DISABLE_DEPTH_TEST);
             pg.pushStyle();
             if (!_isRoot) {
@@ -546,7 +550,7 @@ public class DrawingConstraint  extends PApplet {
                 pg.stroke(_color);
                 Vector v = location(new Vector(), reference());
                 float m = v.magnitude();
-                if (scene.is2D()) {
+                if (pg.is2D()) {
                     pg.line(_radius * v.x() / m, _radius * v.y() / m, (m - _radius) * v.x() / m, (m - _radius) * v.y() / m);
                 } else {
                     pg.line(_radius * v.x() / m, _radius * v.y() / m, _radius * v.z() / m, (m - _radius) * v.x() / m, (m - _radius) * v.y() / m, (m - _radius) * v.z() / m);
@@ -554,24 +558,24 @@ public class DrawingConstraint  extends PApplet {
             }
             pg.fill(_color);
             pg.noStroke();
-            if (scene.is2D()) pg.ellipse(0, 0, _radius*2, _radius*2);
+            if (pg.is2D()) pg.ellipse(0, 0, _radius*2, _radius*2);
             else pg.sphere(_radius);
             pg.strokeWeight(_radius/4f);
             if (constraint() != null) {
-                drawConstraint(pg,constraintFactor);
+                drawConstraint(_scene, pg, constraintFactor);
             }
-            if(axes) scene.drawAxes(_radius*2);
+            if(axes) Scene.drawAxes(pg,_radius*2);
             if(!depth) pg.hint(PConstants.ENABLE_DEPTH_TEST);
 
             pg.stroke(255);
             //pg.strokeWeight(2);
-            if(markers) scene.drawBullsEye(this);
-
+            //if(markers) scene.drawBullsEye(this);
             pg.popStyle();
 
         }
 
-        public void drawConstraint(PGraphics pGraphics, float factor) {
+        public void drawConstraint(Scene scene, PGraphics pGraphics, float factor) {
+
             if (this.constraint() == null) return;
             float boneLength = 0;
             if (!children().isEmpty()) {
@@ -587,14 +591,14 @@ public class DrawingConstraint  extends PApplet {
             pGraphics.noStroke();
 
             pGraphics.fill(62, 203, 55, 150);
-            Node reference = new Node();
+            Node reference = Node.detach(new Vector(), new Quaternion(), 1f);
             reference.setTranslation(new Vector());
             reference.setRotation(rotation().inverse());
 
             if (constraint() instanceof BallAndSocket) {
                 BallAndSocket constraint = (BallAndSocket) constraint();
                 reference.rotate(((BallAndSocket) constraint()).orientation());
-                graph().applyTransformation(pGraphics, reference);
+                scene.applyTransformation(pGraphics, reference);
                 float width = boneLength * factor;
                 float max = Math.max(Math.max(Math.max(constraint.up(), constraint.down()), constraint.left()), constraint.right());
                 //Max value will define max radius length
@@ -606,7 +610,7 @@ public class DrawingConstraint  extends PApplet {
                 float down_r = (float) Math.abs((height * Math.tan(constraint.down())));
                 float left_r = (float) Math.abs((height * Math.tan(constraint.left())));
                 float right_r = (float) Math.abs((height * Math.tan(constraint.right())));
-                ((Scene) graph()).drawCone(pGraphics, 20, 0, 0, height, left_r, up_r, right_r, down_r);
+                scene.drawCone(pGraphics, 20, 0, 0, height, left_r, up_r, right_r, down_r);
                 //Draw Up - Down Triangle
                 pGraphics.pushStyle();
                 //Draw offset

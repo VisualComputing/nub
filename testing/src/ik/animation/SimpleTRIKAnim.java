@@ -60,8 +60,6 @@ public class SimpleTRIKAnim extends PApplet {
     float targetRadius = 7;
     float boneLength = 50;
 
-    int color;
-
     TRIK solver; //IK Algorithm that uses Solver template
     TRIKVisualizer visualizer; //A Visualizer manages a scene in which the IK algorithm will be animated
     VisualizerMediator mediator; //Since the interaction between a solver and a Visualizer is bidirectional a mediator is required to handle the events
@@ -97,19 +95,18 @@ public class SimpleTRIKAnim extends PApplet {
         redBall.setFill(color(255,0,0));
 
         //create targets
-        target = new Node(scene){
+        target = new Node(){
             @Override
             public void graphics(PGraphics pg){
                 pg.shape(redBall);
-                scene.drawAxes(pg,targetRadius * 1.5f);
+                Scene.drawAxes(pg,targetRadius * 1.5f);
             }
         };
         target.setPickingThreshold(0);
 
         //create skeleton
-        color = color(212,0,255);
         //structure = Util.generateChain(scene, numJoints, targetRadius * 0.8f, boneLength, new Vector(), color);
-        structure = createLimb(scene, numJoints, boneLength, targetRadius * 0.8f, color(0,255,0), new Vector());
+        structure = createLimb(scene, numJoints, boneLength, targetRadius * 0.8f, 0,255,0, new Vector());
 
         solver = new TRIK(structure);
         solver.enableMediator(true);
@@ -128,7 +125,7 @@ public class SimpleTRIKAnim extends PApplet {
         target.setPosition(structure.get(structure.size() - 1).position());
 
         //Defines a task to run the solver each 40 ms
-        TimingTask task = new TimingTask(scene) {
+        TimingTask task = new TimingTask() {
             @Override
             public void execute() {
                 if(solve) {
@@ -139,7 +136,7 @@ public class SimpleTRIKAnim extends PApplet {
         task.run(40);
 
         //Defines a task to run the animation each 40 ms
-        TimingTask animTask = new TimingTask(scene) {
+        TimingTask animTask = new TimingTask() {
             @Override
             public void execute() {
                 if (anim) {
@@ -152,20 +149,20 @@ public class SimpleTRIKAnim extends PApplet {
         textFont(createFont("Zapfino", 38));
     }
 
-    public List<Node> createLimb(Scene scene, int segments, float length, float radius, int color, Vector translation){
-        Node reference = new Node(scene);
+    public List<Node> createLimb(Scene scene, int segments, float length, float radius, int red, int green, int blue, Vector translation){
+        Node reference = new Node();
         reference.translate(translation);
 
-        Joint initial = new Joint(scene, color(255,0,0), radius);
+        Joint initial = new Joint(255,0,0, radius);
         initial.setRoot(true);
         initial.setReference(reference);
 
         ArrayList<Node> joints = new ArrayList<>();
-        Joint root = new Joint(scene, color, radius);
+        Joint root = new Joint(red, green, blue, radius);
         //root.setReference(reference);
         joints.add(root);
         for(int i = 0; i < max(segments, 2); i++){
-            Joint middle = new Joint(scene, color, radius);
+            Joint middle = new Joint(red, green, blue, radius);
             middle.setReference(joints.get(i));
             middle.translate(0, length, 0);
             if(i < max(segments, 2) - 1) {
@@ -181,7 +178,7 @@ public class SimpleTRIKAnim extends PApplet {
         cone.setRestRotation(joints.get(joints.size() - 1).rotation().get(), new Vector(0,-1,0), new Vector(0,0,1));
         joints.get(joints.size() - 1).setConstraint(cone);
 
-        Joint low = new Joint(scene, color, radius);
+        Joint low = new Joint(red, green, blue, radius);
         low.setReference(joints.get(joints.size() - 1));
         low.translate(0,0,length);
 

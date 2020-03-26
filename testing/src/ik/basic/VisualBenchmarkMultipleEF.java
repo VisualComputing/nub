@@ -47,8 +47,8 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         float alpha = 1.f * width / height > 1.5f ? 0.5f * width / height : 0.5f;
         alpha *= depth/2f; //avoid undesirable overlapping
 
-        int color = color(random(255), random(255), random(255));
-        structures.add(generateYShape(depth, false, boneLength, repetitions, new Vector(), color));
+        int red = (int) random(255), green = (int) random(255), blue = (int) random(255);
+        structures.add(generateYShape(depth, false, boneLength, repetitions, new Vector(), red, green, blue));
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
@@ -101,7 +101,7 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         else  redBall = createShape(ELLIPSE, 0,0, targetRadius, targetRadius);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
-        Node target = new Node(scene){
+        Node target = new Node(){
             @Override
             public void visit() {
                 scene.drawAxes(targetRadius * 2);
@@ -119,31 +119,31 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         return target;
     }
 
-    public ArrayList<Node> generateYShape(int depth, boolean independent, float boneLength, int repetitions, Vector translation, int color) {
-        Joint reference = independent ? null : new Joint(scene, color, targetRadius * 0.3f);
+    public ArrayList<Node> generateYShape(int depth, boolean independent, float boneLength, int repetitions, Vector translation, int red, int green, int blue) {
+        Joint reference = independent ? null : new Joint(red, green, blue, targetRadius * 0.3f);
         HashMap<Node, Node> target = new HashMap<>();
-        Joint root = generateYShape(reference, independent, depth, repetitions, boneLength, color, target);
+        Joint root = generateYShape(reference, independent, depth, repetitions, boneLength, red, green, blue, target);
         root.setRoot(true);
         root.translate(translation);
         targets.add(target);
         return new ArrayList<Node>(scene.branch(root));
     }
 
-    public Joint generateYShape(Joint reference, boolean independent, int depth, int repetitions, float boneLength, int color, HashMap<Node, Node> targets) {
+    public Joint generateYShape(Joint reference, boolean independent, int depth, int repetitions, float boneLength, int red, int green, int blue, HashMap<Node, Node> targets) {
         if(depth < 1){
             targets.put(reference, generateTarget(reference));
             return null;
         }
         //create Y - Shape
         if(independent) {
-            Joint j0 = new Joint(scene, color, targetRadius * 0.3f);
+            Joint j0 = new Joint(red, green, blue, targetRadius * 0.3f);
             j0.setReference(reference);
             reference = j0;
         }
         Joint prev = reference;
         Joint j1 = reference;
         for(int i = 0; i < repetitions; i++){
-            j1 = new Joint(scene, color, targetRadius * 0.3f);
+            j1 = new Joint(red, green, blue, targetRadius * 0.3f);
             j1.setReference(prev);
             j1.translate(0, boneLength, 0);
             prev = j1;
@@ -152,7 +152,7 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         prev = j1;
         Joint j2 = j1;
         for(int i = 0; i < repetitions; i++){
-            j2 = new Joint(scene, color, targetRadius * 0.3f);
+            j2 = new Joint(red, green, blue, targetRadius * 0.3f);
             j2.setReference(prev);
             j2.translate(Vector.multiply(new Vector(1, 1, 0).normalize(null), boneLength));
             prev = j2;
@@ -161,7 +161,7 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         prev = j1;
         Joint j3 = j1;
         for (int i = 0; i < repetitions; i++) {
-            j3 = new Joint(scene, color, targetRadius * 0.3f);
+            j3 = new Joint(red, green, blue, targetRadius * 0.3f);
             j3.setReference(prev);
             j3.translate(Vector.multiply(new Vector(-1, 1, 0).normalize(null), boneLength));
             prev = j3;
@@ -169,8 +169,8 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         //Generate Y Shape on each Branch
         j2.rotate(new Quaternion(new Vector(0, 0, 1), radians(-45)));
         j3.rotate(new Quaternion(new Vector(0, 0, 1), radians(45)));
-        generateYShape(j2, independent, depth - 1, repetitions, boneLength, color, targets);
-        generateYShape(j3, independent, depth - 1, repetitions, boneLength, color, targets);
+        generateYShape(j2, independent, depth - 1, repetitions, boneLength, red, green, blue, targets);
+        generateYShape(j3, independent, depth - 1, repetitions, boneLength, red, green, blue, targets);
         return independent ? reference : j1;
     }
 

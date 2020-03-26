@@ -40,7 +40,7 @@ public class testBiped extends PApplet {
         redBall.setFill(color(255,0,0));
 
         for(int i = 0; i < 4; i++){
-            Node target = new Node(scene, redBall);
+            Node target = new Node(redBall);
             target.setPickingThreshold(0);
             targets.add(target);
         }

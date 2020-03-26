@@ -42,7 +42,7 @@ public class GaitGenerator extends PApplet {
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI / 4));
         scene.fit();
 
-        ref = new Node(scene);
+        ref = new Node();
         ref.setPickingThreshold(0.0001f);
         for(int k = 0; k < 15; k++) {
             PShape body = createShape(BOX, 90, boneLength, 5.2f * boneLength);
@@ -51,15 +51,15 @@ public class GaitGenerator extends PApplet {
             body.setShininess(10.0f);
 
             body.setFill(color(random(255), random(255), random(255)));
-            Node com = new Node(scene, body);
+            Node com = new Node(body);
 
             com.setReference(ref);
             int n = 5;
             float x = random(0, 30) * 180;
             for (int i = 0; i < n; i++) {
-                Node f1 = new Node(scene, new Vector(-boneLength, 0, i * 5 * boneLength / n - boneLength * 10 / n), new Quaternion(), 1);
+                Node f1 = new Node(new Vector(-boneLength, 0, i * 5 * boneLength / n - boneLength * 10 / n), new Quaternion(), 1);
                 f1.setReference(com);
-                Node f2 = new Node(scene, new Vector(boneLength, 0, i * 5 * boneLength / n - boneLength * 10 / n), new Quaternion(new Vector(0, 1, 0), PI), 1);
+                Node f2 = new Node(new Vector(boneLength, 0, i * 5 * boneLength / n - boneLength * 10 / n), new Quaternion(new Vector(0, 1, 0), PI), 1);
                 f2.setReference(com);
                 leg(f1, i % 2 == 1, i % 2 == 1, x);
                 leg(f2, i % 2 == 1, i % 2 == 0, x);
@@ -78,29 +78,29 @@ public class GaitGenerator extends PApplet {
     }
 
     public void leg(Node reference, boolean mirror, boolean inv, float d){
-        Node target = new Node(scene);
+        Node target = new Node();
         target.setReference(reference);
 
         //Create a leg
         Vector v = new Vector(-boneLength, 0, 0);
-        Joint j1 = new Joint(scene);
+        Joint j1 = new Joint();
         j1.setReference(reference);
         j1.setDrawConstraint(false);
         BallAndSocket c1 = new BallAndSocket(radians(80),radians(80),radians(80), radians(80));
         c1.setRestRotation(j1.rotation().get(), new Vector(0,1,0), new Vector(-1,0,0));
         j1.setConstraint(c1);
 
-        Joint j2 = new Joint(scene);
+        Joint j2 = new Joint();
         j2.setDrawConstraint(false);
         j2.setReference(j1);
         j2.translate(-boneLength,0,0);
 
-        Joint j3 = new Joint(scene);
+        Joint j3 = new Joint();
         j3.setDrawConstraint(false);
         j3.setReference(j2);
         j3.translate(new Quaternion(new Vector(0,0,1), radians(-35)).rotate(v));
 
-        Joint j4 = new Joint(scene);
+        Joint j4 = new Joint();
         j4.setDrawConstraint(false);
         j4.setReference(j3);
         j4.translate(new Quaternion(new Vector(0,0,1), radians(-35)).rotate(v));
@@ -125,10 +125,10 @@ public class GaitGenerator extends PApplet {
         y_floor = j4.position().y();
         scene.addIKTarget(j4, target);
         Vector o = reference.location(new Vector(), j4);
-        TimingTask task = new TimingTask(scene) {
+        TimingTask task = new TimingTask() {
             @Override
             public void execute() {
-                updateTarget(scene.timingHandler().frameCount()*8, o, target, mirror, inv, d);
+                updateTarget(Scene.timingHandler().frameCount *8, o, target, mirror, inv, d);
             }
         };
         task.run(100);

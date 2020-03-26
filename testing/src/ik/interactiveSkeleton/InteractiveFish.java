@@ -48,7 +48,7 @@ public class InteractiveFish extends PApplet {
         scene.fit(1);
         //2. Define the Skeleton
         //2.1 Define a reference node to the skeleton and the mesh
-        reference = new Node(scene);
+        reference = new Node();
         //2.2 Use SimpleBuilder example (or a Modelling Sw if desired) and locate each Joint accordingly to mesh
         //2.3 Create the Joints based on 2.2.
         List<Node> skeleton = fishSkeleton(reference);
@@ -83,7 +83,7 @@ public class InteractiveFish extends PApplet {
         //Generates a default Path that target must follow
         targetInterpolator = setupTargetInterpolator(target);
 
-        TimingTask solverTask = new TimingTask(scene) {
+        TimingTask solverTask = new TimingTask() {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
@@ -97,7 +97,7 @@ public class InteractiveFish extends PApplet {
         PShape redBall = createShape(SPHERE, radius);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
-        Node target = new Node(scene, redBall);
+        Node target = new Node(redBall);
         target.setPickingThreshold(0);
         return target;
     }
@@ -108,27 +108,27 @@ public class InteractiveFish extends PApplet {
         lights();
         scene.drawAxes();
         //Render mesh with respect to the node
-        skinning.render(reference);
+        skinning.render(scene, reference);
         if(showSkeleton) scene.render();
     }
 
     public List<Node> fishSkeleton(Node reference) {
-        Joint j1 = new Joint(scene);
+        Joint j1 = new Joint();
         j1.setReference(reference);
         j1.setPosition(0, 10.8f, 93);
-        Joint j2 = new Joint(scene);
+        Joint j2 = new Joint();
         j2.setReference(j1);
         j2.setPosition(0, 2.3f, 54.7f);
-        Joint j3 = new Joint(scene);
+        Joint j3 = new Joint();
         j3.setReference(j2);
         j3.setPosition(0, 0.4f, 22);
-        Joint j4 = new Joint(scene);
+        Joint j4 = new Joint();
         j4.setReference(j3);
         j4.setPosition(0, 0, -18);
-        Joint j5 = new Joint(scene);
+        Joint j5 = new Joint();
         j5.setReference(j4);
         j5.setPosition(0, 1.8f, -54);
-        Joint j6 = new Joint(scene);
+        Joint j6 = new Joint();
         j6.setReference(j5);
         j6.setPosition(0, -1.1f, -95);
         j1.setRoot(true);
@@ -143,7 +143,7 @@ public class InteractiveFish extends PApplet {
         int nbKeyFrames = 10;
         float step = 2.0f * PI / (nbKeyFrames - 1);
         for (int i = 0; i < nbKeyFrames; i++) {
-            Node iFrame = new Node(scene);
+            Node iFrame = new Node();
             iFrame.setReference(target.reference());
             iFrame.setTranslation(new Vector(100 * sin(step * i), target.translation().y(), target.translation().z()));
             targetInterpolator.addKeyFrame(iFrame);

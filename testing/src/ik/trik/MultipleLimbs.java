@@ -41,7 +41,7 @@ public class MultipleLimbs extends PApplet {
         scene.setRadius(boneLength * numJoints);
         scene.fit();
         //Create a kinematic chain
-        createSkeleton(scene, null, color(0,255,0), radius, boneLength, numJoints);
+        createSkeleton(null, 0,255,0, radius, boneLength, numJoints);
     }
 
     public void draw(){
@@ -82,14 +82,14 @@ public class MultipleLimbs extends PApplet {
     }
 
 
-    public TRIKTree createSolver(Scene scene, Node root, float radius){
+    public TRIKTree createSolver(Node root, float radius){
         TRIKTree solver = new TRIKTree(root, SimpleTRIK.HeuristicMode.FINAL);
         solver.setTimesPerFrame(10);
         solver.setMaxIterations(10);
         solver.setChainTimesPerFrame(15);
         solver.setChainMaxIterations(15);
         solver.setMaxError(20);
-        for(Node node : scene.branch(root)){
+        for(Node node : Scene.branch(root)){
             if(node.children() == null || node.children().isEmpty()){
                 node.enableTagging(false);
                 //Add as target
@@ -100,7 +100,7 @@ public class MultipleLimbs extends PApplet {
             }
         }
 
-        TimingTask task = new TimingTask(scene) {
+        TimingTask task = new TimingTask() {
             @Override
             public void execute() {
                 solver.solve();
@@ -110,10 +110,10 @@ public class MultipleLimbs extends PApplet {
         return solver;
     }
 
-    public HashMap<String, Node> createSkeleton(Scene scene, Node reference, int color, float radius, float boneLength, int numJoints){
+    public HashMap<String, Node> createSkeleton(Node reference, int red, int green, int blue, float radius, float boneLength, int numJoints){
         HashMap<String, Node> skeleton = new HashMap<>();
         //Create root
-        Joint root = new Joint(scene, color, radius);
+        Joint root = new Joint(red, green, blue, radius);
         root.setReference(reference);
         root.setConstraint(new Constraint() {
             @Override
@@ -130,27 +130,27 @@ public class MultipleLimbs extends PApplet {
         skeleton.put("ROOT", root);
 
         //create lower limbs
-        createLimb("LOWER_LEFT_1", numJoints, scene, color, radius, boneLength,
+        createLimb("LOWER_LEFT_1", numJoints, red, green, blue, radius, boneLength,
                 root, Vector.multiply(new Vector(-1,1,0),boneLength), new Vector(0,1,0), skeleton);
-        createLimb("LOWER_RIGHT_1", numJoints, scene, color, radius, boneLength,
+        createLimb("LOWER_RIGHT_1", numJoints, red, green, blue, radius, boneLength,
                 root, Vector.multiply(new Vector(1,1,0),boneLength), new Vector(0,1,0), skeleton);
 
-        createSolver(scene, root, radius);
+        createSolver(root, radius);
 
         return skeleton;
     }
 
-    public void createLimb(String name, int joints, Scene scene, int color, float radius, float boneLength, Node reference, Vector translation, Vector direction, HashMap<String, Node> skeleton){
+    public void createLimb(String name, int joints, int red, int green, int blue, float radius, float boneLength, Node reference, Vector translation, Vector direction, HashMap<String, Node> skeleton){
         Vector v = direction.normalize(null);
         v.multiply(boneLength);
 
-        Joint prev = new Joint(scene, color, radius);
+        Joint prev = new Joint(red, green, blue, radius);
         prev.setReference(reference);
         prev.translate(translation);
         skeleton.put(name , prev);
 
         for(int i = 0; i < joints; i++){
-            Joint next = new Joint(scene, color, radius);
+            Joint next = new Joint(red, green, blue, radius);
             next.setReference(prev);
             next.translate(v);
             skeleton.put(name + i , next);

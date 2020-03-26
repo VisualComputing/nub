@@ -43,7 +43,7 @@ public class LoadMesh extends PApplet {
 
     public void setup() {
         randomSeed(14);
-        Joint.markers = true;
+        //Joint.markers = true;
         textureMode(NORMAL);
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
@@ -149,7 +149,7 @@ public class LoadMesh extends PApplet {
                 solver_r_leg.setMaxError(0.01f);
                 solver_r_leg.setMinDistance(0.01f);
                 solver_r_leg.setTarget(model.skeleton().get(effectors[i]), targets.get(i));
-                TimingTask task = new TimingTask(scene) {
+                TimingTask task = new TimingTask() {
                     @Override
                     public void execute() {
                         solver_r_leg.solve();

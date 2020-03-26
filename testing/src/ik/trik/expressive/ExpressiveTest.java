@@ -38,7 +38,7 @@ public class ExpressiveTest extends PApplet {
 
         //create target
         Node target = Util.createTarget(mainScene, targetRadius);
-        List<Node> structure = Util.generateChain(mainScene, numJoints, targetRadius * 0.7f, boneLength, new Vector(), color(0,255, 0));
+        List<Node> structure = Util.generateAttachedChain(numJoints, targetRadius * 0.7f, boneLength, new Vector(), 0,255, 0);
 
         //Util.generateConstraints(structure, Util.ConstraintType.CONE_CIRCLE, 0, true);
 
@@ -53,7 +53,7 @@ public class ExpressiveTest extends PApplet {
         //Move the target to any position
         target.setPosition(structure.get(numJoints - 1).position());
 
-        TimingTask task = new TimingTask(mainScene) {
+        TimingTask task = new TimingTask() {
             @Override
             public void execute() {
                 if(enableTask){

@@ -30,7 +30,7 @@ public class EagleCPU extends PApplet {
     }
 
     public void setup() {
-        Joint.markers = true;
+        //Joint.markers = true;
         Joint.depth = false;
         //1. Create and set the scene
         scene = new Scene(this);
@@ -39,7 +39,7 @@ public class EagleCPU extends PApplet {
         scene.fit(1);
         //2. Define the Skeleton
         //2.1 Define a reference node to the skeleton and the mesh
-        reference = new Node(scene);
+        reference = new Node();
         reference.enableTagging(false); //disable interaction
         //2.2 Use SimpleBuilder example (or a Modelling Sw if desired) and locate each Joint accordingly to mesh
         //2.3 Create the Joints based on 2.2.
@@ -78,7 +78,7 @@ public class EagleCPU extends PApplet {
         lights();
         scene.drawAxes();
         //Render mesh with respect to the node
-        skinning.render(reference);
+        skinning.render(scene, reference);
         scene.render();
         //Optionally print some info:
         scene.beginHUD();
@@ -140,82 +140,82 @@ public class EagleCPU extends PApplet {
     */
 
     public List<Node> buildSkeleton(Node reference){
-        Joint j1 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j1 = new Joint(scene.radius() * 0.01f);
         j1.setPickingThreshold(-0.01f);
         j1.setReference(reference);
         j1.setTranslation(-1.7894811E-7f, -1.2377515f, -1.5709928f);
 
         Joint dummy;
-        dummy = new Joint(scene, scene.radius() * 0.01f);
+        dummy = new Joint(scene.radius() * 0.01f);
         dummy.setReference(j1);
         dummy.enableTagging(false);
 
-        Joint j2 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j2 = new Joint( scene.radius() * 0.01f);
         j2.setPickingThreshold(-0.01f);
         j2.setReference(dummy);
         j2.setTranslation(6.425498E-7f, 1.2980552f, 5.463369f);
-        Joint j3 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j3 = new Joint( scene.radius() * 0.01f);
         j3.setPickingThreshold(-0.01f);
         j3.setReference(j2);
         j3.setTranslation(6.5103023E-7f, 0.23802762f, 5.4746757f);
 
 
-        dummy = new Joint(scene, scene.radius() * 0.01f);
+        dummy = new Joint(scene.radius() * 0.01f);
         dummy.setReference(j1);
         dummy.enableTagging(false);
-        Joint j4 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j4 = new Joint(scene.radius() * 0.01f);
         j4.setPickingThreshold(-0.01f);
         j4.setReference(dummy);
         j4.setTranslation(-4.70038E-7f, -2.0343544f, -4.0577974f);
-        Joint j5 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j5 = new Joint(scene.radius() * 0.01f);
         j5.setPickingThreshold(-0.01f);
         j5.setReference(j4);
         j5.setTranslation( -4.5386977E-7f, -4.236917f, -4.046496f);
 
-        dummy = new Joint(scene, scene.radius() * 0.01f);
+        dummy = new Joint(scene.radius() * 0.01f);
         dummy.setReference(j1);
         dummy.enableTagging(false);
-        Joint j6 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j6 = new Joint(scene.radius() * 0.01f);
         j6.setPickingThreshold(-0.01f);
         j6.setReference(dummy);
         j6.setTranslation( -6.223473E-7f, 1.202842f, -5.1527314f);
-        Joint j7 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j7 = new Joint( scene.radius() * 0.01f);
         j7.setPickingThreshold(-0.01f);
         j7.setReference(j6);
         j7.setTranslation( -7.298398E-7f, -0.33323926f, -6.1411514f);
-        Joint j8 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j8 = new Joint(scene.radius() * 0.01f);
         j8.setPickingThreshold(-0.01f);
         j8.setReference(j7);
         j8.setTranslation( -6.5542355E-7f, -0.4284538f, -5.5222764f);
 
-        dummy = new Joint(scene, scene.radius() * 0.01f);
+        dummy = new Joint(scene.radius() * 0.01f);
         dummy.setReference(j1);
         dummy.enableTagging(false);
-        Joint j9 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j9 = new Joint( scene.radius() * 0.01f);
         j9.setPickingThreshold(-0.01f);
         j9.setReference(dummy);
         j9.setTranslation( -5.269003f, 3.248286f, -1.3883741f);
-        Joint j10 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j10 = new Joint( scene.radius() * 0.01f);
         j10.setPickingThreshold(-0.01f);
         j10.setReference(j9);
         j10.setTranslation( -12.133301f, 5.3501167f, 0.6687609f);
-        Joint j11 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j11 = new Joint(scene.radius() * 0.01f);
         j11.setPickingThreshold(-0.01f);
         j11.setReference(j10);
         j11.setTranslation( -19.107552f, 5.445654f, 2.483986f);
 
-        dummy = new Joint(scene, scene.radius() * 0.01f);
+        dummy = new Joint(scene.radius() * 0.01f);
         dummy.setReference(j1);
         dummy.enableTagging(false);
-        Joint j12 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j12 = new Joint(scene.radius() * 0.01f);
         j12.setPickingThreshold(-0.01f);
         j12.setReference(dummy);
         j12.setTranslation( 8.201833f, 3.9170508f, -1.8660631f);
-        Joint j13 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j13 = new Joint(scene.radius() * 0.01f);
         j13.setPickingThreshold(-0.01f);
         j13.setReference(j12);
         j13.setTranslation( 11.942226f, 5.541193f, 1.8152181f);
-        Joint j14 = new Joint(scene, scene.radius() * 0.01f);
+        Joint j14 = new Joint(scene.radius() * 0.01f);
         j14.setPickingThreshold(-0.01f);
         j14.setReference(j13);
         j14.setTranslation( 13.184211f, 3.8215134f, 2.3884451f);

@@ -28,7 +28,7 @@ class Boid {
         pApplet = scene.pApplet();
         position = new Vector();
         position.set(inPos);
-        frame = new Node(scene) {
+        frame = new Node() {
             // Note that within visit() geometry is defined at the
             // frame local coordinate system.
             @Override

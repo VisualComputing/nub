@@ -16,7 +16,7 @@ public class MultipleViews {
 
     public MultipleViews(Scene scene) {
         _scene = scene;
-        _defaultView = new AuxiliaryView(_scene, new Node(_scene.eye().position(), _scene.eye().orientation(), _scene.eye().magnitude()), 0,0, scene.width(), scene.height());
+        _defaultView = new AuxiliaryView(_scene, Node.detach(_scene.eye().position(), _scene.eye().orientation(), _scene.eye().magnitude()), 0,0, scene.width(), scene.height());
         _currentView = _defaultView;
         _auxiliaryViews = new ArrayList<>();
     }

@@ -75,7 +75,7 @@ public class UnconstrainedVsConstrained extends PApplet{
         solver.setTarget(endEffector, target);
 
         //5. Create a Timing Task such that the solver executes each amount of time
-        TimingTask solverTask = new TimingTask(scene) {
+        TimingTask solverTask = new TimingTask() {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
@@ -143,7 +143,7 @@ public class UnconstrainedVsConstrained extends PApplet{
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        Node target = new Node(scene, redBall);
+        Node target = new Node(redBall);
         //Exact picking precision
         target.setPickingThreshold(0);
         return target;
@@ -155,15 +155,14 @@ public class UnconstrainedVsConstrained extends PApplet{
          * that is joined to its reference Node
          * */
 
-        Node joint = new Node(scene){
+        Node joint = new Node(){
             @Override
             public void graphics(PGraphics pg){
-                Scene scene = (Scene) this._graph;
                 pg.pushStyle();
                 if (drawLine) {
                     pg.stroke(255);
                     Vector v = location(new Vector(), reference());
-                    if (scene.is2D()) {
+                    if (pg.is2D()) {
                         pg.line(0, 0, v.x(), v.y());
                     } else {
                         pg.line(0, 0, 0,  v.x(), v.y(), v.z());
@@ -171,16 +170,16 @@ public class UnconstrainedVsConstrained extends PApplet{
                 }
                 pg.fill(color(0,255,0));
                 pg.noStroke();
-                if (scene.is2D()) pg.ellipse(0, 0, radius*2, radius*2);
+                if (pg.is2D()) pg.ellipse(0, 0, radius*2, radius*2);
                 else pg.sphere(radius);
 
                 if (constraint() != null) {
-                    scene.drawConstraint(pg,this, 0.5f);
+                    Scene.drawConstraint(pg,this, 0.5f);
                 }
 
                 pg.hint(DISABLE_DEPTH_TEST);
                 pg.strokeWeight(3);
-                scene.drawAxes(pg,radius * 3);
+                Scene.drawAxes(pg,radius * 3);
                 pg.hint(ENABLE_DEPTH_TEST);
                 pg.popStyle();
 

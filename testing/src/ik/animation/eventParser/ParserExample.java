@@ -122,12 +122,12 @@ public class ParserExample extends PApplet {
         for (InterestingEvent event : methodEvents.eventQueue()) {
             EventCell cell = new EventCell(board, event.name(), event.startingTime(), event.executionDuration(), event.renderingDuration());
             if(event.name().equals("AFTER_CONDITION") || event.name().equals("ON_REPEAT") || event.name().equals("LAST_EVENT")) {
-                cell.setColorCell(((Scene) cell.graph()).pApplet().color(84,84,197));
+                cell.setColorCell(eventScene.pApplet().color(84,84,197));
             }else if(event.getAttribute("ON_IF") != null){
-                cell.setColorCell(((Scene) cell.graph()).pApplet().color(78,204,163));
+                cell.setColorCell(eventScene.pApplet().color(78,204,163));
                 cell.setLabel("ON IF: " + event.getAttribute("ON_IF"));
             } else if(event.getAttribute("ON_ELSE") != null){
-                cell.setColorCell(((Scene) cell.graph()).pApplet().color(175,4,4));
+                cell.setColorCell(eventScene.pApplet().color(175,4,4));
                 cell.setLabel("ON ELSE: " + event.getAttribute("ON_ELSE"));
             }
             if(event.getAttribute("CONTEXT") != null) {

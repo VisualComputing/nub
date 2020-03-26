@@ -33,6 +33,7 @@ public class InteractiveSpider extends PApplet {
     public static class Spider{
         float[] velocity = new float[]{0.02f, 0.2f}; //save direction and angle
 
+        Scene scene;
         Node shape;
         PShape pshape;
         Interpolator[] interpolator;
@@ -42,6 +43,7 @@ public class InteractiveSpider extends PApplet {
         }
 
         public Spider(Scene scene, float bodyWidth, float bodyHeight, float bodyLength, int legs){
+            this.scene = scene;
             pshape = scene.context().createShape(BOX, bodyWidth, bodyHeight, bodyLength);
             float r = scene.pApplet().random(0, 255);
             float g = scene.pApplet().random(0, 255);
@@ -53,14 +55,14 @@ public class InteractiveSpider extends PApplet {
 
             float targetRadius = bodyWidth/10.f;
 
-            shape = new Node(scene, pshape);
+            shape = new Node(pshape);
             shape.setPickingThreshold(0);
             //create targets
             Node[] targets = new Node[legs];
             interpolator = new Interpolator[legs];
 
             for(int i = 0; i < legs; i++){
-                targets[i] = new Node(scene);
+                targets[i] = new Node();
             }
             spiderSkeleton(shape, legs,bodyWidth,bodyHeight,bodyLength, targets, targetRadius);
 
@@ -99,34 +101,33 @@ public class InteractiveSpider extends PApplet {
         }
 
         public void keepInside(){
-            if(shape.translation().x() > shape.graph().radius()) {
-                shape.translation().setX(-shape.graph().radius() + shape.graph().radius()*0.1f);
-            } else if(shape.translation().x() < -shape.graph().radius()) {
-                shape.translation().setX(shape.graph().radius() - shape.graph().radius()*0.1f);
-            } else if(shape.translation().z() > shape.graph().radius()) {
-                shape.translation().setZ(-shape.graph().radius() + shape.graph().radius()*0.1f);
-            } else if(shape.translation().z() < -shape.graph().radius()) {
-                shape.translation().setZ(shape.graph().radius() - shape.graph().radius()*0.1f);
+            if(shape.translation().x() > scene.radius()) {
+                shape.translation().setX(-scene.radius() + scene.radius()*0.1f);
+            } else if(shape.translation().x() < -scene.radius()) {
+                shape.translation().setX(scene.radius() - scene.radius()*0.1f);
+            } else if(shape.translation().z() > scene.radius()) {
+                shape.translation().setZ(-scene.radius() + scene.radius()*0.1f);
+            } else if(shape.translation().z() < -scene.radius()) {
+                shape.translation().setZ(scene.radius() - scene.radius()*0.1f);
             }
         }
 
         //Skeleton and IK Stuff
         public Joint leg(int i, Node reference, Vector upper, Vector middle, Vector lower, Node target, boolean invert, float radius){
-            Scene scene = (Scene) (shape.graph());
-            Joint j1 = new Joint(scene, radius);
+            Joint j1 = new Joint(radius);
             j1.setDrawConstraint(false);
             j1.setReference(reference);
             j1.setPosition(reference.worldLocation(upper));
-            Joint j2 = new Joint(scene, radius);
+            Joint j2 = new Joint(radius);
             j2.setDrawConstraint(false);
             j2.setReference(j1);
             j2.setPosition(reference.worldLocation(middle));
-            Joint j21 = new Joint(scene, radius);
+            Joint j21 = new Joint(radius);
             j21.setDrawConstraint(false);
             j21.setReference(j2);
             Vector v = Vector.add(middle, Vector.multiply(Vector.subtract(lower, middle),0.5f));
             j21.setPosition(reference.worldLocation(v));
-            Joint j3 = new Joint(scene, radius);
+            Joint j3 = new Joint(radius);
             j3.setDrawConstraint(false);
             j3.setReference(j21);
             j3.setPosition(reference.worldLocation(lower));
@@ -173,7 +174,6 @@ public class InteractiveSpider extends PApplet {
         }
 
         public void addIk(int i, Node root, Node endEffector, Node target, boolean invert){
-            Scene scene = (Scene) (shape.graph());
             target.setReference(root.reference());
             target.setPosition(endEffector.position());
             interpolator[i] = legPath(target, Vector.distance(root.position(), endEffector.position())*0.1f, invert);
@@ -184,7 +184,6 @@ public class InteractiveSpider extends PApplet {
         }
 
         public Interpolator legPath(Node target, float amplitude, boolean invert) {
-            Scene scene = (Scene) (shape.graph());
             Interpolator targetInterpolator = new Interpolator(target);
             targetInterpolator.enableRecurrence();
             targetInterpolator.setSpeed(8.2f);
@@ -198,7 +197,7 @@ public class InteractiveSpider extends PApplet {
                 if(i >= nbKeyFrames/2 - 1 && invert) y = target.translation().y();
                 if(i <= nbKeyFrames/2 - 1 && !invert) y = target.translation().y();
 
-                Node iFrame = new Node(scene);
+                Node iFrame = new Node();
                 iFrame.setReference(target.reference());
                 iFrame.setTranslation(new Vector(target.translation().x(), y, z));
                 targetInterpolator.addKeyFrame(iFrame);
@@ -258,7 +257,7 @@ public class InteractiveSpider extends PApplet {
         userSpider.shape.setPosition(0,userSpider.shape.position().y(),0);
         userSpider.pshape.setFill(color(255,0,0));
 
-        Node cursor = new Node(scene);
+        Node cursor = new Node();
         cursor.setShape(diamond(scene.radius()*0.2f, scene.radius()*0.1f, scene.radius()*0.1f));
 
         cursor.setReference(userSpider.shape);

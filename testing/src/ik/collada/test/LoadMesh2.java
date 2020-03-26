@@ -36,7 +36,7 @@ public class LoadMesh2 extends PApplet {
     public void setup() {
         randomSeed(14);
         textSize(24);
-        Joint.markers = true;
+        //Joint.markers = true;
         //1. Create the scene
         textureMode(NORMAL);
         scene = new Scene(this);

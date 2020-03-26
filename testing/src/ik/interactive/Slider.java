@@ -62,7 +62,7 @@ public class Slider {
 
     protected void createSlider(){
         float detail = _bar_width/_detail;
-        _bar = new Node(_scene){
+        _bar = new Node(){
             @Override
             public void visit() {
                 PGraphics pGraphics = _scene.context();

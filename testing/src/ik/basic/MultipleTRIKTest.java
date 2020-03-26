@@ -119,7 +119,7 @@ public class MultipleTRIKTest extends PApplet {
         //4. relate targets with end effectors
         solver.setTarget(endEffector, target);
         //5. Create a Timing Task such that the solver executes each amount of time
-        TimingTask solverTask = new TimingTask(scene) {
+        TimingTask solverTask = new TimingTask() {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
@@ -147,10 +147,10 @@ public class MultipleTRIKTest extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(col);
 
-        Node target = new Node(scene){
+        Node target = new Node(){
             @Override
             public void graphics(PGraphics pGraphics){
-                scene.drawAxes(pGraphics,radius *1.5f);
+                Scene.drawAxes(pGraphics,radius *1.5f);
                 pGraphics.shape(redBall);
             }
         };
@@ -164,7 +164,7 @@ public class MultipleTRIKTest extends PApplet {
          * A Joint will be represented as a ball
          * that is joined to its reference Node
          * */
-        Joint joint = new Joint(scene, radius);
+        Joint joint = new Joint(radius);
         joint.setReference(node);
         //Exact picking precision
         joint.setPickingThreshold(0);

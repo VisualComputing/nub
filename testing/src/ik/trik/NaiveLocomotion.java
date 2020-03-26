@@ -50,7 +50,7 @@ public class NaiveLocomotion extends PApplet {
         scene.setRadius(segments * 4 * boneLength);
         scene.fit(1);
 
-        createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(-boneLength*3, 0,0), IKMode.SIMPLETRIK, 10 , 0);
+        createStructure(segments, boneLength, radius, 0,255,0, new Vector(-boneLength*3, 0,0), IKMode.SIMPLETRIK, 10 , 0);
     }
 
     public void draw(){
@@ -87,7 +87,7 @@ public class NaiveLocomotion extends PApplet {
                 scene.align();
     }
 
-    public Solver addIKbehavior(Scene scene, ArrayList<Node> limb, Node target, IKMode mode){
+    public Solver addIKbehavior(ArrayList<Node> limb, Node target, IKMode mode){
         Solver solver;
         switch (mode){
             case CCD:{
@@ -146,49 +146,49 @@ public class NaiveLocomotion extends PApplet {
         return solver;
     }
 
-    public Node createTarget(Scene scene, float radius){
+    public Node createTarget(float radius){
         PShape ball = createShape(SPHERE, radius);
         ball.setFill(color(255,0,0));
         ball.setStroke(false);
-        return new Node(scene){
+        return new Node(){
             @Override
             public void graphics(PGraphics pg){
-                scene.drawAxes(pg, radius * 3);
+                Scene.drawAxes(pg, radius * 3);
                 pg.shape(ball);
             }
         };
     }
 
-    public void createStructure(Scene scene, int segments, float length, float radius, int color, Vector translation, IKMode mode, float min , float max){
-        Node reference = new Node(scene);
+    public void createStructure(int segments, float length, float radius, int red, int green, int blue, Vector translation, IKMode mode, float min , float max){
+        Node reference = new Node();
         reference.translate(translation);
 
         //1. Create reference Frame
-        Joint root = new Joint(scene, color(255,0,0), radius);
+        Joint root = new Joint(255,0,0, radius);
         root.setRoot(true);
         root.setReference(reference);
 
         //2. Create Targets, Limbs & Solvers
-        Node target1 = createTarget(scene, radius*1.2f);
-        Node target2 = createTarget(scene, radius*1.2f);
+        Node target1 = createTarget(radius*1.2f);
+        Node target2 = createTarget(radius*1.2f);
 
-        solvers.add(createLimb(scene, segments, length, radius, color, root, target1, new Vector(-length,0,0), mode, min, max));
-        solvers.add(createLimb(scene, segments, length, radius, color, root, target2, new Vector(length,0,0), mode, min, max));
+        solvers.add(createLimb(segments, length, radius, red, green, blue, root, target1, new Vector(-length,0,0), mode, min, max));
+        solvers.add(createLimb(segments, length, radius, red, green, blue, root, target2, new Vector(length,0,0), mode, min, max));
 
         //3. Create walking cycle
-        createBipedCycle(scene, root, solvers.get(solvers.size() - 1), solvers.get(solvers.size() - 2), target1, target2);
+        createBipedCycle(root, solvers.get(solvers.size() - 1), solvers.get(solvers.size() - 2), target1, target2);
     }
 
 
-    public Solver createLimb(Scene scene, int segments, float length, float radius, int color, Node reference, Node target, Vector translation, IKMode mode, float min, float max){
+    public Solver createLimb(int segments, float length, float radius, int red, int green, int blue, Node reference, Node target, Vector translation, IKMode mode, float min, float max){
         target.setReference(reference.reference());
         ArrayList<Node> joints = new ArrayList<>();
-        Joint root = new Joint(scene, color, radius);
+        Joint root = new Joint(red, green, blue, radius);
         root.setReference(reference);
         joints.add(root);
 
         for(int i = 0; i < max(segments, 2); i++){
-            Joint middle = new Joint(scene, color, radius);
+            Joint middle = new Joint(red, green, blue, radius);
             middle.setReference(joints.get(i));
             middle.translate(0, length, 0);
             if(i < max(segments, 2) - 1) {
@@ -201,34 +201,34 @@ public class NaiveLocomotion extends PApplet {
         cone.setRestRotation(joints.get(joints.size() - 1).rotation().get(), new Vector(0,-1,0), new Vector(0,0,1));
         joints.get(joints.size() - 1).setConstraint(cone);
 
-        Joint low = new Joint(scene, color, radius);
+        Joint low = new Joint(red, green, blue, radius);
         low.setReference(joints.get(joints.size() - 1));
         low.translate(0,0,length);
 
         joints.add(low);
         root.translate(translation);
         root.setConstraint(new Hinge(radians(80), radians(80), root.rotation().get(), new Vector(0, 1, 0), new Vector(1, 0, 0)));
-        return addIKbehavior(scene, joints, target, mode);
+        return addIKbehavior(joints, target, mode);
     }
 
 
 
-    public void createBipedCycle(Scene scene, Node root, Solver leg1, Solver leg2, Node target1, Node target2){
+    public void createBipedCycle(Node root, Solver leg1, Solver leg2, Node target1, Node target2){
         //Create Walking Cycle
-        Cycle cycle = new Cycle(scene, leg1, leg2);
+        Cycle cycle = new Cycle(leg1, leg2);
         Cycle.Step s1, s2, s3, s4, s5, s6;
-        s1 = new LiftStep(scene, target1, 0.5f * stepWidth / 180);
+        s1 = new LiftStep(target1, 0.5f * stepWidth / 180);
         cycle.addStep(s1);
         cycle.initialStep(s1);
-        s2 = new ForwardHipStep(scene, root, target1, 0.5f * stepWidth / 180);
+        s2 = new ForwardHipStep(root, target1, 0.5f * stepWidth / 180);
         cycle.addStep(s2);
-        s3 = new LiftStep(scene, target2, stepWidth / 180);
+        s3 = new LiftStep(target2, stepWidth / 180);
         cycle.addStep(s3);
-        s4 = new ForwardHipStep(scene, root, target1, 0.5f * stepWidth / 180);
+        s4 = new ForwardHipStep(root, target1, 0.5f * stepWidth / 180);
         cycle.addStep(s4);
-        s5 = new LiftStep(scene, target1, stepWidth / 180);
+        s5 = new LiftStep(target1, stepWidth / 180);
         cycle.addStep(s5);
-        s6 = new ForwardHipStep(scene, root, target1, 0.5f * stepWidth / 180);
+        s6 = new ForwardHipStep(root, target1, 0.5f * stepWidth / 180);
         cycle.addStep(s6);
 
         cycle.addTransition(s1, s2);
@@ -240,7 +240,7 @@ public class NaiveLocomotion extends PApplet {
 
         final Vector center = root.translation();
 
-        TimingTask task = new TimingTask(scene) {
+        TimingTask task = new TimingTask() {
             float ang = 0;
 
             @Override
@@ -257,8 +257,8 @@ public class NaiveLocomotion extends PApplet {
 
     public static class Cycle{
         public static abstract class Step{
-            public Step(Scene scene){
-                _task = new TimingTask(scene) {
+            public Step(){
+                _task = new TimingTask() {
                     @Override
                     public void execute() {
                         Step.this.execute();
@@ -270,7 +270,6 @@ public class NaiveLocomotion extends PApplet {
             public abstract void execute();
             public abstract void start();
         }
-        Scene _scene;
         List<Step> _steps = new ArrayList<Step>();
         HashMap<Step, Step> _transition = new HashMap<>();
         Step _current = null;
@@ -314,11 +313,10 @@ public class NaiveLocomotion extends PApplet {
             _transition.put(from, to);
         }
 
-        public Cycle(Scene scene, Solver leg1, Solver leg2){
-            _scene = scene;
+        public Cycle(Solver leg1, Solver leg2){
             this._leg1 = leg1;
             this._leg2 = leg2;
-            TimingTask task = new TimingTask(scene) {
+            TimingTask task = new TimingTask() {
                 @Override
                 public void execute() {
                     Cycle.this.run();
@@ -337,8 +335,8 @@ public class NaiveLocomotion extends PApplet {
 
 
 
-        public LiftStep(Scene scene, Node target, float w) {
-            super(scene);
+        public LiftStep(Node target, float w) {
+            super();
             _target = target;
             _w = w;
         }
@@ -371,8 +369,8 @@ public class NaiveLocomotion extends PApplet {
 
 
 
-        public ForwardHipStep(Scene scene, Node hip, Node target, float w) {
-            super(scene);
+        public ForwardHipStep(Node hip, Node target, float w) {
+            super();
             _hip = hip;
             _target = target;
             _vt = _target.translation().get();

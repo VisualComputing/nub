@@ -66,7 +66,7 @@ public class SkeletonBuilder extends PApplet{
         scene.setRadius(800);
         scene.fit();
 
-        new InteractiveJoint(scene, radius).setRoot(true);
+        new InteractiveJoint(radius).setRoot(true);
         // = new OptionPanel(this, 0.7f * width, 0, (int)(0.3f * width), h );
         //scene.fit(1);
         views = createViews();
@@ -313,7 +313,7 @@ public class SkeletonBuilder extends PApplet{
     boolean solve = false, keepDirections = true, fixTwisting = true;
     public void keyPressed(){
         if(key == '+'){
-            new InteractiveJoint(scene, radius).setRoot(true);
+            new InteractiveJoint(radius).setRoot(true);
         }
         if(key == 'A' || key == 'a'){
             addTreeSolver();
@@ -505,7 +505,7 @@ public class SkeletonBuilder extends PApplet{
         };
 
         Scene[] views = new Scene[3];
-        Node eyeXY = new Node();
+        Node eyeXY = Node.detach(new Vector(), new Quaternion(), 1f);
         eyeXY.scale(2f);
         eyeXY.setPosition(scene.eye().position());
         eyeXY.setOrientation(scene.eye().orientation());
@@ -515,7 +515,7 @@ public class SkeletonBuilder extends PApplet{
         views[0].setEye(eyeXY);
         views[0].setType(Graph.Type.ORTHOGRAPHIC);
         //create an auxiliary view to look at the XY Plane
-        Node eyeXZ = new Node();
+        Node eyeXZ = Node.detach(new Vector(), new Quaternion(), 1f);
         eyeXZ.scale(2f);
         eyeXZ.setPosition(0, scene.radius(), 0);
         eyeXZ.setOrientation(new Quaternion(new Vector(1,0,0), -HALF_PI));
@@ -525,7 +525,7 @@ public class SkeletonBuilder extends PApplet{
         views[1].setEye(eyeXZ);
         views[1].setType(Graph.Type.ORTHOGRAPHIC);
         //create an auxiliary view to look at the XY Plane
-        Node eyeYZ = new Node();
+        Node eyeYZ = Node.detach(new Vector(), new Quaternion(), 1f);
         //eyeYZ.setMagnitude(0.5f);
         eyeYZ.scale(2f);
         eyeYZ.setPosition(scene.radius(), 0, 0);

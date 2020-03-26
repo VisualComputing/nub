@@ -31,11 +31,11 @@ public class AuxiliaryViews extends PApplet {
         scene.setRadius(max(w, h));
         shapes = new Node[20];
         for (int i = 0; i < shapes.length; i++) {
-            shapes[i] = new Node(scene, caja());
+            shapes[i] = new Node(caja());
             shapes[i].setPickingThreshold(0);
-            shapes[i].randomize();
+            shapes[i].randomize(new Vector(), scene.radius(), scene.is3D());
         }
-        light = new Node(scene) {
+        light = new Node() {
             @Override
             public void graphics(PGraphics pg) {
                 pg.pushStyle();
@@ -144,8 +144,8 @@ public class AuxiliaryViews extends PApplet {
             scene.setType(scene.type() == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC);
         }
         if (key == 'p') {
-            scene.eye().position().print();
-            scene.eye().orientation().print();
+            //scene.eye().position().print();
+            //scene.eye().orientation().print();
         }
     }
 

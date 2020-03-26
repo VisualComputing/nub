@@ -181,7 +181,7 @@ public class ConstrainedIK extends PApplet {
         solver.setTarget(node4, target);
 
         //5. Create a Timing Task such that the solver executes each amount of time
-        TimingTask solverTask = new TimingTask(scene) {
+        TimingTask solverTask = new TimingTask() {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
@@ -224,7 +224,7 @@ public class ConstrainedIK extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        Node target = new Node(scene, redBall);
+        Node target = new Node(redBall);
         //Exact picking precision
         target.setPickingThreshold(0);
         return target;
@@ -236,15 +236,14 @@ public class ConstrainedIK extends PApplet {
          * that is joined to its reference Node
          * */
 
-        Node joint = new Node(scene){
+        Node joint = new Node(){
             @Override
             public void graphics(PGraphics pg){
-                Scene scene = (Scene) this._graph;
                 pg.pushStyle();
                 if (drawLine) {
                     pg.stroke(255);
                     Vector v = location(new Vector(), reference());
-                    if (scene.is2D()) {
+                    if (pg.is2D()) {
                         pg.line(0, 0, v.x(), v.y());
                     } else {
                         pg.line(0, 0, 0,  v.x(), v.y(), v.z());
@@ -252,15 +251,15 @@ public class ConstrainedIK extends PApplet {
                 }
                 pg.fill(color(0,255,0));
                 pg.noStroke();
-                if (scene.is2D()) pg.ellipse(0, 0, radius*2, radius*2);
+                if (pg.is2D()) pg.ellipse(0, 0, radius*2, radius*2);
                 else pg.sphere(radius);
 
                 //Invoke drawConstraint method to draw the constraint related with the joint
                 if (constraint() != null) {
-                    scene.drawConstraint(pg,this);
+                    Scene.drawConstraint(pg,this);
                 }
                 pg.strokeWeight(5);
-                scene.drawAxes(radius*3);
+                Scene.drawAxes(pg,radius*3);
                 pg.popStyle();
             }
         };

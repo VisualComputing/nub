@@ -54,7 +54,7 @@ public class UR10 extends PApplet {
         }
 
         Joint.axes = true;
-        Joint.markers = true;
+        //Joint.markers = true;
         randomSeed(14);
         this.g.textureMode(NORMAL);
         scene = new Scene(this);
@@ -118,7 +118,7 @@ public class UR10 extends PApplet {
         solver.setMaxError(scene.radius() * 0.01f); solver.setMinDistance(scene.radius() * 0.01f);
         solver.setTarget(branch.get(branch.size() - 1), target);
         target.setPosition(branch.get(branch.size() - 1).position().get());
-        TimingTask task = new TimingTask(scene) {
+        TimingTask task = new TimingTask() {
             @Override
             public void execute() {
                 if (solve) solver.solve();
@@ -246,7 +246,7 @@ public class UR10 extends PApplet {
     }
 
     public Node generateRandomReachablePosition(List<? extends Node> original, boolean is3D){
-        ArrayList<? extends Node> chain = Util.copy(original);
+        ArrayList<? extends Node> chain = Util.detachedCopy(original);
         for(int i = 0; i < chain.size(); i++){
             if(is3D)
                 chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));

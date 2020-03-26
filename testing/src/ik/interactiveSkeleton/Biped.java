@@ -48,13 +48,13 @@ public class Biped extends PApplet {
         redBall.setFill(color(255,0,0));
 
         for(String key : keys){
-            Node target = new Node(scene, redBall);
+            Node target = new Node(redBall);
             target.setPickingThreshold(0);
             targets.put(key, target);
         }
 
-        Joint chest = new Joint(scene);
-        Joint lowerRoot = new Joint(scene);
+        Joint chest = new Joint();
+        Joint lowerRoot = new Joint();
 
         //right arm
         limbs.put("LeftArm", limb(chest, new Vector(10,-30,0), new Vector(1,0,0), boneLength, new Vector(0,0,10)));
@@ -63,7 +63,7 @@ public class Biped extends PApplet {
         limbs.put("RightFoot", limb(lowerRoot, new Vector(-10,10,0), new Vector(0,1,0), boneLength, new Vector(-10,0,0)));
 
         chest.translate(0,-50,0);
-        Joint upperRoot = new Joint(scene);
+        Joint upperRoot = new Joint();
         chest.setReference(upperRoot);
 
         //applyConstraint(chest.frame, boneLength);
@@ -122,13 +122,13 @@ public class Biped extends PApplet {
         ArrayList<Joint> skeleton = new ArrayList<Joint>();
         Vector bone = direction.normalize(null);
         bone.multiply(boneLength);
-        Joint j1 = new Joint(scene);
+        Joint j1 = new Joint();
         j1.setReference(root);
         j1.setPosition(origin);
-        Joint j2 = new Joint(scene);
+        Joint j2 = new Joint();
         j2.setReference(j1);
         j2.translate(bone);
-        Joint j3 = new Joint(scene);
+        Joint j3 = new Joint();
         j3.setReference(j2);
         j3.translate(bone);
 
