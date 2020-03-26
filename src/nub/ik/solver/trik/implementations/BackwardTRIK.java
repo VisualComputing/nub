@@ -28,6 +28,7 @@ public class BackwardTRIK extends Solver {
     public BackwardTRIK(List<? extends Node> chain, Node target) {
         super();
         this._context = new Context(chain, target);
+        _context.setSolver(this);
         this._backwardHeuristic = new BackwardHeuristic(_context);
     }
 

@@ -26,6 +26,7 @@ public class ForwardTRIK extends Solver {
     public ForwardTRIK(List<? extends Node> chain, Node target) {
         super();
         this._context = new Context(chain, target);
+        _context.setSolver(this);
         this._forwardHeuristic = new ForwardHeuristic(_context);
     }
 

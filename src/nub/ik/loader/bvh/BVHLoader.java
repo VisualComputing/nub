@@ -167,7 +167,7 @@ public class BVHLoader {
         }
         //Create a Frame
         try {
-          root = _class.getConstructor(Scene.class).newInstance(scene);
+          root = _class.getConstructor().newInstance();
         } catch (InstantiationException e) {
           e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -200,7 +200,7 @@ public class BVHLoader {
       } else if (expression[0].equals("JOINT")) {
         //Create a node
         try {
-          current = _class.getConstructor(Scene.class).newInstance(scene);
+          current = _class.getConstructor().newInstance();
         } catch (InstantiationException e) {
           e.printStackTrace();
         } catch (IllegalAccessException e) {
