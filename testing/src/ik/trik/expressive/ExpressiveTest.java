@@ -22,6 +22,7 @@ public class ExpressiveTest extends PApplet {
     SimpleTRIK solver;
     Scene delegationScene, mainScene, focus;
     DelegationPanel panel;
+    Node root;
     boolean solve = true, enableTask = false;
 
 
@@ -39,6 +40,7 @@ public class ExpressiveTest extends PApplet {
         //create target
         Node target = Util.createTarget(mainScene, targetRadius);
         List<Node> structure = Util.generateAttachedChain(numJoints, targetRadius * 0.7f, boneLength, new Vector(), 0,255, 0);
+        root = structure.get(0);
 
         //Util.generateConstraints(structure, Util.ConstraintType.CONE_CIRCLE, 0, true);
 
@@ -94,6 +96,8 @@ public class ExpressiveTest extends PApplet {
     public void draw() {
         handleMouse();
         lights();
+        root.cull(false);
+        panel.cull(true);
         mainScene.context().background(0);
         mainScene.drawAxes();
         mainScene.render();
@@ -105,6 +109,8 @@ public class ExpressiveTest extends PApplet {
 
 
         noLights();
+        root.cull(true);
+        panel.cull(false);
         mainScene.beginHUD();
         delegationScene.beginDraw();
         delegationScene.context().background(0);

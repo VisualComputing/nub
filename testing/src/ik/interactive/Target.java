@@ -113,7 +113,7 @@ public class Target extends Node {
     public static void multipleTranslate(){
         for(Target target : _selectedTargets){
             if(target._scene.node() != target)
-                target._scene.translateNode(target, target._scene.mouseDX(), target._scene.mouseDY(), 0);
+                target._scene.translateNode(target, target._scene.mouseDX(), target._scene.mouseDY(), 0, 0);
         }
     }
 

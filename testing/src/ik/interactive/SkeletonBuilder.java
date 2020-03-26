@@ -224,7 +224,7 @@ public class SkeletonBuilder extends PApplet{
                 focus.spin(focus.pmouseX(), focus.pmouseY(), focus.mouseX(), focus.mouseY());
             }
         } else if (mouseButton == RIGHT) {
-            focus.translate(focus.mouseX() - focus.pmouseX(), focus.mouseY() - focus.pmouseY(), 0);
+            focus.translate(focus.mouseX() - focus.pmouseX(), focus.mouseY() - focus.pmouseY(), 0, 0);
             Target.multipleTranslate();
         } else if (mouseButton == CENTER){
             focus.scale(focus.mouseDX());

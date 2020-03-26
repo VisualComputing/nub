@@ -214,7 +214,7 @@ public class Case1 extends PApplet {
             focus.mouseSpin();
         } else if (mouseButton == RIGHT) {
             if(targets.contains(focus.node())){
-                for(Node t : targets) focus.translateNode(t, focus.mouseDX(), focus.mouseDY(), 0);
+                for(Node t : targets) focus.translateNode(t, focus.mouseDX(), focus.mouseDY(), 0, 0);
             } else {
                 focus.mouseTranslate();
             }

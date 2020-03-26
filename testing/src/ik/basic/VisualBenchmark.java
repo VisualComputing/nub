@@ -232,7 +232,7 @@ public class VisualBenchmark extends PApplet {
             scene.mouseSpin();
         } else if (mouseButton == RIGHT) {
             if(targets.contains(scene.node())){
-                for(Node target : targets) scene.translateNode(target, scene.mouseDX(), scene.mouseDY(), 0);
+                for(Node target : targets) scene.translateNode(target, scene.mouseDX(), scene.mouseDY(), 0, 0);
             }else{
                 scene.mouseTranslate();
             }
