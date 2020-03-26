@@ -1,5 +1,6 @@
 package nub.ik.solver.trik.heuristic;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.FABRIKSolver;
@@ -23,11 +24,11 @@ public class ForwardHeuristic extends Heuristic{
     public ForwardHeuristic(Context context) {
         super(context);
         List<Node> auxiliarChain;
-        if(context.debug() && context.chain().get(0).graph() instanceof Scene) {
-            auxiliarChain = FABRIKSolver._copy(context.chain(), null, (Scene) context.chain().get(0).graph(), false);
+        if(context.debug() && Graph.isReachable(context.chain().get(0))) {
+            auxiliarChain = Context._attachedCopy(context.chain(), null, false);
         }
         else {
-            auxiliarChain = FABRIKSolver._copy(context.chain(), false);
+            auxiliarChain = Context._detachedCopy(context.chain(), false);
         }
         _auxiliaryChainInformation = NodeInformation._createInformationList(auxiliarChain, true);
     }

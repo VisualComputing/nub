@@ -317,7 +317,7 @@ public class BVHLoader {
         }
         i++;
       }
-      Node next = new Node(current.translation().get(), current.rotation().get(), 1);
+      Node next = Node.detach(current.translation().get(), current.rotation().get(), 1);
 
       switch (properties._parametrization) {
         case "XYZ": {

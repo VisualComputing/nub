@@ -2965,7 +2965,7 @@ public class Scene extends Graph implements PConstants {
    * @param b
    * @param detail
    */
-  public void drawCone(PGraphics pGraphics, float height, float a, float b, int detail) {
+  public static void drawCone(PGraphics pGraphics, float height, float a, float b, int detail) {
     float[] x = new float[detail + 1];
     float[] y = new float[detail + 1];
 
@@ -2991,7 +2991,7 @@ public class Scene extends Graph implements PConstants {
    * @param height
    * @param vertices
    */
-  public void drawCone(PGraphics pGraphics, float height, List<Vector> vertices) {
+  public static void drawCone(PGraphics pGraphics, float height, List<Vector> vertices) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     pGraphics.vertex(0, 0, 0);
     for (Vector v : vertices) {
@@ -3011,7 +3011,7 @@ public class Scene extends Graph implements PConstants {
    * @param vertices
    * @param scale
    */
-  public void drawCone(PGraphics pGraphics, List<Vector> vertices, float scale) {
+  public static void drawCone(PGraphics pGraphics, List<Vector> vertices, float scale) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     pGraphics.vertex(0, 0, 0);
     for (Vector v : vertices)
@@ -3030,7 +3030,7 @@ public class Scene extends Graph implements PConstants {
    * @param height
    * @param vertices
    */
-  public void drawCone(PGraphics pGraphics, float height, float scaling, List<Vector> vertices) {
+  public static void drawCone(PGraphics pGraphics, float height, float scaling, List<Vector> vertices) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     pGraphics.vertex(0, 0, 0);
     for (Vector v : vertices) {
@@ -3092,7 +3092,7 @@ public class Scene extends Graph implements PConstants {
    * @param maxAngle
    * @param detail
    */
-  public void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail) {
+  public static void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     pGraphics.vertex(0, 0, 0);
     float step = (maxAngle - minAngle) / detail;
@@ -3670,7 +3670,7 @@ public class Scene extends Graph implements PConstants {
    * @see Node#constraint()
    * @see nub.core.constraint.Constraint
    */
-  public void drawConstraint(PGraphics pGraphics, Node node) {
+  public static void drawConstraint(PGraphics pGraphics, Node node) {
     drawConstraint(pGraphics, node, 0.5f);
   }
 
@@ -3680,11 +3680,10 @@ public class Scene extends Graph implements PConstants {
    * @see Node#constraint()
    * @see nub.core.constraint.Constraint
    */
-  public void drawConstraint(PGraphics pGraphics, Node node, float factor) {
+  public static void drawConstraint(PGraphics pGraphics, Node node, float factor) {
     if (node == null) return;
+    if (node.isCulled()) return;
     if (node.constraint() == null) return;
-    // TODO test
-    if (!node.isAttached(this)) return;
     float boneLength = 0;
     if (!node.children().isEmpty()) {
       for (Node child : node.children())
@@ -3699,7 +3698,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.noStroke();
 
     pGraphics.fill(62, 203, 55, 150);
-    Node reference = new Node();
+    Node reference = Node.detach(new Vector(), new Quaternion(), 1f);
     reference.setTranslation(new Vector());
     reference.setRotation(node.rotation().inverse());
 

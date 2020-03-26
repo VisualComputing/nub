@@ -1,6 +1,7 @@
 package nub.ik.solver.geometric.oldtrik;
 
 import javafx.util.Pair;
+import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
@@ -8,6 +9,7 @@ import nub.ik.animation.InterestingEvent;
 import nub.ik.animation.VisualizerMediator;
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.FABRIKSolver;
+import nub.ik.solver.trik.Context;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -70,13 +72,13 @@ public class TRIK extends Solver {
     public TRIK(List<? extends Node> chain, Node target) {
         super();
         this._original = chain;
-        if(_debug && _original.get(0).graph() instanceof Scene) {
-            this._chain = FABRIKSolver._copy(chain, null, (Scene) _original.get(0).graph());
-            this._auxiliary_chain = FABRIKSolver._copy(chain, null, (Scene) _original.get(0).graph(), false);
+        if(_debug && Graph.isReachable(_original.get(0))) {
+            this._chain = Context._attachedCopy(chain, null);
+            this._auxiliary_chain = Context._attachedCopy(chain, null, false);
         }
         else {
-            this._chain = FABRIKSolver._copy(chain);
-            this._auxiliary_chain = FABRIKSolver._copy(chain, false);
+            this._chain = Context._detachedCopy(chain);
+            this._auxiliary_chain = Context._detachedCopy(chain, false);
         }
 
         //create info list
@@ -86,9 +88,9 @@ public class TRIK extends Solver {
 
         this._target = target;
         this._previousTarget =
-                target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
+                target == null ? null : Node.detach(target.position().get(), target.orientation().get(), 1);
 
-        this._worldTarget = target == null ? new Node() : new Node(_target.position(), _target.orientation(), 1);
+        this._worldTarget = target == null ? Node.detach(new Vector(), new Quaternion(), 1) : Node.detach(_target.position(), _target.orientation(), 1);
         this._last = _chain.size() - 1;
     }
 
@@ -299,7 +301,7 @@ public class TRIK extends Solver {
             //Add the convenient attributes
             messageEvent.addAttribute("message", "Updating chain");
         }
-        _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
+        _previousTarget = _target == null ? null : Node.detach(_target.position().get(), _target.orientation().get(), 1);
         //Copy original state into chain
         _copyChainState(_original, _chain);
         //Update cache
@@ -788,7 +790,7 @@ public class TRIK extends Solver {
 
 
         //axis w.r.t j_i ref
-        Node ref = j_i.reference() != null ? j_i.reference() : new Node();
+        Node ref = j_i.reference() != null ? j_i.reference() : Node.detach(new Vector(), new Quaternion(), 1);
         axis = ref.displacement(axis, j_i);
 
         for(float angle = 0; angle < (float)Math.PI; angle += step){

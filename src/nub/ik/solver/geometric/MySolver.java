@@ -6,6 +6,7 @@ import nub.core.constraint.ConeConstraint;
 import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
 import nub.ik.solver.Solver;
+import nub.ik.solver.trik.Context;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -34,8 +35,8 @@ public class MySolver extends Solver{
     public MySolver(List<? extends Node> chain, Node target){
         super();
         this._original = chain;
-        this._chain = FABRIKSolver._copy(chain); //TODO: Move this method
-        this._reversed = _reverseChain(_original, (Scene)_original.get(0).graph());
+        this._chain = Context._detachedCopy(chain); //TODO: Move this method
+        this._reversed = _reverseChain(_original);
         _generateGlobalConstraints();
     }
 
@@ -243,7 +244,7 @@ public class MySolver extends Solver{
 
     @Override
     protected void _reset() {
-        _prevTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
+        _prevTarget = _target == null ? null : Node.detach(_target.position().get(), _target.orientation().get(), 1);
         _iterations = 0;
         st = 0; cur = 0; bkd = false;
         _updateReverse(_original, _reversed);
@@ -590,15 +591,15 @@ public class MySolver extends Solver{
         //j_i.rotate(desired_rotation.axis(), desired_rotation.angle()/(reversed.size() -1 - i));
     }
 
-    protected static List<Node> _reverseChain(List<? extends Node> chain, Scene s){
+    protected static List<Node> _reverseChain(List<? extends Node> chain){
         List<Node> reversed = new ArrayList<>();
         Node reference = chain.get(0).reference();
         if (reference != null) {
-            reference = new Node(reference.position().get(), reference.orientation().get(), 1);
+            reference = Node.detach(reference.position().get(), reference.orientation().get(), 1);
         }
         for(int i = chain.size() -1; i >= 0; i--){
             Node joint = chain.get(i);
-            Node newJoint = new Joint(s);
+            Node newJoint = new Joint();
             newJoint.setReference(reference);
             newJoint.setPosition(joint.position().get());
             newJoint.setOrientation(joint.orientation().get());
@@ -693,7 +694,7 @@ public class MySolver extends Solver{
             //TODO: This will work better if we consider angles up to PI (current boundaries are at maximum PI/2)
             float[] angles = {0,0,0,0};
             for(int dir = 0; dir < 4; dir++) {
-                List<Node> local_chain = FABRIKSolver._copy(_chain);
+                List<Node> local_chain = Context._detachedCopy(_chain);
                 while(local_chain.size() > i + 1) local_chain.remove(local_chain.size() - 1);
 
                 for (int k = 0; k < i; k++) {

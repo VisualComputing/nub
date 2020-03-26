@@ -123,7 +123,7 @@ public class TRIKTree extends Solver {
         //in case a children was modified and the node is not a leaf
         Quaternion rotation = QCP.CalcRMSDRotationalMatrix(desired_coords, current_coords, null);
         solver.context().chain().get(solver.context().chain().size() - 1).rotate(rotation);
-        Node target = new Node();
+        Node target = Node.detach(new Vector(), new Quaternion(), 1f);
         //solve ik for current chain
         //Set the target position
         Vector translation = new Vector();

@@ -419,7 +419,7 @@ public class GASolver extends Solver {
       return;
     }
     for (Integer endEffector : _targets.keySet()) {
-      _previousTarget.put(endEffector, new Node(_targets.get(endEffector).position(), _targets.get(endEffector).orientation(), 1));
+      _previousTarget.put(endEffector, Node.detach(_targets.get(endEffector).position(), _targets.get(endEffector).orientation(), 1));
     }
 
     _best.setChain(_structure);

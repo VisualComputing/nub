@@ -97,7 +97,7 @@ public class Visualizer {
     //TODO: ADD "SAME" OPTION i.e animate the same structure instead of create a new one
     //Register the structures to Animate
     public void registerNode(Node node){
-        Joint joint = new Joint(_scene, _scene.pApplet().color(255, 0, 0));
+        Joint joint = new Joint(255,0,0);
         joint.setRoot(true);
         joint.setPosition(node.position().get());
         joint.setOrientation(node.orientation().get());
@@ -115,13 +115,14 @@ public class Visualizer {
 
     //TODO: Move this constructor
     protected Joint _generateBranch(Node root){
-        Joint joint = new Joint(_scene, _radius);
+        Joint joint = new Joint(_radius);
         joint.setRoot(true);
         joint.setPosition(root.position().get());
         joint.setOrientation(root.orientation().get());
         joint.setConstraint(root.constraint());
         if(root instanceof Joint){
-            joint.setColor(((Joint) root).color());
+            Joint r = ((Joint) root);
+            joint.setColor(r.red(), r.green(), r.blue());
         }
         _nodeToJoint.put(root, joint);
         _addBranch(joint, root);
@@ -132,13 +133,14 @@ public class Visualizer {
         //here we assume that node is attached to a graph
         if(node.children() == null) return;
         for(Node child : node.children()){
-            Joint joint = new Joint(_scene, _radius);
+            Joint joint = new Joint(_radius);
             child.setReference(reference);
             child.setTranslation(node.translation().get());
             child.setRotation(node.rotation().get());
             child.setConstraint(node.constraint());
             if(node instanceof Joint){
-                joint.setColor(((Joint) node).color());
+                Joint j = ((Joint) node);
+                joint.setColor(j.red(), j.green(), j.blue());
             }
             _nodeToJoint.put(child, joint);
             _addBranch(joint, child);
@@ -146,24 +148,27 @@ public class Visualizer {
     }
 
     protected Joint _generateChain(List<?  extends Node> chain){
-        Joint root = new Joint(_scene, _radius);
+        Joint root = new Joint(_radius);
         root.setPosition(chain.get(0).position().get());
         root.setOrientation(chain.get(0).orientation().get());
         root.setRoot(true);
         if(chain.get(0) instanceof Joint){
-            root.setColor(((Joint) chain.get(0)).color());
+            Joint j = ((Joint) chain.get(0));
+            root.setColor(j.red(), j.green(), j.blue());
         }
         _nodeToJoint.put(chain.get(0), root);
         for(int i = 1; i < chain.size(); i++){
             Node current = chain.get(i);
-            Joint joint = new Joint(_scene, _radius);
+            Joint joint = new Joint(_radius);
             Joint ref = _nodeToJoint.get(current.reference());
             joint.setReference(ref);
             joint.setPosition(current.position().get());
             joint.setOrientation(current.orientation().get());
             joint.setConstraint(current.constraint());
             if(current instanceof Joint){
-                joint.setColor(((Joint) current).color());
+                Joint j = ((Joint) current);
+                joint.setColor(j.red(), j.green(), j.blue());
+
             }
             _nodeToJoint.put(current, joint);
         }

@@ -39,7 +39,7 @@ public class HighLightStructure extends VisualStep {
         int color = (int)_attributes.get("highlight");
         for(int i = 0; i < n; i++){
             if(_structure.get(i) instanceof Joint){
-                ((Joint) _structure.get(i)).setColor(color);
+                ((Joint) _structure.get(i)).setColor( (int) _scene.context().red(color), (int) _scene.context().green(color), (int) _scene.context().blue(color));
             }
         }
         _transparency = _init;

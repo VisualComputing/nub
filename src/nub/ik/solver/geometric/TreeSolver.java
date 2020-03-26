@@ -12,6 +12,7 @@
 package nub.ik.solver.geometric;
 
 import nub.core.Node;
+import nub.ik.solver.trik.Context;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -147,7 +148,7 @@ public class TreeSolver extends FABRIKSolver {
     //dummy must have only a child,
     this.root = dummy._children().get(0);
     this.root._parent = null;
-    this._is3D = frame.graph().is3D();
+    this._is3D = true;
   }
 
   protected int _forwardReaching(TreeNode treeNode) {
@@ -175,7 +176,7 @@ public class TreeSolver extends FABRIKSolver {
       newTarget.add(Vector.multiply(child._solver()._positions().get(0), 1.f / totalWeight));
     }
     if (newTarget.magnitude() > 0) {
-      solver.setTarget(new Node(newTarget, solver._chain.get(solver._chain.size() - 1).orientation().get(), 1));
+      solver.setTarget(Node.detach(newTarget, solver._chain.get(solver._chain.size() - 1).orientation().get(), 1));
     }
 
     //Execute Until the distance between the end effector and the target is below a threshold
@@ -421,13 +422,13 @@ public class TreeSolver extends FABRIKSolver {
   protected List<Node> _copyChain(TreeNode parent, List<Node> list) {
     if(parent != null && parent._solver != null && parent._solver._chain.size() > 1) {
       if (debug)
-        return _copy(list, parent._solver._chain.get(parent._solver._chain.size() - 2), ((Scene) list.get(0).graph()));
-      return _copy(list, parent._solver._chain.get(parent._solver._chain.size() - 2));
+        return Context._attachedCopy(list, parent._solver._chain.get(parent._solver._chain.size() - 2));
+      return Context._detachedCopy(list, parent._solver._chain.get(parent._solver._chain.size() - 2));
     }
 
     if(debug)
-      return _copy(list, null, ((Scene) list.get(0).graph()));
-    return _copy(list);
+      return Context._attachedCopy(list, null);
+    return Context._detachedCopy(list);
   }
 
   //AVERAGING QUATERNIONS AS SUGGESTED IN http://wiki.unity3d.com/index.php/Averaging_Quaternions_and_Vectors

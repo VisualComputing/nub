@@ -48,7 +48,7 @@ public class TransposeSolver extends Solver {
     this._chain = chain;
     this._target = target;
     this._previousTarget =
-        target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
+        target == null ? null : Node.detach(target.position().get(), target.orientation().get(), 1);
     _axes = new Vector[_chain.size() - 1];
   }
 
@@ -94,7 +94,7 @@ public class TransposeSolver extends Solver {
     }
 
     SimpleMatrix error = SimpleMatrix.wrap(
-        Util.vectorToMatrix(e, head().graph().is3D()));
+        Util.vectorToMatrix(e, true));
     _J = SimpleMatrix.wrap(Util.jacobian(_chain, endEffector(), _target.position(), _axes));
 
     _delta = _J.transpose().mult(error);
@@ -135,7 +135,7 @@ public class TransposeSolver extends Solver {
 
   @Override
   protected void _reset() {
-    _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
+    _previousTarget = _target == null ? null : Node.detach(_target.position().get(), _target.orientation().get(), 1);
     _iterations = 0;
     _axes = new Vector[_chain.size() - 1];
   }

@@ -14,6 +14,7 @@ package nub.ik.solver.geometric;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.ik.animation.VisualizerMediator;
+import nub.ik.solver.trik.Context;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -113,7 +114,7 @@ public class ChainSolver extends FABRIKSolver {
   public ChainSolver(List<? extends Node> chain, List<Node> copy, Node target) {
     super();
     this._original = chain;
-    this._chain = copy == null ? _copy(chain) : copy;
+    this._chain = copy == null ? Context._detachedCopy(chain) : copy;
     _positions = new ArrayList<Vector>();
     _distances = new ArrayList<Float>();
     _jointChange = new ArrayList<Float>();
@@ -135,12 +136,11 @@ public class ChainSolver extends FABRIKSolver {
       prevPosition = position;
       prevOrientation = orientation.get();
     }
-    _is3D = chain.get(0).graph() == null ? true : chain.get(0).graph().is3D();
     if (!_is3D) _fixTwisting = false;
     _jointChange.remove(0);
     this._target = target;
     this._prevTarget =
-        target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
+        target == null ? null : Node.detach(target.position().get(), target.orientation().get(), 1);
     //TODO : REFINE
     //_generateGlobalConstraints();
   }
@@ -312,7 +312,7 @@ public class ChainSolver extends FABRIKSolver {
 
   @Override
   protected void _reset() {
-    _prevTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
+    _prevTarget = _target == null ? null : Node.detach(_target.position().get(), _target.orientation().get(), 1);
     _iterations = 0;
     _explorationTimes = 0;
     //We know that State has change but not where, then it is better to reset Global Positions and Orientations
@@ -422,7 +422,7 @@ public class ChainSolver extends FABRIKSolver {
     if (debug) System.out.println();
 
     for (int i = 0; i < 20; i++) {
-      List<Node> copy = i < 10 ? _copy(_chain) : _copy(b_copy);
+      List<Node> copy = i < 10 ? Context._detachedCopy(_chain) : Context._detachedCopy(b_copy);
       ArrayList<Vector> copy_p = new ArrayList<>();
       HashMap<Integer, Properties> copy_props = new HashMap<Integer, Properties>();
       int j = 0;
@@ -465,7 +465,7 @@ public class ChainSolver extends FABRIKSolver {
     }
 
     for (int i = 0; i < 20; i++) {
-      List<Node> copy = i < 10 ? _copy(b_copy) : _copy(_chain);
+      List<Node> copy = i < 10 ? Context._detachedCopy(b_copy) : Context._detachedCopy(_chain);
       ArrayList<Vector> copy_p = new ArrayList<>();
       HashMap<Integer, Properties> copy_props = new HashMap<Integer, Properties>();
       int j = 0;
@@ -567,7 +567,7 @@ public class ChainSolver extends FABRIKSolver {
       //TODO: This will work better if we consider angles up to PI (current boundaries are at maximum PI/2)
       float[] angles = {0,0,0,0};
       for(int dir = 0; dir < 4; dir++) {
-        List<Node> local_chain = _copy(_chain);
+        List<Node> local_chain = Context._detachedCopy(_chain);
         while(local_chain.size() > i + 1) local_chain.remove(local_chain.size() - 1);
 
         for (int k = 0; k < i; k++) {

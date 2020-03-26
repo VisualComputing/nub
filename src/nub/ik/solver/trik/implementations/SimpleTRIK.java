@@ -300,7 +300,7 @@ public class SimpleTRIK extends Solver {
 
     @Override
     protected void _reset() {
-        _context.setPreviousTarget(_context.target() == null ? null : new Node(_context.target().position().get(), _context.target().orientation().get(), 1));
+        _context.setPreviousTarget(_context.target() == null ? null : Node.detach(_context.target().position().get(), _context.target().orientation().get(), 1));
         //Copy original state into chain
         _context.copyChainState(_context.chainInformation(), _context.usableChainInformation());
         //Update cache

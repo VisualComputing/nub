@@ -91,10 +91,10 @@ public class ESSolver extends Solver {
     ArrayList<Node> copy = new ArrayList<Node>();
     Node reference = chain.get(0).reference();
     if (reference != null) {
-      reference = new Node(reference.position().get(), reference.orientation().get(), 1);
+      reference = Node.detach(reference.position().get(), reference.orientation().get(), 1);
     }
     for (Node joint : chain) {
-      Node newJoint = new Node();
+      Node newJoint = Node.detach(new Vector(), new Quaternion(), 1f);
       newJoint.setReference(reference);
       newJoint.setPosition(joint.position().get());
       newJoint.setOrientation(joint.orientation().get());
@@ -163,7 +163,7 @@ public class ESSolver extends Solver {
 
   @Override
   protected void _reset() {
-    _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
+    _previousTarget = _target == null ? null : Node.detach(_target.position().get(), _target.orientation().get(), 1);
     _iterations = 0;
   }
 

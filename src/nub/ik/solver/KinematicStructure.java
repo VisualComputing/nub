@@ -234,7 +234,7 @@ public class KinematicStructure {
 
         Node reference = chain.get(0).reference();
         if (reference != null) {
-            KNode kNode = new KNode(structure, new Node(reference.position().get(), reference.orientation().get(), reference.scaling()));
+            KNode kNode = new KNode(structure, Node.detach(reference.position().get(), reference.orientation().get(), reference.scaling()));
             map.put(reference, kNode);
         }
 
@@ -279,7 +279,7 @@ public class KinematicStructure {
     public static List<Node> _copy(List<? extends Node> chain, Node reference) {
         List<Node> copy = new ArrayList<Node>();
         for (Node joint : chain) {
-            Node newJoint = new Node();
+            Node newJoint = Node.detach(new Vector(), new Quaternion(), 1f);
             newJoint.setReference(reference);
             newJoint.setPosition(joint.position().get());
             newJoint.setOrientation(joint.orientation().get());
@@ -293,7 +293,7 @@ public class KinematicStructure {
     public static List<Node> _copy(List<? extends Node> chain) {
         Node reference = chain.get(0).reference();
         if (reference != null) {
-            reference = new Node(reference.position().get(), reference.orientation().get(), 1);
+            reference = Node.detach(reference.position().get(), reference.orientation().get(), 1);
         }
         return _copy(chain, reference);
     }
@@ -309,6 +309,6 @@ public class KinematicStructure {
         Quaternion orientation = Quaternion.compose(q, o_end);
         Vector p = Vector.subtract(end.position(), init.position());
         Vector position = Vector.add(init.position(), q.rotate(p));
-        return new Node(position, orientation, 1);
+        return Node.detach(position, orientation, 1);
     }
 }

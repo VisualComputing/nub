@@ -1,14 +1,17 @@
 package nub.ik.solver.trik;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.Constraint;
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.FABRIKSolver;
 import nub.ik.solver.geometric.oldtrik.NodeInformation;
+import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -117,11 +120,11 @@ public class Context {
     public Context(List<? extends Node> chain, Node target, boolean debug){
         this._chain = chain;
         this._debug = debug;
-        if(_debug && _chain.get(0).graph() instanceof Scene) {
-            this._usableChain = FABRIKSolver._copy(chain, null, (Scene) _chain.get(0).graph());
+        if(_debug && Graph.isReachable(_chain.get(0))) {
+            this._usableChain = _attachedCopy(chain, null);
         }
         else {
-            this._usableChain = FABRIKSolver._copy(chain);
+            this._usableChain = _detachedCopy(chain);
         }
 
         //create info list
@@ -131,9 +134,9 @@ public class Context {
 
         this._target = target;
         this._previousTarget =
-                target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
+                target == null ? null : Node.detach(target.position().get(), target.orientation().get(), 1);
 
-        this._worldTarget = target == null ? new Node() : new Node(_target.position(), _target.orientation(), 1);
+        this._worldTarget = target == null ? Node.detach(new Vector(),new Quaternion(), 1) : Node.detach(_target.position(), _target.orientation(), 1);
         this._last = _chain.size() - 1;
         _delegationAtJoint = new float[chain.size() - 1];
         update();
@@ -394,5 +397,71 @@ public class Context {
             worldTarget().setRotation(target().orientation().get());
             worldTarget().setPosition(target().position().get());
         }
+    }
+
+    public static List<Node> _detachedCopy(List<? extends Node> chain, Node reference){
+        return  _detachedCopy(chain, reference, true);
+    }
+
+    public static List<Node> _detachedCopy(List<? extends Node> chain, Node reference, boolean copy_constraints) {
+        List<Node> copy = new ArrayList<Node>();
+        for (Node joint : chain) {
+            Node newJoint = Node.detach(new Vector(), new Quaternion(), 1);
+            newJoint.setReference(reference);
+            newJoint.setPosition(joint.position().get());
+            newJoint.setOrientation(joint.orientation().get());
+            if(copy_constraints) newJoint.setConstraint(joint.constraint());
+            copy.add(newJoint);
+            reference = newJoint;
+        }
+        return copy;
+    }
+
+    public static List<Node> _detachedCopy(List<? extends Node> chain){
+        return _detachedCopy(chain, true);
+    }
+
+    public static List<Node> _detachedCopy(List<? extends Node> chain, boolean copy_constraints) {
+        Node reference = chain.get(0).reference();
+        if (reference != null) {
+            reference = Node.detach(reference.position().get(), reference.orientation().get(), 1);
+        }
+        return _detachedCopy(chain, reference, copy_constraints);
+    }
+
+    /*TODO: remove this! (debug purposes)*/
+    public static List<Node> _attachedCopy(List<? extends Node> chain, Node reference) {
+        return _attachedCopy(chain, reference, true);
+    }
+
+    public static List<Node> _attachedCopy(List<? extends Node> chain, Node reference, boolean copy_constraints) {
+        Node ref = reference;
+        List<Node> copy = new ArrayList<Node>();
+        if(ref == null){
+            reference = chain.get(0).reference();
+            if (reference != null) {
+                ref = new Node();
+                ref.setPosition(reference.position().get());
+                ref.setOrientation(reference.orientation().get());
+                ref.enableTagging(false);
+            }
+        }
+
+        int r = (int) (Math.random() * 255);
+        int g = (int) (Math.random() * 255);
+        int b = (int) (Math.random() * 255);
+        for (Node joint : chain) {
+            Joint newJoint = new Joint(r, g, b,3);
+            if(copy.isEmpty()){
+                newJoint.setRoot(true);
+            }
+            newJoint.setReference(ref);
+            newJoint.setPosition(joint.position().get());
+            newJoint.setOrientation(joint.orientation().get());
+            if(copy_constraints) newJoint.setConstraint(joint.constraint());
+            copy.add(newJoint);
+            ref = newJoint;
+        }
+        return copy;
     }
 }

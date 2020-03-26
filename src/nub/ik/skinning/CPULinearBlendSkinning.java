@@ -1,5 +1,6 @@
 package nub.ik.skinning;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -185,13 +186,9 @@ public class CPULinearBlendSkinning implements Skinning {
   }
 
   @Override
-  public void render(Node reference) {
-    PGraphics pg = _pg;
-    if (reference.graph() instanceof Scene) {
-      pg = ((Scene) reference.graph()).context();
-    }
-    reference.graph().applyWorldTransformation(reference);
-    render(pg);
+  public void render(Scene scene, Node reference) {
+    scene.applyWorldTransformation(reference);
+    render(scene.context());
   }
 
 

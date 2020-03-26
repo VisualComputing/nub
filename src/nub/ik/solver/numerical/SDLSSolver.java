@@ -42,7 +42,7 @@ public class SDLSSolver extends Solver {
       _max_d = _max_d < d ? d : _max_d;
     }
     _axes = new Vector[_chain.size() - 1];
-    _dof = chain.get(0).graph().is3D() ? 3 : 2;
+    _dof = 3; //chain.get(0).graph().is3D() ? 3 : 2;
   }
 
   public SDLSSolver(ArrayList<? extends Node> chain, Node target) {
@@ -50,9 +50,9 @@ public class SDLSSolver extends Solver {
     this._chain = chain;
     this._target = target;
     this._previousTarget =
-        target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
+        target == null ? null : Node.detach(target.position().get(), target.orientation().get(), 1);
     _axes = new Vector[_chain.size() - 1];
-    _dof = chain.get(0).graph().is3D() ? 3 : 2;
+    _dof = 3; //chain.get(0).graph().is3D() ? 3 : 2;
   }
 
   public List<? extends Node> chain() {
@@ -92,7 +92,7 @@ public class SDLSSolver extends Solver {
     }
 
     SimpleMatrix error = SimpleMatrix.wrap(
-        Util.vectorToMatrix(e, head().graph().is3D()));
+        Util.vectorToMatrix(e, true));
 
     _J = SimpleMatrix.wrap(Util.jacobian(_chain, endEffector(), _target.position(), _axes));
     _delta = SimpleMatrix.wrap(new DMatrixRMaj(new double[_J.numCols()]));
@@ -183,7 +183,7 @@ public class SDLSSolver extends Solver {
 
   @Override
   protected void _reset() {
-    _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
+    _previousTarget = _target == null ? null : Node.detach(_target.position().get(), _target.orientation().get(), 1);
     _axes = new Vector[_chain.size() - 1];
     _iterations = 0;
   }

@@ -93,10 +93,10 @@ public class HillClimbingSolver extends Solver {
     ArrayList<Node> copy = new ArrayList<Node>();
     Node reference = chain.get(0).reference();
     if (reference != null) {
-      reference = new Node(reference.position().get(), reference.orientation().get(), 1);
+      reference = Node.detach(reference.position().get(), reference.orientation().get(), 1);
     }
     for (Node joint : chain) {
-      Node newJoint = new Node();
+      Node newJoint = Node.detach(new Vector(), new Quaternion(), 1f);
       newJoint.setReference(reference);
       newJoint.setPosition(joint.position().get());
       newJoint.setOrientation(joint.orientation().get());
@@ -126,12 +126,7 @@ public class HillClimbingSolver extends Solver {
         yaw = (float) (random.nextGaussian() * _sigma);
       }
       //rotate method consider constraints
-      if (_chain.get(0).graph() == null)
-        x_i1.get(i).rotate(new Quaternion(roll, pitch, yaw));
-      else if (_chain.get(0).graph().is3D())
-        x_i1.get(i).rotate(new Quaternion(roll, pitch, yaw));
-      else
-        x_i1.get(i).rotate(0, 0, 1, roll);
+      x_i1.get(i).rotate(new Quaternion(roll, pitch, yaw));
     }
 
     double d1 = _distanceToTarget(x_i1), d2 = _distanceToTarget(_x_i);
@@ -171,7 +166,7 @@ public class HillClimbingSolver extends Solver {
   @Override
   protected void _reset() {
     _x_i = _copy(_chain);
-    _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
+    _previousTarget = _target == null ? null : Node.detach(_target.position().get(), _target.orientation().get(), 1);
     _iterations = 0;
   }
 

@@ -128,11 +128,11 @@ public class Individual {
     ArrayList<Node> copy = new ArrayList<Node>();
     Node reference = chain.get(0).reference();
     if (reference != null) {
-      reference = new Node(reference.position().get(), reference.orientation().get(), 1);
+      reference = Node.detach(reference.position().get(), reference.orientation().get(), 1);
     }
     map.put(chain.get(0).reference(), reference);
     for (Node joint : chain) {
-      Node newJoint = new Node();
+      Node newJoint = Node.detach(new Vector(), new Quaternion(), 1);
       newJoint.setReference(map.get(joint.reference()));
       newJoint.setPosition(joint.position().get());
       newJoint.setOrientation(joint.orientation().get());

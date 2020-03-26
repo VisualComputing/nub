@@ -72,7 +72,7 @@ public class GPULinearBlendSkinning implements Skinning {
       _ids.put(_skeleton.get(i), i);
       if (_skeleton.get(i) instanceof Joint) {
         int c = Color.HSBtoRGB((i + 1.0f) / skeleton.size(), 1f, 1f);
-        ((Joint) _skeleton.get(i)).setColor(c);
+        ((Joint) _skeleton.get(i)).setColor((int) pg.red(c), (int) pg.blue(c), (int) pg.green(c));
       }
     }
     _initialOrientations = new Quaternion[joints];
@@ -233,13 +233,9 @@ public class GPULinearBlendSkinning implements Skinning {
   }
 
   @Override
-  public void render(Node reference) {
-    PGraphics pg = _pg;
-    if (reference.graph() instanceof Scene) {
-      pg = ((Scene) reference.graph()).context();
-    }
-    reference.graph().applyWorldTransformation(reference);
-    render(pg);
+  public void render(Scene scene, Node reference) {
+    scene.applyWorldTransformation(reference);
+    render(scene.context());
   }
 
   //Adapted from http://www.cutsquash.com/2015/04/better-obj-model-loading-in-processing/

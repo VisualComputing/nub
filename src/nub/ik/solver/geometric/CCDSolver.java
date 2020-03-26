@@ -74,7 +74,7 @@ public class CCDSolver extends Solver {
     else this._chain = chain;
     this._target = target;
     this._previousTarget =
-        target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
+        target == null ? null : Node.detach(target.position().get(), target.orientation().get(), 1);
   }
 
   /*
@@ -195,7 +195,7 @@ public class CCDSolver extends Solver {
 
   @Override
   protected void _reset() {
-    _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
+    _previousTarget = _target == null ? null : Node.detach(_target.position().get(), _target.orientation().get(), 1);
     _iterations = 0;
     if(_enableMediator){
       InterestingEvent event = mediator().addEventStartingAfterLast("RESET STRUCTURE", "UpdateStructure", 1, 1);

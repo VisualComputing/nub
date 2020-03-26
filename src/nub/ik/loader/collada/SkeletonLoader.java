@@ -60,7 +60,7 @@ public class SkeletonLoader {
     String nameId = jointNode.getAttribute("sid");
     int index = boneOrder.indexOf(nameId);
 
-    Joint joint = new Joint(model.getScene());
+    Joint joint = new Joint(model.getScene().radius() * 0.01f);
     if (parent != null) joint.setReference(parent);
     //use bind matrix info
 
@@ -86,7 +86,7 @@ public class SkeletonLoader {
   }
 
   private Joint extractMainJointTransformationData(XmlNode jointNode, Model model, Joint parent) {
-    Joint joint = new Joint(model.getScene());
+    Joint joint = new Joint(model.getScene().radius() * 0.01f);
     if (parent != null) joint.setReference(parent);
 
     String nameId = jointNode.getAttribute("sid");
