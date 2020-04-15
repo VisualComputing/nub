@@ -278,14 +278,16 @@ public class Context {
     public void setKDistributionDelegation(float k){//work done by current joint is k times greater than done by remaining ones
         for(int i = 0; i < chain().size() - 1; i++){
             int n = chain().size() - 1 - i;
-            int idx = i; //int idx = _topToBottom ? i : chain().size() - 2 - i;
-            _delegationAtJoint[idx] = k / (k + n - 1);
+            int idx = i;
+            //idx = _topToBottom ? i : chain().size() - 2 - i;
+            //_delegationAtJoint[idx] = k / (k + n - 1);
+            _delegationAtJoint[idx] = 0.4f;
         }
     }
 
 
     public void setDelegationFactor(float k){
-        _enableDelegation = true;
+        //_enableDelegation = true;
         _delegationFactor = k;
         setKDistributionDelegation(_delegationFactor);
     }
