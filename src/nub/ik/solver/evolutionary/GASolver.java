@@ -1,9 +1,8 @@
 package nub.ik.solver.evolutionary;
 
 import nub.core.Node;
-import nub.ik.animation.InterestingEvent;
-import nub.ik.animation.VisualizerMediator;
-import nub.ik.solver.KinematicStructure;
+import nub.ik.visualization.InterestingEvent;
+import nub.ik.visualization.VisualizerMediator;
 import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.operator.Operator;
 import nub.ik.solver.evolutionary.operator.OperatorMethods;

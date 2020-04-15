@@ -5,14 +5,12 @@ import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
-import nub.ik.animation.InterestingEvent;
-import nub.ik.animation.VisualizerMediator;
+import nub.ik.visualization.InterestingEvent;
+import nub.ik.visualization.VisualizerMediator;
 import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.FABRIKSolver;
 import nub.ik.solver.trik.Context;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.processing.Scene;
 
 import java.util.*;
 

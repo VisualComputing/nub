@@ -13,7 +13,7 @@ package nub.ik.solver.geometric;
 
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
-import nub.ik.animation.VisualizerMediator;
+import nub.ik.visualization.VisualizerMediator;
 import nub.ik.solver.trik.Context;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;

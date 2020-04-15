@@ -12,7 +12,7 @@
 package nub.ik.solver;
 
 import nub.core.Node;
-import nub.ik.animation.VisualizerMediator;
+import nub.ik.visualization.VisualizerMediator;
 
 import java.util.Iterator;
 

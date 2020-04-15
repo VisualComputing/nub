@@ -15,12 +15,10 @@ import nub.core.Node;
 import nub.core.constraint.ConeConstraint;
 import nub.core.constraint.DistanceFieldConstraint;
 import nub.core.constraint.Hinge;
-import nub.ik.animation.InterestingEvent;
+import nub.ik.visualization.InterestingEvent;
 import nub.ik.solver.Solver;
-import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.processing.Scene;
 
 import java.util.ArrayList;
 import java.util.HashMap;

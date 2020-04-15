@@ -12,7 +12,7 @@
 package nub.ik.solver.geometric;
 
 import nub.core.Node;
-import nub.ik.animation.*;
+import nub.ik.visualization.*;
 import nub.ik.solver.KinematicStructure;
 import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
