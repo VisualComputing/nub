@@ -2,7 +2,7 @@ package ik.animation;
 
 import nub.core.Node;
 import nub.core.Graph;
-import nub.ik.animation.*;
+import nub.ik.visualization.*;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.primitives.Vector;
 import nub.processing.Scene;

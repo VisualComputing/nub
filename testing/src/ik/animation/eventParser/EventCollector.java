@@ -6,7 +6,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import nub.ik.animation.InterestingEvent;
+import nub.ik.visualization.InterestingEvent;
 
 import java.util.*;
 import java.util.function.Consumer;

@@ -1,6 +1,6 @@
 package ik.animation.eventParser;
 
-import nub.ik.animation.InterestingEvent;
+import nub.ik.visualization.InterestingEvent;
 import java.util.ArrayList;
 import java.util.List;
 

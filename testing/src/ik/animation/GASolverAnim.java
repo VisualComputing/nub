@@ -3,7 +3,7 @@ package ik.animation;
 import ik.basic.Util;
 import nub.core.Graph;
 import nub.core.Node;
-import nub.ik.animation.*;
+import nub.ik.visualization.*;
 import nub.ik.solver.evolutionary.GASolver;
 import nub.ik.visual.Joint;
 import nub.primitives.Vector;

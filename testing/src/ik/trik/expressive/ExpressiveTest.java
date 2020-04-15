@@ -15,7 +15,7 @@ import processing.event.MouseEvent;
 import java.util.List;
 
 public class ExpressiveTest extends PApplet {
-    int numJoints = 10;
+    int numJoints = 28;
     float boneLength = 50;
     float targetRadius = 10;
 
@@ -44,12 +44,13 @@ public class ExpressiveTest extends PApplet {
 
         //Util.generateConstraints(structure, Util.ConstraintType.CONE_CIRCLE, 0, true);
 
+        //solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.FINAL);
         solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL);
         solver.setTarget(structure.get(numJoints - 1), target);
         //solver.enableSmooth(true);
-        solver.context().setSingleStep(!solve);
-        solver.setTimesPerFrame(5);
-        solver.setMaxIterations(100);
+        //solver.context().setSingleStep(!solve);
+        solver.setTimesPerFrame(1);
+        solver.setMaxIterations(200);
         solver.setMaxError(0.1f);
 
         //Move the target to any position
@@ -135,7 +136,7 @@ public class ExpressiveTest extends PApplet {
             if (mouseButton == LEFT) {
                 focus.mouseSpin();
             } else if (mouseButton == RIGHT)
-                focus.mouseTranslate();
+                focus.mouseTranslate(0);
             else
                 focus.moveForward(mouseX - pmouseX);
         }
@@ -144,6 +145,13 @@ public class ExpressiveTest extends PApplet {
     public void mouseReleased(){
         if(focus.node() instanceof Slider){
             focus.node().interact("OnFinishedMovement", new Vector(focus.mouseX(), focus.mouseY()));
+            if(allSliders){
+                for(Slider s : panel._sliders){
+                    s.setValue(((Slider) focus.node())._value);
+                    s.onValueChanged();
+                }
+                panel.updateSliders();
+            }
         }
     }
 
@@ -152,6 +160,7 @@ public class ExpressiveTest extends PApplet {
     }
 
 
+    boolean allSliders = false;
     public void keyPressed(){
         if(key == 'W' || key == 'w'){
             enableTask = !enableTask;
@@ -164,6 +173,10 @@ public class ExpressiveTest extends PApplet {
         if(key == 'C' || key == 'c'){
             solve = !solve;
             solver.context().setSingleStep(!solve);
+        }
+
+        if(key == 'A' || key == 'a'){
+            allSliders = !allSliders;
         }
 
     }

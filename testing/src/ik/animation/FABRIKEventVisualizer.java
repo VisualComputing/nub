@@ -6,7 +6,7 @@ import ik.animation.eventVisualizer.Slot;
 import ik.basic.Util;
 import nub.core.Node;
 import nub.core.constraint.Constraint;
-import nub.ik.animation.*;
+import nub.ik.visualization.*;
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.primitives.Quaternion;

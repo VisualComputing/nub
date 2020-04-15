@@ -194,8 +194,8 @@ public class NaiveBiped extends PApplet {
             case SIMPLETRIK:{
                 solver = new SimpleTRIK(limb, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL);
                 ((SimpleTRIK) solver).context().setDirection(true);
-                ((SimpleTRIK) solver).context().setSearchingAreaRadius(1f, true);
-                ((SimpleTRIK) solver).context().setOrientationWeight(0.5f);
+                ((SimpleTRIK) solver).context().setSearchingAreaRadius(3f, true);
+                ((SimpleTRIK) solver).context().setOrientationWeight(0.1f);
                 solver.setTarget(limb.get(limb.size() - 1), target);
 
                 break;

@@ -8,7 +8,7 @@ import com.github.javaparser.ast.visitor.VoidVisitor;
 import ik.animation.eventVisualizer.Board;
 import ik.animation.eventVisualizer.EventCell;
 import ik.animation.eventVisualizer.Slot;
-import nub.ik.animation.InterestingEvent;
+import nub.ik.visualization.InterestingEvent;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
