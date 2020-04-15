@@ -22,9 +22,15 @@ public class FinalHeuristic extends Heuristic {
      */
 
     HashMap<String, Pair<Vector, Vector>> vectors = new HashMap<>();
-    protected int _smoothingIterations = 10;
+    protected int _smoothingIterations = 30;
     protected Quaternion[] _initialRotations;
     protected boolean _checkHinge = true;
+
+    protected boolean _enableWeights = false;
+    protected float maxAngle = 111f * (float)Math.toRadians(40);
+
+
+
 
     public void checkHinge(boolean check){
         _checkHinge = check;
@@ -75,9 +81,6 @@ public class FinalHeuristic extends Heuristic {
                 j_i_proj.multiply(Vector.distance(_context.usableChainInformation().get(i).positionCache(), _context.usableChainInformation().get(i + 1).positionCache()));
                 j_i_proj.add(_context.usableChainInformation().get(i).positionCache());
                 target = Vector.add(j_i_proj, eff_to_j_i1);
-                target = Vector.subtract(target, _context.target().position());
-                if (_context._currentIteration() == _smoothingIterations) target.multiply(0);
-                target.add(_context.target().position());
             }
 
             if(_log) {
@@ -179,8 +182,9 @@ public class FinalHeuristic extends Heuristic {
             final_eff[s] = new NodeState(endEffector);
 
             a = Math.abs(_context.quaternionDistance(initial_j_i.rotation(), j_i.node().rotation()) + _context.quaternionDistance(initial_j_i1.rotation(), j_i1.node().rotation()));
+            //a = Math.abs(_context.quaternionDistance(initial_j_i.rotation(), j_i.node().rotation()));
+            //a = Math.abs(_context.quaternionDistance(initial_j_i1.orientation(), j_i1.node().orientation()));
             //a += 0.5f * Math.abs(_context.quaternionDistance(_initialRotations[i], j_i.node().rotation()) - _context.quaternionDistance(_initialRotations[i + 1], j_i1.node().rotation()));
-
             if(_log) {
                 System.out.println("---> a : " + a);
                 System.out.println("initial j_i :" +  _initialRotations[i].axis() + "a " + _initialRotations[i].angle() + "final " + final_j_i[s].rotation().axis() + " a " + final_j_i[s].rotation().angle());
@@ -193,16 +197,43 @@ public class FinalHeuristic extends Heuristic {
             }
 
             float dist;
-            if(!_context.enableDelegation()) {
+            if(!_context.enableDelegation() && ! _enableWeights) {
                 dist = _context.error(endEffector, _context.worldTarget());
                 dist /= _context.searchingAreaRadius();
             } else {
                 float error = _context.positionError(endEffector.positionCache(), target);
-                float orientationError = _context.orientationError(endEffector.orientationCache(), _context.worldTarget().orientation(), false);
-                float weighted_error = error / _context.searchingAreaRadius();
-                float c_k = (float) Math.floor(weighted_error);
-                error =  c_k + _context.orientationWeight() * orientationError + (1 - _context.orientationWeight()) * (weighted_error - c_k);
+                if(_context.direction()) {
+                    float orientationError = _context.orientationError(endEffector.orientationCache(), _context.worldTarget().orientation(), false);
+                    float weighted_error = error / _context.searchingAreaRadius();
+                    float c_k = (float) Math.floor(weighted_error);
+                    error = c_k + _context.orientationWeight() * orientationError + (1 - _context.orientationWeight()) * (weighted_error - c_k);
+                }
                 dist = error;
+
+                //Handiness
+                if(i + 3 < _context.usableChainInformation().size()) {
+                    NodeInformation j_i2 = _context.usableChainInformation().get(i + 2);
+                    NodeInformation j_i3 = _context.usableChainInformation().get(i + 3);
+                    Vector b1 = Vector.subtract(j_i1.node().position(), j_i.node().position());
+                    Vector b2 = Vector.subtract(j_i2.node().position(), j_i1.node().position());
+                    Vector b3 = Vector.subtract(j_i3.node().position(), j_i2.node().position());
+                    b1.normalize();
+                    b2.normalize();
+                    b3.normalize();
+
+                    Vector c1 = Vector.cross(b1, b2, null);
+                    Vector c2 = Vector.cross(b2, b3, null);
+                    if(c1.magnitude() > 0.1f || c2.magnitude() > 0.1f){
+                        //System.out.println("Handiness : " + c1 + " " + c2);
+                        //System.out.println("Handiness : " + c1.magnitude() + " " + c2.magnitude());
+
+                        //System.out.println("---> dist : " + dist);
+                        if(Vector.dot(c1 , c2) < 0) {
+                            //dist += 1f;
+                            //System.out.println("---> new dist : " + dist);
+                        }
+                    }
+                }
             }
 
             if(_log) {
@@ -211,7 +242,6 @@ public class FinalHeuristic extends Heuristic {
             }
 
             dist =  dist + 0.1f * a;// + solutions[s].value();// + length_distance * _lengthWeight;
-
             if(dist < best_dist){
                 best_dist = dist;
                 best = s;
@@ -419,8 +449,11 @@ public class FinalHeuristic extends Heuristic {
         deltas[0] = new Solution(new Quaternion(normal, constrained_angle_1), 1 - (Math.abs(constrained_angle_1) + 1)/(Math.abs(angle_1) + 1));
         deltas[1] = new Solution(new Quaternion(normal, constrained_angle_2), 1 - (Math.abs(constrained_angle_2) + 1)/(Math.abs(angle_2) + 1));
         for(Solution delta : deltas){
-            if(_smooth){
-                //delta.setQuaternion(_clampRotation(j_i1.node().rotation(), _initialRotations[i + 1], Quaternion.compose(j_i1.node().rotation(),delta.quaternion()), _smoothAngle));
+            if(_enableWeights){
+                //smooth angle
+                delta.setQuaternion(new Quaternion(delta.quaternion().axis(), delta.quaternion().angle() * _context.delegationAtJoint(i + 1)));
+                //clamp rotation if required
+                delta.setQuaternion(_clampRotation(j_i1.node().rotation(), _initialRotations[i + 1], Quaternion.compose(j_i1.node().rotation(),delta.quaternion()), maxAngle));
             }
             if(j_i1.node().constraint() != null){
                 delta.setQuaternion(j_i1.node().constraint().constrainRotation(delta.quaternion(), j_i1.node()));
@@ -480,8 +513,10 @@ public class FinalHeuristic extends Heuristic {
         }
         //Apply desired rotation removing twist component
         Quaternion delta = new Quaternion(p, q);
-        if(_smooth){
-            //delta =_clampRotation(j_i.node().rotation(), _initialRotations[i], Quaternion.compose(j_i.node().rotation(), delta), _smoothAngle);
+        if(_enableWeights){
+            //smooth angle
+            delta = new Quaternion(delta.axis(), delta.angle() * _context.delegationAtJoint(i));
+            delta = _clampRotation(j_i.node().rotation(), _initialRotations[i], Quaternion.compose(j_i.node().rotation(), delta), maxAngle);
         }
         if(j_i.node().constraint() != null){
             delta = j_i.node().constraint().constrainRotation(delta, j_i.node());

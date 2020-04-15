@@ -59,6 +59,7 @@ public class SimpleTRIK extends Solver {
                 _context.setTopToBottom(false);
                 context().enableDelegation(false);
                 ((FinalHeuristic)_mainHeuristic).checkHinge(false);
+                //context().setDelegationFactor(1f);
                 _secondaryHeuristic = _mainHeuristic;
                 break;
             }
