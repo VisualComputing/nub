@@ -38,7 +38,7 @@ public class Posture {
 
     public void loadValues(Skeleton skeleton){
         for(Map.Entry<String, NodeInformation> entry : _nodeInformation.entrySet()){
-            Node node = skeleton.getJoint(entry.getKey());
+            Node node = skeleton.joint(entry.getKey());
             Constraint constrain = node.constraint();
             node.setConstraint(null);
             node.setTranslation(entry.getValue()._translation.get());
