@@ -2,6 +2,7 @@ package nub.ik.skinning;
 
 import nub.core.Graph;
 import nub.core.Node;
+import nub.ik.animation.Skeleton;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -72,6 +73,14 @@ public class CPULinearBlendSkinning implements Skinning {
 
   public CPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor) {
     this(skeleton, pg, shape, texture, factor, false);
+  }
+
+  public CPULinearBlendSkinning(Skeleton skeleton, String shape, String texture, float factor) {
+    this(skeleton.joints(), skeleton.scene().context(), shape, texture, factor);
+  }
+
+  public CPULinearBlendSkinning(Skeleton skeleton, String shape, String texture, float factor, boolean quad) {
+    this(skeleton.joints(), skeleton.scene().context(), shape, texture, factor, quad);
   }
 
   public CPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor, boolean quad) {

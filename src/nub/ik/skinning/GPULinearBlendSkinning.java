@@ -1,6 +1,7 @@
 package nub.ik.skinning;
 
 import nub.core.Node;
+import nub.ik.animation.Skeleton;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -33,7 +34,6 @@ public class GPULinearBlendSkinning implements Skinning {
   protected final String _fragmentPath = "frag.glsl";
   protected final String _vertexPath = "skinning.glsl";
 
-
   public GPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, PShape shape) {
     this._shapes = new ArrayList<>();
     _ids = new HashMap<>();
@@ -59,8 +59,20 @@ public class GPULinearBlendSkinning implements Skinning {
     initParams();
   }
 
+  public GPULinearBlendSkinning(Skeleton skeleton, PShape shape) {
+    this(skeleton.joints(), skeleton.scene().context(), shape);
+  }
+
   public GPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor) {
     this(skeleton, pg, shape, texture, factor, false);
+  }
+
+  public GPULinearBlendSkinning(Skeleton skeleton, String shape, String texture, float factor) {
+    this(skeleton, shape, texture, factor, false);
+  }
+
+  public GPULinearBlendSkinning(Skeleton skeleton, String shape, String texture, float factor, boolean quad) {
+    this(skeleton.joints(), skeleton.scene().context(), shape, texture, factor, quad);
   }
 
   public GPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor, boolean quad) {
@@ -85,6 +97,7 @@ public class GPULinearBlendSkinning implements Skinning {
     _shapes.add(createShape(pg, pg.loadShape(shape), texture, factor, quad));
     initParams();
   }
+
 
   public PShader shader() {
     return _shader;
