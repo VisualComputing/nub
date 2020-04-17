@@ -29,6 +29,9 @@ public abstract class ConeConstraint extends Constraint {
   protected Quaternion _offset = new Quaternion();
   protected float _min = (float) Math.PI, _max = (float) Math.PI;
 
+  protected AxisPlaneConstraint.Type transConstraintType = AxisPlaneConstraint.Type.FORBIDDEN;;
+  protected Vector transConstraintDir = new Vector();
+
 
   public Quaternion restRotation() {
     return _restRotation;
@@ -148,12 +151,61 @@ public abstract class ConeConstraint extends Constraint {
     return rot;
   }
 
-  @Override
-  public Vector constrainTranslation(Vector translation, Node node) {
-    return new Vector(0, 0, 0);
-  }
-
   public abstract Vector apply(Vector target);
 
+  @Override
+  public Vector constrainTranslation(Vector translation, Node node) {
+    Vector res = new Vector(translation._vector[0], translation._vector[1], translation._vector[2]);
+    Vector proj;
+    switch (translationConstraintType()) {
+      case FREE:
+        break;
+      case PLANE:
+        proj = node.rotation().rotate(translationConstraintDirection());
+        // proj = node._localInverseTransformOf(translationConstraintDirection());
+        res = Vector.projectVectorOnPlane(translation, proj);
+        break;
+      case AXIS:
+        proj = node.rotation().rotate(translationConstraintDirection());
+        // proj = node._localInverseTransformOf(translationConstraintDirection());
+        res = Vector.projectVectorOnAxis(translation, proj);
+        break;
+      case FORBIDDEN:
+        res = new Vector(0.0f, 0.0f, 0.0f);
+        break;
+    }
+    return res;
+  }
+
+  public AxisPlaneConstraint.Type translationConstraintType() {
+    return transConstraintType;
+  }
+
+  public Vector translationConstraintDirection() {
+    return transConstraintDir;
+  }
+
+  public void setTranslationConstraint(AxisPlaneConstraint.Type type, Vector direction) {
+    setTranslationConstraintType(type);
+    setTranslationConstraintDirection(direction);
+  }
+
+  public void setTranslationConstraintType(AxisPlaneConstraint.Type type) {
+    transConstraintType = type;
+  }
+
+
+  public void setTranslationConstraintDirection(Vector direction) {
+    if ((translationConstraintType() != AxisPlaneConstraint.Type.FREE) && (translationConstraintType()
+            != AxisPlaneConstraint.Type.FORBIDDEN)) {
+      float norm = direction.magnitude();
+      if (norm == 0) {
+        System.out
+                .println("Warning: AxisPlaneConstraint.setTranslationConstraintDir: null vector for translation constraint");
+        transConstraintType = AxisPlaneConstraint.Type.FREE;
+      } else
+        transConstraintDir = Vector.multiply(direction, (1.0f / norm));
+    }
+  }
 }
 
