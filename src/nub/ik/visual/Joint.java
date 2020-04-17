@@ -36,7 +36,7 @@ public class Joint extends Node {
     _g = green;
     _b = blue;
     _radius = radius;
-    setPickingThreshold(-_radius * 2);
+    setPickingThreshold(0);
   }
 
   public Joint(int red, int green, int blue) {
