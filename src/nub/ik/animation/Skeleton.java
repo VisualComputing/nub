@@ -4,7 +4,7 @@ import nub.core.Graph;
 import nub.core.Node;
 import nub.ik.visual.Joint;
 import nub.processing.Scene;
-import processing.core.PShape;
+import processing.core.PGraphics;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
@@ -12,9 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static processing.core.PConstants.ELLIPSE;
-import static processing.core.PConstants.SPHERE;
 
 /**
     Wrapper class that facilitates the creation of an Skeleton, its manipulation and its animation.
@@ -25,6 +22,8 @@ public class Skeleton {
     HashMap<String, Node> _targets;
     Node _reference;
     Scene _scene;
+    float _targetRadius;
+
 
     public Skeleton(Scene scene){
         _joints = new HashMap<String, Node>();
@@ -33,6 +32,7 @@ public class Skeleton {
         _reference = new Node(); //dummy node to contain all generated Joints
         _reference.enableTagging(false);
         _scene = scene;
+        _targetRadius = 0.06f * scene.radius();
     }
 
     public Skeleton(Scene scene, String file){
@@ -60,6 +60,10 @@ public class Skeleton {
         joint.setReference(_reference);
         joint.setRoot(true);
         return joint;
+    }
+
+    public Scene scene(){
+        return _scene;
     }
 
     public Joint addJoint(String name, float radius){
@@ -114,27 +118,34 @@ public class Skeleton {
         node.setReference(_reference);
     }
 
-    public Node addTarget(String name, float radius){
+    public Node reference(){
+        return _reference;
+    }
+
+    public Node addTarget(String name){
         Node endEffector = _joints.get(name);
         //Create a Basic target
-        PShape redBall;
-        if(_scene.is3D())
-            redBall = _scene.context().createShape(SPHERE, radius);
-        else
-            redBall = _scene.context().createShape(ELLIPSE, 0,0, 2 *radius, 2 * radius);
-        redBall.setFill(_scene.context().color(255,0,0));
-        redBall.setStroke(false);
-        Node target = new Node(redBall);
+        Node target = new Node(){
+            @Override
+            public void graphics(PGraphics pGraphics) {
+                pGraphics.noStroke();
+                pGraphics.fill(255,0,0);
+                if(pGraphics.is3D()) pGraphics.sphere(_targetRadius);
+                else pGraphics.ellipse(0,0, 2 * _targetRadius, 2 * _targetRadius);
+            }
+        };
         _targets.put(name, target);
         target.setReference(_reference);
         target.setPosition(endEffector.position().get());
         target.setOrientation(endEffector.orientation().get());
+        target.setPickingThreshold(0f);
+
         _scene.addIKTarget(endEffector, target);
         return target;
     }
 
-    public Node addTarget(String name){
-        return addTarget(name, _scene.radius() * 0.07f);
+    public void setTargetRadius(float radius){
+        _targetRadius = radius;
     }
 
     public void addTarget(String name, Node target){
@@ -160,8 +171,30 @@ public class Skeleton {
         }
     }
 
+    public void addTargets(){
+        for(Map.Entry<String, Node> entry : _joints.entrySet()){
+            if(entry.getValue().children().isEmpty()){
+                addTarget(entry.getKey());
+            }
+        }
+    }
+
     public List<Node> joints(){
         return new ArrayList<Node>(_joints.values());
+    }
+
+    public void prune(Node joint){
+        List<Node> branch = Graph.branch(joint);
+        Graph.prune(joint);
+        for(Node node : branch){
+            //remove the reference of this node
+            String name = _names.get(node);
+            if(name != null){
+                _joints.remove(name);
+                _targets.remove(name);
+                _names.remove(node);
+            }
+        }
     }
 
     //Send the targets to the eff position / orientation
@@ -200,7 +233,6 @@ public class Skeleton {
                 joint.setFloat("green", 255);
                 joint.setFloat("blue", 0);
             }
-            System.out.println("-> " + i);
             jsonArray.setJSONObject(i, joint);
         }
         int idx = i;
@@ -265,7 +297,8 @@ public class Skeleton {
     protected void _loadTargets(JSONArray jsonTargets){
         for(int i = 0; i < jsonTargets.size(); i++){
             JSONObject jsonTarget = jsonTargets.getJSONObject(i);
-            Node target = addTarget(jsonTarget.getString("name"), jsonTarget.getFloat("radius"));
+            setTargetRadius(jsonTarget.getFloat("radius"));
+            Node target = addTarget(jsonTarget.getString("name"));
             target.setTranslation(jsonTarget.getFloat("x"), jsonTarget.getFloat("y"), jsonTarget.getFloat("z"));
             target.setRotation(jsonTarget.getFloat("q_x"), jsonTarget.getFloat("q_y"), jsonTarget.getFloat("q_z"), jsonTarget.getFloat("q_w"));
         }
@@ -275,11 +308,6 @@ public class Skeleton {
         JSONObject jsonObject = new JSONObject();
         JSONArray jsonJoints = new JSONArray();
         JSONArray jsonTargets = new JSONArray();
-        //1. Save joints
-        for(String s : _names.values()){
-            System.out.println(" ***** " + s);
-        }
-
         _saveJoints(jsonJoints, _reference, "", -1);
         jsonObject.setJSONArray("Joints", jsonJoints);
         //2. Save Targets
