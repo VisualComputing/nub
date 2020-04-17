@@ -1,8 +1,11 @@
 package ik.trik.animation;
 
 import nub.core.Node;
+import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
 import nub.ik.animation.Skeleton;
+import nub.ik.skinning.GPULinearBlendSkinning;
+import nub.ik.skinning.Skinning;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -12,8 +15,13 @@ import processing.event.MouseEvent;
 
 public class AnimationTest extends PApplet{
     Scene mainScene, controlScene, focus;
+    String jsonPath = "/testing/data/skeletons/Hand.json";
+    String shapePath = "/testing/data/objs/Rigged_Hand.obj";
+    String texturePath = "/testing/data/objs/HAND_C.jpg";
     AnimationPanel panel;
     Skeleton skeleton;
+    Skinning skinning;
+
 
     public void settings() {
         size(1200, 800, P3D);
@@ -22,9 +30,30 @@ public class AnimationTest extends PApplet{
     public void setup() {
         //Kinematic scene
         mainScene = new Scene(this);
-        mainScene.fit(1);
+        mainScene.fit(0);
         mainScene.setRightHanded();
-        skeleton = generateSkeleton(mainScene, 5);
+        //skeleton = generateSkeleton(mainScene, 5);
+        skeleton = new Skeleton(mainScene, sketchPath() + jsonPath);
+        skeleton.enableIK();
+        skeleton.addTargets();
+        skeleton.setTargetRadius(0.03f * mainScene.radius());
+
+        //Dummy constraints in all joints
+        for(Node node : skeleton.joints()){
+            if(node.children().size() == 1){
+                float angle = radians(85);
+                BallAndSocket constraint = new BallAndSocket(angle, angle);
+                Vector twist = node.children().get(0).translation().get();
+                constraint.setRestRotation(node.rotation().get(), twist.orthogonalVector(), twist);
+                constraint.setTwistLimits(0,0);
+                node.setConstraint(constraint);
+            }
+        }
+
+
+        //Relate the shape with a skinning method (CPU or GPU)
+        skinning = new GPULinearBlendSkinning(skeleton, sketchPath() + shapePath, sketchPath() + texturePath, mainScene.radius());
+
 
         //Set the control scene
         controlScene = new Scene(this, P2D, width, (int)(height * 0.3), 0,(int)(height * 0.7f));
@@ -34,6 +63,7 @@ public class AnimationTest extends PApplet{
         panel = new AnimationPanel(controlScene, skeleton);
         //set eye constraint
         //set eye constraint
+        controlScene.eye().enableTagging(false);
         controlScene.eye().setConstraint(new Constraint() {
             @Override
             public Vector constrainTranslation(Vector translation, Node node) {
@@ -50,16 +80,16 @@ public class AnimationTest extends PApplet{
 
 
     public void draw() {
-        handleMouse();
+        //cull main scene
         lights();
         //cull panel
         skeleton.cull(false);
         panel.cull(true);
         mainScene.context().background(0);
         mainScene.drawAxes();
+        skinning.render(mainScene, skeleton.reference());
         mainScene.render();
 
-        //cull main scene
         noLights();
         skeleton.cull(true);
         panel.cull(false);
@@ -70,6 +100,9 @@ public class AnimationTest extends PApplet{
         controlScene.endDraw();
         controlScene.display();
         mainScene.endHUD();
+
+        skeleton.cull(false);
+        panel.cull(true);
     }
 
     //Skeleton definition methods
@@ -92,11 +125,9 @@ public class AnimationTest extends PApplet{
 
 
     //Interaction methods
-    public void handleMouse(){
-        if(!mousePressed) focus = mouseY > 0.7 * height ? controlScene : mainScene;
-    }
 
     public void mouseMoved(){
+        focus = mouseY > 0.7 * height ? controlScene : mainScene;
         focus.mouseTag();
     }
 

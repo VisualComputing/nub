@@ -270,13 +270,13 @@ public class SkeletonBuilder extends PApplet{
         Vector vector = new Vector(focus.mouseX(), focus.mouseY());
         if(focus.node() != null)
             if(focus.node() instanceof  InteractiveJoint)
-                focus.node().interact("Add", scene, focus, vector);
+                focus.node().interact("Add", focus, vector);
             //else focus.trackedFrame().interact("Add", vector, false);
             else{
                 if(fitCurve != null){
                     fitCurve.setStarted(false);
                     fitCurve.getCatmullRomCurve(scene, 0);
-                    fitCurve._interpolator.run();
+                    //fitCurve._interpolator.run();
                     focus.node().interact("AddCurve", fitCurve);
                 }
             }

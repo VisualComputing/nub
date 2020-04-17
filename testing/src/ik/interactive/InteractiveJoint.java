@@ -2,6 +2,7 @@ package ik.interactive;
 
 import nub.core.Node;
 import nub.core.Graph;
+import nub.ik.animation.Skeleton;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.ik.visual.Joint;
@@ -22,7 +23,10 @@ public class InteractiveJoint extends Joint {
         String command = (String) gesture[0];
         if(command.matches("Add")){
             if(_desiredTranslation != null) {
-                addChild((Scene) gesture[1], (Scene) gesture[2], (Vector) gesture[3]);
+                if(gesture.length == 3)
+                    addChild((Scene) gesture[1], (Vector) gesture[2]);
+                else
+                    addChild((Scene) gesture[1], (Vector) gesture[2], (Skeleton) gesture[3]);
             }
             _desiredTranslation = null;
         } else if(command.matches("OnAdding")){
@@ -30,9 +34,13 @@ public class InteractiveJoint extends Joint {
         } else if(command.matches("Reset")){
             _desiredTranslation = null;
         } else if(command.matches("Remove")){
-            removeChild();
+            if(gesture.length == 1)
+                removeChild();
+            else
+                removeChild((Skeleton) gesture[1]);
         }
     }
+
     @Override
     public void graphics(PGraphics pg) {
         super.graphics(pg);
@@ -48,15 +56,30 @@ public class InteractiveJoint extends Joint {
         if(!depth)pg.hint(PConstants.ENABLE_DEPTH_TEST);
     }
 
-    public void addChild(Scene scene, Scene focus, Vector mouse){
+    public void addChild(Scene focus, Vector mouse){
+        addChild(focus, mouse, null);
+    }
+
+    public void addChild(Scene focus, Vector mouse, Skeleton skeleton){
         InteractiveJoint joint = new InteractiveJoint(this.radius());
         joint.setPickingThreshold(this.pickingThreshold());
+        if(skeleton != null){
+            skeleton.addJoint("J" + skeleton.joints().size(), joint);
+        }
         joint.setReference(this);
         joint.setTranslation(joint.translateDesired(focus, mouse));
     }
 
     public void removeChild(){
         Graph.prune(this);
+    }
+
+    public void removeChild(Skeleton skeleton){
+        skeleton.prune(this);
+    }
+
+    public Vector desiredTranslation(){
+        return _desiredTranslation;
     }
 
     //------------------------------------
