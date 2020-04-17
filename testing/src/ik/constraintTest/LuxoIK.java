@@ -125,7 +125,7 @@ public class LuxoIK extends PApplet {
 
     Scene scene;
     Lamp lamp;
-
+    ChainSolver solver;
     public void settings() {
         size(700, 700, P3D);
     }
@@ -145,7 +145,7 @@ public class LuxoIK extends PApplet {
         lamp = new Lamp();
         target.setPosition(lamp.frame(3).position());
 
-        ChainSolver solver = new ChainSolver(  Scene.branch(lamp.frame(0)));
+        solver = new ChainSolver(  Scene.branch(lamp.frame(0)));
         solver.setTarget(target);
         solver.setKeepDirection(true);
         solver.setFixTwisting(true);
@@ -157,7 +157,7 @@ public class LuxoIK extends PApplet {
                 solver.solve();
             }
         };
-        task.run(40);
+        //task.run(40);
 
         //scene.registerTreeSolver(lamp.frame(0));
 
@@ -184,6 +184,7 @@ public class LuxoIK extends PApplet {
             }
             endShape();
         }
+        solver.solve();
     }
 
     public void mouseMoved() {

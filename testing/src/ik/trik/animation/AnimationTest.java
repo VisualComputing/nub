@@ -16,7 +16,7 @@ public class AnimationTest extends PApplet{
     Skeleton skeleton;
 
     public void settings() {
-        size(1200, 800, P2D);
+        size(1200, 800, P3D);
     }
 
     public void setup() {

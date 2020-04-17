@@ -55,7 +55,7 @@ public class Viewer extends PApplet{
 
         skeletons.add(new Skeleton(parser, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL, scene, 0,255,0, scene.radius() * 0.01f));
         //skeletons.add(new Skeleton(parser, SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL, scene, color(255,0,0), scene.radius() * 0.01f));
-        parser.root().cull(true);
+        //parser.root().cull(true);
         //skeleton._root.cull(true);
     }
 
