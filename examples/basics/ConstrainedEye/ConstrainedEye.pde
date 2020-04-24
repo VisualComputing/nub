@@ -14,7 +14,7 @@ import nub.core.constraint.*;
 import nub.processing.*;
 
 Scene scene;
-PFont myFont;
+PFont font;
 
 int transDir;
 int rotDir;
@@ -26,8 +26,8 @@ String renderer = P3D;
 
 void setup() {
   size(800, 800, renderer);
-  myFont = loadFont("FreeSans-16.vlw");
-  textFont(myFont);
+  font = loadFont("FreeSans-16.vlw");
+  textFont(font);
   scene = new Scene(this);
   scene.setRadius(400);
   scene.fit(1);
@@ -114,46 +114,46 @@ void keyPressed() {
   constraints[activeConstraint].setRotationConstraintDirection(dir);
 }
 
-static AxisPlaneConstraint.Type nextTranslationConstraintType(AxisPlaneConstraint.Type type) {
-  AxisPlaneConstraint.Type rType;
-  switch (type) {
+AxisPlaneConstraint.Type nextTranslationConstraintType(AxisPlaneConstraint.Type transType) {
+  AxisPlaneConstraint.Type type;
+  switch (transType) {
   case FREE:
-    rType = AxisPlaneConstraint.Type.PLANE;
+    type = AxisPlaneConstraint.Type.PLANE;
     break;
   case PLANE:
-    rType = AxisPlaneConstraint.Type.AXIS;
+    type = AxisPlaneConstraint.Type.AXIS;
     break;
   case AXIS:
-    rType = AxisPlaneConstraint.Type.FORBIDDEN;
+    type = AxisPlaneConstraint.Type.FORBIDDEN;
     break;
   case FORBIDDEN:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
     break;
   default:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
   }
-  return rType;
+  return type;
 }
 
-static AxisPlaneConstraint.Type nextRotationConstraintType(AxisPlaneConstraint.Type type) {
-  AxisPlaneConstraint.Type rType;
-  switch (type) {
+AxisPlaneConstraint.Type nextRotationConstraintType(AxisPlaneConstraint.Type rotType) {
+  AxisPlaneConstraint.Type type;
+  switch (rotType) {
   case FREE:
-    rType = AxisPlaneConstraint.Type.AXIS;
+    type = AxisPlaneConstraint.Type.AXIS;
     break;
   case PLANE:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
     break;
   case AXIS:
-    rType = AxisPlaneConstraint.Type.FORBIDDEN;
+    type = AxisPlaneConstraint.Type.FORBIDDEN;
     break;
   case FORBIDDEN:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
     break;
   default:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
   }
-  return rType;
+  return type;
 }
 
 void changeConstraint() {
