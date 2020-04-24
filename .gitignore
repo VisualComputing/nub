@@ -13,8 +13,7 @@ out/
 .project
 .classpath
 # code-oss + processing
-examples/**/.vscode
-testing/src/processing/**/.vscode
+**/.vscode
 # nub config
 data/config.json
 examples/**/config.json
