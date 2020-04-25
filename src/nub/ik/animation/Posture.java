@@ -6,23 +6,12 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class Posture {
-    protected class NodeInformation{
-        Vector _translation;
-        Quaternion _rotation;
-
-        protected NodeInformation(Node node){
-            _translation = node.translation().get();
-            _rotation = node.rotation().get();
-        }
-    }
-
-    protected HashMap<String, NodeInformation> _nodeInformation;
+    protected HashMap<String, Node> _nodeInformation;
 
     public Posture(){
-        _nodeInformation = new HashMap<String, NodeInformation>();
+        _nodeInformation = new HashMap<String, Node>();
     }
 
     public Posture(Skeleton skeleton){
@@ -31,23 +20,42 @@ public class Posture {
     }
 
     public void saveCurrentValues(Skeleton skeleton){
-        for(Map.Entry<String, Node> entry : skeleton._joints.entrySet()){
-            _nodeInformation.put(entry.getKey(), new NodeInformation(entry.getValue()));
+        Node ref = Node.detach(skeleton.reference().position().get(), skeleton.reference().orientation().get(), skeleton.reference().magnitude());
+        for(Node original : skeleton.BFS()){
+            //Create a detached copy of the node basic information
+            String name = skeleton.jointName(original);
+            Node copy = Node.detach(new Vector(), new Quaternion(), 1);
+            _nodeInformation.put(name, copy);
+            //set reference
+            String refName = skeleton.jointName(original.reference());
+            if(refName != null){
+                copy.setReference(_nodeInformation.get(refName));
+            } else{
+                copy.setReference(ref);
+            }
+            //set values
+            copy.setPosition(original.position().get());
+            copy.setOrientation(original.orientation().get());
+            copy.setMagnitude(original.magnitude());
         }
     }
 
     public void loadValues(Skeleton skeleton){
-        for(Map.Entry<String, NodeInformation> entry : _nodeInformation.entrySet()){
-            Node node = skeleton.joint(entry.getKey());
+        for(Node node : skeleton.BFS()){
+            if(node == skeleton.reference() || !skeleton._names.containsKey(node)) continue;
+            String name = skeleton.jointName(node);
+            if(!_nodeInformation.containsKey(name)) continue;
             Constraint constrain = node.constraint();
             node.setConstraint(null);
-            node.setTranslation(entry.getValue()._translation.get());
-            node.setRotation(entry.getValue()._rotation.get());
+            Node info = _nodeInformation.get(name);
+            node.setPosition(info.position().get());
+            node.setOrientation(info.orientation().get());
             node.setConstraint(constrain);
         }
+        skeleton.restoreTargetsState();
     }
 
-    public NodeInformation jointState(String name){
+    public Node jointState(String name){
         return _nodeInformation.get(name);
     }
 
