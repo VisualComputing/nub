@@ -373,6 +373,7 @@ public class Scene extends Graph implements PConstants {
     _upperLeftCornerX = _offscreen ? x : 0;
     _upperLeftCornerY = _offscreen ? y : 0;
     // 2. Back buffer
+    _backBuffer().noSmooth();
     _triangleShader = pApplet().loadShader("PickingBuffer.frag");
     _lineShader = pApplet().loadShader("PickingBuffer.frag");
     _pointShader = pApplet().loadShader("PickingBuffer.frag");
@@ -3736,12 +3737,10 @@ public class Scene extends Graph implements PConstants {
     } else if (node.constraint() instanceof Hinge) {
       //TODO: Only works well if child lies on Axis Plane
       Hinge constraint = (Hinge) node.constraint();
-      if (node.children().size() == 1) {
-        reference.rotate(constraint.orientation());
-        reference.rotate(new Quaternion(new Vector(1, 0, 0), new Vector(0, 1, 0)));
-        applyTransformation(pGraphics, reference);
-        drawArc(pGraphics, boneLength * factor, -constraint.minAngle(), constraint.maxAngle(), 10);
-      }
+      reference.rotate(constraint.orientation());
+      reference.rotate(new Quaternion(new Vector(1, 0, 0), new Vector(0, 1, 0)));
+      applyTransformation(pGraphics, reference);
+      drawArc(pGraphics, boneLength * factor, -constraint.minAngle(), constraint.maxAngle(), 10);
     }
     pGraphics.popMatrix();
     pGraphics.popStyle();
