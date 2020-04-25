@@ -28,6 +28,7 @@ public class CPULinearBlendSkinning implements Skinning {
   protected Map<Node, Integer> _ids;
   protected List<Vertex> _vertices;
   protected PGraphics _pg;
+  protected Node _reference;
 
   protected class Vertex {
     protected int[] _joints;
@@ -76,11 +77,13 @@ public class CPULinearBlendSkinning implements Skinning {
   }
 
   public CPULinearBlendSkinning(Skeleton skeleton, String shape, String texture, float factor) {
-    this(skeleton.joints(), skeleton.scene().context(), shape, texture, factor);
+    this(skeleton.BFS(), skeleton.scene().context(), shape, texture, factor);
+    _reference = skeleton.reference();
   }
 
   public CPULinearBlendSkinning(Skeleton skeleton, String shape, String texture, float factor, boolean quad) {
-    this(skeleton.joints(), skeleton.scene().context(), shape, texture, factor, quad);
+    this(skeleton.BFS(), skeleton.scene().context(), shape, texture, factor, quad);
+    _reference = skeleton.reference();
   }
 
   public CPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor, boolean quad) {
@@ -124,6 +127,10 @@ public class CPULinearBlendSkinning implements Skinning {
     return _ids;
   }
 
+  public void setReference(Node reference){
+    _reference = reference;
+  }
+
   @Override
   public void initParams() {
     for (int i = 0; i < _skeleton.size(); i++) {
@@ -158,7 +165,7 @@ public class CPULinearBlendSkinning implements Skinning {
     //Find the nearest 3 joints
     //TODO : Perhaps enable more joints - use QuickSort
     for (Node joint : branch) {
-      if (joint == branch.get(0)) continue;
+      if (_ids.get(joint.reference()) == null) continue;
       if (joint.translation().magnitude() <= Float.MIN_VALUE) continue;
       float dist = (float) Math.pow(getDistance(position, joint), 10);
       if (dist <= d[0] || dist <= d[1] || dist <= d[2]) {
@@ -195,11 +202,15 @@ public class CPULinearBlendSkinning implements Skinning {
   }
 
   @Override
-  public void render(Scene scene, Node reference) {
-    scene.applyWorldTransformation(reference);
-    render(scene.context());
+  public void render(Scene scene) {
+    render(scene, _reference);
   }
 
+  @Override
+  public void render(Scene scene, Node reference) {
+    if(reference != null) scene.applyWorldTransformation(reference);
+    render(scene.context());
+  }
 
   /*
    * Get the distance from vertex to line formed by frame and the reference frame of frame
@@ -224,7 +235,7 @@ public class CPULinearBlendSkinning implements Skinning {
       distance = Vector.subtract(distance, vertex);
     }
     if (u < 0) {
-      distance = Vector.subtract(position, vertex);
+      distance = Vector.subtract(parentPosition, vertex);
     }
     if (u > 1) {
       distance = Vector.subtract(position, vertex);

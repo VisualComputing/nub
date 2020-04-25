@@ -33,6 +33,7 @@ public class GPULinearBlendSkinning implements Skinning {
   protected Map<Node, Integer> _ids;
   protected final String _fragmentPath = "frag.glsl";
   protected final String _vertexPath = "skinning.glsl";
+  protected Node _reference;
 
   public GPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, PShape shape) {
     this._shapes = new ArrayList<>();
@@ -60,7 +61,8 @@ public class GPULinearBlendSkinning implements Skinning {
   }
 
   public GPULinearBlendSkinning(Skeleton skeleton, PShape shape) {
-    this(skeleton.joints(), skeleton.scene().context(), shape);
+    this(skeleton.BFS(), skeleton.scene().context(), shape);
+    _reference = skeleton.reference();
   }
 
   public GPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor) {
@@ -69,10 +71,12 @@ public class GPULinearBlendSkinning implements Skinning {
 
   public GPULinearBlendSkinning(Skeleton skeleton, String shape, String texture, float factor) {
     this(skeleton, shape, texture, factor, false);
+    _reference = skeleton.reference();
   }
 
   public GPULinearBlendSkinning(Skeleton skeleton, String shape, String texture, float factor, boolean quad) {
-    this(skeleton.joints(), skeleton.scene().context(), shape, texture, factor, quad);
+    this(skeleton.BFS(), skeleton.scene().context(), shape, texture, factor, quad);
+    _reference = skeleton.reference();
   }
 
   public GPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor, boolean quad) {
@@ -118,6 +122,10 @@ public class GPULinearBlendSkinning implements Skinning {
 
   public Map<Node, Integer> ids() {
     return _ids;
+  }
+
+  public void setReference(Node reference){
+    _reference = reference;
   }
 
   @Override
@@ -175,7 +183,7 @@ public class GPULinearBlendSkinning implements Skinning {
     //Find the nearest 3 joints
     //TODO : Perhaps enable more joints - use QuickSort
     for (Node joint : branch) {
-      if (joint == branch.get(0)) continue;
+      if (_ids.get(joint.reference()) == null) continue;
       if (joint.translation().magnitude() <= Float.MIN_VALUE) continue;
       float dist = (float) Math.pow(getDistance(position, joint), 10);
       if (dist <= d[0] || dist <= d[1] || dist <= d[2]) {
@@ -202,7 +210,7 @@ public class GPULinearBlendSkinning implements Skinning {
   /*
    * Get the distance from vertex to line formed by frame and the reference frame of frame
    * Distance will be measure according to root coordinates.
-   * In case of reference frame of frame is root, it will return distance from vertex to frame
+   * If the reference frame is the root, it will return distance from vertex to frame
    * */
   public static float getDistance(Vector vertex, Node node) {
     if (node == null) return Float.MAX_VALUE;
@@ -222,7 +230,7 @@ public class GPULinearBlendSkinning implements Skinning {
       distance = Vector.subtract(distance, vertex);
     }
     if (u < 0) {
-      distance = Vector.subtract(position, vertex);
+      distance = Vector.subtract(parentPosition, vertex);
     }
     if (u > 1) {
       distance = Vector.subtract(position, vertex);
@@ -240,6 +248,12 @@ public class GPULinearBlendSkinning implements Skinning {
     pg.resetShader();
   }
 
+
+  @Override
+  public void render(Scene scene) {
+    render(scene, _reference);
+  }
+
   @Override
   public void render() {
     render(_pg);
@@ -247,7 +261,7 @@ public class GPULinearBlendSkinning implements Skinning {
 
   @Override
   public void render(Scene scene, Node reference) {
-    scene.applyWorldTransformation(reference);
+    if(reference != null) scene.applyWorldTransformation(reference);
     render(scene.context());
   }
 

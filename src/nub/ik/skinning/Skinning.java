@@ -15,6 +15,8 @@ public interface Skinning {
 
   void render(PGraphics pg);
 
+  void render(Scene scene);
+
   void render(Scene scene, Node node);
 
   List<Node> skeleton();
