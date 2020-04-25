@@ -2,7 +2,11 @@ package nub.ik.animation;
 
 import nub.core.Graph;
 import nub.core.Node;
+import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.Constraint;
+import nub.core.constraint.Hinge;
 import nub.ik.visual.Joint;
+import nub.primitives.Quaternion;
 import nub.processing.Scene;
 import processing.core.PGraphics;
 import processing.data.JSONArray;
@@ -94,6 +98,22 @@ public class Skeleton {
         return joint;
     }
 
+    public List<Node> BFS(){
+        List<Node> list = new ArrayList<Node>();
+        List<Node> frontier = new ArrayList<Node>();
+        frontier.add(_reference);
+        while(!frontier.isEmpty()){
+            Node next = frontier.remove(0);
+            list.add(next);
+            for(Node child : next.children()){
+                frontier.add(child);
+            }
+        }
+        list.remove(0);
+        return list;
+    }
+
+
     public Joint addJoint(String name, String reference){
         return  addJoint(name, reference, (int) (255 * Math.random()), (int) (255 * Math.random()), (int) (255 * Math.random()), _scene.radius() * 0.05f);
     }
@@ -183,6 +203,17 @@ public class Skeleton {
         return new ArrayList<Node>(_joints.values());
     }
 
+    public void setName(String name, String newName){
+        if(!_joints.containsKey(name)) return;
+        Node joint = _joints.remove(name);
+        Node target = _targets.remove(name);
+        _names.remove(joint);
+        _joints.put(newName, joint);
+        if(target != null) _targets.put(newName, target);
+        _names.put(joint, newName);
+    }
+
+
     public void prune(Node joint){
         List<Node> branch = Graph.branch(joint);
         Graph.prune(joint);
@@ -208,8 +239,8 @@ public class Skeleton {
 
     //Load and Save Skeleton model
     protected int _saveJoints(JSONArray jsonArray, Node node, String referenceName, int i){
-        if(node == null) return 0;
-        if(node != _reference && !_names.containsKey(node)) return 0;
+        if(node == null) return i;
+        if(node != _reference && !_names.containsKey(node)) return i - 1;
         if(node != _reference) {
             JSONObject joint = new JSONObject();
             joint.setString("reference", referenceName);
@@ -221,7 +252,7 @@ public class Skeleton {
             joint.setFloat("q_y", node.rotation().y());
             joint.setFloat("q_z", node.rotation().z());
             joint.setFloat("q_w", node.rotation().w());
-
+            _saveConstraint(joint, node);
             if (node instanceof Joint) {
                 joint.setFloat("radius", ((Joint) node).radius());
                 joint.setFloat("red", ((Joint) node).red());
@@ -266,6 +297,90 @@ public class Skeleton {
             }
             joint.setTranslation(jsonJoint.getFloat("x"), jsonJoint.getFloat("y"), jsonJoint.getFloat("z"));
             joint.setRotation(jsonJoint.getFloat("q_x"), jsonJoint.getFloat("q_y"), jsonJoint.getFloat("q_z"), jsonJoint.getFloat("q_w"));
+            _loadConstraint(jsonJoint, joint);
+        }
+    }
+
+    protected void _saveConstraint(JSONObject jsonJoint, Node node){
+        JSONObject jsonConstraint = new JSONObject();
+        Constraint constraint = node.constraint();
+        if(constraint == null) {
+            jsonConstraint.setString("type", "none");
+        }
+        else if(constraint instanceof Hinge){
+            Hinge h = (Hinge) node.constraint();
+            jsonConstraint.setString("type", "hinge");
+            jsonConstraint.setFloat("reference_x", h.idleRotation().x());
+            jsonConstraint.setFloat("reference_y", h.idleRotation().y());
+            jsonConstraint.setFloat("reference_z", h.idleRotation().z());
+            jsonConstraint.setFloat("reference_w", h.idleRotation().w());
+            jsonConstraint.setFloat("rest_x", h.restRotation().x());
+            jsonConstraint.setFloat("rest_y", h.restRotation().y());
+            jsonConstraint.setFloat("rest_z", h.restRotation().z());
+            jsonConstraint.setFloat("rest_w", h.restRotation().w());
+            jsonConstraint.setFloat("min", h.minAngle());
+            jsonConstraint.setFloat("max", h.maxAngle());
+        } else if(constraint instanceof BallAndSocket){
+            BallAndSocket b = (BallAndSocket) node.constraint();
+            jsonConstraint.setString("type", "ball_socket");
+            jsonConstraint.setFloat("reference_x", b.idleRotation().x());
+            jsonConstraint.setFloat("reference_y", b.idleRotation().y());
+            jsonConstraint.setFloat("reference_z", b.idleRotation().z());
+            jsonConstraint.setFloat("reference_w", b.idleRotation().w());
+            jsonConstraint.setFloat("rest_x", b.restRotation().x());
+            jsonConstraint.setFloat("rest_y", b.restRotation().y());
+            jsonConstraint.setFloat("rest_z", b.restRotation().z());
+            jsonConstraint.setFloat("rest_w", b.restRotation().w());
+            jsonConstraint.setFloat("min", b.minTwistAngle());
+            jsonConstraint.setFloat("max", b.maxTwistAngle());
+            jsonConstraint.setFloat("up", b.up());
+            jsonConstraint.setFloat("down", b.down());
+            jsonConstraint.setFloat("left", b.left());
+            jsonConstraint.setFloat("right", b.right());
+        }
+        jsonJoint.setJSONObject("constraint", jsonConstraint);
+    }
+
+    protected void _loadConstraint(JSONObject jsonJoint, Node node){
+        if(!jsonJoint.hasKey("constraint")) return;
+        JSONObject jsonConstraint = jsonJoint.getJSONObject("constraint");
+        if(jsonConstraint.getString("type").equals("none")) {
+            return;
+        }
+        else if(jsonConstraint.getString("type").equals("hinge")){
+            float min = jsonConstraint.getFloat("min");
+            float max = jsonConstraint.getFloat("max");
+            Quaternion reference = new Quaternion(jsonConstraint.getFloat("reference_x"),
+                    jsonConstraint.getFloat("reference_y"),
+                    jsonConstraint.getFloat("reference_z"),
+                    jsonConstraint.getFloat("reference_w"));
+            Quaternion rest = new Quaternion(jsonConstraint.getFloat("rest_x"),
+                    jsonConstraint.getFloat("rest_y"),
+                    jsonConstraint.getFloat("rest_z"),
+                    jsonConstraint.getFloat("rest_w"));
+            Hinge h = new Hinge(min, max);
+            h.setRotations(reference, rest);
+            node.setConstraint(h);
+        } else if(jsonConstraint.getString("type").equals("ball_socket")){
+            float min = jsonConstraint.getFloat("min");
+            float max = jsonConstraint.getFloat("max");
+            float up = jsonConstraint.getFloat("up");
+            float down = jsonConstraint.getFloat("down");
+            float left = jsonConstraint.getFloat("left");
+            float right = jsonConstraint.getFloat("right");
+
+            Quaternion reference = new Quaternion(jsonConstraint.getFloat("reference_x"),
+                    jsonConstraint.getFloat("reference_y"),
+                    jsonConstraint.getFloat("reference_z"),
+                    jsonConstraint.getFloat("reference_w"));
+            Quaternion rest = new Quaternion(jsonConstraint.getFloat("rest_x"),
+                    jsonConstraint.getFloat("rest_y"),
+                    jsonConstraint.getFloat("rest_z"),
+                    jsonConstraint.getFloat("rest_w"));
+            BallAndSocket b = new BallAndSocket(down, up, left, right);
+            b.setRotations(reference, rest);
+            b.setTwistLimits(min, max);
+            node.setConstraint(b);
         }
     }
 
