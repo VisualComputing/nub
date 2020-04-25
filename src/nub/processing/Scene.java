@@ -369,6 +369,7 @@ public class Scene extends Graph implements PConstants {
     _upperLeftCornerX = _offscreen ? x : 0;
     _upperLeftCornerY = _offscreen ? y : 0;
     // 2. Back buffer
+    _backBuffer().noSmooth();
     _triangleShader = pApplet().loadShader("PickingBuffer.frag");
     _lineShader = pApplet().loadShader("PickingBuffer.frag");
     _pointShader = pApplet().loadShader("PickingBuffer.frag");
