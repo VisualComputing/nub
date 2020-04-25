@@ -78,6 +78,12 @@ public class Hinge extends Constraint {
     _restRotation = delta;
   }
 
+  public void setRotations(Quaternion reference, Quaternion rest){
+    _idleRotation = reference.get();
+    _restRotation = rest.get();
+    _orientation = Quaternion.compose(reference, rest);
+  }
+
   public Quaternion orientation() {
     return _orientation;
   }
