@@ -2735,6 +2735,8 @@ public class Graph {
    * Used by the {@link #_renderBackBuffer()} algorithm.
    */
   protected void _renderBackBuffer(Node node) {
+    if (node._graph != null && node._graph != this)
+      return;
     _bbMatrixHandler.pushMatrix();
     _bbMatrixHandler.applyTransformation(node);
     if (!node.isCulled()) {
