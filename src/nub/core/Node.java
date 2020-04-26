@@ -156,6 +156,9 @@ public class Node {
   protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
   protected final float _scalingFactor = 800;
 
+  // Locked Scene, see Graph.lock / unlock
+  Graph _graph;
+
   /**
    * Same as {@code this(null, null, null, new Vector(), new Quaternion(), 1)}.
    *

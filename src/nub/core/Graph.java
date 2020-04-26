@@ -841,6 +841,50 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return lock(this, node)}.
+   *
+   * @see #lock(Graph, Node)
+   * @see #unlock(Node)
+   */
+  public boolean lock(Node node) {
+    return lock(this, node);
+  }
+
+  /**
+   * Only {@link #render()} (and {@link #render(Object)}) the {@code node} in {@code graph}.
+   * Return {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #unlock(Node)
+   */
+  public static boolean lock(Graph graph, Node node) {
+    if (isReachable(node)) {
+      if (node._graph != null)
+        System.out.println("Warning: re-locking node.");
+      node._graph = graph;
+      return true;
+    }
+    System.out.println("Warning: Only reachable nodes can be locked.");
+    return false;
+  }
+
+  /**
+   * Always {@link #render()} (and {@link #render(Object)}) the {@code node} and its descendants.
+   * Return {@code true} if succeeded and {@code false} otherwise.
+   *
+   * @see #lock(Graph, Node)
+   */
+  public static boolean unlock(Node node) {
+    if (isReachable(node)) {
+      if (node._graph == null)
+        System.out.println("Warning: re-unlocking node.");
+      node._graph = null;
+      return true;
+    }
+    System.out.println("Warning: Only reachable nodes can be unlocked.");
+    return false;
+  }
+
+  /**
    * Collects {@code node} and all its descendant nodes. Note that for a node to be collected
    * it must be reachable.
    *
@@ -2891,6 +2935,8 @@ public class Graph {
    * Used by the {@link #render()} algorithm.
    */
   protected void _render(Node node) {
+    if (node._graph != null && node._graph != this)
+      return;
     _matrixHandler.pushMatrix();
     _matrixHandler.applyTransformation(node);
     node.visit();
@@ -2940,7 +2986,27 @@ public class Graph {
     if (context == _fb && !_rays.isEmpty())
       render();
     else
-      render(context, projection(), view());
+      // TODO testing bypassing locked nodes
+      _render(this, nub.processing.Scene.matrixHandler(context), context);
+    // previous line was:
+    //render(context, projection(), view());
+  }
+
+  /**
+   * Used by {@link #render(Object)}.
+   */
+  protected static void _render(Graph graph, MatrixHandler matrixHandler, Object context) {
+    matrixHandler.bind(graph.projection(), graph.view());
+    for (Node node : _leadingNodes())
+      _render(graph, matrixHandler, context, node);
+  }
+
+  /**
+   * Used by {@link #_render(Graph, MatrixHandler, Object, Node)}. Bypass locked nodes.
+   */
+  protected static void _render(Graph graph, MatrixHandler matrixHandler, Object context, Node node) {
+    if (node._graph == null || node._graph == graph)
+      _render(matrixHandler, context, node);
   }
 
   /**
