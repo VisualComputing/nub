@@ -6,7 +6,7 @@ class Target extends Node{
     */    
     
     Target(Scene scene, float radius){
-      super(scene);
+      super();
       PShape redBall;
       if (scene.is2D()) redBall = createShape(ELLIPSE,0, 0, radius*2, radius*2);
       else  redBall = createShape(SPHERE, radius);

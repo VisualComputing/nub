@@ -20,51 +20,59 @@
  *                           ^
  *                           |
  *                           4
- * As Node 4 is the End effector of the structure (leaf node) we will attach a Target to it.
+ * As Joint 4 is the End effector of the structure (leaf node) we will attach a Target to it.
  * Press 'S' to stop/restart IK Solver
  */
 
-
 import nub.primitives.*;
 import nub.core.*;
-import nub.core.constraint.*;
 import nub.processing.*;
-import nub.ik.solver.geometric.*;
-import nub.timing.*;
+import nub.core.constraint.*;
 
-int w = 700;
-int h = 700;
+//this packages are required for ik behavior
+import nub.ik.animation.*;
+import nub.ik.visual.*;
+import nub.ik.solver.*;
+
+int w = 1200;
+int h = 1200;
+
+//Choose a renderer P2D or P3D
+String renderer = P3D;
 
 Scene scene;
-float jointRadius = 5;
 float length = 50;
 //Skeleton structure defined above
-ArrayList<Node> skeleton = new ArrayList<Node>();
-boolean enableSolver = true;
+Skeleton skeleton;
 
 void settings() {
-    size(w, h, P3D);
+    size(w, h, renderer);
 }
 
 void setup() {
     //Setting the scene
     scene = new Scene(this);
-    if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
-    scene.setRadius(280);
+    scene.setRadius(200);
     scene.fit(1);
-    //1. Create the Skeleton (chain described above)
-    Node node0 = new Joint(scene,null, new Vector(0, -scene.radius()/2), jointRadius, false);
-    Node node1 = new Joint(scene,node0, new Vector(0, length), jointRadius, true);
-    Node node2 = new Joint(scene,node1, new Vector(0, length), jointRadius, true);
-    Node node3 = new Joint(scene,node2, new Vector(0, length), jointRadius, true);
-    Node node4 = new Joint(scene,node3, new Vector(0, length), jointRadius, true);
-    skeleton.add(node0);
-    skeleton.add(node1);
-    skeleton.add(node2);
-    skeleton.add(node3);
-    skeleton.add(node4);
-    //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
-    node4.enableTracking(false);
+    //Create the Skeleton described above
+    skeleton = new Skeleton(scene);
+    /*
+      A joint is a node with a predefined visual representation.
+      To add a joint to the Skeleton you must use either the method skeleton.addJoint(name)
+      or skeleton.addJoint(name, reference_name).
+      Each joint has a unique name that will be use later by the IK solver.            
+    */
+    Joint joint0 = skeleton.addJoint("Joint 0");
+    joint0.translate(new Vector(0,-scene.radius()/2));
+    Joint joint1 = skeleton.addJoint("Joint 1", "Joint 0"); 
+    joint1.translate(new Vector(0,length));
+    Joint joint2 = skeleton.addJoint("Joint 2","Joint 1");
+    joint2.translate(new Vector(0,length));
+    Joint joint3 = skeleton.addJoint("Joint 3", "Joint 2");
+    joint3.translate(new Vector(0,length));
+    Joint joint4 = skeleton.addJoint("Joint 4", "Joint 3");
+    joint4.translate(new Vector(0,length));
+
     //---------------------------------------------------
     //Apply constraints
     /*
@@ -80,97 +88,70 @@ void setup() {
      * Once they are properly identified you could define the limits of the Hinge (1-DOF) or Ball and Socket (3-DOF)
      * constraints (see Constraint explanation on nub wikis).
      **/
-
+    
     //Apply a Ball & Socket constraint to node0:
     BallAndSocket constraint0 = new BallAndSocket(radians(40), radians(60));
-    constraint0.setRestRotation(node0.rotation(), new Vector(1,0,0), new Vector(0,1,0));
+    constraint0.setRestRotation(joint0.rotation(), new Vector(1,0,0), new Vector(0,1,0));
     constraint0.setTwistLimits(radians(50), radians(50));
-    node0.setConstraint(constraint0);
+    joint0.setConstraint(constraint0);
 
     //Apply a Ball & Socket constraint to node1:
     BallAndSocket constraint1 = new BallAndSocket(radians(60), radians(40));
-    constraint1.setRestRotation(node1.rotation(), new Vector(1,0,0), new Vector(0,1,0));
+    constraint1.setRestRotation(joint1.rotation(), new Vector(1,0,0), new Vector(0,1,0));
     constraint1.setTwistLimits(radians(5), radians(5));
-    node1.setConstraint(constraint1);
+    joint1.setConstraint(constraint1);
 
     //Apply a Hinge constraint to node2:
     Hinge constraint2 = new Hinge(radians(40), radians(60));
-    constraint2.setRestRotation(node2.rotation(), new Vector(0,1,0), new Vector(1,0,0));
-    node2.setConstraint(constraint2);
+    constraint2.setRestRotation(joint2.rotation(), new Vector(0,1,0), new Vector(1,0,0));
+    joint2.setConstraint(constraint2);
 
     //Apply a Hinge constraint to node3:
     Hinge constraint3 = new Hinge(radians(60), radians(40));
-    constraint3.setRestRotation(node3.rotation(), new Vector(0,1,0), new Vector(0,0,1));
-    node3.setConstraint(constraint3);
+    constraint3.setRestRotation(joint4.rotation(), new Vector(0,1,0), new Vector(0,0,1));
+    joint3.setConstraint(constraint3);
     //---------------------------------------------------
-    
-    //2. Lets create a Target (a bit bigger than a Joint in the structure)
-    Node target = new Target(scene, jointRadius * 1.5f);
-    
-    //Locate the Target on same spot of the end effector
-    target.setPosition(node4.position());
-    
-    //3. Relate the structure with a Solver. In this example we instantiate a solver
-    //As we're dealing with a Chain Structure a Chain Solver is preferable
-    //A Chain solver constructor receives an ArrayList containing the Skeleton structure
-    final ChainSolver solver = new ChainSolver(skeleton);
-    
-    //Optionally you could modify the following parameters of the Solver:
-    //Maximum distance between end effector and target, If is below maxError, then we stop executing IK solver (Default value is 0.01)
-    solver.setMaxError(1);
-    //Number of iterations to perform in order to reach the target (Default value is 50)
-    solver.setMaxIterations(15);
-    //Times a solver will iterate on a single Frame (Default value is 5)
-    solver.setTimesPerFrame(5);
-    //Minimum distance between previous and current solution to consider that Solver converges (Default value is 0.01)
-    solver.setMinDistance(0.5f);
-    
-    //4. relate targets with end effectors
-    solver.setTarget(node4, target);
-    
-    //5. Create a Timing Task such that the solver executes each amount of time
-    TimingTask solverTask = new TimingTask() {
-        @Override
-        public void execute() {
-            //a solver perform an iteration when solve method is called
-            if(enableSolver){
-                solver.solve();
-            }
-        }
-    };
-    scene.registerTask(solverTask); //Add solverTask to the Graph scene
-    solverTask.run(40); //Execute the solverTask each 40 ms
-    
+
+
+    //Enable IK functionallity
+    skeleton.enableIK();
+    //Lets create a Targets indicating the name of the leaf nodes. 
+    skeleton.addTarget("Joint 4");
+    //If desired you could set the target position and orientation to be the same as the leaves of the structure 
+    skeleton.restoreTargetsState();
     //Define Text Properties
     textAlign(CENTER);
     textSize(24);
 }
 
-public void draw() {
+void draw() {
     background(0);
-    lights();
+    if(scene.is3D()) lights();
     scene.drawAxes();
     scene.render();
+    
+    noLights();
     scene.beginHUD();
-    for (int i = 0; i < skeleton.size(); i++) {
-        //Print Node names
-        Vector screenLocation = scene.screenLocation(skeleton.get(i).position());
-        text("Node " + i, screenLocation.x(), screenLocation.y());
+    text("Basic Skeleton Structure with constraints", width /2, 100);
+    for(Node joint : skeleton.joints()){
+        Vector screenLocation = scene.screenLocation(joint.position());
+        String s = !joint.children().isEmpty() ? "" : "End effector: ";
+        s += skeleton.jointName(joint);
+        text(s , screenLocation.x(), screenLocation.y() + 30);
     }
     scene.endHUD();
+    
 }
 
-
-
 void mouseMoved() {
-    scene.cast();
+    scene.mouseTag();
 }
 
 void mouseDragged() {
     if (mouseButton == LEFT){
-        scene.spin();
+        scene.mouseSpin();
     } else if (mouseButton == RIGHT) {
-        scene.translate();
+        scene.mouseTranslate();
     } else {
         scene.scale(mouseX - pmouseX);
     }
@@ -186,10 +167,4 @@ void mouseClicked(MouseEvent event) {
             scene.focus();
         else
             scene.align();
-}
-
-void keyPressed(){
-    if(key == 'S' || key == 's'){
-        enableSolver = !enableSolver;
-    }
 }

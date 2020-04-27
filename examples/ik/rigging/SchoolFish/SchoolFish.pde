@@ -28,7 +28,7 @@ int flockHeight = 720;
 int flockDepth = 600;
 boolean avoidWalls = true;
 
-int initBoidNum = 80 ,numFlocks = 10; // amount of boids to start the program with
+int initBoidNum = 80 ,numFlocks = 20; // amount of boids to start the program with
 ArrayList< ArrayList<Boid> > flocks = new ArrayList< ArrayList<Boid> >();
 Node avatar;
 boolean animate = true;
@@ -45,7 +45,7 @@ void setup() {
       ArrayList<Boid> flock = new ArrayList();
       Node objShape = generateFish("fish" + k % 4);
       for (int i = 0; i < initBoidNum; i++)
-          flock.add(new Boid(scene, objShape, skinning.get(k), new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), flock));
+          flock.add(new Boid(objShape, skinning.get(k), new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), flock));
       flocks.add(flock);
   }
 }
@@ -110,13 +110,13 @@ void resetEye() {
 void mouseClicked() {
   // two options to update the boid avatar:
   // 1. Synchronously
-  updateAvatar(scene.track("mouseClicked", mouseX, mouseY));
+  updateAvatar(scene.updateMouseTag("mouseClicked"));
   // which is the same as these two lines:
-  // scene.track("mouseClicked", mouseX, mouseY);
-  // updateAvatar(scene.trackedNode("mouseClicked"));
+  // scene.updateMouseTag("mouseClicked");
+  // updateAvatar(scene.node("mouseClicked"));
   // 2. Asynchronously
-  // which requires updateAvatar(scene.trackedNode("mouseClicked")) to be called within draw()
-  // scene.cast("mouseClicked", mouseX, mouseY);
+  // which requires updateAvatar(scene.node("mouseClicked")) to be called within draw()
+  // scene.mouseTag("mouseClicked");
 }
 
 // 'first-person' interaction
@@ -124,10 +124,10 @@ void mouseDragged() {
   if (scene.eye().reference() == null)
     if (mouseButton == LEFT)
       // same as: scene.spin(scene.eye());
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
       // same as: scene.translate(scene.eye());
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(mouseX - pmouseX);
 }
@@ -135,12 +135,12 @@ void mouseDragged() {
 // highlighting and 'third-person' interaction
 void mouseMoved(MouseEvent event) {
   // 1. highlighting
-  scene.cast("mouseMoved", mouseX, mouseY);
+  scene.mouseTag("mouseMoved");
   // 2. third-person interaction
   if (scene.eye().reference() != null)
     // press shift to move the mouse without looking around
     if (!event.isShiftDown())
-      scene.lookAround();
+      scene.mouseLookAround();
 }
 
 void mouseWheel(MouseEvent event) {
@@ -151,17 +151,36 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   switch (key) {
   case 'a':
-    animate = !animate;
+    for(ArrayList<Boid> flock : flocks)
+      for (Boid boid : flock)
+        boid.task.toggle();
+    break;
+  case '+':
+    for(ArrayList<Boid> flock : flocks)
+      for (Boid boid : flock)
+        boid.task.increasePeriod(-2);
+    break;
+  case '-':
+    for(ArrayList<Boid> flock : flocks)
+      for (Boid boid : flock)
+        boid.task.increasePeriod(2);
+    break;
+  case 'e':
+    for(ArrayList<Boid> flock : flocks)
+      for (Boid boid : flock)
+        boid.task.enableConcurrence(true);
+    break;
+  case 'd':
+    for(ArrayList<Boid> flock : flocks)
+      for (Boid boid : flock)
+        boid.task.enableConcurrence(false);
     break;
   case 's':
     if (scene.eye().reference() == null)
       scene.fit(1);
     break;
-  case 't':
-    scene.shiftTimers();
-    break;
   case 'p':
-    println("Node rate: " + frameRate);
+    println("Frame rate: " + frameRate);
     break;
   case 'v':
     avoidWalls = !avoidWalls;
@@ -173,14 +192,14 @@ void keyPressed() {
       thirdPerson();
     break;
   }
-}
-  
+}  
+
 //Generate a Fish
 Node generateFish(String name){
   String  shapeFile = name + ".obj";
   String  textureFile = name + ".jpg";
   //Invert Y Axis and set Fill
-  Node objShape = new Node(scene);
+  Node objShape = new Node();
   objShape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
 
   List<Node> skeleton = loadSkeleton(null);
@@ -192,7 +211,7 @@ Node generateFish(String name){
   //Uncomment to use Linear Blending Skinning with CPU
   skinning.add(new GPULinearBlendSkinning(skeleton, this.g, shapeFile, textureFile, 200, true));
   //Adding IK behavior
-  Node target = new Node(scene);
+  Node target = new Node();
   target.setReference(null);
   target.setPosition(skeleton.get(skeleton.size() - 1).position());
   //Making a default Path that target must follow
@@ -210,7 +229,7 @@ List<Node> loadSkeleton(Node reference){
   List<Node> skeleton = new ArrayList<Node>();
   for(int i = 0; i < skeleton_data.size(); i++){
     JSONObject joint_data = skeleton_data.getJSONObject(i);
-    Joint joint = new Joint(scene, joint_data.getFloat("radius"));
+    Joint joint = new Joint(joint_data.getFloat("radius"));
     joint.setPickingThreshold(joint_data.getFloat("picking"));
     if(i == 0){
       joint.setRoot(true);
@@ -228,17 +247,17 @@ List<Node> loadSkeleton(Node reference){
 
 Interpolator setupTargetInterpolator(Node target) {
     Interpolator targetInterpolator = new Interpolator(target);
-    targetInterpolator.setLoop();
+    targetInterpolator.enableRecurrence();
     targetInterpolator.setSpeed(3f);
     // Create an initial path
     int nbKeyFrames = 7;
     float step = 2.0f * PI / (nbKeyFrames - 1);
     for (int i = 0; i < nbKeyFrames; i++) {
-        Node iFrame = new Node(scene);
+        Node iFrame = new Node();
         iFrame.setReference(target.reference());
         iFrame.setTranslation(new Vector(50 * sin(step * i), target.translation().y(), target.translation().z() - 25 + 25 * abs(sin(step * i)) ));
         targetInterpolator.addKeyFrame(iFrame);
     }
-    targetInterpolator.start();
+    targetInterpolator.run();
     return targetInterpolator;
 }

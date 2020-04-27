@@ -2,11 +2,15 @@
  * Flock of birds 
  * by Sebastian Chaparro Cuevas.
  * 
- * This example is an Adaptation of Flock of Boids, replacing each Boid by a Fish
+ * This example is an Adaptation of Flock of Boids, replacing each Boid by an Eagle
  * with a simple IK Structure (see Fish and Flock of Boids examples). 
  *
  * Press ' ' to switch between the different eye modes.
  * Press 'a' to toggle (start/stop) animation.
+ * Press '+' to speed up the boids animation.
+ * Press '-' to speed down the boids animation.
+ * Press 'e' to enable concurrence of the flock animation.
+ * Press 'd' to disable concurrence of the flock animation.
  * Press 'p' to print the current node rate.
  * Press 'm' to change the boid visual mode.
  * Press 'v' to toggle boids' wall skipping.
@@ -18,7 +22,7 @@ import nub.core.*;
 import nub.core.constraint.*;
 import nub.processing.*;
 import nub.ik.solver.*;
-import nub.ik.rigging.*;
+import nub.ik.skinning.*;
 import nub.ik.visual.Joint; //Joint provides default way to visualize the skeleton
 import java.util.List;
 
@@ -29,7 +33,7 @@ int flockHeight = 720;
 int flockDepth = 600;
 boolean avoidWalls = true;
 
-int initBoidNum = 30 ,numFlocks = 2; // amount of boids to start the program with
+int initBoidNum = 30 ,numFlocks = 5; // amount of boids to start the program with
 ArrayList< ArrayList<Boid> > flocks = new ArrayList< ArrayList<Boid> >();
 Node avatar;
 boolean animate = true;
@@ -46,7 +50,7 @@ void setup() {
       ArrayList<Boid> flock = new ArrayList();
       Node objShape = generateEagle();
       for (int i = 0; i < initBoidNum; i++)
-          flock.add(new Boid(scene, objShape, skinning.get(k), new Vector(flockWidth / 2 + random(-flockWidth / 4, flockWidth / 4  ),
+          flock.add(new Boid(objShape, skinning.get(k), new Vector(flockWidth / 2 + random(-flockWidth / 4, flockWidth / 4  ),
                                                                           flockHeight / 2 + random(-flockHeight / 4, flockHeight / 4  ),
                                                                           flockDepth / 2  + random(-flockDepth / 4, flockDepth / 4  )), flock));
       flocks.add(flock);
@@ -113,13 +117,13 @@ void resetEye() {
 void mouseClicked() {
   // two options to update the boid avatar:
   // 1. Synchronously
-  updateAvatar(scene.track("mouseClicked", mouseX, mouseY));
+  updateAvatar(scene.updateMouseTag("mouseClicked"));
   // which is the same as these two lines:
-  // scene.track("mouseClicked", mouseX, mouseY);
-  // updateAvatar(scene.trackedNode("mouseClicked"));
+  // scene.updateMouseTag("mouseClicked");
+  // updateAvatar(scene.node("mouseClicked"));
   // 2. Asynchronously
-  // which requires updateAvatar(scene.trackedNode("mouseClicked")) to be called within draw()
-  // scene.cast("mouseClicked", mouseX, mouseY);
+  // which requires updateAvatar(scene.node("mouseClicked")) to be called within draw()
+  // scene.mouseTag("mouseClicked");
 }
 
 // 'first-person' interaction
@@ -127,10 +131,10 @@ void mouseDragged() {
   if (scene.eye().reference() == null)
     if (mouseButton == LEFT)
       // same as: scene.spin(scene.eye());
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
       // same as: scene.translate(scene.eye());
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(mouseX - pmouseX);
 }
@@ -138,12 +142,12 @@ void mouseDragged() {
 // highlighting and 'third-person' interaction
 void mouseMoved(MouseEvent event) {
   // 1. highlighting
-  scene.cast("mouseMoved", mouseX, mouseY);
+  scene.mouseTag("mouseMoved");
   // 2. third-person interaction
   if (scene.eye().reference() != null)
     // press shift to move the mouse without looking around
     if (!event.isShiftDown())
-      scene.lookAround();
+      scene.mouseLookAround();
 }
 
 void mouseWheel(MouseEvent event) {
@@ -154,17 +158,36 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   switch (key) {
   case 'a':
-    animate = !animate;
+    for(ArrayList<Boid> flock : flocks)
+      for (Boid boid : flock)
+        boid.task.toggle();
+    break;
+  case '+':
+    for(ArrayList<Boid> flock : flocks)
+      for (Boid boid : flock)
+        boid.task.increasePeriod(-2);
+    break;
+  case '-':
+    for(ArrayList<Boid> flock : flocks)
+      for (Boid boid : flock)
+        boid.task.increasePeriod(2);
+    break;
+  case 'e':
+    for(ArrayList<Boid> flock : flocks)
+      for (Boid boid : flock)
+        boid.task.enableConcurrence(true);
+    break;
+  case 'd':
+    for(ArrayList<Boid> flock : flocks)
+      for (Boid boid : flock)
+        boid.task.enableConcurrence(false);
     break;
   case 's':
     if (scene.eye().reference() == null)
       scene.fit(1);
     break;
-  case 't':
-    scene.shiftTimers();
-    break;
   case 'p':
-    println("Node rate: " + frameRate);
+    println("Frame rate: " + frameRate);
     break;
   case 'v':
     avoidWalls = !avoidWalls;
@@ -176,14 +199,13 @@ void keyPressed() {
       thirdPerson();
     break;
   }
-}
-  
-//Generate a Fish
+}  
+//Generate an Eagle
 Node generateEagle(){
   String shapeFile = "EAGLE_2.OBJ";
   String textureFile = "EAGLE2.jpg";
   //Invert Y Axis and set Fill
-  Node objShape = new Node(scene);
+  Node objShape = new Node();
   objShape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
 
   List<Node> skeleton = loadSkeleton(null);
@@ -210,13 +232,13 @@ Node generateEagle(){
   solver.setMaxIterations(5);
   for(Node endEffector : endEffectors){
       //4.3 Create target(s) to relate with End Effector(s)
-      Node target = new Node(scene);
+      Node target = new Node();
       target.setPickingThreshold(0);
       target.setPosition(endEffector.position().get());
       //4.4 Relate target(s) with end effector(s)
       scene.addIKTarget(endEffector, target);
       //disable enf effector tracking
-      endEffector.enableTracking(false);
+      endEffector.enableTagging(false);
 
       //If desired generates a default Path that target must follow
       if(endEffector == skeleton.get(14)){
@@ -236,7 +258,7 @@ List<Node> loadSkeleton(Node reference){
   List<Node> skeleton = new ArrayList<Node>();
   for(int i = 0; i < skeleton_data.size(); i++){
     JSONObject joint_data = skeleton_data.getJSONObject(i);
-    Joint joint = new Joint(scene, joint_data.getFloat("radius"));
+    Joint joint = new Joint(joint_data.getFloat("radius"));
     joint.setPickingThreshold(joint_data.getFloat("picking"));
     if(i == 0){
       joint.setRoot(true);
@@ -296,16 +318,16 @@ void setConstraints(List<Node> skeleton){
 
 Interpolator setupTargetInterpolator(Node target, Vector[] positions) {
     Interpolator targetInterpolator = new Interpolator(target);
-    targetInterpolator.setLoop();
-    targetInterpolator.setSpeed(3f);
+    targetInterpolator.enableRecurrence();
+    targetInterpolator.setSpeed(1f);
     // Create a path
     for(int i = 0; i < positions.length; i++){
-        Node iFrame = new Node(scene);
+        Node iFrame = new Node();
         iFrame.setPickingThreshold(5);
         iFrame.setReference(target.reference());
         iFrame.setTranslation(positions[i]);
         targetInterpolator.addKeyFrame(iFrame);
     }
-    targetInterpolator.start();
+    targetInterpolator.run();
     return targetInterpolator;
 }

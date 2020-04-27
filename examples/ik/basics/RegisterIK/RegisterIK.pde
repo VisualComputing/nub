@@ -31,7 +31,7 @@ import nub.ik.solver.*;
 int w = 1200;
 int h = 1200;
 
-//Choose FX2D, JAVA2D, P2D or P3D
+//Choose P2D or P3D
 String renderer = P3D;
 
 Scene scene;
@@ -53,20 +53,20 @@ void setup() {
     scene.setRadius(200);
     scene.fit(1);
     //1. Create the Skeleton (Y-Shape described above)
-    skeleton[0] = new Joint(scene,null, new Vector(0,-scene.radius()/2), jointRadius, false);
-    skeleton[1] = new Joint(scene,skeleton[0], new Vector(0, length), jointRadius, true);
-    skeleton[2] = new Joint(scene,skeleton[0], new Vector(0, length), jointRadius, true);
-    skeleton[3] = new Joint(scene,skeleton[1], new Vector(-length, length), jointRadius, true);
-    skeleton[4] = new Joint(scene,skeleton[2], new Vector(length, length), jointRadius, true);
+    skeleton[0] = new Joint(null, new Vector(0,-scene.radius()/2), jointRadius, false);
+    skeleton[1] = new Joint(skeleton[0], new Vector(0, length), jointRadius, true);
+    skeleton[2] = new Joint(skeleton[0], new Vector(0, length), jointRadius, true);
+    skeleton[3] = new Joint(skeleton[1], new Vector(-length, length), jointRadius, true);
+    skeleton[4] = new Joint(skeleton[2], new Vector(length, length), jointRadius, true);
 
     //Left End Effector
-    skeleton[5] = new Joint(scene,skeleton[3], new Vector(-length, length), jointRadius, true);
+    skeleton[5] = new Joint(skeleton[3], new Vector(-length, length), jointRadius, true);
     //Right End Effector
-    skeleton[6] = new Joint(scene,skeleton[4], new Vector(length, length), jointRadius, true);
+    skeleton[6] = new Joint(skeleton[4], new Vector(length, length), jointRadius, true);
 
-    //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
-    skeleton[5].enableTracking(false);
-    skeleton[6].enableTracking(false);
+    //As targets and effectors lie on the same spot, is preferable to disable End Effectors tagging
+    skeleton[5].enableTagging(false);
+    skeleton[6].enableTagging(false);
 
     //2. Lets create two Targets (a bit bigger than a Joint structure)
     leftTarget = new Target(scene, jointRadius * 1.3f);
@@ -77,7 +77,7 @@ void setup() {
     rightTarget.setPosition(skeleton[6].position());
 
     //3. Relate the structure with a Solver. In this example we register a solver in the graph scene
-    Solver solver = scene.registerTreeSolver(skeleton[0]);
+    Solver solver = Scene.registerTreeSolver(skeleton[0]);
 
     //Optionally you could modify the following parameters of the Solver:
     //Maximum distance between end effector and target, If is below maxError, then we stop executing IK solver (Default value is 0.01)
@@ -90,8 +90,8 @@ void setup() {
     solver.setMinDistance(0.5f);
 
     //4. relate targets with end effectors
-    scene.addIKTarget(skeleton[5], leftTarget);
-    scene.addIKTarget(skeleton[6], rightTarget);
+    Scene.addIKTarget(skeleton[5], leftTarget);
+    Scene.addIKTarget(skeleton[6], rightTarget);
 
     //Define Text Properties
     textAlign(CENTER);
@@ -127,14 +127,14 @@ void draw() {
 }
 
 void mouseMoved() {
-    scene.cast();
+    scene.mouseTag();
 }
 
 void mouseDragged() {
     if (mouseButton == LEFT){
-        scene.spin();
+        scene.mouseSpin();
     } else if (mouseButton == RIGHT) {
-        scene.translate();
+        scene.mouseTranslate();
     } else {
         scene.scale(mouseX - pmouseX);
     }

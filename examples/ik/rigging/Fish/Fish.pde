@@ -49,7 +49,7 @@ public void setup() {
     scene.fit(1);
     //2. Define the Skeleton
     //2.1 Define a reference node to the skeleton and the mesh
-    reference = new Node(scene);
+    reference = new Node();
     //2.2 Use SimpleBuilder example (or a Modelling Sw if desired) and locate each Joint accordingly to mesh
     //2.3 Create the Joints based on 2.2.
     skeleton = loadSkeleton(reference);
@@ -83,7 +83,7 @@ void draw() {
     lights();
     scene.drawAxes();
     //Render mesh with respect to the node
-    skinning.render(reference);
+    skinning.render(scene, reference);
     if(showSkeleton) scene.render();
     scene.beginHUD();
     text("Mode: " + (gpu ? "GPU " : "CPU") + " Frame rate: " + nf(frameRate, 0, 1), width/2, 50);
@@ -94,7 +94,7 @@ Node createTarget(float radius){
     PShape redBall = createShape(SPHERE, radius);
     redBall.setStroke(false);
     redBall.setFill(color(255,0,0));
-    Node target = new Node(scene, redBall);
+    Node target = new Node(redBall);
     target.setPickingThreshold(0);
     return target;
 }
@@ -118,7 +118,7 @@ List<Node> loadSkeleton(Node reference){
   List<Node> skeleton = new ArrayList<Node>();
   for(int i = 0; i < skeleton_data.size(); i++){
     JSONObject joint_data = skeleton_data.getJSONObject(i);
-    Joint joint = new Joint(scene, joint_data.getFloat("radius"));
+    Joint joint = new Joint(joint_data.getFloat("radius"));
     joint.setPickingThreshold(joint_data.getFloat("picking"));
     if(i == 0){
       joint.setRoot(true);
@@ -136,18 +136,18 @@ List<Node> loadSkeleton(Node reference){
 
 Interpolator setupTargetInterpolator(Node target) {
     Interpolator targetInterpolator = new Interpolator(target);
-    targetInterpolator.setLoop();
+    targetInterpolator.enableRecurrence();
     targetInterpolator.setSpeed(1f);
     // Create an initial path
     int nbKeyFrames = 7;
     float step = 2.0f * PI / (nbKeyFrames - 1);
     for (int i = 0; i < nbKeyFrames; i++) {
-        Node iFrame = new Node(scene);
+        Node iFrame = new Node();
         iFrame.setReference(target.reference());
         iFrame.setTranslation(new Vector(100 * sin(step * i), target.translation().y(), target.translation().z() + 25 * abs(sin(step * i))));
         targetInterpolator.addKeyFrame(iFrame);
     }
-    targetInterpolator.start();
+    targetInterpolator.run();
     return targetInterpolator;
 }
 
@@ -161,17 +161,17 @@ void keyPressed() {
     }
 }
 
-public void mouseMoved() {
-    scene.cast();
+void mouseMoved() {
+    scene.mouseTag();
 }
 
 void mouseDragged() {
     if (mouseButton == LEFT){
-        scene.spin();
+        scene.mouseSpin();
     } else if (mouseButton == RIGHT) {
-        scene.translate();
+        scene.mouseTranslate();
     } else {
-        scene.scale(scene.mouseDX());
+        scene.scale(mouseX - pmouseX);
     }
 }
 

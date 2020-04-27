@@ -1,17 +1,17 @@
 class Joint extends Node{
     /*
     * A Joint will be represented as a green ball
-    * that is joined by a Line to its reference Node
+    * that is joined by a cone / triangle to its reference Node
     * Note that you could override graphics or interaction methods 
     * to generate complex behaviors
     * */
     float radius;
-    boolean drawLine;
+    boolean drawBone;
     
-    Joint(Scene scene, Node node, Vector translation, float radius, boolean drawLine){
-        super(scene);
+    Joint(Node node, Vector translation, float radius, boolean drawBone){
+        super();
         this.radius = radius;
-        this.drawLine = drawLine;
+        this.drawBone = drawBone;
         this.setReference(node);
         //Exact picking precision
         this.setPickingThreshold(0);
@@ -20,9 +20,8 @@ class Joint extends Node{
     
     @Override
     public void graphics(PGraphics pg){
-        Scene scene = (Scene) this._graph;
         pg.pushStyle();
-        if (drawLine) {
+        if (drawBone) {
             pg.stroke(255);
             Vector v = location(new Vector(), reference());
             if (scene.is2D()) {

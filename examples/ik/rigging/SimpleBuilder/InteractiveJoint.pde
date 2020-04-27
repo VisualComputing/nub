@@ -1,10 +1,10 @@
-public class InteractiveJoint extends Joint {
+class InteractiveJoint extends Joint {
     protected Vector _desiredTranslation;
-    public InteractiveJoint(Scene scene, int colour, float radius) {
-        super(scene, colour, radius);
+    public InteractiveJoint(int red, int green, int blue, float radius) {
+        super(red, green, blue, radius);
     }
-    public InteractiveJoint(Scene scene, float radius) {
-        super(scene, radius);
+    public InteractiveJoint(float radius) {
+        super(radius);
     }
 
     @Override
@@ -12,7 +12,10 @@ public class InteractiveJoint extends Joint {
         String command = (String) gesture[0];
         if(command.matches("Add")){
             if(_desiredTranslation != null) {
-                addChild((Scene) gesture[1], (Scene) gesture[2], (Vector) gesture[3]);
+                if(gesture.length == 3)
+                    addChild((Scene) gesture[1], (Vector) gesture[2]);
+                else
+                    addChild((Scene) gesture[1], (Vector) gesture[2], (Skeleton) gesture[3]);
             }
             _desiredTranslation = null;
         } else if(command.matches("OnAdding")){
@@ -20,9 +23,13 @@ public class InteractiveJoint extends Joint {
         } else if(command.matches("Reset")){
             _desiredTranslation = null;
         } else if(command.matches("Remove")){
-            removeChild();
+            if(gesture.length == 1)
+                removeChild();
+            else
+                removeChild((Skeleton) gesture[1]);
         }
     }
+
     @Override
     public void graphics(PGraphics pg) {
         super.graphics(pg);
@@ -38,15 +45,30 @@ public class InteractiveJoint extends Joint {
         if(!depth)pg.hint(PConstants.ENABLE_DEPTH_TEST);
     }
 
-    public void addChild(Scene scene, Scene focus, Vector mouse){
-        InteractiveJoint joint = new InteractiveJoint(scene, this.radius());
+    public void addChild(Scene focus, Vector mouse){
+        addChild(focus, mouse, null);
+    }
+
+    public void addChild(Scene focus, Vector mouse, Skeleton skeleton){
+        InteractiveJoint joint = new InteractiveJoint(this.radius());
         joint.setPickingThreshold(this.pickingThreshold());
+        if(skeleton != null){
+            skeleton.addJoint("J" + skeleton.joints().size(), joint);
+        }
         joint.setReference(this);
         joint.setTranslation(joint.translateDesired(focus, mouse));
     }
 
     public void removeChild(){
-        _graph.pruneBranch(this);
+        Graph.prune(this);
+    }
+
+    public void removeChild(Skeleton skeleton){
+        skeleton.prune(this);
+    }
+
+    public Vector desiredTranslation(){
+        return _desiredTranslation;
     }
 
     //------------------------------------
@@ -72,7 +94,6 @@ public class InteractiveJoint extends Joint {
         Vector eyeVector = new Vector(dx, dy, dz * 2 * scene.radius() / zMax);
         return node.reference() == null ? scene.eye().worldDisplacement(eyeVector) : node.reference().displacement(eyeVector, scene.eye());
     }
-
 
     public Vector translateDesired(Scene scene, Vector point){
         Vector delta = Vector.subtract(point, scene.screenLocation(position()));
