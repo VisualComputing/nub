@@ -14,21 +14,20 @@ import nub.core.constraint.*;
 import nub.processing.*;
 
 Scene scene;
-PFont myFont;
+PFont font;
 int transDir;
 int rotDir;
-Node iNode;
+Node node;
 AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[3];
 int activeConstraint;
-boolean wC = true;
 
 //Choose P2D or P3D
 String renderer = P3D;
 
 void setup() {
   size(800, 800, renderer);
-  myFont = loadFont("FreeSans-16.vlw");
-  textFont(myFont);
+  font = loadFont("FreeSans-16.vlw");
+  textFont(font);
 
   scene = new Scene(this);
 
@@ -41,7 +40,7 @@ void setup() {
   rotDir = 0;
   activeConstraint = 0;
 
-  iNode = new Node() {
+  node = new Node() {
     // Note that within render() geometry is defined at the
     // node local coordinate system.
     @Override
@@ -51,10 +50,10 @@ void setup() {
       Scene.drawTorusSolenoid(pg);
     }
   };
-  scene.randomize(iNode);
-  iNode.setPickingThreshold(0);
-  iNode.translate(new Vector(20, 20, 0));
-  iNode.setConstraint(constraints[activeConstraint]);
+  scene.randomize(node);
+  node.setPickingThreshold(0);
+  node.translate(new Vector(20, 20, 0));
+  node.setConstraint(constraints[activeConstraint]);
 }
 
 void draw() {
@@ -92,10 +91,10 @@ void mouseWheel(MouseEvent event) {
 
 void keyPressed() {
   if (key == 'i')
-    if (scene.hasTag("key", iNode)) {
+    if (scene.hasTag("key", node)) {
       scene.removeTag("key");
     } else {
-      scene.tag("key", iNode);
+      scene.tag("key", node);
     }
   if (key == 'b' || key == 'B') {
     rotDir = (rotDir + 1) % 3;
@@ -146,44 +145,44 @@ void keyPressed() {
   constraints[activeConstraint].setRotationConstraintDirection(dir);
 }
 
-static AxisPlaneConstraint.Type nextTranslationConstraintType(AxisPlaneConstraint.Type type) {
-  AxisPlaneConstraint.Type rType;
-  switch (type) {
+AxisPlaneConstraint.Type nextTranslationConstraintType(AxisPlaneConstraint.Type transType) {
+  AxisPlaneConstraint.Type type;
+  switch (transType) {
   case FREE:
-    rType = AxisPlaneConstraint.Type.PLANE;
+    type = AxisPlaneConstraint.Type.PLANE;
     break;
   case PLANE:
-    rType = AxisPlaneConstraint.Type.AXIS;
+    type = AxisPlaneConstraint.Type.AXIS;
     break;
   case AXIS:
-    rType = AxisPlaneConstraint.Type.FORBIDDEN;
+    type = AxisPlaneConstraint.Type.FORBIDDEN;
     break;
   case FORBIDDEN:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
     break;
   default:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
   }
-  return rType;
+  return type;
 }
 
-static AxisPlaneConstraint.Type nextRotationConstraintType(AxisPlaneConstraint.Type type) {
-  AxisPlaneConstraint.Type rType;
-  switch (type) {
+AxisPlaneConstraint.Type nextRotationConstraintType(AxisPlaneConstraint.Type rotType) {
+  AxisPlaneConstraint.Type type;
+  switch (rotType) {
   case FREE:
-    rType = AxisPlaneConstraint.Type.AXIS;
+    type = AxisPlaneConstraint.Type.AXIS;
     break;
   case AXIS:
-    rType = AxisPlaneConstraint.Type.FORBIDDEN;
+    type = AxisPlaneConstraint.Type.FORBIDDEN;
     break;
   case PLANE:
   case FORBIDDEN:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
     break;
   default:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
   }
-  return rType;
+  return type;
 }
 
 void changeConstraint() {
@@ -203,7 +202,7 @@ void changeConstraint() {
     .setRotationConstraintDirection(constraints[previous]
     .rotationConstraintDirection());
 
-  iNode.setConstraint(constraints[activeConstraint]);
+  node.setConstraint(constraints[activeConstraint]);
 }
 
 void displayType(AxisPlaneConstraint.Type type, int x, int y, char c) {

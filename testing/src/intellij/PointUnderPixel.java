@@ -4,6 +4,7 @@ import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -28,10 +29,6 @@ public class PointUnderPixel extends PApplet {
   }
 
   public void setup() {
-    if (offScreen)
-      // hint(ENABLE_DEPTH_READING) doesn't exist
-      //hint(PApplet.ENABLE_BUFFER_READING);
-      hint(PApplet.ENABLE_DEPTH_TEST);
     scene = offScreen ? new Scene(this, P3D, width, height) : new Scene(this);
     scene.setRadius(1000);
     scene.fit(1);
@@ -40,6 +37,9 @@ public class PointUnderPixel extends PApplet {
       models[i] = new Node(boxShape());
       models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
+    }
+    if (offScreen) {
+      scene.context().hint(PConstants.ENABLE_BUFFER_READING);
     }
   }
 
