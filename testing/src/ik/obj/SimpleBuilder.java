@@ -27,7 +27,7 @@ import processing.event.MouseEvent;
  *    Drag with RIGTH button while pressing CTRL to extrude a Joint from the selected one. Release to create a Joint.
  *    Double click with LEFT button while pressing SHIFT key to remove the Branch from the selected Joint.
  * Using the keyboard:
- *    Press 'P' when the mouse is over a Joint to print the branch information on the console (you could require this info in other Sketch)
+ *    Press 'P' to save the skeleton on a JSON file (you could require this info in other Sketch).
  *    Press 'E' when the mouse is over a Joint to set its translation to (0,0,0). It is useful to mantain Chains of a Structure independent.
  */
 

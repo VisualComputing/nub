@@ -4,8 +4,11 @@ import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
 import nub.ik.animation.Skeleton;
+import nub.ik.animation.SkeletonAnimation;
 import nub.ik.skinning.GPULinearBlendSkinning;
 import nub.ik.skinning.Skinning;
+import nub.ik.solver.Solver;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -15,7 +18,7 @@ import processing.event.MouseEvent;
 
 public class AnimationTest extends PApplet{
     Scene mainScene, controlScene, focus;
-    String jsonPath = "/testing/data/skeletons/Hand.json";
+    String jsonPath = "/testing/data/skeletons/Hand_constrained.json";
     String shapePath = "/testing/data/objs/Rigged_Hand.obj";
     String texturePath = "/testing/data/objs/HAND_C.jpg";
     AnimationPanel panel;
@@ -38,8 +41,9 @@ public class AnimationTest extends PApplet{
         skeleton.addTargets();
         skeleton.setTargetRadius(0.03f * mainScene.radius());
 
+        Solver s = new SimpleTRIK(skeleton.joints(), SimpleTRIK.HeuristicMode.FORWARD_TRIANGULATION);
         //Dummy constraints in all joints
-        for(Node node : skeleton.joints()){
+        /*for(Node node : skeleton.joints()){
             if(node.children().size() == 1){
                 float angle = radians(85);
                 BallAndSocket constraint = new BallAndSocket(angle, angle);
@@ -48,7 +52,7 @@ public class AnimationTest extends PApplet{
                 constraint.setTwistLimits(0,0);
                 node.setConstraint(constraint);
             }
-        }
+        }*/
 
 
         //Relate the shape with a skinning method (CPU or GPU)
@@ -87,7 +91,7 @@ public class AnimationTest extends PApplet{
         panel.cull(true);
         mainScene.context().background(0);
         mainScene.drawAxes();
-        skinning.render(mainScene, skeleton.reference());
+        skinning.render(mainScene);
         mainScene.render();
 
         noLights();
@@ -171,6 +175,16 @@ public class AnimationTest extends PApplet{
         if(key == 'd' || key == 'D'){
             panel.deletePostureAtKeyPoint();
         }
+
+        if(key == 'l') {
+            panel._skeletonAnimation.setInterpolationMode(SkeletonAnimation.InterpolationMode.LINEAR);
+            System.out.println("Linear");
+        }
+        if(key == 'c') {
+            panel._skeletonAnimation.setInterpolationMode(SkeletonAnimation.InterpolationMode.CATMULL_ROM);
+            System.out.println("Catmull");
+        }
+
     }
 
     public void mouseClicked(MouseEvent event) {
