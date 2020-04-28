@@ -1079,33 +1079,61 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and
-   * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye} as
-   * the light point-of-view. Same as {@code render(pGraphics, type, eye, zNear, zFar, true)}.
+   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and remaining frustum
+   * parameters. Useful to compute a shadow map taking the {@code eye} as the light point-of-view.
+   * Same as {@code render(pGraphics, type, null, eye, zNear, zFar, true)}.
    *
-   * @see #render(Object)
+   * @see #render(PGraphics, Type, Node, Node, float, float, boolean)
+   * @see #render(PGraphics, Type, Node, Node, float, float)
    * @see #render(PGraphics, Type, Node, float, float, boolean)
-   * @see #render()
    */
   public static void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar) {
-    render(pGraphics, type, eye, zNear, zFar, true);
+    render(pGraphics, type, null, eye, zNear, zFar, true);
   }
 
   /**
-   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and
-   * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye}
-   * as the light point-of-view. Same as
-   * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}.
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto
+   * {@code pGraphics} using the {@code eye} viewpoint and remaining frustum parameters.
+   * Useful to compute a shadow map taking the {@code eye} as the light point-of-view.
+   * Same as {@code render(pGraphics, type, subtree, eye, zNear, zFar, true)}.
    *
-   * @see #render(Object)
    * @see #render(PGraphics, Type, Node, float, float)
-   * @see #render()
+   * @see #render(PGraphics, Type, Node, Node, float, float, boolean)
+   * @see #render(PGraphics, Type, Node, float, float, boolean)
+   */
+  public static void render(PGraphics pGraphics, Type type, Node subtree, Node eye, float zNear, float zFar) {
+    render(pGraphics, type, subtree, eye, zNear, zFar, true);
+  }
+
+  /**
+   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and remaining frustum parameters.
+   * Useful to compute a shadow map taking the {@code eye} as the light point-of-view. Same as
+   * {@code render(pGraphics, type, null, eye, zNear, zFar, leftHanded)}.
+   *
+   * @see #render(PGraphics, Type, Node, float, float)
+   * @see #render(PGraphics, Type, Node, Node, float, float)
+   * @see #render(PGraphics, Type, Node, Node, float, float, boolean)
    */
   public static void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar, boolean leftHanded) {
+    render(pGraphics, type, null, eye, zNear, zFar, leftHanded);
+  }
+
+  /**
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto {@code pGraphics}
+   * using the {@code eye} viewpoint and remaining frustum parameters. Useful to compute a shadow map taking the
+   * {@code eye} as the light point-of-view. Same as
+   * {@code render(pGraphics, type, subtree, eye, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded)}.
+   *
+   * @see #render(PGraphics, Type, Node, float, float)
+   * @see #render(PGraphics, Type, Node, Node, float, float)
+   * @see #render(PGraphics, Type, Node, float, float, boolean)
+   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
+   */
+  public static void render(PGraphics pGraphics, Type type, Node subtree, Node eye, float zNear, float zFar, boolean leftHanded) {
     if (pGraphics instanceof PGraphicsOpenGL)
-      render(pGraphics, type, eye, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded);
+      render(pGraphics, type, subtree, eye, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded);
     else
-      System.out.println("Nothing done: pg should be instance of PGraphicsOpenGL in render()");
+      System.out.println("Nothing done: pGraphics should be instance of PGraphicsOpenGL in render()");
   }
 
   /**

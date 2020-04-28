@@ -191,6 +191,13 @@ public class Graph {
   Vector _upVector;
   protected long _lookAroundCount;
 
+  // 6. subtree rendering
+  // this variable is only needed to keep track of the subtree
+  // that's to be rendered in the back buffer
+  protected Node _subtree;
+
+  // 7. Visibility
+
   /**
    * Enumerates the different visibility states an object may have respect to the eye
    * boundary.
@@ -198,6 +205,8 @@ public class Graph {
   public enum Visibility {
     VISIBLE, SEMIVISIBLE, INVISIBLE
   }
+
+  // 8. Projection stuff
 
   Type _type;
 
@@ -2473,6 +2482,7 @@ public class Graph {
    * Tags (with {@code tag} which may be {@code null}) the node in {@code nodeArray} picked with ray-casting
    * at pixel {@code pixelX, pixelY} and returns it (see {@link #node(String)}).
    *
+   * @see #updateTag(Node, String, int, int)
    * @see #updateTag(String, int, int)
    * @see #updateTag(String, int, int, List)
    * @see #render()
@@ -2522,19 +2532,29 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return track(null, pixelX, pixelY)}.
+   * Same as {@code return updateTag(null, null, pixelX, pixelY)}.
    *
-   * @see #updateTag(String, int, int)
+   * @see #updateTag(Node, String, int, int)
    */
   public Node updateTag(int pixelX, int pixelY) {
-    return updateTag(null, pixelX, pixelY);
+    return updateTag(null, null, pixelX, pixelY);
+  }
+
+  /**
+   * Same as {@code return return updateTag(subtree, null, pixelX, pixelY)}.
+   *
+   * @see #updateTag(Node, String, int, int)
+   */
+  public Node updateTag(Node subtree, int pixelX, int pixelY) {
+    return updateTag(subtree, null, pixelX, pixelY);
   }
 
   /**
    * Tags (with {@code tag} which may be {@code null}) the node in {@link #nodes()} picked with ray-casting at pixel
    * {@code pixelX, pixelY} and returns it (see {@link #node(String)}). May return {@code null} if no node is intersected by
-   * the ray. Not that the {@link #eye()} is never tagged.
+   * the ray. Not that the {@link #eye()} is never tagged. Same as {@code return updateTag(null, tag, pixelX, pixelY)}.
    *
+   * @see #updateTag(Node, int, int)
    * @see #updateTag(String, int, int, Node[])
    * @see #render()
    * @see #node(String)
@@ -2548,9 +2568,36 @@ public class Graph {
    * @see #tag(String, int, int)
    */
   public Node updateTag(String tag, int pixelX, int pixelY) {
+    return updateTag(null, tag, pixelX, pixelY);
+  }
+
+  /**
+   * Tags (with {@code tag} which may be {@code null}) the node in the {@code subtree} (or the whole tree when
+   * {@code subtree} is {@code null}) picked with ray-casting at pixel {@code pixelX, pixelY} and returns it
+   * (see {@link #node(String)}). May return {@code null} if no node is intersected by the ray.
+   * Not that the {@link #eye()} is never tagged.
+   *
+   * @see #updateTag(String, int, int)
+   * @see #updateTag(String, int, int, Node[])
+   * @see #render()
+   * @see #node(String)
+   * @see #removeTag(String)
+   * @see #tracks(Node, int, int)
+   * @see #tag(String, Node)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
+   * @see Node#pickingThreshold()
+   * @see Node#setPickingThreshold(float)
+   * @see #tag(String, int, int)
+   */
+  public Node updateTag(Node subtree, String tag, int pixelX, int pixelY) {
     removeTag(tag);
-    for (Node node : _leadingNodes())
-      _track(tag, node, pixelX, pixelY);
+    if (subtree == null) {
+      for (Node node : _leadingNodes())
+        _track(tag, node, pixelX, pixelY);
+    } else {
+      _track(tag, subtree, pixelX, pixelY);
+    }
     return node(tag);
   }
 
@@ -2681,8 +2728,19 @@ public class Graph {
    */
   protected void _renderBackBuffer() {
     _bbMatrixHandler.bind(projection(), view());
-    for (Node node : _leadingNodes())
-      _renderBackBuffer(node);
+    if (_subtree == null) {
+      for (Node node : _leadingNodes())
+        _renderBackBuffer(node);
+    } else {
+      if (_subtree.reference() != null) {
+        _bbMatrixHandler.pushMatrix();
+        _bbMatrixHandler.applyWorldTransformation(_subtree.reference());
+      }
+      _renderBackBuffer(_subtree);
+      if (_subtree.reference() != null) {
+        _bbMatrixHandler.popMatrix();
+      }
+    }
     if (isOffscreen())
       _rays.clear();
   }
@@ -2870,7 +2928,9 @@ public class Graph {
   /**
    * Renders the node tree onto the {@link #context()} from the {@link #eye()} viewpoint.
    * Calls {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
+   * Same as {@code render(null)}.
    *
+   * @see #render(Node)
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
@@ -2882,13 +2942,44 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render() {
-    for (Node node : _leadingNodes())
-      _render(node);
+    render(null);
+  }
+
+  /**
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null})
+   * onto the {@link #context()} from the {@link #eye()} viewpoint.
+   * Calls {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
+   *
+   * @see #render(Object, Node)
+   * @see #render(Object, Node, Matrix, Matrix)
+   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
+   * @see Node#visit()
+   * @see Node#cull(boolean)
+   * @see Node#isCulled()
+   * @see Node#bypass()
+   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(processing.core.PShape)
+   */
+  public void render(Node subtree) {
+    _subtree = subtree;
+    if (subtree == null) {
+      for (Node node : _leadingNodes())
+        _render(node);
+    } else {
+      if (subtree.reference() != null) {
+        _matrixHandler.pushMatrix();
+        _matrixHandler.applyWorldTransformation(subtree.reference());
+      }
+      _render(subtree);
+      if (subtree.reference() != null) {
+        _matrixHandler.popMatrix();
+      }
+    }
     _rays.clear();
   }
 
   /**
-   * Used by the {@link #render()} algorithm.
+   * Used by the {@link #render(Node)} algorithm.
    */
   protected void _render(Node node) {
     _matrixHandler.pushMatrix();
@@ -2909,7 +3000,9 @@ public class Graph {
 
   /**
    * Renders the node tree onto context from the {@code eye} viewpoint with the given frustum parameters.
+   * Same as {@code render(context, type, null, eye, width, height, zNear, zFar, leftHanded)}.
    *
+   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
@@ -2917,19 +3010,35 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    _render(nub.processing.Scene.matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
+    render(context, type, null, eye, width, height, zNear, zFar, leftHanded);
+  }
+
+  /**
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto context
+   * from the {@code eye} viewpoint with the given frustum parameters.
+   *
+   * @see #render(Node)
+   * @see #render(Object, Node)
+   * @see #render(Object, Node, Matrix, Matrix)
+   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(processing.core.PShape)
+   */
+  public static void render(Object context, Type type, Node subtree, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
+    _render(nub.processing.Scene.matrixHandler(context), context, type, subtree, eye, width, height, zNear, zFar, leftHanded);
   }
 
   /**
    * used by {@link #render(Object, Type, Node, int, int, float, float, boolean)}.
    */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    _render(matrixHandler, context, projection(eye, type, width, height, zNear, zFar, leftHanded), eye.view());
+  protected static void _render(MatrixHandler matrixHandler, Object context, Type type, Node subtree, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
+    _render(matrixHandler, context, subtree, projection(eye, type, width, height, zNear, zFar, leftHanded), eye.view());
   }
 
   /**
    * Renders the node tree onto {@code context} from the {@link #eye()} viewpoint.
+   * Same as {@code render(context, null)}.
    *
+   * @see #render(Object, Node)
    * @see #render()
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
@@ -2937,15 +3046,31 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Object context) {
+    render(context, null);
+  }
+
+  /**
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree}
+   * is {@code null}) onto {@code context} from the {@link #eye()} viewpoint.
+   *
+   * @see #render(Node)
+   * @see #render(Object, Node, Matrix, Matrix)
+   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
+   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(processing.core.PShape)
+   */
+  public void render(Object context, Node subtree) {
     if (context == _fb && !_rays.isEmpty())
-      render();
+      render(subtree);
     else
-      render(context, projection(), view());
+      render(context, subtree, projection(), view());
   }
 
   /**
    * Renders the node tree onto context with the given {@code projection} and {@code view} matrices.
+   * Same as {@code render(context, null, projection, view)}.
    *
+   * @see #render(Object, Node, Matrix, Matrix)
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
@@ -2953,20 +3078,45 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Matrix projection, Matrix view) {
-    _render(nub.processing.Scene.matrixHandler(context), context, projection, view);
+    render(context, null, projection, view);
   }
 
   /**
-   * Used by {@link #render(Object, Matrix, Matrix)}.
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto
+   * context with the given {@code projection} and {@code view} matrices.
+   *
+   * @see #render(Node)
+   * @see #render(Object, Node)
+   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
+   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(processing.core.PShape)
    */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
-    matrixHandler.bind(projection, view);
-    for (Node node : _leadingNodes())
-      _render(matrixHandler, context, node);
+  public static void render(Object context, Node subtree, Matrix projection, Matrix view) {
+    _render(nub.processing.Scene.matrixHandler(context), context, subtree, projection, view);
   }
 
   /**
-   * Used by the {@link #_render(MatrixHandler, Object, Matrix, Matrix)} algorithm.
+   * Used by {@link #render(Object, Node, Matrix, Matrix)}.
+   */
+  protected static void _render(MatrixHandler matrixHandler, Object context, Node subtree, Matrix projection, Matrix view) {
+    matrixHandler.bind(projection, view);
+    if (subtree == null) {
+      for (Node node : _leadingNodes())
+        _render(matrixHandler, context, node);
+    } else {
+      if (subtree.reference() != null) {
+        matrixHandler.pushMatrix();
+        matrixHandler.applyWorldTransformation(subtree.reference());
+      }
+      _render(matrixHandler, context, subtree);
+      if (subtree.reference() != null) {
+        matrixHandler.popMatrix();
+      }
+    }
+  }
+
+  /**
+   * Used by the {@link #_render(MatrixHandler, Object, Node, Matrix, Matrix)} algorithm.
    */
   protected static void _render(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushMatrix();
