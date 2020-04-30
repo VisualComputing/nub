@@ -3210,25 +3210,41 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return super.updateTag(tag, mouseX(), mouseY())}.
+   * Same as {@code return updateMouseTag(null, tag)}.
    *
-   * @see #updateTag(String, int, int)
-   * @see #mouseX()
-   * @see #mouseY()
+   * @see #updateMouseTag(Node, String)
    */
   public Node updateMouseTag(String tag) {
-    return super.updateTag(tag, mouseX(), mouseY());
+    return updateMouseTag(null, tag);
   }
 
   /**
    * Same as {@code return super.updateTag(mouseX(), mouseY())}.
    *
-   * @see #updateTag(int, int)
+   * @see #updateTag(Node, String, int, int)
    * @see #mouseX()
    * @see #mouseY()
    */
   public Node updateMouseTag() {
-    return super.updateTag(mouseX(), mouseY());
+    return super.updateTag(null, null, mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code return updateMouseTag(subtree, null)}.
+   *
+   * @see #updateMouseTag(Node, String)
+   */
+  public Node updateMouseTag(Node subtree) {
+    return updateMouseTag(subtree, null);
+  }
+
+  /**
+   * Same as {@code return super.updateTag(subtree, tag, mouseX(), mouseY())}.
+   *
+   * @see #updateTag(Node, String, int, int)
+   */
+  public Node updateMouseTag(Node subtree, String tag) {
+    return super.updateTag(subtree, tag, mouseX(), mouseY());
   }
 
   /**
