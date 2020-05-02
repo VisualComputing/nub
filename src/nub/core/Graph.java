@@ -1427,20 +1427,20 @@ public class Graph {
   }
 
   /**
-   * Returns the pixel to graph (units) ratio at {@code position}.
+   * Returns the pixel to scene (units) ratio at {@code position}.
    * <p>
-   * Convenience function that simply returns {@code 1 / graphToPixelRatio(position)}.
+   * Convenience function that simply returns {@code 1 / sceneToPixelRatio(position)}.
    *
-   * @see #graphToPixelRatio(Vector)
+   * @see #sceneToPixelRatio(Vector)
    */
-  public float pixelToGraphRatio(Vector position) {
-    return 1 / graphToPixelRatio(position);
+  public float pixelToSceneRatio(Vector position) {
+    return 1 / sceneToPixelRatio(position);
   }
 
   /**
-   * Returns the ratio of graph (units) to pixel at {@code position}.
+   * Returns the ratio of scene (units) to pixel at {@code position}.
    * <p>
-   * A line of {@code n * graphToPixelRatio()} graph units, located at {@code position} in
+   * A line of {@code n * sceneToPixelRatio()} graph units, located at {@code position} in
    * the world coordinate system, will be projected with a length of {@code n} pixels on
    * screen.
    * <p>
@@ -1450,12 +1450,12 @@ public class Graph {
    * <p>
    * {@code beginShape(LINES);}<br>
    * {@code vertex(scene.center().x(), scene.center().y(), scene.center().z());}<br>
-   * {@code Vector v = Vector.add(scene.center(), Vector.multiply(scene.upVector(), 20 * scene.graphToPixelRatio(scene.center())));}
+   * {@code Vector v = Vector.add(scene.center(), Vector.multiply(scene.upVector(), 20 * scene.sceneToPixelRatio(scene.center())));}
    * <br>
    * {@code vertex(v.x(), v.y(), v.z());}<br>
    * {@code endShape();}<br>
    */
-  public float graphToPixelRatio(Vector position) {
+  public float sceneToPixelRatio(Vector position) {
     switch (type()) {
       case PERSPECTIVE:
         return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math.tan(fov() / 2.0f) / height();
@@ -2657,7 +2657,7 @@ public class Graph {
       return false;
     if (!node.isTaggingEnabled())
       return false;
-    float threshold = Math.abs(node.pickingThreshold()) < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position())
+    float threshold = Math.abs(node.pickingThreshold()) < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToSceneRatio(node.position())
         : node.pickingThreshold() / 2;
     return threshold > 0 ? ((Math.abs(pixelX - projection._vector[0]) < threshold) && (Math.abs(pixelY - projection._vector[1]) < threshold)) :
         (float) Math.sqrt((float) Math.pow((projection._vector[0] - pixelX), 2.0) + (float) Math.pow((projection._vector[1] - pixelY), 2.0)) < -threshold;
