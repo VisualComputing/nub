@@ -1989,6 +1989,20 @@ public class Node {
     return new Node(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
   }
 
+  // QUATERNION CONVERSION
+
+  public Quaternion displacement(Quaternion quaternion) {
+    return displacement(quaternion, null);
+  }
+
+  public Quaternion displacement(Quaternion quaternion, Node node) {
+    return new Quaternion(displacement(quaternion.axis(), node), quaternion.angle());
+  }
+
+  public Quaternion worldDisplacement(Quaternion quaternion) {
+    return new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle());
+  }
+
   // VECTOR CONVERSION
 
   /**

@@ -122,7 +122,8 @@ public class MouseDragInteraction extends PApplet {
       } else if (lookAround) {
         scene.mouseLookAround();
       } else {
-        scene.mouseSpin();
+        //scene.mouseSpin();
+        scene.rotateTag(scene.mouseRADY(), scene.mouseRADX(), 0);
         //if (!scene.mouseSpinTag(1))
         //scene.mouseSpinEye(1);
       }

@@ -3577,6 +3577,10 @@ public class Graph {
     return true;
   }
 
+  public Quaternion ndcToScreenDisplacement(Quaternion quaternion) {
+    return new Quaternion(ndcToScreenDisplacement(quaternion.axis()), quaternion.axis());
+  }
+
   /**
    * Converts {@code vector} displacement from normalized device coordinates (NDC) to screen space.
    * {@link #screenToNDCDisplacement(Vector)} performs the inverse transformation.
@@ -3587,6 +3591,10 @@ public class Graph {
    */
   public Vector ndcToScreenDisplacement(Vector vector) {
     return new Vector(width() * vector.x() / 2, height() * vector.y() / 2, vector.z() / 2);
+  }
+
+  public Quaternion screenToNDCDisplacement(Quaternion quaternion) {
+    return new Quaternion(screenToNDCDisplacement(quaternion.axis()), quaternion.angle());
   }
 
   /**
@@ -3601,6 +3609,10 @@ public class Graph {
     return new Vector(2 * vector.x() / width(), 2 * vector.y() / height(), 2 * vector.z());
   }
 
+  public Quaternion displacement(Quaternion quaternion) {
+    return new Quaternion(displacement(quaternion.axis()), quaternion.angle());
+  }
+
   /**
    * Same as {@code return displacement(vector, null)}.
    *
@@ -3609,6 +3621,10 @@ public class Graph {
    */
   public Vector displacement(Vector vector) {
     return this.displacement(vector, null);
+  }
+
+  public Quaternion displacement(Quaternion quaternion, Node node) {
+    return new Quaternion(displacement(quaternion.axis(), node), quaternion.angle());
   }
 
   /**
@@ -3646,6 +3662,10 @@ public class Graph {
     return node == null ? eye().worldDisplacement(eyeVector) : node.displacement(eyeVector, eye());
   }
 
+  public Quaternion screenDisplacement(Quaternion quaternion) {
+    return new Quaternion(screenDisplacement(quaternion.axis()), quaternion.angle());
+  }
+
   /**
    * Same as {@code return screenDisplacement(vector, null)}.
    *
@@ -3654,6 +3674,10 @@ public class Graph {
    */
   public Vector screenDisplacement(Vector vector) {
     return screenDisplacement(vector, null);
+  }
+
+  public Quaternion screenDisplacement(Quaternion quaternion, Node node) {
+    return new Quaternion(screenDisplacement(quaternion.axis(), node), quaternion.angle());
   }
 
   /**
@@ -4281,8 +4305,9 @@ public class Graph {
       pitch = 0;
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
-    // don't really need to differentiate among the two cases, but the eye can be speeded up
     Quaternion quaternion = new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
+    // TODO experimental: discard me
+    /*
     Vector vector = new Vector(-quaternion.x(), -quaternion.y(), -quaternion.z());
     vector = eye().orientation().rotate(vector);
     vector = node.displacement(vector);
@@ -4290,6 +4315,8 @@ public class Graph {
     quaternion.setY(vector.y());
     quaternion.setZ(vector.z());
     node.rotate(quaternion, inertia);
+    */
+    node.rotate(node.displacement(quaternion, eye()), inertia);
   }
 
   /**
@@ -4441,11 +4468,15 @@ public class Graph {
     Vector axis = p2.cross(p1);
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
+    // TODO experimental: discard me
+    /*
     Quaternion quaternion = new Quaternion(axis, angle);
     Vector vector = quaternion.axis();
     vector = eye().orientation().rotate(vector);
     vector = node.displacement(vector);
     node.rotate(new Quaternion(vector, -quaternion.angle()), inertia);
+    // */
+    node.rotate(node.displacement(new Quaternion(axis, -angle), eye()), inertia);
   }
 
   /**
