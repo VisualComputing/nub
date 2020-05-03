@@ -150,11 +150,11 @@ The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/process
 
 The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world):
 
-| Space transformation  | Points                      | Vectors                          |
-|-----------------------|-----------------------------|----------------------------------|
-| Node to (this) Node   | ```location(point, node)``` | ```displacement(vector, node)``` |
-| World to (this) Node  | ```location(point)```       | ```displacement(vector)```       |
-| (this) Node to World  | ```worldLocation(point)```  | ```worldDisplacement(vector)```  |
+| Space transformation  | Points                      | Vectors                          | Quaternions                          |
+|-----------------------|-----------------------------|----------------------------------|--------------------------------------|
+| Node to (this) Node   | ```location(point, node)``` | ```displacement(vector, node)``` | ```displacement(quaternion, node)``` |
+| World to (this) Node  | ```location(point)```       | ```displacement(vector)```       | ```displacement(quaternion)```       |
+| (this) Node to World  | ```worldLocation(point)```  | ```worldDisplacement(vector)```  | ```worldDisplacement(quaternion)```  |
 
 Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances.
 
