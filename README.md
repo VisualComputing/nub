@@ -165,10 +165,12 @@ Render (and display) the scene node hierarchy from its [eye()](https://visualcom
 ```processing
 void draw() {
   scene.render();
+  // To render a node subtree call:
+  // scene.render(subtree);
 }
 ```
 
-see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render (and display) a scene subtree, like n1-n2, from the scene `eye` point-of-view with:
+see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render (and display) a scene branch, like n1-n2, from the scene `eye` point-of-view with:
 
 ```processing
 // renders n1-n2, discarding n3
@@ -196,6 +198,8 @@ PGraphics pg;
 
 void draw() {
   scene.render(pg);
+  // To render a node subtree call:
+  // scene.render(pg, subtree);
 }
 ```
 
@@ -210,6 +214,8 @@ float zNear, zFar;
 
 void draw() {
   Scene.render(pg, frustumType, viewPoint, zNear, zFar);
+  // To render a node subtree call:
+  // Scene.render(pg, frustumType, subtree, viewPoint, zNear, zFar);
 }
 ```
 
@@ -221,6 +227,8 @@ Matrix projection, view;
 
 void draw() {
   Scene.render(pg, projection, view);
+  // To render a node subtree call:
+  // Scene.render(pg, subtree, projection, view);
 }
 ```
 
@@ -230,6 +238,8 @@ Render (and display) the off-screen scene node hierarchy from its `eye` point-of
 void draw() {
   offScreenScene.beginDraw();
   offScreenScene.render();
+  // To render a node subtree call:
+  // offScreenScene.render(subtree);
   offScreenScene.endDraw();
   // display the rendered offScreenScene
   offScreenScene.display();
