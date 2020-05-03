@@ -118,14 +118,14 @@ public class Interpolation extends PApplet {
       showEyePath = !showEyePath;
 
     if (key == '1')
-      eyeInterpolator1.addKeyFrame(scene);
+      eyeInterpolator1.addKeyFrame();
     if (key == 'a')
       eyeInterpolator1.toggle();
     if (key == 'b')
       eyeInterpolator1.clear();
 
     if (key == '2')
-      eyeInterpolator2.addKeyFrame(scene);
+      eyeInterpolator2.addKeyFrame();
     if (key == 'c')
       eyeInterpolator2.toggle();
     if (key == 'd')

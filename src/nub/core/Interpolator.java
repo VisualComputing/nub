@@ -535,48 +535,42 @@ public class Interpolator {
   }
 
   /**
-   * Appends a copy of the current {@code #graph} {@link Graph#eye()}
-   * one second after the previously added keyframe.
+   * Appends a copy of the current {@link #node()} one second after the previously added keyframe.
    *
-   * @see #addKeyFrame(Graph, float)
+   * @see #addKeyFrame(float)
    * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
-   * @see Node#get()
-   * @see Graph#eye()
+   * @see Node#set(Node)
    */
-  public void addKeyFrame(Graph graph) {
-    // Warning: if get copies the node shape, go like this:
-    // Node node = new Node();
-    // node.set(graph.eye());
-    Node node = graph.eye().get();
-    node.setPickingThreshold(20);
-    addKeyFrame(node);
+  public void addKeyFrame() {
+    addKeyFrame(_list.isEmpty() ? 0.0f : 1.0f);
   }
 
   /**
-   * Appends a copy of the current {@code graph} {@link Graph#eye()}
+   * Appends a copy of the current {@link #node()}
    * {@code time} seconds after the previously added keyframe.
    *
-   * @see #addKeyFrame(Graph)
+   * @see #addKeyFrame()
    * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
-   * @see Node#get()
-   * @see Graph#eye()
+   * @see Node#set(Node)
    */
-  public void addKeyFrame(Graph graph, float time) {
-    // Warning: if get copies the node shape, go like this:
-    // Node node = new Node();
-    // node.set(graph.eye());
-    Node node = graph.eye().get();
+  public void addKeyFrame(float time) {
+    //Node node = graph.eye().get();
+    //node.setPickingThreshold(20);
+    Node node = new Node();
+    node.setReference(node().reference());
+    node.set(node());
     node.setPickingThreshold(20);
+
     addKeyFrame(node, time);
   }
 
   /**
    * Appends a new keyframe one second after the previously added one.
    *
-   * @see #addKeyFrame(Graph, float)
-   * @see #addKeyFrame(Graph)
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame()
    * @see #addKeyFrame(Node, float)
    */
   public void addKeyFrame(Node node) {
@@ -592,9 +586,9 @@ public class Interpolator {
    * <p>
    * {@code null} node references are silently ignored.
    *
-   * @see #addKeyFrame(Graph, float)
+   * @see #addKeyFrame(float)
    * @see #addKeyFrame(Node)
-   * @see #addKeyFrame(Graph)
+   * @see #addKeyFrame()
    */
   public void addKeyFrame(Node node, float time) {
     if (_list.size() == 0) {
