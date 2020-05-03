@@ -253,6 +253,8 @@ void draw() {
   scene.render();
   // To render a node subtree call:
   // scene.render(subtree);
+  // To render a node subtree call:
+  // scene.render(subtree);
   // 2. render onto the off-screen scene
   offScreenScene.beginDraw();
   offScreenScene.render();
