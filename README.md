@@ -147,15 +147,17 @@ The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/process
 | Screen to World       | ```location(pixel)```             | ```displacement(element)```             |
 | World to Screen       | ```screenLocation(point)```       | ```screenDisplacement(element)```       |
 
+Note that `point` and `pixel` are [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances and `element` is either a [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) or [Quaternion](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Quaternion.html) one.
+
 The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world):
 
-| Space transformation  | Points                      | Vectors / Quaternions                          |
+| Space transformation  | Points                      | Scalars / Vectors / Quaternions   |
 |-----------------------|-----------------------------|-----------------------------------|
 | Node to (this) Node   | ```location(point, node)``` | ```displacement(element, node)``` |
 | World to (this) Node  | ```location(point)```       | ```displacement(element)```       |
 | (this) Node to World  | ```worldLocation(point)```  | ```worldDisplacement(element)```  |
 
-Note that `point` and `pixel` are [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances and `element` is either a [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) or [Quaternion](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Quaternion.html) one.
+Note that `point` is a [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instance and `element` is either a `float` (scalar), [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) or [Quaternion](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Quaternion.html) one.
 
 ## Rendering
 
