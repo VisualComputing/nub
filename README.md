@@ -3,23 +3,24 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
 
 **Table of Contents**
 
-- [Description](#description)
-- [Scene](#scene)
-- [Nodes](#nodes)
-    - [Localization](#localization)
-    - [Shapes](#shapes)
-    - [Space transformations](#space-transformations)
-- [Rendering](#rendering)
-    - [Drawing functionality](#drawing-functionality)
-- [Interactivity](#interactivity)
-  - [Eye](#eye)
-  - [Nodes](#nodes-1)
-  - [Picking](#picking)
-- [Timing](#timing)
-  - [Timing tasks](#timing-tasks)
-  - [Interpolators](#interpolators)
-- [Installation](#installation)
-- [Contributors](#contributors)
+- [nub![All Contributors](#contributors)](#nubimg-src%22contributors%22-alt%22all-contributors%22)
+  - [Description](#description)
+  - [Scene](#scene)
+  - [Nodes](#nodes)
+      - [Localization](#localization)
+      - [Shapes](#shapes)
+      - [Space transformations](#space-transformations)
+  - [Rendering](#rendering)
+      - [Drawing functionality](#drawing-functionality)
+  - [Interactivity](#interactivity)
+    - [Eye](#eye)
+    - [Nodes](#nodes-1)
+    - [Picking](#picking)
+  - [Timing](#timing)
+    - [Timing tasks](#timing-tasks)
+    - [Interpolators](#interpolators)
+  - [Installation](#installation)
+  - [Contributors](#contributors)
 
 ## Description
 
@@ -138,22 +139,22 @@ Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Im
 
 The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions where user interaction takes place), [NDC](http://www.songho.ca/opengl/gl_projectionmatrix.html) and nodes (including the world, i.e., the `null` node):
 
-| Space transformation | Points                            | Vectors                                |
-|----------------------|-----------------------------------|----------------------------------------|
-| NDC to Screen        | ```ndcToScreenLocation(point)```  | ```ndcToScreenDisplacement(vector)```  |
-| Screen to NDC        | ```screenToNDCLocation(pixel)```  | ```screenToNDCDisplacement(vector)```  |
-| Screen to Node       | ```location(pixel, node)```       | ```displacement(vector, node)```       |
-| Node to Screen       | ```screenLocation(point, node)``` | ```screenDisplacement(vector, node)``` |
-| Screen to World      | ```location(pixel)```             | ```displacement(vector)```             |
-| World to Screen      | ```screenLocation(point)```       | ```screenDisplacement(vector)```       |
+| Space transformation  | Points                            | Vectors                                | Quaternions                                |
+|-----------------------|-----------------------------------|----------------------------------------| -------------------------------------------|
+| NDC to Screen         | ```ndcToScreenLocation(point)```  | ```ndcToScreenDisplacement(vector)```  | ```ndcToScreenDisplacement(quaternion)```  |
+| Screen to NDC         | ```screenToNDCLocation(pixel)```  | ```screenToNDCDisplacement(vector)```  | ```screenToNDCDisplacement(quaternion)```  |
+| Screen to Node        | ```location(pixel, node)```       | ```displacement(vector, node)```       | ```displacement(quaternion, node)```       |
+| Node to Screen        | ```screenLocation(point, node)``` | ```screenDisplacement(vector, node)``` | ```screenDisplacement(quaternion, node)``` | 
+| Screen to World       | ```location(pixel)```             | ```displacement(vector)```             | ```displacement(quaternion)```             |
+| World to Screen       | ```screenLocation(point)```       | ```screenDisplacement(vector)```       | ```screenDisplacement(quaternion)```       |
 
 The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world):
 
-| Space transformation | Points                      | Vectors                          |
-|----------------------|-----------------------------|----------------------------------|
-| Node to (this) Node  | ```location(point, node)``` | ```displacement(vector, node)``` |
-| World to (this) Node | ```location(point)```       | ```displacement(vector)```       |
-| (this) Node to World | ```worldLocation(point)```  | ```worldDisplacement(vector)```  |
+| Space transformation  | Points                      | Vectors                          |
+|-----------------------|-----------------------------|----------------------------------|
+| Node to (this) Node   | ```location(point, node)``` | ```displacement(vector, node)``` |
+| World to (this) Node  | ```location(point)```       | ```displacement(vector)```       |
+| (this) Node to World  | ```worldLocation(point)```  | ```worldDisplacement(vector)```  |
 
 Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances.
 
