@@ -156,7 +156,7 @@ The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Nod
 | World to (this) Node  | ```location(point)```       | ```displacement(vector)```       | ```displacement(quaternion)```       |
 | (this) Node to World  | ```worldLocation(point)```  | ```worldDisplacement(vector)```  | ```worldDisplacement(quaternion)```  |
 
-Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances.
+Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances and `quaternion` [Quaternion](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Quaternion.html) ones.
 
 ## Rendering
 
