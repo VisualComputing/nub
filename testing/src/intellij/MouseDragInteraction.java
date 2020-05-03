@@ -47,8 +47,20 @@ public class MouseDragInteraction extends PApplet {
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, 0);
 
-    shape2 = new Node(shape1);
-    shape2.setShape(shape());
+    shape2 = new Node(shape1) {
+      @Override
+      public void graphics(PGraphics pGraphics) {
+        Scene.drawAxes(pGraphics, scene.radius() / 3);
+        pGraphics.pushStyle();
+        pGraphics.rectMode(CENTER);
+        pGraphics.fill(255, 255, 0);
+        if (scene.is3D())
+          pGraphics.box(150);
+        else
+          pGraphics.rect(10, 10, 200, 200);
+        pGraphics.popStyle();
+      }
+    };
     shape2.translate(275, 275, 0);
     shape2.setPickingThreshold(0);
 
@@ -122,8 +134,7 @@ public class MouseDragInteraction extends PApplet {
       } else if (lookAround) {
         scene.mouseLookAround();
       } else {
-        //scene.mouseSpin();
-        scene.rotateTag(scene.mouseRADY(), scene.mouseRADX(), 0);
+        scene.mouseSpin();
         //if (!scene.mouseSpinTag(1))
         //scene.mouseSpinEye(1);
       }
