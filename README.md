@@ -138,24 +138,24 @@ Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Im
 
 The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions where user interaction takes place), [NDC](http://www.songho.ca/opengl/gl_projectionmatrix.html) and nodes (including the world, i.e., the `null` node):
 
-| Space transformation | Points                            | Vectors                                |
-|----------------------|-----------------------------------|----------------------------------------|
-| NDC to Screen        | ```ndcToScreenLocation(point)```  | ```ndcToScreenDisplacement(vector)```  |
-| Screen to NDC        | ```screenToNDCLocation(pixel)```  | ```screenToNDCDisplacement(vector)```  |
-| Screen to Node       | ```location(pixel, node)```       | ```displacement(vector, node)```       |
-| Node to Screen       | ```screenLocation(point, node)``` | ```screenDisplacement(vector, node)``` |
-| Screen to World      | ```location(pixel)```             | ```displacement(vector)```             |
-| World to Screen      | ```screenLocation(point)```       | ```screenDisplacement(vector)```       |
+| Space transformation  | Points                            | Vectors / Quaternions                   |
+|-----------------------|-----------------------------------|-----------------------------------------|
+| NDC to Screen         | ```ndcToScreenLocation(point)```  | ```ndcToScreenDisplacement(element)```  |
+| Screen to NDC         | ```screenToNDCLocation(pixel)```  | ```screenToNDCDisplacement(element)```  |
+| Screen to Node        | ```location(pixel, node)```       | ```displacement(element, node)```       |
+| Node to Screen        | ```screenLocation(point, node)``` | ```screenDisplacement(element, node)``` |
+| Screen to World       | ```location(pixel)```             | ```displacement(element)```             |
+| World to Screen       | ```screenLocation(point)```       | ```screenDisplacement(element)```       |
 
 The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world):
 
-| Space transformation | Points                      | Vectors                          |
-|----------------------|-----------------------------|----------------------------------|
-| Node to (this) Node  | ```location(point, node)``` | ```displacement(vector, node)``` |
-| World to (this) Node | ```location(point)```       | ```displacement(vector)```       |
-| (this) Node to World | ```worldLocation(point)```  | ```worldDisplacement(vector)```  |
+| Space transformation  | Points                      | Vectors / Quaternions                          |
+|-----------------------|-----------------------------|-----------------------------------|
+| Node to (this) Node   | ```location(point, node)``` | ```displacement(element, node)``` |
+| World to (this) Node  | ```location(point)```       | ```displacement(element)```       |
+| (this) Node to World  | ```worldLocation(point)```  | ```worldDisplacement(element)```  |
 
-Note that `points`, `pixels` and `vectors` are all [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances.
+Note that `point` and `pixel` are [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances and `element` is either a [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) or [Quaternion](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Quaternion.html) one.
 
 ## Rendering
 
@@ -164,10 +164,12 @@ Render (and display) the scene node hierarchy from its [eye()](https://visualcom
 ```processing
 void draw() {
   scene.render();
+  // To render a node subtree call:
+  // scene.render(subtree);
 }
 ```
 
-see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render (and display) a scene subtree, like n1-n2, from the scene `eye` point-of-view with:
+see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render (and display) a scene branch, like n1-n2, from the scene `eye` point-of-view with:
 
 ```processing
 // renders n1-n2, discarding n3
@@ -195,6 +197,8 @@ PGraphics pg;
 
 void draw() {
   scene.render(pg);
+  // To render a node subtree call:
+  // scene.render(pg, subtree);
 }
 ```
 
@@ -209,6 +213,8 @@ float zNear, zFar;
 
 void draw() {
   Scene.render(pg, frustumType, viewPoint, zNear, zFar);
+  // To render a node subtree call:
+  // Scene.render(pg, frustumType, subtree, viewPoint, zNear, zFar);
 }
 ```
 
@@ -220,6 +226,8 @@ Matrix projection, view;
 
 void draw() {
   Scene.render(pg, projection, view);
+  // To render a node subtree call:
+  // Scene.render(pg, subtree, projection, view);
 }
 ```
 
@@ -229,6 +237,8 @@ Render (and display) the off-screen scene node hierarchy from its `eye` point-of
 void draw() {
   offScreenScene.beginDraw();
   offScreenScene.render();
+  // To render a node subtree call:
+  // offScreenScene.render(subtree);
   offScreenScene.endDraw();
   // display the rendered offScreenScene
   offScreenScene.display();

@@ -688,7 +688,7 @@ public class Interpolator {
         _list.get(_forwards.nextIndex())._tangentQuaternion,
         _list.get(_forwards.nextIndex())._node.orientation(), alpha);
     node().setPosition(pos);
-    node().setRotation(q);
+    node().setOrientation(q);
     node().setMagnitude(mag);
   }
 

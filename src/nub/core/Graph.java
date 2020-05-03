@@ -195,10 +195,12 @@ public class Graph {
   Vector _upVector;
   protected long _lookAroundCount;
 
-  // 6. IKinematics solvers
-  protected static boolean _useTRIK = false; //TODO : remove this flag and solve only with TRIK when it is finished.
-  protected static List<Solver> _solvers = new ArrayList<Solver>();
-  protected static HashMap<Solver, Task> _solverTasks = new HashMap<Solver, Task>();
+  // 6. subtree rendering
+  // this variable is only needed to keep track of the subtree
+  // that's to be rendered in the back buffer
+  protected Node _subtree;
+
+  // 7. Visibility
 
   /**
    * Enumerates the different visibility states an object may have respect to the eye
@@ -208,9 +210,16 @@ public class Graph {
     VISIBLE, SEMIVISIBLE, INVISIBLE
   }
 
+  // 8. Projection stuff
+
   Type _type;
 
-  /**
+  // 9. Inverse Kinematics solvers
+  protected static boolean _useTRIK = true; //TODO : remove this flag and solve only with TRIK when it is finished.
+  protected static List<Solver> _solvers = new ArrayList<Solver>();
+  protected static HashMap<Solver, Task> _solverTasks = new HashMap<Solver, Task>();
+
+    /**
    * Enumerates the graph types.
    * <p>
    * The type mainly defines the way the projection matrix is computed.
@@ -850,50 +859,6 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return lock(this, node)}.
-   *
-   * @see #lock(Graph, Node)
-   * @see #unlock(Node)
-   */
-  public boolean lock(Node node) {
-    return lock(this, node);
-  }
-
-  /**
-   * Only {@link #render()} (and {@link #render(Object)}) the {@code node} in {@code graph}.
-   * Return {@code true} if succeeded and {@code false} otherwise.
-   *
-   * @see #unlock(Node)
-   */
-  public static boolean lock(Graph graph, Node node) {
-    if (isReachable(node)) {
-      if (node._graph != null)
-        System.out.println("Warning: re-locking node.");
-      node._graph = graph;
-      return true;
-    }
-    System.out.println("Warning: Only reachable nodes can be locked.");
-    return false;
-  }
-
-  /**
-   * Always {@link #render()} (and {@link #render(Object)}) the {@code node} and its descendants.
-   * Return {@code true} if succeeded and {@code false} otherwise.
-   *
-   * @see #lock(Graph, Node)
-   */
-  public static boolean unlock(Node node) {
-    if (isReachable(node)) {
-      if (node._graph == null)
-        System.out.println("Warning: re-unlocking node.");
-      node._graph = null;
-      return true;
-    }
-    System.out.println("Warning: Only reachable nodes can be unlocked.");
-    return false;
-  }
-
-  /**
    * Collects {@code node} and all its descendant nodes. Note that for a node to be collected
    * it must be reachable.
    *
@@ -1471,20 +1436,20 @@ public class Graph {
   }
 
   /**
-   * Returns the pixel to graph (units) ratio at {@code position}.
+   * Returns the pixel to scene (units) ratio at {@code position}.
    * <p>
-   * Convenience function that simply returns {@code 1 / graphToPixelRatio(position)}.
+   * Convenience function that simply returns {@code 1 / sceneToPixelRatio(position)}.
    *
-   * @see #graphToPixelRatio(Vector)
+   * @see #sceneToPixelRatio(Vector)
    */
-  public float pixelToGraphRatio(Vector position) {
-    return 1 / graphToPixelRatio(position);
+  public float pixelToSceneRatio(Vector position) {
+    return 1 / sceneToPixelRatio(position);
   }
 
   /**
-   * Returns the ratio of graph (units) to pixel at {@code position}.
+   * Returns the ratio of scene (units) to pixel at {@code position}.
    * <p>
-   * A line of {@code n * graphToPixelRatio()} graph units, located at {@code position} in
+   * A line of {@code n * sceneToPixelRatio()} graph units, located at {@code position} in
    * the world coordinate system, will be projected with a length of {@code n} pixels on
    * screen.
    * <p>
@@ -1494,12 +1459,12 @@ public class Graph {
    * <p>
    * {@code beginShape(LINES);}<br>
    * {@code vertex(scene.center().x(), scene.center().y(), scene.center().z());}<br>
-   * {@code Vector v = Vector.add(scene.center(), Vector.multiply(scene.upVector(), 20 * scene.graphToPixelRatio(scene.center())));}
+   * {@code Vector v = Vector.add(scene.center(), Vector.multiply(scene.upVector(), 20 * scene.sceneToPixelRatio(scene.center())));}
    * <br>
    * {@code vertex(v.x(), v.y(), v.z());}<br>
    * {@code endShape();}<br>
    */
-  public float graphToPixelRatio(Vector position) {
+  public float sceneToPixelRatio(Vector position) {
     switch (type()) {
       case PERSPECTIVE:
         return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math.tan(fov() / 2.0f) / height();
@@ -2526,6 +2491,7 @@ public class Graph {
    * Tags (with {@code tag} which may be {@code null}) the node in {@code nodeArray} picked with ray-casting
    * at pixel {@code pixelX, pixelY} and returns it (see {@link #node(String)}).
    *
+   * @see #updateTag(Node, String, int, int)
    * @see #updateTag(String, int, int)
    * @see #updateTag(String, int, int, List)
    * @see #render()
@@ -2575,19 +2541,29 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return track(null, pixelX, pixelY)}.
+   * Same as {@code return updateTag(null, null, pixelX, pixelY)}.
    *
-   * @see #updateTag(String, int, int)
+   * @see #updateTag(Node, String, int, int)
    */
   public Node updateTag(int pixelX, int pixelY) {
-    return updateTag(null, pixelX, pixelY);
+    return updateTag(null, null, pixelX, pixelY);
+  }
+
+  /**
+   * Same as {@code return return updateTag(subtree, null, pixelX, pixelY)}.
+   *
+   * @see #updateTag(Node, String, int, int)
+   */
+  public Node updateTag(Node subtree, int pixelX, int pixelY) {
+    return updateTag(subtree, null, pixelX, pixelY);
   }
 
   /**
    * Tags (with {@code tag} which may be {@code null}) the node in {@link #nodes()} picked with ray-casting at pixel
    * {@code pixelX, pixelY} and returns it (see {@link #node(String)}). May return {@code null} if no node is intersected by
-   * the ray. Not that the {@link #eye()} is never tagged.
+   * the ray. Not that the {@link #eye()} is never tagged. Same as {@code return updateTag(null, tag, pixelX, pixelY)}.
    *
+   * @see #updateTag(Node, int, int)
    * @see #updateTag(String, int, int, Node[])
    * @see #render()
    * @see #node(String)
@@ -2601,9 +2577,36 @@ public class Graph {
    * @see #tag(String, int, int)
    */
   public Node updateTag(String tag, int pixelX, int pixelY) {
+    return updateTag(null, tag, pixelX, pixelY);
+  }
+
+  /**
+   * Tags (with {@code tag} which may be {@code null}) the node in the {@code subtree} (or the whole tree when
+   * {@code subtree} is {@code null}) picked with ray-casting at pixel {@code pixelX, pixelY} and returns it
+   * (see {@link #node(String)}). May return {@code null} if no node is intersected by the ray.
+   * Not that the {@link #eye()} is never tagged.
+   *
+   * @see #updateTag(String, int, int)
+   * @see #updateTag(String, int, int, Node[])
+   * @see #render()
+   * @see #node(String)
+   * @see #removeTag(String)
+   * @see #tracks(Node, int, int)
+   * @see #tag(String, Node)
+   * @see #hasTag(String, Node)
+   * @see Node#enableTagging(boolean)
+   * @see Node#pickingThreshold()
+   * @see Node#setPickingThreshold(float)
+   * @see #tag(String, int, int)
+   */
+  public Node updateTag(Node subtree, String tag, int pixelX, int pixelY) {
     removeTag(tag);
-    for (Node node : _leadingNodes())
-      _track(tag, node, pixelX, pixelY);
+    if (subtree == null) {
+      for (Node node : _leadingNodes())
+        _track(tag, node, pixelX, pixelY);
+    } else {
+      _track(tag, subtree, pixelX, pixelY);
+    }
     return node(tag);
   }
 
@@ -2663,7 +2666,7 @@ public class Graph {
       return false;
     if (!node.isTaggingEnabled())
       return false;
-    float threshold = Math.abs(node.pickingThreshold()) < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position())
+    float threshold = Math.abs(node.pickingThreshold()) < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToSceneRatio(node.position())
         : node.pickingThreshold() / 2;
     return threshold > 0 ? ((Math.abs(pixelX - projection._vector[0]) < threshold) && (Math.abs(pixelY - projection._vector[1]) < threshold)) :
         (float) Math.sqrt((float) Math.pow((projection._vector[0] - pixelX), 2.0) + (float) Math.pow((projection._vector[1] - pixelY), 2.0)) < -threshold;
@@ -2734,8 +2737,19 @@ public class Graph {
    */
   protected void _renderBackBuffer() {
     _bbMatrixHandler.bind(projection(), view());
-    for (Node node : _leadingNodes())
-      _renderBackBuffer(node);
+    if (_subtree == null) {
+      for (Node node : _leadingNodes())
+        _renderBackBuffer(node);
+    } else {
+      if (_subtree.reference() != null) {
+        _bbMatrixHandler.pushMatrix();
+        _bbMatrixHandler.applyWorldTransformation(_subtree.reference());
+      }
+      _renderBackBuffer(_subtree);
+      if (_subtree.reference() != null) {
+        _bbMatrixHandler.popMatrix();
+      }
+    }
     if (isOffscreen())
       _rays.clear();
   }
@@ -2744,8 +2758,6 @@ public class Graph {
    * Used by the {@link #_renderBackBuffer()} algorithm.
    */
   protected void _renderBackBuffer(Node node) {
-    if (node._graph != null && node._graph != this)
-      return;
     _bbMatrixHandler.pushMatrix();
     _bbMatrixHandler.applyTransformation(node);
     if (!node.isCulled()) {
@@ -2925,7 +2937,9 @@ public class Graph {
   /**
    * Renders the node tree onto the {@link #context()} from the {@link #eye()} viewpoint.
    * Calls {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
+   * Same as {@code render(null)}.
    *
+   * @see #render(Node)
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
@@ -2937,17 +2951,46 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render() {
-    for (Node node : _leadingNodes())
-      _render(node);
+    render(null);
+  }
+
+  /**
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null})
+   * onto the {@link #context()} from the {@link #eye()} viewpoint.
+   * Calls {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
+   *
+   * @see #render(Object, Node)
+   * @see #render(Object, Node, Matrix, Matrix)
+   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
+   * @see Node#visit()
+   * @see Node#cull(boolean)
+   * @see Node#isCulled()
+   * @see Node#bypass()
+   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(processing.core.PShape)
+   */
+  public void render(Node subtree) {
+    _subtree = subtree;
+    if (subtree == null) {
+      for (Node node : _leadingNodes())
+        _render(node);
+    } else {
+      if (subtree.reference() != null) {
+        _matrixHandler.pushMatrix();
+        _matrixHandler.applyWorldTransformation(subtree.reference());
+      }
+      _render(subtree);
+      if (subtree.reference() != null) {
+        _matrixHandler.popMatrix();
+      }
+    }
     _rays.clear();
   }
 
   /**
-   * Used by the {@link #render()} algorithm.
+   * Used by the {@link #render(Node)} algorithm.
    */
   protected void _render(Node node) {
-    if (node._graph != null && node._graph != this)
-      return;
     _matrixHandler.pushMatrix();
     _matrixHandler.applyTransformation(node);
     node.visit();
@@ -2966,7 +3009,9 @@ public class Graph {
 
   /**
    * Renders the node tree onto context from the {@code eye} viewpoint with the given frustum parameters.
+   * Same as {@code render(context, type, null, eye, width, height, zNear, zFar, leftHanded)}.
    *
+   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
@@ -2974,19 +3019,35 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    _render(nub.processing.Scene.matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
+    render(context, type, null, eye, width, height, zNear, zFar, leftHanded);
+  }
+
+  /**
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto context
+   * from the {@code eye} viewpoint with the given frustum parameters.
+   *
+   * @see #render(Node)
+   * @see #render(Object, Node)
+   * @see #render(Object, Node, Matrix, Matrix)
+   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(processing.core.PShape)
+   */
+  public static void render(Object context, Type type, Node subtree, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
+    _render(nub.processing.Scene.matrixHandler(context), context, type, subtree, eye, width, height, zNear, zFar, leftHanded);
   }
 
   /**
    * used by {@link #render(Object, Type, Node, int, int, float, float, boolean)}.
    */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    _render(matrixHandler, context, projection(eye, type, width, height, zNear, zFar, leftHanded), eye.view());
+  protected static void _render(MatrixHandler matrixHandler, Object context, Type type, Node subtree, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
+    _render(matrixHandler, context, subtree, projection(eye, type, width, height, zNear, zFar, leftHanded), eye.view());
   }
 
   /**
    * Renders the node tree onto {@code context} from the {@link #eye()} viewpoint.
+   * Same as {@code render(context, null)}.
    *
+   * @see #render(Object, Node)
    * @see #render()
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
@@ -2994,35 +3055,31 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Object context) {
+    render(context, null);
+  }
+
+  /**
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree}
+   * is {@code null}) onto {@code context} from the {@link #eye()} viewpoint.
+   *
+   * @see #render(Node)
+   * @see #render(Object, Node, Matrix, Matrix)
+   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
+   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(processing.core.PShape)
+   */
+  public void render(Object context, Node subtree) {
     if (context == _fb && !_rays.isEmpty())
-      render();
+      render(subtree);
     else
-      // TODO testing bypassing locked nodes
-      _render(this, nub.processing.Scene.matrixHandler(context), context);
-    // previous line was:
-    //render(context, projection(), view());
-  }
-
-  /**
-   * Used by {@link #render(Object)}.
-   */
-  protected static void _render(Graph graph, MatrixHandler matrixHandler, Object context) {
-    matrixHandler.bind(graph.projection(), graph.view());
-    for (Node node : _leadingNodes())
-      _render(graph, matrixHandler, context, node);
-  }
-
-  /**
-   * Used by {@link #_render(Graph, MatrixHandler, Object, Node)}. Bypass locked nodes.
-   */
-  protected static void _render(Graph graph, MatrixHandler matrixHandler, Object context, Node node) {
-    if (node._graph == null || node._graph == graph)
-      _render(matrixHandler, context, node);
+      render(context, subtree, projection(), view());
   }
 
   /**
    * Renders the node tree onto context with the given {@code projection} and {@code view} matrices.
+   * Same as {@code render(context, null, projection, view)}.
    *
+   * @see #render(Object, Node, Matrix, Matrix)
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
@@ -3030,20 +3087,45 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Matrix projection, Matrix view) {
-    _render(nub.processing.Scene.matrixHandler(context), context, projection, view);
+    render(context, null, projection, view);
   }
 
   /**
-   * Used by {@link #render(Object, Matrix, Matrix)}.
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto
+   * context with the given {@code projection} and {@code view} matrices.
+   *
+   * @see #render(Node)
+   * @see #render(Object, Node)
+   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
+   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(processing.core.PShape)
    */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
-    matrixHandler.bind(projection, view);
-    for (Node node : _leadingNodes())
-      _render(matrixHandler, context, node);
+  public static void render(Object context, Node subtree, Matrix projection, Matrix view) {
+    _render(nub.processing.Scene.matrixHandler(context), context, subtree, projection, view);
   }
 
   /**
-   * Used by the {@link #_render(MatrixHandler, Object, Matrix, Matrix)} algorithm.
+   * Used by {@link #render(Object, Node, Matrix, Matrix)}.
+   */
+  protected static void _render(MatrixHandler matrixHandler, Object context, Node subtree, Matrix projection, Matrix view) {
+    matrixHandler.bind(projection, view);
+    if (subtree == null) {
+      for (Node node : _leadingNodes())
+        _render(matrixHandler, context, node);
+    } else {
+      if (subtree.reference() != null) {
+        matrixHandler.pushMatrix();
+        matrixHandler.applyWorldTransformation(subtree.reference());
+      }
+      _render(matrixHandler, context, subtree);
+      if (subtree.reference() != null) {
+        matrixHandler.popMatrix();
+      }
+    }
+  }
+
+  /**
+   * Used by the {@link #_render(MatrixHandler, Object, Node, Matrix, Matrix)} algorithm.
    */
   protected static void _render(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushMatrix();
@@ -3298,9 +3380,11 @@ public class Graph {
    * Converts {@code vector} location from normalized device coordinates (NDC) to screen space.
    * {@link #screenToNDCLocation(Vector)} performs the inverse transformation.
    * {@link #ndcToScreenDisplacement(Vector)} transforms vector displacements instead of locations.
+   * {@link #ndcToScreenDisplacement(Quaternion)} transforms quaternion displacements instead of locations.
    *
    * @see #screenToNDCLocation(Vector)
    * @see #ndcToScreenDisplacement(Vector)
+   * @see #ndcToScreenDisplacement(Quaternion)
    */
   public Vector ndcToScreenLocation(Vector vector) {
     return new Vector(_map(vector.x(), -1, 1, 0, width()),
@@ -3312,9 +3396,11 @@ public class Graph {
    * Converts {@code vector} location from screen space to normalized device coordinates (NDC).
    * {@link #ndcToScreenLocation(Vector)} performs the inverse transformation.
    * {@link #screenToNDCDisplacement(Vector)} transforms vector displacements instead of locations.
+   * {@link #screenToNDCDisplacement(Quaternion)} transforms quaternion displacements instead of locations.
    *
    * @see #ndcToScreenLocation(Vector)
    * @see #screenToNDCDisplacement(Vector)
+   * @see #screenToNDCDisplacement(Quaternion)
    */
   public Vector screenToNDCLocation(Vector vector) {
     return new Vector(_map(vector.x(), 0, width(), -1, 1),
@@ -3434,7 +3520,9 @@ public class Graph {
    * <p>
    * {@link #screenLocation(Vector, Node)} performs the inverse transformation.
    * <p>
-   * {@link #screenDisplacement(Vector, Node)} converts displacements instead of locations.
+   * {@link #screenDisplacement(Vector, Node)} converts vector displacements instead of locations.
+   * <p>
+   * {@link #screenDisplacement(Quaternion, Node)} converts quaternion displacements instead of locations.
    * <p>
    * This method only uses the intrinsic eye parameters (view and projection matrices),
    * {@link #width()} and {@link #height()}). You can hence define a virtual eye and use
@@ -3446,6 +3534,7 @@ public class Graph {
    *
    * @see #screenLocation(Vector, Node)
    * @see #screenDisplacement(Vector, Node)
+   * @see #screenDisplacement(Quaternion, Node)
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
@@ -3505,11 +3594,27 @@ public class Graph {
   }
 
   /**
+   * Converts {@code quaternion} displacement from normalized device coordinates (NDC) to screen space.
+   * {@link #screenToNDCDisplacement(Quaternion)} performs the inverse transformation.
+   * {@link #ndcToScreenDisplacement(Vector)} transforms vector displacements instead of quaternion displacements.
+   * {@link #ndcToScreenLocation(Vector)} transforms locations instead of vector displacements.
+   *
+   * @see #screenToNDCDisplacement(Quaternion)
+   * @see #screenToNDCDisplacement(Vector)
+   * @see #ndcToScreenLocation(Vector)
+   */
+  public Quaternion ndcToScreenDisplacement(Quaternion quaternion) {
+    return new Quaternion(ndcToScreenDisplacement(quaternion.axis()), quaternion.axis());
+  }
+
+  /**
    * Converts {@code vector} displacement from normalized device coordinates (NDC) to screen space.
    * {@link #screenToNDCDisplacement(Vector)} performs the inverse transformation.
+   * {@link #ndcToScreenDisplacement(Quaternion)} transforms quaternion displacements instead of vector displacements.
    * {@link #ndcToScreenLocation(Vector)} transforms locations instead of vector displacements.
    *
    * @see #screenToNDCDisplacement(Vector)
+   * @see #screenToNDCDisplacement(Quaternion)
    * @see #ndcToScreenLocation(Vector)
    */
   public Vector ndcToScreenDisplacement(Vector vector) {
@@ -3517,11 +3622,27 @@ public class Graph {
   }
 
   /**
+   * Converts {@code vquaternion} displacement from screen space to normalized device coordinates (NDC).
+   * {@link #ndcToScreenDisplacement(Quaternion)} performs the inverse transformation.
+   * {@link #screenToNDCDisplacement(Vector)} transforms vector displacements instead of quaternion displacements.
+   * {@link #screenToNDCLocation(Vector)} transforms locations instead of vector displacements.
+   *
+   * @see #ndcToScreenDisplacement(Quaternion)
+   * @see #screenToNDCDisplacement(Vector)
+   * @see #screenToNDCLocation(Vector)
+   */
+  public Quaternion screenToNDCDisplacement(Quaternion quaternion) {
+    return new Quaternion(screenToNDCDisplacement(quaternion.axis()), quaternion.angle());
+  }
+
+  /**
    * Converts {@code vector} displacement from screen space to normalized device coordinates (NDC).
    * {@link #ndcToScreenDisplacement(Vector)} performs the inverse transformation.
+   * {@link #screenToNDCDisplacement(Quaternion)} transforms quaternion displacements instead of vector displacements.
    * {@link #screenToNDCLocation(Vector)} transforms locations instead of vector displacements.
    *
    * @see #ndcToScreenDisplacement(Vector)
+   * @see #screenToNDCDisplacement(Quaternion)
    * @see #screenToNDCLocation(Vector)
    */
   public Vector screenToNDCDisplacement(Vector vector) {
@@ -3529,13 +3650,44 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return displacement(quaternion, null)}.
+   *
+   * @see #displacement(Vector, Node)
+   * @see #displacement(Quaternion, Node)
+   * @see #location(Vector, Node)
+   */
+  public Quaternion displacement(Quaternion quaternion) {
+    return new Quaternion(displacement(quaternion.axis()), quaternion.angle());
+  }
+
+  /**
    * Same as {@code return displacement(vector, null)}.
    *
    * @see #displacement(Vector, Node)
+   * @see #displacement(Quaternion, Node)
    * @see #location(Vector, Node)
    */
   public Vector displacement(Vector vector) {
     return this.displacement(vector, null);
+  }
+
+  /**
+   * Converts {@code quaternion} displacement given in screen space to the {@code node} coordinate system.
+   * The screen space coordinate system is centered at the bounding box of {@link #width()} *
+   * {@link #height()} * 1} dimensions. The screen space defines the place where
+   * user gestures takes place, e.g., {@link #rotateNode(Node, float, float, float)}.
+   * <p>
+   * {@link #screenDisplacement(Quaternion, Node)} performs the inverse transformation.
+   * {@link #displacement(Vector, Node)} converts vector displacements instead of quaternion displacements.
+   * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
+   *
+   * @see #displacement(Vector, Node)
+   * @see #screenLocation(Vector, Node)
+   * @see #translateNode(Node, float, float, float)
+   * @see #translateEye(float, float, float)
+   */
+  public Quaternion displacement(Quaternion quaternion, Node node) {
+    return new Quaternion(displacement(quaternion.axis(), node), quaternion.angle());
   }
 
   /**
@@ -3545,6 +3697,7 @@ public class Graph {
    * user gestures takes place, e.g., {@link #translateNode(Node, float, float, float)}.
    * <p>
    * {@link #screenDisplacement(Vector, Node)} performs the inverse transformation.
+   * {@link #displacement(Quaternion, Node)} converts quaternion displacements instead of vector displacements.
    * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
    *
    * @see #displacement(Vector, Node)
@@ -3574,9 +3727,21 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return screenDisplacement(quaternion, null)}.
+   *
+   * @see #screenDisplacement(Quaternion, Node)
+   * @see #screenDisplacement(Vector, Node)
+   * @see #screenLocation(Node)
+   */
+  public Quaternion screenDisplacement(Quaternion quaternion) {
+    return new Quaternion(screenDisplacement(quaternion.axis()), quaternion.angle());
+  }
+
+  /**
    * Same as {@code return screenDisplacement(vector, null)}.
    *
    * @see #screenDisplacement(Vector, Node)
+   * @see #screenDisplacement(Quaternion, Node)
    * @see #screenLocation(Node)
    */
   public Vector screenDisplacement(Vector vector) {
@@ -3584,11 +3749,27 @@ public class Graph {
   }
 
   /**
+   * Converts the {@code node} {@code quaternion} displacement to screen space.
+   * {@link #displacement(Quaternion, Node)} performs the inverse transformation.
+   * {@link #screenDisplacement(Vector, Node)} converts vector displacements instead of quaternion displacements.
+   * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
+   *
+   * @see #displacement(Quaternion, Node)
+   * @see #displacement(Vector, Node)
+   * @see #screenLocation(Vector, Node)
+   */
+  public Quaternion screenDisplacement(Quaternion quaternion, Node node) {
+    return new Quaternion(screenDisplacement(quaternion.axis(), node), quaternion.angle());
+  }
+
+  /**
    * Converts the {@code node} {@code vector} displacement to screen space.
    * {@link #displacement(Vector, Node)} performs the inverse transformation.
+   * {@link #screenDisplacement(Quaternion, Node)} converts quaternion displacements instead of vector displacements.
    * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
    *
    * @see #displacement(Vector, Node)
+   * @see #displacement(Quaternion, Node)
    * @see #screenLocation(Vector, Node)
    */
   public Vector screenDisplacement(Vector vector, Node node) {
@@ -4208,15 +4389,7 @@ public class Graph {
       pitch = 0;
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
-    // don't really need to differentiate among the two cases, but the eye can be speeded up
-    Quaternion quaternion = new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
-    Vector vector = new Vector(-quaternion.x(), -quaternion.y(), -quaternion.z());
-    vector = eye().orientation().rotate(vector);
-    vector = node.displacement(vector);
-    quaternion.setX(vector.x());
-    quaternion.setY(vector.y());
-    quaternion.setZ(vector.z());
-    node.rotate(quaternion, inertia);
+    node.rotate(node.displacement(new Quaternion(isLeftHanded() ? roll : -roll, -pitch, isLeftHanded() ? yaw : -yaw), eye()), inertia);
   }
 
   /**
@@ -4368,11 +4541,7 @@ public class Graph {
     Vector axis = p2.cross(p1);
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
-    Quaternion quaternion = new Quaternion(axis, angle);
-    Vector vector = quaternion.axis();
-    vector = eye().orientation().rotate(vector);
-    vector = node.displacement(vector);
-    node.rotate(new Quaternion(vector, -quaternion.angle()), inertia);
+    node.rotate(node.displacement(new Quaternion(axis, -angle), eye()), inertia);
   }
 
   /**

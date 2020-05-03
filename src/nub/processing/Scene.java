@@ -118,8 +118,8 @@ import java.util.Map;
  * @see TimingTask
  */
 public class Scene extends Graph implements PConstants {
-  public static String prettyVersion = "0.5.0";
-  public static String version = "5";
+  public static String prettyVersion = "0.6.0";
+  public static String version = "6";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
@@ -1083,33 +1083,61 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and
-   * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye} as
-   * the light point-of-view. Same as {@code render(pGraphics, type, eye, zNear, zFar, true)}.
+   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and remaining frustum
+   * parameters. Useful to compute a shadow map taking the {@code eye} as the light point-of-view.
+   * Same as {@code render(pGraphics, type, null, eye, zNear, zFar, true)}.
    *
-   * @see #render(Object)
+   * @see #render(PGraphics, Type, Node, Node, float, float, boolean)
+   * @see #render(PGraphics, Type, Node, Node, float, float)
    * @see #render(PGraphics, Type, Node, float, float, boolean)
-   * @see #render()
    */
   public static void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar) {
-    render(pGraphics, type, eye, zNear, zFar, true);
+    render(pGraphics, type, null, eye, zNear, zFar, true);
   }
 
   /**
-   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and
-   * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye}
-   * as the light point-of-view. Same as
-   * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}.
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto
+   * {@code pGraphics} using the {@code eye} viewpoint and remaining frustum parameters.
+   * Useful to compute a shadow map taking the {@code eye} as the light point-of-view.
+   * Same as {@code render(pGraphics, type, subtree, eye, zNear, zFar, true)}.
    *
-   * @see #render(Object)
    * @see #render(PGraphics, Type, Node, float, float)
-   * @see #render()
+   * @see #render(PGraphics, Type, Node, Node, float, float, boolean)
+   * @see #render(PGraphics, Type, Node, float, float, boolean)
+   */
+  public static void render(PGraphics pGraphics, Type type, Node subtree, Node eye, float zNear, float zFar) {
+    render(pGraphics, type, subtree, eye, zNear, zFar, true);
+  }
+
+  /**
+   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and remaining frustum parameters.
+   * Useful to compute a shadow map taking the {@code eye} as the light point-of-view. Same as
+   * {@code render(pGraphics, type, null, eye, zNear, zFar, leftHanded)}.
+   *
+   * @see #render(PGraphics, Type, Node, float, float)
+   * @see #render(PGraphics, Type, Node, Node, float, float)
+   * @see #render(PGraphics, Type, Node, Node, float, float, boolean)
    */
   public static void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar, boolean leftHanded) {
+    render(pGraphics, type, null, eye, zNear, zFar, leftHanded);
+  }
+
+  /**
+   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto {@code pGraphics}
+   * using the {@code eye} viewpoint and remaining frustum parameters. Useful to compute a shadow map taking the
+   * {@code eye} as the light point-of-view. Same as
+   * {@code render(pGraphics, type, subtree, eye, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded)}.
+   *
+   * @see #render(PGraphics, Type, Node, float, float)
+   * @see #render(PGraphics, Type, Node, Node, float, float)
+   * @see #render(PGraphics, Type, Node, float, float, boolean)
+   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
+   */
+  public static void render(PGraphics pGraphics, Type type, Node subtree, Node eye, float zNear, float zFar, boolean leftHanded) {
     if (pGraphics instanceof PGraphicsOpenGL)
-      render(pGraphics, type, eye, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded);
+      render(pGraphics, type, subtree, eye, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded);
     else
-      System.out.println("Nothing done: pg should be instance of PGraphicsOpenGL in render()");
+      System.out.println("Nothing done: pGraphics should be instance of PGraphicsOpenGL in render()");
   }
 
   /**
@@ -2598,7 +2626,7 @@ public class Scene extends Graph implements PConstants {
     context().pushStyle();
     if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
-    drawCross(node, node.pickingThreshold() < 1 ? 200 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position()) : node.pickingThreshold());
+    drawCross(node, node.pickingThreshold() < 1 ? 200 * node.pickingThreshold() * node.scaling() * pixelToSceneRatio(node.position()) : node.pickingThreshold());
     context().popStyle();
   }
 
@@ -2687,7 +2715,7 @@ public class Scene extends Graph implements PConstants {
     context().pushStyle();
     if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
-    drawSquaredBullsEye(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToGraphRatio(node.position())
+    drawSquaredBullsEye(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToSceneRatio(node.position())
         : Math.abs(node.pickingThreshold()));
     context().popStyle();
   }
@@ -2783,7 +2811,7 @@ public class Scene extends Graph implements PConstants {
     context().pushStyle();
     if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
-    drawCircledBullsEye(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToGraphRatio(node.position())
+    drawCircledBullsEye(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToSceneRatio(node.position())
         : Math.abs(node.pickingThreshold()));
     context().popStyle();
   }
@@ -3247,25 +3275,41 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return super.updateTag(tag, mouseX(), mouseY())}.
+   * Same as {@code return updateMouseTag(null, tag)}.
    *
-   * @see #updateTag(String, int, int)
-   * @see #mouseX()
-   * @see #mouseY()
+   * @see #updateMouseTag(Node, String)
    */
   public Node updateMouseTag(String tag) {
-    return super.updateTag(tag, mouseX(), mouseY());
+    return updateMouseTag(null, tag);
   }
 
   /**
    * Same as {@code return super.updateTag(mouseX(), mouseY())}.
    *
-   * @see #updateTag(int, int)
+   * @see #updateTag(Node, String, int, int)
    * @see #mouseX()
    * @see #mouseY()
    */
   public Node updateMouseTag() {
-    return super.updateTag(mouseX(), mouseY());
+    return super.updateTag(null, null, mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code return updateMouseTag(subtree, null)}.
+   *
+   * @see #updateMouseTag(Node, String)
+   */
+  public Node updateMouseTag(Node subtree) {
+    return updateMouseTag(subtree, null);
+  }
+
+  /**
+   * Same as {@code return super.updateTag(subtree, tag, mouseX(), mouseY())}.
+   *
+   * @see #updateTag(Node, String, int, int)
+   */
+  public Node updateMouseTag(Node subtree, String tag) {
+    return super.updateTag(subtree, tag, mouseX(), mouseY());
   }
 
   /**

@@ -1993,14 +1993,76 @@ public class Node {
     return new Node(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
   }
 
+  // SCALAR CONVERSION
+
+  /*
+  public float displacement(float magnitude) {
+    return magnitude / magnitude();
+  }
+
+  public float displacement(float magnitude, Node node) {
+    return magnitude * (node == null ? 1 : node.magnitude()) / magnitude();
+  }
+
+  public float worldDisplacement(float magnitude) {
+    return magnitude * magnitude();
+  }
+  // */
+
+  // QUATERNION CONVERSION
+
+  /**
+   * Converts {@code quaternion} displacement from world to this node.
+   * Same as {@code return displacement(quaterion, null)}.
+   * {@link #displacement(Vector)} converts vector displacements instead of quaternion displacements.
+   * {@link #location(Vector)} converts locations instead of displacements.
+   *
+   * @see #displacement(Quaternion, Node)
+   * @see #displacement(Vector)
+   * @see #location(Vector)
+   */
+  public Quaternion displacement(Quaternion quaternion) {
+    return displacement(quaternion, null);
+  }
+
+  /**
+   * Converts {@code quaternion} displacement from {@code node} to this node.
+   * Use {@code node.displacement(quaternion, this)} to perform the inverse transformation.
+   * {@link #displacement(Vector, Node)} converts vector displacements instead of quaternion displacements.
+   * {@link #location(Vector, Node)} converts locations instead of displacements.
+   *
+   * @see #displacement(Quaternion)
+   * @see #displacement(Vector)
+   * @see #worldDisplacement(Vector)
+   */
+  public Quaternion displacement(Quaternion quaternion, Node node) {
+    return new Quaternion(displacement(quaternion.axis(), node), quaternion.angle());
+  }
+
+  /**
+   * Converts {@code vector} displacement from this node to world.
+   * {@link #displacement(Vector)} performs the inverse transformation.
+   * {@link #worldDisplacement(Vector)} converts vector displacements instead of quaternion displacements.
+   * {@link #worldLocation(Vector)} converts locations instead of displacements.
+   *
+   * @see #location(Vector)
+   * @see #worldDisplacement(Vector)
+   * @see #displacement(Quaternion, Node)
+   */
+  public Quaternion worldDisplacement(Quaternion quaternion) {
+    return new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle());
+  }
+
   // VECTOR CONVERSION
 
   /**
    * Converts {@code vector} displacement from world to this node.
    * Same as {@code return displacement(vector, null)}.
+   * {@link #displacement(Quaternion)} converts quaternion displacements instead of vector displacements.
    * {@link #location(Vector)} converts locations instead of displacements.
    *
    * @see #displacement(Vector, Node)
+   * @see #displacement(Quaternion)
    * @see #location(Vector)
    */
   public Vector displacement(Vector vector) {
@@ -2010,9 +2072,11 @@ public class Node {
   /**
    * Converts {@code vector} displacement from {@code node} to this node.
    * Use {@code node.displacement(vector, this)} to perform the inverse transformation.
+   * {@link #displacement(Quaternion, Node)} converts quaternion displacements instead of vector displacements.
    * {@link #location(Vector, Node)} converts locations instead of displacements.
    *
    * @see #displacement(Vector)
+   * @see #displacement(Quaternion)
    * @see #worldDisplacement(Vector)
    */
   public Vector displacement(Vector vector, Node node) {
@@ -2022,9 +2086,11 @@ public class Node {
   /**
    * Converts {@code vector} displacement from this node to world.
    * {@link #displacement(Vector)} performs the inverse transformation.
+   * {@link #worldDisplacement(Quaternion)} converts quaternion displacements instead of vector displacements.
    * {@link #worldLocation(Vector)} converts locations instead of displacements.
    *
    * @see #location(Vector)
+   * @see #worldDisplacement(Quaternion)
    * @see #displacement(Vector, Node)
    */
   public Vector worldDisplacement(Vector vector) {
@@ -2066,11 +2132,13 @@ public class Node {
   /**
    * Converts the {@code node} origin location to this node.
    * Same as {@code return location(new Vector(), node)}.
-   * {@link #displacement(Vector, Node)} converts displacements instead of locations.
+   * {@link #displacement(Vector, Node)} converts vector displacements instead of locations.
+   * {@link #displacement(Quaternion, Node)} converts quaternion displacements instead of locations.
    *
    * @see #location(Vector)
    * @see #location(Vector, Node)
    * @see #displacement(Vector, Node)
+   * @see #displacement(Quaternion, Node)
    */
   public Vector location(Node node) {
     return location(new Vector(), node);
@@ -2079,11 +2147,13 @@ public class Node {
   /**
    * Converts {@code vector} location from world to this node.
    * Same as {@code return location(vector, null)}.
-   * {@link #displacement(Vector)} converts displacements instead of locations.
+   * {@link #displacement(Vector)} converts vector displacements instead of locations.
+   * {@link #displacement(Quaternion)} converts quaternion displacements instead of locations.
    *
    * @see #location(Node)
    * @see #location(Vector, Node)
    * @see #displacement(Vector)
+   * @see #displacement(Quaternion)
    */
   public Vector location(Vector vector) {
     return location(vector, null);
@@ -2092,7 +2162,8 @@ public class Node {
   /**
    * Converts {@code vector} location from {@code node} to this node.
    * Use {@code node.location(vector, this)} to perform the inverse transformation.
-   * {@link #displacement(Vector, Node)} converts displacements instead of locations.
+   * {@link #displacement(Vector, Node)} converts vector displacements instead of locations.
+   * {@link #displacement(Quaternion, Node)} converts quaternion displacements instead of locations.
    *
    * @see #location(Node)
    * @see #location(Vector)
@@ -2105,9 +2176,11 @@ public class Node {
   /**
    * Converts {@code vector} location from this node to world.
    * {@link #location(Vector)} performs the inverse transformation.
-   * {@link #worldDisplacement(Vector)} converts displacements instead of locations.
+   * {@link #worldDisplacement(Vector)} converts vector displacements instead of locations.
+   * {@link #worldDisplacement(Quaternion)} converts quaternion displacements instead of locations.
    *
    * @see #displacement(Vector)
+   * @see #displacement(Quaternion)
    * @see #location(Vector, Node)
    */
   public Vector worldLocation(Vector vector) {
