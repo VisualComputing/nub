@@ -251,9 +251,13 @@ see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/exampl
 void draw() {
   // 1. render onto the scene
   scene.render();
+  // To render a node subtree call:
+  // scene.render(subtree);
   // 2. render onto the off-screen scene
   offScreenScene.beginDraw();
   offScreenScene.render();
+  // To render a node subtree call:
+  // offScreenScene.render(subtree);
   offScreenScene.endDraw();
   // display the rendered offScreenScene
   offScreenScene.display();
