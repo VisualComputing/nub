@@ -1,10 +1,12 @@
 package nub.ik.animation;
 
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
+import nub.ik.solver.Solver;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.processing.Scene;
@@ -23,7 +25,10 @@ import java.util.Map;
 public class Skeleton {
     HashMap<String, Node> _joints;
     HashMap<Node, String> _names;
+    HashMap<Node, Constraint> _constraints;
+    HashMap<Node, Solver> _solvers;
     HashMap<String, Node> _targets;
+
     Node _reference;
     Scene _scene;
     float _targetRadius;
@@ -61,6 +66,7 @@ public class Skeleton {
         Joint joint = new Joint(red, green, blue, radius);
         _joints.put(name, joint);
         _names.put(joint, name);
+        _constraints.put(joint, joint.constraint());
         joint.setReference(_reference);
         joint.setRoot(true);
         return joint;
@@ -94,6 +100,7 @@ public class Skeleton {
         Joint joint = new Joint(red, green, blue, radius);
         _joints.put(name, joint);
         _names.put(joint, name);
+        _constraints.put(joint, joint.constraint());
         joint.setReference(_joints.get(reference));
         return joint;
     }
@@ -126,6 +133,7 @@ public class Skeleton {
         }
         _joints.put(name, node);
         _names.put(node, name);
+        _constraints.put(node, node.constraint());
         node.setReference(_joints.get(reference));
     }
 
@@ -136,6 +144,7 @@ public class Skeleton {
         }
         _joints.put(name, node);
         _names.put(node, name);
+        _constraints.put(node, node.constraint());
         node.setReference(_reference);
     }
 
@@ -186,20 +195,6 @@ public class Skeleton {
         return _targets.get(name);
     }
 
-    public void enableIK(){
-        for(Node child : _reference.children()){
-            Graph.registerTreeSolver(child);
-        }
-    }
-
-    public void addTargets(){
-        for(Map.Entry<String, Node> entry : _joints.entrySet()){
-            if(entry.getValue().children().isEmpty()){
-                addTarget(entry.getKey());
-            }
-        }
-    }
-
     public List<Node> joints(){
         return new ArrayList<Node>(_joints.values());
     }
@@ -214,7 +209,6 @@ public class Skeleton {
         _names.put(joint, newName);
     }
 
-
     public void prune(Node joint){
         List<Node> branch = Graph.branch(joint);
         Graph.prune(joint);
@@ -227,6 +221,92 @@ public class Skeleton {
                 _names.remove(node);
             }
         }
+    }
+
+    public void updateConstraints(){
+        for(Node node : BFS()){
+            _constraints.put(node, node.constraint());
+        }
+    }
+
+    public void enableConstraint(Node joint, boolean enable){
+        if(enable) enableConstraint(joint);
+        else disableConstraint(joint);
+    }
+
+    public void enableConstraint(Node joint){
+        joint.setConstraint(_constraints.get(joint));
+    }
+
+    public void disableConstraint(Node joint){
+        joint.setConstraint(null);
+    }
+
+    public void enableConstraints(boolean enable){
+        if(enable) enableConstraints();
+        else disableConstraints();
+    }
+
+    public void enableConstraints(){
+        for(Map.Entry<Node, Constraint> entry : _constraints.entrySet()){
+            entry.getKey().setConstraint(entry.getValue());
+        }
+    }
+
+    public void disableConstraints(){
+        for(Node node : BFS()){
+            node.setConstraint(null);
+        }
+    }
+
+    //Inverse Kinematics stuff
+    public void enableIK(boolean enable){
+        if(enable) enableIK();
+        else disableIK();
+    }
+
+    public void enableIK(){
+        for(Node child : _reference.children()){
+            if(!_solvers.containsKey(child)){
+                _solvers.put(child, Graph.registerTreeSolver(child));
+            } else {
+                Graph.executeSolver(_solvers.get(child));
+            }
+        }
+    }
+
+    public void disableIK(){
+        for(Solver solver : _solvers.values()){
+            Graph.stopSolver(solver);
+        }
+    }
+
+    public void addTargets(){
+        for(Map.Entry<String, Node> entry : _joints.entrySet()){
+            if(entry.getValue().children().isEmpty()){
+                addTarget(entry.getKey());
+            }
+        }
+    }
+
+    public void setMaxError(float maxError) {
+        for(Solver solver : _solvers.values())
+            solver.setMaxError(maxError);
+    }
+
+    public void setMaxIterations(int maxIterations) {
+        for(Solver solver : _solvers.values())
+            solver.setMaxIterations(maxIterations);
+    }
+
+    public void setMinDistance(float minDistance) {
+        for(Solver solver : _solvers.values())
+            solver.setMinDistance(minDistance);
+    }
+
+    public void setTimesPerFrame(float timesPerFrame) {
+        for(Solver solver : _solvers.values())
+            solver.setTimesPerFrame(timesPerFrame);
     }
 
     //Send the targets to the eff position / orientation

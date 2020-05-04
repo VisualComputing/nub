@@ -4829,14 +4829,24 @@ public class Graph {
    * @see #unregisterTreeSolver(Node)
    */
   public static void executeSolver(Solver solver, long period) {
-    //Add task
-    Task task = new Task(_timingHandler) {
-      @Override
-      public void execute() {
-        solver.solve();
-      }
-    };
-    task.run(period);
-    _solverTasks.put(solver, task);
+    if (!_solverTasks.containsKey(solver)) {
+      //Add task
+      Task task = new Task(_timingHandler) {
+        @Override
+        public void execute() {
+          solver.solve();
+        }
+      };
+      task.run(period);
+      _solverTasks.put(solver, task);
+    } else{
+      _solverTasks.get(solver).run();
+    }
   }
+
+  public static void stopSolver(Solver solver){
+    _solverTasks.get(solver).stop();
+  }
+
+
 }
