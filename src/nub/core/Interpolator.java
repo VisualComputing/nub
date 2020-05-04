@@ -111,6 +111,30 @@ public class Interpolator {
     public KeyFrame get() {
       return new KeyFrame(this);
     }
+
+    /**
+     * Returns the key-frame translation respect to the {@link #node()} {@link Node#reference()} space.
+     * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
+     */
+    public Vector translation() {
+      return node().reference() == null ? _node.translation() : node().reference().displacement(_node.translation(), _node.reference());
+    }
+
+    /**
+     * Returns the key-frame rotation respect to the {@link #node()} {@link Node#reference()} space.
+     * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
+     */
+    public Quaternion rotation() {
+      return node().reference() == null ? _node.rotation() : node().reference().displacement(_node.rotation(), _node.reference());
+    }
+
+    /**
+     * Returns the key-frame scaling respect to the {@link #node()} {@link Node#reference()} space.
+     * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
+     */
+    public float scaling() {
+      return node().reference() == null ? _node.scaling() : node().reference().displacement(_node.scaling(), _node.reference());
+    }
   }
 
   protected long _lastUpdate;
@@ -535,48 +559,42 @@ public class Interpolator {
   }
 
   /**
-   * Appends a copy of the current {@code #graph} {@link Graph#eye()}
-   * one second after the previously added keyframe.
+   * Appends a copy of the current {@link #node()} one second after the previously added keyframe.
    *
-   * @see #addKeyFrame(Graph, float)
+   * @see #addKeyFrame(float)
    * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
-   * @see Node#get()
-   * @see Graph#eye()
+   * @see Node#set(Node)
    */
-  public void addKeyFrame(Graph graph) {
-    // Warning: if get copies the node shape, go like this:
-    // Node node = new Node();
-    // node.set(graph.eye());
-    Node node = graph.eye().get();
-    node.setPickingThreshold(20);
-    addKeyFrame(node);
+  public void addKeyFrame() {
+    addKeyFrame(_list.isEmpty() ? 0.0f : 1.0f);
   }
 
   /**
-   * Appends a copy of the current {@code graph} {@link Graph#eye()}
+   * Appends a copy of the current {@link #node()}
    * {@code time} seconds after the previously added keyframe.
    *
-   * @see #addKeyFrame(Graph)
+   * @see #addKeyFrame()
    * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
-   * @see Node#get()
-   * @see Graph#eye()
+   * @see Node#set(Node)
    */
-  public void addKeyFrame(Graph graph, float time) {
-    // Warning: if get copies the node shape, go like this:
-    // Node node = new Node();
-    // node.set(graph.eye());
-    Node node = graph.eye().get();
+  public void addKeyFrame(float time) {
+    //Node node = graph.eye().get();
+    //node.setPickingThreshold(20);
+    Node node = new Node();
+    node.setReference(node().reference());
+    node.set(node());
     node.setPickingThreshold(20);
+
     addKeyFrame(node, time);
   }
 
   /**
    * Appends a new keyframe one second after the previously added one.
    *
-   * @see #addKeyFrame(Graph, float)
-   * @see #addKeyFrame(Graph)
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame()
    * @see #addKeyFrame(Node, float)
    */
   public void addKeyFrame(Node node) {
@@ -592,9 +610,9 @@ public class Interpolator {
    * <p>
    * {@code null} node references are silently ignored.
    *
-   * @see #addKeyFrame(Graph, float)
+   * @see #addKeyFrame(float)
    * @see #addKeyFrame(Node)
-   * @see #addKeyFrame(Graph)
+   * @see #addKeyFrame()
    */
   public void addKeyFrame(Node node, float time) {
     if (_list.size() == 0) {
@@ -678,18 +696,18 @@ public class Interpolator {
       alpha = 0.0f;
     else
       alpha = (time - _list.get(_backwards.nextIndex())._time) / dt;
-    Vector pos = Vector.add(_list.get(_backwards.nextIndex())._node.position(), Vector.multiply(
+    Vector pos = Vector.add(_list.get(_backwards.nextIndex()).translation(), Vector.multiply(
         Vector.add(_list.get(_backwards.nextIndex())._tangentVector,
             Vector.multiply(Vector.add(_vector1, Vector.multiply(_vector2, alpha)), alpha)), alpha));
-    float mag = Vector.lerp(_list.get(_backwards.nextIndex())._node.magnitude(),
-        _list.get(_forwards.nextIndex())._node.magnitude(), alpha);
-    Quaternion q = Quaternion.squad(_list.get(_backwards.nextIndex())._node.orientation(),
+    float mag = Vector.lerp(_list.get(_backwards.nextIndex()).scaling(),
+        _list.get(_forwards.nextIndex()).scaling(), alpha);
+    Quaternion q = Quaternion.squad(_list.get(_backwards.nextIndex()).rotation(),
         _list.get(_backwards.nextIndex())._tangentQuaternion,
         _list.get(_forwards.nextIndex())._tangentQuaternion,
-        _list.get(_forwards.nextIndex())._node.orientation(), alpha);
-    node().setPosition(pos);
-    node().setOrientation(q);
-    node().setMagnitude(mag);
+        _list.get(_forwards.nextIndex()).rotation(), alpha);
+    node().setTranslation(pos);
+    node().setRotation(q);
+    node().setScaling(mag);
   }
 
   /**
@@ -726,8 +744,8 @@ public class Interpolator {
    * Internal use. Used by {@link #interpolate(float)}.
    */
   protected void _updateSplineCache() {
-    Vector deltaP = Vector.subtract(_list.get(_forwards.nextIndex())._node.position(),
-        _list.get(_backwards.nextIndex())._node.position());
+    Vector deltaP = Vector.subtract(_list.get(_forwards.nextIndex()).translation(),
+        _list.get(_backwards.nextIndex()).translation());
     _vector1 = Vector.add(Vector.multiply(deltaP, 3.0f), Vector.multiply(_list.get(_backwards.nextIndex())._tangentVector, (-2.0f)));
     _vector1 = Vector.subtract(_vector1, _list.get(_forwards.nextIndex())._tangentVector);
     _vector2 = Vector.add(Vector.multiply(deltaP, (-2.0f)), _list.get(_backwards.nextIndex())._tangentVector);
@@ -810,11 +828,11 @@ public class Interpolator {
       KeyFrame next = (index < _list.size()) ? _list.get(index) : null;
       index++;
       if (next != null) {
-        keyFrame._tangentVector = Vector.multiply(Vector.subtract(next._node.position(), prev._node.position()), 0.5f);
-        keyFrame._tangentQuaternion = Quaternion.squadTangent(prev._node.orientation(), keyFrame._node.orientation(), next._node.orientation());
+        keyFrame._tangentVector = Vector.multiply(Vector.subtract(next.translation(), prev.translation()), 0.5f);
+        keyFrame._tangentQuaternion = Quaternion.squadTangent(prev.rotation(), keyFrame.rotation(), next.rotation());
       } else {
-        keyFrame._tangentVector = Vector.multiply(Vector.subtract(keyFrame._node.position(), prev._node.position()), 0.5f);
-        keyFrame._tangentQuaternion = Quaternion.squadTangent(prev._node.orientation(), keyFrame._node.orientation(), keyFrame._node.orientation());
+        keyFrame._tangentVector = Vector.multiply(Vector.subtract(keyFrame.translation(), prev.translation()), 0.5f);
+        keyFrame._tangentQuaternion = Quaternion.squadTangent(prev.rotation(), keyFrame.rotation(), keyFrame.rotation());
       }
       prev = keyFrame;
       keyFrame = next;

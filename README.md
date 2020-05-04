@@ -147,15 +147,17 @@ The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/process
 | Screen to World       | ```location(pixel)```             | ```displacement(element)```             |
 | World to Screen       | ```screenLocation(point)```       | ```screenDisplacement(element)```       |
 
+Note that `point` and `pixel` are [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances and `element` is either a [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) or [Quaternion](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Quaternion.html) one.
+
 The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world):
 
-| Space transformation  | Points                      | Vectors / Quaternions                          |
+| Space transformation  | Points                      | Scalars / Vectors / Quaternions   |
 |-----------------------|-----------------------------|-----------------------------------|
 | Node to (this) Node   | ```location(point, node)``` | ```displacement(element, node)``` |
 | World to (this) Node  | ```location(point)```       | ```displacement(element)```       |
 | (this) Node to World  | ```worldLocation(point)```  | ```worldDisplacement(element)```  |
 
-Note that `point` and `pixel` are [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances and `element` is either a [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) or [Quaternion](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Quaternion.html) one.
+Note that `point` is a [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instance and `element` is either a `float` (scalar), [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) or [Quaternion](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Quaternion.html) one.
 
 ## Rendering
 
@@ -164,8 +166,6 @@ Render (and display) the scene node hierarchy from its [eye()](https://visualcom
 ```processing
 void draw() {
   scene.render();
-  // To render a node subtree call:
-  // scene.render(subtree);
 }
 ```
 
@@ -190,15 +190,13 @@ void draw() {
 }
 ```
 
-this technique may also be useful when projecting the same subtree among several scenes, but it requires the node hierarchy to be known in advanced. Render the scene node hierarchy from its `eye` point-of-view, onto an arbitrary `PGraphics` with:
+this technique may also be useful when projecting the same branch among several scenes, but it requires the node hierarchy to be known in advanced. Render the scene node hierarchy from its `eye` point-of-view, onto an arbitrary `PGraphics` with:
 
 ```processing
 PGraphics pg;
 
 void draw() {
   scene.render(pg);
-  // To render a node subtree call:
-  // scene.render(pg, subtree);
 }
 ```
 
@@ -213,8 +211,6 @@ float zNear, zFar;
 
 void draw() {
   Scene.render(pg, frustumType, viewPoint, zNear, zFar);
-  // To render a node subtree call:
-  // Scene.render(pg, frustumType, subtree, viewPoint, zNear, zFar);
 }
 ```
 
@@ -226,8 +222,6 @@ Matrix projection, view;
 
 void draw() {
   Scene.render(pg, projection, view);
-  // To render a node subtree call:
-  // Scene.render(pg, subtree, projection, view);
 }
 ```
 
@@ -237,8 +231,6 @@ Render (and display) the off-screen scene node hierarchy from its `eye` point-of
 void draw() {
   offScreenScene.beginDraw();
   offScreenScene.render();
-  // To render a node subtree call:
-  // offScreenScene.render(subtree);
   offScreenScene.endDraw();
   // display the rendered offScreenScene
   offScreenScene.display();
@@ -305,6 +297,8 @@ public void visit() {
 ```
 
 see the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
+
+Note that the above rendering algorithms take an optional node param that enables them to render a subtree: `scene.render(subtree)`, `scene.render(pg, subtree)`, `Scene.render(pg, frustumType, subtree, viewPoint, zNear, zFar)` and `Scene.render(pg, subtree, projection, view)`.
 
 #### Drawing functionality
 
