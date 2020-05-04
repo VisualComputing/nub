@@ -2,8 +2,8 @@ package ik.trik.animation;
 
 import nub.core.Node;
 import nub.core.constraint.Constraint;
+import nub.ik.animation.PostureInterpolator;
 import nub.ik.animation.Skeleton;
-import nub.ik.animation.SkeletonAnimation;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -17,7 +17,7 @@ public class AnimationPanel extends Node {
     protected PFont _font36;
     protected Scene _scene;
     protected TimeLine _timeLine;
-    protected SkeletonAnimation _skeletonAnimation;
+    protected PostureInterpolator _postureInterpolator;
 
 
     public AnimationPanel(Scene scene, Skeleton skeleton){
@@ -43,7 +43,7 @@ public class AnimationPanel extends Node {
         _height = 2 * rh;
 
         _scene = scene;
-        _skeletonAnimation = new SkeletonAnimation(skeleton);
+        _postureInterpolator = new PostureInterpolator(skeleton);
 
         _timeLine = new TimeLine(this, 200, 1000, 28);
 
@@ -67,7 +67,19 @@ public class AnimationPanel extends Node {
     }
 
     public void play(){
-        _skeletonAnimation.play();
+        _postureInterpolator.clear();
+        addKeyPostures();
+        _postureInterpolator.run();
+    }
+
+    public void addKeyPostures(){
+        float prev = 0;
+        for(KeyPoint keyPoint : _timeLine._points){
+            float time = keyPoint._time / 1000f;
+            if(keyPoint._status == KeyPoint.Status.ENABLED)
+                _postureInterpolator.addKeyPosture(keyPoint._posture, time - prev);
+            prev = time;
+        }
     }
 
     public void toggleCurrentKeyPoint(){

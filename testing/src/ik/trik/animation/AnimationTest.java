@@ -176,15 +176,9 @@ public class AnimationTest extends PApplet{
             panel.deletePostureAtKeyPoint();
         }
 
-        if(key == 'l') {
-            panel._skeletonAnimation.setInterpolationMode(SkeletonAnimation.InterpolationMode.LINEAR);
-            System.out.println("Linear");
+        if(Character.isDigit(key)){
+            panel._postureInterpolator.setSpeed(Integer.valueOf("" + key));
         }
-        if(key == 'c') {
-            panel._skeletonAnimation.setInterpolationMode(SkeletonAnimation.InterpolationMode.CATMULL_ROM);
-            System.out.println("Catmull");
-        }
-
     }
 
     public void mouseClicked(MouseEvent event) {
