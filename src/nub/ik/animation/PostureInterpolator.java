@@ -75,6 +75,10 @@ public class PostureInterpolator {
         return _task;
     }
 
+    public HashMap<Node, Interpolator> interpolators(){
+        return _interpolators;
+    }
+
     public void _execute(){
         if ((_postures.isEmpty()) || (skeleton() == null))
             return;
@@ -173,6 +177,9 @@ public class PostureInterpolator {
 
     public void setSpeed(float speed) {
         _speed = speed;
+        for(Interpolator interpolator : _interpolators.values()){
+            interpolator.setSpeed(_speed);
+        }
     }
 
     public void loadPosture(int i){
