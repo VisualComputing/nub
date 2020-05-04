@@ -106,7 +106,8 @@ public class Skeleton {
             Node next = frontier.remove(0);
             list.add(next);
             for(Node child : next.children()){
-                frontier.add(child);
+                if(_names.containsKey(child))
+                    frontier.add(child);
             }
         }
         list.remove(0);
