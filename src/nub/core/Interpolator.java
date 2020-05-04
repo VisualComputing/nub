@@ -577,16 +577,14 @@ public class Interpolator {
    * @see #addKeyFrame()
    * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
-   * @see Node#set(Node)
    */
   public void addKeyFrame(float time) {
-    //Node node = graph.eye().get();
-    //node.setPickingThreshold(20);
     Node node = new Node();
     node.setReference(node().reference());
-    node.set(node());
+    node.setPosition(node());
+    node.setOrientation(node());
+    node.setMagnitude(node());
     node.setPickingThreshold(20);
-
     addKeyFrame(node, time);
   }
 
