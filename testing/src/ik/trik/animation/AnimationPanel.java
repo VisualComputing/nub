@@ -66,9 +66,10 @@ public class AnimationPanel extends Node {
         _timeLine._current.savePosture();
     }
 
-    public void play(){
+    public void play(float speed){
         _postureInterpolator.clear();
         addKeyPostures();
+        _postureInterpolator.setSpeed(speed);
         _postureInterpolator.run();
     }
 

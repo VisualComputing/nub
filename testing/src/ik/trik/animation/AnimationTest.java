@@ -1,10 +1,9 @@
 package ik.trik.animation;
 
+import nub.core.Interpolator;
 import nub.core.Node;
-import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
 import nub.ik.animation.Skeleton;
-import nub.ik.animation.SkeletonAnimation;
 import nub.ik.skinning.GPULinearBlendSkinning;
 import nub.ik.skinning.Skinning;
 import nub.ik.solver.Solver;
@@ -92,6 +91,10 @@ public class AnimationTest extends PApplet{
         mainScene.context().background(0);
         mainScene.drawAxes();
         skinning.render(mainScene);
+        for(Interpolator interpolator : panel._postureInterpolator.interpolators().values()){
+            mainScene.drawCatmullRom(interpolator);
+        }
+
         mainScene.render();
 
         noLights();
@@ -158,9 +161,10 @@ public class AnimationTest extends PApplet{
         if(focus != controlScene && focus.node() == null) focus.scale(event.getCount() * 50);
     }
 
+    float speed = 1, dir = 1;
     public void keyPressed(){
         if(key == 'r' || key == 'R'){
-            panel.play();
+            panel.play(dir * speed);
         }
 
         if(key == 's' || key == 'S'){
@@ -176,8 +180,16 @@ public class AnimationTest extends PApplet{
             panel.deletePostureAtKeyPoint();
         }
 
+        if(key == 'i' || key == 'I'){
+            dir  *= -1;
+        }
+
+        if(key == 'l' || key == 'L'){
+            panel._postureInterpolator.enableRecurrence(!panel._postureInterpolator.isRecurrent());
+        }
+
         if(Character.isDigit(key)){
-            panel._postureInterpolator.setSpeed(Integer.valueOf("" + key));
+            speed = Float.valueOf(""+key);
         }
     }
 

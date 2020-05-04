@@ -31,6 +31,7 @@ public class InteractiveFish extends PApplet {
     Interpolator targetInterpolator;
     String shapePath = "/testing/data/objs/fish0.obj";
     String texturePath = "/testing/data/objs/fish0.jpg";
+    List<Node> skeleton2;
 
     float targetRadius = 7;
 
@@ -52,6 +53,8 @@ public class InteractiveFish extends PApplet {
         //2.2 Use SimpleBuilder example (or a Modelling Sw if desired) and locate each Joint accordingly to mesh
         //2.3 Create the Joints based on 2.2.
         List<Node> skeleton = fishSkeleton(reference);
+
+        skeleton2 = fishSkeleton(reference);
         //3. Relate the shape with a skinning method (CPU or GPU)
         skinning = new GPULinearBlendSkinning(skeleton, this.g, sketchPath() + shapePath, sketchPath() + texturePath, 200, true);
 
@@ -72,7 +75,7 @@ public class InteractiveFish extends PApplet {
         //4.3 Create target(s) to relate with End Effector(s)
         target = createTarget(targetRadius);
         //Target also depends on reference
-        target.setReference(reference);
+        target.setReference(skeleton2.get(0));
         //Make target to be on same position/orientation as endEffector
         target.setPosition(endEffector.position());
 
@@ -87,7 +90,7 @@ public class InteractiveFish extends PApplet {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
-                solver.solve();
+                //solver.solve();
             }
         };
         solverTask.run(40); //Execute the solverTask each 40 ms
@@ -110,6 +113,8 @@ public class InteractiveFish extends PApplet {
         //Render mesh with respect to the node
         skinning.render(scene, reference);
         if(showSkeleton) scene.render();
+
+        scene.drawCatmullRom(targetInterpolator);
     }
 
     public List<Node> fishSkeleton(Node reference) {
@@ -136,6 +141,7 @@ public class InteractiveFish extends PApplet {
     }
 
     public Interpolator setupTargetInterpolator(Node target) {
+        Node ref = skeleton2.get(2);
         Interpolator targetInterpolator = new Interpolator(target);
         targetInterpolator.enableRecurrence();
         targetInterpolator.setSpeed(3.2f);
@@ -144,8 +150,9 @@ public class InteractiveFish extends PApplet {
         float step = 2.0f * PI / (nbKeyFrames - 1);
         for (int i = 0; i < nbKeyFrames; i++) {
             Node iFrame = new Node();
-            iFrame.setReference(target.reference());
-            iFrame.setTranslation(new Vector(100 * sin(step * i), target.translation().y(), target.translation().z()));
+            iFrame.setReference(ref);
+            Vector v = iFrame.location(target);
+            iFrame.setTranslation(new Vector(100 * sin(step * i) + v.x(), v.y(), v.z()));
             targetInterpolator.addKeyFrame(iFrame);
         }
         targetInterpolator.run();
