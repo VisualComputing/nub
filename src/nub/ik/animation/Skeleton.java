@@ -38,6 +38,8 @@ public class Skeleton {
         _joints = new HashMap<String, Node>();
         _names = new HashMap<Node, String>();
         _targets = new HashMap<String, Node>();
+        _constraints = new HashMap<Node, Constraint>();
+        _solvers = new HashMap<Node, Solver>();
         _reference = new Node(); //dummy node to contain all generated Joints
         _reference.enableTagging(false);
         _scene = scene;
