@@ -136,7 +136,7 @@ Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Im
 
 #### Space transformations
 
-The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions where user interaction takes place), [NDC](http://www.songho.ca/opengl/gl_projectionmatrix.html) and nodes (including the world, i.e., the `null` node):
+The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transform points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions where user interaction takes place), [NDC](http://www.songho.ca/opengl/gl_projectionmatrix.html) and nodes (including the world, i.e., the `null` node):
 
 | Space transformation  | Points                            | Vectors                                |
 |-----------------------|-----------------------------------|----------------------------------------|
@@ -149,7 +149,7 @@ The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/process
 
 Note that `point`, `pixel` and `vector` are [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances.
 
-The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and scalars / vectors/ quaternions (_displacements_) between different node instances (including the world):
+The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transform points (_locations_) and scalars / vectors/ quaternions (_displacements_) between different node instances (including the world):
 
 | Space transformation  | Points                      | Scalars / Vectors / Quaternions   |
 |-----------------------|-----------------------------|-----------------------------------|
