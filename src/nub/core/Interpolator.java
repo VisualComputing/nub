@@ -101,7 +101,11 @@ public class Interpolator {
     KeyFrame(Node node, float time) {
       _time = time;
       _node = node;
+
+      _twin = new Node(node().reference());
     }
+
+    Node _twin;
 
     protected KeyFrame(KeyFrame other) {
       this._time = other._time;
@@ -117,7 +121,9 @@ public class Interpolator {
      * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
      */
     public Vector translation() {
-      return node().reference() == null ? _node.translation() : node().reference().displacement(_node.translation(), _node.reference());
+      return node().reference() == _node.reference() ? _node.translation() :
+            node().reference() == null ? _node.position() : node().reference().location(_node.position());
+             //node().reference() == null ? _node.position() : node().reference().location(_node.translation(), _node.reference());
     }
 
     /**
@@ -125,7 +131,22 @@ public class Interpolator {
      * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
      */
     public Quaternion rotation() {
-      return node().reference() == null ? _node.rotation() : node().reference().displacement(_node.rotation(), _node.reference());
+      Quaternion q = node().reference() == _node.reference() ? _node.rotation() :
+                     node().reference() == null ? _node.orientation() : node().reference().displacement(_node.orientation());
+      System.out.println("v1: " + q.toString());
+      if (node().reference() == _node.reference()) {
+        System.out.println("v2: " + _node.rotation().toString());
+        return _node.rotation();
+      }
+      else {
+        _twin.setOrientation(_node.orientation());
+        System.out.println("v2: " + _twin.rotation().toString());
+        return _twin.rotation();
+      }
+      // */
+      //return node().reference() == _node.reference() ? _node.rotation() :
+             //node().reference() == null ? _node.orientation() : node().reference().displacement(_node.orientation());
+             //node().reference() == null ? _node.orientation() : node().reference().displacement(_node.rotation(), _node.reference());
     }
 
     /**
@@ -133,7 +154,23 @@ public class Interpolator {
      * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
      */
     public float scaling() {
-      return node().reference() == null ? _node.scaling() : node().reference().displacement(_node.scaling(), _node.reference());
+      /*
+      float test = node().reference() == _node.reference() ? _node.scaling() :
+                   node().reference() == null ? _node.magnitude() : node().reference().displacement(_node.magnitude());
+      System.out.println("v1: " + test);
+      if (node().reference() == _node.reference()) {
+        System.out.println("v2: " + _node.scaling());
+        return _node.scaling();
+      }
+      else {
+        _twin.setMagnitude(_node.magnitude());
+        System.out.println("v2: " + _twin.scaling());
+        return _twin.scaling();
+      }
+       */
+      return node().reference() == _node.reference() ? _node.scaling() :
+             node().reference() == null ? _node.magnitude() : node().reference().displacement(_node.magnitude());
+             //node().reference() == null ? _node.magnitude() : node().reference().displacement(_node.scaling(), _node.reference());
     }
   }
 
