@@ -3371,11 +3371,9 @@ public class Graph {
    * Converts {@code vector} location from normalized device coordinates (NDC) to screen space.
    * {@link #screenToNDCLocation(Vector)} performs the inverse transformation.
    * {@link #ndcToScreenDisplacement(Vector)} transforms vector displacements instead of locations.
-   * {@link #ndcToScreenDisplacement(Quaternion)} transforms quaternion displacements instead of locations.
    *
    * @see #screenToNDCLocation(Vector)
    * @see #ndcToScreenDisplacement(Vector)
-   * @see #ndcToScreenDisplacement(Quaternion)
    */
   public Vector ndcToScreenLocation(Vector vector) {
     return new Vector(_map(vector.x(), -1, 1, 0, width()),
@@ -3387,11 +3385,9 @@ public class Graph {
    * Converts {@code vector} location from screen space to normalized device coordinates (NDC).
    * {@link #ndcToScreenLocation(Vector)} performs the inverse transformation.
    * {@link #screenToNDCDisplacement(Vector)} transforms vector displacements instead of locations.
-   * {@link #screenToNDCDisplacement(Quaternion)} transforms quaternion displacements instead of locations.
    *
    * @see #ndcToScreenLocation(Vector)
    * @see #screenToNDCDisplacement(Vector)
-   * @see #screenToNDCDisplacement(Quaternion)
    */
   public Vector screenToNDCLocation(Vector vector) {
     return new Vector(_map(vector.x(), 0, width(), -1, 1),
@@ -3513,8 +3509,6 @@ public class Graph {
    * <p>
    * {@link #screenDisplacement(Vector, Node)} converts vector displacements instead of locations.
    * <p>
-   * {@link #screenDisplacement(Quaternion, Node)} converts quaternion displacements instead of locations.
-   * <p>
    * This method only uses the intrinsic eye parameters (view and projection matrices),
    * {@link #width()} and {@link #height()}). You can hence define a virtual eye and use
    * this method to compute un-projections out of a classical rendering context.
@@ -3525,7 +3519,6 @@ public class Graph {
    *
    * @see #screenLocation(Vector, Node)
    * @see #screenDisplacement(Vector, Node)
-   * @see #screenDisplacement(Quaternion, Node)
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
@@ -3585,27 +3578,11 @@ public class Graph {
   }
 
   /**
-   * Converts {@code quaternion} displacement from normalized device coordinates (NDC) to screen space.
-   * {@link #screenToNDCDisplacement(Quaternion)} performs the inverse transformation.
-   * {@link #ndcToScreenDisplacement(Vector)} transforms vector displacements instead of quaternion displacements.
-   * {@link #ndcToScreenLocation(Vector)} transforms locations instead of vector displacements.
-   *
-   * @see #screenToNDCDisplacement(Quaternion)
-   * @see #screenToNDCDisplacement(Vector)
-   * @see #ndcToScreenLocation(Vector)
-   */
-  public Quaternion ndcToScreenDisplacement(Quaternion quaternion) {
-    return new Quaternion(ndcToScreenDisplacement(quaternion.axis()), quaternion.axis());
-  }
-
-  /**
    * Converts {@code vector} displacement from normalized device coordinates (NDC) to screen space.
    * {@link #screenToNDCDisplacement(Vector)} performs the inverse transformation.
-   * {@link #ndcToScreenDisplacement(Quaternion)} transforms quaternion displacements instead of vector displacements.
    * {@link #ndcToScreenLocation(Vector)} transforms locations instead of vector displacements.
    *
    * @see #screenToNDCDisplacement(Vector)
-   * @see #screenToNDCDisplacement(Quaternion)
    * @see #ndcToScreenLocation(Vector)
    */
   public Vector ndcToScreenDisplacement(Vector vector) {
@@ -3613,27 +3590,11 @@ public class Graph {
   }
 
   /**
-   * Converts {@code vquaternion} displacement from screen space to normalized device coordinates (NDC).
-   * {@link #ndcToScreenDisplacement(Quaternion)} performs the inverse transformation.
-   * {@link #screenToNDCDisplacement(Vector)} transforms vector displacements instead of quaternion displacements.
-   * {@link #screenToNDCLocation(Vector)} transforms locations instead of vector displacements.
-   *
-   * @see #ndcToScreenDisplacement(Quaternion)
-   * @see #screenToNDCDisplacement(Vector)
-   * @see #screenToNDCLocation(Vector)
-   */
-  public Quaternion screenToNDCDisplacement(Quaternion quaternion) {
-    return new Quaternion(screenToNDCDisplacement(quaternion.axis()), quaternion.angle());
-  }
-
-  /**
    * Converts {@code vector} displacement from screen space to normalized device coordinates (NDC).
    * {@link #ndcToScreenDisplacement(Vector)} performs the inverse transformation.
-   * {@link #screenToNDCDisplacement(Quaternion)} transforms quaternion displacements instead of vector displacements.
    * {@link #screenToNDCLocation(Vector)} transforms locations instead of vector displacements.
    *
    * @see #ndcToScreenDisplacement(Vector)
-   * @see #screenToNDCDisplacement(Quaternion)
    * @see #screenToNDCLocation(Vector)
    */
   public Vector screenToNDCDisplacement(Vector vector) {
@@ -3641,44 +3602,13 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return displacement(quaternion, null)}.
-   *
-   * @see #displacement(Vector, Node)
-   * @see #displacement(Quaternion, Node)
-   * @see #location(Vector, Node)
-   */
-  public Quaternion displacement(Quaternion quaternion) {
-    return new Quaternion(displacement(quaternion.axis()), quaternion.angle());
-  }
-
-  /**
    * Same as {@code return displacement(vector, null)}.
    *
    * @see #displacement(Vector, Node)
-   * @see #displacement(Quaternion, Node)
    * @see #location(Vector, Node)
    */
   public Vector displacement(Vector vector) {
     return this.displacement(vector, null);
-  }
-
-  /**
-   * Converts {@code quaternion} displacement given in screen space to the {@code node} coordinate system.
-   * The screen space coordinate system is centered at the bounding box of {@link #width()} *
-   * {@link #height()} * 1} dimensions. The screen space defines the place where
-   * user gestures takes place, e.g., {@link #rotateNode(Node, float, float, float)}.
-   * <p>
-   * {@link #screenDisplacement(Quaternion, Node)} performs the inverse transformation.
-   * {@link #displacement(Vector, Node)} converts vector displacements instead of quaternion displacements.
-   * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
-   *
-   * @see #displacement(Vector, Node)
-   * @see #screenLocation(Vector, Node)
-   * @see #translateNode(Node, float, float, float)
-   * @see #translateEye(float, float, float)
-   */
-  public Quaternion displacement(Quaternion quaternion, Node node) {
-    return new Quaternion(displacement(quaternion.axis(), node), quaternion.angle());
   }
 
   /**
@@ -3688,7 +3618,6 @@ public class Graph {
    * user gestures takes place, e.g., {@link #translateNode(Node, float, float, float)}.
    * <p>
    * {@link #screenDisplacement(Vector, Node)} performs the inverse transformation.
-   * {@link #displacement(Quaternion, Node)} converts quaternion displacements instead of vector displacements.
    * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
    *
    * @see #displacement(Vector, Node)
@@ -3718,21 +3647,9 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return screenDisplacement(quaternion, null)}.
-   *
-   * @see #screenDisplacement(Quaternion, Node)
-   * @see #screenDisplacement(Vector, Node)
-   * @see #screenLocation(Node)
-   */
-  public Quaternion screenDisplacement(Quaternion quaternion) {
-    return new Quaternion(screenDisplacement(quaternion.axis()), quaternion.angle());
-  }
-
-  /**
    * Same as {@code return screenDisplacement(vector, null)}.
    *
    * @see #screenDisplacement(Vector, Node)
-   * @see #screenDisplacement(Quaternion, Node)
    * @see #screenLocation(Node)
    */
   public Vector screenDisplacement(Vector vector) {
@@ -3740,27 +3657,11 @@ public class Graph {
   }
 
   /**
-   * Converts the {@code node} {@code quaternion} displacement to screen space.
-   * {@link #displacement(Quaternion, Node)} performs the inverse transformation.
-   * {@link #screenDisplacement(Vector, Node)} converts vector displacements instead of quaternion displacements.
-   * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
-   *
-   * @see #displacement(Quaternion, Node)
-   * @see #displacement(Vector, Node)
-   * @see #screenLocation(Vector, Node)
-   */
-  public Quaternion screenDisplacement(Quaternion quaternion, Node node) {
-    return new Quaternion(screenDisplacement(quaternion.axis(), node), quaternion.angle());
-  }
-
-  /**
    * Converts the {@code node} {@code vector} displacement to screen space.
    * {@link #displacement(Vector, Node)} performs the inverse transformation.
-   * {@link #screenDisplacement(Quaternion, Node)} converts quaternion displacements instead of vector displacements.
    * {@link #screenLocation(Vector, Node)} converts pixel locations instead.
    *
    * @see #displacement(Vector, Node)
-   * @see #displacement(Quaternion, Node)
    * @see #screenLocation(Vector, Node)
    */
   public Vector screenDisplacement(Vector vector, Node node) {
