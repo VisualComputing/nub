@@ -1,6 +1,5 @@
 package nub.ik.animation;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
