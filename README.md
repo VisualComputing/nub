@@ -138,16 +138,16 @@ Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Im
 
 The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transforms points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions where user interaction takes place), [NDC](http://www.songho.ca/opengl/gl_projectionmatrix.html) and nodes (including the world, i.e., the `null` node):
 
-| Space transformation  | Points                            | Vectors / Quaternions                   |
-|-----------------------|-----------------------------------|-----------------------------------------|
-| NDC to Screen         | ```ndcToScreenLocation(point)```  | ```ndcToScreenDisplacement(element)```  |
-| Screen to NDC         | ```screenToNDCLocation(pixel)```  | ```screenToNDCDisplacement(element)```  |
-| Screen to Node        | ```location(pixel, node)```       | ```displacement(element, node)```       |
-| Node to Screen        | ```screenLocation(point, node)``` | ```screenDisplacement(element, node)``` |
-| Screen to World       | ```location(pixel)```             | ```displacement(element)```             |
-| World to Screen       | ```screenLocation(point)```       | ```screenDisplacement(element)```       |
+| Space transformation  | Points                            | Vectors                               |
+|-----------------------|-----------------------------------|---------------------------------------|
+| NDC to Screen         | ```ndcToScreenLocation(point)```  | ```ndcToScreenDisplacement(vector)``` |
+| Screen to NDC         | ```screenToNDCLocation(pixel)```  | ```screenToNDCDisplacement(vector)``` |
+| Screen to Node        | ```location(pixel, node)```       | ```displacement(vector, node)```      |
+| Node to Screen        | ```screenLocation(point, node)``` | ```screenDisplacement(vector, node)`` |
+| Screen to World       | ```location(pixel)```             | ```displacement(vector)```            |
+| World to Screen       | ```screenLocation(point)```       | ```screenDisplacement(vector)```      |
 
-Note that `point` and `pixel` are [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances and `element` is either a [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) or [Quaternion](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Quaternion.html) one.
+Note that `point`, `pixel` and `vector` are [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances.
 
 The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transforms points (_locations_) and vectors (_displacements_) between different node instances (including the world):
 
