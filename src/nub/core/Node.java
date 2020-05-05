@@ -1278,13 +1278,7 @@ public class Node {
    * @see #rotation()
    */
   public Quaternion orientation() {
-    Quaternion quaternion = rotation().get();
-    Node reference = reference();
-    while (reference != null) {
-      quaternion = Quaternion.compose(reference.rotation(), quaternion);
-      reference = reference.reference();
-    }
-    return quaternion;
+    return worldDisplacement(new Quaternion());
   }
 
   /**
@@ -1310,7 +1304,7 @@ public class Node {
    * to bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    */
   public void setOrientation(Quaternion quaternion) {
-    setRotation(reference() != null ? Quaternion.compose(reference().orientation().inverse(), quaternion) : quaternion);
+    setRotation(reference() != null ? reference().displacement(quaternion) : quaternion);
   }
 
   /**
@@ -2070,11 +2064,11 @@ public class Node {
    * @see #worldDisplacement(Vector)
    */
   public Quaternion displacement(Quaternion quaternion, Node node) {
-    return new Quaternion(displacement(quaternion.axis(), node), quaternion.angle());
+    return this == node ? quaternion : _displacement(reference() != null ? reference().displacement(quaternion, node) : node == null ? quaternion : node.worldDisplacement(quaternion));
   }
 
   /**
-   * Converts {@code vector} displacement from this node to world.
+   * Converts {@code quaternion} displacement from this node to world.
    * {@link #displacement(Vector)} performs the inverse transformation.
    * {@link #worldDisplacement(Vector)} converts vector displacements instead of quaternion displacements.
    * {@link #worldDisplacement(float)} converts scalar displacements instead of quaternion displacements.
@@ -2086,7 +2080,39 @@ public class Node {
    * @see #displacement(Quaternion, Node)
    */
   public Quaternion worldDisplacement(Quaternion quaternion) {
-    return new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle());
+    Node node = this;
+    Quaternion result = quaternion;
+    while (node != null) {
+      result = node._referenceDisplacement(result);
+      node = node.reference();
+    }
+    return result;
+  }
+
+  /**
+   * Converts {@code quaternion} displacement from {@link #reference()} to this node.
+   * <p>
+   * {@link #_referenceDisplacement(Quaternion)} performs the inverse transformation.
+   * {@link #_location(Vector)} converts locations instead of displacements.
+   *
+   * @see #displacement(Quaternion)
+   * @see #displacement(Vector)
+   */
+  protected Quaternion _displacement(Quaternion quaternion) {
+    return Quaternion.compose(rotation().inverse(), quaternion);
+  }
+
+  /**
+   * Converts {@code quaternion} displacement from this node to {@link #reference()}.
+   * <p>
+   * {@link #_displacement(Quaternion)} performs the inverse transformation.
+   * {@link #_referenceLocation(Vector)} converts locations instead of displacements.
+   *
+   * @see #worldDisplacement(Quaternion)
+   * @see #worldDisplacement(Vector)
+   */
+  protected Quaternion _referenceDisplacement(Quaternion quaternion) {
+    return Quaternion.compose(rotation(), quaternion);
   }
 
   // VECTOR CONVERSION
