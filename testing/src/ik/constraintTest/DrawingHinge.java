@@ -3,7 +3,6 @@ package ik.constraintTest;
 import nub.core.Graph;
 import nub.core.Interpolator;
 import nub.core.Node;
-import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -16,7 +15,9 @@ import processing.event.MouseEvent;
 
 
 public class DrawingHinge  extends PApplet {
-    Scene sceneConstraint, sceneTheta, focus;
+    Scene constraintScene, thetaScene, focus;
+    Node constraintRoot, thetaRoot;
+
     int w = 900;
     int h = 500;
     int mode = -1;
@@ -31,31 +32,38 @@ public class DrawingHinge  extends PApplet {
 
     public void setup() {
         font = createFont("Zapfino", 38);
-        sceneConstraint = new Scene(this, P3D, w/2, h);
-        sceneConstraint.setType(Graph.Type.ORTHOGRAPHIC);
-        sceneConstraint.fit(1);
-        sceneTheta = new Scene(this, P2D, w/2, h, w/2, 0);
-        sceneTheta.fit(1);
+        constraintScene = new Scene(this, P3D, w/2, h);
+        constraintScene.setType(Graph.Type.ORTHOGRAPHIC);
+        constraintScene.fit(1);
+        constraintRoot = new Node();
+        constraintRoot.enableTagging(false);
+
+        thetaScene = new Scene(this, P2D, w/2, h, w/2, 0);
+        thetaScene.fit(1);
+        thetaRoot = new Node();
+        thetaRoot.enableTagging(false);
+
         //Create a Joint
         Joint.constraintFactor = 0.9f;
-        j0 = new Joint(sceneConstraint, color(255), 0.1f * sceneConstraint.radius());
+        j0 = new Joint(constraintScene, color(255), 0.1f * constraintScene.radius());
+        j0.setReference(constraintRoot);
         j0.setRoot(true);
-        j0.translate(-sceneConstraint.radius() * 0.5f,0,0);
-        j1 = new Joint(sceneConstraint, color(255), 0.1f * sceneConstraint.radius());
+        j0.translate(-constraintScene.radius() * 0.5f,0,0);
+        j1 = new Joint(constraintScene, color(255), 0.1f * constraintScene.radius());
         j1.setReference(j0);
 
         Vector v = new Vector(1f,0,0);
         v.normalize();
-        v.multiply(sceneConstraint.radius());
+        v.multiply(constraintScene.radius());
         j1.translate(v);
 
         //Add constraint to joint j0
         Hinge constraint = new Hinge(radians(30), radians(30), j0.rotation(), new Vector(1,0,0), new Vector(0,0,1));
         j0.setConstraint(constraint);
-        Interpolator intp;
 
         //Create controllers
-        control = new ThetaControl(sceneTheta, color(100,203,30));
+        control = new ThetaControl(thetaScene, color(100,203,30));
+        control.setReference(thetaRoot);
         control.setNames("Min", "Max");
 
         //Update controllers
@@ -64,13 +72,9 @@ public class DrawingHinge  extends PApplet {
 
     public void draw() {
         handleMouse();
-        control.cull(true);
-        j0.cull(false);
-        drawScene(sceneConstraint, "Constraint View");
-        control.cull(false);
-        j0.cull(true);
-        drawScene(sceneTheta, "Hinge Control");
-        sceneTheta.drawBullsEye(control);
+        drawScene(constraintScene, constraintRoot, "Constraint View");
+        drawScene(thetaScene, thetaRoot, "Hinge Control");
+        thetaScene.drawBullsEye(control);
         updateCostraint((Hinge) j0.constraint(), control);
         if(mode == 0) {
             j0.rotate(new Quaternion(new Vector(0, 0, 1), radians(1)));
@@ -92,12 +96,11 @@ public class DrawingHinge  extends PApplet {
         control.update(constraint.minAngle(), constraint.maxAngle());
     }
 
-    public void drawScene(Scene scene, String title){
+    public void drawScene(Scene scene, Node root, String title){
         scene.beginDraw();
         scene.context().background(0);
         scene.context().lights();
-        //scene.drawAxes();
-        scene.render();
+        scene.render(root);
         scene.beginHUD();
         scene.context().noLights();
         scene.context().pushStyle();
@@ -108,7 +111,7 @@ public class DrawingHinge  extends PApplet {
         scene.context().text(title, scene.context().width / 2, 20);
         scene.context().noFill();
         scene.context().strokeWeight(3);
-        scene.context().rect(0,0,sceneConstraint.context().width, sceneConstraint.context().height);
+        scene.context().rect(0,0, constraintScene.context().width, constraintScene.context().height);
         scene.context().popStyle();
         scene.endHUD();
         scene.endDraw();
@@ -431,7 +434,7 @@ public class DrawingHinge  extends PApplet {
 
     public void handleMouse() {
         Scene prev = focus;
-        focus = mouseX < w / 2 ? sceneConstraint : sceneTheta;
+        focus = mouseX < w / 2 ? constraintScene : thetaScene;
         if(prev != focus && prev != null){
             if(prev.node() != null) prev.node().interact("Clear");
             if(focus != null && focus.node() != null) focus.node().interact("Clear");
@@ -444,7 +447,7 @@ public class DrawingHinge  extends PApplet {
     }
 
     public void mouseDragged() {
-        if(focus == sceneTheta) {
+        if(focus == thetaScene) {
             if(focus.node() != null) focus.node().interact("OnScaling", new Vector(focus.mouseX(), focus.mouseY()));
             return;
         }
@@ -458,7 +461,7 @@ public class DrawingHinge  extends PApplet {
     }
 
     public void mouseReleased(){
-        if(focus == sceneTheta) {
+        if(focus == thetaScene) {
             if(focus.node() != null) focus.node().interact("Scale");
             return;
         }

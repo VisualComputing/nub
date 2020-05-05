@@ -1,6 +1,5 @@
 package ik.constraintTest;
 
-import ik.basic.Util;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
@@ -17,15 +16,17 @@ import processing.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class DrawingConstraint  extends PApplet {
-    Scene sceneConstraint, sceneTheta, sceneBase, focus;
+    Scene constraintScene, thetaScene, baseScene, focus;
+    Node constraintRoot, thetaRoot, baseRoot;
+
     int w = 900;
     int h = 500;
 
     ThetaControl t_lr, t_ud;
     BaseControl base;
     Joint j0, j1, target;
+
     SimpleTRIK solver;
     boolean solve = false;
 
@@ -37,25 +38,34 @@ public class DrawingConstraint  extends PApplet {
 
     public void setup() {
         font = createFont("Zapfino", 38);
-        sceneConstraint = new Scene(this, P3D, w/3, h);
-        sceneConstraint.setType(Graph.Type.ORTHOGRAPHIC);
-        sceneConstraint.fit(1);
-        sceneTheta = new Scene(this, P2D, w/3, h, w/3, 0);
-        sceneTheta.fit(1);
-        sceneBase = new Scene(this, P2D, w/3, h, 2*w/3, 0);
-        sceneBase.fit(1);
+        constraintScene = new Scene(this, P3D, w/3, h);
+        constraintScene.setType(Graph.Type.ORTHOGRAPHIC);
+        constraintScene.fit(1);
+        constraintRoot = new Node();
+        constraintRoot.enableTagging(false);
+
+        thetaScene = new Scene(this, P2D, w/3, h, w/3, 0);
+        thetaScene.fit(1);
+        thetaRoot = new Node();
+        thetaRoot.enableTagging(false);
+
+        baseScene = new Scene(this, P2D, w/3, h, 2*w/3, 0);
+        baseScene.fit(1);
+        baseRoot = new Node();
+        baseRoot.enableTagging(false);
 
         //Create a Joint
         Joint.constraintFactor = 0.9f;
-        j0 = new Joint(sceneConstraint, color(255), 0.1f * sceneConstraint.radius());
+        j0 = new Joint(constraintScene, color(255), 0.1f * constraintScene.radius());
         j0.setRoot(true);
-        j0.translate(-sceneConstraint.radius() * 0.5f,0,0);
-        j1 = new Joint(sceneConstraint, color(255), 0.1f * sceneConstraint.radius());
+        j0.setReference(constraintRoot);
+        j0.translate(-constraintScene.radius() * 0.5f,0,0);
+        j1 = new Joint(constraintScene, color(255), 0.1f * constraintScene.radius());
         j1.setReference(j0);
 
         Vector v = new Vector(1f,0.f,0);
         v.normalize();
-        v.multiply(sceneConstraint.radius());
+        v.multiply(constraintScene.radius());
         j1.translate(v);
         j1.enableTagging(false);
 
@@ -68,57 +78,35 @@ public class DrawingConstraint  extends PApplet {
         structure.add(j0);
         structure.add(j1);
 
-        solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.CCD);
-        target = new Joint(sceneConstraint, color(255,0,0), 0.2f * sceneConstraint.radius());
+        solver = new SimpleTRIK(structure, SimpleTRIK.HeuristicMode.FINAL);
+        target = new Joint(constraintScene, color(255,0,0), 0.2f * constraintScene.radius());
         target.setRoot(true);
+        target.setReference(constraintRoot);
         solver.setTarget(target);
         target.set(j1);
 
         solver.setTimesPerFrame(1);
 
-
-
         //Create controllers
-        t_lr = new ThetaControl(sceneTheta, color(255, 154, 31));
-        t_lr.translate(-sceneTheta.radius() * 0.3f, -sceneTheta.radius() * 0.7f, 0);
+        t_lr = new ThetaControl(thetaScene, color(255, 154, 31));
+        t_lr.setReference(thetaRoot);
+        t_lr.translate(-thetaScene.radius() * 0.3f, -thetaScene.radius() * 0.7f, 0);
         t_lr.setNames("Right", "Left");
-        t_ud = new ThetaControl(sceneTheta, color(31, 132, 255));
-        t_ud.translate(-sceneTheta.radius() * 0.3f, sceneTheta.radius() * 0.8f, 0);
+        t_ud = new ThetaControl(thetaScene, color(31, 132, 255));
+        t_ud.setReference(thetaRoot);
+        t_ud.translate(-thetaScene.radius() * 0.3f, thetaScene.radius() * 0.8f, 0);
         t_ud.setNames("Down", "Up");
-        base = new BaseControl(sceneBase, color(100,203,30));
-
+        base = new BaseControl(baseScene, color(100,203,30));
+        base.setReference(baseRoot);
         //Update controllers
         updateControllers(constraint, t_lr, t_ud, base);
     }
 
-    public void cullThetaControls(boolean cull){
-        t_lr.cull(cull);
-        t_ud.cull(cull);
-    }
-
-    public void cullBaseControl(boolean cull){
-        base.cull(cull);
-    }
-
-    public void cullJoints(boolean cull){
-        j0.cull(cull);
-        target.cull(cull);
-    }
-
     public void draw() {
         handleMouse();
-        cullBaseControl(true);
-        cullThetaControls(true);
-        cullJoints(false);
-        drawScene(sceneConstraint, "Constraint View");
-        cullBaseControl(true);
-        cullThetaControls(false);
-        cullJoints(true);
-        drawScene(sceneTheta, "Side / Top View");
-        cullBaseControl(false);
-        cullThetaControls(true);
-        cullJoints(true);
-        drawScene(sceneBase, "Front View");
+        drawScene(constraintScene, constraintRoot, "Constraint View");
+        drawScene(thetaScene, thetaRoot, "Side / Top View");
+        drawScene(baseScene, baseRoot, "Front View");
         updateCostraint((BallAndSocket) j0.constraint(), t_lr, t_ud, base);
         if(solve) solver.solve();
     }
@@ -151,12 +139,11 @@ public class DrawingConstraint  extends PApplet {
         b.update(constraint.left(), constraint.right(), constraint.up(), constraint.down());
     }
 
-    public void drawScene(Scene scene, String title){
+    public void drawScene(Scene scene, Node root, String title){
         scene.beginDraw();
         scene.context().background(0);
         scene.context().lights();
-        //scene.drawAxes();
-        scene.render();
+        scene.render(root);
         scene.beginHUD();
         scene.context().noLights();
         scene.context().pushStyle();
@@ -167,7 +154,7 @@ public class DrawingConstraint  extends PApplet {
         scene.context().text(title, scene.context().width / 2, 20);
         scene.context().noFill();
         scene.context().strokeWeight(3);
-        scene.context().rect(0,0,sceneConstraint.context().width, sceneConstraint.context().height);
+        scene.context().rect(0,0, constraintScene.context().width, constraintScene.context().height);
         scene.context().popStyle();
         scene.endHUD();
         scene.endDraw();
@@ -702,7 +689,7 @@ public class DrawingConstraint  extends PApplet {
 
     public void handleMouse() {
         Scene prev = focus;
-        focus = mouseX < w / 3 ? sceneConstraint : mouseX < 2 * w / 3 ? sceneTheta : sceneBase;
+        focus = mouseX < w / 3 ? constraintScene : mouseX < 2 * w / 3 ? thetaScene : baseScene;
         if(prev != focus && prev != null && prev.node() != null){
             prev.node().interact("Clear");
             if(focus != null && focus.node() != null)focus.node().interact("Clear");
@@ -715,7 +702,7 @@ public class DrawingConstraint  extends PApplet {
     }
 
     public void mouseDragged() {
-        if(focus == sceneTheta || focus == sceneBase) {
+        if(focus == thetaScene || focus == baseScene) {
             if(focus.node() != null) focus.node().interact("OnScaling", new Vector(focus.mouseX(), focus.mouseY()));
             return;
         }
@@ -729,7 +716,7 @@ public class DrawingConstraint  extends PApplet {
     }
 
     public void mouseReleased(){
-        if(focus == sceneTheta || focus == sceneBase) {
+        if(focus == thetaScene || focus == baseScene) {
             if(focus.node() != null )focus.node().interact("Scale");
             return;
         }
