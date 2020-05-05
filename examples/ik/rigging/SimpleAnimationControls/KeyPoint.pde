@@ -10,7 +10,7 @@ static class KeyPoint extends Node {
     protected KeyPoint _prev, _next;
     protected float _radius, _time;
     protected Status _status = Status.EMPTY;
-    protected SkeletonAnimation.TimePosture _timePosture;
+    protected Posture _posture;
 
 
     public KeyPoint(TimeLine timeLine, float radius){
@@ -107,9 +107,8 @@ static class KeyPoint extends Node {
         //first delete posture
         Status prev = _status;
         deletePosture();
-        Skeleton skeleton = _timeLine._panel._skeletonAnimation.skeleton();
-        Posture posture = new Posture(skeleton);
-        _timePosture = new SkeletonAnimation.TimePosture(posture, _time);
+        Skeleton skeleton = _timeLine._panel._postureInterpolator.skeleton();
+        _posture = new Posture(skeleton);
         if(_status.equals(Status.DISABLED)) return;
         _status = Status.DISABLED;
         if(!prev.equals(Status.DISABLED)){
@@ -119,50 +118,31 @@ static class KeyPoint extends Node {
 
     public void loadPosture(){
         if(_status.equals(Status.EMPTY)) return;
-        _timePosture.posture().loadValues(_timeLine._panel._skeletonAnimation.skeleton());
+        _posture.loadValues(_timeLine._panel._postureInterpolator.skeleton());
         //restore targets to eff position
-        _timeLine._panel._skeletonAnimation.skeleton().restoreTargetsState();
+        _timeLine._panel._postureInterpolator.skeleton().restoreTargetsState();
     }
 
     public void deletePosture(){
         if(_status.equals(Status.EMPTY)) return;
         disable(); //disable the posture
-        _timePosture = null;
+        _posture = null;
         _status = Status.EMPTY;
     }
 
     public void disable(){
         if(_status.equals(Status.DISABLED) || _status.equals(Status.EMPTY)) return;
-        //Remove the posture from the list
-        _timeLine._panel._skeletonAnimation.postures().remove(_timePosture);
         //change status to disabled
         _status = Status.DISABLED;
     }
 
     public void enable(){
         if(_status.equals(Status.ENABLED) || _status.equals(Status.EMPTY)) return; //no modification is required
-        //Add the posture to the animation handler list in the correct position
-        SkeletonAnimation skeletonAnimation = _timeLine._panel._skeletonAnimation;
-        if(skeletonAnimation.postures().isEmpty() || skeletonAnimation.postures().get(skeletonAnimation.postures().size() - 1).time() <= _time){
-            skeletonAnimation.postures().add(_timePosture); //add posture at the end of the list
-            _status = Status.ENABLED;
-            return;
-        }
-
-        for(int i = 0; i < skeletonAnimation.postures().size(); i++){
-            SkeletonAnimation.TimePosture p = skeletonAnimation.postures().get(i);
-            if(_time < p.time()){
-                skeletonAnimation.postures().add(i,_timePosture);
-                _status = Status.ENABLED;
-                return;
-            }
-        }
+        _status = Status.ENABLED;
     }
 
     protected void _timeChanged(){
         _time = Vector.distance(_timeLine.position(), this.position()) / _timeLine._spaceStep * _timeLine._timeStep;
         if(_status.equals(Status.EMPTY)) return;
-        _timePosture.setTime(_time);
     }
-
 }

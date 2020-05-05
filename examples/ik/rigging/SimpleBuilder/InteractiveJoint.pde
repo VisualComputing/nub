@@ -43,6 +43,10 @@ class InteractiveJoint extends Joint {
             pg.popStyle();
         }
         if(!depth)pg.hint(PConstants.ENABLE_DEPTH_TEST);
+        pg.pushStyle();
+        stroke(255);
+        scene.drawBullsEye(this);
+        pg.popStyle();
     }
 
     public void addChild(Scene focus, Vector mouse){

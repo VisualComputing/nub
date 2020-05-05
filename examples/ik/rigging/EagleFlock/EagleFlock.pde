@@ -33,7 +33,7 @@ int flockHeight = 720;
 int flockDepth = 600;
 boolean avoidWalls = true;
 
-int initBoidNum = 30 ,numFlocks = 5; // amount of boids to start the program with
+int initBoidNum = 20 ,numFlocks = 10; // amount of boids to start the program with
 ArrayList< ArrayList<Boid> > flocks = new ArrayList< ArrayList<Boid> >();
 Node avatar;
 boolean animate = true;
@@ -242,11 +242,21 @@ Node generateEagle(){
 
       //If desired generates a default Path that target must follow
       if(endEffector == skeleton.get(14)){
-        setupTargetInterpolator(target, new Vector[]{new Vector(-48,0,0), new Vector(-40,-13,0), new Vector(-32,0,0) , new Vector(-40,20,0), new Vector(-48,0,0)});
+        setupTargetInterpolator(target, new Vector[]{
+          new Vector(-36,3,0), 
+          new Vector(-34,-11,0), 
+          new Vector(-36,3,0) , 
+          new Vector(-34,15,0), 
+          new Vector(-36,3,0)});
       }
 
       if(endEffector == skeleton.get(18)){
-        setupTargetInterpolator(target, new Vector[]{new Vector(44,0,0), new Vector(38,-16,0), new Vector(28.5,0,0) , new Vector(38,19,0), new Vector(44,0,0)});
+        setupTargetInterpolator(target, new Vector[]{
+          new Vector(33,3,0), 
+          new Vector(31,-11,0), 
+          new Vector(33,3,0) , 
+          new Vector(31,15,0), 
+          new Vector(33,3,0)});
       } 
   }
   return objShape;
@@ -329,5 +339,6 @@ Interpolator setupTargetInterpolator(Node target, Vector[] positions) {
         targetInterpolator.addKeyFrame(iFrame);
     }
     targetInterpolator.run();
+    targetInterpolator.setTime(random(positions.length));
     return targetInterpolator;
 }

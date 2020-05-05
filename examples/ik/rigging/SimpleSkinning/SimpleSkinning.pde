@@ -32,9 +32,9 @@ Node reference;
 Skeleton skeleton;
 Skinning skinning;
 
-String shapePath = "Rex.obj";
-String texturePath = "T-Rex.jpg";
-String skeletonPath = "rex_constrained.json";
+String shapePath = "Kangaroo/Kangaroo.obj";
+String texturePath = "Kangaroo/Kangaroo_diff.jpg";
+String skeletonPath = "Kangaroo/Kangaroo.json";
 
 //Flag used to visualize which joint influences the most a region of the mesh
 int activeRegion = 0;  

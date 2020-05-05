@@ -1,3 +1,29 @@
+/**
+ * Simple Animation Controls
+ * by Sebastian Chaparro Cuevas.
+ *
+ * In this example a mesh is loaded (shapePath) along with a skeleton (jsonPath) and the idea is to define
+ * key postures at different times (represented in the timeline at the bottom of the window) that will be 
+ * interpolated to produce a smooth movement.
+ *
+ * To do so you could interact with the scene and the time line as follows:
+ * Interact with the main scene and the skeleton as usual either manipulating the skeleton itself or the IK targets.
+ * Click on a key frame to set it as the current key frame. Note that the current key frame is highlighted with a green border
+ * and any action performed with the keyboard will be applied to it.
+ * Press 'S' to save the posture of the skeleton on the current key frame.
+ * Press 'E' to enable / disable the current key frame if it contains a posture. If a key frame is enabled (green fill) 
+ * then it will be used to generate the animation otherwise it will be ignored (red fill).
+ * Press 'D' to delete the posture saved in the current key frame.
+ * Press 'R' to play the current animation.
+ * Press 'T' to stop the animation.
+ * Press 'I' to invert the speed direction (if is negative the animation will run backwards).
+ * Press 'L' to make the animation loop.
+ * Press any digit to change the sped of the animation.
+ * Press the space bar to show / hide the skeleton.
+ * Translate the key frames to change their time position.
+ */
+
+
 import nub.core.*;
 import nub.core.constraint.*;
 import nub.primitives.*;
@@ -14,13 +40,18 @@ import nub.ik.solver.*;
 
     
 Scene mainScene, controlScene, focus;
+
 boolean showSkeleton = true;
-String jsonPath = "data/rex.json";
-String shapePath = "Rex.obj";
-String texturePath = "T-Rex.jpg";
+String jsonPath = "data/Hand_constrained.json";
+String shapePath = "Rigged_Hand.obj";
+String texturePath = "HAND_C.jpg";
 AnimationPanel panel;
 Skeleton skeleton;
 Skinning skinning;
+
+float speed = 1, direction = 1;
+
+
 
 
 public void settings() {
@@ -29,10 +60,9 @@ public void settings() {
 
 public void setup() {
   //Kinematic scene
-  mainScene = new Scene(this);
+  mainScene = new Scene(this, P3D, width, height);
   mainScene.fit(0);
   mainScene.setRightHanded();
-  //skeleton = generateSkeleton(mainScene, 5);
   skeleton = new Skeleton(mainScene, jsonPath);
   skeleton.enableIK();
   skeleton.addTargets();
@@ -58,49 +88,24 @@ public void setup() {
           return new Quaternion(); //no rotation is allowed
       }
   });
-  //Lock nodes on a given graph
-  mainScene.lock(skeleton.reference());
-  controlScene.lock(panel);
 }
 
 
 public void draw() {
-  lights();
+  mainScene.beginDraw();
+  mainScene.context().lights();
   mainScene.context().background(0);
   mainScene.drawAxes();
-  skinning.render(mainScene, skeleton.reference());
-  skeleton.cull(!showSkeleton);
-  mainScene.render();
-
-  noLights();
-  mainScene.beginHUD();
+  skinning.render(mainScene);
+  if(showSkeleton) mainScene.render(skeleton.reference());
+  mainScene.endDraw();
+  mainScene.display();
   controlScene.beginDraw();
   controlScene.context().background(150);
-  controlScene.render();
+  controlScene.render(panel);
   controlScene.endDraw();
   controlScene.display();
-  mainScene.endHUD();
-
 }
-
-//Skeleton definition methods
-public Skeleton generateSkeleton(Scene scene, int n){
-  Skeleton skeleton = new Skeleton(scene);
-  //1. create a basic skeleton composed of n Joints
-  int idx = 0;
-  skeleton.addJoint("J" + idx++);
-  Vector t = new Vector(0, scene.radius() / n);
-  for( ; idx < n; idx++){
-      Joint joint = skeleton.addJoint("J" +idx, "J" + (idx - 1));
-      joint.translate(t);
-  }
-  //2. create solvers
-  skeleton.enableIK();
-  //3. add targets
-  skeleton.addTargets();
-  return skeleton;
-}
-
 
 //Interaction methods
 
@@ -122,32 +127,44 @@ public void mouseWheel(MouseEvent event) {
   if(focus != controlScene && focus.node() == null) focus.scale(event.getCount() * 50);
 }
 
-public void keyPressed(){
-  if(key == 'r' || key == 'R'){
-    panel.play();
-  }
+    public void keyPressed(){
+        if(key == 'r' || key == 'R'){
+            panel.play(direction * speed);
+        }
+        
+        if(key == 't' || key == 'T'){
+          panel.stop();
+        }
 
-  if(key == 's' || key == 'S'){
-    //save skeleton posture
-    panel.savePosture();
-  }
+        if(key == 's' || key == 'S'){
+            //save skeleton posture
+            panel.savePosture();
+        }
 
-  if(key == 'e' || key == 'E'){
-    panel.toggleCurrentKeyPoint();
-  }
+        if(key == 'e' || key == 'E'){
+            panel.toggleCurrentKeyPoint();
+        }
 
-  if(key == 'd' || key == 'D'){
-    panel.deletePostureAtKeyPoint();
-  }
+        if(key == 'd' || key == 'D'){
+            panel.deletePostureAtKeyPoint();
+        }
 
-  if(key == 't' || key == 'T'){
-    skeleton.restoreTargetsState();
-  }
-  
-  if(key == ' '){
-    showSkeleton = !showSkeleton;
-  }
-}
+        if(key == 'i' || key == 'I'){
+            direction  *= -1;
+        }
+
+        if(key == 'l' || key == 'L'){
+            panel.enableRecurrence(!panel.isRecurrent());
+        }
+
+        if(Character.isDigit(key)){
+            speed = Float.valueOf(""+key);
+        }
+        
+        if(key == ' '){
+          showSkeleton = !showSkeleton;
+        }
+    }
 
 public void mouseClicked(MouseEvent event) {
   if(focus == mainScene) {

@@ -94,11 +94,21 @@ void setup() {
         endEffector.enableTagging(false);
         //If desired generates a default Path that target must follow
         if(endEffector == skeleton.get(14)){
-          targetInterpolator[0] = setupTargetInterpolator(target, new Vector[]{new Vector(-48,0,0), new Vector(-40,-13,0), new Vector(-32,0,0) , new Vector(-40,20,0), new Vector(-48,0,0)});
+          targetInterpolator[0] = setupTargetInterpolator(target, new Vector[]{
+            new Vector(-36,3,0), 
+            new Vector(-34,-11,0), 
+            new Vector(-36,3,0) , 
+            new Vector(-34,15,0), 
+            new Vector(-36,3,0)});
         }
 
         if(endEffector == skeleton.get(18)){
-          targetInterpolator[1] = setupTargetInterpolator(target, new Vector[]{new Vector(44,0,0), new Vector(38,-16,0), new Vector(28.5,0,0) , new Vector(38,19,0), new Vector(44,0,0)});
+          targetInterpolator[1] = setupTargetInterpolator(target, new Vector[]{
+            new Vector(33,3,0), 
+            new Vector(31,-11,0), 
+            new Vector(33,3,0) , 
+            new Vector(31,15,0), 
+            new Vector(33,3,0)});
         } 
     }
     //use this method to visualize which node influences the most on a region of the mesh.
@@ -292,6 +302,6 @@ Interpolator setupTargetInterpolator(Node target, Vector[] positions) {
         iFrame.setTranslation(positions[i]);
         targetInterpolator.addKeyFrame(iFrame);
     }
-    //targetInterpolator.run();
+    targetInterpolator.run();
     return targetInterpolator;
 }

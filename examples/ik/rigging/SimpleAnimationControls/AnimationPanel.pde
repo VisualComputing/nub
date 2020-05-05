@@ -6,7 +6,7 @@ class AnimationPanel extends Node {
     protected PFont _font36;
     protected Scene _scene;
     protected TimeLine _timeLine;
-    protected SkeletonAnimation _skeletonAnimation;
+    protected PostureInterpolator _postureInterpolator;
 
 
     public AnimationPanel(Scene scene, Skeleton skeleton){
@@ -32,9 +32,9 @@ class AnimationPanel extends Node {
         _height = 2 * rh;
 
         _scene = scene;
-        _skeletonAnimation = new SkeletonAnimation(skeleton);
+        _postureInterpolator = new PostureInterpolator(skeleton);
 
-        _timeLine = new TimeLine(this, 200, 1000, 28);
+        _timeLine = new TimeLine(this, 200, 1000, 50);
 
         this.setConstraint(new Constraint() {
             @Override
@@ -55,8 +55,21 @@ class AnimationPanel extends Node {
         _timeLine._current.savePosture();
     }
 
-    public void play(){
-        _skeletonAnimation.play();
+    public void play(float speed){
+        _postureInterpolator.clear();
+        addKeyPostures();
+        _postureInterpolator.setSpeed(speed);
+        _postureInterpolator.run();
+    }
+
+    public void addKeyPostures(){
+        float prev = 0;
+        for(KeyPoint keyPoint : _timeLine._points){
+            float time = keyPoint._time / 1000f;
+            if(keyPoint._status == KeyPoint.Status.ENABLED)
+                _postureInterpolator.addKeyPosture(keyPoint._posture, time - prev);
+            prev = time;
+        }
     }
 
     public void toggleCurrentKeyPoint(){
@@ -68,5 +81,17 @@ class AnimationPanel extends Node {
     public void deletePostureAtKeyPoint(){
         KeyPoint p = _timeLine._current;
         p.deletePosture();
+    }
+    
+    public void enableRecurrence(boolean recurrent){
+        _postureInterpolator.enableRecurrence(recurrent);    
+    }
+    
+    public boolean isRecurrent(){
+      return _postureInterpolator.isRecurrent();
+    }
+    
+    public void stop(){
+      _postureInterpolator.reset();
     }
 }

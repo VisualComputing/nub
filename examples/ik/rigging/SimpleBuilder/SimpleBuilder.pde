@@ -36,11 +36,11 @@ String lastCommand = "None";
 PShape model;
 
 //Set this path to load your objs
-String shapePath = "Rex.obj";
-String texturePath = "T-Rex.jpg";
+String shapePath = "Kangaroo/Kangaroo.obj";
+String texturePath = "Kangaroo/Kangaroo_diff.jpg";
 
 //This is the path in which the skeleton will be saved
-String jsonPath = "data/rex.json"; 
+String jsonPath = "data/Kangaroo/Kangaroo.json"; 
 
 float radius = 0;
 int w = 1000, h = 700;

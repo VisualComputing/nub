@@ -248,7 +248,7 @@ List<Node> loadSkeleton(Node reference){
 Interpolator setupTargetInterpolator(Node target) {
     Interpolator targetInterpolator = new Interpolator(target);
     targetInterpolator.enableRecurrence();
-    targetInterpolator.setSpeed(3f);
+    targetInterpolator.setSpeed(5f);
     // Create an initial path
     int nbKeyFrames = 7;
     float step = 2.0f * PI / (nbKeyFrames - 1);
