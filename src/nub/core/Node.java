@@ -73,8 +73,11 @@ import java.util.List;
  * the graph when a node is set as its eye, see {@link Graph#preDraw()}.
  * <p>
  * To transform a point from one node to another use {@link #location(Vector, Node)} and
- * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
+ * {@link #worldLocation(Vector)}. To transform a vector (such as a normal) use
  * {@link #displacement(Vector, Node)} and {@link #worldDisplacement(Vector)}.
+ * To transform a quaternion use {@link #displacement(Quaternion, Node)} and
+ * {@link #worldDisplacement(Quaternion)}. To transform a scalar use
+ * {@link #displacement(float, Node)} and {@link #worldDisplacement(float)}.
  * <p>
  * The methods {@link #translate(Vector, float)}, {@link #rotate(Quaternion, float)},
  * {@link #orbit(Quaternion, Vector, float)} and {@link #scale(float, float)}, locally apply

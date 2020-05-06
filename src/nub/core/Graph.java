@@ -37,7 +37,10 @@ import java.util.List;
  * for a 2d graph.
  * <h1>2. Scene-graph handling</h1>
  * A graph forms a tree of {@link Node}s whose visual representations may be
- * {@link #render()}. Note that {@link #render()} should be called within your main-event loop.
+ * {@link #render()}. To render a subtree call {@link #render(Node)}. To render into an arbitrary
+ * rendering context (different than {@link #context()}) call {@link #render(Object, Node)},
+ * {@link #render(Object, Matrix, Matrix)} or {@link #render(Object, Node, Matrix, Matrix)}.
+ * Note that rendering routines should be called within your main-event loop.
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
@@ -65,7 +68,7 @@ import java.util.List;
  * {@link #updateTag(String, int, int, Node[])} and {@link #updateTag(String, int, int)} update the
  * tagged node synchronously (i.e., they return the tagged node immediately),
  * {@link #tag(String, int, int)} updates it asynchronously (i.e., it optimally updates the tagged
- * node during the next call to the {@link #render()} algorithm); and, </li>
+ * node during the next call to the {@link #render()} or {@link #render(Node)} algorithms); and, </li>
  * <li>Interact with your tagged nodes by calling any of the following methods: {@link #alignTag(String)},
  * {@link #focusTag(String)}, {@link #translateTag(String, float, float, float, float)},
  * {@link #rotateTag(String, float, float, float, float)}, {@link #scaleTag(String, float, float)},
@@ -117,8 +120,7 @@ import java.util.List;
  * <p>
  * To apply the transformation defined by a node call {@link #applyTransformation(Node)}
  * (see also {@link #applyWorldTransformation(Node)}). Note that the node transformations are
- * applied automatically by the {@link #render()} (together with all its variants) algorithm
- * (in this case you don't need to call them).
+ * applied automatically by the above rendering routines.
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
  * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
