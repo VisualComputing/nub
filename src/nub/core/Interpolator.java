@@ -101,11 +101,7 @@ public class Interpolator {
     KeyFrame(Node node, float time) {
       _time = time;
       _node = node;
-
-      _twin = new Node(node().reference());
     }
-
-    Node _twin;
 
     protected KeyFrame(KeyFrame other) {
       this._time = other._time;
