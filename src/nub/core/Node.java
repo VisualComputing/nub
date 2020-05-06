@@ -475,7 +475,7 @@ public class Node {
   // MODIFIED
 
   /**
-   * @return the last frame the this node was updated.
+   * @return the last frame this node was updated.
    */
   public long lastUpdate() {
     return _lastUpdate;
