@@ -111,6 +111,12 @@ public class MouseDragInteraction extends PApplet {
         scene.fit();
       }
     }
+    if (key == 'q') {
+      println(shape2.orientation().toString());
+      //Quaternion q = shape2.worldDisplacement(new Quaternion());
+      Quaternion q = shape2.worldDisplacement(shape2.rotation());
+      println(q.toString());
+    }
     if (key == 'a')
       lookAround = !lookAround;
     if (key == 'r')

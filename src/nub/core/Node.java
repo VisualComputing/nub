@@ -73,8 +73,11 @@ import java.util.List;
  * the graph when a node is set as its eye, see {@link Graph#preDraw()}.
  * <p>
  * To transform a point from one node to another use {@link #location(Vector, Node)} and
- * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
+ * {@link #worldLocation(Vector)}. To transform a vector (such as a normal) use
  * {@link #displacement(Vector, Node)} and {@link #worldDisplacement(Vector)}.
+ * To transform a quaternion use {@link #displacement(Quaternion, Node)} and
+ * {@link #worldDisplacement(Quaternion)}. To transform a scalar use
+ * {@link #displacement(float, Node)} and {@link #worldDisplacement(float)}.
  * <p>
  * The methods {@link #translate(Vector, float)}, {@link #rotate(Quaternion, float)},
  * {@link #orbit(Quaternion, Vector, float)} and {@link #scale(float, float)}, locally apply
@@ -155,9 +158,6 @@ public class Node {
   // Tasks
   protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
   protected final float _scalingFactor = 800;
-
-  // Locked Scene, see Graph.lock / unlock
-  Graph _graph;
 
   /**
    * Same as {@code this(null, null, null, new Vector(), new Quaternion(), 1)}.
@@ -478,7 +478,7 @@ public class Node {
   // MODIFIED
 
   /**
-   * @return the last frame the this node was updated.
+   * @return the last frame this node was updated.
    */
   public long lastUpdate() {
     return _lastUpdate;
@@ -1006,7 +1006,7 @@ public class Node {
    * @see #translation()
    */
   public Vector position() {
-    return worldLocation(new Vector(0, 0, 0));
+    return worldLocation(new Vector());
   }
 
   /**
@@ -1016,10 +1016,7 @@ public class Node {
    * @see #set(Node)
    */
   public void setPosition(Node node) {
-    if (node == null)
-      setPosition(new Vector());
-    else
-      setPosition(node.position());
+    setPosition(node == null ? new Vector() : node.position());
   }
 
   /**
@@ -1281,14 +1278,7 @@ public class Node {
    * @see #rotation()
    */
   public Quaternion orientation() {
-    Quaternion quaternion = rotation().get();
-    Node reference = reference();
-    while (reference != null) {
-      quaternion = Quaternion.compose(reference.rotation(), quaternion);
-      quaternion.normalize();
-      reference = reference.reference();
-    }
-    return quaternion;
+    return worldDisplacement(new Quaternion());
   }
 
   /**
@@ -1298,10 +1288,7 @@ public class Node {
    * @see #set(Node)
    */
   public void setOrientation(Node node) {
-    if (node == null)
-      setOrientation(new Quaternion());
-    else
-      setOrientation(node.orientation());
+    setOrientation(node == null ? new Quaternion() : node.orientation());
   }
 
   /**
@@ -1314,7 +1301,7 @@ public class Node {
    * to bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    */
   public void setOrientation(Quaternion quaternion) {
-    setRotation(reference() != null ? Quaternion.compose(reference().orientation().inverse(), quaternion) : quaternion);
+    setRotation(reference() != null ? reference().displacement(quaternion) : quaternion);
   }
 
   /**
@@ -1400,10 +1387,7 @@ public class Node {
    * @see Graph#projection(Node, Graph.Type, float, float, float, float, boolean)
    */
   public float magnitude() {
-    if (reference() != null)
-      return reference().magnitude() * scaling();
-    else
-      return scaling();
+    return reference() != null ? reference().magnitude() * scaling() : scaling();
   }
 
   /**
@@ -1413,10 +1397,7 @@ public class Node {
    * @see #set(Node)
    */
   public void setMagnitude(Node node) {
-    if (node == null)
-      setMagnitude(1);
-    else
-      setMagnitude(node.magnitude());
+    setMagnitude(node == null ? 1 : node.magnitude());
   }
 
   /**
@@ -1427,10 +1408,7 @@ public class Node {
    */
   public void setMagnitude(float magnitude) {
     Node reference = reference();
-    if (reference != null)
-      setScaling(magnitude / reference.magnitude());
-    else
-      setScaling(magnitude);
+    setScaling(reference != null ? magnitude / reference.magnitude() : magnitude);
   }
 
   // ALIGNMENT
@@ -2074,11 +2052,11 @@ public class Node {
    * @see #worldDisplacement(Vector)
    */
   public Quaternion displacement(Quaternion quaternion, Node node) {
-    return new Quaternion(displacement(quaternion.axis(), node), quaternion.angle());
+    return this == node ? quaternion : _displacement(reference() != null ? reference().displacement(quaternion, node) : node == null ? quaternion : node.worldDisplacement(quaternion));
   }
 
   /**
-   * Converts {@code vector} displacement from this node to world.
+   * Converts {@code quaternion} displacement from this node to world.
    * {@link #displacement(Vector)} performs the inverse transformation.
    * {@link #worldDisplacement(Vector)} converts vector displacements instead of quaternion displacements.
    * {@link #worldDisplacement(float)} converts scalar displacements instead of quaternion displacements.
@@ -2090,7 +2068,39 @@ public class Node {
    * @see #displacement(Quaternion, Node)
    */
   public Quaternion worldDisplacement(Quaternion quaternion) {
-    return new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle());
+    Node node = this;
+    Quaternion result = quaternion;
+    while (node != null) {
+      result = node._referenceDisplacement(result);
+      node = node.reference();
+    }
+    return result;
+  }
+
+  /**
+   * Converts {@code quaternion} displacement from {@link #reference()} to this node.
+   * <p>
+   * {@link #_referenceDisplacement(Quaternion)} performs the inverse transformation.
+   * {@link #_location(Vector)} converts locations instead of displacements.
+   *
+   * @see #displacement(Quaternion)
+   * @see #displacement(Vector)
+   */
+  protected Quaternion _displacement(Quaternion quaternion) {
+    return Quaternion.compose(rotation().inverse(), quaternion);
+  }
+
+  /**
+   * Converts {@code quaternion} displacement from this node to {@link #reference()}.
+   * <p>
+   * {@link #_displacement(Quaternion)} performs the inverse transformation.
+   * {@link #_referenceLocation(Vector)} converts locations instead of displacements.
+   *
+   * @see #worldDisplacement(Quaternion)
+   * @see #worldDisplacement(Vector)
+   */
+  protected Quaternion _referenceDisplacement(Quaternion quaternion) {
+    return Quaternion.compose(rotation(), quaternion);
   }
 
   // VECTOR CONVERSION
