@@ -1006,7 +1006,7 @@ public class Node {
    * @see #translation()
    */
   public Vector position() {
-    return worldLocation(new Vector(0, 0, 0));
+    return worldLocation(new Vector());
   }
 
   /**
@@ -1016,10 +1016,7 @@ public class Node {
    * @see #set(Node)
    */
   public void setPosition(Node node) {
-    if (node == null)
-      setPosition(new Vector());
-    else
-      setPosition(node.position());
+    setPosition(node == null ? new Vector() : node.position());
   }
 
   /**
@@ -1291,10 +1288,7 @@ public class Node {
    * @see #set(Node)
    */
   public void setOrientation(Node node) {
-    if (node == null)
-      setOrientation(new Quaternion());
-    else
-      setOrientation(node.orientation());
+    setOrientation(node == null ? new Quaternion() : node.orientation());
   }
 
   /**
@@ -1393,10 +1387,7 @@ public class Node {
    * @see Graph#projection(Node, Graph.Type, float, float, float, float, boolean)
    */
   public float magnitude() {
-    if (reference() != null)
-      return reference().magnitude() * scaling();
-    else
-      return scaling();
+    return reference() != null ? reference().magnitude() * scaling() : scaling();
   }
 
   /**
@@ -1406,10 +1397,7 @@ public class Node {
    * @see #set(Node)
    */
   public void setMagnitude(Node node) {
-    if (node == null)
-      setMagnitude(1);
-    else
-      setMagnitude(node.magnitude());
+    setMagnitude(node == null ? 1 : node.magnitude());
   }
 
   /**
@@ -1420,10 +1408,7 @@ public class Node {
    */
   public void setMagnitude(float magnitude) {
     Node reference = reference();
-    if (reference != null)
-      setScaling(magnitude / reference.magnitude());
-    else
-      setScaling(magnitude);
+    setScaling(reference != null ? magnitude / reference.magnitude() : magnitude);
   }
 
   // ALIGNMENT

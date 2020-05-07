@@ -1905,9 +1905,11 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Node node, float duration) {
-    if (duration <= 0)
-      eye().set(node);
-    else {
+    if (duration <= 0) {
+      eye().setPosition(node);
+      eye().setOrientation(node);
+      eye().setMagnitude(node);
+    } else {
       _interpolator.reset();
       _interpolator.clear();
       _interpolator.addKeyFrame(eye().detach());
