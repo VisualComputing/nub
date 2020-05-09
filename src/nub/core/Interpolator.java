@@ -113,6 +113,20 @@ public class Interpolator {
     }
 
     /**
+     * Returns the cache {@code _tangentVector} world-view. Good for drawing. See {@link #_updatePath()}.
+     */
+    protected Vector _tangentVector() {
+      return node().reference() == null ? _tangentVector : node().reference().worldDisplacement(_tangentVector);
+    }
+
+    /**
+     * Returns the cache {@code _tangentQuaternion} world-view. Good for drawing. See {@link #_updatePath()}.
+     */
+    protected Quaternion _tangentQuaternion() {
+      return node().reference() == null ? _tangentQuaternion : node().reference().worldDisplacement(_tangentQuaternion);
+    }
+
+    /**
      * Returns the key-frame translation respect to the {@link #node()} {@link Node#reference()} space.
      * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
      */
@@ -797,15 +811,15 @@ public class Interpolator {
         keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         while (keyFrames[2] != null) {
           Vector pdiff = Vector.subtract(keyFrames[2]._node.position(), keyFrames[1]._node.position());
-          Vector pvec1 = Vector.add(Vector.multiply(pdiff, 3.0f), Vector.multiply(keyFrames[1]._tangentVector, (-2.0f)));
-          pvec1 = Vector.subtract(pvec1, keyFrames[2]._tangentVector);
-          Vector pvec2 = Vector.add(Vector.multiply(pdiff, (-2.0f)), keyFrames[1]._tangentVector);
-          pvec2 = Vector.add(pvec2, keyFrames[2]._tangentVector);
+          Vector pvec1 = Vector.add(Vector.multiply(pdiff, 3.0f), Vector.multiply(keyFrames[1]._tangentVector(), (-2.0f)));
+          pvec1 = Vector.subtract(pvec1, keyFrames[2]._tangentVector());
+          Vector pvec2 = Vector.add(Vector.multiply(pdiff, (-2.0f)), keyFrames[1]._tangentVector());
+          pvec2 = Vector.add(pvec2, keyFrames[2]._tangentVector());
           for (int step = 0; step < nbSteps; ++step) {
             float alpha = step / (float) nbSteps;
             _path.add(Node.detach(
-                Vector.add(keyFrames[1]._node.position(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector, Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
-                Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion, keyFrames[2]._tangentQuaternion, keyFrames[2]._node.orientation(), alpha),
+                Vector.add(keyFrames[1]._node.position(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
+                Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.orientation(), alpha),
                 Vector.lerp(keyFrames[1]._node.magnitude(), keyFrames[2]._node.magnitude(), alpha))
             );
           }
