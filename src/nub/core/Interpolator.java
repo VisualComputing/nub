@@ -643,6 +643,19 @@ public class Interpolator {
       return;
     if (node == null)
       return;
+
+    if (!_list.isEmpty()) {
+      Node last = _list.get(_list.size() - 1)._node;
+      //Interpolate using the shortest path between two quaternions
+      if(Quaternion.dot(last.rotation(), node.rotation()) < 0){
+        //change sign
+        node.rotation().setX(-node.rotation().x());
+        node.rotation().setY(-node.rotation().y());
+        node.rotation().setZ(-node.rotation().z());
+        node.rotation().setW(-node.rotation().w());
+      }
+    }
+
     _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time));
     _valuesAreValid = false;
     _pathIsValid = false;
