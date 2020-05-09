@@ -646,13 +646,11 @@ public class Interpolator {
 
     if (!_list.isEmpty()) {
       Node last = _list.get(_list.size() - 1)._node;
-      //Interpolate using the shortest path between two quaternions
-      if(Quaternion.dot(last.rotation(), node.rotation()) < 0){
-        //change sign
-        node.rotation().setX(-node.rotation().x());
-        node.rotation().setY(-node.rotation().y());
-        node.rotation().setZ(-node.rotation().z());
-        node.rotation().setW(-node.rotation().w());
+      // Interpolate using the shortest path between two quaternions
+      // See: https://stackoverflow.com/questions/2886606/flipping-issue-when-interpolating-rotations-using-quaternions
+      if(Quaternion.dot(last.rotation(), node.rotation()) < 0) {
+        // change sign
+        node.rotation().negate();
       }
     }
 
