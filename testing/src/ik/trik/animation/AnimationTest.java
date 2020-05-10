@@ -23,6 +23,7 @@ public class AnimationTest extends PApplet{
     AnimationPanel panel;
     Skeleton skeleton;
     Skinning skinning;
+    boolean showSkeleton = true;
 
 
     public void settings() {
@@ -31,40 +32,21 @@ public class AnimationTest extends PApplet{
 
     public void setup() {
         //Kinematic scene
-        mainScene = new Scene(this);
+        mainScene = new Scene(this, P3D, width, height);
         mainScene.fit(0);
         mainScene.setRightHanded();
-        //skeleton = generateSkeleton(mainScene, 5);
-        skeleton = new Skeleton(mainScene, sketchPath() + jsonPath);
+        skeleton = new Skeleton(mainScene, jsonPath);
         skeleton.enableIK();
         skeleton.addTargets();
         skeleton.setTargetRadius(0.03f * mainScene.radius());
-
-        Solver s = new SimpleTRIK(skeleton.joints(), SimpleTRIK.HeuristicMode.FORWARD_TRIANGULATION);
-        //Dummy constraints in all joints
-        /*for(Node node : skeleton.joints()){
-            if(node.children().size() == 1){
-                float angle = radians(85);
-                BallAndSocket constraint = new BallAndSocket(angle, angle);
-                Vector twist = node.children().get(0).translation().get();
-                constraint.setRestRotation(node.rotation().get(), twist.orthogonalVector(), twist);
-                constraint.setTwistLimits(0,0);
-                node.setConstraint(constraint);
-            }
-        }*/
-
-
         //Relate the shape with a skinning method (CPU or GPU)
-        skinning = new GPULinearBlendSkinning(skeleton, sketchPath() + shapePath, sketchPath() + texturePath, mainScene.radius());
-
-
+        skinning = new GPULinearBlendSkinning(skeleton, shapePath, texturePath, mainScene.radius());
         //Set the control scene
         controlScene = new Scene(this, P2D, width, (int)(height * 0.3), 0,(int)(height * 0.7f));
         controlScene.setRadius( height * 0.3f / 2.f);
         controlScene.fit();
         //Setting the panel
         panel = new AnimationPanel(controlScene, skeleton);
-        //set eye constraint
         //set eye constraint
         controlScene.eye().enableTagging(false);
         controlScene.eye().setConstraint(new Constraint() {
@@ -78,38 +60,23 @@ public class AnimationTest extends PApplet{
                 return new Quaternion(); //no rotation is allowed
             }
         });
-
     }
 
 
     public void draw() {
-        //cull main scene
-        lights();
-        //cull panel
-        skeleton.cull(false);
-        panel.cull(true);
+        mainScene.beginDraw();
+        mainScene.context().lights();
         mainScene.context().background(0);
         mainScene.drawAxes();
         skinning.render(mainScene);
-        for(Interpolator interpolator : panel._postureInterpolator.interpolators().values()){
-            mainScene.drawCatmullRom(interpolator);
-        }
-
-        mainScene.render();
-
-        noLights();
-        skeleton.cull(true);
-        panel.cull(false);
-        mainScene.beginHUD();
+        if(showSkeleton) mainScene.render(skeleton.reference());
+        mainScene.endDraw();
+        mainScene.display();
         controlScene.beginDraw();
         controlScene.context().background(150);
-        controlScene.render();
+        controlScene.render(panel);
         controlScene.endDraw();
         controlScene.display();
-        mainScene.endHUD();
-
-        skeleton.cull(false);
-        panel.cull(true);
     }
 
     //Skeleton definition methods
@@ -161,10 +128,14 @@ public class AnimationTest extends PApplet{
         if(focus != controlScene && focus.node() == null) focus.scale(event.getCount() * 50);
     }
 
-    float speed = 1, dir = 1;
+    float speed = 1, direction = 1;
     public void keyPressed(){
         if(key == 'r' || key == 'R'){
-            panel.play(dir * speed);
+            panel.play(direction * speed);
+        }
+
+        if(key == 't' || key == 'T'){
+            panel.stop();
         }
 
         if(key == 's' || key == 'S'){
@@ -181,15 +152,19 @@ public class AnimationTest extends PApplet{
         }
 
         if(key == 'i' || key == 'I'){
-            dir  *= -1;
+            direction  *= -1;
         }
 
         if(key == 'l' || key == 'L'){
-            panel._postureInterpolator.enableRecurrence(!panel._postureInterpolator.isRecurrent());
+            panel.enableRecurrence(!panel.isRecurrent());
         }
 
         if(Character.isDigit(key)){
             speed = Float.valueOf(""+key);
+        }
+
+        if(key == ' '){
+            showSkeleton = !showSkeleton;
         }
     }
 

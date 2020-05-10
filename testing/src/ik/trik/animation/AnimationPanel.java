@@ -93,4 +93,17 @@ public class AnimationPanel extends Node {
         KeyPoint p = _timeLine._current;
         p.deletePosture();
     }
+
+    public void enableRecurrence(boolean recurrent){
+        _postureInterpolator.enableRecurrence(recurrent);
+    }
+
+    public boolean isRecurrent(){
+        return _postureInterpolator.isRecurrent();
+    }
+
+    public void stop(){
+        _postureInterpolator.reset();
+    }
+
 }
