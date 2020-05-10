@@ -219,15 +219,6 @@ public class PostureInterpolator {
             Node joint = _skeleton.joint(entry.getKey());
             Interpolator interpolator = _interpolators.get(joint);
             Node info = entry.getValue();
-            //create detached node with local information
-            if(joint.rotation().w() < 0 && info.rotation().w() > 0){
-                //change sign
-                info.rotation().setX(-info.rotation().x());
-                info.rotation().setY(-info.rotation().y());
-                info.rotation().setZ(-info.rotation().z());
-                info.rotation().setW(-info.rotation().w());
-            }
-
             Node detach = Node.detach(info.translation().get(), info.rotation().get(), info.magnitude());
             interpolator.addKeyFrame(detach, time);
         }
