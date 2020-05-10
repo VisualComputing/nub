@@ -7,7 +7,9 @@
  * 
  * Double Click on a joint to display a panel on the left with its information and modify it.
  * Double Click on the scene to hide the panel.
- * Press 'P' when you want to save the skeleton. 
+ * Press 'P' when you want to save the skeleton.
+ *
+ * This example requires the g4p library: http://www.lagers.org.uk/g4p/
  * 
  * Please refer to https://github.com/sechaparroc/nub/wiki/6.-Rigging-skeletons-with-constraints for a detailed explanation.
  */

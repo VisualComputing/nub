@@ -11,7 +11,6 @@ import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.oldtrik.TRIK;
-import nub.ik.solver.numerical.SDLSSolver;
 import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
@@ -112,10 +111,6 @@ public class BenchmarkUR10 extends PApplet {
         }
         case "CCD": {
           solver = new CCDSolver(branch);
-          break;
-        }
-        case "NUMERICAL": {
-          solver = new SDLSSolver(branch);
           break;
         }
         case "TRIK": {

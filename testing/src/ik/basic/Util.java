@@ -14,9 +14,6 @@ import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.MySolver;
 import nub.ik.solver.geometric.oldtrik.TRIK;
-import nub.ik.solver.numerical.PseudoInverseSolver;
-import nub.ik.solver.numerical.SDLSSolver;
-import nub.ik.solver.numerical.TransposeSolver;
 import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
@@ -53,8 +50,6 @@ public class Util {
         CCDSolver solver = new CCDSolver(structure, false);
         return solver;
       }
-      case PINV:
-        new PseudoInverseSolver(structure);
       case FABRIK: {
         ChainSolver solver = new ChainSolver(structure);
         solver.setKeepDirection(false);
@@ -80,14 +75,10 @@ public class Util {
         solver.setFixTwisting(true);
         return solver;
       }
-      case TRANSPOSE:
-        return new TransposeSolver(structure);
       case GA:
         return new GASolver(structure, 10);
       case HAEA:
         return new HAEASolver(structure, 10, true);
-      case SDLS:
-        return new SDLSSolver(structure);
       case MySolver:
         return new MySolver(structure);
       case TRIK_V1: {
@@ -491,15 +482,6 @@ public class Util {
     }
     if (solver instanceof CCDSolver) {
       pg.text("CCD" + "\n Error: " + String.format("%.7f", solver.error()) + "\nAccum error : " + solver.accumulatedError() + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
-    }
-    if (solver instanceof TransposeSolver) {
-      pg.text("Transpose" + "\n Error: " + String.format("%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
-    }
-    if (solver instanceof SDLSSolver) {
-      pg.text("SDLS" + "\n Error: " + String.format("%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
-    }
-    if (solver instanceof PseudoInverseSolver) {
-      pg.text("PseudoInv" + "\n Error: " + String.format("%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
     }
     if (solver instanceof HillClimbingSolver) {
       HillClimbingSolver s = (HillClimbingSolver) solver;
