@@ -46,17 +46,17 @@ public class ShadowMappingVBO extends PApplet {
     shapes = new Node[50];
     for (int i = 0; i < shapes.length; i++) {
       tint(random(0, 255), random(0, 255), random(0, 255), random(150, 255));
-      shapes[i] = new Node(scene, loadShape("/home/pierre/IdeaProjects/nubjs/testing/data/interaction/rocket.obj"));
+      shapes[i] = new Node(loadShape("/home/pierre/IdeaProjects/nub/testing/data/interaction/rocket.obj"));
       scene.randomize(shapes[i]);
       shapes[i].setPickingThreshold(0);
       shapes[i].scale(0.2f);
     }
-    light = new Node(scene) {
+    light = new Node() {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();
         if (debug) {
-          pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
+          pg.fill(0, scene.hasTag(this) ? 255 : 0, 255, 120);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         }
         Scene.drawAxes(pg, 300);
@@ -77,19 +77,19 @@ public class ShadowMappingVBO extends PApplet {
     //PShape box = createShape(RECT, 0, 0, 360, 360);
     box.setFill(0xff222222);
     box.setStroke(false);
-    floor = new Node(scene);
+    floor = new Node();
     floor.setShape(box);
 
     // initShadowPass
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_frag.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth_alt/depth_nonlinear.glsl");
     shadowMap = createGraphics(2048, 2048, P3D);
     shadowMap.shader(depthShader);
     // TODO testing the appearance of artifacts first
     //shadowMap.noSmooth();
 
     // initDefaultPass
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nub/testing/data/shadow/shadow_vert.glsl");
     shader(shadowShader);
     noStroke();
   }
@@ -105,7 +105,7 @@ public class ShadowMappingVBO extends PApplet {
     // 2. Render the scene from the scene.eye() node
     background(0xff222222);
     if (!debug) {
-      Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+      Matrix projectionView = scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
       //Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
       Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, scene.eye().viewInverse()));
@@ -131,14 +131,14 @@ public class ShadowMappingVBO extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.cast();
+    scene.mouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(mouseX - pmouseX);
   }

@@ -56,7 +56,7 @@ public class TwoScenes extends PApplet {
       Vector zNear = new Vector(0, 0, scene1.zNear());
       Vector zFar = new Vector(0, 0, scene1.zFar());
       Vector zNear2ZFar = Vector.subtract(zFar, zNear);
-      scene1.translate(0, 0, zNear2ZFar.magnitude(), node);
+      scene1.translateNode(node, 0, 0, zNear2ZFar.magnitude());
     }
     if (key == 'n')
       scene1.eye().setMagnitude(1);
@@ -77,9 +77,9 @@ public class TwoScenes extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.spin();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.translate();
+      focus.mouseTranslate();
     else
       focus.moveForward(mouseX - pmouseX);
   }
@@ -94,7 +94,7 @@ public class TwoScenes extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.align();
+        focus.alignTag();
   }
 
   void draw(Scene scn) {

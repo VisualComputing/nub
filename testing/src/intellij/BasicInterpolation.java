@@ -14,6 +14,7 @@ import processing.event.MouseEvent;
 public class BasicInterpolation extends PApplet {
   Scene scene;
   Interpolator interpolator;
+  float speed = 1;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
@@ -31,12 +32,12 @@ public class BasicInterpolation extends PApplet {
     // interpolation 1. Default eye interpolations
     scene.fit(1);
 
-    interpolator = new Interpolator(scene);
-    interpolator.setLoop();
+    interpolator = new Interpolator();
+    interpolator.enableRecurrence();
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(Node.random(scene));
-    interpolator.start();
+    interpolator.run();
   }
 
   public void draw() {
@@ -44,30 +45,30 @@ public class BasicInterpolation extends PApplet {
 
     pushStyle();
     stroke(255);
-    scene.drawPath(interpolator, 5);
+    scene.drawCatmullRom(interpolator, 5);
     popStyle();
 
     pushStyle();
     fill(255, 0, 0, 125);
-    scene.matrixHandler().pushMatrix();
+    pushMatrix();
     scene.applyTransformation(interpolator.node());
     box(50);
-    scene.matrixHandler().popMatrix();
+    popMatrix();
     popStyle();
   }
 
   @Override
   public void mouseMoved() {
-    scene.track();
+    scene.updateMouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
       //scene.lookAround(upVector);
       //scene.mouseCAD();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
       //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);
@@ -80,10 +81,13 @@ public class BasicInterpolation extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == '-')
-      interpolator.setSpeed(interpolator.speed() - 0.25f);
-    if (key == '+')
-      interpolator.setSpeed(interpolator.speed() + 0.25f);
+    if (key == '-' || key == '+') {
+      if (key == '-')
+        speed -= 0.25f;
+      else
+        speed += 0.25f;
+      interpolator.run(speed);
+    }
 
     if (key == 's')
       scene.fit(1);

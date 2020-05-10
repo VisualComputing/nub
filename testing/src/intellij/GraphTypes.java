@@ -43,7 +43,7 @@ public class GraphTypes extends PApplet {
     auxScene.setRadius(400);
     //scene2.fit(1);
     auxScene.fit();
-    boxNode = new Node(auxScene);
+    boxNode = new Node();
     boxNode.rotate(new Quaternion(new Vector(0, 1, 0), QUARTER_PI));
   }
 
@@ -68,7 +68,7 @@ public class GraphTypes extends PApplet {
       println("2*radius*sqrt(3): " + 2 * scene.radius() * sqrt(3));
       println(version1() + " " + version2() + " eye magnitude: " + scene.eye().magnitude());
       println((scene.type() == Graph.Type.ORTHOGRAPHIC ? "ORTHO" : "PERSP") + " zNear: " + scene.zNear() + " zFar: " + scene.zFar());
-      scene.eye().position().print();
+      print(scene.eye().position().toString());
     }
     if (key == 'n')
       scene.setFOV(1);
@@ -84,10 +84,10 @@ public class GraphTypes extends PApplet {
       //scene1.fit();
     }
     if (key == 'e')
-      if (auxScene.trackedNode() == boxNode)
-        auxScene.resetTrackedNode();
+      if (auxScene.node() == boxNode)
+        auxScene.removeTag();
       else
-        auxScene.setTrackedNode(boxNode);
+        auxScene.tag(boxNode);
     if (key == '+')
       scene.eye().rotate(0, 1, 0, QUARTER_PI / 2);
     if (key == '-')
@@ -121,9 +121,9 @@ public class GraphTypes extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.spin();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.translate();
+      focus.mouseTranslate();
     else
       focus.moveForward(mouseX - pmouseX);
   }
@@ -138,7 +138,7 @@ public class GraphTypes extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.align();
+        focus.alignTag();
   }
 
   void draw(PGraphics graphics) {

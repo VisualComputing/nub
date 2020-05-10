@@ -25,7 +25,7 @@ public class OFFScreen extends PApplet {
     scene.setRadius(300);
     scene.fit(1);
 
-    shape1 = new Node(scene) {
+    shape1 = new Node() {
       @Override
       public void graphics(PGraphics pGraphics) {
         Scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -59,14 +59,14 @@ public class OFFScreen extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast();
+    scene.mouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(mouseX - pmouseX);
   }
@@ -80,7 +80,7 @@ public class OFFScreen extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.align();
+        scene.alignTag();
   }
 
   public void keyPressed() {

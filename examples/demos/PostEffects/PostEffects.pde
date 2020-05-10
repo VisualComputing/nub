@@ -1,11 +1,13 @@
 /**
- * PostEffects.
+ * Post Effects.
  * by Ivan Castellanos and Jean Pierre Charalambos.
  *
- * This example illustrates how to concatenate shaders to accumulate their
- * effects which requires drawing shapes into arbitrary PGraphics canvases.
+ * This example is an adaption of Neil Mendoza great openFrameworks
+ * ofxPostProcessing addon (http://www.neilmendoza.com/ofxpostprocessing/)
+ * which illustrates how to concatenate shaders to accumulate their effects
+ * by drawing shapes into arbitrary PGraphics canvases.
  *
- * Press '1' to '9' to (de)activate effect.
+ * Press '1' to '7' to (de)activate effect.
  */
 
 import nub.primitives.*;
@@ -16,7 +18,6 @@ PShader noiseShader, kaleidoShader, raysShader, pixelShader, edgeShader, depthSh
 PGraphics drawGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, depthPGraphics, horizontalGraphics;
 Scene scene;
 boolean bdepth, brays, bpixel, bedge, bkaleido, bnoise, bhorizontal;
-int startTime;
 Node[] models;
 PFont font;
 
@@ -29,7 +30,7 @@ public void setup() {
   scene.setRadius(1000);
   models = new Node[100];
   for (int i = 0; i < models.length; i++) {
-    models[i] = new Node(scene, shape());
+    models[i] = new Node(shape());
     scene.randomize(models[i]);
     // set picking precision to the pixels of the node projection
     models[i].setPickingThreshold(0);
@@ -186,14 +187,14 @@ void keyPressed() {
 }
 
 void mouseMoved() {
-  scene.cast();
+  scene.mouseTag();
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.spin();
+    scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.translate();
+    scene.mouseTranslate();
   else
     scene.moveForward(scene.mouseDX());
 }

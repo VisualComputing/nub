@@ -39,7 +39,7 @@ public class Util {
   //Here it is assumed a kinematic chain
   public static DMatrixRMaj jacobian(List<? extends Node> chain, Node endEffector, Vector target, Vector[] axes) {
     if (chain == null) return null;
-    int dim = endEffector.graph().is3D() ? 3 : 2;
+    int dim = 3; //endEffector.graph().is3D() ? 3 : 2;
     double[][] J = new double[dim][(chain.size() - 1)];
     //TODO: Make it in an efficient way (calculate global transformations)
     Vector z = new Vector(0, 0, 1);
@@ -69,7 +69,7 @@ public class Util {
   //Here it is assumed a kinematic chain
   public static DMatrixRMaj numericalJacobian(List<? extends Node> chain, Node endEffector, Vector target, Vector[] axes) {
     if (chain == null) return null;
-    int dim = endEffector.graph().is3D() ? 3 : 2;
+    int dim = 3; //endEffector.graph().is3D() ? 3 : 2;
     double[][] J = new double[dim][(chain.size() - 1)];
     //TODO: Make it in an efficient way (calculate global transformations)
     Vector z = new Vector(0, 0, 1);

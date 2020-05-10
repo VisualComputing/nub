@@ -1,6 +1,5 @@
 package intellij;
 
-import nub.core.Graph;
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
@@ -11,8 +10,6 @@ import processing.event.MouseEvent;
 public class MiniMap extends PApplet {
   Scene scene, minimap, focus;
   Node[] models;
-  // the sceneEye doesn't hold a graphics representation
-  Node sceneEye;
   boolean displayMinimap = true;
   // whilst scene is either on-screen or not, the minimap is always off-screen
   // test both cases here:
@@ -23,29 +20,38 @@ public class MiniMap extends PApplet {
   int h = 1200;
 
   //Choose FX2D, JAVA2D, P2D or P3D
-  String renderer = P3D;
+  String renderer = P2D;
 
   public void settings() {
     size(w, h, renderer);
   }
 
   public void setup() {
+    /*
+    Node eye = new Node() {
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+        Scene.drawFrustum(pg, scene);
+        pg.popStyle();
+      }
+    };
+    scene = onScreen ? new Scene(this, eye) : new Scene(this, renderer, eye);
+    // */
     scene = onScreen ? new Scene(this) : new Scene(this, renderer);
     scene.setRadius(1000);
-    // set a detached eye node
-    scene.setEye(new Node());
-    if (scene.is2D())
-      rectMode(CENTER);
+    rectMode(CENTER);
     scene.fit(1);
-    models = new Node[6];
+    models = new Node[30];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
-        //models[i] = new Node(scene, shape());
-        models[i] = new Node(scene);
-        models[i].setShape(shape());
+        models[i] = new Node(shape());
       } else {
-        models[i] = new Node(scene) {
-          int _faces = (int) MiniMap.this.random(3, 15), _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
+        models[i] = new Node() {
+          int _faces = (int) MiniMap.this.random(3, 15);
+          // We need to call the PApplet random function instead of the node random version
+          int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
+
           @Override
           public void graphics(PGraphics pg) {
             pg.pushStyle();
@@ -55,22 +61,18 @@ public class MiniMap extends PApplet {
           }
         };
       }
+      // set picking precision to the pixels of the node projection
       models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
-
-    // Note that we pass the upper left corner coordinates where the scene1
+    // Note that we pass the upper left corner coordinates where the minimap
     // is to be drawn (see drawing code below) to its constructor.
     minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
     minimap.setRadius(2000);
-    // set a detached eye node
-    //minimap.setEye(new Node());
-    // TODO bug
     if (renderer == P3D)
-      minimap.setType(Graph.Type.ORTHOGRAPHIC);
+      minimap.togglePerspective();
     minimap.fit(1);
-    // detached node
-    sceneEye = new Node();
+    scene.eye().setPickingThreshold(30);
   }
 
   PShape shape() {
@@ -85,45 +87,37 @@ public class MiniMap extends PApplet {
     if (key == 'i') {
       interactiveEye = !interactiveEye;
       if (interactiveEye)
-        minimap.setTrackedNode(sceneEye);
+        minimap.tag(scene.eye());
       else
-        minimap.resetTrackedNode();
+        minimap.untag(scene.eye());
     }
     if (key == 'f')
       focus.fit(1);
     if (key == 't')
-      if (renderer == P3D)
-        if (focus.type() == Graph.Type.PERSPECTIVE)
-          focus.setType(Graph.Type.ORTHOGRAPHIC);
-        else
-          focus.setType(Graph.Type.PERSPECTIVE);
+      focus.togglePerspective();
   }
 
-  @Override
   public void mouseMoved() {
     if (!interactiveEye || focus == scene)
-      focus.cast();
+      focus.mouseTag();
   }
 
-  @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.spin();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.translate();
+      focus.mouseTranslate();
     else
       focus.scale(focus.mouseDX());
   }
 
-  @Override
   public void mouseWheel(MouseEvent event) {
     if (renderer == P3D)
-      focus.moveForward(event.getCount() * 20);
+      focus.moveForward(event.getCount() * 40);
     else
-      focus.scale(event.getCount() * 50);
+      focus.scale(event.getCount() * 40);
   }
 
-  @Override
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
@@ -134,8 +128,6 @@ public class MiniMap extends PApplet {
 
   public void draw() {
     focus = displayMinimap ? (mouseX > w / 2 && mouseY > h / 2) ? minimap : scene : scene;
-    if (interactiveEye)
-      Node.sync(scene.eye(), sceneEye);
     background(75, 25, 15);
     if (scene.isOffscreen()) {
       scene.beginDraw();
@@ -149,23 +141,24 @@ public class MiniMap extends PApplet {
       scene.render();
     }
     if (displayMinimap) {
-      scene.shift(minimap);
       if (!scene.isOffscreen())
         scene.beginHUD();
       minimap.beginDraw();
       minimap.context().background(125, 80, 90);
       minimap.drawAxes();
       minimap.render();
+      // /*
       // draw scene eye
-      minimap.context().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 125);
-      minimap.context().stroke(0, 0, 255);
+      minimap.context().fill(minimap.isTagged(scene.eye()) ? 255 : 25, minimap.isTagged(scene.eye()) ? 0 : 255, 255, 125);
       minimap.context().strokeWeight(2);
+      minimap.context().stroke(0, 0, 255);
       minimap.drawFrustum(scene);
+      minimap.drawBullsEye(scene.eye());
+      // */
       minimap.endDraw();
       minimap.display();
       if (!scene.isOffscreen())
         scene.endHUD();
-      minimap.shift(scene);
     }
   }
 

@@ -1,5 +1,5 @@
 /**
- * ConstrainedEye.
+ * Constrained Eye.
  * by Jean Pierre Charalambos.
  *
  * This example illustrates how to add constraints to your eye
@@ -14,27 +14,26 @@ import nub.core.constraint.*;
 import nub.processing.*;
 
 Scene scene;
-PFont myFont;
+PFont font;
 
 int transDir;
 int rotDir;
 AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[2];
 int activeConstraint;
 
-//Choose FX2D, JAVA2D, P2D or P3D
+//P2D or P3D
 String renderer = P3D;
 
 void setup() {
   size(800, 800, renderer);
-  myFont = loadFont("FreeSans-16.vlw");
-  textFont(myFont);
+  font = loadFont("FreeSans-16.vlw");
+  textFont(font);
   scene = new Scene(this);
   scene.setRadius(400);
   scene.fit(1);
-
   constraints[0] = new WorldConstraint();
   // Note that an EyeConstraint(eye) would produce the same results:
-  // An EyeConstraint is a LocalConstraint when applied to the camera node !
+  // An EyeConstraint is a LocalConstraint when applied to the eye node!
   constraints[1] = new LocalConstraint();
   transDir = 0;
   rotDir = 0;
@@ -49,7 +48,7 @@ void draw() {
   scene.drawDottedGrid();
   fill(204, 102, 0, 150);
   scene.drawTorusSolenoid();
-  fill(0, 0, 255);
+  fill(0, 255, 255);
   scene.beginHUD();
   displayText();
   scene.endHUD();
@@ -57,18 +56,18 @@ void draw() {
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.spin();
+    scene.mouseSpinEye();
   else if (mouseButton == RIGHT)
-    scene.translate();
+    scene.mouseTranslateEye();
   else
-    scene.scale(mouseX - pmouseX);
+    scene.scaleEye(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
   if (scene.is3D())
     scene.moveForward(event.getCount() * 20);
   else
-    scene.scale(event.getCount() * 20, scene.eye());
+    scene.scaleEye(event.getCount() * 20);
 }
 
 void keyPressed() {
@@ -87,88 +86,83 @@ void keyPressed() {
   if (key == 'r' || key == 'R') {
     constraints[activeConstraint].setRotationConstraintType(nextRotationConstraintType(constraints[activeConstraint].rotationConstraintType()));
   }
-
-  Vector dir = new Vector(0.0f, 0.0f, 0.0f);
+  Vector dir = new Vector(0, 0, 0);
   switch (transDir) {
   case 0:
-    dir.setX(1.0f);
+    dir.setX(1);
     break;
   case 1:
-    dir.setY(1.0f);
+    dir.setY(1);
     break;
   case 2:
-    dir.setZ(1.0f);
+    dir.setZ(1);
     break;
   }
-
   constraints[activeConstraint].setTranslationConstraintDirection(dir);
-
-  dir.set(0.0f, 0.0f, 0.0f);
+  dir.set(0, 0, 0);
   switch (rotDir) {
   case 0:
-    dir.setX(1.0f);
+    dir.setX(1);
     break;
   case 1:
-    dir.setY(1.0f);
+    dir.setY(1);
     break;
   case 2:
-    dir.setZ(1.0f);
+    dir.setZ(1);
     break;
   }
   constraints[activeConstraint].setRotationConstraintDirection(dir);
 }
 
-static AxisPlaneConstraint.Type nextTranslationConstraintType(AxisPlaneConstraint.Type type) {
-  AxisPlaneConstraint.Type rType;
-  switch (type) {
+AxisPlaneConstraint.Type nextTranslationConstraintType(AxisPlaneConstraint.Type transType) {
+  AxisPlaneConstraint.Type type;
+  switch (transType) {
   case FREE:
-    rType = AxisPlaneConstraint.Type.PLANE;
+    type = AxisPlaneConstraint.Type.PLANE;
     break;
   case PLANE:
-    rType = AxisPlaneConstraint.Type.AXIS;
+    type = AxisPlaneConstraint.Type.AXIS;
     break;
   case AXIS:
-    rType = AxisPlaneConstraint.Type.FORBIDDEN;
+    type = AxisPlaneConstraint.Type.FORBIDDEN;
     break;
   case FORBIDDEN:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
     break;
   default:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
   }
-  return rType;
+  return type;
 }
 
-static AxisPlaneConstraint.Type nextRotationConstraintType(AxisPlaneConstraint.Type type) {
-  AxisPlaneConstraint.Type rType;
-  switch (type) {
+AxisPlaneConstraint.Type nextRotationConstraintType(AxisPlaneConstraint.Type rotType) {
+  AxisPlaneConstraint.Type type;
+  switch (rotType) {
   case FREE:
-    rType = AxisPlaneConstraint.Type.AXIS;
+    type = AxisPlaneConstraint.Type.AXIS;
     break;
   case PLANE:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
     break;
   case AXIS:
-    rType = AxisPlaneConstraint.Type.FORBIDDEN;
+    type = AxisPlaneConstraint.Type.FORBIDDEN;
     break;
   case FORBIDDEN:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
     break;
   default:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
   }
-  return rType;
+  return type;
 }
 
 void changeConstraint() {
   int previous = activeConstraint;
   activeConstraint = (activeConstraint + 1) % 2;
-
   constraints[activeConstraint].setTranslationConstraintType(constraints[previous].translationConstraintType());
   constraints[activeConstraint].setTranslationConstraintDirection(constraints[previous].translationConstraintDirection());
   constraints[activeConstraint].setRotationConstraintType(constraints[previous].rotationConstraintType());
   constraints[activeConstraint].setRotationConstraintDirection(constraints[previous].rotationConstraintDirection());
-
   scene.eye().setConstraint(constraints[activeConstraint]);
 }
 

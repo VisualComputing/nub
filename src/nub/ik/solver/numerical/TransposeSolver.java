@@ -17,10 +17,11 @@ import nub.primitives.Vector;
 import org.ejml.simple.SimpleMatrix;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TransposeSolver extends Solver {
   //look at https://www.math.ucsd.edu/~sbuss/ResearchWeb/ikmethods/iksurvey.pdf
-  protected ArrayList<? extends Node> _chain;
+  protected List<? extends Node> _chain;
   protected Node _target;
   protected Node _previousTarget;
   protected SimpleMatrix _J;
@@ -32,7 +33,7 @@ public class TransposeSolver extends Solver {
   //protected List<Statistics> _statistics;
   protected boolean _debug = false;
 
-  public TransposeSolver(ArrayList<? extends Node> chain) {
+  public TransposeSolver(List<? extends Node> chain) {
     super();
     this._chain = chain;
     _axes = new Vector[_chain.size() - 1];
@@ -47,7 +48,7 @@ public class TransposeSolver extends Solver {
     this._chain = chain;
     this._target = target;
     this._previousTarget =
-        target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
+        target == null ? null : Node.detach(target.position().get(), target.orientation().get(), 1);
     _axes = new Vector[_chain.size() - 1];
   }
 
@@ -57,7 +58,7 @@ public class TransposeSolver extends Solver {
     }
     */
 
-  public ArrayList<? extends Node> chain() {
+  public List<? extends Node> chain() {
     return _chain;
   }
 
@@ -93,7 +94,7 @@ public class TransposeSolver extends Solver {
     }
 
     SimpleMatrix error = SimpleMatrix.wrap(
-        Util.vectorToMatrix(e, head().graph().is3D()));
+        Util.vectorToMatrix(e, true));
     _J = SimpleMatrix.wrap(Util.jacobian(_chain, endEffector(), _target.position(), _axes));
 
     _delta = _J.transpose().mult(error);
@@ -134,7 +135,7 @@ public class TransposeSolver extends Solver {
 
   @Override
   protected void _reset() {
-    _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
+    _previousTarget = _target == null ? null : Node.detach(_target.position().get(), _target.orientation().get(), 1);
     _iterations = 0;
     _axes = new Vector[_chain.size() - 1];
   }

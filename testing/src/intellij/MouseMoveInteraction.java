@@ -13,7 +13,7 @@ import processing.event.MouseEvent;
  */
 public class MouseMoveInteraction extends PApplet {
   Scene scene;
-  boolean lookAround = true;
+  boolean lookAround;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -25,7 +25,7 @@ public class MouseMoveInteraction extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    Node shape1 = new Node(scene) {
+    Node shape1 = new Node() {
       @Override
       public void graphics(PGraphics pGraphics) {
         pGraphics.pushStyle();
@@ -54,7 +54,7 @@ public class MouseMoveInteraction extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == 'f')
+    if (key == 'p')
       scene.flip();
     if (key == 's')
       scene.fit(1);
@@ -66,11 +66,11 @@ public class MouseMoveInteraction extends PApplet {
 
   public void mouseMoved(MouseEvent event) {
     if (event.isShiftDown())
-      scene.translate();
-    else if (lookAround && scene.trackedNode() == null)
-      scene.lookAround();
+      scene.mouseTranslate();
+    else if (lookAround && scene.node() == null)
+      scene.mouseLookAround();
     else
-      scene.spin();
+      scene.mouseSpin();
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -81,12 +81,12 @@ public class MouseMoveInteraction extends PApplet {
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
       //scene.track();
-      scene.cast();
+      scene.mouseTag();
     else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.align();
+        scene.alignTag();
   }
 
   PShape shape() {

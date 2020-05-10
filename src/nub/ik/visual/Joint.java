@@ -16,9 +16,8 @@ import java.util.List;
 
 public class Joint extends Node {
   public static boolean depth = false;
-  public static boolean markers = false;
   protected String _name;
-  protected int _color;
+  protected int _r, _g, _b, _alpha = 255;
   protected float _radius;
   protected List<PShape> _mesh;
   public static boolean axes = false;
@@ -31,23 +30,25 @@ public class Joint extends Node {
     _mesh.add(mesh);
   }
 
-  public Joint(Scene scene, int color, float radius) {
-    super(scene);
-    _color = color;
+  public Joint(int red, int green, int blue, float radius) {
+    super();
+    _r = red;
+    _g = green;
+    _b = blue;
     _radius = radius;
-    setPickingThreshold(-_radius * 2);
+    setPickingThreshold(0);
   }
 
-  public Joint(Scene scene, int color) {
-    this(scene, color, 5);
+  public Joint(int red, int green, int blue) {
+    this(red, green, blue, 5f);
   }
 
-  public Joint(Scene scene) {
-    this(scene, scene.pApplet().color(scene.pApplet().random(0, 255), scene.pApplet().random(0, 255), scene.pApplet().random(0, 255)));
+  public Joint() {
+    this((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
   }
 
-  public Joint(Scene scene, float radius) {
-    this(scene, scene.pApplet().color(scene.pApplet().random(0, 255), scene.pApplet().random(0, 255), scene.pApplet().random(0, 255)), radius);
+  public Joint(float radius) {
+    this((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255), radius);
   }
 
   public void setDrawConstraint(boolean drawConstraint) {
@@ -56,7 +57,6 @@ public class Joint extends Node {
 
   @Override
   public void graphics(PGraphics pg) {
-    Scene scene = (Scene) this._graph;
     if (_mesh != null) {
       for (PShape shape : _mesh) pg.shape(shape);
     }
@@ -65,36 +65,45 @@ public class Joint extends Node {
     pg.pushStyle();
     if (!_isRoot) {
       pg.strokeWeight(Math.max(_radius / 4f, 2));
-      pg.stroke(reference() instanceof Joint ? ((Joint) reference())._color : _color);
+      if (reference() instanceof Joint) {
+        Joint ref = ((Joint) reference());
+        pg.stroke(ref._r, ref._g, ref._b, _alpha);
+      } else {
+        pg.stroke(_r, _g, _b, _alpha);
+      }
+
       Vector v = location(new Vector(), reference());
       float m = v.magnitude();
-      if (scene.is2D()) {
+      if (pg.is2D()) {
         pg.line(_radius * v.x() / m, _radius * v.y() / m, (m - _radius) * v.x() / m, (m - _radius) * v.y() / m);
       } else {
         pg.line(_radius * v.x() / m, _radius * v.y() / m, _radius * v.z() / m, (m - _radius) * v.x() / m, (m - _radius) * v.y() / m, (m - _radius) * v.z() / m);
       }
     }
-    pg.fill(_color);
+    pg.fill(_r, _g, _b, _alpha);
     pg.noStroke();
-    if (scene.is2D()) pg.ellipse(0, 0, _radius * 2, _radius * 2);
+    if (pg.is2D()) pg.ellipse(0, 0, _radius * 2, _radius * 2);
     else pg.sphere(_radius);
     pg.strokeWeight(_radius / 4f);
     if (constraint() != null && _drawConstraint) {
-      scene.drawConstraint(pg, this, constraintFactor);
+      Scene.drawConstraint(pg, this, constraintFactor);
     }
-    if (axes) scene.drawAxes(_radius * 2);
+    if (axes) Scene.drawAxes(pg, _radius * 2);
     if (!depth) pg.hint(PConstants.ENABLE_DEPTH_TEST);
 
     pg.stroke(255);
     //pg.strokeWeight(2);
-    if (markers) scene.drawBullsEye(this);
-
     pg.popStyle();
-
   }
 
-  public void setColor(int color) {
-    _color = color;
+  public void setColor(int red, int green, int blue) {
+    _r = red;
+    _g = green;
+    _b = blue;
+  }
+
+  public void setAlpha(int alpha) {
+    _alpha = alpha;
   }
 
   public void setRadius(float radius) {
@@ -114,11 +123,23 @@ public class Joint extends Node {
     return _radius;
   }
 
-  public int color() {
-    return _color;
+  public int alpha() {
+    return _alpha;
   }
 
   public String name() {
     return _name;
+  }
+
+  public int red() {
+    return _r;
+  }
+
+  public int green() {
+    return _g;
+  }
+
+  public int blue() {
+    return _b;
   }
 }

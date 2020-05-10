@@ -87,11 +87,7 @@ public class PlanarPolygon extends ConeConstraint {
   }
 
   public Vector apply(Vector target) {
-    return apply(target, _restRotation);
-  }
-
-  public Vector apply(Vector target, Quaternion restRotation) {
-    Vector point = restRotation.inverse().multiply(target);
+    Vector point = target;
     if (point.z() == 0) point.setZ(0.5f);
     float alpha = Math.abs(1.f / point.z());
     Vector proj = new Vector(alpha * point.x(), alpha * point.y());
@@ -102,7 +98,7 @@ public class PlanarPolygon extends ConeConstraint {
       constrained.multiply(1.f / alpha);
       float z = inverse ? -point.z() : point.z();
       constrained.setZ(z);
-      return restRotation.rotate(constrained);
+      return constrained;
     }
     return target;
   }

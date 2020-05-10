@@ -75,14 +75,10 @@ public class SphericalPolygon extends ConeConstraint {
   }
 
   public Vector apply(Vector target) {
-    return apply(target, _restRotation);
-  }
-
-  public Vector apply(Vector target, Quaternion restRotation) {
-    Vector point = restRotation.inverse().multiply(target);
+    Vector point = target;
     if (!_isInside(point)) {
       Vector constrained = _closestPoint(point);
-      return restRotation.rotate(constrained);
+      return constrained;
     }
     return target;
   }

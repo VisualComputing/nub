@@ -1,12 +1,13 @@
-/****************************************************************************************
+/***************************************************************************************
  * nub
- * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
+ * Copyright (c) 2019-2020 Universidad Nacional de Colombia
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
- * handling to a third party (real or non-real time) renderer. Released under the terms
- * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ****************************************************************************************/
+ * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
+ * computing library, featuring interaction, visualization and animation frameworks and
+ * supporting advanced (onscreen/offscreen) (real/non-real time) rendering techniques.
+ * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
+ ***************************************************************************************/
 
 package nub.primitives;
 
@@ -828,13 +829,13 @@ public class Matrix {
   }
 
   /**
-   * Print this matrix contents onto the console.
+   * Return this matrix components as a String.
    */
-  public void print() {
-    System.out.println(
-        _matrix[0] + " " + _matrix[4] + " " + _matrix[8] + " " + _matrix[12] + "\n" + _matrix[1] + " " + _matrix[5] + " " + _matrix[9] + " " + _matrix[13]
-            + "\n" + _matrix[2] + " " + _matrix[6] + " " + _matrix[10] + " " + _matrix[14] + "\n" + _matrix[3] + " " + _matrix[7] + " " + _matrix[11]
-            + " " + _matrix[15] + "\n");
+  @Override
+  public String toString() {
+    return new String(_matrix[0] + " " + _matrix[4] + " " + _matrix[8] + " " + _matrix[12] + "\n" + _matrix[1] + " " + _matrix[5] + " " + _matrix[9] + " " + _matrix[13]
+        + "\n" + _matrix[2] + " " + _matrix[6] + " " + _matrix[10] + " " + _matrix[14] + "\n" + _matrix[3] + " " + _matrix[7] + " " + _matrix[11]
+        + " " + _matrix[15]);
   }
 
   /**

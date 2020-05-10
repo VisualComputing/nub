@@ -1,6 +1,7 @@
 package nub.ik.skinning;
 
 import nub.core.Node;
+import nub.ik.animation.Skeleton;
 import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -32,7 +33,7 @@ public class GPULinearBlendSkinning implements Skinning {
   protected Map<Node, Integer> _ids;
   protected final String _fragmentPath = "frag.glsl";
   protected final String _vertexPath = "skinning.glsl";
-
+  protected Node _reference;
 
   public GPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, PShape shape) {
     this._shapes = new ArrayList<>();
@@ -59,8 +60,23 @@ public class GPULinearBlendSkinning implements Skinning {
     initParams();
   }
 
+  public GPULinearBlendSkinning(Skeleton skeleton, PShape shape) {
+    this(skeleton.BFS(), skeleton.scene().context(), shape);
+    _reference = skeleton.reference();
+  }
+
   public GPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor) {
     this(skeleton, pg, shape, texture, factor, false);
+  }
+
+  public GPULinearBlendSkinning(Skeleton skeleton, String shape, String texture, float factor) {
+    this(skeleton, shape, texture, factor, false);
+    _reference = skeleton.reference();
+  }
+
+  public GPULinearBlendSkinning(Skeleton skeleton, String shape, String texture, float factor, boolean quad) {
+    this(skeleton.BFS(), skeleton.scene().context(), shape, texture, factor, quad);
+    _reference = skeleton.reference();
   }
 
   public GPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor, boolean quad) {
@@ -72,7 +88,7 @@ public class GPULinearBlendSkinning implements Skinning {
       _ids.put(_skeleton.get(i), i);
       if (_skeleton.get(i) instanceof Joint) {
         int c = Color.HSBtoRGB((i + 1.0f) / skeleton.size(), 1f, 1f);
-        ((Joint) _skeleton.get(i)).setColor(c);
+        ((Joint) _skeleton.get(i)).setColor((int) pg.red(c), (int) pg.blue(c), (int) pg.green(c));
       }
     }
     _initialOrientations = new Quaternion[joints];
@@ -85,6 +101,7 @@ public class GPULinearBlendSkinning implements Skinning {
     _shapes.add(createShape(pg, pg.loadShape(shape), texture, factor, quad));
     initParams();
   }
+
 
   public PShader shader() {
     return _shader;
@@ -105,6 +122,10 @@ public class GPULinearBlendSkinning implements Skinning {
 
   public Map<Node, Integer> ids() {
     return _ids;
+  }
+
+  public void setReference(Node reference) {
+    _reference = reference;
   }
 
   @Override
@@ -162,7 +183,7 @@ public class GPULinearBlendSkinning implements Skinning {
     //Find the nearest 3 joints
     //TODO : Perhaps enable more joints - use QuickSort
     for (Node joint : branch) {
-      if (joint == branch.get(0)) continue;
+      if (_ids.get(joint.reference()) == null) continue;
       if (joint.translation().magnitude() <= Float.MIN_VALUE) continue;
       float dist = (float) Math.pow(getDistance(position, joint), 10);
       if (dist <= d[0] || dist <= d[1] || dist <= d[2]) {
@@ -189,7 +210,7 @@ public class GPULinearBlendSkinning implements Skinning {
   /*
    * Get the distance from vertex to line formed by frame and the reference frame of frame
    * Distance will be measure according to root coordinates.
-   * In case of reference frame of frame is root, it will return distance from vertex to frame
+   * If the reference frame is the root, it will return distance from vertex to frame
    * */
   public static float getDistance(Vector vertex, Node node) {
     if (node == null) return Float.MAX_VALUE;
@@ -209,7 +230,7 @@ public class GPULinearBlendSkinning implements Skinning {
       distance = Vector.subtract(distance, vertex);
     }
     if (u < 0) {
-      distance = Vector.subtract(position, vertex);
+      distance = Vector.subtract(parentPosition, vertex);
     }
     if (u > 1) {
       distance = Vector.subtract(position, vertex);
@@ -227,19 +248,21 @@ public class GPULinearBlendSkinning implements Skinning {
     pg.resetShader();
   }
 
+
+  @Override
+  public void render(Scene scene) {
+    render(scene, _reference);
+  }
+
   @Override
   public void render() {
     render(_pg);
   }
 
   @Override
-  public void render(Node reference) {
-    PGraphics pg = _pg;
-    if (reference.graph() instanceof Scene) {
-      pg = ((Scene) reference.graph()).context();
-    }
-    reference.graph().applyWorldTransformation(reference);
-    render(pg);
+  public void render(Scene scene, Node reference) {
+    if (reference != null) scene.applyWorldTransformation(reference);
+    render(scene.context());
   }
 
   //Adapted from http://www.cutsquash.com/2015/04/better-obj-model-loading-in-processing/

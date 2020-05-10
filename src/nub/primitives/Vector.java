@@ -1,12 +1,13 @@
-/****************************************************************************************
+/***************************************************************************************
  * nub
- * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
+ * Copyright (c) 2019-2020 Universidad Nacional de Colombia
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
- * handling to a third party (real or non-real time) renderer. Released under the terms
- * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ****************************************************************************************/
+ * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
+ * computing library, featuring interaction, visualization and animation frameworks and
+ * supporting advanced (onscreen/offscreen) (real/non-real time) rendering techniques.
+ * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
+ ***************************************************************************************/
 
 package nub.primitives;
 
@@ -813,10 +814,10 @@ public class Vector {
     return target;
   }
 
-  public void print() {
-    System.out.println(x() + " " + y() + " " + z() + "\n");
-  }
-
+  /**
+   * Return this vector components as a String.
+   */
+  @Override
   public String toString() {
     return "[ " + this._vector[0] + ", " + this._vector[1] + ", " + this._vector[2] + " ]";
   }

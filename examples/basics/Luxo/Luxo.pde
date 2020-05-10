@@ -1,12 +1,12 @@
 /**
  * Luxo.
  * by Jean Pierre Charalambos.
- * 
+ *
  * A more complex example that combines Shapes, selection and constraints.
- * 
+ *
  * This example displays a famous luxo lamp (Pixar) that can be interactively
  * manipulated with the mouse.
- * 
+ *
  * Hover over lamp elements to select them, and then drag them with the mouse.
  */
 
@@ -23,7 +23,7 @@ void setup() {
   scene = new Scene(this);
   scene.setRadius(100);
   scene.fit(1);
-  lamp = new Lamp(scene);
+  lamp = new Lamp();
 }
 
 void draw() {
@@ -37,7 +37,7 @@ void draw() {
   noStroke();
   fill(120, 120, 120);
   float nbPatches = 100;
-  normal(0.0f, 0.0f, 1.0f);
+  normal(0, 0, 1);
   for (int j = 0; j < nbPatches; ++j) {
     beginShape(QUAD_STRIP);
     for (int i = 0; i <= nbPatches; ++i) {
@@ -49,16 +49,21 @@ void draw() {
 }
 
 void mouseMoved() {
-  scene.cast();
+  scene.mouseTag();
 }
 
 void mouseDragged() {
-  if (mouseButton == LEFT)
-    scene.spin();
-  else if (mouseButton == RIGHT)
-    scene.translate();
-  else
-    scene.scale(mouseX - pmouseX);
+  // no inertia for the nodes, but for the eye
+  if (mouseButton == LEFT) {
+    if (!scene.mouseSpinTag(0))
+      scene.mouseSpinEye(0.85);
+  } else if (mouseButton == RIGHT) {
+    if (!scene.mouseTranslateTag(0))
+      scene.mouseTranslateEye(0.85);
+  } else {
+    if (!scene.scaleTag(mouseX - pmouseX, 0))
+      scene.scaleEye(mouseX - pmouseX, 0.85);
+  }
 }
 
 void mouseWheel(MouseEvent event) {

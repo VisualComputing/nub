@@ -1,23 +1,22 @@
 class Piece extends Node {
   int mode;
 
-  Piece(Scene scene) {
-    super(scene);
+  Piece() {
     // set picking precision to the pixels of the node projection
     setPickingThreshold(0);
   }
 
   void drawCone(PGraphics pg, float zMin, float zMax, float r1, float r2, int nbSub) {
-    pg.translate(0.0f, 0.0f, zMin);
+    pg.translate(0, 0, zMin);
     Scene.drawCone(pg, nbSub, 0, 0, r1, r2, zMax - zMin);
-    pg.translate(0.0f, 0.0f, -zMin);
+    pg.translate(0, 0, -zMin);
   }
 
   @Override
   public void graphics(PGraphics pGraphics) {
     switch (mode) {
     case 1:
-      pGraphics.fill(isTracked() ? 255 : 0, 0, 255);
+      pGraphics.fill(isTagged(scene) ? 255 : 0, 0, 255);
       drawCone(pGraphics, 0, 3, 15, 15, 30);
       drawCone(pGraphics, 3, 5, 15, 13, 30);
       drawCone(pGraphics, 5, 7, 13, 1, 30);
@@ -36,7 +35,7 @@ class Piece extends Node {
       pGraphics.translate(2, 0, 0);
       break;
     case 3:
-      pGraphics.fill(0, 255, isTracked() ? 0 : 255);
+      pGraphics.fill(0, 255, isTagged(scene) ? 0 : 255);
       drawCone(pGraphics, -2, 6, 4, 4, 30);
       drawCone(pGraphics, 6, 15, 4, 17, 30);
       drawCone(pGraphics, 15, 17, 17, 17, 30);

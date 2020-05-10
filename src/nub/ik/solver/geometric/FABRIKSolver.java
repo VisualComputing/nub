@@ -15,12 +15,10 @@ import nub.core.Node;
 import nub.core.constraint.ConeConstraint;
 import nub.core.constraint.DistanceFieldConstraint;
 import nub.core.constraint.Hinge;
-import nub.ik.animation.IKAnimation;
 import nub.ik.solver.Solver;
-import nub.ik.visual.Joint;
+import nub.ik.visualization.InterestingEvent;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.processing.Scene;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,11 +103,6 @@ public abstract class FABRIKSolver extends Solver {
 
   protected int _head = 0;
 
-  //Animation Stuff
-  //TODO : Animation with proposed heuristics
-  protected boolean _enableHistory;
-  protected IKAnimation.NodeStates _history;
-
   /*Heuristic Parameters*/
   protected boolean _fixTwisting = true;
   protected boolean _keepDirection = true;
@@ -176,6 +169,25 @@ public abstract class FABRIKSolver extends Solver {
    * */
   protected float _forwardReaching(List<? extends Node> chain) {
     float change = 0;
+    if (_enableMediator) {
+      InterestingEvent event1 = mediator().addEventStartingAfterLast("FORWARD SET TARGET", "Trajectory", 1, 2); //Create the event at the desired time
+      event1.addAttribute("positions", chain.get(chain.size() - 1).position(), _positions.get(chain.size() - 1).get()); //Add the convenient attributes
+      //Create the event
+      InterestingEvent message1 = mediator().addEventStartingWithLast("FORWARD SET TARGET MESSAGE", "Message", 0, 1);
+      message1.addAttribute("message", "Step 1: Find the segment line defined by the end effector and the desired position"); //Add the convenient attributes
+      InterestingEvent event2 = mediator().addEventStartingAfterLast("FORWARD MOVE TO TARGET", "NodeTranslation", 1, 1);
+      event2.addAttribute("node", chain.get(chain.size() - 1)); //Add the convenient attributes
+      Vector translation;
+      if (chain.get(chain.size() - 1).reference() != null)
+        translation = Vector.subtract(_positions.get(chain.size() - 1), chain.get(chain.size() - 1).position());
+      else
+        translation = _positions.get(chain.size() - 1).get();
+      event2.addAttribute("translation", translation);
+      event2.addAttribute("enableConstraint", false);
+      event2.addAttribute("useGlobalCoordinates", true);
+      InterestingEvent message2 = mediator().addEventStartingWithLast("FORWARD MOVE TO TARGET MESSAGE", "Message", 0, 1); //Create the event
+      message2.addAttribute("message", "Step 2: Assume that end effector reach the desired position"); //Add the convenient attributes
+    }
     for (int i = chain.size() - 2; i >= 0; i--) {
       Vector pos_i = _positions.get(i);
       Vector pos_i1 = _positions.get(i + 1);
@@ -183,9 +195,22 @@ public abstract class FABRIKSolver extends Solver {
       if (dist_i <= 10e-4) {
         //As rigid segment between J_i and J_i1 lies on same position, J_i must match exactly J_i1 position
         _positions.set(i, pos_i1.get());
-        if (_enableHistory) {
-          history().addNodeState("Forward step", chain.get(i), chain.get(i).reference(), pos_i1.get(), null);
-          history().incrementStep();
+
+        if (_enableMediator) {
+          //Create the event
+          InterestingEvent event = mediator().addEventStartingAfterLast("FORWARD FIX LENGTH", "NodeTranslation", 1, 2);
+          event.addAttribute("node", chain.get(i)); //Add the convenient attributes
+          Vector translation;
+          if (chain.get(i).reference() != null)
+            translation = Vector.subtract(pos_i1, chain.get(i).position());
+          else
+            translation = pos_i1;
+          event.addAttribute("translation", translation);
+          event.addAttribute("enableConstraint", false);
+          event.addAttribute("modifyChildren", false);
+          event.addAttribute("useGlobalCoordinates", true);
+          InterestingEvent message = mediator().addEventStartingWithLast("FORWARD FIX LENGTH MESSAGE", "Message", 0, 1);
+          message.addAttribute("message", "Step 3: Fix the bone's length"); //Add the convenient attributes
         }
         continue;
       }
@@ -196,7 +221,7 @@ public abstract class FABRIKSolver extends Solver {
       //if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
       if ((chain.get(i).constraint() != null && _keepDirection) || props_i1._enableDirectionWeight) {
         /*
-         * H1 : If Joint has a constrat it is desirable that:
+         * H1 : If Joint has a constraint it is desirable that:
          * a) J_i reach its target position
          * b) J_i keeps its orientation
          * */
@@ -217,15 +242,23 @@ public abstract class FABRIKSolver extends Solver {
         _positions.set(i, _move(pos_i1, pos_i, dist_i, 0));
       }
 
-      if (_enableHistory) {
-        history().addNodeState("Forward step", chain.get(i), chain.get(i).reference(), _positions.get(i).get(), null);
-        history().incrementStep();
+      if (_enableMediator) {
+        InterestingEvent event = mediator().addEventStartingAfterLast("FORWARD FIX LENGTH", "NodeTranslation", 1, 2); //Create the event
+        event.addAttribute("node", chain.get(i)); //Add the convenient attributes
+        Vector translation;
+        if (chain.get(i).reference() != null)
+          translation = Vector.subtract(_positions.get(i), chain.get(i).position());
+        else
+          translation = _positions.get(i);
+        event.addAttribute("translation", translation);
+        event.addAttribute("enableConstraint", false);
+        event.addAttribute("modifyChildren", false);
+        event.addAttribute("useGlobalCoordinates", true);
+        InterestingEvent message = mediator().addEventStartingWithLast("FORWARD FIX LENGTH MESSAGE", "Message", 0, 1); //Create the event
+        message.addAttribute("message", "Step 3: Fix the bone's length"); //Add the convenient attributes
       }
-
       change += Vector.distance(pos_i, _positions().get(i));
     }
-
-    if (_enableHistory) history().incrementIteration();
     return change;
   }
 
@@ -323,7 +356,7 @@ public abstract class FABRIKSolver extends Solver {
     return _backwardReaching(chain, o, 0);
   }
 
-  //TODO : All this code is a mess, remove duplicate code later, this is jusst to prove ideas
+  //TODO : All this code is a mess, remove duplicate code later, this is just to prove ideas
   protected float _backwardReaching(List<? extends Node> chain, Vector o, int start) {
     float change = 0;
     Quaternion orientation;
@@ -331,9 +364,30 @@ public abstract class FABRIKSolver extends Solver {
     orientation = chain.get(0).reference() != null ? chain.get(0).reference().orientation() : new Quaternion();
     magnitude = chain.get(0).reference() != null ? chain.get(0).reference().scaling() : 1;
 
+    if (_enableMediator) {
+      InterestingEvent event1 = mediator().addEventStartingAfterLast("BACKWARD SET INIT", "Trajectory", 1, 2); //Create the event
+      event1.addAttribute("positions", o, chain.get(0).position()); //Add the convenient attributes
+      InterestingEvent message1 = mediator().addEventStartingWithLast("BACKWARD SET INIT MESSAGE", "Message", 0, 1); //Create the event
+      message1.addAttribute("message", "Step 4: Find the segment line defined by the root and the initial position"); //Add the convenient attributes
+      InterestingEvent event2 = mediator().addEventStartingAfterLast("BACKWARD MOVE TO INIT", "NodeTranslation", 1, 1); //Create the event
+      //Add the convenient attributes
+      event2.addAttribute("node", chain.get(0));
+      Vector translation;
+      if (chain.get(0).reference() != null)
+        translation = Vector.subtract(o, _positions.get(0));
+      else
+        translation = Vector.multiply(o, -1);
+      event2.addAttribute("translation", translation);
+      event2.addAttribute("enableConstraint", false);
+      event2.addAttribute("modifyChildren", false);
+      event2.addAttribute("useGlobalCoordinates", true);
+      InterestingEvent message2 = mediator().addEventStartingWithLast("BACKWARD MOVE TO INIT MESSAGE", "Message", 0, 1); //Create the event
+      message2.addAttribute("message", "Step 5: Assume that root reach the initial position"); //Add the convenient attributes
+    }
+
     Vector o_hat = o;
 
-    for(int i = 0; i < start; i++){
+    for (int i = 0; i < start; i++) {
       orientation.compose(chain.get(i).rotation());
     }
 
@@ -342,9 +396,20 @@ public abstract class FABRIKSolver extends Solver {
         _positions.set(i + 1, _positions.get(i)); //keep pos
         orientation.compose(chain.get(i).rotation()); //update orientation
         //Animation
-        if (_enableHistory) {
-          history().addNodeState("Backward step", chain.get(i + 1), chain.get(i + 1).reference(), _positions.get(i + 1).get(), null);
-          history().incrementStep();
+        if (_enableMediator) {
+          InterestingEvent event = mediator().addEventStartingAfterLast("BACKWARD FIX LENGTH", "NodeTranslation", 1, 2); //Create the event
+          event.addAttribute("node", chain.get(i + 1)); //Add the convenient attributes
+          Vector translation = null;
+          if (chain.get(i + 1).reference() != null)
+            translation = Vector.subtract(_positions.get(i), chain.get(i + 1).position());
+          else
+            translation = _positions.get(i);
+          event.addAttribute("translation", translation);
+          event.addAttribute("enableConstraint", false);
+          event.addAttribute("modifyChildren", false);
+          event.addAttribute("useGlobalCoordinates", true);
+          InterestingEvent message = mediator().addEventStartingWithLast("BACKWARD FIX LENGTH MESSAGE", "Message", 0, 1);
+          message.addAttribute("message", "Step 6: Fix the bone's length"); //Add the convenient attributes
         }
         continue;
       }
@@ -352,6 +417,7 @@ public abstract class FABRIKSolver extends Solver {
       //Find delta rotation
       Properties props_i = _properties.get(chain.get(i).id());
       Properties props_i1 = _properties.get(chain.get(i + 1).id());
+      Vector prevPos = _positions.get(i + 1);
       //TODO : Is necessary to check children?
       //if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
       if (chain.get(i).constraint() != null && _keepDirection) {
@@ -386,12 +452,23 @@ public abstract class FABRIKSolver extends Solver {
       //change += Vector.distance(_positions.get(i + 1), constrained_pos);
       _positions.set(i + 1, constrained_pos);
 
-      if (_enableHistory) {
-        history().addNodeState("Backward step", chain.get(i + 1), chain.get(i + 1).reference(), _positions.get(i + 1).get(), null);
-        history().incrementStep();
+      if (_enableMediator) {
+        InterestingEvent event = mediator().addEventStartingAfterLast("BACKWARD FIX LENGTH", "NodeTranslation", 1, 2); //Create the event
+        event.addAttribute("node", chain.get(i + 1)); //Add the convenient attributes
+        Vector translation;
+        if (chain.get(i + 1).reference() != null)
+          translation = Vector.subtract(_positions.get(i + 1), prevPos);
+        else
+          translation = _positions.get(i + 1);
+        event.addAttribute("translation", translation);
+        event.addAttribute("enableConstraint", false);
+        event.addAttribute("modifyChildren", false);
+        event.addAttribute("useGlobalCoordinates", true);
+        InterestingEvent message = mediator().addEventStartingWithLast("BACKWARD FIX LENGTH MESSAGE", "Message", 0, 1); //Create the event
+        message.addAttribute("message", "Step 6: Fix the bone's length"); //Add the convenient attributes
       }
+
     }
-    if (_enableHistory) history().incrementIteration();
     return change;
   }
 
@@ -658,57 +735,6 @@ public abstract class FABRIKSolver extends Solver {
     return distance;
   }
 
-  protected static List<Node> _copy(List<? extends Node> chain, Node reference) {
-    List<Node> copy = new ArrayList<Node>();
-    for (Node joint : chain) {
-      Node newJoint = new Node();
-      newJoint.setReference(reference);
-      newJoint.setPosition(joint.position().get());
-      newJoint.setOrientation(joint.orientation().get());
-      newJoint.setConstraint(joint.constraint());
-      copy.add(newJoint);
-      reference = newJoint;
-    }
-    return copy;
-  }
-
-  protected static List<Node> _copy(List<? extends Node> chain) {
-    Node reference = chain.get(0).reference();
-    if (reference != null) {
-      reference = new Node(reference.position().get(), reference.orientation().get(), 1);
-    }
-    return _copy(chain, reference);
-  }
-
-  /*TODO: remove this! (debug purposes)*/
-  protected static List<Node> _copy(List<? extends Node> chain, Node reference, Scene scene) {
-    Node ref = reference;
-    List<Node> copy = new ArrayList<Node>();
-    if(ref == null){
-      reference = chain.get(0).reference();
-      if (reference != null) {
-        ref = new Node(scene);
-        ref.setPosition(reference.position().get());
-        ref.setOrientation(reference.orientation().get());
-        ref.enableTracking(false);
-      }
-    }
-
-    for (Node joint : chain) {
-      Joint newJoint = new Joint(scene, scene.context().color(0,255,0,200), 3);
-      if(copy.isEmpty()){
-        newJoint.setRoot(true);
-      }
-      newJoint.setReference(ref);
-      newJoint.setPosition(joint.position().get());
-      newJoint.setOrientation(joint.orientation().get());
-      newJoint.setConstraint(joint.constraint());
-      copy.add(newJoint);
-      ref = newJoint;
-    }
-    return copy;
-  }
-
   public ArrayList<Vector> positions() {
     return _positions;
   }
@@ -716,14 +742,4 @@ public abstract class FABRIKSolver extends Solver {
   public FABRIKSolver() {
     super();
   }
-
-  //Animation Stuff
-  public IKAnimation.NodeStates history() {
-    return _history;
-  }
-
-  public void enableHistory(boolean enable) {
-    _enableHistory = enable;
-  }
-
 }

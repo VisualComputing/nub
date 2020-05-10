@@ -17,6 +17,7 @@ public class MouseDragInteraction extends PApplet {
   Scene scene;
   Vector randomVector;
   boolean cad, lookAround;
+  Node node, shape1, shape2;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -29,7 +30,7 @@ public class MouseDragInteraction extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    Node shape1 = new Node(scene) {
+    shape1 = new Node() {
       @Override
       public void graphics(PGraphics pGraphics) {
         Scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -44,11 +45,24 @@ public class MouseDragInteraction extends PApplet {
       }
     };
     shape1.setRotation(Quaternion.random());
-    shape1.translate(-375, 175);
+    shape1.translate(-375, 175, 0);
 
-    Node shape2 = new Node(shape1);
-    shape2.setShape(shape());
-    shape2.translate(275, 275);
+    shape2 = new Node(shape1) {
+      @Override
+      public void graphics(PGraphics pGraphics) {
+        Scene.drawAxes(pGraphics, scene.radius() / 3);
+        pGraphics.pushStyle();
+        pGraphics.rectMode(CENTER);
+        pGraphics.fill(255, 255, 0);
+        if (scene.is3D())
+          pGraphics.box(150);
+        else
+          pGraphics.rect(10, 10, 200, 200);
+        pGraphics.popStyle();
+      }
+    };
+    shape2.translate(275, 275, 0);
+    shape2.setPickingThreshold(0);
 
     randomVector = Vector.random();
     randomVector.setMagnitude(scene.radius() * 0.5f);
@@ -64,12 +78,32 @@ public class MouseDragInteraction extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == 'f')
+    if (key == 'd') {
+      if (node == null) {
+        node = shape1.detach();
+        node.setPickingThreshold(0);
+        scene.randomize(node);
+        node.setShape(shape());
+        node.setReference(shape2);
+      }
+    }
+    if (key == 'e') {
+      if (node != null)
+        node.setReference(shape1);
+    }
+    if (key == 'x') {
+      Scene.prune(node);
+    }
+    if (key == 'y') {
+      if (node != null)
+        node.resetReference();
+    }
+    if (key == 'i')
       scene.flip();
     if (key == 's')
-      scene.fit(1);
-    if (key == 'f')
       scene.fit();
+    if (key == 'f')
+      scene.fit(1);
     if (key == 'c') {
       cad = !cad;
       if (cad) {
@@ -77,12 +111,16 @@ public class MouseDragInteraction extends PApplet {
         scene.fit();
       }
     }
+    if (key == 'q') {
+      println(shape2.orientation().toString());
+      //Quaternion q = shape2.worldDisplacement(new Quaternion());
+      Quaternion q = shape2.worldDisplacement(shape2.rotation());
+      println(q.toString());
+    }
     if (key == 'a')
       lookAround = !lookAround;
     if (key == 'r')
-      scene.setRightHanded();
-    if (key == 'l')
-      scene.setLeftHanded();
+      scene.flip();
     if (key == 'p')
       if (scene.type() == Graph.Type.PERSPECTIVE)
         scene.setType(Graph.Type.ORTHOGRAPHIC);
@@ -92,31 +130,24 @@ public class MouseDragInteraction extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast();
-    //scene.track();
+    scene.mouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
       if (cad) {
-        //scene.mouseCAD(randomVector);
-        scene.rotateCAD(randomVector);
+        scene.mouseRotateCAD(randomVector);
       } else if (lookAround) {
-        //scene.lookAround();
-        scene.lookAround();
+        scene.mouseLookAround();
       } else {
-        //scene.spin();
-        scene.spin();
+        scene.mouseSpin();
+        //if (!scene.mouseSpinTag(1))
+        //scene.mouseSpinEye(1);
       }
     else if (mouseButton == RIGHT) {
-      //scene.translate();
-      //scene.translate(scene.mouseDX(), scene.mouseDY(), scene.defaultNode());
-      scene.translate();
+      scene.mouseTranslate();
     } else {
-      //scene.mouseZoom(mouseX - pmouseX);
-      //scene.zoom(scene.mouseDX(), scene.defaultNode());
       scene.scale(scene.mouseDX());
-      //scene.scale(mouseX - pmouseX);
     }
   }
 
@@ -129,7 +160,7 @@ public class MouseDragInteraction extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.align();
+        scene.alignTag();
   }
 
   PShape shape() {

@@ -159,7 +159,7 @@ public class LeapMotionTest1 extends PApplet {
     }
 
     public void mouseMoved() {
-        scene.cast();
+        scene.mouseTag();
     }
 
     public void mouseDragged() {

@@ -1,5 +1,6 @@
 package nub.ik.solver.evolutionary;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.operator.Operator;
@@ -58,7 +59,7 @@ public class BioIk extends Solver {
   }
 
   public BioIk(Node root, int population_size, int _elitism_size) {
-    this._structure = root.graph().branch(root);
+    this._structure = Graph.branch(root);
     this._population_size = population_size;
     this._target = new HashMap<Integer, Node>();
     this._previousTarget = new HashMap<Integer, Node>();
@@ -427,7 +428,7 @@ public class BioIk extends Solver {
       return;
     }
     for (Integer endEffector : _target.keySet()) {
-      _previousTarget.put(endEffector, new Node(_target.get(endEffector).position(), _target.get(endEffector).orientation(), 1));
+      _previousTarget.put(endEffector, Node.detach(_target.get(endEffector).position(), _target.get(endEffector).orientation(), 1));
     }
     //If there is no population then generate one
     _population = Util.generatePopulation(_structure, _population_size);

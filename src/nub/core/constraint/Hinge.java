@@ -34,6 +34,10 @@ public class Hinge extends Constraint {
   protected Quaternion _idleRotation = new Quaternion();
   protected Quaternion _orientation = new Quaternion();
 
+  protected AxisPlaneConstraint.Type transConstraintType = AxisPlaneConstraint.Type.FORBIDDEN;
+  ;
+  protected Vector transConstraintDir = new Vector();
+
 
   public Hinge(float min, float max) {
     _min = min;
@@ -46,6 +50,14 @@ public class Hinge extends Constraint {
     setRestRotation(rotation, up, twist);
   }
 
+  public Quaternion restRotation() {
+    return _restRotation;
+  }
+
+  public Quaternion idleRotation() {
+    return _idleRotation;
+  }
+
   /**
    * reference is a Quaternion that will be aligned to point to the given Basis Vectors
    * result will be stored on restRotation.
@@ -54,14 +66,23 @@ public class Hinge extends Constraint {
   public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
     _orientation = reference.get();
     _idleRotation = reference.get();
+    //Align z-Axis with twist vector around new up Vector
+    Quaternion delta = new Quaternion(new Vector(0, 0, 1), twist);
+    Vector tw = delta.inverseRotate(up);
     //Align y-Axis with up vector
-    Quaternion delta = new Quaternion(new Vector(0, 1, 0), up);
-    Vector tw = delta.inverseRotate(twist);
-    //Align z-Axis with twist vector
-    delta.compose(new Quaternion(new Vector(0, 0, 1), tw));
-
+    //Assume that up and twist are orthogonal
+    float angle = Vector.angleBetween(tw, new Vector(0, 1, 0));
+    if (Vector.cross(new Vector(0, 1, 0), tw, null).dot(new Vector(0, 0, 1)) < 0)
+      angle *= -1;
+    delta.compose(new Quaternion(new Vector(0, 0, 1), angle));
     _orientation.compose(delta); // orientation = idle * rest
     _restRotation = delta;
+  }
+
+  public void setRotations(Quaternion reference, Quaternion rest) {
+    _idleRotation = reference.get();
+    _restRotation = rest.get();
+    _orientation = Quaternion.compose(reference, rest);
   }
 
   public Quaternion orientation() {
@@ -110,7 +131,57 @@ public class Hinge extends Constraint {
   }
 
   @Override
-  public Vector constrainTranslation(Vector translation, Node frame) {
-    return new Vector();
+  public Vector constrainTranslation(Vector translation, Node node) {
+    Vector res = new Vector(translation._vector[0], translation._vector[1], translation._vector[2]);
+    Vector proj;
+    switch (translationConstraintType()) {
+      case FREE:
+        break;
+      case PLANE:
+        proj = node.rotation().rotate(translationConstraintDirection());
+        // proj = node._localInverseTransformOf(translationConstraintDirection());
+        res = Vector.projectVectorOnPlane(translation, proj);
+        break;
+      case AXIS:
+        proj = node.rotation().rotate(translationConstraintDirection());
+        // proj = node._localInverseTransformOf(translationConstraintDirection());
+        res = Vector.projectVectorOnAxis(translation, proj);
+        break;
+      case FORBIDDEN:
+        res = new Vector(0.0f, 0.0f, 0.0f);
+        break;
+    }
+    return res;
+  }
+
+  public AxisPlaneConstraint.Type translationConstraintType() {
+    return transConstraintType;
+  }
+
+  public Vector translationConstraintDirection() {
+    return transConstraintDir;
+  }
+
+  public void setTranslationConstraint(AxisPlaneConstraint.Type type, Vector direction) {
+    setTranslationConstraintType(type);
+    setTranslationConstraintDirection(direction);
+  }
+
+  public void setTranslationConstraintType(AxisPlaneConstraint.Type type) {
+    transConstraintType = type;
+  }
+
+
+  public void setTranslationConstraintDirection(Vector direction) {
+    if ((translationConstraintType() != AxisPlaneConstraint.Type.FREE) && (translationConstraintType()
+        != AxisPlaneConstraint.Type.FORBIDDEN)) {
+      float norm = direction.magnitude();
+      if (norm == 0) {
+        System.out
+            .println("Warning: AxisPlaneConstraint.setTranslationConstraintDir: null vector for translation constraint");
+        transConstraintType = AxisPlaneConstraint.Type.FREE;
+      } else
+        transConstraintDir = Vector.multiply(direction, (1.0f / norm));
+    }
   }
 }

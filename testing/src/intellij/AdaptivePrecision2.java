@@ -23,8 +23,7 @@ public class AdaptivePrecision2 extends PApplet {
     scene.fit(1);
     shapes = new Node[25];
     for (int i = 0; i < shapes.length; i++) {
-      //shapes[i] = new Node(scene, shape());
-      shapes[i] = new Node(scene);
+      shapes[i] = new Node();
       shapes[i].setShape(shape());
       scene.randomize(shapes[i]);
       shapes[i].setPickingThreshold(0.25f);
@@ -35,7 +34,6 @@ public class AdaptivePrecision2 extends PApplet {
     background(0);
     scene.drawAxes();
     for (int i = 0; i < shapes.length; i++) {
-      //scene.draw(shapes[i]);
       pushMatrix();
       scene.applyTransformation(shapes[i]);
       scene.draw(shapes[i]);
@@ -54,9 +52,9 @@ public class AdaptivePrecision2 extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.scale(mouseX - pmouseX);
   }
@@ -66,10 +64,10 @@ public class AdaptivePrecision2 extends PApplet {
   }
 
   public void mouseClicked(MouseEvent event) {
-    scene.resetTrackedNode();
+    scene.removeTag();
     for (int i = 0; i < shapes.length; i++)
-      if (scene.tracks(shapes[i])) {
-        scene.setTrackedNode(shapes[i]);
+      if (scene.mouseTracks(shapes[i])) {
+        scene.tag(shapes[i]);
         break;
       }
   }

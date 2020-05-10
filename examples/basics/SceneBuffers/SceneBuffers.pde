@@ -1,9 +1,9 @@
 /**
- * SceneBuffers.
+ * Scene Buffers.
  * by Jean Pierre Charalambos.
- * 
+ *
  * This example displays the scene front and back buffers.
- * 
+ *
  * The front buffer is filled with some scene objects.
  * The back buffer is used to pick them.
  */
@@ -15,7 +15,7 @@ import nub.processing.*;
 Scene scene;
 Node[] shapes;
 
-//Choose one of P3D for a 3D scene or P2D for a 2D one.
+//Choose P2D or P3D
 String renderer = P3D;
 int w = 1000;
 int h = 1000;
@@ -32,10 +32,10 @@ void setup() {
 
   shapes = new Node[100];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Node(scene, caja());
+    shapes[i] = new Node(caja());
     // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
-    shapes[i].randomize();
+    scene.randomize(shapes[i]);
   }
   scene.fit(1);
 }
@@ -52,23 +52,23 @@ void draw() {
 }
 
 void mouseMoved() {
-  scene.cast();
+  scene.mouseTag();
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.spin();
+    scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.translate();
+    scene.mouseTranslate();
   else
     scene.scale(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
   if (scene.is3D())
-    scene.moveForward(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 30);
   else
-    scene.scale(event.getCount() * 20, scene.eye());
+    scene.scaleEye(event.getCount() * 20);
 }
 
 PShape caja() {

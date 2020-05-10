@@ -12,7 +12,9 @@
 package nub.ik.solver.geometric;
 
 import nub.core.Node;
-import nub.ik.animation.IKAnimation;
+import nub.core.constraint.BallAndSocket;
+import nub.ik.solver.trik.Context;
+import nub.ik.visualization.VisualizerMediator;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -24,10 +26,11 @@ public class ChainSolver extends FABRIKSolver {
   //TODO: Enable Translation of Head (Skip Backward Step)
   protected List<Node> _chain;
   protected List<? extends Node> _original;
-  protected float _current = 10e10f, _best = 10e10f;
+  protected float _current = 10e10f, _best = 10e10f, _previousBest = 10e10f;
   protected Node _target;
   protected Node _prevTarget;
   protected boolean _is3D = true;
+  protected int _deadlockCounter = 0;
 
   //TODO : Check this ideas, clean and refine (*)
   //----------------------------------------------------
@@ -111,7 +114,7 @@ public class ChainSolver extends FABRIKSolver {
   public ChainSolver(List<? extends Node> chain, List<Node> copy, Node target) {
     super();
     this._original = chain;
-    this._chain = copy == null ? _copy(chain) : copy;
+    this._chain = copy == null ? Context._detachedCopy(chain) : copy;
     _positions = new ArrayList<Vector>();
     _distances = new ArrayList<Float>();
     _jointChange = new ArrayList<Float>();
@@ -133,12 +136,13 @@ public class ChainSolver extends FABRIKSolver {
       prevPosition = position;
       prevOrientation = orientation.get();
     }
-    _is3D = chain.get(0).graph().is3D();
     if (!_is3D) _fixTwisting = false;
     _jointChange.remove(0);
     this._target = target;
     this._prevTarget =
-        target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
+        target == null ? null : Node.detach(target.position().get(), target.orientation().get(), 1);
+    //TODO : REFINE
+    //_generateGlobalConstraints();
   }
 
   public ChainSolver(List<? extends Node> chain, Node target) {
@@ -212,11 +216,6 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(_chain.size() - 1, target.get());
 
     //Animation
-    if (_enableHistory) {
-      history().addNodeState("Effector to Target step", _chain.get(_chain.size() - 1), _chain.get(_chain.size() - 1).reference(), target.get(), null);
-      history().incrementStep();
-    }
-
     _forwardReaching();
     //Animation stuff
     //if(debug) addIterationRecord(_positions);
@@ -225,11 +224,6 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(0, initial);
 
     //Animation
-    if (_enableHistory) {
-      history().addNodeState("Head to Initial", _chain.get(0), _chain.get(0).reference(), initial, null);
-      history().incrementStep();
-    }
-
     float change = _backwardReaching(o);
     //Save best solution
     float currentError = Vector.distance(end.position(), _target.position());
@@ -250,8 +244,29 @@ public class ChainSolver extends FABRIKSolver {
         _avoidDeadlock(avoid);
       }
     }
+
     _current = Vector.distance(target, _chain.get(_chain.size() - 1).position());
+
+    if (Math.abs(_best - _previousBest) < Float.MIN_VALUE) { //DeadLock
+      _deadlockCounter++;
+    } else {
+      _deadlockCounter = 0;
+    }
+
+    if (_deadlockCounter == 5) { //apply random perturbation
+      for (int i = 0; i < _chain.size() - 1; i++) {
+        Node j_i = _chain.get(i);
+        Quaternion q = Quaternion.random();
+        if (j_i.constraint() != null) j_i.constraint().constrainRotation(q, j_i);
+        j_i.rotate(q);
+      }
+      _deadlockCounter = 0;
+      _current = 10e10f;
+    }
+
     _update();
+
+    _previousBest = _best;
     //if(debug) addIterationRecord(_positions);
     //Check total position change
     return false;
@@ -274,7 +289,10 @@ public class ChainSolver extends FABRIKSolver {
   protected void _update() {
     if (_current < _best) {
       for (int i = 0; i < _original.size(); i++) {
-        _original.get(i).setRotation(_chain.get(i).rotation().get());
+        _original.get(i).rotation()._quaternion[0] = _chain.get(i).rotation()._quaternion[0];
+        _original.get(i).rotation()._quaternion[1] = _chain.get(i).rotation()._quaternion[1];
+        _original.get(i).rotation()._quaternion[2] = _chain.get(i).rotation()._quaternion[2];
+        _original.get(i).rotation()._quaternion[3] = _chain.get(i).rotation()._quaternion[3];
       }
       _best = _current;
     }
@@ -293,7 +311,7 @@ public class ChainSolver extends FABRIKSolver {
 
   @Override
   protected void _reset() {
-    _prevTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
+    _prevTarget = _target == null ? null : Node.detach(_target.position().get(), _target.orientation().get(), 1);
     _iterations = 0;
     _explorationTimes = 0;
     //We know that State has change but not where, then it is better to reset Global Positions and Orientations
@@ -303,6 +321,8 @@ public class ChainSolver extends FABRIKSolver {
     } else {
       _best = 10e10f;
     }
+    _deadlockCounter = 0;
+    _previousBest = 10e10f;
   }
 
   @Override
@@ -312,11 +332,6 @@ public class ChainSolver extends FABRIKSolver {
 
   protected void _init() {
     //Initialize List with info about Positions and Orientations
-    if (_enableHistory) {
-      if (_history == null) _history = new IKAnimation.NodeStates();
-      else _history.clear();
-    }
-
     if (_original.get(0).reference() != null) {
       _chain.get(0).reference().setMagnitude(_original.get(0).reference().magnitude());
       _chain.get(0).reference().setOrientation(_original.get(0).reference().orientation().get());
@@ -353,14 +368,14 @@ public class ChainSolver extends FABRIKSolver {
       _orientations.add(orientation);
       prevPosition = position;
       prevOrientation = orientation.get();
-      if (_enableHistory)
-        _history.addNodeState("initialization", node, node.reference(), node.translation().get(), node.rotation().get());
     }
     _jointChange.remove(0);
     _explorationTimes = 0;
     //TODO : REFINE & USE ONLY IN DEBUG MODE
     _avoidHistory = new ArrayList<>();
     _divergeHistory = new ArrayList<>();
+    //TODO : REFINE
+    //_generateGlobalConstraints();
   }
 
   protected void _applyTargetdirection() {
@@ -406,7 +421,7 @@ public class ChainSolver extends FABRIKSolver {
     if (debug) System.out.println();
 
     for (int i = 0; i < 20; i++) {
-      List<Node> copy = i < 10 ? _copy(_chain) : _copy(b_copy);
+      List<Node> copy = i < 10 ? Context._detachedCopy(_chain) : Context._detachedCopy(b_copy);
       ArrayList<Vector> copy_p = new ArrayList<>();
       HashMap<Integer, Properties> copy_props = new HashMap<Integer, Properties>();
       int j = 0;
@@ -449,7 +464,7 @@ public class ChainSolver extends FABRIKSolver {
     }
 
     for (int i = 0; i < 20; i++) {
-      List<Node> copy = i < 10 ? _copy(b_copy) : _copy(_chain);
+      List<Node> copy = i < 10 ? Context._detachedCopy(b_copy) : Context._detachedCopy(_chain);
       ArrayList<Vector> copy_p = new ArrayList<>();
       HashMap<Integer, Properties> copy_props = new HashMap<Integer, Properties>();
       int j = 0;
@@ -512,5 +527,211 @@ public class ChainSolver extends FABRIKSolver {
       _positions.set(i, b_copy.get(i).position().get());
     }
     _afterAvoidPosition = (ArrayList<Vector>) _positions.clone();
+  }
+
+  /*Original method is not accurate when joints are highly constrained, sometimes
+   * we observe that actions on Forward Step makes the root of the structure move away
+   * from initial position.
+   * TODO: Rename ?
+   */
+
+  BallAndSocket[] _globalConstraints; //these constraint are useful only on froward step, hence we will reflect them
+
+  public static class DebugGlobal {
+    public Node n;
+    public Vector axis;
+    public Vector up_axis;
+    public Vector right_axis;
+    public List<Node>[] chain = new List[4];
+  }
+
+  ;
+
+  public DebugGlobal[] dg;
+
+  protected void _generateGlobalConstraints() {
+    _globalConstraints = new BallAndSocket[_chain.size()];
+    dg = new DebugGlobal[_chain.size()];
+    Vector root_pos = _chain.get(0).position();
+    System.out.println("Global Constraints Info");
+    for (int i = 1; i < _chain.size(); i++) {
+      System.out.println("Joint i: " + i);
+      Vector j_i_pos = _chain.get(i).position();
+      Vector axis = Vector.subtract(j_i_pos, root_pos);
+      Vector up_axis = Vector.orthogonalVector(axis);
+      Vector right_axis = Vector.cross(axis, up_axis, null);
+      Vector[] dirs = {up_axis, right_axis, Vector.multiply(up_axis, -1), Vector.multiply(right_axis, -1)};
+      dg[i] = new DebugGlobal();
+      dg[i].axis = axis;
+      dg[i].up_axis = up_axis;
+      dg[i].right_axis = right_axis;
+      //TODO: Check avg vs Max / Min - Also, it is important to Take into account Twisting!
+      //TODO: This will work better if we consider angles up to PI (current boundaries are at maximum PI/2)
+      float[] angles = {0, 0, 0, 0};
+      for (int dir = 0; dir < 4; dir++) {
+        List<Node> local_chain = Context._detachedCopy(_chain);
+        while (local_chain.size() > i + 1) local_chain.remove(local_chain.size() - 1);
+
+        for (int k = 0; k < i; k++) {
+          System.out.println("|--- Joint K: " + k);
+          Node j_k = local_chain.get(k);
+          //get axis in terms of J_k
+          Vector local_j_i = j_k.location(_chain.get(i));
+          Vector local_j_i_hat = j_k.location(local_chain.get(i));
+          Vector local_j_0 = j_k.location(root_pos);
+          Vector local_dir = j_k.displacement(dirs[dir]);
+          float desired_angle = _computeAngle(local_dir, local_j_0, local_j_i, local_j_i_hat);
+          //rotate by desired
+          if (j_k.constraint() instanceof BallAndSocket) {
+            //TODO : CLEAN THIS! Do not apply any twisting
+            BallAndSocket c = ((BallAndSocket) j_k.constraint());
+            float min = c.minTwistAngle();
+            float max = c.maxTwistAngle();
+            c.setTwistLimits(0, 0);
+            j_k.rotate(new Quaternion(local_dir, desired_angle));
+            c.setTwistLimits(min, max);
+          } else {
+            j_k.rotate(new Quaternion(local_dir, desired_angle));
+          }
+        }
+        //Find rotation between original and local
+        System.out.println("original chain: " + _chain.get(0).location(_chain.get(i).position()));
+        System.out.println("dir" + dirs[dir]);
+        System.out.println("dir : " + dir + " proj chain chain: " + _chain.get(0).location(local_chain.get(i).position()));
+
+        dg[i].chain[dir] = local_chain;
+        Quaternion q = new Quaternion(_chain.get(0).location(Vector.projectVectorOnPlane(_chain.get(i).position(), dirs[dir])), _chain.get(0).location(Vector.projectVectorOnPlane(local_chain.get(i).position(), dirs[dir])));
+        float ang = Vector.angleBetween(Vector.subtract(_chain.get(i).position(), root_pos), Vector.subtract(local_chain.get(i).position(), root_pos));
+        angles[dir] = ang;//q.angle();
+        System.out.println(">>>>result: " + q.axis() + "  " + q.angle());
+        //if(q.axis().dot(dirs[dir]) < 0)
+        //  angles[dir] = (float)(2 * Math.PI - q.angle());
+        System.out.println(">>>>result: " + q.axis() + "  " + Math.toDegrees(angles[dir]));
+
+      }
+      System.out.println("axis " + axis);
+      System.out.println("up " + Math.toDegrees(angles[0]));
+      System.out.println("right " + Math.toDegrees(angles[1]));
+      System.out.println("down " + Math.toDegrees(angles[2]));
+      System.out.println("left " + Math.toDegrees(angles[3]));
+      //TODO : Generalize conic constraints
+      //with the obtained information generate the global constraint for j_i
+      if (angles[2] < Math.PI / 2 && angles[0] < Math.PI / 2 && angles[1] < Math.PI / 2 && angles[3] < Math.PI / 2) {
+        _globalConstraints[i] = new BallAndSocket(angles[3], angles[1], angles[2], angles[0]);
+        _globalConstraints[i].setRestRotation(new Quaternion(), up_axis, Vector.multiply(axis, 1));
+      }
+    }
+  }
+
+  protected float _computeAngle(Vector axis, Vector j0, Vector ji, Vector ji_hat) {
+    //All parameters are defined locally w.r.t j_k
+    Vector ji_proj = Vector.projectVectorOnPlane(ji, axis);
+    Vector A = Vector.projectVectorOnPlane(Vector.subtract(ji, j0), axis);
+    System.out.println("  A : " + A);
+    Vector B = Vector.projectVectorOnPlane(ji_hat, axis);
+    System.out.println("  B : " + B);
+    //Find the intersection between line defined by A and the the circle with radius B
+    float radius = B.magnitude();
+    float angle = Vector.angleBetween(A, ji_proj);
+    System.out.println("  Angle : " + angle);
+    float chord_length = (float) (2 * radius * Math.cos(angle));
+    Vector C = Vector.add(ji_proj, Vector.multiply(A.normalize(null), -chord_length));
+    System.out.println("  C : " + C);
+    float desired_angle;
+    if (radius <= j0.magnitude()) {
+      //C =  Vector.add(Vector.multiply(Vector.subtract(C, ji_proj),0.5f), B).normalize(null);
+      C = Vector.cross(axis, A, null).normalize(null);
+      C.multiply(radius);
+      desired_angle = Vector.angleBetween(B, C);
+      Vector cross = Vector.cross(B, C, null);
+      if (Vector.dot(cross, axis) < 0) {
+        desired_angle = (float) Math.PI - desired_angle;
+      }
+    } else {
+      desired_angle = Vector.angleBetween(B, C);
+      Vector cross = Vector.cross(B, C, null);
+      if (Vector.dot(cross, axis) < 0) {
+        desired_angle = (float) (2 * Math.PI - desired_angle);
+      }
+    }
+    System.out.println("ANG : " + Math.min(desired_angle, (float) (0.99 * Math.PI)));
+    return Math.min(desired_angle, (float) (0.8 * Math.PI)); //Rotation near to PI generates Singularity problems
+  }
+
+//  protected float _computeAngle(Vector axis, Vector a, Vector b){
+//    Vector v1 = Vector.projectVectorOnPlane(b, axis);
+//    Vector v2 = Vector.projectVectorOnPlane(Vector.multiply(a,-1), axis);
+//    float angle = Vector.angleBetween(v1,v2);
+//    Vector cross = Vector.cross(v1, v2, null);
+//    if(Vector.dot(cross, axis) < 0){
+//      angle = (float) Math.PI * 2 - angle;
+//    }
+//    System.out.println("ANG : " + angle);
+//    return Math.min(angle, (float) Math.PI * 0.99f); //Rotation near to PI generates Singularity problems
+//  }
+
+  protected float _getBound(Vector axis, Vector local_axis, float angle, Node node) {
+    Quaternion q = new Quaternion(local_axis, angle);
+    Quaternion delta = node.constraint().constrainRotation(new Quaternion(local_axis, angle), node);
+    System.out.println("----| cons: " + ((BallAndSocket) node.constraint()).orientation().axis() + Math.toDegrees(((BallAndSocket) node.constraint()).orientation().angle()));
+    System.out.println("----| axis: " + axis);
+    System.out.println("----| local axis: " + local_axis);
+    System.out.println("----| desired quat : " + q.axis() + " angle (degrees) " + Math.toDegrees(q.angle()));
+    System.out.println("----| constrained quat : " + delta.axis() + " angle (degrees) " + Math.toDegrees(delta.angle()));
+
+
+    Quaternion rotor = node.orientation();
+    System.out.println("----| rot orig computed : " + rotor.axis() + " angle (degrees) " + Math.toDegrees(rotor.angle()));
+
+    //Keep only the component that we're interested on
+    //Decompose in terms of twist and swing
+    Vector rotationOAxis = new Vector(rotor._quaternion[0], rotor._quaternion[1], rotor._quaternion[2]);
+    rotationOAxis = Vector.projectVectorOnAxis(rotationOAxis, axis);
+    //Get rotation component on Axis direction
+    Quaternion rotationOTwist = new Quaternion(rotationOAxis.x(), rotationOAxis.y(), rotationOAxis.z(), rotor.w());
+    System.out.println("----| rot orig twist : " + rotationOTwist.axis() + " angle (degrees) " + Math.toDegrees(rotationOTwist.angle()));
+
+
+    Quaternion rot = Quaternion.compose(node.orientation(), delta);
+    System.out.println("----| rot computed : " + rot.axis() + " angle (degrees) " + Math.toDegrees(rot.angle()));
+
+    //Keep only the component that we're interested on
+    //Decompose in terms of twist and swing
+    Vector rotationAxis = new Vector(rot._quaternion[0], rot._quaternion[1], rot._quaternion[2]);
+    rotationAxis = Vector.projectVectorOnAxis(rotationAxis, node.orientation().inverseRotate(axis));
+    System.out.println("rotAx : " + rotationAxis);
+    //Get rotation component on Axis direction
+    Quaternion rotationTwist = new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), rot.w());
+    System.out.println("----| rot twist : " + rotationTwist.axis() + " angle (degrees) " + Math.toDegrees(rotationTwist.angle()));
+    return rotationTwist.angle();
+  }
+
+  protected Quaternion applyGlobalConstraint(Vector j_hat, Vector j_root_hat, Vector j_root, BallAndSocket b) {
+    if (b == null) return new Quaternion(); //no correction is done
+    //Find angle in global space
+    Quaternion rot = new Quaternion(Vector.subtract(j_root_hat, j_hat), Vector.subtract(j_root, j_hat));
+    Vector axis = b.restRotation().rotate(new Vector(0, 0, 1));
+    Vector target = rot.rotate(axis);
+    //Apply constraint
+    Vector result = b.apply(target);
+    //Apply inverse transformation
+    return new Quaternion(result, target);
+  }
+
+  public BallAndSocket[] globalConstraints() {
+    return _globalConstraints;
+  }
+
+  //Animation Stuff
+  //TODO: Refactor, perhaps move to Solver class
+  @Override
+  public void registerStructure(VisualizerMediator mediator) {
+    mediator.registerStructure(_chain);
+    mediator.registerStructure(_target);
+  }
+
+  @Override
+  public Iterator<? extends Node> iterator() {
+    return _chain.iterator();
   }
 }

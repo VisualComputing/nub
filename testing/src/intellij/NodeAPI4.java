@@ -342,20 +342,20 @@ public class NodeAPI4 extends PApplet {
     if (key == '-')
       scene.eye().setScaling(scene.eye().scaling() / 1.1f);
     if (key == 'e')
-      f1.enableTracking(!f1.isTrackingEnabled());
+      f1.enableTagging(!f1.isTaggingEnabled());
   }
 
   @Override
   public void mouseMoved() {
-    scene.track(new Node[]{f1, f2, f3, f4, f5});
+    scene.updateMouseTag(new Node[]{f1, f2, f3, f4, f5});
   }
 
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(mouseX - pmouseX);
   }
@@ -371,7 +371,7 @@ public class NodeAPI4 extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.align();
+        scene.alignTag();
   }
 
   public class InteractiveNode extends Node {

@@ -281,7 +281,7 @@ public class HAEASolver extends Solver {
       return;
     }
     for (Integer endEffector : _target.keySet()) {
-      _previousTarget.put(endEffector, new Node(_target.get(endEffector).position(), _target.get(endEffector).orientation(), 1));
+      _previousTarget.put(endEffector, Node.detach(_target.get(endEffector).position(), _target.get(endEffector).orientation(), 1));
     }
     //If there is no population then genereate one
     _population = Util.generatePopulation(_structure, _population_size);

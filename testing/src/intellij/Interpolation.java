@@ -3,6 +3,7 @@ package intellij;
 import nub.core.Interpolator;
 import nub.core.Node;
 import nub.processing.Scene;
+import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -16,6 +17,7 @@ public class Interpolation extends PApplet {
   Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
   Node shape;
   boolean showEyePath = true;
+  float speed = 1;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
@@ -38,7 +40,7 @@ public class Interpolation extends PApplet {
 
     // interpolation 3. Custom (arbitrary) node interpolations
 
-    shape = new Node(scene) {
+    shape = new Node() {
       // Note that within render() geometry is defined at the
       // node local coordinate system.
       @Override
@@ -55,11 +57,11 @@ public class Interpolation extends PApplet {
       }
     };
     interpolator = new Interpolator(shape);
-    interpolator.setLoop();
+    interpolator.enableRecurrence();
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
-      interpolator.addKeyFrame(scene.randomNode());
-    interpolator.start();
+      interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+    interpolator.run();
   }
 
   public void draw() {
@@ -68,14 +70,13 @@ public class Interpolation extends PApplet {
 
     pushStyle();
     stroke(255);
-    // same as:scene.drawPath(interpolator, 5);
-    scene.drawPath(interpolator);
+    // same as:scene.drawCatmullRom(interpolator, 5);
+    scene.drawCatmullRom(interpolator);
     popStyle();
-
-    for (Node node : interpolator.keyFrames()) {
+    for (Node node : interpolator.keyFrames().values()) {
       pushMatrix();
       scene.applyTransformation(node);
-      scene.drawAxes(scene.tracks(node) ? 40 : 20);
+      scene.drawAxes(scene.mouseTracks(node) ? 40 : 20);
       popMatrix();
     }
     if (showEyePath) {
@@ -83,23 +84,24 @@ public class Interpolation extends PApplet {
       fill(255, 0, 0);
       stroke(0, 255, 0);
       // same as:
-      // scene.drawPath(eyeInterpolator1, 3);
-      // scene.drawPath(eyeInterpolator2, 3);
-      scene.drawPath(eyeInterpolator1);
-      scene.drawPath(eyeInterpolator2);
+      // scene.drawCatmullRom(eyeInterpolator1, 3);
+      // scene.drawCatmullRom(eyeInterpolator2, 3);
+      scene.drawCatmullRom(eyeInterpolator1);
+      scene.drawCatmullRom(eyeInterpolator2);
       popStyle();
     }
+    println(frameRate);
   }
 
   public void mouseMoved() {
-    scene.track();
+    scene.updateMouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.scale(mouseX - pmouseX);
   }
@@ -108,7 +110,7 @@ public class Interpolation extends PApplet {
     if (scene.is3D())
       scene.moveForward(event.getCount() * 20);
     else
-      scene.scale(event.getCount() * 20, scene.eye());
+      scene.scaleEye(event.getCount() * 20);
   }
 
   public void keyPressed() {
@@ -120,24 +122,36 @@ public class Interpolation extends PApplet {
     if (key == 'a')
       eyeInterpolator1.toggle();
     if (key == 'b')
-      eyeInterpolator1.purge();
+      eyeInterpolator1.clear();
 
     if (key == '2')
       eyeInterpolator2.addKeyFrame();
     if (key == 'c')
       eyeInterpolator2.toggle();
     if (key == 'd')
-      eyeInterpolator2.purge();
+      eyeInterpolator2.clear();
 
-    if (key == '-')
-      interpolator.setSpeed(interpolator.speed() - 0.25f);
-    if (key == '+')
-      interpolator.setSpeed(interpolator.speed() + 0.25f);
+    if (key == '-' || key == '+') {
+      if (key == '-')
+        speed -= 0.25f;
+      else
+        speed += 0.25f;
+      interpolator.run(speed);
+    }
 
     if (key == 's')
       scene.fit(1);
     if (key == 'f')
       scene.fit();
+
+    if (key == 'x')
+      for (Task task : Scene.timingHandler().tasks())
+        task.enableConcurrence();
+    if (key == 'y')
+      for (Task task : Scene.timingHandler().tasks())
+        task.disableConcurrence();
+    if (key == 'p')
+      println(Scene.nodes().size());
   }
 
   public static void main(String[] args) {

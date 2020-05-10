@@ -2,12 +2,13 @@
  * View Frustum Culling.
  * by Jean Pierre Charalambos.
  *
- * This example illustrates a basic view frustum culling implementation which is performed
- * by analytically solving the frustum plane equations.
+ * This example illustrates a basic view frustum culling implementation which
+ * is performed by analytically solving the frustum plane equations.
  *
- * A hierarchical octree structure is clipped against the camera's frustum clipping planes.
- * A second viewer displays an external view of the scene that exhibits the clipping
- * (using scene.drawFrustum(Scene otherScene) to display the frustum).
+ * A customized traversal rendering algorithm is implemented by overriding the
+ * node visit() method to clip an octree against the camera's viewing frustum.
+ * A second viewer displays an external view of the main frustum scene (using
+ * the drawFrustum(Scene otherScene) method) and the clipped octree.
  *
  * Press the space-bar to change the scene type: PERSPECTIVE or ORTHOGRAPHIC.
  */
@@ -17,85 +18,98 @@ import nub.core.*;
 import nub.processing.*;
 
 OctreeNode root;
-Scene scene1, scene2, focus;
+Scene mainScene, secondaryScene, focus;
+boolean bypass;
 
-int w = 1110;
-int h = 1110;
+int w = 1000;
+int h = 800;
+//octree
+float a = 220, b = 100, c = 280;
+int levels = 4;
 
 void settings() {
   size(w, h, P3D);
 }
 
 void setup() {
+  // main scene
+  mainScene = new Scene(this, P3D, w, h /2);
+  mainScene.togglePerspective();
+  mainScene.enableBoundaryEquations();
+  mainScene.fit(1);
+
   // declare and build the octree hierarchy
-  Vector p = new Vector(100, 70, 130);
-  root = new OctreeNode(p, Vector.multiply(p, -1.0f));
-  root.buildBoxHierarchy(4);
+  root = new OctreeNode();
+  buildOctree(root);
 
-  scene1 = new Scene(this, P3D, w, h /2);
-  scene1.togglePerspective();
-  scene1.enableBoundaryEquations();
-  scene1.fit(1);
+  // secondary scene
+  secondaryScene = new Scene(this, P3D, w, h / 2, 0, h / 2);
+  secondaryScene.togglePerspective();
+  secondaryScene.setRadius(200);
+  secondaryScene.fit();
+}
 
-  // Note that we pass the upper left corner coordinates where the scene
-  // is to be drawn (see drawing code below) to its constructor.
-  scene2 = new Scene(this, P3D, w, h / 2, 0, h / 2);
-  scene2.togglePerspective();
-  scene2.setRadius(200);
-  scene2.fit();
+void buildOctree(OctreeNode parent) {
+  if (parent.level() < levels)
+    for (int i = 0; i < 8; ++i)
+      buildOctree(new OctreeNode(parent, new Vector((i & 4) == 0 ? a : -a, (i & 2) == 0 ? b : -b, (i & 1) == 0 ? c : -c)));
 }
 
 void draw() {
   handleMouse();
-  background(0);
-  scene1.beginDraw();
-  scene1.context().background(0);
-  root.drawIfAllChildrenAreVisible(scene1.context(), scene1);
-  scene1.endDraw();
-  scene1.display();
+  background(255);
+  mainScene.beginDraw();
+  mainScene.context().background(255);
+  // culling condition should be retested every frame
+  root.cull(false);
+  bypass = false;
+  mainScene.render();
+  mainScene.endDraw();
+  mainScene.display();
+  bypass = true;
+  secondaryScene.beginDraw();
+  secondaryScene.context().background(185);
+  secondaryScene.render();
+  secondaryScene.context().pushStyle();
+  secondaryScene.context().strokeWeight(2);
+  secondaryScene.context().stroke(255, 0, 255);
+  secondaryScene.context().fill(255, 0, 255, 160);
+  secondaryScene.drawFrustum(mainScene);
+  secondaryScene.context().popStyle();
+  secondaryScene.endDraw();
+  secondaryScene.display();
+}
 
-  scene2.beginDraw();
-  scene2.context().background(0);
-  root.drawIfAllChildrenAreVisible(scene2.context(), scene1);
-  scene2.context().pushStyle();
-  scene2.context().stroke(255, 255, 0);
-  scene2.context().fill(255, 255, 0, 160);
-  scene2.drawFrustum(scene1);
-  scene2.context().popStyle();
-  scene2.endDraw();
-  scene2.display();
+void handleMouse() {
+  focus = mouseY < h / 2 ? mainScene : secondaryScene;
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    focus.spin();
+    focus.mouseSpinEye();
   else if (mouseButton == RIGHT)
-    focus.translate();
+    focus.mouseTranslateEye();
   else
-    focus.scale(focus.mouseDX());
+    focus.scaleEye(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
-  focus.moveForward(event.getCount() * 50);
+  focus.moveForward(event.getCount() * 20);
 }
 
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 2)
     if (event.getButton() == LEFT)
-      focus.focus();
+      focus.focusEye();
     else
-      focus.align();
+      focus.alignEye();
 }
 
 void keyPressed() {
   if (key == ' ')
     focus.togglePerspective();
   if (key == 'f') {
-    scene1.flip();
-    scene2.flip();
+    mainScene.flip();
+    secondaryScene.flip();
   }
-}
-
-void handleMouse() {
-  focus = mouseY < h / 2 ? scene1 : scene2;
 }

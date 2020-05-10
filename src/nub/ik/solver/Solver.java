@@ -12,7 +12,9 @@
 package nub.ik.solver;
 
 import nub.core.Node;
-import nub.timing.TimingTask;
+import nub.ik.visualization.VisualizerMediator;
+
+import java.util.Iterator;
 
 /**
  * A Solver is a convenient class to solve IK problem,
@@ -32,25 +34,20 @@ public abstract class Solver {
   protected int _iterations = 0;
   protected int _last_iteration = 0; //TODO : Clean this!
   protected boolean _change_temp = false; //TODO : Clean this!
+  protected boolean _accumulate = false;
+  protected float _accumulatedError = 0; //TODO : Remove this
+  protected float _timePerIteration = 0;
 
-  protected TimingTask _task;
-
-  public TimingTask task() {
-    return _task;
-  }
-
-  public Solver() {
-    _task = new TimingTask() {
-      @Override
-      public void execute() {
-        solve();
-      }
-    };
-  }
+  protected VisualizerMediator _mediator;
+  protected boolean _enableMediator = false;
 
   /*Getters and setters*/
   public int lastIteration() {
     return _last_iteration;
+  }
+
+  public int iteration() {
+    return _iterations;
   }
 
   public void setMaxError(float maxError) {
@@ -73,6 +70,10 @@ public abstract class Solver {
     _change_temp = change;
   }
 
+  public float accumulatedError() {
+    return _accumulatedError;
+  }
+
   /*Performs an Iteration of Solver Algorithm */
   protected abstract boolean _iterate();
 
@@ -92,30 +93,69 @@ public abstract class Solver {
     //Reset counter
     if (_changed() || _change_temp) {
       _reset();
+      _last_iteration = 0;
+      _accumulate = true;
       _change_temp = false;
     }
 
     if (_iterations >= _maxIterations) {
       return true;
     }
+
     _frameCounter += _timesPerFrame;
 
     while (Math.floor(_frameCounter) > 0) {
       //Returns a boolean that indicates if a termination condition has been accomplished
       if (_iterate()) {
-        _last_iteration = _iterations;
+        _last_iteration = _iterations + 1;
         _iterations = _maxIterations;
-        break;
+        _frameCounter = 0;
       } else {
-        _last_iteration = _iterations;
         _iterations += 1;
+        _last_iteration = _iterations;
+        _frameCounter -= 1;
       }
-      _frameCounter -= 1;
     }
+
+    if (_iterations >= _maxIterations) {
+      if (_accumulate) {
+        _accumulatedError += error();
+        _accumulate = false;
+      }
+    }
+
     //update positions
     _update();
     return false;
   }
 
   public abstract void setTarget(Node endEffector, Node target);
+
+
+  //Animation Stuff
+  //TODO set as abstract
+
+  //TODO: Perhaps change it to use an iterator pattern
+  public Iterator<? extends Node> iterator() {
+    return null;
+  }
+
+  ;
+
+  public VisualizerMediator mediator() {
+    return _mediator;
+  }
+
+  public void setMediator(VisualizerMediator mediator) {
+    _mediator = mediator;
+  }
+
+  public void enableMediator(boolean enable) {
+    _enableMediator = enable;
+  }
+
+  public void registerStructure(VisualizerMediator mediator) {
+  }
+
+  ;
 }

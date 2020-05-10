@@ -28,6 +28,7 @@ import nub.primitives.*;
 import nub.core.*;
 import nub.processing.*;
 import nub.ik.solver.geometric.*;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.timing.*;
 
 int w = 700;
@@ -54,16 +55,16 @@ void setup() {
     scene.setRadius(280);
     scene.fit(1);
     //1. Create the Skeleton (chain described above)
-    skeleton.add(new Joint(scene,null, new Vector(0, -scene.radius()/2), jointRadius, false));
-    skeleton.add(new Joint(scene,skeleton.get(0), new Vector(0, length), jointRadius, true));
-    skeleton.add(new Joint(scene,skeleton.get(1), new Vector(0, length), jointRadius, true));
-    skeleton.add(new Joint(scene,skeleton.get(2), new Vector(0, length), jointRadius, true));
-    skeleton.add(new Joint(scene,skeleton.get(3), new Vector(0, length), jointRadius, true));
+    skeleton.add(new Joint(null, new Vector(0, -scene.radius()/2), jointRadius, false));
+    skeleton.add(new Joint(skeleton.get(0), new Vector(0, length), jointRadius, true));
+    skeleton.add(new Joint(skeleton.get(1), new Vector(0, length), jointRadius, true));
+    skeleton.add(new Joint(skeleton.get(2), new Vector(0, length), jointRadius, true));
+    skeleton.add(new Joint(skeleton.get(3), new Vector(0, length), jointRadius, true));
     //End Effector
-    Node endEffector = new Joint(scene,skeleton.get(4), new Vector(0, length), jointRadius, true);
+    Node endEffector = new Joint(skeleton.get(4), new Vector(0, length), jointRadius, true);
     skeleton.add(endEffector);
     //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
-    endEffector.enableTracking(false);
+    endEffector.enableTagging(false);
 
     //2. Lets create a Target (a bit bigger than a Joint in the structure)
     Node target = new Target(scene, jointRadius * 1.5f);
@@ -72,10 +73,14 @@ void setup() {
     target.setPosition(endEffector.position());
 
     //3. Relate the structure with a Solver. In this example we instantiate a solver
-    //As we're dealing with a Chain Structure a Chain Solver is preferable
-    //A Chain solver constructor receives an ArrayList containing the Skeleton structure
-    final ChainSolver solver = new ChainSolver(skeleton);
-
+    //As we're dealing with a Chain Structure we could use a SimpleTRIK solver (this option is only valid for chain structures).
+    //The heuristic mode defines the kind of algorithm to use most common options are:
+    //SimpleTRIK.HeuristicMode.EXPRESSIVE_FINAL
+    //SimpleTRIK.HeuristicMode.FINAL
+    //SimpleTRIK.HeuristicMode.CCD
+    final SimpleTRIK solver = new SimpleTRIK(skeleton, SimpleTRIK.HeuristicMode.FINAL);
+    
+    
     //Optionally you could modify the following parameters of the Solver:
     //Maximum distance between end effector and target, If is below maxError, then we stop executing IK solver (Default value is 0.01)
     solver.setMaxError(1);
@@ -132,14 +137,14 @@ void draw() {
 
 
 void mouseMoved() {
-    scene.cast();
+    scene.mouseTag();
 }
 
 void mouseDragged() {
     if (mouseButton == LEFT){
-        scene.spin();
+        scene.mouseSpin();
     } else if (mouseButton == RIGHT) {
-        scene.translate();
+        scene.mouseTranslate();
     } else {
         scene.scale(mouseX - pmouseX);
     }
@@ -156,7 +161,6 @@ void mouseClicked(MouseEvent event) {
         else
             scene.align();
 }
-
 void keyPressed(){
     if(key == 'S' || key == 's'){
         enableSolver = !enableSolver;

@@ -20,7 +20,7 @@ public class Interaction2D extends PApplet {
   PFont font36;
 
   public void settings() {
-    size(2600, 1400, JAVA2D);
+    size(2600, 1400, P2D);
   }
 
   public void setup() {
@@ -31,7 +31,7 @@ public class Interaction2D extends PApplet {
     //scene.eye().setScaling(1);
     scene.fit(1);
 
-    shape1 = new Node(scene) {
+    shape1 = new Node() {
       @Override
       public void graphics(PGraphics pGraphics) {
         Scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -53,17 +53,17 @@ public class Interaction2D extends PApplet {
       }
     };
     //shape1.setRotation(Quaternion.random());
-    shape1.translate(-375, 175);
+    shape1.translate(-375, 175, 0);
 
     shape2 = new Node(shape1);
     shape2.setShape(shape());
-    shape2.translate(75, 475);
+    shape2.translate(75, 475, 0);
     if (g instanceof PGraphics2D)
       shape2.setPickingThreshold(0);
 
     shape3 = new Node(shape2);
     shape3.setShape(createShape(RECT, 0, 0, 150, 150));
-    shape3.translate(-775, -575);
+    shape3.translate(-775, -575, 0);
   }
 
   public void draw() {
@@ -74,7 +74,7 @@ public class Interaction2D extends PApplet {
     scene.drawSquaredBullsEye(shape1);
     scene.beginHUD();
     Vector position = scene.screenLocation(shape1.position());
-    fill(shape1.isTracked() ? 0 : 255, shape1.isTracked() ? 255 : 0, shape1.isTracked() ? 0 : 255);
+    fill(shape1.isTagged(scene) ? 0 : 255, shape1.isTagged(scene) ? 255 : 0, shape1.isTagged(scene) ? 0 : 255);
     textFont(font36);
     text("center", position.x(), position.y());
     scene.endHUD();
@@ -102,14 +102,14 @@ public class Interaction2D extends PApplet {
       shape3.setReference(null);
     }
     if (key == 'p') {
-      scene.screenLocation(shape1.position()).print();
+      print(scene.screenLocation(shape1.position()).toString());
       println(mouseX + " " + mouseY);
     }
   }
 
   @Override
   public void mouseMoved() {
-    scene.track();
+    scene.updateMouseTag();
   }
 
   public void mousePressed() {
@@ -124,12 +124,12 @@ public class Interaction2D extends PApplet {
     // Mouse methods that don't take a node parameter (such as mouseCAD)
     // are only available to the scene.eye().
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
       //scene.mouseCAD();
       //scene.lookAround(upVector);
       //scene.mouseCAD();
     else if (mouseButton == RIGHT)
-      scene.translate();
+      scene.mouseTranslate();
       //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);
@@ -147,7 +147,7 @@ public class Interaction2D extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.align();
+        scene.alignTag();
   }
 
   PShape shape() {

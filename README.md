@@ -1,31 +1,48 @@
+nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
+===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
 **Table of Contents**
 
-- [Description](#user-content-description)
-- [Scene](#user-content-scene)
-- [Nodes](#user-content-nodes)
-- [Interpolators](#user-content-interpolators)
-- [HIDs](#user-content-hids)
-- [Control](#user-content-control)
-- [IK](#user-content-ik)
-- [Installation](#user-content-installation)
-- [Contributors](#user-content-contributors)
+- [Description](#description)
+- [Scene](#scene)
+- [Nodes](#nodes)
+    - [Localization](#localization)
+    - [Shapes](#shapes)
+    - [Space transformations](#space-transformations)
+- [Rendering](#rendering)
+    - [Drawing functionality](#drawing-functionality)
+- [Interactivity](#interactivity)
+  - [Eye](#eye)
+  - [Nodes](#nodes-1)
+  - [Picking](#picking)
+- [Timing](#timing)
+  - [Timing tasks](#timing-tasks)
+  - [Interpolators](#interpolators)
+- [Installation](#installation)
+- [Contributors](#contributors)
 
 ## Description
 
-[nub](http://visualcomputing.github.io/Transformations/#/6) is a simple, expressive, language-agnostic, and extensible [(2D/3D) scene graph](https://en.wikipedia.org/wiki/Scene_graph) featuring interaction, visualization and animation frameworks and supporting advanced (onscreen/offscreen) rendering techniques, such as [view frustum culling](http://cgvr.informatik.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html).
+[nub](http://visualcomputing.github.io/Transformations/#/6) is a simple, expressive, language-agnostic, and extensible [visual computing](https://en.wikipedia.org/wiki/Visual_computing) library, featuring interaction, visualization and animation frameworks and supporting advanced (onscreen/offscreen) rendering techniques, such as [view frustum culling](http://cgvr.informatik.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html).
 
-*nub* is meant to be coupled with third party real and non-real time [renderers](https://en.wikipedia.org/wiki/3D_rendering). Our current [release](https://github.com/VisualComputing/nubjs/releases) supports all major [Processing](https://processing.org/) desktop renderers: [2D and 3D PGraphicsOpenGL (a.k.a. P2D and P3D, respectively)](https://processing.github.io/processing-javadocs/core/processing/opengl/PGraphicsOpenGL.html), [PGraphicsJava2D (a.k.a. JAVA2D)](https://processing.github.io/processing-javadocs/core/processing/awt/PGraphicsJava2D.html) and [PGraphicsFX2D (a.k.a. FX2D)](https://processing.github.io/processing-javadocs/core/processing/javafx/PGraphicsFX2D.html).
+_nub_ is meant to be coupled with third party real and non-real time [renderers](https://en.wikipedia.org/wiki/3D_rendering). Our current [release](https://github.com/VisualComputing/nub/releases) supports the [2D and 3D PGraphicsOpenGL (a.k.a. P2D and P3D, respectively)](https://processing.github.io/processing-javadocs/core/processing/opengl/PGraphicsOpenGL.html) [Processing](https://processing.org/) renderers.
 
 If looking for the API docs, check them [here](https://visualcomputing.github.io/nub-javadocs/).
 
-Readers unfamiliar with geometry transformations may first check the great [Processing 2D transformations tutorial](https://processing.org/tutorials/transform2d/) by _J David Eisenberg_ and this [presentation](http://visualcomputing.github.io/Transformations/#/6) that discusses some related formal foundations.
+Readers unfamiliar with geometry transformations may first check the great [Processing 2D transformations tutorial](https://processing.org/tutorials/transform2d/) by _J David Eisenberg_ and the [affine transformations](http://visualcomputing.github.io/Transformations) and [scene-graphs](http://visualcomputing.github.io/SceneGraphs) presentations that discuss some related formal foundations.
 
 ## Scene
 
 Instantiate your on-screen scene at the [setup()](https://processing.org/reference/setup_.html):
 
 ```processing
+// import all nub classes
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
+
 Scene scene;
+
 void setup() {
   scene = new Scene(this);
 }
@@ -36,165 +53,504 @@ The [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.
 Off-screen scenes should be instantiated upon a [PGraphics](https://processing.org/reference/PGraphics.html) object:
 
 ```processing
-Scene scene;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
+
+Scene offScreenScene;
+
 void setup() {
-  scene = new Scene(this, createGraphics(500, 500, P3D));
+  offScreenScene = new Scene(this, createGraphics(500, 500, P3D));
   // or use the equivalent but simpler version:
-  // scene = new Scene(this, P3D, 500, 500);
+  // offScreenScene = new Scene(this, P3D, 500, 500);
 }
 ```
 
-In this case, the [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) [context()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#context--) corresponds to the `PGraphics` instantiated with [createGraphics()](https://processing.org/reference/createGraphics_.html) (which is of course different than the *PApplet* main `PGraphics` instance).
+In this case, the `offScreenScene` [context()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#context--) corresponds to the `PGraphics` instantiated with [createGraphics()](https://processing.org/reference/createGraphics_.html) (which is of course different than the *PApplet* main `PGraphics` instance).
 
 ## Nodes
 
-A node may be translated, rotated and scaled (the order is important) and be rendered when it has a shape. [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instances define each of the nodes comprising a scene graph. To illustrate their use, suppose the following scene graph is being implemented:
+A node may be translated, rotated and scaled (the order is important) and be rendered when it has a shape. [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instances define each of the nodes comprising the scene tree. To illustrate their use, suppose the following scene hierarchy is being implemented:
 
 ```processing
- World
+World
   ^
   |\
-  1 eye
+ n1 eye
   ^
   |\
-  2 3
+ n2 n3
 ```
 
-To setup the scene hierarchy of _attached_ nodes, i.e., nodes belonging to the scene, use code such as the following:
+To setup the scene hierarchy of nodes use code such as the following:
 
 ```processing
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
+
 Scene scene;
 Node n1, n2, n3;
+
 void setup() {
+  size(720, 480, P3D);
+  // the scene object creates a default eye node
   scene = new Scene(this);
-  // To attach a leading-node (those whose parent is the world, such as n1)
-  // the scene parameter is passed to the Node constructor:
-  n1 = new Node(scene);
+  // Create a top-level node (i.e., a node whose reference is null) with:
+  n1 = new Node();
   // whereas for the remaining nodes we pass any constructor taking a
-  // reference node paramater, such as Node(Node referenceNode)
+  // reference node parameter, such as Node(Node referenceNode)
   n2 = new Node(n1) {
     // immediate mode rendering procedure
     // defines n2 visual representation
     @Override
-    public boolean graphics(PGraphics pg) {
+    public void graphics(PGraphics pg) {
       Scene.drawTorusSolenoid(pg);
-      return true;
     }
   };
   // retained-mode rendering PShape
   // defines n3 visual representation
-  n3 = new Node(n1, createShape(BOX, 60));
+  n3 = new Node(n1, createShape(BOX, 30));
+  // translate the node to make it visible
+  n3.translate(50, 50, 50);
 }
 ```
 
-Some advantages of using _attached_ nodes are:
+Note that the hierarchy of nodes may be modified with [setReference(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setReference-nub.core.Node-) and the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) set from an arbitrary node instance with [setEye(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setEye-nub.core.Node-). Calling [setConstraint(Constraint)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setConstraint-nub.core.constraint.Constraint-) will apply a [Constraint](https://visualcomputing.github.io/nub-javadocs/nub/core/constraint/Constraint.html) to a node to limit its motion, see the [ConstrainedEye](https://github.com/VisualComputing/nub/tree/master/examples/basics/ConstrainedEye) and [ConstrainedNode](https://github.com/VisualComputing/nub/tree/master/examples/basics/ConstrainedNode) examples.
 
-* The [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) sets up a default _eye_ node. To set the eye from an arbitrary [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance call [setEye(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setEye-frames.core.Node-). To retrieve the scene _eye_ instance call [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--).
-* A node shape can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure (see [graphics(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#graphics-processing.core.PGraphics-)) or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see [setShape(PShape)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setShape-java.lang.Object-)). Node shapes can be picked precisely using their projection onto the screen, see [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--).
-* Even the _eye_ can have a shape which may be useful to depict the viewer in first person camera style.
-* The scene topology is set (even at run time) with [setReference(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setReference-frames.core.Node-).
-* The [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods [location(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#location-frames.primitives.Vector-frames.core.Node-) and [screenLocation(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Node-) transform coordinates between the node and screen space.
-* The node methods [setTranslation(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setTranslation-frames.primitives.Vector-), [translate(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#translate-frames.primitives.Vector-), [setRotation(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setRotation-frames.primitives.Quaternion-), [rotate(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#rotate-frames.primitives.Quaternion-), [setScaling(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setScaling-float-) and [scale(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#scale-float-), locally manipulate a node instance.
-* The [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods [setPosition(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPosition-frames.primitives.Vector-), [setOrientation(Quaternion)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setOrientation-frames.primitives.Quaternion-), and [setMagnitude(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setMagnitude-float-), globally manipulate a node instance.
-* The [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods [location(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#location-frames.primitives.Vector-frames.core.Node-) and [displacement(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#displacement-frames.primitives.Vector-frames.core.Node-) transform coordinates and vectors (resp.) from other node instances.
-* The [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods [worldLocation(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#worldLocation-frames.primitives.Vector-) and [worldDisplacement(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#worldDisplacement-frames.primitives.Vector-) transform node coordinates and vectors (resp.) to the world.
-* The [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) method [setConstraint(Constrain)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setConstraint-frames.core.constraint.Constraint-) applies a [Constraint](https://visualcomputing.github.io/nub-javadocs/nub/core/constraint/Constraint.html) to a node instance limiting its motion.
+#### Localization
 
-### Interactivity
+A node [position](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#position--), [orientation](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#orientation--) and [magnitude]() may be set with the following methods:
 
-To set the scene [tracked-node](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#trackedNode--) (the node the mouse should interact with) call [setTrackedNode(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setTrackedNode-frames.core.Node-) or update it using ray-casting with [cast()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#cast--), for example:
+|Node localization|Position                          |Orientation                                                                    |Magnitude                     |
+|-----------------|----------------------------------|-------------------------------------------------------------------------------|------------------------------|
+|Globally         |```setPosition(vector)```         |```setOrientation(quaternion)```                                               |```setMagnitude(mag)```       |
+|Locally          |```setTranslation(vector)```      |```setRotation(quaternion)```                                                  |```setScaling(scl)```         |
+|Incrementally    |```translate(vector, [inertia])```|```rotate(quaternion, [inertia])```, ```orbit(quaternion, center, [inertia])```|```scale(amount, [inertia])```|
 
-```processing
-void mouseMoved() {
-  // the tracked-node is updated using ray-casting from the set of scene attached nodes
-  scene.cast();
-}
-```
+The optional `inertia` parameter should be a value in [0..1], `0` no inertia (which is the default value) & `1` no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of [TimingTasks](https://visualcomputing.github.io/nub-javadocs/nub/processing/TimingTask.html).
 
-To interact with a given node use any [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) method that takes a [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) parameter, such as: [spin(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#spin-frames.core.Node-), [translate(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#translate-frames.core.Node-) or [scale(float, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scale-float-frames.core.Node-) For example:
+#### Shapes
 
-```processing
-public void mouseDragged() {
-  // spin n1
-  if (mouseButton == LEFT)
-    scene.spin(n1);
-  // translate n3
-  else if (mouseButton == RIGHT)
-    scene.translate(n3);
-  // scale n2
-  else
-    scene.scale(scene.mouseDX(), n2);
-}
-```
+Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure (see [graphics(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#graphics-processing.core.PGraphics-)) or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see [shape(PShape)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#shape-processing.core.PShape-)). Shapes can be picked precisely using their projection onto the screen, see [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--). Note that even the _eye_ can have a shape which may be useful to depict the viewer in first person camera style.
 
-To interact with the [default-node](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#defaultNode--) (which is either the tracked-node updated with the `mouseMoved` above or the scene _eye_ when the tracked-node is null) use the _nodeless_ versions of the above methods, e.g., [spin()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#spin--), [translate()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#translate--) or [scale(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scale-float-). For example:
+#### Space transformations
 
-```processing
-public void mouseDragged() {
-  // spins the default-node (the eye or the node picked with a mouseMoved)
-  if (mouseButton == LEFT)
-    scene.spin();
-  else if (mouseButton == RIGHT)
-  // translates the default-node (the eye or the node picked with a mouseMoved)
-    scene.translate();
-  // scales the default-node (the eye or the node picked with a mouseMoved)
-  else
-    scene.scale(scene.mouseDX());
-}
-```
+The following [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) methods transform points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions where user interaction takes place), [NDC](http://www.songho.ca/opengl/gl_projectionmatrix.html) and nodes (including the world, i.e., the `null` node):
 
-See the [CajasOrientadas example](https://github.com/VisualComputing/nubjs/tree/processing/examples/basics/CajasOrientadas).
+| Space transformation  | Points                            | Vectors                                |
+|-----------------------|-----------------------------------|----------------------------------------|
+| NDC to Screen         | ```ndcToScreenLocation(point)```  | ```ndcToScreenDisplacement(vector)```  |
+| Screen to NDC         | ```screenToNDCLocation(pixel)```  | ```screenToNDCDisplacement(vector)```  |
+| Screen to Node        | ```location(pixel, node)```       | ```displacement(vector, node)```       |
+| Node to Screen        | ```screenLocation(point, node)``` | ```screenDisplacement(vector, node)``` |
+| Screen to World       | ```location(pixel)```             | ```displacement(vector)```             |
+| World to Screen       | ```screenLocation(point)```       | ```screenDisplacement(vector)```       |
 
-### Rendering
+Note that `point`, `pixel` and `vector` are [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instances.
 
-Render the node hierarchy onto [context()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#context--) with:
+The following [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) methods transform points (_locations_) and scalars / vectors/ quaternions (_displacements_) between different node instances (including the world):
+
+| Space transformation  | Points                      | Scalars / Vectors / Quaternions   |
+|-----------------------|-----------------------------|-----------------------------------|
+| Node to (this) Node   | ```location(point, node)``` | ```displacement(element, node)``` |
+| World to (this) Node  | ```location(point)```       | ```displacement(element)```       |
+| (this) Node to World  | ```worldLocation(point)```  | ```worldDisplacement(element)```  |
+
+Note that `point` is a [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) instance and `element` is either a `float` (scalar), [Vector](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Vector.html) or [Quaternion](https://visualcomputing.github.io/nub-javadocs/nub/primitives/Quaternion.html) one.
+
+## Rendering
+
+Render (and display) the scene node hierarchy from its [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) point-of-view with:
 
 ```processing
 void draw() {
-  // calls visit() on each shape to draw the shape
   scene.render();
 }
 ```
 
-observe that:
-
-* The scene gets rendered respect to the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) node.
-* Call [render(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render-java.lang.Object-) to render the scene into an arbitrary _PGraphics_ context. See the [PostEffects example](https://github.com/VisualComputing/nubjs/tree/processing/examples/demos/PostEffects).
-* Call [render(PGraphics, Graph.Type, Node, zNear, zFar)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#render-processing.core.PGraphics-frames.core.Graph.Type-frames.core.Node-float-float-) to render the scene into an arbitrary _PGraphics_ context from an arbitrary node point-of-view. See the [PostEffects example](https://github.com/VisualComputing/nubjs/tree/processing/examples/demos/PostEffects).
-* The role played by a [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance during a scene graph traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--) method.
-
-To bypass the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm use [detached nodes](detached.md), or override [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--) to setup a _cullingCondition_ for the node as follows (see [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--), [cull(boolean)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#isCulled--)):
+see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render (and display) a scene branch, like n1-n2, from the scene `eye` point-of-view with:
 
 ```processing
-Scene scene;
-Node node;
-void setup() {
-  scene = new Scene(this);
-  node = new Node(scene) {
-    @Override
-    public void visit() {
-      // Hierarchical culling is optional and disabled by default. When the cullingCondition
-      // (which should be implemented by you) is true, scene.render() will prune the branch at the node
-      cull(cullingCondition);
-      if(!isCulled())
-        // Draw your object here, at the node coordinate system.
+// renders n1-n2, discarding n3
+void draw() {
+  // save space
+  pushMatrix();
+  // enter n1 space
+  scene.applyTransformation(n1);
+  scene.draw(n1);
+  // save state
+  pushMatrix();
+  // enter n2 space
+  scene.applyTransformation(n2);
+  scene.draw(n2);
+  // restore space
+  popMatrix();
+  popMatrix();
+}
+```
+
+this technique may also be useful when projecting the same branch among several scenes, but it requires the node hierarchy to be known in advanced. Render the scene node hierarchy from its `eye` point-of-view, onto an arbitrary `PGraphics` with:
+
+```processing
+PGraphics pg;
+
+void draw() {
+  scene.render(pg);
+}
+```
+
+see the [PostEffects](https://github.com/VisualComputing/nub/tree/master/examples/demos/PostEffects) example. Render the scene node hierarchy onto an arbitrary `PGraphics`, from an arbitrary node `viewPoint` with:
+
+```processing
+PGraphics pg;
+Node viewPoint;
+// frustum data
+Scene.Type frustumType = Scene.Type.PERSPECTIVE;
+float zNear, zFar;
+
+void draw() {
+  Scene.render(pg, frustumType, viewPoint, zNear, zFar);
+}
+```
+
+see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) and [ShadowMapping](https://github.com/VisualComputing/nub/tree/master/examples/demos/ShadowMapping) examples.  Render the scene node hierarchy onto an arbitrary `PGraphics`, from given `projection` and `view` matrices with:
+
+```processing
+PGraphics pg;
+Matrix projection, view;
+
+void draw() {
+  Scene.render(pg, projection, view);
+}
+```
+
+Render (and display) the off-screen scene node hierarchy from its `eye` point-of-view with:
+
+```processing
+void draw() {
+  offScreenScene.beginDraw();
+  offScreenScene.render();
+  offScreenScene.endDraw();
+  // display the rendered offScreenScene
+  offScreenScene.display();
+}
+```
+
+see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde) example. Render (and display) the same node hierarchy among the scene and several off-screen scenes, each one from its own `eye` point-of-view, with:
+
+```processing
+void draw() {
+  // 1. render onto the scene
+  scene.render();
+  // 2. render onto the off-screen scene
+  offScreenScene.beginDraw();
+  offScreenScene.render();
+  offScreenScene.endDraw();
+  // display the rendered offScreenScene
+  offScreenScene.display();
+}
+```
+
+see the [MiniMap](https://github.com/VisualComputing/nub/blob/master/examples/demos/MiniMap/MiniMap.pde) and the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) examples. Render 2D screen space stuff (such as gui elements and text) on top of a 3D scene with:
+
+```processing
+PGraphics pg;
+
+void draw() {
+ // save space and setup projection matrix for 2D drawing
+ // https://manmohanbishnoi.wordpress.com/2014/12/02/2d-hud-graphics-over-3d-objects-in-modern-opengl/
+ scene.beginHUD();
+ // Use 2D screen space coordinates from here:
+ image(pg, width / 2, height / 2);
+ // restore space
+ scene.endHUD();
+}
+```
+
+see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) example, among several others. Customize the rendering traversal algorithm by overriding the node `visit()` method, which will then be just called before its drawing routine, for example:
+
+```processing
+Scene.Visibility visibility;
+
+@Override
+public void visit() {
+  switch (visibility) {
+  case VISIBLE:
+    for (Node node : children())
+      node.cull();
+    break;
+  case SEMIVISIBLE:
+    if (!children().isEmpty()) {
+      // don't render the node...
+      bypass();
+      // ... but don't cull its children either
+      for (Node node : children())
+        node.cull(false);
     }
+    break;
+  case INVISIBLE:
+    cull();
+    break;
   }
 }
 ```
 
+see the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
+
+Note that the above rendering algorithms take an optional node param that enables them to render a subtree: `scene.render(subtree)`, `scene.render(pg, subtree)`, `Scene.render(pg, frustumType, subtree, viewPoint, zNear, zFar)` and `Scene.render(pg, subtree, projection, view)`.
+
 #### Drawing functionality
 
-The [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) implements several static drawing functions that complements those already provided by Processing, such as: [drawCylinder(PGraphics, int, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCylinder-processing.core.PGraphics-int-float-float-), [drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawHollowCylinder-processing.core.PGraphics-int-float-float-frames.primitives.Vector-frames.primitives.Vector-), [drawCone(PGraphics, int, float, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-), [drawCone(PGraphics, int, float, float, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-float-) and [drawTorusSolenoid(PGraphics, int, int, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawTorusSolenoid-processing.core.PGraphics-int-int-float-float-).
+The [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) implements several static drawing functions that complements those already provided by Processing, such as: [drawCylinder(PGraphics, int, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCylinder-processing.core.PGraphics-int-float-float-), [drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawHollowCylinder-processing.core.PGraphics-int-float-float-nub.primitives.Vector-nub.primitives.Vector-), [drawCone(PGraphics, int, float, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-), [drawCone(PGraphics, int, float, float, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-float-) and [drawTorusSolenoid(PGraphics, int, int, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawTorusSolenoid-processing.core.PGraphics-int-int-float-float-).
 
 Drawing functions that take a `PGraphics` parameter (including the above static ones), such as [beginHUD(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#beginHUD-processing.core.PGraphics-),
 [endHUD(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#endHUD-processing.core.PGraphics-), [drawAxes(PGraphics, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawAxes-processing.core.PGraphics-float-), [drawCross(PGraphics, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCross-processing.core.PGraphics-float-float-float-) and [drawGrid(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawGrid-processing.core.PGraphics-) among others, can be used to set a node shape.
 
-Another scene's eye (different than this one) can be drawn with [drawEye(Graph)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawEye-frames.core.Graph-). Typical usage include interactive [minimaps](https://en.wikipedia.org/wiki/Mini-map) and _visibility culling_ visualization and debugging.
+Another scene's eye (different than this one) can be drawn with [drawFrustum(Scene)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawFrustum-nub.core.Graph-). Typical usage include interactive [minimaps](https://en.wikipedia.org/wiki/Mini-map) and _visibility culling_ visualization and debugging.
 
-## Interpolators
+## Interactivity
 
-A node can be animated through a [key-frame](https://en.wikipedia.org/wiki/Key_frame) [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) [interpolator](https://visualcomputing.github.io/nub-javadocs/nub/core/Interpolator.html) path. Use code such as the following:
+### Eye
+
+The scene has several methods to position and orient the _eye_ node, such as: [lookAt(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#lookAt-nub.primitives.Vector-), [setFov(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setFOV-float-), [setViewDirection(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setViewDirection-nub.primitives.Vector-), [setUpVector(Vector)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setUpVector-nub.primitives.Vector-), [fit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#fit--) and [fit(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#fit-nub.core.Node-), among others.
+
+The following scene methods implement _eye_ motion actions particularly suited for input devices, possibly having several degrees-of-freedom ([DOFs](https://en.wikipedia.org/wiki/Degrees_of_freedom_(mechanics))):
+
+| Action       | Generic input device                                         | Mouse                              |
+|--------------|--------------------------------------------------------------|------------------------------------|
+| Align        | ```alignEye()```                                             | n.a.                               |
+| Focus        | ```focusEye()```                                             | n.a.                               |
+| Translate    | ```translateEye(dx, dy, dz, [inertia])```                    | ```mouseTranslateEye([inertia])``` |
+| Rotate       | ```rotateEye(roll, pitch, yaw, [inertia])```                 | n.a.                               |
+| Scale        | ```scaleEye(delta, [inertia])```                             | n.a.                               |
+| Spin         | ```spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` | ```mouseSpinEye([inertia])```      |
+| Move forward | ```moveForward(dz, [inertia])```                             | n.a.                               |
+| Rotate CAD   | ```rotateCAD(roll, pitch, [inertia])```                      | ```mouseRotateCAD([inertia])```    |
+| Look around  | ```lookAround(deltaX, deltaY, [inertia])```                  | ```mouseLookAround([inertia])```   |
+
+**n.a.** doesn't mean the mouse action isn't available, but that it can be implemented in several ways (see the code snippets below). The provided mouse actions got _non-ambiguously_ implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts (e.g., `mouseTranslateEye()` is the same as `translateEye(pmouseX - mouseX, pmouseY - mouseY, 0)` and `mouseSpinEye()` is the same as `spinEye(pmouseX, pmouseY, mouseX, mouseY)`), and hence their simpler signatures. 
+
+Mouse and keyboard examples:
+
+```processing
+// define a mouse-dragged eye interaction
+void mouseDragged() {
+  if (mouseButton == LEFT)
+    scene.mouseSpinEye();
+  else if (mouseButton == RIGHT)
+    scene.mouseTranslateEye();
+  else
+    // drag along x-axis: changes the scene field-of-view
+    scene.scaleEye(scene.mouseDX());
+}
+```
+
+```processing
+// define a mouse-moved eye interaction
+void mouseMoved(MouseEvent event) {
+  if (event.isShiftDown())
+    // move mouse along y-axis: roll
+    // move mouse along x-axis: pitch
+    scene.rotateEye(scene.mouseRADY(), scene.mouseRADX(), 0);
+  else
+    scene.mouseLookAround();
+}
+```
+
+```processing
+// define a mouse-wheel eye interaction
+void mouseWheel(MouseEvent event) {
+  if (scene.is3D())
+    // move along z
+    scene.moveForward(event.getCount() * 20);
+  else
+    // changes the eye scaling
+    scene.scaleEye(event.getCount() * 20);
+}
+```
+
+```processing
+// define a mouse-click eye interaction
+void mouseClicked(MouseEvent event) {
+  if (event.getCount() == 1)
+    scene.alignEye();
+  else
+    scene.focusEye();
+}
+```
+
+```processing
+// define a key-pressed eye interaction
+void keyPressed() {
+  // roll with 'x' key
+  scene.rotateEye(key == 'x' ? QUARTER_PI / 2 : -QUARTER_PI / 2, 0, 0);
+}
+```
+
+The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples/basics/SpaceNavigator) and [CustomEyeInteraction](https://github.com/VisualComputing/nub/tree/master/examples/demos/CustomEyeInteraction) examples illustrate how to set up other hardware such as a keyboard or a full fledged 6-DOFs device like the [space-navigator](https://en.wikipedia.org/wiki/3Dconnexion).
+
+### Nodes
+
+To directly interact with a given node, call any of the following scene methods:
+
+| Action    | Generic input device                                                | Mouse                                     |
+|-----------|---------------------------------------------------------------------|-------------------------------------------|
+| Align     | ```alignNode(node)```                                               | n.a.                                      |
+| Focus     | ```focusNode(node)```                                               | n.a.                                      |
+| Translate | ```translateNode(node, dx, dy, dz, [inertia])```                    | ```mouseTranslateNode(node, [inertia])``` |
+| Rotate    | ```rotateNode(node, roll, pitch, yaw, [inertia])```                 | n.a.                                      |
+| Scale     | ```scaleNode(node, delta, [inertia])```                             | n.a.                                      |
+| Spin      | ```spinNode(node, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` | ```mouseSpinNode(node, [inertia])```      |
+
+Note that the mouse actions are implemented in a similar manner as it has been done with the [eye](#eye).
+
+Mouse and keyboard examples:
+
+```processing
+void mouseDragged() {
+  // spin n1
+  if (mouseButton == LEFT)
+    scene.spinNode(n1);
+  // translate n3
+  else if (mouseButton == RIGHT)
+    scene.translateNode(n3);
+  // scale n1
+  else
+    scene.scaleNode(n1, scene.mouseDX());
+}
+```
+
+```processing
+void keyPressed() {
+  if (key == CODED)
+    if(keyCode == UP)
+      scene.translateNode(n2, 0, 10);
+    if(keyCode == DOWN)
+      scene.translateNode(n2, 0, -10);
+}
+```
+
+Customize node behaviors by overriding the node [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) method and then invoke it with the scene [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-) method. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
+
+### Picking
+
+Picking a node (which should be different than the scene eye) to interact with it is a two-step process:
+
+1. Tag the node using an arbitrary name either with [tag(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tag-nub.core.Node-) or ray-casting:
+   
+   | Ray casting | Synchronously :small_blue_diamond:   | Asynchronously :small_orange_diamond: |
+   |-------------|--------------------------------------|---------------------------------------|
+   | Generic     | ```updateTag(tag, pixelX, pixelY)``` | ```tag(tag, pixelX, pixelY)```        |
+   | Mouse       | ```updateMouseTag(tag)```            | ```mouseTag(tag)```                |
+   
+   :small_blue_diamond: The tagged node (see [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-)) is returned immediately
+   :small_orange_diamond: The tagged node is returned during the next call to the ```render()``` algorithm
+   
+2. Interact with your _tagged_ nodes using one of the following patterns:
+   
+   1. **Tagged node**: `interactTag(tag, gesture...)` which simply calls `interactNode(node(tag), gesture)` using [node(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#node-java.lang.String-) to resolve the node parameter in the [node methods above](#nodes-1).
+   2. **Tagged node or `eye`**: `interact(tag, gesture...)` which is the same as `if (!interactTag(tag, gesture...)) interactEye(gesture...)` i.e., To either interact with the node referred with a given tag (pattern **i.**) or delegate the gesture to the eye ([see above](#eye)) when that tag is not in use.
+   
+   Generic actions:
+
+   | Action    | Tagged node                                                       | Tagged node or `eye`                                           |
+   |-----------|-------------------------------------------------------------------|----------------------------------------------------------------|
+   | Align     | ```alignTag(tag)```                                               | ```align(tag)```                                               |
+   | Focus     | ```focusTag(tag)```                                               | ```focus(tag)```                                               |
+   | Translate | ```translateTag(tag, dx, dy, dz, [inertia])```                    | ```translate(tag, dx, dy, dz, [inertia])```                    |
+   | Rotate    | ```rotateTag(tag, roll, pitch, yaw, [inertia])```                 | ```rotate(tag, roll, pitch, yaw, [inertia])```                 |
+   | Scale     | ```scaleTag(tag, delta, [inertia])```                             | ```scale(tag, delta, [inertia])```                             |
+   | Spin      | ```spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` | ```spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])``` |
+
+   Mouse actions:
+
+   | Action    | Tagged nodes                        | Tagged node or `eye`            |
+   |-----------|-------------------------------------|---------------------------------|
+   | Translate | ```mouseTranslateTag(tag, [lag])``` | ```mouseTranslate(tag, [lag])```|
+   | Spin      | ```mouseSpinTag(tag, [inertia])```  | ```mouseSpin(tag, [inertia])``` |
+
+Observations:
+
+1. A node can have multiple tags but a given tag cannot be assigned to more than one node, and since the null tag is allowed, signatures of all the above methods lacking the tag parameter are provided for convenience, e.g., `mouseTag()` is equivalent to calling `mouseTag(null)` which in turn is equivalent to `tag(null, mouseX, mouseY)` (and `tag(mouseX, mouseY)`).
+2. Refer to [pickingThreshold()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#pickingThreshold--) and [setPickingThreshold(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setPickingThreshold-float-) for the different ray-casting node picking policies.
+3. To check if a given node would be picked with a ray cast at a given screen position, call [tracks(Node, int, int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#tracks-nub.core.Node-int-int-) or [mouseTracks(Node)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#mouseTracks-nub.core.Node-).
+4. To tag the nodes in a given array with ray casting use [updateTag(String, int, int, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#updateTag-java.lang.String-int-int-nub.core.Node:A-) and [updateMouseTag(String, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#updateMouseTag-java.lang.String-nub.core.Node:A-).
+5. In the case of `mouseTranslateTag(tag, [lag])` and `mouseTranslate(tag, [lag])` a `lag` is used (instead of `inertia`), `0` responds immediately and `1` no response at all.
+6. Set `Scene.inertia` in  [0..1] (`0` no inertia & `1` no friction) to change the default `inertia` value globally. It is initially set to `0.8` and it also affects the `lag` in `mouseTranslateTag(tag, [lag])` and `mouseTranslate(tag, [lag])`. See the [CajasOrientadas](https://github.com/VisualComputing/nub/tree/master/examples/basics/CajasOrientadas) example.
+7. Invoke custom node behaviors by either calling the scene [interactNode(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactNode-nub.core.Node-java.lang.Object...-), [interactTag(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.String-java.lang.Object...-) or [interactTag(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interactTag-java.lang.Object...-) methods. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
+
+Mouse and keyboard examples:
+
+```processing
+// pick with mouse-moved
+void mouseMoved() {
+  scene.mouseTag();
+}
+
+// interact with mouse-dragged
+void mouseDragged() {
+  if (mouseButton == LEFT)
+    // spin the picked node or the eye if no node has been picked
+    scene.mouseSpin();
+  else if (mouseButton == RIGHT)
+    // spin the picked node or the eye if no node has been picked
+    scene.mouseTranslate();
+  else
+    // spin the picked node or the eye if no node has been picked
+    scene.scale(mouseX - pmouseX);
+}
+```
+
+```processing
+// pick with mouse-clicked
+void mouseClicked(MouseEvent event) {
+  if (event.getCount() == 1)
+    // use the null tag to manipulate the picked node with mouse-moved
+    scene.mouseTag();
+  if (event.getCount() == 2)
+    // use the "key" tag to manipulate the picked node with key-pressed
+    scene.mouseTag("key");
+}
+
+// interact with mouse-moved
+void mouseMoved() {
+  // spin the node picked with one click
+  scene.mouseSpinTag();
+}
+
+// interact with key-pressed
+void keyPressed() {
+  // focus the node picked with two clicks
+  scene.focusTag("key");
+}
+```
+
+## Timing
+
+### Timing tasks
+
+[Timing tasks](https://visualcomputing.github.io/nub-javadocs/nub/processing/TimingTask.html) are (non)recurrent, (non)concurrent (see [isRecurrent()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#isRecurrent--) and [isConcurrent()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#isConcurrent--) resp.) callbacks defined by overriding [execute()](https://visualcomputing.github.io/nub-javadocs/nub/timing/Task.html#execute--). For example:
+
+```processing
+Scene scene;
+void setup() {
+  scene = new Scene(this);
+  TimingTask spinningTask = new TimingTask(scene) {
+    @Override
+    public void execute() {
+      scene.eye().orbit(new Vector(0, 1, 0), PI / 100);
+    }
+  };
+  spinningTask.run();
+}
+```
+
+will run the timing-task at 25Hz (which is its default [frequency()]()). See the [ParticleSystem](https://github.com/VisualComputing/nub/tree/master/examples/basics/ParticleSystem) example.
+
+### Interpolators
+
+An [interpolator](https://visualcomputing.github.io/nub-javadocs/nub/core/Interpolator.html) is a timing-task that allows to define the position, orientation and magnitude a node (including the eye) should have at a particular moment in time, a.k.a., [key-frame](https://en.wikipedia.org/wiki/Key_frame). When the interpolator is run the node is then animated through a [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) spline, matching in space-time the key-frames which defines it. Use code such as the following:
 
 ```processing
 Scene scene;
@@ -203,66 +559,47 @@ Node shape;
 Interpolator interpolator;
 void setup() {
   ...
-  shape = new Node(scene, pshape);
+  shape = new Node(pshape);
   interpolator = new Interpolator(shape);
   for (int i = 0; i < random(4, 10); i++)
-    interpolator.addKeyFrame(scene.randomNode());
-  interpolator.start();
+    // addKeyFrame(node, elapsedTime) where elapsedTime is defined respect
+    // to the previously added key-frame and expressed in seconds.
+    interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+  interpolator.run();
 }
 ```
 
-which will create a random interpolator path containing [4..10] key-frames. The interpolation is also started. The interpolator path may be drawn with code like this:
+which will create a `shape` interpolator containing [4..10] random key-frames. The interpolation is also run. The interpolator trajectory may be drawn with code like this:
 
 ```processing
 ...
 void draw() {
   scene.render();
-  scene.drawPath(interpolator);
+  scene.drawCatmullRom(interpolator);
 }
 ```
 
-while [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) will draw the animated shape(s) [drawPath(Interpolator)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawPath-frames.core.Interpolator-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/nubjs/tree/processing/examples/basics/Interpolators).
-
-## HIDs
-
-Setting up a [Human Interface Device (hid)](https://en.wikipedia.org/wiki/Human_interface_device) (different than the mouse which is provided by default) such as a keyboard or a [space-navigator](https://en.wikipedia.org/wiki/3Dconnexion), is a two step process:
-
-1. Define an _hid_ tracked-node instance, using an arbitrary name for it (see [setTrackedNode(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setTrackedNode-java.lang.String-frames.core.Node-)); and,
-2. Call any interactivity method that take an _hid_ param (such as [translate(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translate-java.lang.String-float-float-), [rotate(String, float, float, float)]() or [scale(String, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scale-java.lang.String-float-) following the name convention you defined in 1.
-
-See the [SpaceNavigator example](https://github.com/VisualComputing/nubjs/tree/processing/examples/basics/SpaceNavigator).
-
-Observations:
-
-1. An _hid_ tracked-node (see [trackedNode(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#trackedNode-java.lang.String-)) defines in turn an _hid_ default-node (see [defaultNode(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#defaultNode-java.lang.String-)) which simply returns the tracked-node or the scene _eye_ when the _hid_ tracked-node is `null`
-2. The _hid_ interactivity methods are implemented in terms of the ones defined previously by simply passing the _hid_ [defaultNode(String)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#defaultNode-java.lang.String-) to them.
-3. The default _hid_ is defined with a `null` String parameter (e.g., [scale(float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scale-float-) simply calls `scale(null, delta)`). The _Scene_ default mouse _hid_ presented in the [Nodes](#user-content-frames) section is precisely implemented is this manner.
-4. To update an _hid_ tracked-node using ray-casting call [track(String, Point, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Node:A-) (detached or attached nodes), [track(String, Point)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#track-java.lang.String-frames.primitives.Point-) (only attached nodes) or [cast(String, Point)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) (only for attached nodes too). While [track(String, Point, Node[])](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Node:A-) and [track(String, Point)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#track-java.lang.String-frames.primitives.Point-) update the _hid_ tracked-node synchronously (i.e., they return the _hid_ tracked-node immediately), [cast(String, Point)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) updates it asynchronously (i.e., it optimally updates the _hid_ tracked-node during the next call to the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm).
-
-## Control
-
-[Application control](https://hal.inria.fr/hal-00789413/) (aka as Post-[WIMP](https://en.wikipedia.org/wiki/WIMP_(computing)) interaction styles) refers to interfaces “containing at least one interaction technique not dependent on classical 2D widgets” [[van Dam]](http://dl.acm.org/citation.cfm?id=253708), such as:  [tangible interaction](https://en.wikipedia.org/wiki/Tangible_user_interface), or perceptual and [affective computing](https://en.wikipedia.org/wiki/Affective_computing).
-
-Implementing an application control for a node is a two step process:
-
-1. Override the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) to parse the gesture into a custom (application) control.
-2. Send gesture data to the node by calling one of the following scene methods: [defaultHIDControl(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#defaultHIDControl-java.lang.Object...-), [control(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#control-java.lang.String-java.lang.Object...-) or [control(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#control-frames.core.Node-java.lang.Object...-).
-
-See the [ApplicationControl example](https://github.com/VisualComputing/nubjs/tree/processing/examples/demos/ApplicationControl).
-
-## IK
-
-[Forward Kinematics (FK)](https://en.wikipedia.org/wiki/Forward_kinematics) and [Inverse Kinematics (IK)](https://en.wikipedia.org/wiki/Inverse_kinematics) could be used on nub to describe the motion of a skeleton structure [Skeletal animation](https://en.wikipedia.org/wiki/Skeletal_animation). 
-
-Solving IK on nub is a three step process:
-
-1. Define a skeleton i.e. a branch of a graph (see [branch(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#branch-nub.core.Node-)).
-2. Register a Solver on the graph scene by calling the scene method `registerTreeSolver(Node)` where `Node` is the root of the skeleton. 
-3. Relate a target node to an end effector (leaf node of the skeleton) by calling the scene method `addIKTarget(Node, Node)` where the former node is an end effector, and the latter is the target to follow. Add as many targets as desired.    
-
-See [Solving IK with nub](https://github.com/sechaparroc/nub/wiki/Solving-IK-with-nub), [Solving IK with rotational constraints](https://github.com/sechaparroc/nub/wiki/Solving-IK-with-rotational-constraints) and [Rigging on nub](https://github.com/sechaparroc/nub/wiki/Rigging-on-nub) For a detailed explanation.
- 
+while [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) will draw the animated shape(s) [drawCatmullRom(Interpolator)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCatmullRom-nub.core.Interpolator-) will draw the interpolated path too. See the [Interpolators](https://github.com/VisualComputing/nub/tree/master/examples/basics/Interpolators) example.
 
 ## Installation
 
-Import/update it directly from your PDE. Otherwise download your [release](https://github.com/VisualComputing/nubjs/releases) and extract it to your sketchbook `libraries` folder.
+Import/update it directly from your [PDE](https://processing.org/reference/environment/). Otherwise download your [release](https://github.com/VisualComputing/nub/releases) and extract it to your sketchbook `libraries` folder.
+
+## Contributors
+
+Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/nakednous"><img src="https://avatars2.githubusercontent.com/u/645599?v=4" width="100px;" alt="Jean Pierre Charalambos"/><br /><sub><b>Jean Pierre Charalambos</b></sub></a><br /><a href="#blog-nakednous" title="Blogposts">📝</a> <a href="https://github.com/VisualComputing/nub/issues?q=author%3Anakednous" title="Bug reports">🐛</a> <a href="https://github.com/VisualComputing/nub/commits?author=nakednous" title="Code">💻</a> <a href="#design-nakednous" title="Design">🎨</a> <a href="https://github.com/VisualComputing/nub/commits?author=nakednous" title="Documentation">📖</a> <a href="#eventOrganizing-nakednous" title="Event Organizing">📋</a> <a href="#example-nakednous" title="Examples">💡</a> <a href="#financial-nakednous" title="Financial">💵</a> <a href="#fundingFinding-nakednous" title="Funding Finding">🔍</a> <a href="#ideas-nakednous" title="Ideas, Planning, & Feedback">🤔</a> <a href="#platform-nakednous" title="Packaging/porting to new platform">📦</a> <a href="#plugin-nakednous" title="Plugin/utility libraries">🔌</a> <a href="#question-nakednous" title="Answering Questions">💬</a> <a href="#review-nakednous" title="Reviewed Pull Requests">👀</a> <a href="#talk-nakednous" title="Talks">📢</a> <a href="https://github.com/VisualComputing/nub/commits?author=nakednous" title="Tests">⚠️</a> <a href="#tutorial-nakednous" title="Tutorials">✅</a> <a href="#video-nakednous" title="Videos">📹</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind welcome!

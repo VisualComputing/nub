@@ -14,7 +14,7 @@ public class ShiftViewers extends PApplet {
   boolean displayAuxiliarViewers = true;
   // whilst scene1 is either on-screen or not; scene2 and scene3 are off-screen
   // test both cases here
-  boolean onScreen = false;
+  boolean onScreen = true;
 
   int w = 1200;
   int h = 1200;
@@ -25,19 +25,19 @@ public class ShiftViewers extends PApplet {
 
   public void setup() {
     scene1 = onScreen ? new Scene(this) : new Scene(this, P3D);
+    scene1.eye().disableTagging();
     scene1.setRadius(1000);
-    // set a detached eye node
-    scene1.setEye(new Node());
     scene1.fit(1);
     models = new Node[5];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
         //models[i] = new Node(scene1, boxShape());
-        models[i] = new Node(scene1);
+        models[i] = new Node();
         models[i].setShape(boxShape());
       } else {
-        models[i] = new Node(scene1) {
+        models[i] = new Node() {
           int _faces = (int) ShiftViewers.this.random(3, 15), _color = color(ShiftViewers.this.random(255), ShiftViewers.this.random(255), ShiftViewers.this.random(255));
+
           @Override
           public void graphics(PGraphics pg) {
             pg.pushStyle();
@@ -53,16 +53,14 @@ public class ShiftViewers extends PApplet {
     // Note that we pass the upper left corner coordinates where the scene1
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(this, P3D, w / 2, h / 2, w / 2, 0);
+    scene2.eye().disableTagging();
     scene2.setRadius(1000);
-    // set a detached eye node
-    scene2.setEye(new Node());
     scene2.fit(1);
 
     // idem here
     scene3 = new Scene(this, P3D, w / 2, h / 2, w / 2, h / 2);
+    scene3.eye().disableTagging();
     scene3.setRadius(1000);
-    // set a detached eye node
-    scene3.setEye(new Node());
     scene3.fit(1);
   }
 
@@ -88,15 +86,15 @@ public class ShiftViewers extends PApplet {
 
   @Override
   public void mouseMoved() {
-    focus.cast();
+    focus.mouseTag();
   }
 
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.spin();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.translate();
+      focus.mouseTranslate();
     else
       focus.moveForward(focus.mouseDX());
   }
@@ -112,15 +110,13 @@ public class ShiftViewers extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.align();
+        focus.alignTag();
   }
 
   public void draw() {
     focus = displayAuxiliarViewers ? (mouseX > w / 2 && mouseY < h / 2) ? scene2
         : (mouseX > w / 2 && mouseY > h / 2) ? scene3 : scene1 : scene1;
-
     background(75, 25, 15);
-
     if (scene1.isOffscreen()) {
       scene1.beginDraw();
       scene1.context().background(75, 25, 15);
@@ -132,9 +128,7 @@ public class ShiftViewers extends PApplet {
       scene1.drawAxes();
       scene1.render();
     }
-
     if (displayAuxiliarViewers) {
-      scene1.shift(scene2);
       if (!scene1.isOffscreen())
         scene1.beginHUD();
       scene2.beginDraw();
@@ -145,8 +139,6 @@ public class ShiftViewers extends PApplet {
       scene2.display();
       if (!scene1.isOffscreen())
         scene1.endHUD();
-
-      scene2.shift(scene3);
       if (!scene1.isOffscreen())
         scene1.beginHUD();
       scene3.beginDraw();
@@ -157,8 +149,6 @@ public class ShiftViewers extends PApplet {
       scene3.display();
       if (!scene1.isOffscreen())
         scene1.endHUD();
-
-      scene3.shift(scene1);
     }
   }
 

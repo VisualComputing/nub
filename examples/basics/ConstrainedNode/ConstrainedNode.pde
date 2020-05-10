@@ -1,5 +1,5 @@
 /**
- * ConstrainedNode.
+ * Constrained Node.
  * by Jean Pierre Charalambos.
  *
  * This example illustrates how to add constraints to your nodes
@@ -14,22 +14,20 @@ import nub.core.constraint.*;
 import nub.processing.*;
 
 Scene scene;
-boolean mouseTracking = true;
-PFont myFont;
+PFont font;
 int transDir;
 int rotDir;
-Node iNode;
+Node node;
 AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[3];
 int activeConstraint;
-boolean wC = true;
 
-//Choose FX2D, JAVA2D, P2D or P3D
+//Choose P2D or P3D
 String renderer = P3D;
 
 void setup() {
   size(800, 800, renderer);
-  myFont = loadFont("FreeSans-16.vlw");
-  textFont(myFont);
+  font = loadFont("FreeSans-16.vlw");
+  textFont(font);
 
   scene = new Scene(this);
 
@@ -42,19 +40,20 @@ void setup() {
   rotDir = 0;
   activeConstraint = 0;
 
-  iNode = new Node(scene) {
+  node = new Node() {
     // Note that within render() geometry is defined at the
     // node local coordinate system.
     @Override
     public void graphics(PGraphics pg) {
       Scene.drawAxes(pg, 40);
-      pg.fill(isTracked() ? 255 : 0, 0, 255);
+      pg.fill(isTagged(scene) ? 255 : 0, 0, 255);
       Scene.drawTorusSolenoid(pg);
     }
   };
-  iNode.setPickingThreshold(0);
-  iNode.translate(new Vector(20, 20, 0));
-  iNode.setConstraint(constraints[activeConstraint]);
+  scene.randomize(node);
+  node.setPickingThreshold(0);
+  node.translate(new Vector(20, 20, 0));
+  node.setConstraint(constraints[activeConstraint]);
 }
 
 void draw() {
@@ -68,16 +67,18 @@ void draw() {
 }
 
 void mouseMoved() {
-  if (mouseTracking)
-    scene.cast();
+  if (!scene.isTagValid("key"))
+    scene.mouseTag();
 }
 
 void mouseDragged() {
-  if (mouseButton == LEFT)
-    scene.spin();
-  else if (mouseButton == RIGHT)
-    scene.translate();
-  else
+  if (mouseButton == LEFT) {
+    if (!scene.mouseSpinTag("key"))
+      scene.mouseSpin();
+  } else if (mouseButton == RIGHT) {
+    if (!scene.mouseTranslateTag("key"))
+      scene.mouseTranslate();
+  } else
     scene.scale(mouseX - pmouseX);
 }
 
@@ -85,17 +86,15 @@ void mouseWheel(MouseEvent event) {
   if (scene.is3D())
     scene.moveForward(event.getCount() * 20);
   else
-    scene.scale(event.getCount() * 20, scene.eye());
+    scene.scaleEye(event.getCount() * 20);
 }
 
 void keyPressed() {
   if (key == 'i')
-    if (scene.isTrackedNode(iNode)) {
-      scene.resetTrackedNode();
-      mouseTracking = true;
+    if (scene.hasTag("key", node)) {
+      scene.removeTag("key");
     } else {
-      scene.setTrackedNode(iNode);
-      mouseTracking = false;
+      scene.tag("key", node);
     }
   if (key == 'b' || key == 'B') {
     rotDir = (rotDir + 1) % 3;
@@ -117,73 +116,73 @@ void keyPressed() {
       .rotationConstraintType()));
   }
 
-  Vector dir = new Vector(0.0f, 0.0f, 0.0f);
+  Vector dir = new Vector(0, 0, 0);
   switch (transDir) {
   case 0:
-    dir.setX(1.0f);
+    dir.setX(1);
     break;
   case 1:
-    dir.setY(1.0f);
+    dir.setY(1);
     break;
   case 2:
-    dir.setZ(1.0f);
+    dir.setZ(1);
     break;
   }
   constraints[activeConstraint].setTranslationConstraintDirection(dir);
 
-  dir.set(0.0f, 0.0f, 0.0f);
+  dir.set(0, 0, 0);
   switch (rotDir) {
   case 0:
-    dir.setX(1.0f);
+    dir.setX(1);
     break;
   case 1:
-    dir.setY(1.0f);
+    dir.setY(1);
     break;
   case 2:
-    dir.setZ(1.0f);
+    dir.setZ(1);
     break;
   }
   constraints[activeConstraint].setRotationConstraintDirection(dir);
 }
 
-static AxisPlaneConstraint.Type nextTranslationConstraintType(AxisPlaneConstraint.Type type) {
-  AxisPlaneConstraint.Type rType;
-  switch (type) {
+AxisPlaneConstraint.Type nextTranslationConstraintType(AxisPlaneConstraint.Type transType) {
+  AxisPlaneConstraint.Type type;
+  switch (transType) {
   case FREE:
-    rType = AxisPlaneConstraint.Type.PLANE;
+    type = AxisPlaneConstraint.Type.PLANE;
     break;
   case PLANE:
-    rType = AxisPlaneConstraint.Type.AXIS;
+    type = AxisPlaneConstraint.Type.AXIS;
     break;
   case AXIS:
-    rType = AxisPlaneConstraint.Type.FORBIDDEN;
+    type = AxisPlaneConstraint.Type.FORBIDDEN;
     break;
   case FORBIDDEN:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
     break;
   default:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
   }
-  return rType;
+  return type;
 }
 
-static AxisPlaneConstraint.Type nextRotationConstraintType(AxisPlaneConstraint.Type type) {
-  AxisPlaneConstraint.Type rType;
-  switch (type) {
+AxisPlaneConstraint.Type nextRotationConstraintType(AxisPlaneConstraint.Type rotType) {
+  AxisPlaneConstraint.Type type;
+  switch (rotType) {
   case FREE:
-    rType = AxisPlaneConstraint.Type.AXIS;
+    type = AxisPlaneConstraint.Type.AXIS;
     break;
   case AXIS:
-    rType = AxisPlaneConstraint.Type.FORBIDDEN;
+    type = AxisPlaneConstraint.Type.FORBIDDEN;
     break;
   case PLANE:
   case FORBIDDEN:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
     break;
   default:
-    rType = AxisPlaneConstraint.Type.FREE;
+    type = AxisPlaneConstraint.Type.FREE;
   }
-  return rType;
+  return type;
 }
 
 void changeConstraint() {
@@ -203,7 +202,7 @@ void changeConstraint() {
     .setRotationConstraintDirection(constraints[previous]
     .rotationConstraintDirection());
 
-  iNode.setConstraint(constraints[activeConstraint]);
+  node.setConstraint(constraints[activeConstraint]);
 }
 
 void displayType(AxisPlaneConstraint.Type type, int x, int y, char c) {
@@ -269,12 +268,12 @@ void displayDir(int dir, int x, int y, char c) {
 void displayText() {
   text("TRANSLATION :", 350, height - 30);
   displayDir(transDir, (350 + 105), height - 30, 'D');
-  displayType(constraints[activeConstraint].translationConstraintType(), 
+  displayType(constraints[activeConstraint].translationConstraintType(),
     350, height - 60, 'T');
 
   text("ROTATION :", width - 120, height - 30);
   displayDir(rotDir, width - 40, height - 30, 'B');
-  displayType(constraints[activeConstraint].rotationConstraintType(), 
+  displayType(constraints[activeConstraint].rotationConstraintType(),
     width - 120, height - 60, 'R');
 
   switch (activeConstraint) {

@@ -16,6 +16,10 @@
  *
  * Press ' ' to switch between the different eye modes.
  * Press 'a' to toggle (start/stop) animation.
+ * Press '+' to speed up the boids animation.
+ * Press '-' to speed down the boids animation.
+ * Press 'e' to enable concurrence of the flock animation.
+ * Press 'd' to disable concurrence of the flock animation.
  * Press 'p' to print the current node rate.
  * Press 'm' to change the boid visual mode.
  * Press 'v' to toggle boids' wall skipping.
@@ -36,7 +40,6 @@ boolean avoidWalls = true;
 int initBoidNum = 900; // amount of boids to start the program with
 ArrayList<Boid> flock;
 Node avatar;
-boolean animate = true;
 
 void setup() {
   size(1000, 800, P3D);
@@ -46,7 +49,7 @@ void setup() {
   // create and fill the list of boids
   flock = new ArrayList();
   for (int i = 0; i < initBoidNum; i++)
-    flock.add(new Boid(scene, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
+    flock.add(new Boid(new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
 }
 
 void draw() {
@@ -56,24 +59,21 @@ void draw() {
   walls();
   scene.render();
   // uncomment to asynchronously update boid avatar. See mouseClicked()
-  // updateAvatar(scene.trackedNode("mouseClicked"));
+  // updateAvatar(scene.node("mouseClicked"));
 }
 
 void walls() {
   pushStyle();
   noFill();
   stroke(255, 255, 0);
-
   line(0, 0, 0, 0, flockHeight, 0);
   line(0, 0, flockDepth, 0, flockHeight, flockDepth);
   line(0, 0, 0, flockWidth, 0, 0);
   line(0, 0, flockDepth, flockWidth, 0, flockDepth);
-
   line(flockWidth, 0, 0, flockWidth, flockHeight, 0);
   line(flockWidth, 0, flockDepth, flockWidth, flockHeight, flockDepth);
   line(0, flockHeight, 0, flockWidth, flockHeight, 0);
   line(0, flockHeight, flockDepth, flockWidth, flockHeight, flockDepth);
-
   line(0, 0, 0, 0, 0, flockDepth);
   line(0, flockHeight, 0, 0, flockHeight, flockDepth);
   line(flockWidth, 0, 0, flockWidth, 0, flockDepth);
@@ -109,13 +109,13 @@ void resetEye() {
 void mouseClicked() {
   // two options to update the boid avatar:
   // 1. Synchronously
-  updateAvatar(scene.track("mouseClicked", mouseX, mouseY));
+  updateAvatar(scene.updateMouseTag("mouseClicked"));
   // which is the same as these two lines:
-  // scene.track("mouseClicked", mouseX, mouseY);
-  // updateAvatar(scene.trackedNode("mouseClicked"));
+  // scene.updateMouseTag("mouseClicked");
+  // updateAvatar(scene.node("mouseClicked"));
   // 2. Asynchronously
-  // which requires updateAvatar(scene.trackedNode("mouseClicked")) to be called within draw()
-  // scene.cast("mouseClicked", mouseX, mouseY);
+  // which requires updateAvatar(scene.node("mouseClicked")) to be called within draw()
+  // scene.mouseTag("mouseClicked");
 }
 
 // 'first-person' interaction
@@ -123,10 +123,10 @@ void mouseDragged() {
   if (scene.eye().reference() == null)
     if (mouseButton == LEFT)
       // same as: scene.spin(scene.eye());
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
       // same as: scene.translate(scene.eye());
-      scene.translate();
+      scene.mouseTranslate();
     else
       scene.moveForward(mouseX - pmouseX);
 }
@@ -134,12 +134,12 @@ void mouseDragged() {
 // highlighting and 'third-person' interaction
 void mouseMoved(MouseEvent event) {
   // 1. highlighting
-  scene.cast("mouseMoved", mouseX, mouseY);
+  scene.mouseTag("mouseMoved");
   // 2. third-person interaction
   if (scene.eye().reference() != null)
     // press shift to move the mouse without looking around
     if (!event.isShiftDown())
-      scene.lookAround();
+      scene.mouseLookAround();
 }
 
 void mouseWheel(MouseEvent event) {
@@ -150,17 +150,31 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   switch (key) {
   case 'a':
-    animate = !animate;
+    for (Boid boid : flock)
+      boid.task.toggle();
+    break;
+  case '+':
+    for (Boid boid : flock)
+      boid.task.increasePeriod(-2);
+    break;
+  case '-':
+    for (Boid boid : flock)
+      boid.task.increasePeriod(2);
+    break;
+  case 'e':
+    for (Boid boid : flock)
+      boid.task.enableConcurrence(true);
+    break;
+  case 'd':
+    for (Boid boid : flock)
+      boid.task.enableConcurrence(false);
     break;
   case 's':
     if (scene.eye().reference() == null)
       scene.fit(1);
     break;
-  case 't':
-    scene.shiftTimers();
-    break;
   case 'p':
-    println("Node rate: " + frameRate);
+    println("Frame rate: " + frameRate);
     break;
   case 'v':
     avoidWalls = !avoidWalls;
