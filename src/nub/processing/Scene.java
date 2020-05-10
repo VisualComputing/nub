@@ -3699,6 +3699,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   // methods to draw constraints
+
   /**
    * Same as {@code drawConstraint(frontBuffer(), frame)}.
    *

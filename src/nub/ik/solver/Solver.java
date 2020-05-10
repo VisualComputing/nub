@@ -70,7 +70,7 @@ public abstract class Solver {
     _change_temp = change;
   }
 
-  public float accumulatedError(){
+  public float accumulatedError() {
     return _accumulatedError;
   }
 
@@ -136,19 +136,26 @@ public abstract class Solver {
   //TODO set as abstract
 
   //TODO: Perhaps change it to use an iterator pattern
-  public Iterator<? extends Node> iterator(){ return null; };
+  public Iterator<? extends Node> iterator() {
+    return null;
+  }
 
-  public VisualizerMediator mediator(){
+  ;
+
+  public VisualizerMediator mediator() {
     return _mediator;
   }
 
-  public void setMediator(VisualizerMediator mediator){
+  public void setMediator(VisualizerMediator mediator) {
     _mediator = mediator;
   }
 
-  public void enableMediator(boolean enable){
+  public void enableMediator(boolean enable) {
     _enableMediator = enable;
   }
 
-  public void registerStructure(VisualizerMediator mediator){ };
+  public void registerStructure(VisualizerMediator mediator) {
+  }
+
+  ;
 }

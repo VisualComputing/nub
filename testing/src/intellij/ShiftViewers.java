@@ -37,6 +37,7 @@ public class ShiftViewers extends PApplet {
       } else {
         models[i] = new Node() {
           int _faces = (int) ShiftViewers.this.random(3, 15), _color = color(ShiftViewers.this.random(255), ShiftViewers.this.random(255), ShiftViewers.this.random(255));
+
           @Override
           public void graphics(PGraphics pg) {
             pg.pushStyle();

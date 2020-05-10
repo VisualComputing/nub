@@ -108,8 +108,7 @@ public class ShadowMap extends PApplet {
       // zFar plane is implemented as a custom behavior by node.interact()
       if (scene.node("light") != null)
         depthShader.set("far", zFar += event.getCount() * 20);
-    }
-    else
+    } else
       scene.scale(event.getCount() * 20);
   }
 

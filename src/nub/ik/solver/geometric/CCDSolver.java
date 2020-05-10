@@ -12,9 +12,10 @@
 package nub.ik.solver.geometric;
 
 import nub.core.Node;
-import nub.ik.visualization.*;
 import nub.ik.solver.KinematicStructure;
 import nub.ik.solver.Solver;
+import nub.ik.visualization.InterestingEvent;
+import nub.ik.visualization.VisualizerMediator;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -60,8 +61,8 @@ public class CCDSolver extends Solver {
   }
 
   public CCDSolver(List<? extends Node> chain, boolean enable_kinematic_structure) {
-        this(chain, null, enable_kinematic_structure);
-    }
+    this(chain, null, enable_kinematic_structure);
+  }
 
   public CCDSolver(List<? extends Node> chain, Node target) {
     this(chain, target, true);
@@ -70,7 +71,7 @@ public class CCDSolver extends Solver {
   public CCDSolver(List<? extends Node> chain, Node target, boolean enable_kinematic_structure) {
     super();
     _enable_kinematic_structure = enable_kinematic_structure;
-    if(_enable_kinematic_structure) this._structure = KinematicStructure.generateKChain(chain);
+    if (_enable_kinematic_structure) this._structure = KinematicStructure.generateKChain(chain);
     else this._chain = chain;
     this._target = target;
     this._previousTarget =
@@ -83,12 +84,12 @@ public class CCDSolver extends Solver {
    * */
   @Override
   protected boolean _iterate() {
-    if(_enable_kinematic_structure) return iterateWithStructure();
+    if (_enable_kinematic_structure) return iterateWithStructure();
     return iterateWithChain();
   }
 
   //TODO: this must be removed
-  protected boolean iterateWithChain(){
+  protected boolean iterateWithChain() {
     //As no target is specified there is no need to perform an iteration
     if (_target == null || _chain.size() < 2) return true;
     Node end = _chain.get(_chain.size() - 1);
@@ -125,7 +126,7 @@ public class CCDSolver extends Solver {
     return false;
   }
 
-  protected boolean iterateWithStructure(){
+  protected boolean iterateWithStructure() {
     //As no target is specified there is no need to perform an iteration
     if (_target == null || _structure.size() < 2) return true;
     KinematicStructure.KNode end = _structure.get(_structure.size() - 1);
@@ -143,14 +144,14 @@ public class CCDSolver extends Solver {
     for (int i = _structure.size() - 2; i >= 0; i--) {
       Vector targetLocalPosition = _structure.get(i).location(target, true);
       Vector endLocalPosition = _structure.get(i).location(end.position(), true);
-      if(_enableMediator){
+      if (_enableMediator) {
         //STEP 1:
         InterestingEvent event1a = mediator().addEventStartingAfterLast("JOINT TO EFF LINE", "Trajectory", 1, 2); //Create the event at the desired time
         event1a.addAttribute("positions", _structure.get(i).position(), end.position()); //Add the convenient attributes
         InterestingEvent event1b = mediator().addEventStartingWithLast("JOINT TO EFF LINE LOCAL", "Trajectory", 1, 3); //Create the event at the desired time
         event1b.addAttribute("reference", _structure.get(i).node()); //Add the convenient attributes
         event1b.addAttribute("positions", new Vector(), endLocalPosition);
-        InterestingEvent event2 = mediator().addEventStartingWithLast("JOINT TO EFF MESSAGE", "Message", 0,1); //Create the event
+        InterestingEvent event2 = mediator().addEventStartingWithLast("JOINT TO EFF MESSAGE", "Message", 0, 1); //Create the event
         event2.addAttribute("message", "Find the desired position of Joint " + i + " by fixing the length of the bone"); //Add the convenient attributes
         //STEP 2:
         InterestingEvent event3 = mediator().addEventStartingAfterLast("JOINT TO TARGET", "Trajectory", 1, 2); //Create the event
@@ -162,11 +163,11 @@ public class CCDSolver extends Solver {
       Quaternion delta = new Quaternion(endLocalPosition, targetLocalPosition);
       _structure.get(i).rotate(delta);
 
-      if(_enableMediator){
+      if (_enableMediator) {
         //STEP 3:
         InterestingEvent event5 = mediator().addEventStartingAfterLast("APPLY JOINT ROTATION", "NodeRotation", 1, 1); //Create the event
         event5.addAttribute("node", _structure.get(i).node()); //Add the convenient attributes
-        event5.addAttribute("rotation", _structure.get(i).node().constraint() != null ?_structure.get(i).node().constraint().constrainRotation(delta, _structure.get(i).node()) : delta);
+        event5.addAttribute("rotation", _structure.get(i).node().constraint() != null ? _structure.get(i).node().constraint().constrainRotation(delta, _structure.get(i).node()) : delta);
         InterestingEvent event6 = mediator().addEventStartingWithLast("JOINT ROTATION MESSAGE", "Message", 0, 1); //Create the event
         event6.addAttribute("message", "Step 3: Rotate Joint " + i + " to reduce the distance from End Effector " + i + " to Target (T)"); //Add the convenient attributes
       }
@@ -197,14 +198,14 @@ public class CCDSolver extends Solver {
   protected void _reset() {
     _previousTarget = _target == null ? null : Node.detach(_target.position().get(), _target.orientation().get(), 1);
     _iterations = 0;
-    if(_enableMediator){
+    if (_enableMediator) {
       InterestingEvent event = mediator().addEventStartingAfterLast("RESET STRUCTURE", "UpdateStructure", 1, 1);
-      if(_enable_kinematic_structure){
+      if (_enable_kinematic_structure) {
         List<Node> chain = new ArrayList<Node>();
         int i = 0;
         Vector[] translations = new Vector[_structure.size()];
         Quaternion[] rotations = new Quaternion[_structure.size()];
-        for(KinematicStructure.KNode knode : _structure){
+        for (KinematicStructure.KNode knode : _structure) {
           chain.add(knode.node());
           translations[i] = knode.node().translation().get();
           rotations[i++] = knode.node().rotation().get();
@@ -212,11 +213,11 @@ public class CCDSolver extends Solver {
         event.addAttribute("structure", chain);
         event.addAttribute("rotations", rotations);
         event.addAttribute("translations", translations);
-      }else{
+      } else {
         int i = 0;
         Vector[] translations = new Vector[_chain.size()];
         Quaternion[] rotations = new Quaternion[_chain.size()];
-        for(Node node : _chain){
+        for (Node node : _chain) {
           translations[i] = node.translation().get();
           rotations[i++] = node.rotation().get();
         }
@@ -228,39 +229,40 @@ public class CCDSolver extends Solver {
       //Add the convenient attributes
       messageEvent.addAttribute("message", "Updating structure");
     }
-    if(_enable_kinematic_structure){
-        //TODO: Remove this update!
-        _structure.get(_structure.size()-1).updatePath(null);
+    if (_enable_kinematic_structure) {
+      //TODO: Remove this update!
+      _structure.get(_structure.size() - 1).updatePath(null);
     }
   }
 
   @Override
   public float error() {
-    if(_enable_kinematic_structure) return Vector.distance(_structure.get(_structure.size() - 1).position(), _target.position());
+    if (_enable_kinematic_structure)
+      return Vector.distance(_structure.get(_structure.size() - 1).position(), _target.position());
     return Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position());
   }
 
   //Animation Stuff
   //TODO: Refactor, perhaps move to Solver class
   @Override
-  public void registerStructure(VisualizerMediator mediator){
-      if(_enable_kinematic_structure){
-          List<Node> chain = new ArrayList<Node>();
-          for(KinematicStructure.KNode knode : _structure){
-              chain.add(knode.node());
-          }
-          mediator.registerStructure(chain);
-      }else {
-          mediator.registerStructure(_chain);
+  public void registerStructure(VisualizerMediator mediator) {
+    if (_enable_kinematic_structure) {
+      List<Node> chain = new ArrayList<Node>();
+      for (KinematicStructure.KNode knode : _structure) {
+        chain.add(knode.node());
       }
-      mediator.registerStructure(_target);
+      mediator.registerStructure(chain);
+    } else {
+      mediator.registerStructure(_chain);
+    }
+    mediator.registerStructure(_target);
   }
 
   @Override
-  public Iterator<? extends Node> iterator(){
-    if(_enable_kinematic_structure){
+  public Iterator<? extends Node> iterator() {
+    if (_enable_kinematic_structure) {
       ArrayList<Node> chain = new ArrayList<Node>();
-      for(KinematicStructure.KNode knode : _structure){
+      for (KinematicStructure.KNode knode : _structure) {
         chain.add(knode.node());
       }
       return chain.iterator();

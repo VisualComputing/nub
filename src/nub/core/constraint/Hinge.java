@@ -34,7 +34,8 @@ public class Hinge extends Constraint {
   protected Quaternion _idleRotation = new Quaternion();
   protected Quaternion _orientation = new Quaternion();
 
-  protected AxisPlaneConstraint.Type transConstraintType = AxisPlaneConstraint.Type.FORBIDDEN;;
+  protected AxisPlaneConstraint.Type transConstraintType = AxisPlaneConstraint.Type.FORBIDDEN;
+  ;
   protected Vector transConstraintDir = new Vector();
 
 
@@ -70,15 +71,15 @@ public class Hinge extends Constraint {
     Vector tw = delta.inverseRotate(up);
     //Align y-Axis with up vector
     //Assume that up and twist are orthogonal
-    float angle = Vector.angleBetween(tw, new Vector(0,1,0));
-    if(Vector.cross(new Vector(0,1,0),tw, null).dot(new Vector(0,0,1)) < 0)
+    float angle = Vector.angleBetween(tw, new Vector(0, 1, 0));
+    if (Vector.cross(new Vector(0, 1, 0), tw, null).dot(new Vector(0, 0, 1)) < 0)
       angle *= -1;
     delta.compose(new Quaternion(new Vector(0, 0, 1), angle));
     _orientation.compose(delta); // orientation = idle * rest
     _restRotation = delta;
   }
 
-  public void setRotations(Quaternion reference, Quaternion rest){
+  public void setRotations(Quaternion reference, Quaternion rest) {
     _idleRotation = reference.get();
     _restRotation = rest.get();
     _orientation = Quaternion.compose(reference, rest);
@@ -173,11 +174,11 @@ public class Hinge extends Constraint {
 
   public void setTranslationConstraintDirection(Vector direction) {
     if ((translationConstraintType() != AxisPlaneConstraint.Type.FREE) && (translationConstraintType()
-            != AxisPlaneConstraint.Type.FORBIDDEN)) {
+        != AxisPlaneConstraint.Type.FORBIDDEN)) {
       float norm = direction.magnitude();
       if (norm == 0) {
         System.out
-                .println("Warning: AxisPlaneConstraint.setTranslationConstraintDir: null vector for translation constraint");
+            .println("Warning: AxisPlaneConstraint.setTranslationConstraintDir: null vector for translation constraint");
         transConstraintType = AxisPlaneConstraint.Type.FREE;
       } else
         transConstraintDir = Vector.multiply(direction, (1.0f / norm));

@@ -29,7 +29,8 @@ public abstract class ConeConstraint extends Constraint {
   protected Quaternion _offset = new Quaternion();
   protected float _min = (float) Math.PI, _max = (float) Math.PI;
 
-  protected AxisPlaneConstraint.Type transConstraintType = AxisPlaneConstraint.Type.FORBIDDEN;;
+  protected AxisPlaneConstraint.Type transConstraintType = AxisPlaneConstraint.Type.FORBIDDEN;
+  ;
   protected Vector transConstraintDir = new Vector();
 
 
@@ -66,8 +67,8 @@ public abstract class ConeConstraint extends Constraint {
     Vector tw = delta.inverseRotate(up);
     //Align y-Axis with up vector
     //Assume that up and twist are orthogonal
-    float angle = Vector.angleBetween(tw, new Vector(0,1,0));
-    if(Vector.cross(new Vector(0,1,0),tw, null).dot(new Vector(0,0,1)) < 0)
+    float angle = Vector.angleBetween(tw, new Vector(0, 1, 0));
+    if (Vector.cross(new Vector(0, 1, 0), tw, null).dot(new Vector(0, 0, 1)) < 0)
       angle *= -1;
     delta.compose(new Quaternion(new Vector(0, 0, 1), angle));
     delta.normalize();
@@ -76,7 +77,7 @@ public abstract class ConeConstraint extends Constraint {
     _restRotation = delta;
   }
 
-  public void setRotations(Quaternion reference, Quaternion rest){
+  public void setRotations(Quaternion reference, Quaternion rest) {
     _idleRotation = reference.get();
     _restRotation = rest.get();
     _orientation = Quaternion.compose(reference, rest);
@@ -88,11 +89,11 @@ public abstract class ConeConstraint extends Constraint {
     _max = max;
   }
 
-  public float minTwistAngle(){
+  public float minTwistAngle() {
     return _min;
   }
 
-  public float maxTwistAngle(){
+  public float maxTwistAngle() {
     return _max;
   }
 
@@ -111,7 +112,7 @@ public abstract class ConeConstraint extends Constraint {
     delta_idle.compose(rotation);
     delta_idle.normalize();
     delta_idle.compose(_offset);
-    Quaternion delta_rest =  Quaternion.compose(_restRotation.inverse(), delta_idle);
+    Quaternion delta_rest = Quaternion.compose(_restRotation.inverse(), delta_idle);
     delta_rest.normalize();
     delta_rest.compose(_restRotation);
     delta_rest.normalize();
@@ -204,11 +205,11 @@ public abstract class ConeConstraint extends Constraint {
 
   public void setTranslationConstraintDirection(Vector direction) {
     if ((translationConstraintType() != AxisPlaneConstraint.Type.FREE) && (translationConstraintType()
-            != AxisPlaneConstraint.Type.FORBIDDEN)) {
+        != AxisPlaneConstraint.Type.FORBIDDEN)) {
       float norm = direction.magnitude();
       if (norm == 0) {
         System.out
-                .println("Warning: AxisPlaneConstraint.setTranslationConstraintDir: null vector for translation constraint");
+            .println("Warning: AxisPlaneConstraint.setTranslationConstraintDir: null vector for translation constraint");
         transConstraintType = AxisPlaneConstraint.Type.FREE;
       } else
         transConstraintDir = Vector.multiply(direction, (1.0f / norm));

@@ -51,6 +51,7 @@ public class MiniMap extends PApplet {
           int _faces = (int) MiniMap.this.random(3, 15);
           // We need to call the PApplet random function instead of the node random version
           int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
+
           @Override
           public void graphics(PGraphics pg) {
             pg.pushStyle();

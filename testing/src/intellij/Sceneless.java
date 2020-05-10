@@ -27,7 +27,7 @@ public class Sceneless extends PApplet {
   public void setup() {
     eye = new Node();
     float fov = PI / 3;
-    eye.setMagnitude(tan(fov/2));
+    eye.setMagnitude(tan(fov / 2));
     eye.setPosition(0, 0, 400);
     nodes = new Node[50];
     for (int i = 0; i < nodes.length; i++) {
@@ -39,7 +39,7 @@ public class Sceneless extends PApplet {
             pg.strokeWeight(3);
             pg.stroke(255, 255, 0);
             pg.fill(0, 255, 0);
-            if(pg.is3D())
+            if (pg.is3D())
               pg.box(20);
             else
               pg.square(0, 0, 20);
@@ -53,7 +53,7 @@ public class Sceneless extends PApplet {
             pg.pushStyle();
             pg.noStroke();
             pg.fill(255, 0, 255);
-            if(pg.is3D())
+            if (pg.is3D())
               pg.sphere(20);
             else
               pg.circle(0, 0, 20);

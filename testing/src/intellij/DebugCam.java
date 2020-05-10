@@ -105,7 +105,7 @@ public class DebugCam extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    if (!scene.interactTag((float)event.getCount() * 10.f * PI / (float)width))
+    if (!scene.interactTag((float) event.getCount() * 10.f * PI / (float) width))
       scene.moveForward(event.getCount() * 10, inertia);
   }
 

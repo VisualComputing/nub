@@ -15,8 +15,8 @@ import nub.core.Node;
 import nub.core.constraint.ConeConstraint;
 import nub.core.constraint.DistanceFieldConstraint;
 import nub.core.constraint.Hinge;
-import nub.ik.visualization.InterestingEvent;
 import nub.ik.solver.Solver;
+import nub.ik.visualization.InterestingEvent;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -169,7 +169,7 @@ public abstract class FABRIKSolver extends Solver {
    * */
   protected float _forwardReaching(List<? extends Node> chain) {
     float change = 0;
-    if(_enableMediator) {
+    if (_enableMediator) {
       InterestingEvent event1 = mediator().addEventStartingAfterLast("FORWARD SET TARGET", "Trajectory", 1, 2); //Create the event at the desired time
       event1.addAttribute("positions", chain.get(chain.size() - 1).position(), _positions.get(chain.size() - 1).get()); //Add the convenient attributes
       //Create the event
@@ -178,7 +178,7 @@ public abstract class FABRIKSolver extends Solver {
       InterestingEvent event2 = mediator().addEventStartingAfterLast("FORWARD MOVE TO TARGET", "NodeTranslation", 1, 1);
       event2.addAttribute("node", chain.get(chain.size() - 1)); //Add the convenient attributes
       Vector translation;
-      if(chain.get(chain.size() - 1).reference() != null)
+      if (chain.get(chain.size() - 1).reference() != null)
         translation = Vector.subtract(_positions.get(chain.size() - 1), chain.get(chain.size() - 1).position());
       else
         translation = _positions.get(chain.size() - 1).get();
@@ -196,13 +196,13 @@ public abstract class FABRIKSolver extends Solver {
         //As rigid segment between J_i and J_i1 lies on same position, J_i must match exactly J_i1 position
         _positions.set(i, pos_i1.get());
 
-        if(_enableMediator) {
+        if (_enableMediator) {
           //Create the event
           InterestingEvent event = mediator().addEventStartingAfterLast("FORWARD FIX LENGTH", "NodeTranslation", 1, 2);
           event.addAttribute("node", chain.get(i)); //Add the convenient attributes
-          Vector translation ;
-          if(chain.get(i).reference() != null)
-           translation = Vector.subtract(pos_i1, chain.get(i).position());
+          Vector translation;
+          if (chain.get(i).reference() != null)
+            translation = Vector.subtract(pos_i1, chain.get(i).position());
           else
             translation = pos_i1;
           event.addAttribute("translation", translation);
@@ -242,11 +242,11 @@ public abstract class FABRIKSolver extends Solver {
         _positions.set(i, _move(pos_i1, pos_i, dist_i, 0));
       }
 
-      if(_enableMediator) {
+      if (_enableMediator) {
         InterestingEvent event = mediator().addEventStartingAfterLast("FORWARD FIX LENGTH", "NodeTranslation", 1, 2); //Create the event
         event.addAttribute("node", chain.get(i)); //Add the convenient attributes
         Vector translation;
-        if(chain.get(i).reference() != null)
+        if (chain.get(i).reference() != null)
           translation = Vector.subtract(_positions.get(i), chain.get(i).position());
         else
           translation = _positions.get(i);
@@ -254,7 +254,7 @@ public abstract class FABRIKSolver extends Solver {
         event.addAttribute("enableConstraint", false);
         event.addAttribute("modifyChildren", false);
         event.addAttribute("useGlobalCoordinates", true);
-        InterestingEvent message = mediator().addEventStartingWithLast("FORWARD FIX LENGTH MESSAGE", "Message",0, 1); //Create the event
+        InterestingEvent message = mediator().addEventStartingWithLast("FORWARD FIX LENGTH MESSAGE", "Message", 0, 1); //Create the event
         message.addAttribute("message", "Step 3: Fix the bone's length"); //Add the convenient attributes
       }
       change += Vector.distance(pos_i, _positions().get(i));
@@ -364,7 +364,7 @@ public abstract class FABRIKSolver extends Solver {
     orientation = chain.get(0).reference() != null ? chain.get(0).reference().orientation() : new Quaternion();
     magnitude = chain.get(0).reference() != null ? chain.get(0).reference().scaling() : 1;
 
-    if(_enableMediator) {
+    if (_enableMediator) {
       InterestingEvent event1 = mediator().addEventStartingAfterLast("BACKWARD SET INIT", "Trajectory", 1, 2); //Create the event
       event1.addAttribute("positions", o, chain.get(0).position()); //Add the convenient attributes
       InterestingEvent message1 = mediator().addEventStartingWithLast("BACKWARD SET INIT MESSAGE", "Message", 0, 1); //Create the event
@@ -373,10 +373,10 @@ public abstract class FABRIKSolver extends Solver {
       //Add the convenient attributes
       event2.addAttribute("node", chain.get(0));
       Vector translation;
-      if(chain.get(0).reference() != null)
+      if (chain.get(0).reference() != null)
         translation = Vector.subtract(o, _positions.get(0));
       else
-        translation = Vector.multiply(o,-1);
+        translation = Vector.multiply(o, -1);
       event2.addAttribute("translation", translation);
       event2.addAttribute("enableConstraint", false);
       event2.addAttribute("modifyChildren", false);
@@ -387,7 +387,7 @@ public abstract class FABRIKSolver extends Solver {
 
     Vector o_hat = o;
 
-    for(int i = 0; i < start; i++){
+    for (int i = 0; i < start; i++) {
       orientation.compose(chain.get(i).rotation());
     }
 
@@ -396,11 +396,11 @@ public abstract class FABRIKSolver extends Solver {
         _positions.set(i + 1, _positions.get(i)); //keep pos
         orientation.compose(chain.get(i).rotation()); //update orientation
         //Animation
-        if(_enableMediator) {
+        if (_enableMediator) {
           InterestingEvent event = mediator().addEventStartingAfterLast("BACKWARD FIX LENGTH", "NodeTranslation", 1, 2); //Create the event
           event.addAttribute("node", chain.get(i + 1)); //Add the convenient attributes
           Vector translation = null;
-          if(chain.get(i + 1).reference() != null)
+          if (chain.get(i + 1).reference() != null)
             translation = Vector.subtract(_positions.get(i), chain.get(i + 1).position());
           else
             translation = _positions.get(i);
@@ -408,7 +408,7 @@ public abstract class FABRIKSolver extends Solver {
           event.addAttribute("enableConstraint", false);
           event.addAttribute("modifyChildren", false);
           event.addAttribute("useGlobalCoordinates", true);
-          InterestingEvent message = mediator().addEventStartingWithLast("BACKWARD FIX LENGTH MESSAGE", "Message",0, 1);
+          InterestingEvent message = mediator().addEventStartingWithLast("BACKWARD FIX LENGTH MESSAGE", "Message", 0, 1);
           message.addAttribute("message", "Step 6: Fix the bone's length"); //Add the convenient attributes
         }
         continue;
@@ -417,7 +417,7 @@ public abstract class FABRIKSolver extends Solver {
       //Find delta rotation
       Properties props_i = _properties.get(chain.get(i).id());
       Properties props_i1 = _properties.get(chain.get(i + 1).id());
-      Vector prevPos = _positions.get(i+1);
+      Vector prevPos = _positions.get(i + 1);
       //TODO : Is necessary to check children?
       //if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
       if (chain.get(i).constraint() != null && _keepDirection) {
@@ -452,11 +452,11 @@ public abstract class FABRIKSolver extends Solver {
       //change += Vector.distance(_positions.get(i + 1), constrained_pos);
       _positions.set(i + 1, constrained_pos);
 
-      if(_enableMediator) {
-        InterestingEvent event = mediator().addEventStartingAfterLast("BACKWARD FIX LENGTH", "NodeTranslation",1, 2); //Create the event
+      if (_enableMediator) {
+        InterestingEvent event = mediator().addEventStartingAfterLast("BACKWARD FIX LENGTH", "NodeTranslation", 1, 2); //Create the event
         event.addAttribute("node", chain.get(i + 1)); //Add the convenient attributes
         Vector translation;
-        if(chain.get(i + 1).reference() != null)
+        if (chain.get(i + 1).reference() != null)
           translation = Vector.subtract(_positions.get(i + 1), prevPos);
         else
           translation = _positions.get(i + 1);

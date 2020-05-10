@@ -17,7 +17,7 @@ import java.util.List;
 public class Joint extends Node {
   public static boolean depth = false;
   protected String _name;
-  protected int _r , _g, _b, _alpha = 255;
+  protected int _r, _g, _b, _alpha = 255;
   protected float _radius;
   protected List<PShape> _mesh;
   public static boolean axes = false;
@@ -65,10 +65,10 @@ public class Joint extends Node {
     pg.pushStyle();
     if (!_isRoot) {
       pg.strokeWeight(Math.max(_radius / 4f, 2));
-      if(reference() instanceof Joint){
+      if (reference() instanceof Joint) {
         Joint ref = ((Joint) reference());
         pg.stroke(ref._r, ref._g, ref._b, _alpha);
-      } else{
+      } else {
         pg.stroke(_r, _g, _b, _alpha);
       }
 
@@ -88,7 +88,7 @@ public class Joint extends Node {
     if (constraint() != null && _drawConstraint) {
       Scene.drawConstraint(pg, this, constraintFactor);
     }
-    if (axes) Scene.drawAxes(pg,_radius * 2);
+    if (axes) Scene.drawAxes(pg, _radius * 2);
     if (!depth) pg.hint(PConstants.ENABLE_DEPTH_TEST);
 
     pg.stroke(255);
@@ -131,15 +131,15 @@ public class Joint extends Node {
     return _name;
   }
 
-  public int red(){
+  public int red() {
     return _r;
   }
 
-  public int green(){
+  public int green() {
     return _g;
   }
 
-  public int blue(){
+  public int blue() {
     return _b;
   }
 }

@@ -124,7 +124,7 @@ public class GPULinearBlendSkinning implements Skinning {
     return _ids;
   }
 
-  public void setReference(Node reference){
+  public void setReference(Node reference) {
     _reference = reference;
   }
 
@@ -261,7 +261,7 @@ public class GPULinearBlendSkinning implements Skinning {
 
   @Override
   public void render(Scene scene, Node reference) {
-    if(reference != null) scene.applyWorldTransformation(reference);
+    if (reference != null) scene.applyWorldTransformation(reference);
     render(scene.context());
   }
 

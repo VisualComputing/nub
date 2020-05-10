@@ -11,15 +11,14 @@
 
 package nub.core;
 
+import nub.ik.solver.Solver;
+import nub.ik.solver.geometric.TreeSolver;
+import nub.ik.solver.geometric.oldtrik.TRIKTree;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
-
-import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.oldtrik.TRIKTree;
-import nub.ik.solver.geometric.TreeSolver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -221,7 +220,7 @@ public class Graph {
   protected static List<Solver> _solvers = new ArrayList<Solver>();
   protected static HashMap<Solver, Task> _solverTasks = new HashMap<Solver, Task>();
 
-    /**
+  /**
    * Enumerates the graph types.
    * <p>
    * The type mainly defines the way the projection matrix is computed.
@@ -2224,6 +2223,10 @@ public class Graph {
    * to the {@link #viewDirection()} and passing through the {@link #center()}) that
    * is used to define the 3D rectangle that is eventually fitted.
    *
+   * @param x      coordinate of the rectangle
+   * @param y      coordinate of the rectangle
+   * @param width  width of the rectangle
+   * @param height height of the rectangle
    * @see #fit(int, int, int, int, float)
    * @see #fit(Vector, Vector, float)
    * @see #fit(Vector, Vector)
@@ -2235,10 +2238,6 @@ public class Graph {
    * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
-   * @param x coordinate of the rectangle
-   * @param y coordinate of the rectangle
-   * @param width width of the rectangle
-   * @param height height of the rectangle
    */
   public void fit(int x, int y, int width, int height) {
     int centerX = (int) ((float) x + (float) width / 2);
@@ -4629,10 +4628,11 @@ public class Graph {
   }
 
   //IK SOLVERS
+
   /**
    * Choose between FABRIK or TRIK to solve a given chain
    */
-  public static void enableTRIK(boolean trik){
+  public static void enableTRIK(boolean trik) {
     _useTRIK = trik;
   }
 
@@ -4649,8 +4649,8 @@ public class Graph {
   public static Solver registerTreeSolver(Node node) {
     for (Solver solver : _solvers) {
       Node head = null;
-      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
-      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
+      if (solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
+      else if (solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
       else return null;
       //If Head is Contained in any structure do nothing
       if (!((isReachable(head) && isReachable(node)) ? Node.path(head, node) : new ArrayList<Node>()).isEmpty())
@@ -4659,7 +4659,7 @@ public class Graph {
 
     Solver solver;
 
-    if(_useTRIK) solver = new TRIKTree(node);
+    if (_useTRIK) solver = new TRIKTree(node);
     else solver = new TreeSolver(node);
     _solvers.add(solver);
     //Add task
@@ -4681,8 +4681,8 @@ public class Graph {
     Solver toRemove = null;
     for (Solver solver : _solvers) {
       Node head = null;
-      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
-      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
+      if (solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
+      else if (solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
       else return false;
       if (head == node) {
         toRemove = solver;
@@ -4700,8 +4700,8 @@ public class Graph {
   public static Solver treeSolver(Node node) {
     for (Solver solver : _solvers) {
       Node head = null;
-      if(solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
-      else if(solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
+      if (solver instanceof TreeSolver) head = ((TreeSolver) solver).head();
+      else if (solver instanceof TRIKTree) head = ((TRIKTree) solver).head();
       else return null;
 
       if (head == node) {
@@ -4713,8 +4713,8 @@ public class Graph {
 
   public static boolean addIKTarget(Node endEffector, Node target) {
     for (Solver solver : _solvers) {
-      if (solver instanceof TreeSolver && ((TreeSolver)solver).addTarget(endEffector, target)) return true;
-      if (solver instanceof TRIKTree && ((TRIKTree)solver).addTarget(endEffector, target)) return true;
+      if (solver instanceof TreeSolver && ((TreeSolver) solver).addTarget(endEffector, target)) return true;
+      if (solver instanceof TRIKTree && ((TRIKTree) solver).addTarget(endEffector, target)) return true;
     }
     return false;
   }
@@ -4746,12 +4746,12 @@ public class Graph {
       };
       task.run(period);
       _solverTasks.put(solver, task);
-    } else{
+    } else {
       _solverTasks.get(solver).run();
     }
   }
 
-  public static void stopSolver(Solver solver){
+  public static void stopSolver(Solver solver) {
     _solverTasks.get(solver).stop();
   }
 

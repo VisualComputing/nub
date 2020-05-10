@@ -1,6 +1,5 @@
 package nub.ik.skinning;
 
-import nub.core.Graph;
 import nub.core.Node;
 import nub.ik.animation.Skeleton;
 import nub.primitives.Quaternion;
@@ -127,7 +126,7 @@ public class CPULinearBlendSkinning implements Skinning {
     return _ids;
   }
 
-  public void setReference(Node reference){
+  public void setReference(Node reference) {
     _reference = reference;
   }
 
@@ -208,7 +207,7 @@ public class CPULinearBlendSkinning implements Skinning {
 
   @Override
   public void render(Scene scene, Node reference) {
-    if(reference != null) scene.applyWorldTransformation(reference);
+    if (reference != null) scene.applyWorldTransformation(reference);
     render(scene.context());
   }
 

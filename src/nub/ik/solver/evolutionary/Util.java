@@ -80,7 +80,7 @@ public class Util {
     return generatePopulation(structure, n, (float) Math.toRadians(60));
   }
 
-  public static void setupPopulation(List<Node> structure, List<Individual> population){
+  public static void setupPopulation(List<Node> structure, List<Individual> population) {
     population.get(0).setChain(structure);
     population.get(0).arrayParams().put("Evolution_Gradient", new float[population.get(0).structure().size() * 3]);
     for (int i = 1; i < population.size(); i++) {

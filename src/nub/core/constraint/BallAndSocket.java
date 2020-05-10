@@ -168,7 +168,7 @@ public class BallAndSocket extends ConeConstraint {
 
   //this is an adaptation from https://github.com/0xfaded/ellipse_demo/issues/1
   //more info at: https://wet-robots.ghost.io/simple-method-for-distance-to-ellipse/
-  public static Vector closestPointToEllipse(float semi_major, float  semi_minor, Vector point){
+  public static Vector closestPointToEllipse(float semi_major, float semi_minor, Vector point) {
     float px = Math.abs(point.x());
     float py = Math.abs(point.y());
 
@@ -180,11 +180,11 @@ public class BallAndSocket extends ConeConstraint {
 
     float x, y, ex, ey, rx, ry, qx, qy, r, q, t;
 
-    for(int i = 0; i < 3; i++){
+    for (int i = 0; i < 3; i++) {
       x = a * tx;
       y = b * ty;
-      ex = (a*a - b*b) * (tx*tx*tx) / a;
-      ey = (b*b - a*a) * (ty*ty*ty) / b;
+      ex = (a * a - b * b) * (tx * tx * tx) / a;
+      ey = (b * b - a * a) * (ty * ty * ty) / b;
       rx = x - ex;
       ry = y - ey;
       qx = px - ex;
@@ -201,6 +201,6 @@ public class BallAndSocket extends ConeConstraint {
       ty /= t;
     }
 
-    return new Vector(Math.signum(point.x()) * a * tx,  Math.signum(point.y()) * b * ty);
+    return new Vector(Math.signum(point.x()) * a * tx, Math.signum(point.y()) * b * ty);
   }
 }

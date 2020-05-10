@@ -38,7 +38,7 @@ public class ViewingVolume extends PApplet {
     scene2.setRadius(600);
     scene2.fit();
 
-    point = new Vector(50,50,50);
+    point = new Vector(50, 50, 50);
   }
 
   @Override
@@ -140,7 +140,7 @@ public class ViewingVolume extends PApplet {
       Vector u = scene1.screenDisplacement(t, scene1.eye());
       println("vector t : " + t.toString() + " screenDisplacement(t): " + u);
     }
-    if(key == 'n') {
+    if (key == 'n') {
       Vector r = Vector.multiply(Vector.random(), scene1.radius());
       //Vector r = point;
       Vector s = scene1.screenLocation(r);

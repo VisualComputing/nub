@@ -28,8 +28,8 @@ public class Individual {
     this(structure, false);
   }
 
-  public Individual(List<Node> structure, boolean copy){
-    if(!copy) _structure = structure;
+  public Individual(List<Node> structure, boolean copy) {
+    if (!copy) _structure = structure;
     else _structure = _copy(structure);
     _fitness = Float.NaN;
     arrayParams().put("Evolution_Gradient", new float[structure.size() * 3]);
@@ -145,13 +145,13 @@ public class Individual {
 
   //here we assume that chain and copy has the same structure
   public void setChain(List<Node> chain) {
-    for(int i = 0; i < chain.size(); i++){
+    for (int i = 0; i < chain.size(); i++) {
       _structure.get(i).setTranslation(chain.get(i).translation().get());
       _structure.get(i).setRotation(chain.get(i).rotation().get());
     }
   }
 
-  protected void _cloneAttributes(Individual individual){
+  protected void _cloneAttributes(Individual individual) {
     _fitness = individual._fitness;
     if (_floatParams != null) {
       for (String name : _floatParams.keySet()) {
@@ -171,7 +171,7 @@ public class Individual {
     return individual;
   }
 
-  public void set(Individual individual){
+  public void set(Individual individual) {
     setChain(individual._structure);
     _cloneAttributes(individual);
   }

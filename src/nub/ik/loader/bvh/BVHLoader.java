@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class must be used to load a bvh file and
@@ -85,11 +84,11 @@ public class BVHLoader {
 
   }
 
-  public List<Node> branch(){
+  public List<Node> branch() {
     return _branch;
   }
 
-  public int poses(){
+  public int poses() {
     return _poses.size();
   }
 
@@ -239,7 +238,7 @@ public class BVHLoader {
       }
     }
     _root = root;
-    if(root instanceof Joint) ((Joint) root).setRoot(true);
+    if (root instanceof Joint) ((Joint) root).setRoot(true);
 
     _branch = scene.branch(_root);
     return root;
@@ -353,7 +352,7 @@ public class BVHLoader {
     }
     for (Node node : _branch) {
       Constraint c = node.constraint();
-      if(node == _root)node.setConstraint(null);
+      if (node == _root) node.setConstraint(null);
       node.setRotation(_poses.get(node.id()).get(_currentPose).rotation().get());
       node.setTranslation(_poses.get(node.id()).get(_currentPose).translation().get());
       node.setConstraint(c);
@@ -371,12 +370,12 @@ public class BVHLoader {
     }
   }
 
-  protected Vector findRestVector(Node node){
+  protected Vector findRestVector(Node node) {
     List<Node> poses = _poses.get(node.id());
-    Vector init = new Vector(0,1,0); //use any vector
+    Vector init = new Vector(0, 1, 0); //use any vector
     //if(node.children().size() == 1){
-      //init = node.children().get(0).translation().get();
-      //return init;
+    //init = node.children().get(0).translation().get();
+    //return init;
     //}
 
     //TODO : Prefer child direction
@@ -384,14 +383,14 @@ public class BVHLoader {
 
     Vector rest = init.get();
     System.out.println("init " + init);
-    for(Node keyNode : poses){
+    for (Node keyNode : poses) {
       Quaternion delta = Quaternion.compose(restRotation.inverse(), keyNode.rotation());
       delta.normalize();
       rest.add(delta.rotate(init));
       //System.out.println("delta " + delta.axis() + delta.angle() + " "  + " rest " + rest);
     }
 
-    if(rest.magnitude() < 0.001f) //pick any vector
+    if (rest.magnitude() < 0.001f) //pick any vector
       rest = init;
 
 
@@ -401,66 +400,66 @@ public class BVHLoader {
     return rest;
   }
 
-  public void generateConstraints(){
-    for(Node node : _branch){
-      if(node == _root) continue;
+  public void generateConstraints() {
+    for (Node node : _branch) {
+      if (node == _root) continue;
       generateConstraint(node);
     }
   }
 
 
-  protected void generateConstraint(Node node){
+  protected void generateConstraint(Node node) {
     Vector rest = findRestVector(node);
     List<Node> poses = _poses.get(node.id());
     Quaternion restRotation = node.rotation().get();
     Vector up = rest.orthogonalVector();
     Vector right = Vector.cross(rest, up, null);
 
-    if(node.children() == null || node.children().isEmpty() ){
+    if (node.children() == null || node.children().isEmpty()) {
       return;
     }
 
     float minTwist = 0, maxTwist = 0;
     float upAngle = 0, downAngle = 0, leftAngle = 0, rightAngle = 0;
 
-    for(Node keyNode : poses){
+    for (Node keyNode : poses) {
       Quaternion delta = Quaternion.compose(restRotation.inverse(), keyNode.rotation());
       delta.normalize();
       Vector local_rest = delta.inverseRotate(rest);
       Vector local_up = delta.inverseRotate(up);
       Vector local_right = delta.inverseRotate(right);
 
-      Quaternion deltaRest = decomposeQuaternion(delta , local_rest);
+      Quaternion deltaRest = decomposeQuaternion(delta, local_rest);
 
 
-      if(deltaRest.axis().dot(local_rest) >= 0) maxTwist = Math.max(deltaRest.angle(), maxTwist);
+      if (deltaRest.axis().dot(local_rest) >= 0) maxTwist = Math.max(deltaRest.angle(), maxTwist);
       else minTwist = Math.max(deltaRest.angle(), minTwist);
 
-      Quaternion deltaUp = decomposeQuaternion(delta , local_up);
-      if(deltaUp.axis().dot(local_up) >= 0) upAngle = Math.max(deltaUp.angle(), upAngle);
+      Quaternion deltaUp = decomposeQuaternion(delta, local_up);
+      if (deltaUp.axis().dot(local_up) >= 0) upAngle = Math.max(deltaUp.angle(), upAngle);
       else downAngle = Math.max(deltaUp.angle(), downAngle);
 
-      Quaternion deltaRight = decomposeQuaternion(delta , local_right);
-      if(deltaRight.axis().dot(local_right) >= 0) rightAngle = Math.max(deltaRight.angle(), rightAngle);
+      Quaternion deltaRight = decomposeQuaternion(delta, local_right);
+      if (deltaRight.axis().dot(local_right) >= 0) rightAngle = Math.max(deltaRight.angle(), rightAngle);
       else leftAngle = Math.max(deltaRight.angle(), leftAngle);
     }
 
     //Clamp angles between 5 and 85 degrees
-    System.out.println("(*) -" + _joint.get(node.id()).name() + " constraint : " );
+    System.out.println("(*) -" + _joint.get(node.id()).name() + " constraint : ");
     System.out.println("\t\t" + "rest " + rest + " up " + up + " right " + right);
     System.out.println("\t\t" + "up " + Math.toDegrees(upAngle) + "down   " + Math.toDegrees(downAngle));
     System.out.println("\t\t" + "left   " + Math.toDegrees(leftAngle) + "  rigth   " + Math.toDegrees(rightAngle));
     System.out.println("\t\t" + "min tw   " + Math.toDegrees(minTwist) + "  max tw   " + Math.toDegrees(maxTwist));
 
 
-    upAngle = Math.min(Math.max(upAngle, (float) Math.toRadians(5)), (float )Math.toRadians(85));
-    downAngle = Math.min(Math.max(downAngle, (float) Math.toRadians(5)), (float )Math.toRadians(85));
-    leftAngle = Math.min(Math.max(leftAngle, (float) Math.toRadians(5)), (float )Math.toRadians(85));
-    rightAngle = Math.min(Math.max(rightAngle, (float) Math.toRadians(5)), (float )Math.toRadians(85));
-    minTwist = Math.min(Math.max(minTwist, (float) Math.toRadians(5)), (float )Math.toRadians(175));
-    maxTwist = Math.min(Math.max(maxTwist, (float) Math.toRadians(5)), (float )Math.toRadians(175));
+    upAngle = Math.min(Math.max(upAngle, (float) Math.toRadians(5)), (float) Math.toRadians(85));
+    downAngle = Math.min(Math.max(downAngle, (float) Math.toRadians(5)), (float) Math.toRadians(85));
+    leftAngle = Math.min(Math.max(leftAngle, (float) Math.toRadians(5)), (float) Math.toRadians(85));
+    rightAngle = Math.min(Math.max(rightAngle, (float) Math.toRadians(5)), (float) Math.toRadians(85));
+    minTwist = Math.min(Math.max(minTwist, (float) Math.toRadians(5)), (float) Math.toRadians(175));
+    maxTwist = Math.min(Math.max(maxTwist, (float) Math.toRadians(5)), (float) Math.toRadians(175));
 
-    System.out.println("(* AFTER) -" + _joint.get(node.id()).name() + " constraint : " );
+    System.out.println("(* AFTER) -" + _joint.get(node.id()).name() + " constraint : ");
     System.out.println("\t\t" + "rest " + rest + " up " + up + " right    " + right);
     System.out.println("\t\t" + "up   " + Math.toDegrees(upAngle) + "down   " + Math.toDegrees(downAngle));
     System.out.println("\t\t" + "left   " + Math.toDegrees(leftAngle) + "  rigth   " + Math.toDegrees(rightAngle));
@@ -472,15 +471,12 @@ public class BVHLoader {
     node.setConstraint(constraint);
   }
 
-  protected Quaternion decomposeQuaternion(Quaternion quaternion, Vector axis){
+  protected Quaternion decomposeQuaternion(Quaternion quaternion, Vector axis) {
     Vector rotationAxis = new Vector(quaternion._quaternion[0], quaternion._quaternion[1], quaternion._quaternion[2]);
     rotationAxis = Vector.projectVectorOnAxis(rotationAxis, axis); // w.r.t idle
     //Get rotation component on Axis direction
     return new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), quaternion.w()); //w.r.t rest
   }
-
-
-
 
 
   //----- TESTING SOME BEHAVIOR -----

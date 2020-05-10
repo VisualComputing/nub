@@ -67,7 +67,7 @@ public class Arrow extends Node {
     // Scale to fit the screen relative vector displacement
     if (scene.type() == Graph.Type.PERSPECTIVE) {
       float k = (float) Math.tan(scene.fov() / 2.0f) * Math.abs(
-              scene.eye().location(scene.isEye(frame) ? scene.anchor() : frame.position())._vector[2] * scene.eye().magnitude());
+          scene.eye().location(scene.isEye(frame) ? scene.anchor() : frame.position())._vector[2] * scene.eye().magnitude());
       //TODO check me weird to find height instead of width working (may it has to do with fov?)
       dx *= 2.0 * k / (scene.height() * scene.eye().magnitude());
       dy *= 2.0 * k / (scene.height() * scene.eye().magnitude());

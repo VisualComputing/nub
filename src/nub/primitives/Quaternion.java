@@ -660,7 +660,6 @@ public class Quaternion {
    * @see #fromMatrix(Matrix)
    * @see #fromRotatedBasis(Vector, Vector, Vector)
    * @see #fromAxisAngle(Vector, float)
-   *
    * @see #eulerAngles()
    */
   public void fromEulerAngles(float roll, float pitch, float yaw) {
@@ -767,14 +766,13 @@ public class Quaternion {
    * The three vectors do not have to be normalized but must be orthogonal and direct
    * (i,e., {@code X^Y=k*Z, with k>0}).
    *
+   * @param X the first Vector
+   * @param Y the second Vector
+   * @param Z the third Vector
    * @see #fromTo(Vector, Vector)
    * @see #fromEulerAngles(float, float, float)
    * @see #fromMatrix(Matrix)
    * @see #fromAxisAngle(Vector, float)
-   *
-   * @param X the first Vector
-   * @param Y the second Vector
-   * @param Z the third Vector
    * @see #fromRotatedBasis(Vector, Vector, Vector)
    * @see #Quaternion(Vector, Vector)
    */

@@ -852,7 +852,7 @@ public class Interpolator {
       if (next != null) {
         // Interpolate using the shortest path between two quaternions
         // See: https://stackoverflow.com/questions/2886606/flipping-issue-when-interpolating-rotations-using-quaternions
-        if(Quaternion.dot(next._node.rotation(), keyFrame._node.rotation()) < 0) {
+        if (Quaternion.dot(next._node.rotation(), keyFrame._node.rotation()) < 0) {
           // change sign
           next._node.rotation().negate();
         }

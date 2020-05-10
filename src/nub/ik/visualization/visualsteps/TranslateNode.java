@@ -9,107 +9,107 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 
 public class TranslateNode extends VisualStep {
-    protected Node _node;
-    protected boolean _enableConstraint = true, _modifyChildren = true, _useGlobalCoordinates = false;
-    protected Vector _initial, _final, _deltaPerFrame, _delta;
-    protected Constraint _constraint;
+  protected Node _node;
+  protected boolean _enableConstraint = true, _modifyChildren = true, _useGlobalCoordinates = false;
+  protected Vector _initial, _final, _deltaPerFrame, _delta;
+  protected Constraint _constraint;
 
-    public TranslateNode(Scene scene, Node node, long period, long stepDuration, long executionTimes, long renderingTimes) {
-        super(scene, period, stepDuration, executionTimes, renderingTimes);
-        _node = node;
+  public TranslateNode(Scene scene, Node node, long period, long stepDuration, long executionTimes, long renderingTimes) {
+    super(scene, period, stepDuration, executionTimes, renderingTimes);
+    _node = node;
+  }
+
+  public void setTranslation(Vector delta) {
+    _completed = false;
+    _delta = delta;
+  }
+
+  public void enableConstraint(boolean enable) {
+    _enableConstraint = enable;
+  }
+
+  public void useGlobalCoordinates(boolean useGlobalCoordinates) {
+    _useGlobalCoordinates = useGlobalCoordinates;
+  }
+
+  public void modifyChildren(boolean modifyChildren) {
+    _modifyChildren = modifyChildren;
+  }
+
+  @Override
+  protected void _onTimeUpdate(int remainingTimes) {
+    //Given current status and remaining work find delta per frame
+    Vector remaining = Vector.subtract(_final, _node.translation());
+    if (remainingTimes == 0) remainingTimes = 1;
+    _deltaPerFrame = Vector.multiply(remaining, 1.f / remainingTimes);
+  }
+
+  @Override
+  public void _onInit() {
+    _initial = _node.translation().get();
+    if (!_enableConstraint) {
+      _constraint = _node.constraint();
     }
-
-    public void setTranslation(Vector delta) {
-        _completed = false;
-        _delta = delta;
+    if (_useGlobalCoordinates) {
+      _delta = _node.reference() != null ? _node.reference().displacement(_delta) : _delta;
     }
+    _delta = _enableConstraint && _node.constraint() != null ? _node.constraint().constrainTranslation(_delta, _node) : _delta;
+    _final = Vector.add(_initial, _delta);
+  }
 
-    public void enableConstraint(boolean enable){
-        _enableConstraint = enable;
+  @Override
+  public void reverse() {
+
+  }
+
+
+  @Override
+  protected void _onComplete() {
+    //set translation to fit exactly final translation
+    _applyTranslation(Vector.subtract(_final, _node.translation()));
+  }
+
+  @Override
+  protected void _onRunning() {
+    if (Vector.distance(_node.translation(), _final) >= 0.00001) {
+      _applyTranslation(_deltaPerFrame);
     }
+  }
 
-    public void useGlobalCoordinates(boolean useGlobalCoordinates){
-        _useGlobalCoordinates = useGlobalCoordinates;
+  protected void _applyTranslation(Vector delta) {
+    if (!_enableConstraint) _node.setConstraint(null);
+    _node.translate(delta);
+    if (!_modifyChildren) {
+      for (Node child : _node.children()) {
+        Vector translation = Vector.multiply(delta, -1);
+        translation = _node.rotation().inverseRotate(translation);
+        child.translate(translation);
+      }
     }
+    if (!_enableConstraint) _node.setConstraint(_constraint);
+  }
 
-    public void modifyChildren(boolean modifyChildren){
-        _modifyChildren = modifyChildren;
-    }
+  @Override
+  public void render() {
+    if (!(boolean) _attributes.get("highlight")) return;
+    PGraphics pg = _scene.context();
+    pg.pushStyle();
+    pg.hint(PConstants.DISABLE_DEPTH_TEST);
+    pg.pushMatrix();
+    _scene.applyWorldTransformation(_node);
+    pg.noStroke();
+    if (!_completed) pg.fill((int) _attributes.get("color"));
+    else pg.fill((int) _attributes.get("color"), 150);
+    pg.sphere((float) _attributes.get("radius"));
+    pg.popMatrix();
+    pg.hint(PConstants.ENABLE_DEPTH_TEST);
+    pg.popStyle();
+  }
 
-    @Override
-    protected void _onTimeUpdate(int remainingTimes) {
-        //Given current status and remaining work find delta per frame
-        Vector remaining = Vector.subtract(_final, _node.translation());
-        if(remainingTimes == 0) remainingTimes = 1;
-        _deltaPerFrame = Vector.multiply(remaining, 1.f/remainingTimes);
-    }
-
-    @Override
-    public void _onInit() {
-        _initial = _node.translation().get();
-        if(!_enableConstraint){
-            _constraint = _node.constraint();
-        }
-        if(_useGlobalCoordinates){
-            _delta = _node.reference() != null ? _node.reference().displacement(_delta) : _delta;
-        }
-        _delta = _enableConstraint && _node.constraint() != null ? _node.constraint().constrainTranslation(_delta, _node) : _delta;
-        _final = Vector.add(_initial, _delta);
-    }
-
-    @Override
-    public void reverse() {
-
-    }
-
-
-    @Override
-    protected void _onComplete(){
-        //set translation to fit exactly final translation
-        _applyTranslation(Vector.subtract(_final, _node.translation()));
-    }
-
-    @Override
-    protected void _onRunning(){
-        if (Vector.distance(_node.translation(), _final) >= 0.00001) {
-            _applyTranslation(_deltaPerFrame);
-        }
-    }
-
-    protected void _applyTranslation(Vector delta){
-        if(!_enableConstraint) _node.setConstraint(null);
-        _node.translate(delta);
-        if(!_modifyChildren){
-            for(Node child : _node.children()){
-                Vector translation = Vector.multiply(delta, -1);
-                translation = _node.rotation().inverseRotate(translation);
-                child.translate(translation);
-            }
-        }
-        if(!_enableConstraint) _node.setConstraint(_constraint);
-    }
-
-    @Override
-    public void render() {
-        if(!(boolean)_attributes.get("highlight")) return;
-        PGraphics pg = _scene.context();
-        pg.pushStyle();
-        pg.hint(PConstants.DISABLE_DEPTH_TEST);
-        pg.pushMatrix();
-        _scene.applyWorldTransformation(_node);
-        pg.noStroke();
-        if(!_completed) pg.fill((int)_attributes.get("color"));
-        else pg.fill((int)_attributes.get("color"), 150);
-        pg.sphere((float)_attributes.get("radius"));
-        pg.popMatrix();
-        pg.hint(PConstants.ENABLE_DEPTH_TEST);
-        pg.popStyle();
-    }
-
-    @Override
-    protected void _defineAttributes(){
-        _attributes.put("highlight", true);
-        _attributes.put("color", _scene.pApplet().color(0, 0, 255));
-        _attributes.put("radius", _scene.radius()*0.02f);
-    }
+  @Override
+  protected void _defineAttributes() {
+    _attributes.put("highlight", true);
+    _attributes.put("color", _scene.pApplet().color(0, 0, 255));
+    _attributes.put("radius", _scene.radius() * 0.02f);
+  }
 }
