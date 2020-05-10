@@ -643,7 +643,6 @@ public class Interpolator {
       return;
     if (node == null)
       return;
-
     _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time));
     _valuesAreValid = false;
     _pathIsValid = false;
@@ -852,7 +851,7 @@ public class Interpolator {
       if (next != null) {
         // Interpolate using the shortest path between two quaternions
         // See: https://stackoverflow.com/questions/2886606/flipping-issue-when-interpolating-rotations-using-quaternions
-        if(Quaternion.dot(next._node.rotation(), keyFrame._node.rotation()) < 0) {
+        if (Quaternion.dot(next._node.rotation(), keyFrame._node.rotation()) < 0) {
           // change sign
           next._node.rotation().negate();
         }
