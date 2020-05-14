@@ -536,7 +536,7 @@ void keyPressed() {
 Scene scene;
 void setup() {
   scene = new Scene(this);
-  TimingTask spinningTask = new TimingTask(scene) {
+  TimingTask spinningTask = new TimingTask() {
     @Override
     public void execute() {
       scene.eye().orbit(new Vector(0, 1, 0), PI / 100);
