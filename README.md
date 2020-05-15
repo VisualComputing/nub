@@ -1,4 +1,4 @@
-nub[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+nub[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 **Table of Contents**
@@ -18,6 +18,7 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.s
 - [Timing](#timing)
   - [Timing tasks](#timing-tasks)
   - [Interpolators](#interpolators)
+- [IK](#ik)
 - [Installation](#installation)
 - [Contributors](#contributors)
 
@@ -578,6 +579,10 @@ void draw() {
   scene.drawCatmullRom(interpolator);
 }
 ```
+
+## IK
+
+TODO add me
 
 while [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) will draw the animated shape(s) [drawCatmullRom(Interpolator)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCatmullRom-nub.core.Interpolator-) will draw the interpolated path too. See the [Interpolators](https://github.com/VisualComputing/nub/tree/master/examples/basics/Interpolators) example.
 
