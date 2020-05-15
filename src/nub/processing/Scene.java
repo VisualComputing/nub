@@ -118,8 +118,8 @@ import java.util.Map;
  * @see TimingTask
  */
 public class Scene extends Graph implements PConstants {
-  public static String prettyVersion = "0.6.0";
-  public static String version = "6";
+  public static String prettyVersion = "1.0.0-alpha.1";
+  public static String version = "7";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
