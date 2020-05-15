@@ -1913,7 +1913,12 @@ public class Graph {
       _interpolator.reset();
       _interpolator.clear();
       _interpolator.addKeyFrame(eye().detach());
-      _interpolator.addKeyFrame(node.detach(), duration);
+      // 2nd node is bit of a challenge. Note that:
+      //_interpolator.addKeyFrame(node.detach(), duration);
+      // doesn't work always since the node may be moving (see the Flock example)
+      Node dummy = new Node(node);
+      dummy.disableTagging();
+      _interpolator.addKeyFrame(dummy, duration);
       _interpolator.run();
     }
   }
