@@ -436,7 +436,7 @@ public class Skeleton {
   }
 
   /**
-   * convinient method to relate a target with each of the End effectors of the Skeleton structure
+   * convenient method to relate a target with each of the End effectors of the Skeleton structure
    */
   public void addTargets() {
     for (Map.Entry<String, Node> entry : _joints.entrySet()) {
@@ -445,6 +445,20 @@ public class Skeleton {
       }
     }
   }
+
+  /**
+   * @return a list of {@link Node}s that are leaves of the Skeleton structure
+   */
+  public List<Node> endEffectors(){
+    List<Node> endEffectors = new ArrayList<Node>();
+    for (Map.Entry<String, Node> entry : _joints.entrySet()) {
+      if (entry.getValue().children().isEmpty()) {
+        endEffectors.add(entry.getValue());
+      }
+    }
+    return endEffectors;
+  }
+
 
   /**
    * Same as @see Solver{@link #setMaxError(float)}
