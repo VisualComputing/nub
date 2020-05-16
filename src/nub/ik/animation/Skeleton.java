@@ -481,6 +481,15 @@ public class Skeleton {
     for (Solver solver : _solvers.values())
       solver.setTimesPerFrame(timesPerFrame);
   }
+  /**
+   * Tells the IK Solvers that its status has changed. An IK solver status usually changes when a target position /orientation
+   * changes.
+   * This method is convenient for cases in which we want to execute the solver when a joint position / orientation changes.
+   * */
+  public void IKStatusChanged(){
+    for (Solver solver : _solvers.values())
+      solver.hasChanged(true);
+  }
 
   /**
    * Convinient method to set the position and the orientation of each target to be the same as its corresponding end effector
