@@ -6,7 +6,7 @@ import nub.ik.loader.collada.data.Model;
 import nub.ik.loader.collada.data.SkinningData;
 import nub.ik.loader.collada.xml.XmlNode;
 import nub.ik.loader.collada.xml.XmlParser;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Matrix;
 import nub.processing.Scene;
 import processing.core.PImage;

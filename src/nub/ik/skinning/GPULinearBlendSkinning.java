@@ -2,7 +2,7 @@ package nub.ik.skinning;
 
 import nub.core.Node;
 import nub.ik.animation.Skeleton;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;

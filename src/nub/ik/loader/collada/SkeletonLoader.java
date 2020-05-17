@@ -3,7 +3,7 @@ package nub.ik.loader.collada;
 import nub.core.Node;
 import nub.ik.loader.collada.data.Model;
 import nub.ik.loader.collada.xml.XmlNode;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;

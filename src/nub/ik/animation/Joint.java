@@ -1,4 +1,4 @@
-package nub.ik.visual;
+package nub.ik.animation;
 
 /**
  * Created by sebchaparr on 21/07/18.

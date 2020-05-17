@@ -5,7 +5,7 @@ import nub.ik.loader.collada.data.Mesh;
 import nub.ik.loader.collada.data.Model;
 import nub.ik.loader.collada.xml.XmlNode;
 import nub.ik.loader.collada.xml.XmlParser;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.processing.Scene;
 import processing.core.PShape;
 

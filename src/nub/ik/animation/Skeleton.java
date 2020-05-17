@@ -18,7 +18,6 @@ import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
 import nub.ik.solver.Solver;
-import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.processing.Scene;
 import processing.core.PGraphics;
