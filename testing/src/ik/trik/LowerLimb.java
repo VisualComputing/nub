@@ -4,7 +4,7 @@ import nub.core.Graph;
 import nub.core.Interpolator;
 import nub.core.Node;
 import nub.ik.solver.trik.implementations.SimpleTRIK;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
 import processing.core.PApplet;

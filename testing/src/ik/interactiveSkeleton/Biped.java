@@ -6,7 +6,7 @@ import nub.core.constraint.FixedConstraint;
 import nub.core.constraint.Hinge;
 import nub.core.constraint.PlanarPolygon;
 import nub.ik.solver.Solver;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;

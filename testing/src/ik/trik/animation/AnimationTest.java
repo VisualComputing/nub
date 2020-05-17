@@ -5,7 +5,7 @@ import nub.core.constraint.Constraint;
 import nub.ik.animation.Skeleton;
 import nub.ik.skinning.GPULinearBlendSkinning;
 import nub.ik.skinning.Skinning;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;

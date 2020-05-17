@@ -3,7 +3,7 @@ package ik.interactive;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.ik.animation.Skeleton;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PConstants;

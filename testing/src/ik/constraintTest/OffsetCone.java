@@ -6,10 +6,9 @@ import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.FixedConstraint;
 import nub.ik.solver.Solver;
-import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -74,9 +73,6 @@ public class OffsetCone extends PApplet {
     int i = 0;
     //CCD
     solvers.add(new CCDSolver(structures.get(i++)));
-    //Bio IK
-    solvers.add(new BioIk(structures.get(i++), 10, 4));
-
     //Standard FABRIK
     ChainSolver chainSolver;
     chainSolver = new ChainSolver(structures.get(i++));

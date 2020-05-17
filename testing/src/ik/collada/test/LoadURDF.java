@@ -6,7 +6,7 @@ import nub.core.Node;
 import nub.ik.loader.collada.URDFLoader;
 import nub.ik.loader.collada.data.Model;
 import nub.ik.solver.geometric.ChainSolver;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;

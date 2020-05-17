@@ -5,7 +5,6 @@ import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.ik.solver.Solver;
-import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.primitives.Quaternion;
@@ -109,8 +108,6 @@ public class ConeBall extends PApplet {
     chainSolver.setFixTwisting(true);
     chainSolver.setKeepDirection(true);
     solvers.add(chainSolver);
-    //BioIK
-    solvers.add(new BioIk(structures.get(i++), 10, 4));
 
     for (i = 0; i < solvers.size(); i++) {
       Solver solver = solvers.get(i);
