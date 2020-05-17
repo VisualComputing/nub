@@ -406,7 +406,7 @@ public class Context {
     List<Node> copy = new ArrayList<Node>();
     for (Node joint : chain) {
       Node newJoint = Node.detach(new Vector(), new Quaternion(), 1);
-      newJoint.setReference(reference);
+      if(reference != null) newJoint.setReference(reference);
       newJoint.setPosition(joint.position().get());
       newJoint.setOrientation(joint.orientation().get());
       if (copy_constraints) newJoint.setConstraint(joint.constraint());
