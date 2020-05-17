@@ -108,9 +108,11 @@ public class Hinge extends Constraint {
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Node node) {
     Quaternion desired = Quaternion.compose(node.rotation(), rotation); //w.r.t reference
-
+    desired.normalize();
     desired = Quaternion.compose(_orientation.inverse(), desired);
+    desired.normalize();
     desired = Quaternion.compose(desired, _restRotation);
+    desired.normalize();
 
     Vector rotationAxis = new Vector(desired._quaternion[0], desired._quaternion[1], desired._quaternion[2]);
     rotationAxis = Vector.projectVectorOnAxis(rotationAxis, new Vector(0, 0, 1));
@@ -125,8 +127,12 @@ public class Hinge extends Constraint {
     }
 
     //apply constrained rotation
-    Quaternion rot = Quaternion.compose(node.rotation().inverse(),
-        Quaternion.compose(_orientation, Quaternion.compose(new Quaternion(new Vector(0, 0, 1), change), _restRotation.inverse())));
+    Quaternion rot = Quaternion.compose(node.rotation().inverse(), _orientation);
+    rot.normalize();
+    rot.compose(new Quaternion(new Vector(0, 0, 1), change));
+    rot.normalize();
+    rot.compose(_restRotation.inverse());
+    rot.normalize();
     return rot;
   }
 
