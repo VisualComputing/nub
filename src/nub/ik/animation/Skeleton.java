@@ -696,7 +696,7 @@ public class Skeleton {
   }
 
   /**
-   * Save the Skeleton structure in a .json file.
+   * Saves the Skeleton structure in a .json file.
    * @param filename  Path in which the .json will be saved.
    */
   public void save(String filename) {
@@ -712,7 +712,7 @@ public class Skeleton {
   }
 
   /**
-   * Load the Skeleton structure from a .json file.
+   * Loads the Skeleton structure from a .json file.
    * @param filename  Path from which the .json will be loaded.
    */
   protected void _load(String filename) {
