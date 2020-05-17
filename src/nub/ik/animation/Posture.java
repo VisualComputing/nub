@@ -1,3 +1,15 @@
+/***************************************************************************************
+ * nub
+ * Copyright (c) 2019-2020 Universidad Nacional de Colombia
+ * @author Sebastian Chaparro Cuevas, https://github.com/VisualComputing
+ * @author Jean Pierre Charalambos, https://github.com/VisualComputing
+ *
+ * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
+ * computing library, featuring interaction, visualization and animation frameworks and
+ * supporting advanced (onscreen/offscreen) (real/non-real time) rendering techniques.
+ * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
+ ***************************************************************************************/
+
 package nub.ik.animation;
 
 import nub.core.Node;
@@ -8,11 +20,17 @@ import processing.core.PApplet;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * A Posture saves the current sate of each joint of a skeleton to use it further for
+ * create an Animation, for instance, using a {@link PostureInterpolator}.
+ * A posture containts a detached copy of a Skeleton structure and relate each of the Nodes
+ * with its corresponding name.
+ */
 public class Posture {
   protected Node _reference;
   protected HashMap<String, Node> _nodeInformation;
@@ -23,16 +41,32 @@ public class Posture {
     _namesInformation = new HashMap<Node, String>();
   }
 
+  /**
+   * Constructor for a Posture.
+   * Given a Skeleton structure its current posture will be extracted for future usage.
+   * @param skeleton a {@link Skeleton} structure.
+   */
   public Posture(Skeleton skeleton) {
     this();
     saveCurrentValues(skeleton);
   }
 
+  /**
+   * Load a posture from the given file. A PApplet is required since it allows to easily load / save json objects.
+   * @see PApplet#loadJSONObject(File)
+   * @see PApplet#saveJSONObject(JSONObject, String)
+   * @param pApplet
+   * @param file
+   */
   public Posture(PApplet pApplet, String file){
     this();
     _load(pApplet, file);
   }
 
+  /**
+   * Creates a detached copy of the {@link Skeleton} structure to use later in an animation task.
+   * @param skeleton the skeleton from which the posture information will be extracted.
+   */
   public void saveCurrentValues(Skeleton skeleton) {
     _reference = Node.detach(skeleton.reference().position().get(), skeleton.reference().orientation().get(), skeleton.reference().magnitude());
     _namesInformation.put(_reference, "");
@@ -56,6 +90,11 @@ public class Posture {
     }
   }
 
+  /**
+   * Set the {@link Skeleton} current posture (information of each joint translation and rotation) to be
+   * the same as the saved in this Posture.
+   * @param skeleton
+   */
   public void loadValues(Skeleton skeleton) {
     for (Node node : skeleton.BFS()) {
       if (node == skeleton.reference() || !skeleton._names.containsKey(node)) continue;
@@ -71,6 +110,10 @@ public class Posture {
     skeleton.restoreTargetsState();
   }
 
+  /**
+   * @param name The name of a joint in the Posture
+   * @return the joint translation and rotation related with the given name
+   */
   public Node jointState(String name) {
     return _nodeInformation.get(name);
   }
@@ -131,6 +174,12 @@ public class Posture {
     }
   }
 
+  /**
+   * Saves a List of postures in a .json file
+   * @param pApplet The current PApplet
+   * @param postures The List of postures to save
+   * @param filename  Path in which the postures will be saved
+   */
   public static void savePostures(PApplet pApplet, List<Posture> postures, String filename){
     JSONArray array = new JSONArray();
     for(Posture posture : postures){
@@ -139,6 +188,12 @@ public class Posture {
     pApplet.saveJSONArray(array, filename);
   }
 
+  /**
+   * Loads a List of postures from a .json file
+   * @param pApplet The current PApplet
+   * @param filename Path from which the .json will be loaded
+   * @return  The list of postures contained in the given file.
+   */
   public static List<Posture> loadPostures(PApplet pApplet, String filename){
     JSONArray array = pApplet.loadJSONArray(filename);
     List<Posture> postures = new ArrayList<Posture>();
