@@ -1,13 +1,15 @@
-/****************************************************************************************
+/***************************************************************************************
  * nub
- * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
- * @author Sebastian Chaparro, https://github.com/sechaparroc
+ * Copyright (c) 2019-2020 Universidad Nacional de Colombia
+ * @author Sebastian Chaparro Cuevas, https://github.com/VisualComputing
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
- * handling to a third party (real or non-real time) renderer. Released under the terms
- * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ****************************************************************************************/
+ * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
+ * computing library, featuring interaction, visualization and animation frameworks and
+ * supporting advanced (onscreen/offscreen) (real/non-real time) rendering techniques.
+ * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
+ ***************************************************************************************/
+
 
 package nub.core.constraint;
 
@@ -18,26 +20,17 @@ import static java.lang.Math.PI;
 
 
 /**
- * A Frame is constrained to disable translation and
- * allow 2-DOF rotation limiting Rotation in a Sphere to
- * laid inside an Ellipse.
+ * A Ball and Socket constraint is a {@link ConeConstraint} that defines the boundaries of the cone constraint
+ * with 4 parameters corresponding to the dimensions of each semi-axis of an ellipse.
+ *
+ * Warning: this constraints works properly when the parameters are less than PI / 2 radians, if that not the case
+ * you must use a {@link SphericalPolygon} constraint.
  */
 public class BallAndSocket extends ConeConstraint {
-  /*
-   * With this Kind of Constraint no Translation is allowed
-   * and the rotation depends on 4 angles. This kind of constraint always
-   * look for the reference frame (local constraint), if no initial position is
-   * set a Quat() is assumed as rest position.
-   *
-   * It is important to note that The Twist Axis will be in the same direction as
-   * Z-Axis in The rest Rotation Transformation, similarly Up Vector will correspond to
-   * Y-Axis and right direction with X-Axis direction.
-   * */
   protected float _down;
   protected float _up;
   protected float _left;
   protected float _right;
-
 
   public float down() {
     return _down;
@@ -104,10 +97,7 @@ public class BallAndSocket extends ConeConstraint {
    * Adapted from http://wiki.roblox.com/index.php?title=Inverse_kinematics
    * new_pos: new position defined in terms of local coordinates
    */
-
-  //TODO : rename, discard?
   //TODO : remove unnecessary calculations (consider this restriction only from 0 to PI)
-  //TODO: look at https://wet-robots.ghost.io/simple-method-for-distance-to-ellipse/
   public Vector apply(Vector target) {
     Vector uvec = new Vector(0, 1, 0);
     Vector rvec = new Vector(1, 0, 0);
@@ -200,7 +190,6 @@ public class BallAndSocket extends ConeConstraint {
       tx /= t;
       ty /= t;
     }
-
     return new Vector(Math.signum(point.x()) * a * tx, Math.signum(point.y()) * b * ty);
   }
 }
