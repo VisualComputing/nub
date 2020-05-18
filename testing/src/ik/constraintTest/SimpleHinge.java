@@ -1,9 +1,13 @@
 package ik.constraintTest;
 
+import ik.basic.Util;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.Hinge;
 import nub.ik.animation.Joint;
+import nub.ik.solver.Solver;
+import nub.ik.solver.geometric.CCDSolver;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -11,15 +15,14 @@ import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class SimpleHinge extends PApplet {
-  float constraint_factor_x = 180;
-  float constraint_factor_y = 180;
-  float boneLength = 50;
-  float radius = 10;
-
   Scene scene;
-
+  Solver solver;
+  Joint j1, j2;
   public void settings() {
     size(700, 700, P3D);
   }
@@ -30,29 +33,23 @@ public class SimpleHinge extends PApplet {
     scene.setRadius(200);
     scene.fit(1);
     scene.setRightHanded();
-
-    PShape redBall = createShape(SPHERE, radius);
-    redBall.setStroke(false);
-    redBall.setFill(color(255, 0, 0));
-
-    scene.eye().rotate(new Quaternion(new Vector(1, 0, 0), PI / 2.f));
-    scene.eye().rotate(new Quaternion(new Vector(0, 1, 0), PI));
-
-    //Generate a basic structure
-    Joint j1 = new Joint(radius);
-    Joint j2 = new Joint(radius);
+    //Create a simple structure
+    j1 = new Joint();
+    j1.rotate(Quaternion.random());
+    j2 = new Joint();
     j2.setReference(j1);
-    j2.translate(0, 50, 0);
-    Joint j3 = new Joint(radius);
-    j3.setReference(j2);
-    j3.translate(30, 30, 0);
-
-    Hinge c1 = new Hinge(radians(30), radians(30), j1.rotation(), new Vector(0, 1, 0), new Vector(0, 0, 1));
-    j1.setConstraint(c1);
-
-    Hinge c2 = new Hinge(radians(180), radians(50), j2.rotation().get(), j3.translation().get(), Vector.cross(new Vector(0, -1, 0), j3.translation(), null));
-    j2.setConstraint(c2);
-
+    j2.translate(100,0,0, 0);
+    //Add a constraint
+    Hinge h1 = new Hinge(radians(60), radians(60));
+    h1.setRestRotation(j1.rotation(), new Vector(1,0,0), new Vector(0,0,1));
+    j1.setConstraint(h1);
+    List<Node> skeleton = new ArrayList<Node>();
+    skeleton.add(j1);
+    skeleton.add(j2);
+    solver = new SimpleTRIK(skeleton, SimpleTRIK.HeuristicMode.FINAL);
+    Node target = Util.createTarget(scene, scene.radius() * 0.07f);
+    target.set(j2);
+    solver.setTarget(j2, target);
   }
 
   public void draw() {
@@ -60,34 +57,7 @@ public class SimpleHinge extends PApplet {
     lights();
     scene.drawAxes();
     scene.render();
-  }
-
-  Node n = null;
-  float d = 5;
-
-  public void keyPressed() {
-    if (scene.node() != null) {
-      n = scene.node();
-      if (n != null) {
-        if (key == 'A' || key == 'a') {
-          d += 1;
-          System.out.println("Speed --- : " + d);
-        }
-        if (key == 's' || key == 'S') {
-          d *= -1;
-          System.out.println("Speed --- : " + d);
-        }
-        if (key == 'X' || key == 'x') {
-          n.rotate(new Quaternion(new Vector(1, 0, 0), radians(d)));
-        }
-        if (key == 'Y' || key == 'y') {
-          n.rotate(new Quaternion(new Vector(0, 1, 0), radians(d)));
-        }
-        if (key == 'Z' || key == 'z') {
-          n.rotate(new Quaternion(new Vector(0, 0, 1), radians(d)));
-        }
-      }
-    }
+    solver.solve();
   }
 
   @Override
