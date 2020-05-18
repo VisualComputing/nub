@@ -1,27 +1,55 @@
-/****************************************************************************************
+/***************************************************************************************
  * nub
- * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
- * @author Sebastian Chaparro, https://github.com/sechaparroc
+ * Copyright (c) 2019-2020 Universidad Nacional de Colombia
+ * @author Sebastian Chaparro Cuevas, https://github.com/VisualComputing
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
- * handling to a third party (real or non-real time) renderer. Released under the terms
- * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ****************************************************************************************/
+ * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
+ * computing library, featuring interaction, visualization and animation frameworks and
+ * supporting advanced (onscreen/offscreen) (real/non-real time) rendering techniques.
+ * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
+ ***************************************************************************************/
 
 package nub.core.constraint;
 
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import processing.core.PGraphics;
 
 /**
- * A Frame is constrained to disable translation and
- * allow 2-DOF rotation limiting Rotation in a Sphere to
- * laid inside an Ellipse.
+ * A Cone constraint allows 3-DOF rotational motion and by default no translation is
+ * allowed (0-DOF), however, translation motion could be modified using an {@link AxisPlaneConstraint}.
+ *
+ * To define a Cone constraint you must provide a Reference Quaternion, a Twist axis of rotation, an Up Vector orthogonal to this axis
+ * (in order to draw the constraint properly @see {@link nub.processing.Scene#drawConstraint(PGraphics, Node)}) and the boundaries of the
+ * constraint.
+ *
+ * As the reference rotation give us the transformation against which any further rotation must be compared, we will call it the
+ * idle rotation.
+ *
+ * The Up and Twist vector defines a unique rotation w.r.t the idle rotation that we named rest rotation i.e. the transformation
+ * required to align the Z and Y Axes of the idle rotation with the Twist and Up vector respectively:
+ *    Twist = rest^-1 * Z * rest
+ *    Up = rest^-1 * Y * rest
+ *
+ * The composition transformation of the idle rotation and the rest rotation gives the orientation of the constraint:
+ *    orientation = idle * rest
+ *
+ * It is possible to include an Offset rotation in cases in which the initial rotation to compare does not corresponds with the
+ * idle rotation.
+ *
+ * If a rotation rot is applied to the node rotation the following equations are satisfied:
+ *    (1)  node.rotation() * rot * offset = idle * alpha
+ *    (2)  idle * alpha * rest = idle * rest * beta
+ *    (3)  beta = rest^-1 * alpha * rest
+ *    (4)  beta = rest^-1 * idle^-1 * node.rotation() * rot * offset * rest
+ *    (5)  beta = orientation^-1 * node.rotation() * rot * offset * rest
+ *
+ * Equation (5) is required to compare if the rotation applied to the node satisfies the constraint, and if that is not the case
+ * a clamping action must be performed.
  */
 
-//TODO : Add Twist limit & check for unnecessary transformations
 public abstract class ConeConstraint extends Constraint {
   protected Quaternion _restRotation = new Quaternion();
   protected Quaternion _idleRotation = new Quaternion();
@@ -55,9 +83,12 @@ public abstract class ConeConstraint extends Constraint {
   }
 
   /**
-   * reference is a Quaternion that will be aligned to point to the given Basis Vectors
-   * result will be stored on restRotation.
-   * twist and up axis are defined locally on reference rotation
+   * Defines the orientational parameters of this constraint:
+   * @param reference Is the reference rotation in which the Up and Twist vectors will be defined. Usually this quaternion
+   *                  is the same as the (@see {@link Node#rotation()}) to constraint.
+   * @param up  Represents a Orthogonal vector to the axis of rotation useful to draw properly a Hinge constraint in a
+   *            scene (@see {@link nub.processing.Scene#drawConstraint(PGraphics, Node)}).
+   * @param twist Represents the Axis of rotation of this 1-DOF rotational constraint.
    */
   public void setRestRotation(Quaternion reference, Vector up, Vector twist, Vector offset) {
     _orientation = reference.get();
@@ -214,6 +245,19 @@ public abstract class ConeConstraint extends Constraint {
       } else
         transConstraintDir = Vector.multiply(direction, (1.0f / norm));
     }
+  }
+
+  //Convinient methods to apply stereographic projection.
+  /*more info at http://www.ams.org/publicoutreach/feature-column/fc-2014-02*/
+  protected Vector _stereographicProjection(Vector v){float d = (1 + v.z());
+    float X = 2 * v.x() / d;
+    float Y = 2 * v.y() / d;
+    return new Vector(X, Y, 0);
+  }
+
+  protected Vector _inverseStereographicProjection(Vector v){
+    float s = 4 / (v.x() * v.x() + v.y() * v.y() + 4);
+    return new Vector(s * v.x(), s * v.y(), 2 * s - 1);
   }
 }
 
