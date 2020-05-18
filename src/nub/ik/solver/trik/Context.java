@@ -355,10 +355,7 @@ public class Context {
 
 
   public static float quaternionDistance(Quaternion a, Quaternion b) {
-    float s1 = 1, s2 = 1;
-    if (a.w() < 0) s1 = -1;
-    if (b.w() < 0) s2 = -1;
-    float dot = s1 * a._quaternion[0] * s2 * b._quaternion[0] + s1 * a._quaternion[1] * s2 * b._quaternion[1] + s1 * a._quaternion[2] * s2 * b._quaternion[2] + s1 * a._quaternion[3] * s2 * b._quaternion[3];
+    float dot = Quaternion.dot(a,b);
     return (float) (1 - Math.pow(dot, 2));
   }
 
