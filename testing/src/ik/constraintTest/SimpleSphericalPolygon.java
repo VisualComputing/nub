@@ -39,7 +39,7 @@ public class SimpleSphericalPolygon extends PApplet{
         //Add a constraint
         //Defines vertices at theta degrees
 
-        float theta = radians(40);
+        float theta = radians(120);
         float z = cos(theta);
         int times = 10;
         float step = 2 * PI / (times - 1);
