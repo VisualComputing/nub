@@ -48,7 +48,6 @@ public class Context {
   protected float _orientationWeight = 0.2f;
 
   protected boolean _topToBottom = true;
-
   protected boolean _enableWeight, _explore;
   protected int _lockTimes = 0, _lockTimesCriteria = 4;
 
@@ -57,7 +56,7 @@ public class Context {
   protected float _maxLength = 0, _avgLength = 0;
   protected Solver _solver;
 
-
+  protected boolean _is2D = false;
   protected boolean _debug = false;
   protected float _weightRatio = 3f, _weightRatioNear = 1.2f; //how many times is position more important than orientation
   protected float _weightThreshold = 0.1f; //change error measurement when the chain is near the target
@@ -233,6 +232,14 @@ public class Context {
 
   public void setTarget(Node target) {
     _target = target;
+  }
+
+  public boolean is2D(){
+    return _is2D;
+  }
+
+  public void set2D(boolean is2D){
+    _is2D = is2D;
   }
 
   public void copyChainState(List<NodeInformation> origin, List<NodeInformation> dest) {

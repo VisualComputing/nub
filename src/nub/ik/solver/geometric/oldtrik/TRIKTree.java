@@ -176,6 +176,19 @@ public class TRIKTree extends Solver {
     }
   }
 
+  public void set2D(boolean is2D) {
+    _set2D(is2D, _root);
+  }
+
+  protected void _set2D(boolean is2D, TreeNode treeNode) {
+    if (treeNode == null) return;
+    if (treeNode._children().isEmpty()) treeNode._solver.context().set2D(is2D);
+    for (TreeNode child : treeNode._children()) {
+      _setDirection(is2D, child);
+    }
+  }
+
+
   public void setDirection(boolean direction) {
     _setDirection(direction, _root);
   }

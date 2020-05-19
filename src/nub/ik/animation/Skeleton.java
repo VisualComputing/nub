@@ -18,6 +18,7 @@ import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
 import nub.ik.solver.Solver;
+import nub.ik.solver.geometric.oldtrik.TRIKTree;
 import nub.primitives.Quaternion;
 import nub.processing.Scene;
 import processing.core.PGraphics;
@@ -421,7 +422,10 @@ public class Skeleton {
   public void enableIK() {
     for (Node child : _reference.children()) {
       if (!_solvers.containsKey(child)) {
-        _solvers.put(child, Graph.registerTreeSolver(child));
+        Solver s = Graph.registerTreeSolver(child);
+        if(s instanceof TRIKTree)
+          ((TRIKTree) s).set2D(_scene.is2D());
+        _solvers.put(child, s);
       } else {
         Graph.executeSolver(_solvers.get(child));
       }

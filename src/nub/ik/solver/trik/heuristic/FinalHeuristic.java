@@ -323,7 +323,7 @@ public class FinalHeuristic extends Heuristic {
       endEffector = Vector.projectVectorOnPlane(endEffector, normal);
       target = Vector.projectVectorOnPlane(target, normal);
     } else {
-      normal = Vector.cross(endEffector, target, null);
+      normal = _context.is2D() ? new Vector(0,0,1) : Vector.cross(endEffector, target, null);
       if (normal.squaredNorm() < 0.0001f) {
         normal = Vector.cross(target, v_i, null);
       }
@@ -346,8 +346,9 @@ public class FinalHeuristic extends Heuristic {
       System.out.println("Vec c : " + c + "mag" + c.magnitude());
     }
 
-    float angle = Math.min(Math.max(Vector.dot(a, b) / (a_mag * b_mag), -1), 1);
-    angle = (float) (Math.acos(angle));
+    float angle = Vector.angleBetween(a,b);
+    //Math.min(Math.max(Vector.dot(a, b) / (a_mag * b_mag), -1), 1);
+    //angle = (float) (Math.acos(angle));
     if (_log) {
       System.out.println("dot a ,b  : " + Vector.dot(a, b));
       System.out.println("a mag * b mag : " + (a_mag * b_mag));

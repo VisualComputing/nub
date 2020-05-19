@@ -359,4 +359,8 @@ public class SimpleTRIK extends Solver {
   public Heuristic mainHeuristic() {
     return _mainHeuristic;
   }
+
+  public void set2D(boolean is2D){
+    _context.set2D(is2D);
+  }
 }
