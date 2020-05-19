@@ -366,8 +366,7 @@ public class Scene extends Graph implements PConstants {
     // 1. P5 objects
     _parent = pApplet;
     _offscreen = pGraphics != pApplet.g;
-    _upperLeftCornerX = _offscreen ? x : 0;
-    _upperLeftCornerY = _offscreen ? y : 0;
+    _setUpperLeftCorner(x, y);
     // 2. Back buffer
     _backBuffer().noSmooth();
     _triangleShader = pApplet().loadShader("PickingBuffer.frag");
@@ -786,12 +785,41 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code pApplet().image(pgraphics, originCorner().x(), originCorner().y())}.
+   * Displays the {@code PGraphics} on top of the main sketch canvas at the previously
+   * displayed pixel (see {@link #display(PGraphics, int, int)}).
    * Only meaningful if the graph {@link #isOffscreen()}.
    */
+  // TODO should be displayed at (0,0) -> simplifiying scene constructors
+  // & this method itself: display(0, 0);
   public void display(PGraphics pgraphics) {
-    if (isOffscreen())
+    if (isOffscreen()) {
+      _lastOffDisplayed = frameCount();
       pApplet().image(pgraphics, _upperLeftCornerX, _upperLeftCornerY);
+    }
+  }
+
+  /**
+   * Displays the scene {@link #context()} contents on top of the main sketch canvas
+   * at {@code (pixelX, pixelY)}. Only meaningful if the graph {@link #isOffscreen()}.
+   */
+  public void display(int pixelX, int pixelY) {
+    if (isOffscreen()) {
+      _setUpperLeftCorner(pixelX, pixelY);
+      _lastOffDisplayed = frameCount();
+      pApplet().image(context(), _upperLeftCornerX, _upperLeftCornerY);
+    }
+  }
+
+  /**
+   * Displays the {@code pgraphics} on top of the main sketch canvas
+   * at {@code (pixelX, pixelY)}. Only meaningful if the graph {@link #isOffscreen()}.
+   */
+  public void display(PGraphics pgraphics, int pixelX, int pixelY) {
+    if (isOffscreen()) {
+      _setUpperLeftCorner(pixelX, pixelY);
+      _lastOffDisplayed = frameCount();
+      pApplet().image(pgraphics, _upperLeftCornerX, _upperLeftCornerY);
+    }
   }
 
   /**
@@ -3063,6 +3091,15 @@ public class Scene extends Graph implements PConstants {
     for (float theta = minAngle; theta <= maxAngle; theta += step)
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
     pGraphics.endShape(PApplet.CLOSE);
+  }
+
+  /**
+   * Same as {@code return hasFocus(pApplet().mouseX, pApplet().mouseY)}.
+   *
+   * @see #hasFocus(int, int)
+   */
+  public boolean hasMouseFocus() {
+    return hasFocus(pApplet().mouseX, pApplet().mouseY);
   }
 
   /**
