@@ -20,7 +20,6 @@ import nub.primitives.*;
 import nub.processing.*;
 import nub.ik.animation.*;
 import nub.ik.skinning.*;
-import nub.ik.visual.*;
 
 
 boolean showSkeleton = true;
@@ -96,7 +95,7 @@ void draw(){
 
 void resetSkinning(boolean gpu){
   //move sekeleton to rest position (in this case is when nodes are all aligned)
-  for(Node node : skeleton.joints()){
+  for(Node node : skeleton.joints().values()){
     node.setRotation(new Quaternion());
   }
   
