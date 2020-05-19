@@ -30,7 +30,7 @@ public class NaiveLocomotion extends PApplet {
   Scene scene;
   float boneLength = 50;
   float radius = 10;
-  int segments = 3;
+  int segments = 10;
   float stepHeight = boneLength / 2 * segments / 6f, stepWidth = boneLength * segments * 0.75f;
   static boolean solve = true;
 
@@ -49,7 +49,7 @@ public class NaiveLocomotion extends PApplet {
     scene.setRadius(segments * 4 * boneLength);
     scene.fit(1);
 
-    createStructure(segments, boneLength, radius, 0, 255, 0, new Vector(-boneLength * 3, 0, 0), IKMode.SIMPLETRIK, 10, 0);
+    createStructure(segments, boneLength, radius, 0, 255, 0, new Vector(-boneLength * 3, 0, 0), IKMode.SIMPLETRIK, 20, 0);
   }
 
   public void draw() {
@@ -57,6 +57,10 @@ public class NaiveLocomotion extends PApplet {
     lights();
     scene.drawAxes();
     scene.render();
+    for(Solver s : solvers){
+      s.hasChanged(true);
+      s.solve();
+    }
   }
 
   @Override
@@ -168,9 +172,8 @@ public class NaiveLocomotion extends PApplet {
 
     solvers.add(createLimb(segments, length, radius, red, green, blue, root, target1, new Vector(-length, 0, 0), mode, min, max));
     solvers.add(createLimb(segments, length, radius, red, green, blue, root, target2, new Vector(length, 0, 0), mode, min, max));
-
     //3. Create walking cycle
-    createBipedCycle(root, solvers.get(solvers.size() - 1), solvers.get(solvers.size() - 2), target1, target2);
+    //createBipedCycle(root, solvers.get(solvers.size() - 1), solvers.get(solvers.size() - 2), target1, target2);
   }
 
 
