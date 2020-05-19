@@ -422,11 +422,11 @@ public class Util {
           break;
         }
         case HINGE: {
-          Vector vector = new Vector(2 * random.nextFloat() - 1, 2 * random.nextFloat() - 1, 2 * random.nextFloat() - 1);
-          vector.normalize();
-          vector = Vector.projectVectorOnPlane(vector, structure.get(i + 1).translation());
-          if (Vector.squaredNorm(vector) == 0) {
-            constraint = null;
+          Vector vector = new Vector(0,0,1);
+          if(is3D) {
+            vector = new Vector(2 * random.nextFloat() - 1, 2 * random.nextFloat() - 1, 2 * random.nextFloat() - 1);
+            vector.normalize();
+            vector = Vector.projectVectorOnPlane(vector, structure.get(i + 1).translation());
           }
           float min = (float) Math.min(Math.max(random.nextGaussian() * 30 + 30, 10), 120);
           float max = (float) Math.min(Math.max(random.nextGaussian() * 30 + 30, 10), 120);
