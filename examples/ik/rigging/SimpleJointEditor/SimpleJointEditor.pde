@@ -20,7 +20,6 @@ import nub.core.*;
 import nub.processing.*;
 import nub.core.constraint.*;
 import nub.ik.animation.*;
-import nub.ik.visual.*;
 import nub.ik.solver.*;
 
 
@@ -63,7 +62,7 @@ void setup() {
 void setSceneRadius(Skeleton skeleton){
   //Get max coordinate
   float max_dist = 0;  
-  for(Node n : skeleton.joints()){
+  for(Node n : skeleton.joints().values()){
     float d = n.position().magnitude();
     max_dist = d > max_dist ? d : max_dist;
   } 

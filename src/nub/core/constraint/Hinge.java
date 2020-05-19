@@ -1,33 +1,56 @@
-/****************************************************************************************
+/***************************************************************************************
  * nub
- * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
- * @author Sebastian Chaparro, https://github.com/sechaparroc
+ * Copyright (c) 2019-2020 Universidad Nacional de Colombia
+ * @author Sebastian Chaparro Cuevas, https://github.com/VisualComputing
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
- * handling to a third party (real or non-real time) renderer. Released under the terms
- * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ****************************************************************************************/
+ * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
+ * computing library, featuring interaction, visualization and animation frameworks and
+ * supporting advanced (onscreen/offscreen) (real/non-real time) rendering techniques.
+ * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
+ ***************************************************************************************/
 
 package nub.core.constraint;
 
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import processing.core.PGraphics;
 
 /**
- * A Frame is constrained to disable translation and
- * allow 1-DOF rotation limiting Rotation by defining an
- * Axis (according to Local Frame Coordinates) a Rest Rotation
- * and upper and lower bounds with values between 0 and PI
+ * A Hinge constraint allows 1-DOF rotational motion and by default no translation is
+ * allowed (0-DOF), however, translation motion could be modified using an {@link AxisPlaneConstraint}.
+ *
+ * To define a Hinge constraint you must provide a Reference Quaternion, an Axis of rotation, an orthogonal Vector to this axis
+ * (in order to draw the constraint properly @see {@link nub.processing.Scene#drawConstraint(PGraphics, Node)}) and the maximum and
+ * minimum angle bounds (between 0 and PI).
+ *
+ * As the reference rotation give us the transformation against which any further rotation must be compared, we will call it the
+ * idle rotation.
+ *
+ * The Up and Twist vector defines a unique rotation w.r.t the idle rotation that we named rest rotation i.e. the transformation
+ * required to align the Z and Y Axes of the idle rotation with the Twist and Up vector respectively:
+ *    Twist = rest^-1 * Z * rest
+ *    Up = rest^-1 * Y * rest
+ *
+ * The composition transformation of the idle rotation and the rest rotation gives the orientation of the constraint:
+ *    orientation = idle * rest
+ *
+ * Hence, if the idle rotation corresponds to the initial rotation of a Node to constraint the following equation must be satisfied at
+ * the very moment in which the constraint is created:
+ *    idle = node.rotation()
+ *
+ * Furthermore, if a rotation rot is applied to the node rotation the following equations are satisfied:
+ *    (1)  node.rotation() * rot = idle * alpha
+ *    (2)  idle * alpha * rest = idle * rest * beta
+ *    (3)  beta = rest^-1 * alpha * rest
+ *    (4)  beta = rest^-1 * idle^-1 * node.rotation() * rot * rest
+ *    (5)  beta = orientation^-1 * node.rotation() * rot * rest
+ *
+ * Equation (5) is required to compare if the rotation applied to the node satisfies the constraint, and if that is not the case
+ * a clamping action must be performed.
  */
 public class Hinge extends Constraint {
-  /*
-  With this Kind of Constraint no Translation is allowed
-  * and the rotation depends on 2 angles this kind of constraint always
-  * look for the reference frame (local constraint), if no initial position is
-  * set Identity is assumed as rest position
-  * */
   protected float _max;
   protected float _min;
   protected Quaternion _restRotation = new Quaternion();
@@ -59,9 +82,12 @@ public class Hinge extends Constraint {
   }
 
   /**
-   * reference is a Quaternion that will be aligned to point to the given Basis Vectors
-   * result will be stored on restRotation.
-   * twist and up axis are defined locally on reference rotation
+   * Defines the orientational parameters of this constraint:
+   * @param reference Is the reference rotation in which the Up and Twist vectors will be defined. Usually this quaternion
+   *                  is the same as the (@see {@link Node#rotation()}) to constraint.
+   * @param up  Represents a Orthogonal vector to the axis of rotation useful to draw properly a Hinge constraint in a
+   *            scene (@see {@link nub.processing.Scene#drawConstraint(PGraphics, Node)}).
+   * @param twist Represents the Axis of rotation of this 1-DOF rotational constraint.
    */
   public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
     _orientation = reference.get();
@@ -79,6 +105,11 @@ public class Hinge extends Constraint {
     _restRotation = delta;
   }
 
+  /**
+   * Defines explicitly the reference and rest rotation of this constraint (this method should not be used by the user).
+   * @param reference
+   * @param rest
+   */
   public void setRotations(Quaternion reference, Quaternion rest) {
     _idleRotation = reference.get();
     _restRotation = rest.get();
@@ -108,9 +139,11 @@ public class Hinge extends Constraint {
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Node node) {
     Quaternion desired = Quaternion.compose(node.rotation(), rotation); //w.r.t reference
-
+    desired.normalize();
     desired = Quaternion.compose(_orientation.inverse(), desired);
+    desired.normalize();
     desired = Quaternion.compose(desired, _restRotation);
+    desired.normalize();
 
     Vector rotationAxis = new Vector(desired._quaternion[0], desired._quaternion[1], desired._quaternion[2]);
     rotationAxis = Vector.projectVectorOnAxis(rotationAxis, new Vector(0, 0, 1));
@@ -125,8 +158,12 @@ public class Hinge extends Constraint {
     }
 
     //apply constrained rotation
-    Quaternion rot = Quaternion.compose(node.rotation().inverse(),
-        Quaternion.compose(_orientation, Quaternion.compose(new Quaternion(new Vector(0, 0, 1), change), _restRotation.inverse())));
+    Quaternion rot = Quaternion.compose(node.rotation().inverse(), _orientation);
+    rot.normalize();
+    rot.compose(new Quaternion(new Vector(0, 0, 1), change));
+    rot.normalize();
+    rot.compose(_restRotation.inverse());
+    rot.normalize();
     return rot;
   }
 

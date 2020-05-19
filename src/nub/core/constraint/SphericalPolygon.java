@@ -15,18 +15,19 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
 import java.util.ArrayList;
+import java.util.List;
+
 
 /**
- * A Frame is constrained to disable translation and
- * allow 2-DOF rotation limiting Z-Axis Rotation on a Cone which base is a Spherical Polygon.
- * If no restRotation is set Quat() is assumed as restRotation
- */
+ * A Spherical polygon constraint is a {@link ConeConstraint} that defines the boundaries of the cone constraint
+ * with a list of vertices of a polygon lying in the surface of a sphere.
+ * This code is based on Efficient Spherical Joint Limits with Reach Cones
+ * @see{https://users.soe.ucsc.edu/~avg/Papers/jtl-tr.pdf}
+*/
 
 public class SphericalPolygon extends ConeConstraint {
-  //TODO: Find a Ball and Socket constraint that is enclosed by this one
-
   protected ArrayList<Vector> _vertices = new ArrayList<Vector>();
-  protected Vector _visiblePoint = new Vector();
+  protected Vector _visiblePoint = new Vector(0,0,1);
   protected Vector _min, _max;
 
   //Some pre-computations
@@ -37,9 +38,8 @@ public class SphericalPolygon extends ConeConstraint {
     return _vertices;
   }
 
-  public void setVertices(ArrayList<Vector> vertices) {
+  public void setVertices(List<Vector> vertices) {
     this._vertices = _projectOnUnitSphere(vertices);
-    this._visiblePoint = _setVisiblePoint();
     _setBoundingBox();
     _init();
   }
@@ -62,16 +62,28 @@ public class SphericalPolygon extends ConeConstraint {
   public SphericalPolygon(ArrayList<Vector> vertices, Quaternion restRotation) {
     this._vertices = _projectOnUnitSphere(vertices);
     this._restRotation = restRotation.get();
-    this._visiblePoint = _setVisiblePoint();
     _setBoundingBox();
     _init();
   }
 
   public SphericalPolygon(ArrayList<Vector> vertices) {
     this._vertices = _projectOnUnitSphere(vertices);
-    this._visiblePoint = _setVisiblePoint();
     _setBoundingBox();
     _init();
+  }
+
+  public SphericalPolygon(float down, float up, float left, float right) {
+    _setVertices(down, up, left, right, 24);
+    _setBoundingBox();
+    _init();
+  }
+
+  public SphericalPolygon(float vertical, float horizontal) {
+    this(vertical, vertical, horizontal, horizontal);
+  }
+
+  public SphericalPolygon(float angle, float horizontal, Quaternion restRotation) {
+    this(angle, angle, angle, angle);
   }
 
   public Vector apply(Vector target) {
@@ -96,20 +108,7 @@ public class SphericalPolygon extends ConeConstraint {
     }
   }
 
-  //Compute centroid
-  //TODO: Choose a Visible point which works well for non convex Polygons
-  protected Vector _setVisiblePoint() {
-    if (_vertices.isEmpty()) return null;
-    Vector centroid = new Vector();
-    //Assume that every vertex lie in the sphere boundary
-    for (Vector vertex : _vertices) {
-      centroid.add(vertex);
-    }
-    centroid.normalize();
-    return centroid;
-  }
-
-  protected ArrayList<Vector> _projectOnUnitSphere(ArrayList<Vector> vertices) {
+  protected ArrayList<Vector> _projectOnUnitSphere(List<Vector> vertices) {
     ArrayList<Vector> newVertices = new ArrayList<Vector>();
     for (Vector vertex : vertices) {
       newVertices.add(vertex.normalize(new Vector()));
@@ -141,7 +140,7 @@ public class SphericalPolygon extends ConeConstraint {
   }
 
   protected Vector _closestPoint(Vector point) {
-    float minDist = 999999;
+    float minDist = Float.MAX_VALUE;
     Vector target = new Vector();
     for (int i = 0, j = _vertices.size() - 1; i < _vertices.size(); j = i++) {
       Vector projection;
@@ -169,5 +168,46 @@ public class SphericalPolygon extends ConeConstraint {
       }
     }
     return target;
+  }
+
+  protected void _setVertices(float down, float up, float left, float right, int detail){
+    int detailPerSector = Math.max(detail / 4, 2);
+    _vertices = new ArrayList<Vector>();
+    float cd = (float) Math.cos(up);
+    float sd = (float) Math.sin(up);
+    float cu = (float) Math.cos(down);
+    float su = (float) Math.sin(down);
+    float cl = (float) Math.cos(left);
+    float sl = (float) Math.sin(left);
+    float cr = (float) Math.cos(right);
+    float sr = (float) Math.sin(right);
+    Vector xl = new Vector(-sl, 0, cl);
+    Vector xr = new Vector(sr, 0, cr);
+    Vector yu = new Vector(0, su, cu);
+    Vector yd = new Vector(0, -sd, cd);
+    _constructEllipseQuadrant(xr, yu, detailPerSector, 0);
+    _constructEllipseQuadrant(xl, yu, detailPerSector, (float) Math.toRadians(90));
+    _constructEllipseQuadrant(xl, yd, detailPerSector, (float) Math.toRadians(180));
+    _constructEllipseQuadrant(xr, yd, detailPerSector, (float) Math.toRadians(270));
+  }
+
+  protected void _constructEllipseQuadrant(Vector a, Vector b, int detail, float initial_theta){
+    //find the projection of each semi axis in the plane
+    Vector ap = _stereographicProjection(a);
+    Vector bp = _stereographicProjection(b);
+    float ap_mag = ap.magnitude();
+    float bp_mag = bp.magnitude();
+    //work in the plane
+    float step = (float) Math.PI / (2 * detail);
+    for(int i = 0; i < detail; i++){
+      float theta = initial_theta + step * i;
+      float bp_cos2 = (float) (bp_mag * Math.cos(theta));
+      bp_cos2 *= bp_cos2;
+      float ap_sin2 = (float) (ap_mag * Math.sin(theta));
+      ap_sin2 *= ap_sin2;
+      float r = (ap_mag * bp_mag) / (float) (Math.sqrt(bp_cos2 + ap_sin2));
+      Vector v = new Vector((float) (r * Math.cos(theta)), (float) (r * Math.sin(theta)), 1);
+      _vertices.add(_inverseStereographicProjection(v).normalize(null));
+    }
   }
 }

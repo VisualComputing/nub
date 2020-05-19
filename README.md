@@ -584,7 +584,7 @@ while [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.h
 
 ## IK
 
-TODO add me
+To be completed soon. In the meantime check the [wiki](https://github.com/sechaparroc/nub/wiki/1.-Overview).
 
 ## Installation
 

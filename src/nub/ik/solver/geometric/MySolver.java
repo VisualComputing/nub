@@ -7,7 +7,7 @@ import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
 import nub.ik.solver.Solver;
 import nub.ik.solver.trik.Context;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 

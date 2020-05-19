@@ -11,8 +11,7 @@ import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.oldtrik.TRIK;
-import nub.ik.solver.trik.implementations.SimpleTRIK;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -31,7 +30,7 @@ public class BenchmarkUR10 extends PApplet {
   String path = "/testing/data/dae/";
   String dae = "ur10_joint_limited_robot.dae";
   Model[] models = new Model[5];
-  String solvers_type[] = {"FABRIK", "BIOIK", "CCD", "NUMERICAL", "TRIK"};
+  String solvers_type[] = {"FABRIK", "CCD", "NUMERICAL", "TRIK"};
   List<Solver> solvers = new ArrayList<>();
   List<Vector> positions = new ArrayList<>();
   List<Target> targets = new ArrayList<>();
@@ -102,11 +101,6 @@ public class BenchmarkUR10 extends PApplet {
           ((ChainSolver) solver).setKeepDirection(true);
           ((ChainSolver) solver).setFixTwisting(true);
           ((ChainSolver) solver).explore(true);
-          break;
-        }
-        case "BIOIK": {
-          //solver = new BioIk(branch, 10, 4);
-          solver = new SimpleTRIK(branch, SimpleTRIK.HeuristicMode.CCD);
           break;
         }
         case "CCD": {

@@ -28,17 +28,15 @@ import nub.primitives.*;
 import nub.core.*;
 import nub.processing.*;
 import nub.core.constraint.*;
-
 //this packages are required for ik behavior
 import nub.ik.animation.*;
-import nub.ik.visual.*;
 import nub.ik.solver.*;
 
 int w = 1200;
 int h = 1200;
 
 //Choose a renderer P2D or P3D
-String renderer = P3D;
+String renderer = P2D;
 
 Scene scene;
 float length = 50;
@@ -90,20 +88,22 @@ void setup() {
      **/
     
     //Apply a Ball & Socket constraint to node0:
-    BallAndSocket constraint0 = new BallAndSocket(radians(40), radians(60));
-    constraint0.setRestRotation(joint0.rotation(), new Vector(1,0,0), new Vector(0,1,0));
-    constraint0.setTwistLimits(radians(50), radians(50));
-    joint0.setConstraint(constraint0);
-
-    //Apply a Ball & Socket constraint to node1:
-    BallAndSocket constraint1 = new BallAndSocket(radians(60), radians(40));
-    constraint1.setRestRotation(joint1.rotation(), new Vector(1,0,0), new Vector(0,1,0));
-    constraint1.setTwistLimits(radians(5), radians(5));
-    joint1.setConstraint(constraint1);
+    if(scene.is3D()){
+      BallAndSocket constraint0 = new BallAndSocket(radians(40), radians(60));
+      constraint0.setRestRotation(joint0.rotation(), new Vector(1,0,0), new Vector(0,1,0));
+      constraint0.setTwistLimits(radians(50), radians(50));
+      joint0.setConstraint(constraint0);
+      //Apply a Ball & Socket constraint to node1:
+      BallAndSocket constraint1 = new BallAndSocket(radians(60), radians(40));
+      constraint1.setRestRotation(joint1.rotation(), new Vector(1,0,0), new Vector(0,1,0));
+      constraint1.setTwistLimits(radians(5), radians(5));
+      joint1.setConstraint(constraint1);
+    }
 
     //Apply a Hinge constraint to node2:
     Hinge constraint2 = new Hinge(radians(40), radians(60));
-    constraint2.setRestRotation(joint2.rotation(), new Vector(0,1,0), new Vector(1,0,0));
+    Vector twist = scene.is3D() ? new Vector(1,0,0) : new Vector(0,0,1);
+    constraint2.setRestRotation(joint2.rotation(), new Vector(0,1,0), twist);
     joint2.setConstraint(constraint2);
 
     //Apply a Hinge constraint to node3:
@@ -133,7 +133,7 @@ void draw() {
     noLights();
     scene.beginHUD();
     text("Basic Skeleton Structure with constraints", width /2, 100);
-    for(Node joint : skeleton.joints()){
+    for(Node joint : skeleton.joints().values()){
         Vector screenLocation = scene.screenLocation(joint.position());
         String s = !joint.children().isEmpty() ? "" : "End effector: ";
         s += skeleton.jointName(joint);

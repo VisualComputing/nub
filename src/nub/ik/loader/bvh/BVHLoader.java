@@ -3,7 +3,8 @@ package nub.ik.loader.bvh;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
-import nub.ik.visual.Joint;
+import nub.core.constraint.SphericalPolygon;
+import nub.ik.animation.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -452,10 +453,10 @@ public class BVHLoader {
     System.out.println("\t\t" + "min tw   " + Math.toDegrees(minTwist) + "  max tw   " + Math.toDegrees(maxTwist));
 
 
-    upAngle = Math.min(Math.max(upAngle, (float) Math.toRadians(5)), (float) Math.toRadians(85));
-    downAngle = Math.min(Math.max(downAngle, (float) Math.toRadians(5)), (float) Math.toRadians(85));
-    leftAngle = Math.min(Math.max(leftAngle, (float) Math.toRadians(5)), (float) Math.toRadians(85));
-    rightAngle = Math.min(Math.max(rightAngle, (float) Math.toRadians(5)), (float) Math.toRadians(85));
+    upAngle = Math.min(Math.max(upAngle, (float) Math.toRadians(5)), (float) Math.toRadians(175));
+    downAngle = Math.min(Math.max(downAngle, (float) Math.toRadians(5)), (float) Math.toRadians(175));
+    leftAngle = Math.min(Math.max(leftAngle, (float) Math.toRadians(5)), (float) Math.toRadians(175));
+    rightAngle = Math.min(Math.max(rightAngle, (float) Math.toRadians(5)), (float) Math.toRadians(175));
     minTwist = Math.min(Math.max(minTwist, (float) Math.toRadians(5)), (float) Math.toRadians(175));
     maxTwist = Math.min(Math.max(maxTwist, (float) Math.toRadians(5)), (float) Math.toRadians(175));
 
@@ -465,7 +466,7 @@ public class BVHLoader {
     System.out.println("\t\t" + "left   " + Math.toDegrees(leftAngle) + "  rigth   " + Math.toDegrees(rightAngle));
     System.out.println("\t\t" + "min tw   " + Math.toDegrees(minTwist) + "  max tw   " + Math.toDegrees(maxTwist));
 
-    BallAndSocket constraint = new BallAndSocket(downAngle, upAngle, leftAngle, rightAngle);
+    SphericalPolygon constraint = new SphericalPolygon(downAngle, upAngle, leftAngle, rightAngle);
     constraint.setRestRotation(restRotation, right, rest);
     constraint.setTwistLimits(minTwist, maxTwist);
     node.setConstraint(constraint);

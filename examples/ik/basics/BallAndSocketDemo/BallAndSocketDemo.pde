@@ -17,7 +17,6 @@ import nub.core.*;
 import nub.core.constraint.*;
 import nub.primitives.*;
 import nub.processing.*;
-import nub.ik.solver.trik.implementations.SimpleTRIK;
 
 Scene constraintScene, thetaScene, baseScene, focus;
 Node constraintRoot, thetaRoot, baseRoot;

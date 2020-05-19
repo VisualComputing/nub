@@ -7,7 +7,7 @@ import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.oldtrik.TRIK;
 import nub.ik.solver.trik.implementations.BackwardTRIK;
 import nub.ik.solver.trik.implementations.ForwardTRIK;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;

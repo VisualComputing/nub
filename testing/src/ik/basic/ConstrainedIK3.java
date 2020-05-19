@@ -5,6 +5,7 @@ import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.ChainSolver;
+import nub.ik.solver.trik.implementations.SimpleTRIK;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -142,7 +143,7 @@ public class ConstrainedIK3 extends PApplet {
     //3. Relate the structure with a Solver. In this example we instantiate a solver
     //As we're dealing with a Chain Structure a Chain Solver is preferable
     //A Chain solver constructor receives an ArrayList containing the Skeleton structure
-    ChainSolver solver = new ChainSolver(skeleton);
+    SimpleTRIK solver = new SimpleTRIK(skeleton, SimpleTRIK.HeuristicMode.FINAL);
 
     //Optionally you could modify the following parameters of the Solver:
     //Maximum distance between end effector and target, If is below maxError, then we stop executing IK solver (Default value is 0.01)
@@ -186,7 +187,6 @@ public class ConstrainedIK3 extends PApplet {
       text("Node " + i, screenLocation.x(), screenLocation.y());
     }
     scene.endHUD();
-
   }
 
 

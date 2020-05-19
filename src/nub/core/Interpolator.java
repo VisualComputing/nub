@@ -643,7 +643,6 @@ public class Interpolator {
       return;
     if (node == null)
       return;
-
     _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time));
     _valuesAreValid = false;
     _pathIsValid = false;

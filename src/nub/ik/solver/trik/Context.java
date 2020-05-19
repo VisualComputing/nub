@@ -5,7 +5,7 @@ import nub.core.Node;
 import nub.core.constraint.Constraint;
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.oldtrik.NodeInformation;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -48,7 +48,6 @@ public class Context {
   protected float _orientationWeight = 0.2f;
 
   protected boolean _topToBottom = true;
-
   protected boolean _enableWeight, _explore;
   protected int _lockTimes = 0, _lockTimesCriteria = 4;
 
@@ -57,7 +56,7 @@ public class Context {
   protected float _maxLength = 0, _avgLength = 0;
   protected Solver _solver;
 
-
+  protected boolean _is2D = false;
   protected boolean _debug = false;
   protected float _weightRatio = 3f, _weightRatioNear = 1.2f; //how many times is position more important than orientation
   protected float _weightThreshold = 0.1f; //change error measurement when the chain is near the target
@@ -235,6 +234,14 @@ public class Context {
     _target = target;
   }
 
+  public boolean is2D(){
+    return _is2D;
+  }
+
+  public void set2D(boolean is2D){
+    _is2D = is2D;
+  }
+
   public void copyChainState(List<NodeInformation> origin, List<NodeInformation> dest) {
     //Copy the content of the origin chain into dest
     Node refDest = dest.get(0).node().reference();
@@ -355,10 +362,7 @@ public class Context {
 
 
   public static float quaternionDistance(Quaternion a, Quaternion b) {
-    float s1 = 1, s2 = 1;
-    if (a.w() < 0) s1 = -1;
-    if (b.w() < 0) s2 = -1;
-    float dot = s1 * a._quaternion[0] * s2 * b._quaternion[0] + s1 * a._quaternion[1] * s2 * b._quaternion[1] + s1 * a._quaternion[2] * s2 * b._quaternion[2] + s1 * a._quaternion[3] * s2 * b._quaternion[3];
+    float dot = Quaternion.dot(a,b);
     return (float) (1 - Math.pow(dot, 2));
   }
 
@@ -406,7 +410,7 @@ public class Context {
     List<Node> copy = new ArrayList<Node>();
     for (Node joint : chain) {
       Node newJoint = Node.detach(new Vector(), new Quaternion(), 1);
-      newJoint.setReference(reference);
+      if(reference != null) newJoint.setReference(reference);
       newJoint.setPosition(joint.position().get());
       newJoint.setOrientation(joint.orientation().get());
       if (copy_constraints) newJoint.setConstraint(joint.constraint());

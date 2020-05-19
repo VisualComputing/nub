@@ -18,7 +18,7 @@ import nub.core.*;
 import nub.processing.*;
 import nub.ik.solver.*;
 import nub.ik.skinning.*;
-import nub.ik.visual.Joint; //Joint provides default way to visualize the skeleton
+import nub.ik.animation.Joint; //Joint provides default way to visualize the skeleton
 import java.util.List;
 
 Scene scene;

@@ -25,7 +25,6 @@ import nub.processing.*;
 
 //this packages are required for ik behavior
 import nub.ik.animation.*;
-import nub.ik.visual.*;
 import nub.ik.solver.*;
 
 int w = 1200;
@@ -92,7 +91,7 @@ void draw() {
     noLights();
     scene.beginHUD();
     text("Basic Skeleton Structure", width /2, 100);
-    for(Node joint : skeleton.joints()){
+    for(Node joint : skeleton.joints().values()){
         Vector screenLocation = scene.screenLocation(joint.position());
         String s = !joint.children().isEmpty() ? "" : "End effector: ";
         s += skeleton.jointName(joint);

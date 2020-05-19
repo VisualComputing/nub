@@ -6,12 +6,11 @@ import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
 import nub.ik.solver.Solver;
-import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.oldtrik.TRIK;
 import nub.ik.solver.trik.implementations.SimpleTRIK;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -90,8 +89,6 @@ public class Case1 extends PApplet {
     //CCD
     CCDSolver ccdSolver = new CCDSolver(structures.get(i++));
     solvers.add(ccdSolver);
-    //BioIK
-    solvers.add(new BioIk(structures.get(i++), 10, 4));
     //CCD TRIK
     SimpleTRIK simpleTRIK = new SimpleTRIK(structures.get(i++), SimpleTRIK.HeuristicMode.FINAL);
     solvers.add(simpleTRIK);
@@ -117,10 +114,6 @@ public class Case1 extends PApplet {
     chainSolver.setFixTwisting(true);
     chainSolver.setKeepDirection(true);
     solvers.add(chainSolver);
-    //HGSA
-    BioIk bioIk = new BioIk(structures.get(i++), 20, 12);
-    solvers.add(bioIk);
-    //HGSA
     TRIK trik = new TRIK(structures.get(i++));
     trik.setLookAhead(2);
     trik.enableWeight(true);

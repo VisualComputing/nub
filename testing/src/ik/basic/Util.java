@@ -6,16 +6,12 @@ import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
 import nub.core.constraint.PlanarPolygon;
 import nub.ik.solver.Solver;
-import nub.ik.solver.evolutionary.BioIk;
-import nub.ik.solver.evolutionary.GASolver;
-import nub.ik.solver.evolutionary.HAEASolver;
-import nub.ik.solver.evolutionary.HillClimbingSolver;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.MySolver;
 import nub.ik.solver.geometric.oldtrik.TRIK;
 import nub.ik.solver.trik.implementations.SimpleTRIK;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -40,10 +36,6 @@ public class Util {
 
   public static Solver createSolver(SolverType type, List<Node> structure) {
     switch (type) {
-      case HC:
-        return new HillClimbingSolver(5, radians(5), structure);
-      case HGSA:
-        return new BioIk(structure, 10, 4);
       case CCD:
         return new CCDSolver(structure);
       case CCD_V2: {
@@ -75,10 +67,6 @@ public class Util {
         solver.setFixTwisting(true);
         return solver;
       }
-      case GA:
-        return new GASolver(structure, 10);
-      case HAEA:
-        return new HAEASolver(structure, 10, true);
       case MySolver:
         return new MySolver(structure);
       case TRIK_V1: {
@@ -434,11 +422,11 @@ public class Util {
           break;
         }
         case HINGE: {
-          Vector vector = new Vector(2 * random.nextFloat() - 1, 2 * random.nextFloat() - 1, 2 * random.nextFloat() - 1);
-          vector.normalize();
-          vector = Vector.projectVectorOnPlane(vector, structure.get(i + 1).translation());
-          if (Vector.squaredNorm(vector) == 0) {
-            constraint = null;
+          Vector vector = new Vector(0,0,1);
+          if(is3D) {
+            vector = new Vector(2 * random.nextFloat() - 1, 2 * random.nextFloat() - 1, 2 * random.nextFloat() - 1);
+            vector.normalize();
+            vector = Vector.projectVectorOnPlane(vector, structure.get(i + 1).translation());
           }
           float min = (float) Math.min(Math.max(random.nextGaussian() * 30 + 30, 10), 120);
           float max = (float) Math.min(Math.max(random.nextGaussian() * 30 + 30, 10), 120);
@@ -469,9 +457,6 @@ public class Util {
     pg.fill(255);
     pg.textSize(15);
     Vector pos = scene.screenLocation(basePosition);
-    if (solver instanceof BioIk) {
-      pg.text("HGSA \n Algorithm" + "\n Error: " + String.format("%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
-    }
     if (solver instanceof ChainSolver) {
       ChainSolver s = (ChainSolver) solver;
       String heuristics = "";
@@ -482,20 +467,6 @@ public class Util {
     }
     if (solver instanceof CCDSolver) {
       pg.text("CCD" + "\n Error: " + String.format("%.7f", solver.error()) + "\nAccum error : " + solver.accumulatedError() + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
-    }
-    if (solver instanceof HillClimbingSolver) {
-      HillClimbingSolver s = (HillClimbingSolver) solver;
-      if (s.powerLaw()) {
-        pg.text("Power Law  \n Sigma: " + String.format("%.2f", s.sigma()) + "\n Alpha: " + String.format("%.2f", s.alpha()) + "\n Error: " + String.format("%.7f", s.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
-      } else {
-        pg.text("Gaussian  \n Sigma: " + String.format("%.2f", s.sigma()) + "\n Error: " + String.format("%.7f", s.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
-      }
-    }
-    if (solver instanceof GASolver) {
-      pg.text("Genetic \n Algorithm" + "\n Error: " + String.format("%.7f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
-    }
-    if (solver instanceof HAEASolver) {
-      pg.text("HAEA \n Algorithm" + "\n Error: " + String.format("%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
     }
     if (solver instanceof MySolver) {
       pg.text("MySolver" + "\n Error: " + String.format("%.7f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);

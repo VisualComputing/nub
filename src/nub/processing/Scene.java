@@ -3123,7 +3123,7 @@ public class Scene extends Graph implements PConstants {
    */
   public static void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
-    pGraphics.vertex(0, 0, 0);
+    pGraphics.vertex(0, 0);
     float step = (maxAngle - minAngle) / detail;
     for (float theta = minAngle; theta <= maxAngle; theta += step)
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
@@ -3706,7 +3706,6 @@ public class Scene extends Graph implements PConstants {
    * @see #drawConstraint(PGraphics, Node)
    */
   public void drawConstraint(Node node) {
-    //Makes no sense to draw constraint on BackBuffer unless the user make it explicit
     drawConstraint(context(), node);
   }
 
@@ -3717,7 +3716,7 @@ public class Scene extends Graph implements PConstants {
    * @see nub.core.constraint.Constraint
    */
   public static void drawConstraint(PGraphics pGraphics, Node node) {
-    drawConstraint(pGraphics, node, 0.5f);
+      drawConstraint(pGraphics, node, 0.5f);
   }
 
   /**
@@ -3774,11 +3773,10 @@ public class Scene extends Graph implements PConstants {
       //drawAxes(pGraphics,height*1.2f);
       drawCone(pGraphics, height, height, ((PlanarPolygon) node.constraint()).vertices());
     } else if (node.constraint() instanceof SphericalPolygon) {
-      //TODO : Fix as Planar Polygon
-      reference.rotate(((SphericalPolygon) node.constraint()).restRotation());
+      reference.rotate(((SphericalPolygon) node.constraint()).orientation());
       applyTransformation(pGraphics, reference);
       //drawAxes(pGraphics,5);
-      drawCone(pGraphics, ((SphericalPolygon) node.constraint()).vertices(), boneLength);
+      drawCone(pGraphics, ((SphericalPolygon) node.constraint()).vertices(), boneLength * factor);
     } else if (node.constraint() instanceof Hinge) {
       //TODO: Only works well if child lies on Axis Plane
       Hinge constraint = (Hinge) node.constraint();

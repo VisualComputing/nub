@@ -23,7 +23,6 @@ import nub.core.constraint.*;
 
 //this packages are required for ik behavior
 import nub.ik.animation.*;
-import nub.ik.visual.*;
 import nub.ik.solver.*;
 
  

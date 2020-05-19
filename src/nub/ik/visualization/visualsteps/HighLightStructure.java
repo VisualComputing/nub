@@ -1,7 +1,7 @@
 package nub.ik.visualization.visualsteps;
 
 import nub.core.Node;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.ik.visualization.VisualStep;
 import nub.processing.Scene;
 

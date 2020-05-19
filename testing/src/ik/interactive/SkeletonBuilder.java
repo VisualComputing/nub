@@ -8,7 +8,7 @@ import nub.core.constraint.Hinge;
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.TreeSolver;
 import nub.ik.solver.geometric.oldtrik.TRIKTree;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;

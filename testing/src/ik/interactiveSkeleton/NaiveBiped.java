@@ -6,14 +6,13 @@ import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
 import nub.ik.solver.Solver;
-import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.FABRIKSolver;
 import nub.ik.solver.geometric.MySolver;
 import nub.ik.solver.geometric.oldtrik.TRIK;
 import nub.ik.solver.trik.implementations.SimpleTRIK;
-import nub.ik.visual.Joint;
+import nub.ik.animation.Joint;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -28,7 +27,7 @@ import java.util.List;
 
 public class NaiveBiped extends PApplet {
 
-  public enum IKMode {BIOIK, FABRIK, CCD, MYSOLVER, TRIK, SIMPLETRIK}
+  public enum IKMode {FABRIK, CCD, MYSOLVER, TRIK, SIMPLETRIK}
 
   ;
 
@@ -174,11 +173,6 @@ public class NaiveBiped extends PApplet {
         //chainSolver.explore(false);
         ((ChainSolver) solver).setTarget(target);
         ((ChainSolver) solver).setTargetDirection(new Vector(0, 0, 1));
-        break;
-      }
-      case BIOIK: {
-        solver = new BioIk(limb, 10, 4);
-        solver.setTarget(limb.get(limb.size() - 1), target);
         break;
       }
       case MYSOLVER: {
