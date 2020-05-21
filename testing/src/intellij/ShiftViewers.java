@@ -14,7 +14,7 @@ public class ShiftViewers extends PApplet {
   boolean displayAuxiliarViewers = true;
   // whilst scene1 is either on-screen or not; scene2 and scene3 are off-screen
   // test both cases here
-  boolean onScreen = true;
+  boolean onScreen = false;
 
   int w = 1200;
   int h = 1200;
@@ -113,10 +113,7 @@ public class ShiftViewers extends PApplet {
   }
 
   public void draw() {
-    //focus = displayAuxiliarViewers ? (mouseX > w / 2 && mouseY < h / 2) ? scene2
-    //  : (mouseX > w / 2 && mouseY > h / 2) ? scene3 : scene1 : scene1;
-    focus = displayAuxiliarViewers ? (mouseX > w / 2 && mouseY < h / 2) ? scene2
-        : (mouseX > w / 2 && mouseY > h / 2) ? scene3 : scene1 : scene1;
+    focus = displayAuxiliarViewers ? scene3.hasMouseFocus() ? scene3 : scene2.hasMouseFocus() ? scene2 : scene1 : scene1;
     background(75, 25, 15);
     if (scene1.isOffscreen()) {
       scene1.beginDraw();
@@ -151,6 +148,8 @@ public class ShiftViewers extends PApplet {
       if (!scene1.isOffscreen())
         scene1.endHUD();
     }
+    if (!scene1.hasMouseFocus())
+      println("UNFOCUS");
   }
 
   public static void main(String[] args) {

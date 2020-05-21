@@ -43,7 +43,7 @@ void setup() {
   buildOctree(root);
 
   // secondary scene
-  secondaryScene = new Scene(this, P3D, w, h / 2, 0, h / 2);
+  secondaryScene = new Scene(this, P3D, w, h / 2);
   secondaryScene.togglePerspective();
   secondaryScene.setRadius(200);
   secondaryScene.fit();
@@ -56,7 +56,7 @@ void buildOctree(OctreeNode parent) {
 }
 
 void draw() {
-  handleMouse();
+  focus = mainScene.hasMouseFocus() ? mainScene : secondaryScene;
   background(255);
   mainScene.beginDraw();
   mainScene.context().background(255);
@@ -77,11 +77,7 @@ void draw() {
   secondaryScene.drawFrustum(mainScene);
   secondaryScene.context().popStyle();
   secondaryScene.endDraw();
-  secondaryScene.display();
-}
-
-void handleMouse() {
-  focus = mouseY < h / 2 ? mainScene : secondaryScene;
+  secondaryScene.display(0, h / 2);
 }
 
 void mouseDragged() {

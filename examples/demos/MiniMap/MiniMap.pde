@@ -77,7 +77,7 @@ void setup() {
   }
   // Note that we pass the upper left corner coordinates where the minimap
   // is to be drawn (see drawing code below) to its constructor.
-  minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
+  minimap = new Scene(this, renderer, w / 2, h / 2);
   minimap.setRadius(2000);
   if (renderer == P3D)
     minimap.togglePerspective();
@@ -136,7 +136,7 @@ void mouseClicked(MouseEvent event) {
 }
 
 void draw() {
-  focus = displayMinimap ? (mouseX > w / 2 && mouseY > h / 2) ? minimap : scene : scene;
+  focus = displayMinimap ? minimap.hasMouseFocus() ? minimap : scene : scene;
   background(75, 25, 15);
   if (scene.isOffscreen()) {
     scene.beginDraw();
@@ -159,7 +159,7 @@ void draw() {
     minimap.context().stroke(255);
     minimap.drawBullsEye(scene.eye());
     minimap.endDraw();
-    minimap.display();
+    minimap.display(w / 2, h / 2);
     if (!scene.isOffscreen())
       scene.endHUD();
   }

@@ -2712,22 +2712,23 @@ public class Graph {
   // Off-screen
 
   /**
-   * Returns whether or not the off-screen scene has focus or not under the given pixel.
+   * Returns whether or not the scene has focus or not under the given pixel.
    */
-  // TODO also on-screen (see the method below).
   public boolean hasFocus(int pixelX, int pixelY) {
-    return _lastOffDisplayed + 1 >= frameCount()
-        //_lastOffRendered == frameCount()
-        && _upperLeftCornerX < pixelX && pixelX <= _upperLeftCornerX + width()
-        && _upperLeftCornerY < pixelY && pixelY <= _upperLeftCornerY + height();
+    return (!isOffscreen() ||
+        _lastOffDisplayed + 1 >= frameCount()
+        // _lastOffRendered == frameCount()
+    )
+        && _upperLeftCornerX <= pixelX && pixelX < _upperLeftCornerX + width()
+        && _upperLeftCornerY <= pixelY && pixelY < _upperLeftCornerY + height();
   }
 
   /**
    * Internal use by {@link #hasFocus(int, int)} and the display of offscreen scenes.
    */
   protected void _setUpperLeftCorner(int x, int y) {
-    _upperLeftCornerX = isOffscreen() ? x : 0;
-    _upperLeftCornerY = isOffscreen() ? y : 0;
+    _upperLeftCornerX = x;
+    _upperLeftCornerY = y;
   }
 
   /**
