@@ -33,7 +33,7 @@ public class TwoScenes extends PApplet {
 
     // Note that we pass the upper left corner coordinates where the scene1
     // is to be drawn (see drawing code below) to its constructor.
-    scene2 = new Scene(this, P3D, w, h / 2, 0, h / 2);
+    scene2 = new Scene(this, P3D, w, h / 2);
     //scene2.setType(Graph.Type.ORTHOGRAPHIC);
     scene2.setRadius(400);
     //scene2.fit(1);
@@ -152,7 +152,7 @@ public class TwoScenes extends PApplet {
     scene2.context().popMatrix();
 
     scene2.endDraw();
-    scene2.display();
+    scene2.display(0, h / 2);
   }
 
   public static void main(String args[]) {

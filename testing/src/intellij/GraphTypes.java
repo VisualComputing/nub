@@ -38,7 +38,7 @@ public class GraphTypes extends PApplet {
     auxCanvas = createGraphics(w, h / 2, P3D);
     // Note that we pass the upper left corner coordinates where the scene1
     // is to be drawn (see drawing code below) to its constructor.
-    auxScene = new Scene(this, auxCanvas, 0, h / 2);
+    auxScene = new Scene(this, auxCanvas);
     //scene2.setType(Graph.Type.ORTHOGRAPHIC);
     auxScene.setRadius(400);
     //scene2.fit(1);
@@ -209,7 +209,7 @@ public class GraphTypes extends PApplet {
     auxCanvas.popMatrix();
 
     auxScene.endDraw();
-    auxScene.display();
+    auxScene.display(0, h / 2);
   }
 
   public static void main(String args[]) {

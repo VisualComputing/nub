@@ -34,7 +34,7 @@ public class ViewFrustumCulling extends PApplet {
     buildOctree(root);
 
     // secondary scene
-    secondaryScene = new Scene(this, P3D, w, h / 2, 0, h / 2);
+    secondaryScene = new Scene(this, P3D, w, h / 2);
     secondaryScene.togglePerspective();
     secondaryScene.setRadius(200);
     secondaryScene.fit();
@@ -68,7 +68,7 @@ public class ViewFrustumCulling extends PApplet {
     secondaryScene.drawFrustum(mainScene);
     secondaryScene.context().popStyle();
     secondaryScene.endDraw();
-    secondaryScene.display();
+    secondaryScene.display(0, h / 2);
   }
 
   void handleMouse() {

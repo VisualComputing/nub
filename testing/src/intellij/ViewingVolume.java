@@ -33,7 +33,7 @@ public class ViewingVolume extends PApplet {
     canvas2 = createGraphics(w, h / 2, P3D);
     // Note that we pass the upper left corner coordinates where the scene
     // is to be drawn (see drawing code below) to its constructor.
-    scene2 = new Scene(this, canvas2, 0, h / 2);
+    scene2 = new Scene(this, canvas2);
     scene2.setType(Graph.Type.ORTHOGRAPHIC);
     scene2.setRadius(600);
     scene2.fit();
@@ -83,7 +83,7 @@ public class ViewingVolume extends PApplet {
 
     scene2.context().popStyle();
     scene2.endDraw();
-    scene2.display();
+    scene2.display(0, h / 2);
   }
 
   public void mouseDragged() {

@@ -49,7 +49,7 @@ public class StereoFlock extends PApplet {
       flock.add(new Boid(new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
     nodes = new Node[flock.size()];
     nodes = flock.toArray(nodes);
-    rightEye = new Scene(this, P3D, w / 2, h, w / 2, 0);
+    rightEye = new Scene(this, P3D, w / 2, h);
     // set a detached 'node' instance as the eye
     rightEye.setEye(new Node(head));
     rightEye.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
@@ -58,11 +58,11 @@ public class StereoFlock extends PApplet {
 
   public void draw() {
     focus = mouseX < w / 2 ? leftEye : rightEye;
-    draw(leftEye);
-    draw(rightEye);
+    draw(leftEye, 0, 0);
+    draw(rightEye, w / 2, 0);
   }
 
-  void draw(Scene scene) {
+  void draw(Scene scene, int pixelX, int pixelY) {
     scene.beginDraw();
     scene.context().background(75, 25, 15);
     walls(scene.context());
@@ -73,7 +73,7 @@ public class StereoFlock extends PApplet {
       scene.context().popMatrix();
     }
     scene.endDraw();
-    scene.display();
+    scene.display(pixelX, pixelY);
   }
 
   void walls(PGraphics pg) {

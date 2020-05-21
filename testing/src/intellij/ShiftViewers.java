@@ -51,13 +51,13 @@ public class ShiftViewers extends PApplet {
 
     // Note that we pass the upper left corner coordinates where the scene1
     // is to be drawn (see drawing code below) to its constructor.
-    scene2 = new Scene(this, P3D, w / 2, h / 2, w / 2, 0);
+    scene2 = new Scene(this, P3D, w / 2, h / 2);
     scene2.eye().disableTagging();
     scene2.setRadius(1000);
     scene2.fit(1);
 
     // idem here
-    scene3 = new Scene(this, P3D, w / 2, h / 2, w / 2, h / 2);
+    scene3 = new Scene(this, P3D, w / 2, h / 2);
     scene3.eye().disableTagging();
     scene3.setRadius(1000);
     scene3.fit(1);
@@ -113,6 +113,8 @@ public class ShiftViewers extends PApplet {
   }
 
   public void draw() {
+    //focus = displayAuxiliarViewers ? (mouseX > w / 2 && mouseY < h / 2) ? scene2
+    //  : (mouseX > w / 2 && mouseY > h / 2) ? scene3 : scene1 : scene1;
     focus = displayAuxiliarViewers ? (mouseX > w / 2 && mouseY < h / 2) ? scene2
         : (mouseX > w / 2 && mouseY > h / 2) ? scene3 : scene1 : scene1;
     background(75, 25, 15);
@@ -135,7 +137,7 @@ public class ShiftViewers extends PApplet {
       scene2.drawAxes();
       scene2.render();
       scene2.endDraw();
-      scene2.display();
+      scene2.display(w / 2, 0);
       if (!scene1.isOffscreen())
         scene1.endHUD();
       if (!scene1.isOffscreen())
@@ -145,7 +147,7 @@ public class ShiftViewers extends PApplet {
       scene3.drawAxes();
       scene3.render();
       scene3.endDraw();
-      scene3.display();
+      scene3.display(w / 2, h / 2);
       if (!scene1.isOffscreen())
         scene1.endHUD();
     }

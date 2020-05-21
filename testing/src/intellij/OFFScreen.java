@@ -20,7 +20,9 @@ public class OFFScreen extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this, createGraphics(1300, 900, renderer), 400, 200);
+    // TODO render at 400, 200
+    //scene = new Scene(this, createGraphics(1300, 900, renderer));
+    scene = new Scene(this, P3D, 1300, 900);
     scene.setFOV(PI / 3);
     scene.setRadius(300);
     scene.fit(1);
@@ -54,7 +56,7 @@ public class OFFScreen extends PApplet {
     scene.drawAxes();
     scene.render();
     scene.endDraw();
-    scene.display();
+    scene.display(400, 200);
   }
 
   @Override
