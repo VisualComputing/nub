@@ -10,6 +10,7 @@ import processing.event.MouseEvent;
 import processing.opengl.PShader;
 
 public class DOF extends PApplet {
+  String depthPath;
   PShader depthShader, dofShader;
   PGraphics depthPGraphics, dofPGraphics;
   Scene scene;
@@ -36,9 +37,10 @@ public class DOF extends PApplet {
 
     // Depth shader
     // Test all the different versions
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_nonlinear.glsl");
-    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_frag.glsl");
+    //depthPath = "depth_frag.glsl";
+    depthPath = "depth_linear.glsl";
+    //depthPath = "depth_nonlinear.glsl";
+    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/" + depthPath);
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
@@ -66,8 +68,10 @@ public class DOF extends PApplet {
     depthPGraphics.background(0);
     // only for depth_linear shader
     // Don't pay attention to the doesn't have a uniform called "far/near" message
-    depthShader.set("near", scene.zNear());
-    depthShader.set("far", scene.zFar());
+    if (depthPath.matches("depth_linear.glsl")) {
+      depthShader.set("near", scene.zNear());
+      depthShader.set("far", scene.zFar());
+    }
     scene.render(depthPGraphics);
     depthPGraphics.endDraw();
 

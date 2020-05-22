@@ -703,8 +703,8 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Displays the {@code pgraphics} on top of the main sketch canvas at
-   * {@code (pixelX, pixelY)}. Only meaningful if the graph {@link #isOffscreen()}.
+   * Displays the {@code pgraphics} on top of the main sketch canvas at the upper left
+   * corner: {@code (pixelX, pixelY)}. Only meaningful if the graph {@link #isOffscreen()}.
    * <p>
    * Displaying the {@code pgraphics} requires a call to the PApplet {@code image()}.
    * However, to make {@link #hasMouseFocus()} work, calling this method instead is
@@ -712,19 +712,27 @@ public class Scene extends Graph implements PConstants {
    */
   public void display(PGraphics pgraphics, int pixelX, int pixelY) {
     if (isOffscreen()) {
+      pApplet().pushStyle();
       _setUpperLeftCorner(pixelX, pixelY);
       _lastOffDisplayed = frameCount();
+      pApplet().imageMode(CORNER);
       pApplet().image(pgraphics, _upperLeftCornerX, _upperLeftCornerY);
+      pApplet().popStyle();
     }
   }
 
   /**
    * Display the {@link #_backBuffer()} used for picking at screen coordinates
-   * {@code (x, y)}. Mainly for debugging.
+   * on top of the main sketch canvas at the upper left corner:
+   * {@code (pixelX, pixelY)}. Mainly for debugging.
    */
-  public void displayBackBuffer(int x, int y) {
-    if (_backBuffer() != null)
-      pApplet().image(_backBuffer(), x, y);
+  public void displayBackBuffer(int pixelX, int pixelY) {
+    if (_backBuffer() != null) {
+      pApplet().pushStyle();
+      pApplet().imageMode(CORNER);
+      pApplet().image(_backBuffer(), pixelX, pixelY);
+      pApplet().popStyle();
+    }
   }
 
   /**
