@@ -4,13 +4,13 @@ import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
-import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
-public class PointUnderPixel extends PApplet {
-  Scene scene;
+public class PUP extends PApplet {
+  Scene scene, visualHint, focus;
+  int w = 500, h = 500, atX, atY;
   Node[] models;
 
   Vector orig = new Vector();
@@ -18,18 +18,14 @@ public class PointUnderPixel extends PApplet {
   Vector end = new Vector();
   Vector pup;
 
-  // offScreen breaks reading depths in Processing
-  // try offScreen = false to see how it should work
-  boolean offScreen = false;
-
   @Override
   public void settings() {
-    size(1000, 800, P3D);
+    size(1800, 1400, P3D);
     //noSmooth();
   }
 
   public void setup() {
-    scene = offScreen ? new Scene(this, P3D, width, height) : new Scene(this);
+    scene = new Scene(this);
     scene.setRadius(1000);
     scene.fit(1);
     models = new Node[100];
@@ -38,23 +34,25 @@ public class PointUnderPixel extends PApplet {
       models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
-    if (offScreen) {
-      scene.context().hint(PConstants.ENABLE_BUFFER_READING);
-    }
+    visualHint = new Scene(this, P3D, w, h);
+    visualHint.setRadius(300);
   }
 
   public void draw() {
-    if (offScreen) {
-      scene.beginDraw();
-      scene.context().background(0);
-      drawRay();
-      scene.render();
-      scene.endDraw();
-      scene.display();
-    } else {
-      background(0);
-      drawRay();
-      scene.render();
+    focus = pup != null ? visualHint.hasMouseFocus() ? visualHint : scene : scene;
+    background(0);
+    drawRay();
+    scene.drawAxes();
+    scene.render();
+    if (pup != null) {
+      scene.beginHUD();
+      visualHint.beginDraw();
+      visualHint.context().background(125, 80, 90);
+      visualHint.drawAxes();
+      visualHint.render();
+      visualHint.endDraw();
+      visualHint.display(atX, atY);
+      scene.endHUD();
     }
   }
 
@@ -73,18 +71,12 @@ public class PointUnderPixel extends PApplet {
   }
 
   public void mouseClicked(MouseEvent event) {
-    if (event.getButton() == RIGHT) {
-      pup = scene.mouseLocation();
-      if (pup != null) {
-        scene.mouseToLine(orig, dir);
-        end = Vector.add(orig, Vector.multiply(dir, 4000.0f));
-      }
-    } else {
-      if (event.getCount() == 1)
-        scene.focus();
-      else
-        scene.align();
-    }
+    /*
+    if (event.getCount() == 1)
+      scene.focus();
+    else
+      scene.align();
+     */
   }
 
   PShape boxShape() {
@@ -94,23 +86,40 @@ public class PointUnderPixel extends PApplet {
   }
 
   @Override
-  public void mouseMoved() {
-    scene.mouseTag();
+  public void mouseMoved(MouseEvent event) {
+    if (event.isControlDown()) {
+      pup = scene.mouseLocation();
+      if (pup != null) {
+        visualHint.setCenter(pup);
+        visualHint.eye().setPosition(pup);
+        //visualHint.setViewDirection(scene.displacement(Vector.plusJ));
+        visualHint.setViewDirection(scene.displacement(new Vector(0, 1, 0)));
+        visualHint.setUpVector(scene.displacement(new Vector(0, 0, -1)));
+        visualHint.fit();
+        atX = mouseX - w / 2;
+        atY = mouseY - h;
+        // debug
+        scene.mouseToLine(orig, dir);
+        end = Vector.add(orig, Vector.multiply(dir, 4000.0f));
+      }
+    } else {
+      focus.mouseTag();
+    }
   }
 
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      focus.mouseTranslate();
     else
-      scene.moveForward(scene.mouseDX());
+      focus.moveForward(focus.mouseDX());
   }
 
   @Override
   public void mouseWheel(MouseEvent event) {
-    scene.scale(event.getCount() * 20);
+    focus.scale(event.getCount() * 20);
   }
 
   @Override
@@ -122,6 +131,6 @@ public class PointUnderPixel extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.PointUnderPixel"});
+    PApplet.main(new String[]{"intellij.PUP"});
   }
 }

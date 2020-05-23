@@ -814,6 +814,45 @@ public class Vector {
     return target;
   }
 
+  // TODO decide these canonical forms, and make Quaternion coherent to them
+  // Canonical version took from:
+  // https://github.com/jdf/peasycam/blob/master/src/peasy/org/apache/commons/math/geometry/Vector3D.java
+
+  /**
+   * First canonical vector (coordinates: 1, 0, 0).
+   */
+  public static final Vector plusI = new Vector(1, 0, 0);
+
+  /**
+   * Opposite of the first canonical vector (coordinates: -1, 0, 0).
+   */
+  public static final Vector minusI = new Vector(-1, 0, 0);
+
+  /**
+   * Second canonical vector (coordinates: 0, 1, 0).
+   */
+  public static final Vector plusJ = new Vector(0, 1, 0);
+
+  /**
+   * Opposite of the second canonical vector (coordinates: 0, -1, 0).
+   */
+  public static final Vector minusJ = new Vector(0, -1, 0);
+
+  /**
+   * Third canonical vector (coordinates: 0, 0, 1).
+   */
+  public static final Vector plusK = new Vector(0, 0, 1);
+
+  /**
+   * Opposite of the third canonical vector (coordinates: 0, 0, -1).
+   */
+  public static final Vector minusK = new Vector(0, 0, -1);
+
+  /**
+   * Null vector (coordinates: 0, 0, 0).
+   */
+  public static final Vector zero = new Vector(0, 0, 0);
+
   /**
    * Return this vector components as a String.
    */

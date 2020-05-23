@@ -1772,7 +1772,7 @@ public class Graph {
    * When {@code noMove} is set to {@code false}, the orientation modification is
    * compensated by a translation, so that the {@link #anchor()} stays projected at the
    * same position on screen. This is especially useful when the eye is an observer of the
-   * graph (default action binding).
+   * graph.
    * <p>
    * When {@code noMove} is true, the Eye {@link Node#position()} is left unchanged, which is
    * an intuitive behavior when the Eye is in first person mode.
