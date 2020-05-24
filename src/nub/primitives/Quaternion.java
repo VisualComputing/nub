@@ -288,7 +288,7 @@ public class Quaternion {
         break;
     }
     System.out.println("Warning: some params in Quaternion.from(params) couldn't be parsed!");
-    return Quaternion.identity;
+    return new Quaternion();
   }
 
   /**
