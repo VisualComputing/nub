@@ -814,9 +814,24 @@ public class Vector {
     return target;
   }
 
-  // TODO decide these canonical forms, and make Quaternion coherent to them
   // Canonical version took from:
   // https://github.com/jdf/peasycam/blob/master/src/peasy/org/apache/commons/math/geometry/Vector3D.java
+
+  // TODO: include these three?
+
+  public static final Vector timesI(float scalar) {
+    return Vector.multiply(plusI, scalar);
+  }
+
+  public static final Vector timesJ(float scalar) {
+    return Vector.multiply(plusJ, scalar);
+  }
+
+  public static final Vector timesK(float scalar) {
+    return Vector.multiply(plusK, scalar);
+  }
+
+  // TODO: decide constants
 
   /**
    * First canonical vector (coordinates: 1, 0, 0).
