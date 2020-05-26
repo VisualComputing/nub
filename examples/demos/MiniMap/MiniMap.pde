@@ -134,7 +134,7 @@ void mouseClicked(MouseEvent event) {
 }
 
 void draw() {
-  focus = displayMinimap ? minimap.hasMouseFocus() ? minimap : scene : scene;
+  focus = minimap.hasMouseFocus() ? minimap : scene;
   background(75, 25, 15);
   if (scene.isOffscreen()) {
     scene.beginDraw();
