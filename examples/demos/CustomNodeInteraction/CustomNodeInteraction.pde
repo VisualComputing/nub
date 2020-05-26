@@ -71,8 +71,6 @@ void setup() {
           }
       }
     };
-    // set picking precision to the pixels of the node projection
-    shapes[i].setPickingThreshold(0);
     scene.randomize(shapes[i]);
   }
   font36 = loadFont("FreeSans-36.vlw");

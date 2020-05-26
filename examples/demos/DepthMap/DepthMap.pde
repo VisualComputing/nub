@@ -60,8 +60,6 @@ void setup() {
       }
     };
     scene.randomize(shapes[i]);
-    // set picking precision to the pixels of the node projection
-    shapes[i].setPickingThreshold(0);
     shapes[i].setHighlighting(0);
   }
   shadowMap = createGraphics(w / 2, h / 2, P3D);

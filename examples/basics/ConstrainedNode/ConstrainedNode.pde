@@ -51,7 +51,6 @@ void setup() {
     }
   };
   scene.randomize(node);
-  node.setPickingThreshold(0);
   node.translate(new Vector(20, 20, 0));
   node.setConstraint(constraints[activeConstraint]);
 }

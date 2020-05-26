@@ -39,8 +39,6 @@ void setup() {
   for (int i = 0; i < shapes.length; i++) {
     tint(random(0,255), random(0,255), random(0,255), random(150,255));
     shapes[i] = new Node(loadShape("rocket.obj"));
-    // set picking precision to the pixels of the node projection
-    shapes[i].setPickingThreshold(0);
     scene.randomize(shapes[i]);
   }
   smooth();

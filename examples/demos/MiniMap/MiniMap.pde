@@ -71,8 +71,6 @@ void setup() {
         }
       };
     }
-    // set picking precision to the pixels of the node projection
-    models[i].setPickingThreshold(0);
     scene.randomize(models[i]);
   }
   // Note that we pass the upper left corner coordinates where the minimap

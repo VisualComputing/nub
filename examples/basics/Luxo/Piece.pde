@@ -1,11 +1,6 @@
 class Piece extends Node {
   int mode;
 
-  Piece() {
-    // set picking precision to the pixels of the node projection
-    setPickingThreshold(0);
-  }
-
   void drawCone(PGraphics pg, float zMin, float zMax, float r1, float r2, int nbSub) {
     pg.translate(0, 0, zMin);
     Scene.drawCone(pg, nbSub, 0, 0, r1, r2, zMax - zMin);
