@@ -819,17 +819,32 @@ public class Vector {
 
   // TODO: include these three?
 
-  public static final Vector timesI(float scalar) {
-    return Vector.multiply(plusI, scalar);
+  /*
+  public static final Vector i() {
+    return Vector.i(1);
   }
 
-  public static final Vector timesJ(float scalar) {
-    return Vector.multiply(plusJ, scalar);
+  public static final Vector j() {
+    return Vector.j(1);
   }
 
-  public static final Vector timesK(float scalar) {
-    return Vector.multiply(plusK, scalar);
+  public static final Vector k() {
+    return Vector.k(1);
   }
+
+  public static final Vector i(float scalar) {
+    return new Vector(scalar, 0, 0);
+  }
+
+  public static final Vector j(float scalar) {
+    return new Vector(0, scalar, 0);
+  }
+
+  public static final Vector k(float scalar) {
+    return new Vector(0, 0, scalar);
+  }
+
+   */
 
   // TODO: decide constants
 
@@ -864,7 +879,7 @@ public class Vector {
   public static final Vector minusK = new Vector(0, 0, -1);
 
   /**
-   * Null vector (coordinates: 0, 0, 0).
+   * Zero vector (coordinates: 0, 0, 0).
    */
   public static final Vector zero = new Vector(0, 0, 0);
 

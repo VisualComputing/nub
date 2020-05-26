@@ -30,6 +30,6 @@ public class Box extends Node {
 
   public void updateOrientation(Vector v) {
     Vector to = Vector.subtract(v, position());
-    setOrientation(new Quaternion(new Vector(0, 1, 0), to));
+    setOrientation(Quaternion.from(Vector.plusJ, to));
   }
 }

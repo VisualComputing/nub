@@ -134,8 +134,8 @@ void setup() {
         float lightAngle = frameCount * 0.002;
         light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
       }
-      light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
-      light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
+      light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), Vector.plusJ));
+      light.setZAxis(light.position());
     }
   };
   animation.run(60);

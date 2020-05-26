@@ -15,8 +15,8 @@ class Boid extends Node {
     position = new Vector();
     position.set(inPos);
     setPosition(new Vector(position.x(), position.y(), position.z()));
-    velocity = new Vector(FlockOfBoids.this.random(-1, 1), FlockOfBoids.this.random(-1, 1), FlockOfBoids.this.random(1, -1));
-    acceleration = new Vector(0, 0, 0);
+    velocity = Vector.random();
+    acceleration = new Vector();
     neighborhoodRadius = 100;
     task = new TimingTask() {
       @Override
@@ -34,13 +34,13 @@ class Boid extends Node {
           acceleration.add(Vector.multiply(avoid(new Vector(position.x(), position.y(), flockDepth)), 5));
         }
         //alignment
-        alignment = new Vector(0, 0, 0);
+        alignment = new Vector();
         int alignmentCount = 0;
         //cohesion
         Vector posSum = new Vector();
         int cohesionCount = 0;
         //separation
-        separation = new Vector(0, 0, 0);
+        separation = new Vector();
         Vector repulse;
         for (int i = 0; i < flock.size(); i++) {
           Boid boid = flock.get(i);
@@ -135,8 +135,8 @@ class Boid extends Node {
     // exceed maxSpeed
     position.add(velocity); // add velocity to position
     setPosition(position);
-    setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), atan2(-velocity.z(), velocity.x())),
-                                    new Quaternion(new Vector(0, 0, 1), asin(velocity.y() / velocity.magnitude()))));
+    setRotation(Quaternion.multiply(Quaternion.from(Vector.plusJ, atan2(-velocity.z(), velocity.x())),
+                                    Quaternion.from(Vector.plusK, asin(velocity.y() / velocity.magnitude()))));
     acceleration.multiply(0); // reset acceleration
   }
 

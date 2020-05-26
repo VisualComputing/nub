@@ -44,7 +44,7 @@ Node avatar;
 void setup() {
   size(1000, 800, P3D);
   scene = new Scene(this);
-  scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
+  scene.setFrustum(Vector.zero, new Vector(flockWidth, flockHeight, flockDepth));
   scene.fit();
   // create and fill the list of boids
   flock = new ArrayList();

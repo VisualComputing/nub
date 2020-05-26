@@ -72,7 +72,7 @@ void setup() {
   shadowMap.shader(depthShader);
 
   scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
-  scene.node("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.node("light").position()));
+  scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
 }
 
 void draw() {

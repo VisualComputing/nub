@@ -86,32 +86,12 @@ void keyPressed() {
   if (key == 'r' || key == 'R') {
     constraints[activeConstraint].setRotationConstraintType(nextRotationConstraintType(constraints[activeConstraint].rotationConstraintType()));
   }
-  Vector dir = new Vector(0, 0, 0);
-  switch (transDir) {
-  case 0:
-    dir.setX(1);
-    break;
-  case 1:
-    dir.setY(1);
-    break;
-  case 2:
-    dir.setZ(1);
-    break;
-  }
-  constraints[activeConstraint].setTranslationConstraintDirection(dir);
-  dir.set(0, 0, 0);
-  switch (rotDir) {
-  case 0:
-    dir.setX(1);
-    break;
-  case 1:
-    dir.setY(1);
-    break;
-  case 2:
-    dir.setZ(1);
-    break;
-  }
-  constraints[activeConstraint].setRotationConstraintDirection(dir);
+  constraints[activeConstraint].setTranslationConstraintDirection(
+    transDir == 0 ? Vector.plusI : transDir == 1 ? Vector.plusJ : Vector.plusK
+  );
+  constraints[activeConstraint].setRotationConstraintDirection(
+    rotDir == 0 ? Vector.plusI : rotDir == 1 ? Vector.plusJ : Vector.plusK
+  );
 }
 
 AxisPlaneConstraint.Type nextTranslationConstraintType(AxisPlaneConstraint.Type transType) {

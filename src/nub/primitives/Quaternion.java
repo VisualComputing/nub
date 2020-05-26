@@ -218,17 +218,8 @@ public class Quaternion {
   // TODO decide constants zero and identity
 
   /**
-   * Returns a quaternion whose components are all set to {@code 0}.
-   *
-   * @see #identity
-   * @see #from(Object...)
-   */
-  public static final Quaternion zero = new Quaternion(0, 0, 0, 0);
-
-  /**
    * Returns a quaternion whose components are set to {@code (0, 0, 0, 1)}.
    *
-   * @see #zero
    * @see #from(Object...)
    */
   public static final Quaternion identity = new Quaternion();
@@ -241,8 +232,8 @@ public class Quaternion {
    * <ul>
    * <li>One {@code params}: if its type is {@link Matrix} it returns a quaternion from
    * the given 'matrix-form' (see {@link #Quaternion(Matrix)}). If its type is {@code Quaternion}
-   * then it gets cloned (see {@link #get()}) and returned. If it's of type {@code float[]} then a
-   * quaternion is returned from the 4-array elements (see {@link #Quaternion(float[])}).</li>
+   * then the quaternion is cloned (see {@link #get()}) and returned. If it's of type {@code float[]}
+   * then a quaternion is returned from the 4-array elements (see {@link #Quaternion(float[])}).</li>
    * <li>Two {@code params}: if both params are of type {@link Vector} it returns the quaternion
    * which would produce the rotation from the first vector param to the second (see
    * {@link #Quaternion(Vector, Vector)}). If the first {@code params} is of type
@@ -253,7 +244,7 @@ public class Quaternion {
    * If the three {@code params} are of type {@link Vector} it returns a quaternion from the given
    * 'rotated-basis form', (see {@link #Quaternion(Vector, Vector, Vector)}).</li>
    * </ul>
-   * It {@code params} cannot be parsed an is {@link #identity} returned.
+   * It {@code params} cannot be parsed a new Quaternion ({@code #identity}) is returned.
    *
    * @see #Quaternion(Matrix)
    * @see #get()
@@ -261,7 +252,6 @@ public class Quaternion {
    * @see #Quaternion(Vector, Vector)
    * @see #Quaternion(Vector, float)
    * @see #Quaternion(Vector, Vector, Vector)
-   * @see #identity
    */
   public static final Quaternion from(Object... params) {
     switch (params.length) {

@@ -23,9 +23,9 @@ class Lamp {
     node(2).setTranslation(0, 0, 50);  // Arm length
     node(3).setTranslation(0, 0, 50);  // Arm length
 
-    node(1).setRotation(new Quaternion(new Vector(1, 0, 0), 0.6));
-    node(2).setRotation(new Quaternion(new Vector(1, 0, 0), -2));
-    node(3).setRotation(new Quaternion(new Vector(1, -0.3, 0), -1.7));
+    node(1).setRotation(Quaternion.from(Vector.plusI, 0.6));
+    node(2).setRotation(Quaternion.from(Vector.plusI, -2));
+    node(3).setRotation(Quaternion.from(new Vector(1, -0.3, 0), -1.7));
 
     // Set node graphics modes
     node(0).mode = 1;
@@ -35,18 +35,18 @@ class Lamp {
 
     // Set node constraints
     WorldConstraint baseConstraint = new WorldConstraint();
-    baseConstraint.setTranslationConstraint(AxisPlaneConstraint.Type.PLANE, new Vector(0, 0, 1));
-    baseConstraint.setRotationConstraint(AxisPlaneConstraint.Type.AXIS, new Vector(0, 0, 1));
+    baseConstraint.setTranslationConstraint(AxisPlaneConstraint.Type.PLANE, Vector.plusK);
+    baseConstraint.setRotationConstraint(AxisPlaneConstraint.Type.AXIS, Vector.plusK);
     node(0).setConstraint(baseConstraint);
 
     LocalConstraint XAxis = new LocalConstraint();
-    XAxis.setTranslationConstraint(AxisPlaneConstraint.Type.FORBIDDEN, new Vector(0, 0, 0));
-    XAxis.setRotationConstraint(AxisPlaneConstraint.Type.AXIS, new Vector(1, 0, 0));
+    XAxis.setTranslationConstraint(AxisPlaneConstraint.Type.FORBIDDEN, Vector.zero);
+    XAxis.setRotationConstraint(AxisPlaneConstraint.Type.AXIS, Vector.plusI);
     node(1).setConstraint(XAxis);
     node(2).setConstraint(XAxis);
 
     LocalConstraint headConstraint = new LocalConstraint();
-    headConstraint.setTranslationConstraint(AxisPlaneConstraint.Type.FORBIDDEN, new Vector(0, 0, 0));
+    headConstraint.setTranslationConstraint(AxisPlaneConstraint.Type.FORBIDDEN, Vector.zero);
     node(3).setConstraint(headConstraint);
   }
 

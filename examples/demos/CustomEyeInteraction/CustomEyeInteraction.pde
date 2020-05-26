@@ -87,7 +87,7 @@ void keyPressed(KeyEvent event) {
       // We need to line up the eye up vector along the anchor and the camera position:
       scene.setUpVector(Vector.subtract(scene.eye().position(), scene.anchor()));
       // The rest is just to make the scene appear in front of us.
-      scene.eye().rotate(new Quaternion(a, 0, 0));
+      scene.eye().rotate(Quaternion.from(a, 0, 0));
     } else {
       scene.fit(1);
       scene.lookAtCenter();
@@ -100,13 +100,13 @@ void keyPressed(KeyEvent event) {
       switch (keyCode) {
       case UP:
         if (event.isShiftDown())
-          scene.eye().rotate(new Vector(1, 0, 0), -step, 0.85);
+          scene.eye().rotate(Vector.plusI, -step, 0.85);
         else
           scene.eye().orbit(xAxis(), step, 0.85);
         break;
       case DOWN:
         if (event.isShiftDown())
-          scene.eye().rotate(new Vector(1, 0, 0), step, 0.85);
+          scene.eye().rotate(Vector.plusI, step, 0.85);
         else
           scene.eye().orbit(xAxis(), -step, 0.85);
         break;
@@ -128,15 +128,15 @@ void keyPressed(KeyEvent event) {
 }
 
 Vector xAxis() {
-  return scene.eye().worldDisplacement(new Vector(1, 0, 0));
+  return scene.eye().worldDisplacement(Vector.plusI);
 }
 
 Vector yAxis() {
-  return scene.eye().worldDisplacement(new Vector(0, 1, 0));
+  return scene.eye().worldDisplacement(Vector.plusJ);
 }
 
 Vector zAxis() {
-  return scene.eye().worldDisplacement(new Vector(0, 0, 1));
+  return scene.eye().worldDisplacement(Vector.plusK);
 }
 
 void initializeSphere(int res) {
