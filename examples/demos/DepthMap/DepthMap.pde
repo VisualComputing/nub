@@ -59,7 +59,6 @@ void setup() {
         pg.popStyle();
       }
     };
-    shapes[i].setPickingThreshold(0);
     scene.randomize(shapes[i]);
     // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
