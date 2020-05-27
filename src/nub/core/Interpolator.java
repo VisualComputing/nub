@@ -594,8 +594,8 @@ public class Interpolator {
   }
 
   /**
-   * Appends a copy of the current {@link #node()}
-   * {@code time} seconds after the previously added keyframe.
+   * Appends a copy of the current {@link #node()} {@code time} seconds after the
+   * previously added keyframe. The {@link Node#pickingThreshold()} is set to {@code 20}.
    *
    * @see #addKeyFrame()
    * @see #addKeyFrame(Node)
