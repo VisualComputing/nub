@@ -8,6 +8,7 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -65,52 +66,24 @@ public class Interpolation extends PApplet {
       interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
     interpolator.run();
 
-    Function<Integer, Integer> inc = e -> e + 1;
-    doSum(5, inc);
+    // key lines:
+    callback = (pg) -> {
+      pg.fill(0, 55, 0);
+      pg.rect(0, 0, 300, 300);
+    };
   }
 
-  public static void doSum(int value, Function <Integer, Integer> func) {
-    System.out.println(func.apply(value));
-  }
+  Consumer<PGraphics> callback;
 
-  public static Integer compute(Function<Integer, Integer> function, Integer value) {
-    return function.apply(value);
-  }
-
-  public class AwesomeClass {
-    public Integer invertTheNumber() {
-      Integer toInvert = 5;
-      return compute((a) -> -a, toInvert);
-    }
+  public static void graphics(Consumer<PGraphics> callback, PGraphics pGraphics) {
+    //println("Exec graphics...");
+    callback.accept(pGraphics);
   }
 
   public void draw() {
     background(125);
     scene.render();
-
-    pushStyle();
-    stroke(255);
-    // same as:scene.drawCatmullRom(interpolator, 5);
-    scene.drawCatmullRom(interpolator);
-    popStyle();
-    for (Node node : interpolator.keyFrames().values()) {
-      pushMatrix();
-      scene.applyTransformation(node);
-      scene.drawAxes(scene.mouseTracks(node) ? 40 : 20);
-      popMatrix();
-    }
-    if (showEyePath) {
-      pushStyle();
-      fill(255, 0, 0);
-      stroke(0, 255, 0);
-      // same as:
-      // scene.drawCatmullRom(eyeInterpolator1, 3);
-      // scene.drawCatmullRom(eyeInterpolator2, 3);
-      scene.drawCatmullRom(eyeInterpolator1);
-      scene.drawCatmullRom(eyeInterpolator2);
-      popStyle();
-    }
-    println(frameRate);
+    graphics(callback, g);
   }
 
   public void mouseMoved() {
