@@ -74,7 +74,11 @@ public class Lambda extends PApplet {
 
   Consumer<PGraphics> callback;
 
-  public static void graphics(Consumer<PGraphics> callback, PGraphics pGraphics) {
+  public void hint(PGraphics pGraphics) {
+    graphics(callback, pGraphics);
+  }
+
+  public void graphics(Consumer<PGraphics> callback, PGraphics pGraphics) {
     //println("Exec graphics...");
     callback.accept(pGraphics);
   }
@@ -82,7 +86,8 @@ public class Lambda extends PApplet {
   public void draw() {
     background(125);
     scene.render();
-    graphics(callback, g);
+    //graphics(callback, g);
+    hint(g);
   }
 
   public void mouseMoved() {
