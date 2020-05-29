@@ -80,7 +80,8 @@ public class Lambda extends PApplet {
 
   public void graphics(Consumer<PGraphics> callback, PGraphics pGraphics) {
     //println("Exec graphics...");
-    callback.accept(pGraphics);
+    if (callback != null)
+      callback.accept(pGraphics);
   }
 
   public void draw() {

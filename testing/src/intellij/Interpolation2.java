@@ -5,7 +5,6 @@ import nub.core.Node;
 import nub.processing.Scene;
 import nub.timing.Task;
 import processing.core.PApplet;
-import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 import java.util.function.Function;
@@ -14,7 +13,7 @@ import java.util.function.Function;
  * This example introduces the three different interpolations offered
  * by the Graph.
  */
-public class Interpolation extends PApplet {
+public class Interpolation2 extends PApplet {
   Scene scene;
   Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
   Node shape;
@@ -42,6 +41,7 @@ public class Interpolation extends PApplet {
 
     // interpolation 3. Custom (arbitrary) node interpolations
 
+    /*
     shape = new Node() {
       // Note that within render() geometry is defined at the
       // node local coordinate system.
@@ -58,6 +58,32 @@ public class Interpolation extends PApplet {
         pg.popStyle();
       }
     };
+    // */
+    shape = new Node((pg) -> {
+      pg.pushStyle();
+      pg.fill(0, 255, 255, 125);
+      pg.stroke(0, 0, 255);
+      pg.strokeWeight(2);
+      if (pg.is2D())
+        pg.rect(0, 0, 100, 100);
+      else
+        pg.box(30);
+      pg.popStyle();
+    });
+    /*
+    shape = new Node();
+    shape.hint((pg) -> {
+      pg.pushStyle();
+      pg.fill(0, 255, 255, 125);
+      pg.stroke(0, 0, 255);
+      pg.strokeWeight(2);
+      if (pg.is2D())
+        pg.rect(0, 0, 100, 100);
+      else
+        pg.box(30);
+      pg.popStyle();
+    });
+    */
     interpolator = new Interpolator(shape);
     interpolator.enableRecurrence();
     // Create an initial path
@@ -157,6 +183,6 @@ public class Interpolation extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.Interpolation"});
+    PApplet.main(new String[]{"intellij.Interpolation2"});
   }
 }

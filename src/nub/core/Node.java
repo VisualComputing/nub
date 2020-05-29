@@ -21,6 +21,7 @@ import nub.timing.TimingHandler;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A node encapsulates a 2D or 3D coordinate system, represented by a {@link #position()}, an
@@ -150,6 +151,9 @@ public class Node {
   protected boolean _tagging;
 
   // Rendering
+  // Immediate mode rendering
+  protected Consumer<processing.core.PGraphics> _graphics;
+  // Retained mode rendering
   // PShape is only available in Java
   protected processing.core.PShape _shape;
   protected float _highlight;
@@ -285,6 +289,10 @@ public class Node {
 
   // From here only Java constructors
 
+  public Node(Consumer<processing.core.PGraphics> shape) {
+    this(null, null, shape, new Vector(), new Quaternion(), 1);
+  }
+
   /**
    * Same as {@code this(null, null, shape, new Vector(), new Quaternion(), 1)}.
    *
@@ -292,6 +300,10 @@ public class Node {
    */
   public Node(processing.core.PShape shape) {
     this(null, null, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  public Node(Node reference, Consumer<processing.core.PGraphics> shape) {
+    this(reference, null, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
@@ -303,6 +315,10 @@ public class Node {
     this(reference, null, shape, new Vector(), new Quaternion(), 1);
   }
 
+  public Node(Constraint constraint, Consumer<processing.core.PGraphics> shape) {
+    this(null, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
   /**
    * Same as {@code this(null, constraint, shape, new Vector(), new Quaternion(), 1)}.
    *
@@ -312,6 +328,10 @@ public class Node {
     this(null, constraint, shape, new Vector(), new Quaternion(), 1);
   }
 
+  public Node(Node reference, Constraint constraint, Consumer<processing.core.PGraphics> shape) {
+    this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
   /**
    * Same as {@code this(reference, constraint, shape, new Vector(), new Quaternion(), 1)}.
    *
@@ -319,6 +339,11 @@ public class Node {
    */
   public Node(Node reference, Constraint constraint, processing.core.PShape shape) {
     this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  public Node(Node reference, Constraint constraint, Consumer<processing.core.PGraphics> shape, Vector translation, Quaternion rotation, float scaling) {
+    this(reference, constraint, translation, rotation, scaling);
+    hint(shape);
   }
 
   /**
@@ -2451,6 +2476,23 @@ public class Node {
 
   // js go:
   // public void graphics(Object context) {}
+
+  public void resetHint() {
+    hint(null);
+  }
+
+  public void hint(Consumer<processing.core.PGraphics> callback) {
+    _graphics = callback;
+  }
+
+  public void drawHint(processing.core.PGraphics pGraphics) {
+    _graphics(_graphics, pGraphics);
+  }
+
+  protected void _graphics(Consumer<processing.core.PGraphics> callback, processing.core.PGraphics pGraphics) {
+    if (callback != null)
+      callback.accept(pGraphics);
+  }
 
   /**
    * Override this method to set an immediate mode graphics procedure on the Processing

@@ -968,12 +968,14 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushMatrix();
     if (isTagged(node))
       pGraphics.scale(1 + node.highlighting());
-    if (node.shape() != null)
+    if (node.shape() != null) {
       pGraphics.shapeMode(context().shapeMode);
-    if (node.shape() != null)
       pGraphics.shape(node.shape());
+    }
+    // TODO discard else
     else
       node.graphics(pGraphics);
+    node.drawHint(pGraphics);
     if (node.pickingThreshold() == 0 && node.isTaggingEnabled())
       _bbNeed = frameCount();
     pGraphics.popStyle();
@@ -999,12 +1001,14 @@ public class Scene extends Graph implements PConstants {
       _triangleShader.set("id", new PVector(r, g, b));
       _lineShader.set("id", new PVector(r, g, b));
       _pointShader.set("id", new PVector(r, g, b));
-      if (node.shape() != null)
+      if (node.shape() != null) {
         pGraphics.shapeMode(context().shapeMode);
-      if (node.shape() != null)
         pGraphics.shape(node.shape());
+      }
+      // TODO discard else
       else
         node.graphics(pGraphics);
+      node.drawHint(pGraphics);
       pGraphics.popStyle();
       pGraphics.popMatrix();
     }
