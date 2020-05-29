@@ -131,6 +131,10 @@ import java.util.List;
  * @see MatrixHandler
  */
 public class Graph {
+  // Visual hints
+  public final static int AXES = 1 << 0;
+  public final static int GRID = 1 << 1;
+
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
   protected long _lastOffDisplayed;

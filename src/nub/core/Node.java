@@ -150,6 +150,14 @@ public class Node {
   protected boolean _culled;
   protected boolean _tagging;
 
+  // Visual hints
+  public final static int AXES = Graph.AXES;
+  public final static int CAMERA = 1 << 1;
+  public final static int BULLS_EYE = 1 << 2;
+  public final static int IMR = 1 << 3;
+  public final static int RMR = 1 << 4;
+  protected int _visualHintMask;
+
   // Rendering
   // Immediate mode rendering
   protected Consumer<processing.core.PGraphics> _graphics;
