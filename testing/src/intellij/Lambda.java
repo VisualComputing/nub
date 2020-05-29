@@ -9,13 +9,12 @@ import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * This example introduces the three different interpolations offered
  * by the Graph.
  */
-public class Interpolation extends PApplet {
+public class Lambda extends PApplet {
   Scene scene;
   Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
   Node shape;
@@ -148,6 +147,6 @@ public class Interpolation extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.Interpolation"});
+    PApplet.main(new String[]{"intellij.Lambda"});
   }
 }
