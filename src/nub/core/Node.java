@@ -296,14 +296,14 @@ public class Node {
     // unlikely but theoretically possible
     if (_id == 16777216)
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
-    // TODO remove these two
+    // TODO remove these three
     //_lastUpdate = 0;
     //_threshold = 0;
+    //_culled = false;
     _tagging = true;
     _highlight = 0.15f;
     // cyan encoded as a processing int rgb color
     _bullStroke = -16711681;
-    _culled = false;
     _children = new ArrayList<Node>();
   }
 

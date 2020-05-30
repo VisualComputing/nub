@@ -310,10 +310,12 @@ public class Scene extends Graph implements PConstants {
     PGraphicsOpenGL pGraphics = (PGraphicsOpenGL) context;
     pGraphics.pushStyle();
     pGraphics.pushMatrix();
-    if (node.shape() != null)
-      pGraphics.shape(node.shape());
-    else
+    if (node.rmrShape() != null) {
+      pGraphics.shape(node.rmrShape());
+    } else {
+      node.drawIMRShape(pGraphics);
       node.graphics(pGraphics);
+    }
     pGraphics.popStyle();
     pGraphics.popMatrix();
   }
@@ -610,6 +612,8 @@ public class Scene extends Graph implements PConstants {
    */
   public void draw() {
     _matrixHandler.popMatrix();
+    // display visual hints in the world
+    _displayVisualHints();
     _renderBackBuffer();
   }
 
@@ -669,6 +673,7 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
           + "endDraw() and they cannot be nested. Check your implementation!");
     _matrixHandler.popMatrix();
+    _displayVisualHints();
     context().endDraw();
     _renderBackBuffer();
   }
@@ -1046,6 +1051,26 @@ public class Scene extends Graph implements PConstants {
       pGraphics.popStyle();
       pGraphics.popMatrix();
     }
+  }
+
+  @Override
+  protected void _displayVisualHints() {
+    context().pushStyle();
+    if (isHintEnable(AXES)) {
+      drawAxes();
+    }
+    if (isHintEnable(GRID)) {
+      context().colorMode(PApplet.RGB, 255);
+      context().stroke(_gridStroke);
+      if (_dotted)
+        drawDottedGrid(radius(), _gridSubDiv);
+      else
+        drawGrid(radius(), _gridSubDiv);
+    }
+    if (isHintEnable(INTERPOLATORS)) {
+      // TODO implement me
+    }
+    context().popStyle();
   }
 
   /**

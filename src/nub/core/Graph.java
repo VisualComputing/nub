@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A 2D or 3D scene-graph providing eye, input and timing handling to a raster or ray-tracing
@@ -135,6 +136,10 @@ public class Graph {
   public final static int AXES = 1 << 0;
   public final static int GRID = 1 << 1;
   public final static int INTERPOLATORS = 1 << 2;
+  protected int _mask;
+  protected boolean _dotted;
+  protected int _gridStroke;
+  protected int _gridSubDiv;
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
@@ -400,6 +405,9 @@ public class Graph {
     enableBoundaryEquations(false);
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
+    // middle grey encoded as a processing int rgb color
+    _gridStroke = -8553091;
+    _gridSubDiv = 10;
   }
 
   /**
@@ -2857,6 +2865,10 @@ public class Graph {
       updateBoundaryEquations();
       _lastEqUpdate = TimingHandler.frameCount;
     }
+    // TODO nothing gets drawn because the Processing background!
+    // pre is supposed to draw something
+    // https://github.com/processing/processing/wiki/Library-Basics
+    //_displayVisualHints();
   }
 
   // caches
@@ -3221,10 +3233,18 @@ public class Graph {
    * @see Node#isCulled()
    * @see Node#bypass()
    * @see Node#visit()
-   * @see Node#graphics(processing.core.PGraphics)
-   * @see Node#setShape(processing.core.PShape)
+   * @see Node#setIMRShape(Consumer)
+   * @see Node#setRMRShape(processing.core.PShape)
    */
   protected void _drawBackBuffer(Node node) {
+  }
+
+  /**
+   * Renders the graph visual hints.
+   * <p>
+   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   */
+  protected void _displayVisualHints() {
   }
 
   /**
@@ -4676,5 +4696,76 @@ public class Graph {
   protected void _rotateCAD() {
     Vector _up = eye().displacement(_eyeUp);
     eye().orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_cadRotateTask._y : _cadRotateTask._y)), anchor());
+  }
+
+  // visual hints
+
+  public boolean isHintEnable(int hint) {
+    return (_mask & hint) != 0;
+  }
+
+  public int visualHint() {
+    return this._mask;
+  }
+
+  public void setVisualHint(int mask) {
+    _mask = mask;
+  }
+
+  public void enableHint(int hint) {
+    _mask |= hint;
+  }
+
+  public void disableHint(int hint) {
+    _mask &= ~hint;
+  }
+
+  public void toggleHint(int hint) {
+    if (isHintEnable(hint))
+      disableHint(hint);
+    else
+      enableHint(hint);
+  }
+
+  public void configHint(int hint, Object... params) {
+    if (params.length == 1) {
+      if (hint == GRID) {
+        if (isNumInstance(params[0])) {
+          _gridStroke = castToInt(params[0]);
+        }
+        if (params[0] instanceof Boolean) {
+          _dotted = (Boolean) params[0];
+        }
+      }
+    }
+    if (params.length == 2) {
+      if (hint == GRID) {
+        if (isNumInstance(params[0]) && isNumInstance(params[1])) {
+          _gridStroke = castToInt(params[0]);
+          _gridSubDiv = castToInt(params[1]);
+        }
+        if (isNumInstance(params[0]) && params[1] instanceof Boolean) {
+          _gridStroke = castToInt(params[0]);
+          _dotted = (Boolean) params[1];
+        }
+        if (params[1] instanceof Boolean && isNumInstance(params[0])) {
+          _dotted = (Boolean) params[0];
+          _gridStroke = castToInt(params[1]);
+        }
+      }
+    }
+    if (params.length == 3) {
+      if (hint == GRID) {
+        if (isNumInstance(params[0]) && isNumInstance(params[1]) && params[2] instanceof Boolean) {
+          _gridStroke = castToInt(params[0]);
+          _gridSubDiv = castToInt(params[1]);
+          _dotted = (Boolean) params[2];
+        }
+      }
+    }
+  }
+
+  protected boolean _validateHint(int hint) {
+    return hint == AXES || hint == GRID || hint == INTERPOLATORS;
   }
 }

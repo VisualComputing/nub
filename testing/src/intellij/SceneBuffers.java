@@ -11,7 +11,7 @@ public class SceneBuffers extends PApplet {
   Node[] shapes;
 
   //Choose one of P3D for a 3D scene or P2D for a 2D one.
-  String renderer = P2D;
+  String renderer = P3D;
   int w = 1000;
   int h = 1000;
 
@@ -31,6 +31,7 @@ public class SceneBuffers extends PApplet {
       shapes[i].setPickingThreshold(0);
     }
     scene.fit(1);
+    scene.setVisualHint(Scene.AXES);
   }
 
   public void draw() {
