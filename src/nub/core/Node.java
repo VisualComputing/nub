@@ -163,6 +163,8 @@ public class Node {
   protected float _highlight;
   protected int _bullStroke;
   protected float _axesLength;
+  protected int _cameraStroke;
+  protected float _cameraLength;
 
   // Rendering
   // Immediate mode rendering
@@ -2617,6 +2619,16 @@ public class Node {
           if (0 < highlight && highlight <= 1)
             _highlight = highlight;
         }
+        if (hint == CAMERA) {
+          _cameraStroke = Graph.castToInt(params[0]);
+        }
+      }
+    } else if (params.length == 2) {
+      if (hint == CAMERA) {
+        if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
+          _cameraStroke = Graph.castToInt(params[0]);
+          _cameraLength = Graph.castToFloat(params[1]);
+        }
       }
     }
   }
@@ -2653,5 +2665,13 @@ public class Node {
 
   public float axesLength() {
     return _axesLength;
+  }
+
+  public float cameraLength() {
+    return _cameraLength;
+  }
+
+  public int cameraStroke() {
+    return _cameraStroke;
   }
 }

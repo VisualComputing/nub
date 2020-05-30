@@ -995,6 +995,13 @@ public class Scene extends Graph implements PConstants {
       drawBullsEye(node);
       pGraphics.popStyle();
     }
+    if (node.isHintEnable(Node.CAMERA)) {
+      pGraphics.pushStyle();
+      pGraphics.colorMode(PApplet.RGB, 255);
+      pGraphics.stroke(node.cameraStroke());
+      _drawEye(node.cameraLength() == 0 ? radius() : node.cameraLength());
+      pGraphics.popStyle();
+    }
     // TODO pending
     if (node.pickingThreshold() == 0 && node.isTaggingEnabled())
       _bbNeed = frameCount();

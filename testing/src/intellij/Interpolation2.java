@@ -100,6 +100,7 @@ public class Interpolation2 extends PApplet {
     println(shape.isHintEnable(Node.AXES) ? "yep axes" : "nope exes");
     println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
      */
+    /*
     println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
     //shape.disableHint(Node.IMR);
     //shape.configHint(Node.AXES, 500);
@@ -107,6 +108,14 @@ public class Interpolation2 extends PApplet {
     shape.enableHint(Node.BULLS_EYE);
     shape.configHint(Node.BULLS_EYE, color(255, 0, 0));
     println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
+    shape.setPickingThreshold(50);
+     */
+    shape.disableHint(Node.IMR);
+    shape.enableHint(Node.AXES);
+    shape.enableHint(Node.BULLS_EYE);
+    shape.configHint(Node.BULLS_EYE, color(0, 255, 0));
+    shape.enableHint(Node.CAMERA);
+    shape.configHint(Node.CAMERA, color(255, 0, 0), scene.radius() * 2);
     shape.setPickingThreshold(50);
   }
 
