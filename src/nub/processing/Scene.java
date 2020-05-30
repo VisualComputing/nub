@@ -968,14 +968,29 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushMatrix();
     if (isTagged(node))
       pGraphics.scale(1 + node.highlighting());
-    if (node.shape() != null) {
+    if (node.isHintEnable(Node.RMR) && node.shape() != null) {
       pGraphics.shapeMode(context().shapeMode);
       pGraphics.shape(node.shape());
     }
-    // TODO discard else
-    else
+    /*
+    if (node.isHintEnable(Node.IMR) && node.imr() != null) {
+      node.drawHint(pGraphics);
+    }
+    // */
+    // TODO discard this form, since graphics should be deprecated
+    if (node.isHintEnable(Node.IMR)) {
       node.graphics(pGraphics);
-    node.drawHint(pGraphics);
+      if (node.imr() != null)
+        node.drawHint(pGraphics);
+    }
+    if (node.isHintEnable(Node.AXES)) {
+      drawAxes(node._axesLength == 0 ? radius() / 5 : node._axesLength);
+    }
+    if (node.isHintEnable(Node.BULLS_EYE)) {
+      pGraphics.stroke(node._bullStroke);
+      drawBullsEye(node);
+    }
+    // TODO pending
     if (node.pickingThreshold() == 0 && node.isTaggingEnabled())
       _bbNeed = frameCount();
     pGraphics.popStyle();
@@ -1001,14 +1016,21 @@ public class Scene extends Graph implements PConstants {
       _triangleShader.set("id", new PVector(r, g, b));
       _lineShader.set("id", new PVector(r, g, b));
       _pointShader.set("id", new PVector(r, g, b));
-      if (node.shape() != null) {
+      if (node.isHintEnable(Node.RMR) && node.shape() != null) {
         pGraphics.shapeMode(context().shapeMode);
         pGraphics.shape(node.shape());
       }
-      // TODO discard else
-      else
+      /*
+      if (node.isHintEnable(Node.IMR) && node.imr() != null) {
+        node.drawHint(pGraphics);
+      }
+      // */
+      // TODO discard this form, since graphics should be deprecated
+      if (node.isHintEnable(Node.IMR)) {
         node.graphics(pGraphics);
-      node.drawHint(pGraphics);
+        if (node.imr() != null)
+          node.drawHint(pGraphics);
+      }
       pGraphics.popStyle();
       pGraphics.popMatrix();
     }

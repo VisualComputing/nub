@@ -172,6 +172,34 @@ public class Graph {
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected boolean _isProjectionViewInverseCached;
 
+  // TODO these three to are not only related to Quaternion.from but mainly to hint stuff
+
+  /**
+   * Returns {@code true} if {@code o} is instance of {@link Integer}, {@link Float} or {@link Double},
+   * and {@code false} otherwise.
+   */
+  public static boolean isNumInstance(Object o) {
+    return o instanceof Float || o instanceof Integer || o instanceof Double;
+  }
+
+  /**
+   * Cast {@code o} to a {@link Float}. Returns {@code null} if {@code o} is not a num instance
+   * (See {@link #isNumInstance(Object)}).
+   */
+  public static Float castToFloat(Object o) {
+    return isNumInstance(o) ? o instanceof Integer ? ((Integer) o).floatValue() :
+        o instanceof Double ? ((Double) o).floatValue() : o instanceof Float ? (Float) o : null : null;
+  }
+
+  /**
+   * Cast {@code o} to an {@link Integer}. Returns {@code null} if {@code o} is not a num instance
+   * (See {@link #isNumInstance(Object)}).
+   */
+  public static Integer castToInt(Object o) {
+    return isNumInstance(o) ? o instanceof Float ? ((Float) o).intValue() :
+        o instanceof Double ? ((Double) o).intValue() : o instanceof Integer ? (Integer) o : null : null;
+  }
+
   // 3. Handlers
   protected class Ray {
     public String _tag;

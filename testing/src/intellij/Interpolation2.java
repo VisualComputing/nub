@@ -90,6 +90,20 @@ public class Interpolation2 extends PApplet {
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
     interpolator.run();
+
+    /*
+    println(shape.isHintEnable(Node.AXES) ? "yep axes" : "nope exes");
+    println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
+    shape.setVisualHint(Node.AXES | Node.BULLS_EYE);
+    println(shape.isHintEnable(Node.AXES) ? "yep axes" : "nope exes");
+    println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
+    shape.toggleHint(Node.AXES);
+    println(shape.isHintEnable(Node.AXES) ? "yep axes" : "nope exes");
+    println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
+     */
+    shape.disableHint(Node.IMR);
+    //shape.configHint(Node.AXES, 500);
+    shape.enableHint(Node.AXES);
   }
 
   public void draw() {
@@ -118,7 +132,7 @@ public class Interpolation2 extends PApplet {
       scene.drawCatmullRom(eyeInterpolator2);
       popStyle();
     }
-    println(frameRate);
+    //println(frameRate);
   }
 
   public void mouseMoved() {

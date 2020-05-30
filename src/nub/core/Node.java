@@ -156,7 +156,7 @@ public class Node {
   public final static int BULLS_EYE = 1 << 2;
   public final static int IMR = 1 << 3;
   public final static int RMR = 1 << 4;
-  protected int _visualHintMask;
+  protected int _mask;
 
   // Rendering
   // Immediate mode rendering
@@ -271,6 +271,8 @@ public class Node {
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
+    // TODO new
+    setVisualHint(Node.IMR | Node.RMR);
   }
 
   /**
@@ -282,6 +284,7 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
+    //setVisualHint(Node.IMR | Node.RMR);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -2493,6 +2496,10 @@ public class Node {
     _graphics = callback;
   }
 
+  public Consumer<processing.core.PGraphics> imr() {
+    return _graphics;
+  }
+
   public void drawHint(processing.core.PGraphics pGraphics) {
     _graphics(_graphics, pGraphics);
   }
@@ -2537,5 +2544,57 @@ public class Node {
    */
   public processing.core.PShape shape() {
     return _shape;
+  }
+
+  public int visualHint() {
+    return this._mask;
+  }
+
+  public void setVisualHint(int mask) {
+    _mask = mask;
+  }
+
+  public void enableHint(int hint) {
+    _mask |= hint;
+  }
+
+  public void disableHint(int hint) {
+    _mask &= ~hint;
+  }
+
+  public void toggleHint(int hint) {
+    if (isHintEnable(hint))
+      disableHint(hint);
+    else
+      enableHint(hint);
+  }
+
+  public int _bullStroke;
+
+  public float _axesLength;
+
+  public void configHint(int hint, Object... params) {
+    if (hint == BULLS_EYE) {
+      if (params.length == 1) {
+        if (Graph.isNumInstance(params[0])) {
+          _bullStroke = Graph.castToInt(params[0]);
+        }
+      }
+    }
+    if (hint == AXES) {
+      if (params.length == 1) {
+        if (Graph.isNumInstance(params[0])) {
+          _axesLength = Graph.castToFloat(params[0]);
+        }
+      }
+    }
+  }
+
+  public boolean isHintEnable(int hint) {
+    return (_mask & hint) != 0;
+  }
+
+  protected boolean _validateHint(int hint) {
+    return hint == AXES || hint == CAMERA || hint == BULLS_EYE || hint == IMR || hint == RMR;
   }
 }

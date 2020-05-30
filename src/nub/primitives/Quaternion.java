@@ -15,6 +15,8 @@
 
 package nub.primitives;
 
+import nub.core.Graph;
+
 /**
  * A 4 element unit quaternion represented by single precision floating point
  * x,y,z,w coordinates. This class API aims to conform that of the great <a href=
@@ -267,33 +269,18 @@ public class Quaternion {
         if (params[0] instanceof Vector)
           if (params[1] instanceof Vector)
             return new Quaternion((Vector) params[0], (Vector) params[1]);
-          else if (_numInstance(params[1]))
-            return new Quaternion((Vector) params[0], _toFloat(params[1]));
+          else if (Graph.isNumInstance(params[1]))
+            return new Quaternion((Vector) params[0], Graph.castToFloat(params[1]));
         break;
       case 3:
-        if (_numInstance(params[0]) && _numInstance(params[1]) && _numInstance(params[2]))
-          return new Quaternion(_toFloat(params[0]), _toFloat(params[1]), _toFloat(params[2]));
+        if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1]) && Graph.isNumInstance(params[2]))
+          return new Quaternion(Graph.castToFloat(params[0]), Graph.castToFloat(params[1]), Graph.castToFloat(params[2]));
         else if (params[0] instanceof Vector && params[1] instanceof Vector && params[2] instanceof Vector)
           return new Quaternion((Vector) params[0], (Vector) params[1], (Vector) params[2]);
         break;
     }
     System.out.println("Warning: some params in Quaternion.from(params) couldn't be parsed!");
     return new Quaternion();
-  }
-
-  /**
-   * Internally used by {@link #from(Object...)}.
-   */
-  protected static boolean _numInstance(Object o) {
-    return o instanceof Float || o instanceof Integer || o instanceof Double;
-  }
-
-  /**
-   * Internally used by {@link #from(Object...)}.
-   */
-  protected static Float _toFloat(Object o) {
-    return _numInstance(o) ? o instanceof Integer ? ((Integer) o).floatValue() :
-        o instanceof Double ? ((Double) o).floatValue() : o instanceof Float ? (Float) o : null : null;
   }
 
   /**
