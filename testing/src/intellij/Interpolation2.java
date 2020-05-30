@@ -7,8 +7,6 @@ import nub.timing.Task;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 
-import java.util.function.Function;
-
 /**
  * This example introduces the three different interpolations offered
  * by the Graph.
@@ -61,7 +59,8 @@ public class Interpolation2 extends PApplet {
     // */
     shape = new Node((pg) -> {
       pg.pushStyle();
-      pg.fill(0, 255, 255, 125);
+      //pg.fill(0, 255, 255, 125);
+      pg.fill(0, 255, 255 /*, 125*/);
       pg.stroke(0, 0, 255);
       pg.strokeWeight(2);
       if (pg.is2D())
@@ -101,15 +100,21 @@ public class Interpolation2 extends PApplet {
     println(shape.isHintEnable(Node.AXES) ? "yep axes" : "nope exes");
     println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
      */
-    shape.disableHint(Node.IMR);
+    println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
+    //shape.disableHint(Node.IMR);
     //shape.configHint(Node.AXES, 500);
     shape.enableHint(Node.AXES);
+    shape.enableHint(Node.BULLS_EYE);
+    shape.configHint(Node.BULLS_EYE, color(255, 0, 0));
+    println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
+    shape.setPickingThreshold(50);
   }
 
   public void draw() {
     background(125);
     scene.render();
 
+    /*
     pushStyle();
     stroke(255);
     // same as:scene.drawCatmullRom(interpolator, 5);
@@ -132,7 +137,11 @@ public class Interpolation2 extends PApplet {
       scene.drawCatmullRom(eyeInterpolator2);
       popStyle();
     }
+     */
     //println(frameRate);
+
+    int c = color(0, 255, 255);
+    //println(c);
   }
 
   public void mouseMoved() {

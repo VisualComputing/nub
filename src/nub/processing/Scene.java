@@ -966,11 +966,13 @@ public class Scene extends Graph implements PConstants {
     PGraphics pGraphics = context();
     pGraphics.pushStyle();
     pGraphics.pushMatrix();
-    if (isTagged(node))
-      pGraphics.scale(1 + node.highlighting());
-    if (node.isHintEnable(Node.RMR) && node.shape() != null) {
+    if (isTagged(node)) {
+      if (node.isHintEnable(Node.HIGHLIGHT))
+        pGraphics.scale(1 + node.highlighting());
+    }
+    if (node.isHintEnable(Node.RMR) && node.rmrShape() != null) {
       pGraphics.shapeMode(context().shapeMode);
-      pGraphics.shape(node.shape());
+      pGraphics.shape(node.rmrShape());
     }
     /*
     if (node.isHintEnable(Node.IMR) && node.imr() != null) {
@@ -980,15 +982,18 @@ public class Scene extends Graph implements PConstants {
     // TODO discard this form, since graphics should be deprecated
     if (node.isHintEnable(Node.IMR)) {
       node.graphics(pGraphics);
-      if (node.imr() != null)
-        node.drawHint(pGraphics);
+      if (node.imrShape() != null)
+        node.drawIMRShape(pGraphics);
     }
     if (node.isHintEnable(Node.AXES)) {
-      drawAxes(node._axesLength == 0 ? radius() / 5 : node._axesLength);
+      drawAxes(node.axesLength() == 0 ? radius() / 5 : node.axesLength());
     }
     if (node.isHintEnable(Node.BULLS_EYE)) {
-      pGraphics.stroke(node._bullStroke);
+      pGraphics.pushStyle();
+      pGraphics.colorMode(PApplet.RGB, 255);
+      pGraphics.stroke(node.bullsEyeStroke());
       drawBullsEye(node);
+      pGraphics.popStyle();
     }
     // TODO pending
     if (node.pickingThreshold() == 0 && node.isTaggingEnabled())
@@ -1028,8 +1033,8 @@ public class Scene extends Graph implements PConstants {
       // TODO discard this form, since graphics should be deprecated
       if (node.isHintEnable(Node.IMR)) {
         node.graphics(pGraphics);
-        if (node.imr() != null)
-          node.drawHint(pGraphics);
+        if (node.imrShape() != null)
+          node.drawIMRShape(pGraphics);
       }
       pGraphics.popStyle();
       pGraphics.popMatrix();

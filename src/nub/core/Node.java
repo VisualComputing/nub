@@ -17,6 +17,8 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
+import processing.core.PGraphics;
+import processing.core.PShape;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -156,7 +158,11 @@ public class Node {
   public final static int BULLS_EYE = 1 << 2;
   public final static int IMR = 1 << 3;
   public final static int RMR = 1 << 4;
+  public final static int HIGHLIGHT = 1 << 5;
   protected int _mask;
+  protected float _highlight;
+  protected int _bullStroke;
+  protected float _axesLength;
 
   // Rendering
   // Immediate mode rendering
@@ -164,7 +170,6 @@ public class Node {
   // Retained mode rendering
   // PShape is only available in Java
   protected processing.core.PShape _shape;
-  protected float _highlight;
   protected long _bypass = -1;
 
   // Tasks
@@ -272,7 +277,7 @@ public class Node {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
     // TODO new
-    setVisualHint(Node.IMR | Node.RMR);
+    setVisualHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
   }
 
   /**
@@ -294,6 +299,8 @@ public class Node {
     //_threshold = 0;
     _tagging = true;
     _highlight = 0.15f;
+    // cyan encoded as a processing int rgb color
+    _bullStroke = -16711681;
     _culled = false;
     _children = new ArrayList<Node>();
   }
@@ -354,7 +361,7 @@ public class Node {
 
   public Node(Node reference, Constraint constraint, Consumer<processing.core.PGraphics> shape, Vector translation, Quaternion rotation, float scaling) {
     this(reference, constraint, translation, rotation, scaling);
-    hint(shape);
+    setIMRShape(shape);
   }
 
   /**
@@ -2464,46 +2471,45 @@ public class Node {
     _bypass = TimingHandler.frameCount;
   }
 
-  /**
-   * Sets the node {@link #highlighting()} which should be a value in  {@code [0..1]}.
-   * Default value is {@code 0.15}.
-   *
-   * @see #highlighting()
-   * @see #setPickingThreshold(float)
-   */
-  public void setHighlighting(float highlighting) {
-    _highlight = highlighting;
-  }
-
-  /**
-   * Returns the highlighting magnitude use to scale the node when it's tagged.
-   *
-   * @see #setHighlighting(float)
-   * @see #pickingThreshold()
-   */
-  public float highlighting() {
-    return _highlight;
-  }
-
   // js go:
   // public void graphics(Object context) {}
 
-  public void resetHint() {
-    hint(null);
+  public void resetIMRShape() {
+    setIMRShape(null);
   }
 
-  public void hint(Consumer<processing.core.PGraphics> callback) {
+  /**
+   * Sets the node immediate mode rendering (imr) procedure.
+   *
+   * @see #setRMRShape(PShape)
+   * @see #resetIMRShape()
+   */
+  public void setIMRShape(Consumer<processing.core.PGraphics> callback) {
     _graphics = callback;
   }
 
-  public Consumer<processing.core.PGraphics> imr() {
+  /**
+   * Returns the node immediate mode rendering procedure. Maybe null.
+   *
+   * @see #resetIMRShape()
+   * @see #imrShape()
+   * @see #rmrShape()
+   */
+  public Consumer<processing.core.PGraphics> imrShape() {
     return _graphics;
   }
 
-  public void drawHint(processing.core.PGraphics pGraphics) {
+  /**
+   * Execs the node {@link #imrShape()} immediate mode rendering procedure on the
+   * given {@code pGraphics} context.
+   */
+  public void drawIMRShape(processing.core.PGraphics pGraphics) {
     _graphics(_graphics, pGraphics);
   }
 
+  /**
+   * Internally used by {@link #drawIMRShape(PGraphics)}.
+   */
   protected void _graphics(Consumer<processing.core.PGraphics> callback, processing.core.PGraphics pGraphics) {
     if (callback != null)
       callback.accept(pGraphics);
@@ -2512,37 +2518,65 @@ public class Node {
   /**
    * Override this method to set an immediate mode graphics procedure on the Processing
    * {@code PGraphics}. Return {@code true} if succeeded and {@code false} otherwise.
+   * <p>
+   *
+   * @deprecated use {@link #setIMRShape(Consumer)} instead.
    */
+  @Deprecated
   public void graphics(processing.core.PGraphics pGraphics) {
   }
 
   /**
-   * Same as {@code setShape(null)}.
-   *
-   * @see #setShape(processing.core.PShape)
+   * @deprecated use {@link #resetRMRShape()} instead.
    */
+  @Deprecated
   public void resetShape() {
-    setShape(null);
+    resetRMRShape();
   }
 
   /**
-   * Sets the node retained mode shape.
+   * Same as {@code setRMRShape(null)}.
    *
-   * @see #graphics(processing.core.PGraphics)
-   * @see #resetShape()
+   * @see #setShape(processing.core.PShape)
    */
+  public void resetRMRShape() {
+    setRMRShape(null);
+  }
+
+  /**
+   * @deprecated use {@link #setRMRShape(PShape)} instead.
+   */
+  @Deprecated
   public void setShape(processing.core.PShape shape) {
+    setRMRShape(shape);
+  }
+
+  /**
+   * Sets the node retained mode rendering (rmr) shape.
+   *
+   * @see #setIMRShape(Consumer)
+   * @see #resetRMRShape()
+   */
+  public void setRMRShape(processing.core.PShape shape) {
     _shape = shape;
   }
 
   /**
-   * Returns the node retained mode shape. Maybe null.
-   *
-   * @see #resetShape()
-   * @see #shape()
-   * @see #graphics(processing.core.PGraphics)
+   * @deprecated use {@link #rmrShape()} instead.
    */
+  @Deprecated
   public processing.core.PShape shape() {
+    return rmrShape();
+  }
+
+  /**
+   * Returns the node retained mode rendering shape. Maybe null.
+   *
+   * @see #resetRMRShape()
+   * @see #rmrShape()
+   * @see #imrShape()
+   */
+  public processing.core.PShape rmrShape() {
     return _shape;
   }
 
@@ -2569,22 +2603,19 @@ public class Node {
       enableHint(hint);
   }
 
-  public int _bullStroke;
-
-  public float _axesLength;
-
   public void configHint(int hint, Object... params) {
-    if (hint == BULLS_EYE) {
-      if (params.length == 1) {
-        if (Graph.isNumInstance(params[0])) {
+    if (params.length == 1) {
+      if (Graph.isNumInstance(params[0])) {
+        if (hint == BULLS_EYE) {
           _bullStroke = Graph.castToInt(params[0]);
         }
-      }
-    }
-    if (hint == AXES) {
-      if (params.length == 1) {
-        if (Graph.isNumInstance(params[0])) {
+        if (hint == AXES) {
           _axesLength = Graph.castToFloat(params[0]);
+        }
+        if (hint == HIGHLIGHT) {
+          float highlight = Graph.castToFloat(params[0]);
+          if (0 < highlight && highlight <= 1)
+            _highlight = highlight;
         }
       }
     }
@@ -2596,5 +2627,31 @@ public class Node {
 
   protected boolean _validateHint(int hint) {
     return hint == AXES || hint == CAMERA || hint == BULLS_EYE || hint == IMR || hint == RMR;
+  }
+
+  /**
+   * @deprecated use {@link #configHint(int, Object...)} instead.
+   */
+  @Deprecated
+  public void setHighlighting(float highlighting) {
+    _highlight = highlighting;
+  }
+
+  /**
+   * Returns the highlighting magnitude use to scale the node when it's tagged.
+   *
+   * @see #setHighlighting(float)
+   * @see #pickingThreshold()
+   */
+  public float highlighting() {
+    return _highlight;
+  }
+
+  public int bullsEyeStroke() {
+    return _bullStroke;
+  }
+
+  public float axesLength() {
+    return _axesLength;
   }
 }

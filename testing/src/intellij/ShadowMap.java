@@ -56,7 +56,8 @@ public class ShadowMap extends PApplet {
       scene.randomize(shapes[i]);
       // set picking precision to the pixels of the node projection
       shapes[i].setPickingThreshold(0);
-      shapes[i].setHighlighting(0);
+      //shapes[i].setHighlighting(0);
+      shapes[i].disableHint(Node.HIGHLIGHT);
     }
     shadowMap = createGraphics(w / 2, h / 2, P3D);
     //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
