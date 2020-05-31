@@ -5,7 +5,6 @@ import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import processing.core.PImage;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
@@ -152,25 +151,6 @@ public class HolaMundo extends PApplet {
       pg.line(orig.x(), orig.y(), orig.z(), end.x(), end.y(), end.z());
       pg.popStyle();
     }
-  }
-
-  PShape createCan(float r, float h, int detail, PImage tex) {
-    textureMode(NORMAL);
-    PShape sh = createShape();
-    sh.beginShape(QUAD_STRIP);
-    sh.noStroke();
-    sh.texture(tex);
-    for (int i = 0; i <= detail; i++) {
-      float angle = TWO_PI / detail;
-      float x = sin(i * angle);
-      float z = cos(i * angle);
-      float u = (float) i / detail;
-      sh.normal(x, 0, z);
-      sh.vertex(x * r, -h / 2, z * r, u, 0);
-      sh.vertex(x * r, +h / 2, z * r, u, 1);
-    }
-    sh.endShape();
-    return sh;
   }
 
   public static void main(String[] args) {

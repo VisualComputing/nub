@@ -1,10 +1,8 @@
 package intellij;
 
 import nub.core.Node;
-import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
-import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -15,21 +13,13 @@ public class HolaMundoNUB extends PApplet {
   Node root, torus, box, can;
   // 2. Main-Scene
   Scene mainScene;
-  // 3. Visual hint off-screen scene
-  Scene hintScene;
-  int hintSceneWidth = 500, hintSceneHeight = 500, atX, atY;
-  // 4. can off-screen scene
+  // 3. can off-screen scene
   Scene canScene;
   int canSceneWidth = 500, canSceneHeight = 500;
   boolean displayCan;
   PShader texShader;
-  // 5. Scene handler
+  // 4. Scene handler
   Scene scene;
-  // 6. Debug (draw) ray
-  Vector orig = new Vector();
-  Vector dir = new Vector();
-  Vector end = new Vector();
-  Vector pup;
 
   @Override
   public void settings() {
@@ -40,18 +30,17 @@ public class HolaMundoNUB extends PApplet {
   public void setup() {
     // A. Scenes
     // 1. Main (onscreen) Scene
-    mainScene = new Scene(this);
+    mainScene = new Scene(this, P3D);
     mainScene.setRadius(500);
     mainScene.fit(1);
     mainScene.setVisualHint(Scene.AXES | Scene.GRID);
     mainScene.configHint(Scene.GRID, color(0, 255, 0));
-    // 2. Hint (offscreen) Scene
-    hintScene = new Scene(this, P3D, hintSceneWidth, hintSceneHeight);
-    hintScene.setRadius(300);
-    // 3. Can (offscreen) Scene
+    // 2. Can (offscreen) Scene
     canScene = new Scene(this, P3D, canSceneWidth, canSceneHeight);
     canScene.setRadius(300);
     canScene.fit();
+    texShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/texture/texfrag.glsl");
+    canScene.context().shader(texShader);
     // B. Nodes
     // 1. root (mainScene and hintScene only)
     root = new Node();
@@ -73,57 +62,31 @@ public class HolaMundoNUB extends PApplet {
     box.translate(200, 200, 0);
     box.setPickingThreshold(0);
     // 4. can (canScene only)
-    //can = new Node(createCan(100, 200, 32, mainScene.context()));
-    //can = new Node(createCan(100, 200, 32, loadImage("/home/pierre/IdeaProjects/nub/testing/data/texture/lachoy.jpg")));
+    can = new Node(createCan(100, 200, 32, mainScene.context()));
   }
 
   @Override
   public void draw() {
-    scene = hintScene.hasMouseFocus() ? hintScene : canScene.hasMouseFocus() ? canScene : mainScene;
-    background(0);
+    scene = canScene.hasMouseFocus() ? canScene : mainScene;
     // subtree rendering
-    mainScene.render(root);
-    if (pup != null) {
-      // debug
-      drawRay();
-      displayOFFScreenScene(hintScene, root, color(125, 80, 90), atX, atY);
-    }
+    displayOFFScreenScene(mainScene, root, color(125), 0, 0);
     if (displayCan) {
       displayOFFScreenScene(canScene, can, color(25, 170, 150), width - canSceneWidth, height - canSceneHeight);
     }
   }
 
   void displayOFFScreenScene(Scene offscreeScene, Node subtree, int background, int x, int y) {
-    mainScene.beginHUD();
     offscreeScene.beginDraw();
     offscreeScene.context().background(background);
     // subtree rendering
     offscreeScene.render(subtree);
     offscreeScene.endDraw();
     offscreeScene.display(x, y);
-    mainScene.endHUD();
   }
 
   @Override
   public void mouseMoved(MouseEvent event) {
-    if (event.isControlDown()) {
-      pup = mainScene.mouseLocation();
-      // position the auxiliar viewer
-      if (pup != null) {
-        hintScene.setCenter(pup);
-        hintScene.eye().setPosition(pup);
-        hintScene.setViewDirection(mainScene.displacement(Vector.plusJ));
-        hintScene.setUpVector(mainScene.displacement(Vector.minusK));
-        hintScene.fit();
-        atX = mouseX - hintSceneWidth / 2;
-        atY = mouseY - hintSceneHeight;
-        // debug
-        mainScene.mouseToLine(orig, dir);
-        end = Vector.add(orig, Vector.multiply(dir, 4000.0f));
-      }
-    } else {
-      scene.mouseTag();
-    }
+    scene.mouseTag();
   }
 
   @Override
@@ -151,21 +114,6 @@ public class HolaMundoNUB extends PApplet {
       scene.toggleHint(Scene.AXES);
     } else if (key == 'c') {
       displayCan = !displayCan;
-    }
-  }
-
-  // debug ray
-  void drawRay() {
-    PGraphics pg = mainScene.context();
-    if (pup != null) {
-      pg.pushStyle();
-      pg.strokeWeight(20);
-      pg.stroke(0, 255, 0);
-      pg.point(pup.x(), pup.y(), pup.z());
-      pg.strokeWeight(8);
-      pg.stroke(0, 0, 255);
-      pg.line(orig.x(), orig.y(), orig.z(), end.x(), end.y(), end.z());
-      pg.popStyle();
     }
   }
 
