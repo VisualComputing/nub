@@ -160,6 +160,8 @@ public class Interpolator {
     }
   }
 
+  // TODO implement visual hint here: note that a Scene should be used
+
   protected long _lastUpdate;
   // Attention: We should go like this: protected Map<Float, Node> _list;
   // but Java doesn't allow to iterate backwards a map

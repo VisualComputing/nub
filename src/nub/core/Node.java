@@ -17,7 +17,6 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
-import processing.core.PGraphics;
 import processing.core.PShape;
 
 import java.util.ArrayList;
@@ -159,6 +158,8 @@ public class Node {
   public final static int IMR = 1 << 3;
   public final static int RMR = 1 << 4;
   public final static int HIGHLIGHT = 1 << 5;
+  // TODO eye is pending
+  public final static int EYE = 1 << 6;
   protected int _mask;
   protected float _highlight;
   protected int _bullStroke;
@@ -2506,15 +2507,8 @@ public class Node {
    * given {@code pGraphics} context.
    */
   public void drawIMRShape(processing.core.PGraphics pGraphics) {
-    _graphics(_graphics, pGraphics);
-  }
-
-  /**
-   * Internally used by {@link #drawIMRShape(PGraphics)}.
-   */
-  protected void _graphics(Consumer<processing.core.PGraphics> callback, processing.core.PGraphics pGraphics) {
-    if (callback != null)
-      callback.accept(pGraphics);
+    if (_graphics != null)
+      _graphics.accept(pGraphics);
   }
 
   /**
