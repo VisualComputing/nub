@@ -10,7 +10,7 @@ import processing.event.MouseEvent;
 
 public class HolaMundo extends PApplet {
   // 1. Nodes
-  Node root, torus, box, can;
+  Node torus, box;
   // 2. Main-Scene
   Scene mainScene;
   // 3. Visual hint off-screen scene
@@ -42,11 +42,8 @@ public class HolaMundo extends PApplet {
     hintScene = new Scene(this, P3D, hintSceneWidth, hintSceneHeight);
     hintScene.setRadius(300);
     // B. Nodes
-    // 1. root (mainScene and hintScene only)
-    root = new Node();
-    root.disableTagging();
-    // 2. torus
-    torus = new Node(root, (pg) -> {
+    // 1. torus
+    torus = new Node((pg) -> {
       pg.push();
       pg.fill(255, 0, 0);
       Scene.drawTorusSolenoid(pg);
@@ -58,7 +55,7 @@ public class HolaMundo extends PApplet {
     // 3. box
     PShape pbox = createShape(BOX, 200);
     pbox.setFill(color(255, 255, 0));
-    box = new Node(root, pbox);
+    box = new Node(pbox);
     box.translate(200, 200, 0);
     box.setPickingThreshold(0);
     // 4. can (canScene only)
@@ -71,23 +68,19 @@ public class HolaMundo extends PApplet {
     scene = hintScene.hasMouseFocus() ? hintScene : mainScene;
     background(0);
     // subtree rendering
-    mainScene.render(root);
+    mainScene.render();
     if (pup != null) {
       // debug
       drawRay();
-      displayOFFScreenScene(hintScene, root, color(125, 80, 90), atX, atY);
+      mainScene.beginHUD();
+      hintScene.beginDraw();
+      hintScene.context().background(color(0, 123, 240));
+      // subtree rendering
+      hintScene.render();
+      hintScene.endDraw();
+      hintScene.display(atX, atY);
+      mainScene.endHUD();
     }
-  }
-
-  void displayOFFScreenScene(Scene offscreeScene, Node subtree, int background, int x, int y) {
-    mainScene.beginHUD();
-    offscreeScene.beginDraw();
-    offscreeScene.context().background(background);
-    // subtree rendering
-    offscreeScene.render(subtree);
-    offscreeScene.endDraw();
-    offscreeScene.display(x, y);
-    mainScene.endHUD();
   }
 
   @Override
