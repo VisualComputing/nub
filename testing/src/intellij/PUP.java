@@ -21,7 +21,6 @@ public class PUP extends PApplet {
   @Override
   public void settings() {
     size(1800, 1400, P3D);
-    //noSmooth();
   }
 
   public void setup() {

@@ -7,20 +7,47 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
+import processing.opengl.PShader;
 
 public class HolaMundo extends PApplet {
+  /*
+  // 1. Nodes
+  Node root, torus, box, can;
+  // 2. Main-Scene
+  String renderer = P3D;
+  Scene mainScene;
+  // 3. Visual hint off-screen scene
+  Scene hintScene;
+  int w, h;
+  int atX, atY;
+  // 4. can off-screen scene
+  Scene canScene;
+  boolean displayCan;
+  PShader texShader;
+  // 5. Scene handler
+  Scene scene;
+  // 6. Debug (draw) ray
+  Vector orig = new Vector();
+  Vector dir = new Vector();
+  Vector end = new Vector();
+  Vector pup;
+   */
+
   // 1. Nodes
   Node root, torus, box;
   // 2. Main-Scene
   String renderer = P3D;
-  Scene scene;
-  // 3. Off-screen scene
-  Scene visualHint;
+  Scene mainScene;
+  // 3. Visual hint off-screen scene
+  Scene hintScene;
   int w = 500, h = 500, atX, atY;
-  boolean ray = true;
-  // 4. Scene handler
-  Scene focus;
-  // 5. Debug (draw) ray
+  // 4. can off-screen scene
+  Scene canScene;
+  boolean displayCan;
+  PShader texShader;
+  // 5. Scene handler
+  Scene scene;
+  // 6. Debug (draw) ray
   Vector orig = new Vector();
   Vector dir = new Vector();
   Vector end = new Vector();
@@ -33,9 +60,13 @@ public class HolaMundo extends PApplet {
 
   @Override
   public void setup() {
-    scene = new Scene(this);
-    scene.setRadius(500);
-    scene.fit(1);
+    mainScene = new Scene(this);
+    mainScene.setRadius(500);
+    mainScene.fit(1);
+    mainScene.setVisualHint(Scene.AXES | Scene.GRID);
+    mainScene.configHint(Scene.GRID, color(0, 255, 0));
+    hintScene = new Scene(this, P3D, w, h);
+    hintScene.setRadius(300);
     root = new Node();
     root.disableTagging();
     torus = new Node(root, (pg) -> {
@@ -52,83 +83,78 @@ public class HolaMundo extends PApplet {
     box = new Node(root, pbox);
     box.translate(200, 200, 0);
     box.setPickingThreshold(0);
-    scene.setVisualHint(Scene.AXES | Scene.GRID);
-    scene.configHint(Scene.GRID, color(0, 255, 0));
-    visualHint = new Scene(this, P3D, w, h);
-    visualHint.setRadius(300);
   }
 
   @Override
   public void draw() {
-    focus = pup != null ? visualHint.hasMouseFocus() ? visualHint : scene : scene;
+    scene = pup != null ? hintScene.hasMouseFocus() ? hintScene : mainScene : mainScene;
     background(0);
-    scene.render(root);
-    if (ray)
-      drawRay();
+    mainScene.render(root);
     if (pup != null) {
-      scene.beginHUD();
-      visualHint.beginDraw();
-      visualHint.context().background(125, 80, 90);
-      visualHint.render(root);
-      visualHint.endDraw();
-      visualHint.display(atX, atY);
-      scene.endHUD();
+      drawRay();
+      mainScene.beginHUD();
+      hintScene.beginDraw();
+      hintScene.context().background(125, 80, 90);
+      hintScene.render(root);
+      hintScene.endDraw();
+      hintScene.display(atX, atY);
+      mainScene.endHUD();
     }
   }
 
   @Override
   public void mouseMoved(MouseEvent event) {
     if (event.isControlDown()) {
-      pup = scene.mouseLocation();
+      pup = mainScene.mouseLocation();
       // position the auxiliar viewer
       if (pup != null) {
-        visualHint.setCenter(pup);
-        visualHint.eye().setPosition(pup);
-        visualHint.setViewDirection(scene.displacement(Vector.plusJ));
-        visualHint.setUpVector(scene.displacement(Vector.minusK));
-        visualHint.fit();
+        hintScene.setCenter(pup);
+        hintScene.eye().setPosition(pup);
+        hintScene.setViewDirection(mainScene.displacement(Vector.plusJ));
+        hintScene.setUpVector(mainScene.displacement(Vector.minusK));
+        hintScene.fit();
         atX = mouseX - w / 2;
         atY = mouseY - h;
         // debug
-        scene.mouseToLine(orig, dir);
+        mainScene.mouseToLine(orig, dir);
         end = Vector.add(orig, Vector.multiply(dir, 4000.0f));
       }
     } else {
-      focus.mouseTag();
+      scene.mouseTag();
     }
   }
 
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.mouseSpin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.mouseTranslate();
+      scene.mouseTranslate();
     else
-      focus.scale(mouseX - pmouseX);
+      scene.scale(mouseX - pmouseX);
   }
 
   @Override
   public void mouseWheel(MouseEvent event) {
-    focus.moveForward(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 20);
   }
 
   @Override
   public void keyPressed() {
     if (key == 'f') {
-      focus.flip();
+      scene.flip();
     } else if (key == 'g') {
-      focus.toggleHint(Scene.GRID);
+      scene.toggleHint(Scene.GRID);
     } else if (key == 'a') {
-      focus.toggleHint(Scene.AXES);
-    } else if (key == 'r') {
+      scene.toggleHint(Scene.AXES);
+    }/* else if (key == 'r') {
       ray = !ray;
-    }
+    }*/
   }
 
   // debug ray
   void drawRay() {
-    PGraphics pg = scene.context();
+    PGraphics pg = mainScene.context();
     if (pup != null) {
       pg.pushStyle();
       pg.strokeWeight(20);
