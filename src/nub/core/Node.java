@@ -158,14 +158,19 @@ public class Node {
   public final static int IMR = 1 << 3;
   public final static int RMR = 1 << 4;
   public final static int HIGHLIGHT = 1 << 5;
-  // TODO eye is pending
-  public final static int EYE = 1 << 6;
+  public final static int FRUSTUM = 1 << 6;
+  // TODO pending flags, TORUS?
+  // TODO update constraint examples
+  public final static int CONSTRAINT = 1 << 7;
+  public final static int BONE = 1 << 8;
   protected int _mask;
   protected float _highlight;
   protected int _bullStroke;
   protected float _axesLength;
   protected int _cameraStroke;
   protected float _cameraLength;
+  protected int _frustumColor;
+  protected Graph _frustumGraph;
 
   // Rendering
   // Immediate mode rendering
@@ -305,6 +310,7 @@ public class Node {
     _highlight = 0.15f;
     // cyan encoded as a processing int rgb color
     _bullStroke = -16711681;
+    _frustumColor = 2113863935;
     _children = new ArrayList<Node>();
   }
 
@@ -2616,12 +2622,28 @@ public class Node {
         if (hint == CAMERA) {
           _cameraStroke = Graph.castToInt(params[0]);
         }
+        if (hint == FRUSTUM) {
+          _frustumColor = Graph.castToInt(params[0]);
+        }
+      }
+      if (hint == FRUSTUM && params[0] instanceof Graph) {
+        _frustumGraph = (Graph) params[0];
       }
     } else if (params.length == 2) {
       if (hint == CAMERA) {
         if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
           _cameraStroke = Graph.castToInt(params[0]);
           _cameraLength = Graph.castToFloat(params[1]);
+        }
+      }
+      if (hint == FRUSTUM) {
+        if (Graph.isNumInstance(params[0]) && params[1] instanceof Graph) {
+          _frustumColor = Graph.castToInt(params[0]);
+          _frustumGraph = (Graph) params[1];
+        }
+        if (params[0] instanceof Graph && Graph.isNumInstance(params[1])) {
+          _frustumGraph = (Graph) params[0];
+          _frustumColor = Graph.castToInt(params[1]);
         }
       }
     }
@@ -2667,5 +2689,13 @@ public class Node {
 
   public int cameraStroke() {
     return _cameraStroke;
+  }
+
+  public int frustumColor() {
+    return _frustumColor;
+  }
+
+  public Graph frustumGraph() {
+    return _frustumGraph;
   }
 }

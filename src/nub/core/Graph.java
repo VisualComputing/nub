@@ -135,6 +135,7 @@ public class Graph {
   // Visual hints
   public final static int AXES = 1 << 0;
   public final static int GRID = 1 << 1;
+  // TODO pending
   public final static int INTERPOLATORS = 1 << 2;
   protected int _mask;
   protected boolean _dotted;

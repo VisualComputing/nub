@@ -7,7 +7,7 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
-public class MiniMap extends PApplet {
+public class MiniMap2 extends PApplet {
   Scene scene, minimap, focus;
   Node[] models;
   boolean displayMinimap = true;
@@ -19,36 +19,38 @@ public class MiniMap extends PApplet {
   int w = 1200;
   int h = 1200;
 
-  //Choose P2D or P3D
+  //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P2D;
 
-  @Override
   public void settings() {
     size(w, h, renderer);
   }
 
-  @Override
   public void setup() {
+    /*
+    Node eye = new Node() {
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+        Scene.drawFrustum(pg, scene);
+        pg.popStyle();
+      }
+    };
+    scene = onScreen ? new Scene(this, eye) : new Scene(this, renderer, eye);
+    // */
     scene = onScreen ? new Scene(this) : new Scene(this, renderer);
     scene.setRadius(1000);
     rectMode(CENTER);
     scene.fit(1);
-    scene.eye().setPickingThreshold(50);
-    scene.eye().disableHint(Node.HIGHLIGHT);
-    scene.eye().enableHint(Node.BULLS_EYE);
-    scene.eye().enableHint(Node.FRUSTUM);
-    //scene.eye().configHint(Node.FRUSTUM, scene);
-    scene.eye().configHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
-    //scene.eye().configHint(Node.FRUSTUM, color(255, 0, 0,125), scene);
     models = new Node[30];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
         models[i] = new Node(shape());
       } else {
         models[i] = new Node() {
-          int _faces = (int) MiniMap.this.random(3, 15);
+          int _faces = (int) MiniMap2.this.random(3, 15);
           // We need to call the PApplet random function instead of the node random version
-          int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
+          int _color = color(MiniMap2.this.random(255), MiniMap2.this.random(255), MiniMap2.this.random(255));
 
           @Override
           public void graphics(PGraphics pg) {
@@ -59,6 +61,8 @@ public class MiniMap extends PApplet {
           }
         };
       }
+      // set picking precision to the pixels of the node projection
+      models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
     // Note that we pass the upper left corner coordinates where the minimap
@@ -68,6 +72,7 @@ public class MiniMap extends PApplet {
     if (renderer == P3D)
       minimap.togglePerspective();
     minimap.fit(1);
+    scene.eye().setPickingThreshold(30);
   }
 
   PShape shape() {
@@ -76,7 +81,6 @@ public class MiniMap extends PApplet {
     return shape;
   }
 
-  @Override
   public void keyPressed() {
     if (key == ' ')
       displayMinimap = !displayMinimap;
@@ -93,13 +97,11 @@ public class MiniMap extends PApplet {
       focus.togglePerspective();
   }
 
-  @Override
   public void mouseMoved() {
     if (!interactiveEye || focus == scene)
       focus.mouseTag();
   }
 
-  @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
       focus.mouseSpin();
@@ -109,7 +111,6 @@ public class MiniMap extends PApplet {
       focus.scale(focus.mouseDX());
   }
 
-  @Override
   public void mouseWheel(MouseEvent event) {
     if (renderer == P3D)
       focus.moveForward(event.getCount() * 40);
@@ -117,7 +118,6 @@ public class MiniMap extends PApplet {
       focus.scale(event.getCount() * 40);
   }
 
-  @Override
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
@@ -126,9 +126,8 @@ public class MiniMap extends PApplet {
         focus.align();
   }
 
-  @Override
   public void draw() {
-    focus = minimap.hasMouseFocus() ? minimap : scene;
+    focus = displayMinimap ? (mouseX > w / 2 && mouseY > h / 2) ? minimap : scene : scene;
     background(75, 25, 15);
     if (scene.isOffscreen()) {
       scene.beginDraw();
@@ -148,8 +147,14 @@ public class MiniMap extends PApplet {
       minimap.context().background(125, 80, 90);
       minimap.drawAxes();
       minimap.render();
-      //minimap.context().stroke(255);
-      //minimap.drawBullsEye(scene.eye());
+      // /*
+      // draw scene eye
+      minimap.context().fill(minimap.isTagged(scene.eye()) ? 255 : 25, minimap.isTagged(scene.eye()) ? 0 : 255, 255, 125);
+      minimap.context().strokeWeight(2);
+      minimap.context().stroke(0, 0, 255);
+      minimap.drawFrustum(scene);
+      minimap.drawBullsEye(scene.eye());
+      // */
       minimap.endDraw();
       minimap.display(w / 2, h / 2);
       if (!scene.isOffscreen())
@@ -158,6 +163,6 @@ public class MiniMap extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.MiniMap"});
+    PApplet.main(new String[]{"intellij.MiniMap2"});
   }
 }

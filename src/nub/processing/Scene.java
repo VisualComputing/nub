@@ -979,6 +979,14 @@ public class Scene extends Graph implements PConstants {
       pGraphics.shapeMode(context().shapeMode);
       pGraphics.shape(node.rmrShape());
     }
+    // 2nd conditions is not strictly necessary but made more robust
+    if (node.isHintEnable(Node.FRUSTUM) && (node.frustumGraph() != null && node.frustumGraph() != this)) {
+      pGraphics.pushStyle();
+      pGraphics.colorMode(PApplet.RGB, 255);
+      pGraphics.fill(node.frustumColor());
+      Scene.drawFrustum(pGraphics, node.frustumGraph());
+      pGraphics.popStyle();
+    }
     /*
     if (node.isHintEnable(Node.IMR) && node.imr() != null) {
       node.drawHint(pGraphics);
@@ -2629,7 +2637,6 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawCross(Node node, float length) {
     if (eye() == node) {
-      System.err.println("eye nodes don't have an screen target");
       return;
     }
     Vector center = screenLocation(node.position());
@@ -2720,7 +2727,6 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawSquaredBullsEye(Node node, float length) {
     if (eye() == node) {
-      System.err.println("eye nodes don't have an screen target");
       return;
     }
     Vector center = screenLocation(node.position());
@@ -2816,7 +2822,6 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawCircledBullsEye(Node node, float length) {
     if (eye() == node) {
-      System.err.println("eye nodes don't have an screen target");
       return;
     }
     Vector center = screenLocation(node.position());

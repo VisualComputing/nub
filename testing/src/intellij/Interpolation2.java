@@ -113,12 +113,12 @@ public class Interpolation2 extends PApplet {
     shape.disableHint(Node.IMR);
     shape.enableHint(Node.AXES);
     shape.enableHint(Node.BULLS_EYE);
-    shape.configHint(Node.BULLS_EYE, color(0, 255, 0));
+    //shape.configHint(Node.BULLS_EYE, color(0, 255, 0));
     shape.enableHint(Node.CAMERA);
     shape.configHint(Node.CAMERA, color(255, 0, 0), scene.radius() * 2);
     shape.setPickingThreshold(50);
 
-    int c = color(125);
+    int c = color(255, 0, 255, 125);
     println(c);
 
     scene.setVisualHint(Scene.AXES | Scene.GRID);
