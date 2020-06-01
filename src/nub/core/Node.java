@@ -159,10 +159,11 @@ public class Node {
   public final static int RMR = 1 << 4;
   public final static int HIGHLIGHT = 1 << 5;
   public final static int FRUSTUM = 1 << 6;
-  // TODO pending flags, TORUS?
+  public final static int TORUS = 1 << 7;
+  // TODO pending flags
   // TODO update constraint examples
-  public final static int CONSTRAINT = 1 << 7;
-  public final static int BONE = 1 << 8;
+  public final static int CONSTRAINT = 1 << 8;
+  public final static int BONE = 1 << 9;
   protected int _mask;
   protected float _highlight;
   protected int _bullStroke;
@@ -171,6 +172,8 @@ public class Node {
   protected float _cameraLength;
   protected int _frustumColor;
   protected Graph _frustumGraph;
+  protected int _torusColor;
+  protected int _torusFaces;
 
   // Rendering
   // Immediate mode rendering

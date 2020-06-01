@@ -979,14 +979,6 @@ public class Scene extends Graph implements PConstants {
       pGraphics.shapeMode(context().shapeMode);
       pGraphics.shape(node.rmrShape());
     }
-    // 2nd conditions is not strictly necessary but made more robust
-    if (node.isHintEnable(Node.FRUSTUM) && (node.frustumGraph() != null && node.frustumGraph() != this)) {
-      pGraphics.pushStyle();
-      pGraphics.colorMode(PApplet.RGB, 255);
-      pGraphics.fill(node.frustumColor());
-      Scene.drawFrustum(pGraphics, node.frustumGraph());
-      pGraphics.popStyle();
-    }
     /*
     if (node.isHintEnable(Node.IMR) && node.imr() != null) {
       node.drawHint(pGraphics);
@@ -997,6 +989,14 @@ public class Scene extends Graph implements PConstants {
       node.graphics(pGraphics);
       if (node.imrShape() != null)
         node.drawIMRShape(pGraphics);
+    }
+    // 2nd conditions is not strictly necessary but made more robust
+    if (node.isHintEnable(Node.FRUSTUM) && (node.frustumGraph() != null && node.frustumGraph() != this)) {
+      pGraphics.pushStyle();
+      pGraphics.colorMode(PApplet.RGB, 255);
+      pGraphics.fill(node.frustumColor());
+      Scene.drawFrustum(pGraphics, node.frustumGraph());
+      pGraphics.popStyle();
     }
     if (node.isHintEnable(Node.AXES)) {
       drawAxes(node.axesLength() == 0 ? radius() / 5 : node.axesLength());
@@ -1055,6 +1055,10 @@ public class Scene extends Graph implements PConstants {
         node.graphics(pGraphics);
         if (node.imrShape() != null)
           node.drawIMRShape(pGraphics);
+      }
+      // 2nd conditions is not strictly necessary but made more robust
+      if (node.isHintEnable(Node.FRUSTUM) && (node.frustumGraph() != null && node.frustumGraph() != this)) {
+        Scene.drawFrustum(pGraphics, node.frustumGraph());
       }
       pGraphics.popStyle();
       pGraphics.popMatrix();

@@ -20,7 +20,7 @@ public class MiniMap extends PApplet {
   int h = 1200;
 
   //Choose P2D or P3D
-  String renderer = P2D;
+  String renderer = P3D;
 
   @Override
   public void settings() {
