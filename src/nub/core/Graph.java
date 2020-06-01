@@ -17,10 +17,7 @@ import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -132,6 +129,7 @@ import java.util.function.Consumer;
  * @see MatrixHandler
  */
 public class Graph {
+  public static Random random = new Random();
   // Visual hints
   public final static int AXES = 1 << 0;
   public final static int GRID = 1 << 1;
@@ -205,6 +203,25 @@ public class Graph {
   public static Integer castToInt(Object o) {
     return isNumInstance(o) ? o instanceof Float ? ((Float) o).intValue() :
         o instanceof Double ? ((Double) o).intValue() : o instanceof Integer ? (Integer) o : null : null;
+  }
+
+  static final int _color(float v1, float v2, float v3) {
+    if (v1 > 255.0f) {
+      v1 = 255.0f;
+    } else if (v1 < 0.0f) {
+      v1 = 0.0f;
+    }
+    if (v2 > 255.0f) {
+      v2 = 255.0f;
+    } else if (v2 < 0.0f) {
+      v2 = 0.0f;
+    }
+    if (v3 > 255.0f) {
+      v3 = 255.0f;
+    } else if (v3 < 0.0f) {
+      v3 = 0.0f;
+    }
+    return -16777216 | (int) v1 << 16 | (int) v2 << 8 | (int) v3;
   }
 
   // 3. Handlers

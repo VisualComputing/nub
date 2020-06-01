@@ -995,7 +995,14 @@ public class Scene extends Graph implements PConstants {
       pGraphics.pushStyle();
       pGraphics.colorMode(PApplet.RGB, 255);
       pGraphics.fill(node.frustumColor());
-      Scene.drawFrustum(pGraphics, node.frustumGraph());
+      drawFrustum(pGraphics, node.frustumGraph());
+      pGraphics.popStyle();
+    }
+    if (node.isHintEnable(Node.TORUS)) {
+      pGraphics.pushStyle();
+      pGraphics.colorMode(PApplet.RGB, 255);
+      pGraphics.fill(node.torusColor());
+      drawTorusSolenoid(pGraphics, node.torusFaces(), 5);
       pGraphics.popStyle();
     }
     if (node.isHintEnable(Node.AXES)) {
@@ -1059,6 +1066,9 @@ public class Scene extends Graph implements PConstants {
       // 2nd conditions is not strictly necessary but made more robust
       if (node.isHintEnable(Node.FRUSTUM) && (node.frustumGraph() != null && node.frustumGraph() != this)) {
         Scene.drawFrustum(pGraphics, node.frustumGraph());
+      }
+      if (node.isHintEnable(Node.TORUS)) {
+        drawTorusSolenoid(pGraphics, node.torusFaces(), 5);
       }
       pGraphics.popStyle();
       pGraphics.popMatrix();

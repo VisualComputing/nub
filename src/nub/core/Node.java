@@ -311,6 +311,14 @@ public class Node {
     //_culled = false;
     _tagging = true;
     _highlight = 0.15f;
+    int min = 2, max = 20;
+    _torusFaces = Graph.random.nextInt(max - min + 1) + min;
+    min = 0;
+    max = 255;
+    float r = (float) Graph.random.nextInt(max - min + 1) + min;
+    float g = (float) Graph.random.nextInt(max - min + 1) + min;
+    float b = (float) Graph.random.nextInt(max - min + 1) + min;
+    _torusColor = Graph._color(r, g, b);
     // cyan encoded as a processing int rgb color
     _bullStroke = -16711681;
     _frustumColor = 2113863935;
@@ -2628,6 +2636,9 @@ public class Node {
         if (hint == FRUSTUM) {
           _frustumColor = Graph.castToInt(params[0]);
         }
+        if (hint == TORUS) {
+          _torusColor = Graph.castToInt(params[0]);
+        }
       }
       if (hint == FRUSTUM && params[0] instanceof Graph) {
         _frustumGraph = (Graph) params[0];
@@ -2647,6 +2658,12 @@ public class Node {
         if (params[0] instanceof Graph && Graph.isNumInstance(params[1])) {
           _frustumGraph = (Graph) params[0];
           _frustumColor = Graph.castToInt(params[1]);
+        }
+      }
+      if (hint == TORUS) {
+        if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
+          _torusColor = Graph.castToInt(params[0]);
+          _torusFaces = Graph.castToInt(params[1]);
         }
       }
     }
@@ -2696,6 +2713,14 @@ public class Node {
 
   public int frustumColor() {
     return _frustumColor;
+  }
+
+  public int torusColor() {
+    return _torusColor;
+  }
+
+  public int torusFaces() {
+    return _torusFaces;
   }
 
   public Graph frustumGraph() {

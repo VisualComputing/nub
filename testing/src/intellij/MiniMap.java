@@ -3,7 +3,6 @@ package intellij;
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
-import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
@@ -20,7 +19,7 @@ public class MiniMap extends PApplet {
   int h = 1200;
 
   //Choose P2D or P3D
-  String renderer = P3D;
+  String renderer = P2D;
 
   @Override
   public void settings() {
@@ -44,21 +43,18 @@ public class MiniMap extends PApplet {
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
         models[i] = new Node(shape());
+        models[i].setPickingThreshold(50);
+        models[i].enableHint(Node.BULLS_EYE);
       } else {
-        models[i] = new Node() {
-          int _faces = (int) MiniMap.this.random(3, 15);
-          // We need to call the PApplet random function instead of the node random version
-          int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
-
-          @Override
-          public void graphics(PGraphics pg) {
-            pg.pushStyle();
-            pg.fill(_color);
-            Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
-            pg.popStyle();
-          }
-        };
+        models[i] = new Node();
+        models[i].enableHint(Node.BULLS_EYE);
+        models[i].enableHint(Node.TORUS);
+        //models[i].configHint(Node.TORUS, color(0, 255, 0), 5);
+        models[i].setPickingThreshold(50);
+        models[i].scale(3);
       }
+      // set picking precision to the pixels of the node projection
+      //models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
     // Note that we pass the upper left corner coordinates where the minimap
