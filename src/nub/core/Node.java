@@ -2597,6 +2597,10 @@ public class Node {
     return this._mask;
   }
 
+  public void resetHint() {
+    resetHint(0);
+  }
+
   public void resetHint(int mask) {
     _mask = mask;
   }

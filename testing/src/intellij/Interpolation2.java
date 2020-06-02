@@ -110,7 +110,7 @@ public class Interpolation2 extends PApplet {
     println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
     shape.setPickingThreshold(50);
      */
-    shape.disableHint(Node.IMR);
+    //shape.disableHint(Node.IMR);
     shape.enableHint(Node.AXES);
     shape.enableHint(Node.BULLS_EYE);
     //shape.configHint(Node.BULLS_EYE, color(0, 255, 0));
