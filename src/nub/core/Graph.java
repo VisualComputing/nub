@@ -2878,6 +2878,7 @@ public class Graph {
 
   /**
    * {@link #preDraw()} without calling {@link #_displayHints()} to handle background in Processing.
+   * See: https://github.com/processing/processing/wiki/Library-Basics
    */
   protected void _preDraw() {
     if (_seededGraph)
@@ -2892,10 +2893,6 @@ public class Graph {
       updateBoundaryEquations();
       _lastEqUpdate = TimingHandler.frameCount;
     }
-    // TODO nothing gets drawn because the Processing background!
-    // pre is supposed to draw something
-    // https://github.com/processing/processing/wiki/Library-Basics
-    //_displayHints();
   }
 
   // caches
@@ -4739,8 +4736,12 @@ public class Graph {
     _mask = mask;
   }
 
-  public void enableHint(int hint, Object params) {
+  public void enableHint(int hint) {
     _mask |= hint;
+  }
+
+  public void enableHint(int hint, Object... params) {
+    enableHint(hint);
     configHint(hint, params);
   }
 
@@ -4752,8 +4753,7 @@ public class Graph {
     if (isHintEnable(hint))
       disableHint(hint);
     else
-      //enableHint(hint);
-      _mask |= hint;
+      enableHint(hint);
   }
 
   public void configHint(int hint, Object... params) {

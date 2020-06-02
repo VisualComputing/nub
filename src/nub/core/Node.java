@@ -2601,8 +2601,12 @@ public class Node {
     _mask = mask;
   }
 
-  public void enableHint(int hint, Object... params) {
+  public void enableHint(int hint) {
     _mask |= hint;
+  }
+
+  public void enableHint(int hint, Object... params) {
+    enableHint(hint);
     configHint(hint, params);
   }
 
@@ -2614,8 +2618,7 @@ public class Node {
     if (isHintEnable(hint))
       disableHint(hint);
     else
-      _mask |= hint;
-    //enableHint(hint);
+      enableHint(hint);
   }
 
   public void configHint(int hint, Object... params) {
