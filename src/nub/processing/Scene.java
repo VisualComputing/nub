@@ -592,7 +592,7 @@ public class Scene extends Graph implements PConstants {
       setWidth(context().width);
       setHeight(context().height);
     }
-    preDraw();
+    _preDraw();
     _matrixHandler.pushMatrix();
   }
 
@@ -613,7 +613,7 @@ public class Scene extends Graph implements PConstants {
   public void draw() {
     _matrixHandler.popMatrix();
     // display visual hints in the world
-    _displayVisualHints();
+    _displayHints();
     _renderBackBuffer();
   }
 
@@ -645,7 +645,7 @@ public class Scene extends Graph implements PConstants {
       setHeight(context().height);
     // open off-screen pgraphics for drawing:
     context().beginDraw();
-    preDraw();
+    _preDraw();
     _matrixHandler.pushMatrix();
   }
 
@@ -673,7 +673,7 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
           + "endDraw() and they cannot be nested. Check your implementation!");
     _matrixHandler.popMatrix();
-    _displayVisualHints();
+    _displayHints();
     context().endDraw();
     _renderBackBuffer();
   }
@@ -1076,7 +1076,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  protected void _displayVisualHints() {
+  protected void _displayHints() {
     context().pushStyle();
     if (isHintEnable(AXES)) {
       drawAxes();

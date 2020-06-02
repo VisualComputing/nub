@@ -93,7 +93,7 @@ public class Interpolation2 extends PApplet {
     /*
     println(shape.isHintEnable(Node.AXES) ? "yep axes" : "nope exes");
     println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
-    shape.setVisualHint(Node.AXES | Node.BULLS_EYE);
+    shape.resetHint(Node.AXES | Node.BULLS_EYE);
     println(shape.isHintEnable(Node.AXES) ? "yep axes" : "nope exes");
     println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
     shape.toggleHint(Node.AXES);
@@ -121,7 +121,7 @@ public class Interpolation2 extends PApplet {
     int c = color(255, 0, 255, 125);
     println(c);
 
-    scene.setVisualHint(Scene.AXES | Scene.GRID);
+    scene.resetHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(255, 0, 0));
   }
 

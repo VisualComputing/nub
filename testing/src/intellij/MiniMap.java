@@ -35,9 +35,9 @@ public class MiniMap extends PApplet {
     scene.eye().setPickingThreshold(50);
     scene.eye().disableHint(Node.HIGHLIGHT);
     scene.eye().enableHint(Node.BULLS_EYE);
-    scene.eye().enableHint(Node.FRUSTUM);
+    scene.eye().enableHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
     //scene.eye().configHint(Node.FRUSTUM, scene);
-    scene.eye().configHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
+    //scene.eye().configHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
     //scene.eye().configHint(Node.FRUSTUM, color(255, 0, 0,125), scene);
     models = new Node[30];
     for (int i = 0; i < models.length; i++) {

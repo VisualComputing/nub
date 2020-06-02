@@ -135,6 +135,7 @@ public class Graph {
   public final static int GRID = 1 << 1;
   // TODO pending
   public final static int INTERPOLATORS = 1 << 2;
+  public final static int BACKGROUND = 1 << 3;
   protected int _mask;
   protected boolean _dotted;
   protected int _gridStroke;
@@ -2871,6 +2872,14 @@ public class Graph {
    * @see Node#view()
    */
   public void preDraw() {
+    _preDraw();
+    _displayHints();
+  }
+
+  /**
+   * {@link #preDraw()} without calling {@link #_displayHints()} to handle background in Processing.
+   */
+  protected void _preDraw() {
     if (_seededGraph)
       timingHandler().handle();
     _projection = projection(eye(), type(), width(), height(), zNear(), zFar(), isLeftHanded());
@@ -2886,7 +2895,7 @@ public class Graph {
     // TODO nothing gets drawn because the Processing background!
     // pre is supposed to draw something
     // https://github.com/processing/processing/wiki/Library-Basics
-    //_displayVisualHints();
+    //_displayHints();
   }
 
   // caches
@@ -3262,7 +3271,7 @@ public class Graph {
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
-  protected void _displayVisualHints() {
+  protected void _displayHints() {
   }
 
   /**
@@ -4722,16 +4731,17 @@ public class Graph {
     return (_mask & hint) != 0;
   }
 
-  public int visualHint() {
+  public int hint() {
     return this._mask;
   }
 
-  public void setVisualHint(int mask) {
+  public void resetHint(int mask) {
     _mask = mask;
   }
 
-  public void enableHint(int hint) {
+  public void enableHint(int hint, Object params) {
     _mask |= hint;
+    configHint(hint, params);
   }
 
   public void disableHint(int hint) {
@@ -4742,7 +4752,8 @@ public class Graph {
     if (isHintEnable(hint))
       disableHint(hint);
     else
-      enableHint(hint);
+      //enableHint(hint);
+      _mask |= hint;
   }
 
   public void configHint(int hint, Object... params) {

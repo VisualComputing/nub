@@ -288,7 +288,7 @@ public class Node {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
     // TODO new
-    setVisualHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
+    resetHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
   }
 
   /**
@@ -300,7 +300,7 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    //setVisualHint(Node.IMR | Node.RMR);
+    //resetHint(Node.IMR | Node.RMR);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -2593,16 +2593,17 @@ public class Node {
     return _shape;
   }
 
-  public int visualHint() {
+  public int hint() {
     return this._mask;
   }
 
-  public void setVisualHint(int mask) {
+  public void resetHint(int mask) {
     _mask = mask;
   }
 
-  public void enableHint(int hint) {
+  public void enableHint(int hint, Object... params) {
     _mask |= hint;
+    configHint(hint, params);
   }
 
   public void disableHint(int hint) {
@@ -2613,7 +2614,8 @@ public class Node {
     if (isHintEnable(hint))
       disableHint(hint);
     else
-      enableHint(hint);
+      _mask |= hint;
+    //enableHint(hint);
   }
 
   public void configHint(int hint, Object... params) {
