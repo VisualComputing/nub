@@ -2626,56 +2626,72 @@ public class Node {
   }
 
   public void configHint(int hint, Object... params) {
-    if (params.length == 1) {
-      if (Graph.isNumInstance(params[0])) {
-        if (hint == BULLS_EYE) {
-          _bullStroke = Graph.castToInt(params[0]);
+    switch (params.length) {
+      case 1:
+        if (Graph.isNumInstance(params[0])) {
+          if (hint == BULLS_EYE) {
+            _bullStroke = Graph.castToInt(params[0]);
+            return;
+          }
+          if (hint == AXES) {
+            _axesLength = Graph.castToFloat(params[0]);
+            return;
+          }
+          if (hint == HIGHLIGHT) {
+            float highlight = Graph.castToFloat(params[0]);
+            if (0 < highlight && highlight <= 1) {
+              _highlight = highlight;
+              return;
+            }
+          }
+          if (hint == CAMERA) {
+            _cameraStroke = Graph.castToInt(params[0]);
+            return;
+          }
+          if (hint == FRUSTUM) {
+            _frustumColor = Graph.castToInt(params[0]);
+            return;
+          }
+          if (hint == TORUS) {
+            _torusColor = Graph.castToInt(params[0]);
+            return;
+          }
         }
-        if (hint == AXES) {
-          _axesLength = Graph.castToFloat(params[0]);
+        if (hint == FRUSTUM && params[0] instanceof Graph) {
+          _frustumGraph = (Graph) params[0];
+          return;
         }
-        if (hint == HIGHLIGHT) {
-          float highlight = Graph.castToFloat(params[0]);
-          if (0 < highlight && highlight <= 1)
-            _highlight = highlight;
-        }
+        break;
+      case 2:
         if (hint == CAMERA) {
-          _cameraStroke = Graph.castToInt(params[0]);
+          if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
+            _cameraStroke = Graph.castToInt(params[0]);
+            _cameraLength = Graph.castToFloat(params[1]);
+            return;
+          }
         }
         if (hint == FRUSTUM) {
-          _frustumColor = Graph.castToInt(params[0]);
+          if (Graph.isNumInstance(params[0]) && params[1] instanceof Graph) {
+            _frustumColor = Graph.castToInt(params[0]);
+            _frustumGraph = (Graph) params[1];
+            return;
+          }
+          if (params[0] instanceof Graph && Graph.isNumInstance(params[1])) {
+            _frustumGraph = (Graph) params[0];
+            _frustumColor = Graph.castToInt(params[1]);
+            return;
+          }
         }
         if (hint == TORUS) {
-          _torusColor = Graph.castToInt(params[0]);
+          if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
+            _torusColor = Graph.castToInt(params[0]);
+            _torusFaces = Graph.castToInt(params[1]);
+            return;
+          }
         }
-      }
-      if (hint == FRUSTUM && params[0] instanceof Graph) {
-        _frustumGraph = (Graph) params[0];
-      }
-    } else if (params.length == 2) {
-      if (hint == CAMERA) {
-        if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
-          _cameraStroke = Graph.castToInt(params[0]);
-          _cameraLength = Graph.castToFloat(params[1]);
-        }
-      }
-      if (hint == FRUSTUM) {
-        if (Graph.isNumInstance(params[0]) && params[1] instanceof Graph) {
-          _frustumColor = Graph.castToInt(params[0]);
-          _frustumGraph = (Graph) params[1];
-        }
-        if (params[0] instanceof Graph && Graph.isNumInstance(params[1])) {
-          _frustumGraph = (Graph) params[0];
-          _frustumColor = Graph.castToInt(params[1]);
-        }
-      }
-      if (hint == TORUS) {
-        if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
-          _torusColor = Graph.castToInt(params[0]);
-          _torusFaces = Graph.castToInt(params[1]);
-        }
-      }
+        break;
     }
+    System.out.println("Warning: some params in Node.configHint(params) couldn't be parsed!");
   }
 
   public boolean isHintEnable(int hint) {

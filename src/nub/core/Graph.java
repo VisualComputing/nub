@@ -4761,41 +4761,50 @@ public class Graph {
   }
 
   public void configHint(int hint, Object... params) {
-    if (params.length == 1) {
-      if (hint == GRID) {
-        if (isNumInstance(params[0])) {
-          _gridStroke = castToInt(params[0]);
+    switch (params.length) {
+      case 1:
+        if (hint == GRID) {
+          if (isNumInstance(params[0])) {
+            _gridStroke = castToInt(params[0]);
+            return;
+          }
+          if (params[0] instanceof Boolean) {
+            _dotted = (Boolean) params[0];
+            return;
+          }
         }
-        if (params[0] instanceof Boolean) {
-          _dotted = (Boolean) params[0];
+        break;
+      case 2:
+        if (hint == GRID) {
+          if (isNumInstance(params[0]) && isNumInstance(params[1])) {
+            _gridStroke = castToInt(params[0]);
+            _gridSubDiv = castToInt(params[1]);
+            return;
+          }
+          if (isNumInstance(params[0]) && params[1] instanceof Boolean) {
+            _gridStroke = castToInt(params[0]);
+            _dotted = (Boolean) params[1];
+            return;
+          }
+          if (params[1] instanceof Boolean && isNumInstance(params[0])) {
+            _dotted = (Boolean) params[0];
+            _gridStroke = castToInt(params[1]);
+            return;
+          }
         }
-      }
+        break;
+      case 3:
+        if (hint == GRID) {
+          if (isNumInstance(params[0]) && isNumInstance(params[1]) && params[2] instanceof Boolean) {
+            _gridStroke = castToInt(params[0]);
+            _gridSubDiv = castToInt(params[1]);
+            _dotted = (Boolean) params[2];
+            return;
+          }
+        }
+        break;
     }
-    if (params.length == 2) {
-      if (hint == GRID) {
-        if (isNumInstance(params[0]) && isNumInstance(params[1])) {
-          _gridStroke = castToInt(params[0]);
-          _gridSubDiv = castToInt(params[1]);
-        }
-        if (isNumInstance(params[0]) && params[1] instanceof Boolean) {
-          _gridStroke = castToInt(params[0]);
-          _dotted = (Boolean) params[1];
-        }
-        if (params[1] instanceof Boolean && isNumInstance(params[0])) {
-          _dotted = (Boolean) params[0];
-          _gridStroke = castToInt(params[1]);
-        }
-      }
-    }
-    if (params.length == 3) {
-      if (hint == GRID) {
-        if (isNumInstance(params[0]) && isNumInstance(params[1]) && params[2] instanceof Boolean) {
-          _gridStroke = castToInt(params[0]);
-          _gridSubDiv = castToInt(params[1]);
-          _dotted = (Boolean) params[2];
-        }
-      }
-    }
+    System.out.println("Warning: some params in Scene.configHint(params) couldn't be parsed!");
   }
 
   protected boolean _validateHint(int hint) {
