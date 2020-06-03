@@ -62,8 +62,6 @@ public class MouseDragInteraction extends PApplet {
       }
     };
     shape2.translate(275, 275, 0);
-    shape2.setPickingThreshold(0);
-
     randomVector = Vector.random();
     randomVector.setMagnitude(scene.radius() * 0.5f);
   }
@@ -81,9 +79,9 @@ public class MouseDragInteraction extends PApplet {
     if (key == 'd') {
       if (node == null) {
         node = shape1.detach();
-        node.setPickingThreshold(0);
+        node.setPickingPolicy(Node.PickingPolicy.PRECISE);
         scene.randomize(node);
-        node.setShape(shape());
+        node.setRMRShape(shape());
         node.setReference(shape2);
       }
     }

@@ -75,7 +75,7 @@ import java.util.function.Consumer;
  * </ol>
  * Observations:
  * <ol>
- * <li>Refer to {@link Node#pickingThreshold()} (and {@link Node#setPickingThreshold(float)}) for the different
+ * <li>Refer to {@link Node#bullsEyeSize()} (and {@link Node#setBullsEyeSize(float)}) for the different
  * ray-casting node picking policies.</li>
  * <li>To check if a given node would be picked with a ray casted at a given screen position,
  * call {@link #tracks(Node, int, int)}.</li>
@@ -2562,8 +2562,8 @@ public class Graph {
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
    * @see Node#enableTagging(boolean)
-   * @see Node#pickingThreshold()
-   * @see Node#setPickingThreshold(float)
+   * @see Node#bullsEyeSize()
+   * @see Node#setBullsEyeSize(float)
    * @see #tag(String, int, int)
    * @see #tag(String, int, int)
    */
@@ -2633,8 +2633,8 @@ public class Graph {
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
    * @see Node#enableTagging(boolean)
-   * @see Node#pickingThreshold()
-   * @see Node#setPickingThreshold(float)
+   * @see Node#bullsEyeSize()
+   * @see Node#setBullsEyeSize(float)
    * @see #tag(String, int, int)
    */
   public Node updateTag(String tag, int pixelX, int pixelY) {
@@ -2656,8 +2656,8 @@ public class Graph {
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
    * @see Node#enableTagging(boolean)
-   * @see Node#pickingThreshold()
-   * @see Node#setPickingThreshold(float)
+   * @see Node#bullsEyeSize()
+   * @see Node#setBullsEyeSize(float)
    * @see #tag(String, int, int)
    */
   public Node updateTag(Node subtree, String tag, int pixelX, int pixelY) {
@@ -2687,18 +2687,18 @@ public class Graph {
 
   /**
    * Casts a ray at pixel position {@code (pixelX, pixelY)} and returns {@code true} if the ray picks the {@code node} and
-   * {@code false} otherwise. The node is picked according to the {@link Node#pickingThreshold()}.
+   * {@code false} otherwise. The node is picked according to the {@link Node#bullsEyeSize()}.
    *
    * @see #node(String)
    * @see #removeTag(String)
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
    * @see Node#enableTagging(boolean)
-   * @see Node#pickingThreshold()
-   * @see Node#setPickingThreshold(float)
+   * @see Node#bullsEyeSize()
+   * @see Node#setBullsEyeSize(float)
    */
   public boolean tracks(Node node, int pixelX, int pixelY) {
-    if (node.pickingThreshold() == 0 && _bb != null)
+    if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && _bb != null)
       return _tracks(node, pixelX, pixelY);
     else
       return _tracks(node, pixelX, pixelY, screenLocation(node.position()));
@@ -2713,7 +2713,7 @@ public class Graph {
    * <p>
    * This method should be overridden. Default implementation simply return {@code false}.
    *
-   * @see Node#setPickingThreshold(float)
+   * @see Node#setBullsEyeSize(float)
    */
   protected boolean _tracks(Node node, int pixelX, int pixelY) {
     return false;
@@ -2727,10 +2727,12 @@ public class Graph {
       return false;
     if (!node.isTaggingEnabled())
       return false;
-    float threshold = Math.abs(node.pickingThreshold()) < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToSceneRatio(node.position())
-        : node.pickingThreshold() / 2;
-    return threshold > 0 ? ((Math.abs(pixelX - projection._vector[0]) < threshold) && (Math.abs(pixelY - projection._vector[1]) < threshold)) :
-        (float) Math.sqrt((float) Math.pow((projection._vector[0] - pixelX), 2.0) + (float) Math.pow((projection._vector[1] - pixelY), 2.0)) < -threshold;
+    float threshold = node.bullsEyeSize() < 1 ?
+        100 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) :
+        node.bullsEyeSize() / 2;
+    return node.bullsEyeShape() == Node.BullsEyeShape.SQUARE ?
+        ((Math.abs(pixelX - projection._vector[0]) < threshold) && (Math.abs(pixelY - projection._vector[1]) < threshold)) :
+        (float) Math.sqrt((float) Math.pow((projection._vector[0] - pixelX), 2.0) + (float) Math.pow((projection._vector[1] - pixelY), 2.0)) < threshold;
   }
 
   /**
@@ -2761,8 +2763,8 @@ public class Graph {
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
    * @see Node#enableTagging(boolean)
-   * @see Node#pickingThreshold()
-   * @see Node#setPickingThreshold(float)
+   * @see Node#bullsEyeSize()
+   * @see Node#setBullsEyeSize(float)
    * @see #tag(int, int)
    */
   public void tag(String tag, int pixelX, int pixelY) {
@@ -3275,7 +3277,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingThreshold() != 0) {
+    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.PickingPolicy.BULLS_EYE) {
       Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
@@ -3293,7 +3295,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingThreshold() == 0 && _bb != null) {
+    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.PickingPolicy.PRECISE && _bb != null) {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
@@ -4733,10 +4735,10 @@ public class Graph {
   }
 
   public void resetHint() {
-    resetHint(0);
+    setHint(0);
   }
 
-  public void resetHint(int mask) {
+  public void setHint(int mask) {
     _mask = mask;
   }
 

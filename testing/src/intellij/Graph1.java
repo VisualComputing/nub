@@ -48,7 +48,7 @@ public class Graph1 extends PApplet {
           popStyle();
         }
       };
-      nodes[i].setPickingThreshold(.05f);
+      nodes[i].setBullsEyeSize(.05f);
       graph.randomize(nodes[i]);
     }
     //discard Processing matrices

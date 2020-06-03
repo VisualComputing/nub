@@ -43,7 +43,6 @@ public class InterpolationExample extends PApplet {
     shape.setStroke(false);
     shape.setFill(color(255, 0, 0));
     node = new Node(shape);
-    node.setPickingThreshold(0);
     nodeRef = (int) random(chain.size() - 1);
     node.setReference(chain.get(nodeRef));
 
@@ -71,7 +70,7 @@ public class InterpolationExample extends PApplet {
       Node key = new Node(shape2);
 
       key.setReference(keyReference);
-      key.setPickingThreshold(10);
+      key.setBullsEyeSize(10);
       Vector v = keyReference.location(node);
       key.setTranslation(new Vector(100 * sin(step * i) + v.x() + 50, 100 * cos(step * i) + v.y() + 50, v.z()));
       key.setRotation(Quaternion.random());
@@ -123,7 +122,6 @@ public class InterpolationExample extends PApplet {
       node.setReference(prev);
       node.setTranslation(Vector.multiply(Vector.random(), l));
       node.setRotation(Quaternion.random());
-      node.setPickingThreshold(0);
       prev = node;
       list.add(node);
     }

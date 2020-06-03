@@ -597,7 +597,7 @@ public class Interpolator {
 
   /**
    * Appends a copy of the current {@link #node()} {@code time} seconds after the
-   * previously added keyframe. The {@link Node#pickingThreshold()} is set to {@code 20}.
+   * previously added keyframe. The {@link Node#bullsEyeSize()} is set to {@code 20}.
    *
    * @see #addKeyFrame()
    * @see #addKeyFrame(Node)
@@ -609,7 +609,7 @@ public class Interpolator {
     node.setPosition(node());
     node.setOrientation(node());
     node.setMagnitude(node());
-    node.setPickingThreshold(20);
+    node.setBullsEyeSize(20);
     addKeyFrame(node, time);
   }
 

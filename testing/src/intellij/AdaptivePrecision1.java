@@ -24,9 +24,10 @@ public class AdaptivePrecision1 extends PApplet {
     shapes = new Node[25];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node();
-      shapes[i].setShape(shape());
+      shapes[i].setRMRShape(shape());
       scene.randomize(shapes[i]);
-      shapes[i].setPickingThreshold(0.25f);
+      shapes[i].setBullsEyeSize(0.25f);
+      //shapes[i].setPickingPolicy(Node.PickingPolicy.BULLS_EYE);
     }
   }
 

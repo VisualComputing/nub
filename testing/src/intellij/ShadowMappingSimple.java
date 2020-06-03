@@ -56,7 +56,6 @@ public class ShadowMappingSimple extends PApplet {
         }
       }
     };
-    landscape1.setPickingThreshold(0);
     landscape2 = new Node() {
       @Override
       public void graphics(PGraphics pg) {
@@ -74,7 +73,6 @@ public class ShadowMappingSimple extends PApplet {
         }
       }
     };
-    landscape2.setPickingThreshold(0);
     landscape2.cull();
     landscape3 = new Node() {
       @Override
@@ -94,7 +92,6 @@ public class ShadowMappingSimple extends PApplet {
       }
     };
     landscape3.cull();
-    landscape3.setPickingThreshold(0);
     floor = new Node() {
       @Override
       public void graphics(PGraphics pg) {
@@ -118,7 +115,6 @@ public class ShadowMappingSimple extends PApplet {
         pg.pushStyle();
       }
     };
-    light.setPickingThreshold(0);
     light.setMagnitude(400f / 2048f);
     // initShadowPass
     //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_frag.glsl");

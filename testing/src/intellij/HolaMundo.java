@@ -36,7 +36,7 @@ public class HolaMundo extends PApplet {
     mainScene = new Scene(this);
     mainScene.setRadius(500);
     mainScene.fit(1);
-    mainScene.resetHint(Scene.AXES | Scene.GRID);
+    mainScene.setHint(Scene.AXES | Scene.GRID);
     mainScene.configHint(Scene.GRID, color(0, 255, 0));
     // 2. Hint (offscreen) Scene
     hintScene = new Scene(this, P3D, hintSceneWidth, hintSceneHeight);
@@ -51,13 +51,11 @@ public class HolaMundo extends PApplet {
     });
     torus.scale(10);
     torus.translate(-200, -200, 0);
-    torus.setPickingThreshold(0);
     // 3. box
     PShape pbox = createShape(BOX, 200);
     pbox.setFill(color(255, 255, 0));
     box = new Node(pbox);
     box.translate(200, 200, 0);
-    box.setPickingThreshold(0);
     // 4. can (canScene only)
     //can = new Node(createCan(100, 200, 32, mainScene.context()));
     //can = new Node(createCan(100, 200, 32, loadImage("/home/pierre/IdeaProjects/nub/testing/data/texture/lachoy.jpg")));

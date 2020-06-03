@@ -31,7 +31,7 @@ public class DOF extends PApplet {
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
       models[i] = new Node(boxShape());
-      models[i].setPickingThreshold(0);
+      models[i].setBullsEyeSize(0.7f);
       scene.randomize(models[i]);
     }
 
@@ -114,7 +114,10 @@ public class DOF extends PApplet {
     if (key == 'p') {
       exact = !exact;
       for (int i = 0; i < models.length; i++)
-        models[i].setPickingThreshold(exact ? 0 : 0.7f);
+        if (models[i].pickingPolicy() == Node.PickingPolicy.PRECISE)
+          models[i].setPickingPolicy(Node.PickingPolicy.BULLS_EYE);
+        else
+          models[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
     }
   }
 

@@ -61,8 +61,6 @@ public class MiniMap2 extends PApplet {
           }
         };
       }
-      // set picking precision to the pixels of the node projection
-      models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
     // Note that we pass the upper left corner coordinates where the minimap
@@ -72,7 +70,7 @@ public class MiniMap2 extends PApplet {
     if (renderer == P3D)
       minimap.togglePerspective();
     minimap.fit(1);
-    scene.eye().setPickingThreshold(30);
+    scene.eye().setBullsEyeSize(30);
   }
 
   PShape shape() {

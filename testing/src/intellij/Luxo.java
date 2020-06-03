@@ -79,7 +79,7 @@ public class Luxo extends PApplet {
       pieces = new Piece[4];
 
       for (int i = 0; i < 4; ++i) {
-        pieces[i] = new Piece(scene);
+        pieces[i] = new Piece();
         node(i).setReference(i > 0 ? pieces[i - 1] : null);
       }
 
@@ -122,12 +122,6 @@ public class Luxo extends PApplet {
 
   class Piece extends Node {
     int mode;
-
-    Piece(Scene scene) {
-      super();
-      // set picking precision to the pixels of the node projection
-      setPickingThreshold(0);
-    }
 
     void drawCone(PGraphics pg, float zMin, float zMax, float r1, float r2, int nbSub) {
       pg.translate(0.0f, 0.0f, zMin);

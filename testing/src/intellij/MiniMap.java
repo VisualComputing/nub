@@ -32,7 +32,7 @@ public class MiniMap extends PApplet {
     scene.setRadius(1000);
     rectMode(CENTER);
     scene.fit(1);
-    scene.eye().setPickingThreshold(50);
+    scene.eye().setBullsEyeSize(50);
     scene.eye().disableHint(Node.HIGHLIGHT);
     scene.eye().enableHint(Node.BULLS_EYE);
     scene.eye().enableHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
@@ -43,18 +43,18 @@ public class MiniMap extends PApplet {
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
         models[i] = new Node(shape());
-        models[i].setPickingThreshold(50);
+        models[i].setBullsEyeSize(50);
         models[i].enableHint(Node.BULLS_EYE);
       } else {
         models[i] = new Node();
         models[i].enableHint(Node.BULLS_EYE);
         models[i].enableHint(Node.TORUS);
         //models[i].configHint(Node.TORUS, color(0, 255, 0), 5);
-        models[i].setPickingThreshold(50);
+        models[i].setBullsEyeSize(50);
         models[i].scale(3);
       }
       // set picking precision to the pixels of the node projection
-      //models[i].setPickingThreshold(0);
+      //models[i].setBullsEyeSize(0);
       scene.randomize(models[i]);
     }
     // Note that we pass the upper left corner coordinates where the minimap

@@ -42,7 +42,7 @@ public class PassiveTransformations extends PApplet {
         }
       };
       graph.randomize(nodes[i]);
-      nodes[i].setPickingThreshold(20);
+      nodes[i].setBullsEyeSize(20);
     }
     //discard Processing matrices
     resetMatrix();

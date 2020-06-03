@@ -46,7 +46,6 @@ public class DebugCam extends PApplet {
         }
       }
     };
-    box1.setPickingThreshold(0);
     Node box2 = new Node(box1) {
       @Override
       public void graphics(PGraphics pg) {
@@ -57,7 +56,6 @@ public class DebugCam extends PApplet {
         pg.popStyle();
       }
     };
-    box2.setPickingThreshold(0);
     box2.translate(0, 0, 20);
     scene.setRadius(50);
     scene.fit(1);

@@ -40,7 +40,6 @@ public class TwoScenes extends PApplet {
     scene2.fit();
     node = new Node();
     node.translate(50, 50, 30);
-    node.setPickingThreshold(10);
   }
 
   public void keyPressed() {

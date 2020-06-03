@@ -108,7 +108,7 @@ import java.util.function.Consumer;
  * <h2>Shapes</h2>
  * A node shape can be set from a retained-mode rendering object, see {@link #setShape(processing.core.PShape)};
  * or from an immediate-mode rendering procedure, see {@link #graphics(processing.core.PGraphics)}.
- * Picking a node is done according to a {@link #pickingThreshold()}. When a node is tagged
+ * Picking a node is done according to a {@link #bullsEyeSize()}. When a node is tagged
  * it will be highlighted (scaled) according to a {@link #highlighting()} magnitude.
  * See also {@link #enableTagging(boolean)}.
  * <h2>Custom behavior</h2>
@@ -140,7 +140,19 @@ public class Node {
   protected long _lastUpdate;
 
   // Tagging & Precision
-  protected float _threshold;
+  protected float _bullsEyeSize;
+
+  public enum BullsEyeShape {
+    SQUARE, CIRCLE
+  }
+
+  protected BullsEyeShape _bullsEyeShape;
+
+  public enum PickingPolicy {
+    PRECISE, BULLS_EYE
+  }
+
+  protected PickingPolicy _pickingPolicy;
 
   // ID
   protected static int _counter;
@@ -281,14 +293,14 @@ public class Node {
    * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
    * as {@link #constraint()}, having {@code translation}, {@code rotation} and {@code scaling} as
    * the {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
-   * The {@link #pickingThreshold()} is set to {@code 0} and the {@link #highlighting()}
+   * The {@link #bullsEyeSize()} is set to {@code 0} and the {@link #highlighting()}
    * magnitude to {@code 0.15}.
    */
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
     // TODO new
-    resetHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
+    setHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
   }
 
   /**
@@ -300,15 +312,14 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    //resetHint(Node.IMR | Node.RMR);
+    //setHint(Node.IMR | Node.RMR);
+    setPickingPolicy(PickingPolicy.BULLS_EYE);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
-    // TODO remove these three
-    //_lastUpdate = 0;
-    //_threshold = 0;
-    //_culled = false;
+    setBullsEyeSize(.2f);
+    _bullsEyeShape = BullsEyeShape.SQUARE;
     _tagging = true;
     _highlight = 0.15f;
     int min = 2, max = 20;
@@ -382,18 +393,20 @@ public class Node {
   public Node(Node reference, Constraint constraint, Consumer<processing.core.PGraphics> shape, Vector translation, Quaternion rotation, float scaling) {
     this(reference, constraint, translation, rotation, scaling);
     setIMRShape(shape);
+    setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
    * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
    * as {@link #constraint()}, {@code shape} as {@link #shape()}, having {@code translation},
    * {@code rotation} and {@code scaling} as the {@link #translation()}, {@link #rotation()}
-   * and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to
+   * and {@link #scaling()}, respectively. The {@link #bullsEyeSize()} is set to
    * {@code 0} and the {@link #highlighting()} magnitude to {@code 0.15}.
    */
   public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
     this(reference, constraint, translation, rotation, scaling);
-    setShape(shape);
+    setRMRShape(shape);
+    setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
@@ -475,7 +488,7 @@ public class Node {
   /**
    * Performs a deep copy of this node and returns it. Only the {@link #position()},
    * {@link #orientation()} and {@link #magnitude()} of the node are copied.
-   * The new node {@link #pickingThreshold()} is set to {@code 0.2}.
+   * The new node {@link #bullsEyeSize()} is set to {@code 0.2}.
    *
    * @see #detach()
    */
@@ -484,7 +497,7 @@ public class Node {
     // and it also would affect Interpolator addKeyFrame(eye)
     Node node = new Node();
     node.set(this);
-    node.setPickingThreshold(0.2f);
+    node.setBullsEyeSize(0.2f);
     return node;
   }
 
@@ -860,7 +873,7 @@ public class Node {
    * Returns a random node attached to {@code graph}. The node is randomly positioned inside
    * the {@code graph} viewing volume which is defined by {@link Graph#center()} and {@link Graph#radius()}
    * (see {@link Vector#random()}). The {@link #orientation()} is set by {@link Quaternion#random()}. The
-   * {@link #magnitude()} is a random in [0,5...2]. The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * {@link #magnitude()} is a random in [0,5...2]. The {@link #bullsEyeSize()} is set to {@code 0.2}.
    *
    * @see #random(Vector, float, boolean)
    * @see Vector#random()
@@ -869,7 +882,7 @@ public class Node {
    */
   public static Node random(Graph graph) {
     Node node = new Node();
-    node.setPickingThreshold(.2f);
+    node.setBullsEyeSize(.2f);
     node.randomize(graph.center(), graph.radius(), graph.is3D());
     return node;
   }
@@ -879,7 +892,7 @@ public class Node {
    * by {@code center} and {@code radius} (see {@link Vector#random()}), which in 2D is a
    * circumference parallel to the x-y plane. The {@link #orientation()} is set by
    * {@link Quaternion#random()}. The {@link #magnitude()} is a random in [0,5...2].
-   * The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * The {@link #bullsEyeSize()} is set to {@code 0.2}.
    *
    * @see #random(Graph)
    * @see Vector#random()
@@ -888,28 +901,46 @@ public class Node {
    */
   public static Node random(Vector center, float radius, boolean is3D) {
     Node node = new Node();
-    node.setPickingThreshold(.2f);
+    node.setBullsEyeSize(.2f);
     node.randomize(center, radius, is3D);
     return node;
   }
 
   // PRECISION
 
-  /**
-   * Sets the {@link #pickingThreshold()}.
-   *
-   * @see #pickingThreshold()
-   * @see #setHighlighting(float)
-   */
-  public void setPickingThreshold(float threshold) {
-    _threshold = threshold;
+  public void setPickingPolicy(PickingPolicy policy) {
+    _pickingPolicy = policy;
+  }
+
+  public PickingPolicy pickingPolicy() {
+    return _pickingPolicy;
+  }
+
+  public void setBullsEyeShape(BullsEyeShape shape) {
+    _bullsEyeShape = shape;
+  }
+
+  public BullsEyeShape bullsEyeShape() {
+    return _bullsEyeShape;
   }
 
   /**
-   * Returns the node picking threshold. Set it with {@link #setPickingThreshold(float)}.
+   * Sets the {@link #bullsEyeSize()}.
+   *
+   * @see #bullsEyeSize()
+   * @see #setHighlighting(float)
+   */
+  public void setBullsEyeSize(float size) {
+    if (size <= 0)
+      System.out.println("Warning: bulls eye size should be positive. Nothing done");
+    _bullsEyeSize = size;
+  }
+
+  /**
+   * Returns the node picking threshold. Set it with {@link #setBullsEyeSize(float)}.
    * <p>
    * Picking a node is done with ray casting against a screen-space shape defined according
-   * to a {@link #pickingThreshold()} as follows:
+   * to a {@link #bullsEyeSize()} as follows:
    * <ul>
    * <li>The projected pixels of the node visual representation (see {@link #graphics(processing.core.PGraphics)}
    * and {@link #setShape(processing.core.PShape)}). Set it with {@code threshold = 0}.</li>
@@ -922,11 +953,11 @@ public class Node {
    * </ul>
    * Default picking precision is defined with {@code threshold = 0}.
    *
-   * @see #setPickingThreshold(float)
+   * @see #setBullsEyeSize(float)
    * @see #highlighting()
    */
-  public float pickingThreshold() {
-    return _threshold;
+  public float bullsEyeSize() {
+    return _bullsEyeSize;
   }
 
   // CONSTRAINT
@@ -2598,10 +2629,10 @@ public class Node {
   }
 
   public void resetHint() {
-    resetHint(0);
+    setHint(0);
   }
 
-  public void resetHint(int mask) {
+  public void setHint(int mask) {
     _mask = mask;
   }
 
@@ -2714,7 +2745,7 @@ public class Node {
    * Returns the highlighting magnitude use to scale the node when it's tagged.
    *
    * @see #setHighlighting(float)
-   * @see #pickingThreshold()
+   * @see #bullsEyeSize()
    */
   public float highlighting() {
     return _highlight;

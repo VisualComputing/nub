@@ -43,7 +43,6 @@ public class SpaceNavigator extends PApplet {
       PShape pshape = rocket ? loadShape("/home/pierre/IdeaProjects/nub/testing/data/interaction/rocket.obj") : shape();
       shapes[i] = new Node(pshape);
       scene.randomize(shapes[i]);
-      shapes[i].setPickingThreshold(0);
     }
     smooth();
   }

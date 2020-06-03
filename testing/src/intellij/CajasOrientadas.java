@@ -64,11 +64,11 @@ public class CajasOrientadas extends PApplet {
   public void keyPressed() {
     if (key == ' ')
       for (Box caja : cajas)
-        if (caja.iNode.pickingThreshold() != 0)
-          if (abs(caja.iNode.pickingThreshold()) < 1)
-            caja.iNode.setPickingThreshold(100 * caja.iNode.pickingThreshold());
+        if (caja.iNode.bullsEyeSize() != 0)
+          if (caja.iNode.bullsEyeSize() < 1)
+            caja.iNode.setBullsEyeSize(100 * caja.iNode.bullsEyeSize());
           else
-            caja.iNode.setPickingThreshold(caja.iNode.pickingThreshold() / 100);
+            caja.iNode.setBullsEyeSize(caja.iNode.bullsEyeSize() / 100);
     if (key == 'a')
       drawAxes = !drawAxes;
     if (key == 'p')
@@ -122,7 +122,7 @@ public class CajasOrientadas extends PApplet {
           pg.popStyle();
         }
       };
-      iNode.setPickingThreshold(0.15f);
+      iNode.setBullsEyeSize(0.15f);
       setSize();
       setColor();
       scene.randomize(iNode);
@@ -132,7 +132,7 @@ public class CajasOrientadas extends PApplet {
       w = random(10, 40);
       h = random(10, 40);
       d = random(10, 40);
-      //iNode.setPickingThreshold(PApplet.max(w, h, d));
+      //iNode.setBullsEyeSize(PApplet.max(w, h, d));
     }
 
     public void setSize(float myW, float myH, float myD) {
@@ -200,7 +200,7 @@ public class CajasOrientadas extends PApplet {
           pg.popStyle();
         }
       };
-      iNode.setPickingThreshold(0.15f);
+      iNode.setBullsEyeSize(0.15f);
       setRadius(10);
     }
 
@@ -210,7 +210,7 @@ public class CajasOrientadas extends PApplet {
 
     public void setRadius(float myR) {
       r = myR;
-      iNode.setPickingThreshold(2 * r);
+      iNode.setBullsEyeSize(2 * r);
     }
 
     public int getColor() {

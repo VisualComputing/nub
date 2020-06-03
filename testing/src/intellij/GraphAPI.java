@@ -36,32 +36,26 @@ public class GraphAPI extends PApplet {
 
     // red
     n1 = new Node(shape(color(255, 0, 0)));
-    n1.setPickingThreshold(0);
 
     // green
     n2 = new Node(n1, shape(color(0, 255, 0)));
     scene.randomize(n2);
     n2.scale(0.5f);
-    n2.setPickingThreshold(0);
 
     // blue
     n3 = new Node(n1, shape(color(0, 0, 255)));
     scene.randomize(n3);
-    n3.setPickingThreshold(0);
 
     // yellow
     n4 = new Node(n2, shape(color(255, 255, 0)));
     scene.randomize(n4);
-    n4.setPickingThreshold(0);
 
     // magenta
     n5 = new Node(n4, shape(color(255, 0, 255)));
     scene.randomize(n5);
-    n5.setPickingThreshold(0);
 
     // cyan
     detached = Node.detach(n1);
-    detached.setPickingThreshold(0);
     detached.setShape(shape(color(0, 255, 255)));
     scene.randomize(detached);
   }

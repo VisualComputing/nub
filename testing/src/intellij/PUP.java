@@ -30,7 +30,6 @@ public class PUP extends PApplet {
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
       models[i] = new Node(boxShape());
-      models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
     visualHint = new Scene(this, P3D, w, h);

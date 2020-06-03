@@ -52,10 +52,7 @@ public class ShadowMap extends PApplet {
           pg.popStyle();
         }
       };
-      shapes[i].setPickingThreshold(0);
       scene.randomize(shapes[i]);
-      // set picking precision to the pixels of the node projection
-      shapes[i].setPickingThreshold(0);
       //shapes[i].setHighlighting(0);
       shapes[i].disableHint(Node.HIGHLIGHT);
     }

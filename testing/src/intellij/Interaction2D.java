@@ -8,7 +8,6 @@ import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
-import processing.opengl.PGraphics2D;
 
 /**
  * Created by pierre on 11/15/16.
@@ -56,13 +55,11 @@ public class Interaction2D extends PApplet {
     shape1.translate(-375, 175, 0);
 
     shape2 = new Node(shape1);
-    shape2.setShape(shape());
+    shape2.setRMRShape(shape());
     shape2.translate(75, 475, 0);
-    if (g instanceof PGraphics2D)
-      shape2.setPickingThreshold(0);
 
     shape3 = new Node(shape2);
-    shape3.setShape(createShape(RECT, 0, 0, 150, 150));
+    shape3.setRMRShape(createShape(RECT, 0, 0, 150, 150));
     shape3.translate(-775, -575, 0);
   }
 

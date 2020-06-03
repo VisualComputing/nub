@@ -68,7 +68,6 @@ public class ShadowMappingTutorial extends PApplet {
         }
       };
       scene.randomize(shapes[i]);
-      shapes[i].setPickingThreshold(0);
       shapes[i].scale(0.2f);
     }
     light = new Node() {
@@ -90,7 +89,8 @@ public class ShadowMappingTutorial extends PApplet {
     light.setPosition(0, 160, 160);
     light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
     light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
-    light.setPickingThreshold(-50);
+    light.setBullsEyeSize(50);
+    light.setBullsEyeShape(Node.BullsEyeShape.CIRCLE);
 
     PShape box = createShape(BOX, 360, 5, 360);
     //rectMode(CENTER);
@@ -156,7 +156,9 @@ public class ShadowMappingTutorial extends PApplet {
         resetShader();
       else
         shader(shadowShader);
-      light.setPickingThreshold(debug ? 0 : -50);
+      light.setBullsEyeShape(Node.BullsEyeShape.CIRCLE);
+      if (debug)
+        light.setPickingPolicy(Node.PickingPolicy.PRECISE);
     }
   }
 
