@@ -29,11 +29,11 @@ public class BasicUse extends PApplet {
     node.translate(50, 50, 50);
     node.enableHint(Node.AXES);
     node.enableHint(Node.BULLS_EYE);
-    node.setPickingPolicy(Node.PickingPolicy.BULLS_EYE);
+    //node.setPickingPolicy(Node.PickingPolicy.BULLS_EYE);
+    //node.setBullsEyeSize(50);
     node.setBullsEyeShape(Node.BullsEyeShape.CIRCLE);
     node.configHint(Node.BULLS_EYE, color(0, 255, 0));
     node.enableHint(Node.CAMERA, color(255, 255, 0), scene.radius() * 2);
-    //node.setBullsEyeSize(50);
     scene.setHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(255, 0, 0));
   }

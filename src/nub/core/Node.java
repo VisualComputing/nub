@@ -2587,6 +2587,17 @@ public class Node {
     setRMRShape(null);
   }
 
+  // TODO study alternative possiblity for setShape, such as:
+  /*
+  public void setShape(Object shape) {
+    if (shape instanceof processing.core.PShape)
+      setRMRShape((processing.core.PShape)shape);
+    else if (shape instanceof Consumer)
+      setIMRShape((Consumer) shape);
+    //setIMRShape((Consumer<processing.core.PGraphics>) shape);
+  }
+  */
+
   /**
    * @deprecated use {@link #setRMRShape(PShape)} instead.
    */
