@@ -141,17 +141,13 @@ public class Node {
 
   // Tagging & Precision
   protected float _bullsEyeSize;
-
   public enum BullsEyeShape {
     SQUARE, CIRCLE
   }
-
   protected BullsEyeShape _bullsEyeShape;
-
   public enum PickingPolicy {
     PRECISE, BULLS_EYE
   }
-
   protected PickingPolicy _pickingPolicy;
 
   // ID
@@ -293,7 +289,7 @@ public class Node {
    * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
    * as {@link #constraint()}, having {@code translation}, {@code rotation} and {@code scaling} as
    * the {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
-   * The {@link #bullsEyeSize()} is set to {@code 0} and the {@link #highlighting()}
+   * The {@link #bullsEyeSize()} is set to {@code 0.2} and the {@link #highlighting()}
    * magnitude to {@code 0.15}.
    */
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
@@ -488,7 +484,6 @@ public class Node {
   /**
    * Performs a deep copy of this node and returns it. Only the {@link #position()},
    * {@link #orientation()} and {@link #magnitude()} of the node are copied.
-   * The new node {@link #bullsEyeSize()} is set to {@code 0.2}.
    *
    * @see #detach()
    */
@@ -497,7 +492,6 @@ public class Node {
     // and it also would affect Interpolator addKeyFrame(eye)
     Node node = new Node();
     node.set(this);
-    node.setBullsEyeSize(0.2f);
     return node;
   }
 
@@ -873,7 +867,7 @@ public class Node {
    * Returns a random node attached to {@code graph}. The node is randomly positioned inside
    * the {@code graph} viewing volume which is defined by {@link Graph#center()} and {@link Graph#radius()}
    * (see {@link Vector#random()}). The {@link #orientation()} is set by {@link Quaternion#random()}. The
-   * {@link #magnitude()} is a random in [0,5...2]. The {@link #bullsEyeSize()} is set to {@code 0.2}.
+   * {@link #magnitude()} is a random in [0,5...2].
    *
    * @see #random(Vector, float, boolean)
    * @see Vector#random()
@@ -882,7 +876,6 @@ public class Node {
    */
   public static Node random(Graph graph) {
     Node node = new Node();
-    node.setBullsEyeSize(.2f);
     node.randomize(graph.center(), graph.radius(), graph.is3D());
     return node;
   }
@@ -892,7 +885,6 @@ public class Node {
    * by {@code center} and {@code radius} (see {@link Vector#random()}), which in 2D is a
    * circumference parallel to the x-y plane. The {@link #orientation()} is set by
    * {@link Quaternion#random()}. The {@link #magnitude()} is a random in [0,5...2].
-   * The {@link #bullsEyeSize()} is set to {@code 0.2}.
    *
    * @see #random(Graph)
    * @see Vector#random()
@@ -901,7 +893,6 @@ public class Node {
    */
   public static Node random(Vector center, float radius, boolean is3D) {
     Node node = new Node();
-    node.setBullsEyeSize(.2f);
     node.randomize(center, radius, is3D);
     return node;
   }

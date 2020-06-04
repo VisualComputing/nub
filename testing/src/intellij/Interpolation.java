@@ -8,8 +8,6 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
-import java.util.function.Function;
-
 /**
  * This example introduces the three different interpolations offered
  * by the Graph.
@@ -73,6 +71,7 @@ public class Interpolation extends PApplet {
     pushStyle();
     stroke(255);
     // same as:scene.drawCatmullRom(interpolator, 5);
+    //scene.drawCatmullRom(interpolator, 4);
     scene.drawCatmullRom(interpolator);
     popStyle();
     for (Node node : interpolator.keyFrames().values()) {

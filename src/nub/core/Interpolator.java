@@ -609,7 +609,6 @@ public class Interpolator {
     node.setPosition(node());
     node.setOrientation(node());
     node.setMagnitude(node());
-    node.setBullsEyeSize(20);
     addKeyFrame(node, time);
   }
 

@@ -132,6 +132,7 @@ public class Graph {
   public static Random random = new Random();
   // Visual hints
   public final static int AXES = 1 << 0;
+  // TODO improve dotted, maybe with an enum, following node bullseye related patterns
   public final static int GRID = 1 << 1;
   // TODO pending
   public final static int INTERPOLATORS = 1 << 2;
