@@ -983,8 +983,8 @@ public class Scene extends Graph implements PConstants {
       node.drawHint(pGraphics);
     }
     // */
-    // TODO discard this form, since graphics should be deprecated
     if (node.isHintEnable(Node.IMR)) {
+      // TODO discard this form, since graphics should be deprecated
       node.graphics(pGraphics);
       if (node.imrShape() != null)
         node.drawIMRShape(pGraphics);
@@ -1055,8 +1055,8 @@ public class Scene extends Graph implements PConstants {
         node.drawHint(pGraphics);
       }
       // */
-      // TODO discard this form, since graphics should be deprecated
       if (node.isHintEnable(Node.IMR)) {
+        // TODO discard this form, since graphics should be deprecated
         node.graphics(pGraphics);
         if (node.imrShape() != null)
           node.drawIMRShape(pGraphics);
@@ -1544,18 +1544,8 @@ public class Scene extends Graph implements PConstants {
             _matrixHandler.popMatrix();
           }
       }
-      context().strokeWeight(context().strokeWeight / 2f); // draw the picking targets:
-      /*
-      // TODO picking targets currently broken, requires attach nodes in interpolator._list to interpolator._path
-      for (Node node : interpolator.path())
-        if(node.isAttached(this))
-          drawBullsEye(node);
-       */
+      context().strokeWeight(context().strokeWeight / 2f);
     }
-    // draw the picking targets:
-    for (Node node : interpolator.keyFrames().values())
-      drawBullsEye(node);
-    context().popStyle();
   }
 
   /**

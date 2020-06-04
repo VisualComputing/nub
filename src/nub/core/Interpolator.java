@@ -584,39 +584,8 @@ public class Interpolator {
   }
 
   /**
-   * Appends a copy of the current {@link #node()} one second after the previously added keyframe.
-   *
-   * @see #addKeyFrame(float)
-   * @see #addKeyFrame(Node)
-   * @see #addKeyFrame(Node, float)
-   * @see Node#set(Node)
-   */
-  public void addKeyFrame() {
-    addKeyFrame(_list.isEmpty() ? 0.0f : 1.0f);
-  }
-
-  /**
-   * Appends a copy of the current {@link #node()} {@code time} seconds after the
-   * previously added keyframe. The {@link Node#bullsEyeSize()} is set to {@code 20}.
-   *
-   * @see #addKeyFrame()
-   * @see #addKeyFrame(Node)
-   * @see #addKeyFrame(Node, float)
-   */
-  public void addKeyFrame(float time) {
-    Node node = new Node();
-    node.setReference(node().reference());
-    node.setPosition(node());
-    node.setOrientation(node());
-    node.setMagnitude(node());
-    addKeyFrame(node, time);
-  }
-
-  /**
    * Appends a new keyframe one second after the previously added one.
    *
-   * @see #addKeyFrame(float)
-   * @see #addKeyFrame()
    * @see #addKeyFrame(Node, float)
    */
   public void addKeyFrame(Node node) {
@@ -632,9 +601,7 @@ public class Interpolator {
    * <p>
    * {@code null} node references are silently ignored.
    *
-   * @see #addKeyFrame(float)
    * @see #addKeyFrame(Node)
-   * @see #addKeyFrame()
    */
   public void addKeyFrame(Node node, float time) {
     if (_list.size() == 0) {
