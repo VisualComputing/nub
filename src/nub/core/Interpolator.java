@@ -160,8 +160,6 @@ public class Interpolator {
     }
   }
 
-  // TODO implement visual hint here: note that a Scene should be used
-
   protected long _lastUpdate;
   // Attention: We should go like this: protected Map<Float, Node> _list;
   // but Java doesn't allow to iterate backwards a map
@@ -187,6 +185,17 @@ public class Interpolator {
   protected boolean _currentKeyFrameValid;
   protected boolean _splineCacheIsValid;
   protected Vector _vector1, _vector2;
+
+  // Visual hint
+  protected int _mask;
+  public final static int AXES = Graph.AXES;
+  public final static int CAMERA = Node.CAMERA;
+  public final static int SPLINE = 1 << 2;
+  protected float _axesLength;
+  protected int _cameraStroke;
+  protected float _cameraLength;
+  protected int _splineStroke;
+  protected int _steps;
 
   /**
    * Convenience constructor that simply calls {@code this(graph, new Node())}.
@@ -237,6 +246,12 @@ public class Interpolator {
     _splineCacheIsValid = false;
     _backwards = _list.listIterator();
     _forwards = _list.listIterator();
+    // hints
+    // green (color(0, 255, 0)) encoded as a processing int rgb color
+    _cameraStroke = -16711936;
+    // magenta (color(255, 0, 255)) encoded as a processing int rgb color
+    _splineStroke = -65281;
+    _steps = 6;
   }
 
   protected Interpolator(Interpolator other) {
@@ -266,6 +281,13 @@ public class Interpolator {
     this._splineCacheIsValid = false;
     this._backwards = _list.listIterator();
     this._forwards = _list.listIterator();
+    // TODO decide this and make consistent with Node.get()
+    // hints
+    this._cameraStroke = other._cameraStroke;
+    this._cameraLength = other._cameraLength;
+    this._splineStroke = other._splineStroke;
+    this._steps = other._steps;
+    this._axesLength = other._axesLength;
   }
 
   /**
@@ -852,5 +874,103 @@ public class Interpolator {
       _pathIsValid = false;
       _splineCacheIsValid = false;
     }
+  }
+
+  public boolean isHintEnable(int hint) {
+    return (_mask & hint) != 0;
+  }
+
+  public int hint() {
+    return this._mask;
+  }
+
+  public void resetHint() {
+    setHint(0);
+  }
+
+  public void setHint(int mask) {
+    _mask = mask;
+  }
+
+  public void enableHint(int hint) {
+    _mask |= hint;
+  }
+
+  public void enableHint(int hint, Object... params) {
+    enableHint(hint);
+    configHint(hint, params);
+  }
+
+  public void disableHint(int hint) {
+    _mask &= ~hint;
+  }
+
+  public void toggleHint(int hint) {
+    if (isHintEnable(hint))
+      disableHint(hint);
+    else
+      enableHint(hint);
+  }
+
+  public void configHint(int hint, Object... params) {
+    switch (params.length) {
+      case 1:
+        if (Graph.isNumInstance(params[0])) {
+          if (hint == SPLINE) {
+            _splineStroke = Graph.castToInt(params[0]);
+            return;
+          }
+          if (hint == AXES) {
+            _axesLength = Graph.castToFloat(params[0]);
+            return;
+          }
+          if (hint == CAMERA) {
+            _cameraStroke = Graph.castToInt(params[0]);
+            return;
+          }
+        }
+        break;
+      case 2:
+        if (hint == CAMERA) {
+          if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
+            _cameraStroke = Graph.castToInt(params[0]);
+            _cameraLength = Graph.castToFloat(params[1]);
+            return;
+          }
+        }
+        break;
+    }
+    System.out.println("Warning: some params in Interpolator.configHint(hint, params) couldn't be parsed!");
+  }
+
+  public float axesLength() {
+    return _axesLength;
+  }
+
+  public float cameraLength() {
+    return _cameraLength;
+  }
+
+  public int cameraStroke() {
+    return _cameraStroke;
+  }
+
+  public int splineStroke() {
+    return _splineStroke;
+  }
+
+  public int steps() {
+    return _steps;
+  }
+
+  public void setSteps(int steps) {
+    if (1 <= steps && steps <= 30)
+      _steps = steps;
+    else
+      System.out.println("Warning: spline steps should be in [1..30]. Nothing done!");
+  }
+
+  protected boolean _validateHint(int hint) {
+    return hint == AXES || hint == CAMERA || hint == SPLINE;
   }
 }

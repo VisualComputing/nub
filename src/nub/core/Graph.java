@@ -131,16 +131,17 @@ import java.util.function.Consumer;
 public class Graph {
   public static Random random = new Random();
   // Visual hints
+  protected int _mask;
   public final static int AXES = 1 << 0;
   // TODO improve dotted, maybe with an enum, following node bullseye related patterns
   public final static int GRID = 1 << 1;
   // TODO pending
-  public final static int INTERPOLATORS = 1 << 2;
-  public final static int BACKGROUND = 1 << 3;
-  protected int _mask;
+  public final static int BACKGROUND = 1 << 2;
+  //public final static int INTERPOLATORS = 1 << 3;
   protected boolean _dotted;
   protected int _gridStroke;
   protected int _gridSubDiv;
+  protected static HashSet<Interpolator> _interpolators = new HashSet<Interpolator>();
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
@@ -4807,10 +4808,12 @@ public class Graph {
         }
         break;
     }
-    System.out.println("Warning: some params in Scene.configHint(params) couldn't be parsed!");
+    System.out.println("Warning: some params in Scene.configHint(hint, params) couldn't be parsed!");
   }
 
   protected boolean _validateHint(int hint) {
-    return hint == AXES || hint == GRID || hint == INTERPOLATORS;
+    return hint == AXES || hint == GRID || hint == BACKGROUND;
   }
+
+  // TODO add visual hint getters as with Node and Interpolator
 }

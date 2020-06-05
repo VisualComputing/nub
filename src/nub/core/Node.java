@@ -160,6 +160,7 @@ public class Node {
   protected boolean _tagging;
 
   // Visual hints
+  protected int _mask;
   public final static int AXES = Graph.AXES;
   public final static int CAMERA = 1 << 1;
   public final static int BULLS_EYE = 1 << 2;
@@ -172,7 +173,6 @@ public class Node {
   // TODO update constraint examples
   public final static int CONSTRAINT = 1 << 8;
   public final static int BONE = 1 << 9;
-  protected int _mask;
   protected float _highlight;
   protected int _bullStroke;
   protected float _axesLength;
@@ -317,6 +317,7 @@ public class Node {
     setBullsEyeSize(.2f);
     _bullsEyeShape = BullsEyeShape.SQUARE;
     _tagging = true;
+    // hints
     _highlight = 0.15f;
     int min = 2, max = 20;
     _torusFaces = Graph.random.nextInt(max - min + 1) + min;
@@ -326,9 +327,12 @@ public class Node {
     float g = (float) Graph.random.nextInt(max - min + 1) + min;
     float b = (float) Graph.random.nextInt(max - min + 1) + min;
     _torusColor = Graph._color(r, g, b);
-    // cyan encoded as a processing int rgb color
+    // cyan (color(0, 255, 255)) encoded as a processing int rgb color
     _bullStroke = -16711681;
-    _frustumColor = 2113863935;
+    // yellow (with alpha: color(255, 255, 0, 125)) encoded as a processing int rgb color
+    _frustumColor = 2113928960;
+    // magenta (color(255, 0, 255)) encoded as a processing int rgb color
+    _cameraStroke = -65281;
     _children = new ArrayList<Node>();
   }
 
@@ -492,6 +496,7 @@ public class Node {
     // and it also would affect Interpolator addKeyFrame(eye)
     Node node = new Node();
     node.set(this);
+    // TODO decide this and make consistent with Interpolator.get()
     return node;
   }
 
@@ -919,7 +924,6 @@ public class Node {
    * Sets the {@link #bullsEyeSize()}.
    *
    * @see #bullsEyeSize()
-   * @see #setHighlighting(float)
    */
   public void setBullsEyeSize(float size) {
     if (size <= 0)
@@ -2724,7 +2728,7 @@ public class Node {
         }
         break;
     }
-    System.out.println("Warning: some params in Node.configHint(params) couldn't be parsed!");
+    System.out.println("Warning: some params in Node.configHint(hint, params) couldn't be parsed!");
   }
 
   public boolean isHintEnable(int hint) {
@@ -2732,21 +2736,13 @@ public class Node {
   }
 
   protected boolean _validateHint(int hint) {
-    return hint == AXES || hint == CAMERA || hint == BULLS_EYE || hint == IMR || hint == RMR;
-  }
-
-  /**
-   * @deprecated use {@link #configHint(int, Object...)} instead.
-   */
-  @Deprecated
-  public void setHighlighting(float highlighting) {
-    _highlight = highlighting;
+    return hint == AXES || hint == CAMERA || hint == BULLS_EYE || hint == IMR || hint == RMR || hint == HIGHLIGHT
+        || hint == FRUSTUM || hint == TORUS || hint == CONSTRAINT || hint == BONE;
   }
 
   /**
    * Returns the highlighting magnitude use to scale the node when it's tagged.
    *
-   * @see #setHighlighting(float)
    * @see #bullsEyeSize()
    */
   public float highlighting() {

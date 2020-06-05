@@ -110,23 +110,25 @@ public class Interpolation2 extends PApplet {
     println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
     shape.setPickingThreshold(50);
      */
-    //shape.disableHint(Node.IMR);
+    shape.disableHint(Node.IMR);
     shape.enableHint(Node.AXES);
     shape.enableHint(Node.BULLS_EYE);
     //shape.configHint(Node.BULLS_EYE, color(0, 255, 0));
     shape.enableHint(Node.CAMERA);
-    shape.configHint(Node.CAMERA, color(255, 0, 0), scene.radius() * 2);
+    shape.configHint(Node.CAMERA, color(255, 0, 255), scene.radius() * 2);
     shape.setBullsEyeSize(50);
 
-    int c = color(255, 0, 255, 125);
-    println(c);
+    //int c = color(255, 0, 255, 125);
+    //println(c);
 
     scene.setHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(255, 0, 0));
   }
 
   public void draw() {
-    background(125);
+    int c = color(0, 255, 0);
+    println(c);
+    background(c);
     scene.render();
 
     /*
@@ -154,9 +156,6 @@ public class Interpolation2 extends PApplet {
     }
      */
     //println(frameRate);
-
-    int c = color(0, 255, 255);
-    //println(c);
   }
 
   public void mouseMoved() {

@@ -92,7 +92,7 @@ import java.util.Map;
  * }
  * }
  * </pre>
- * while {@link #render()} will draw the animated node(s), {@link #drawCatmullRom(Interpolator, int)}
+ * while {@link #render()} will draw the animated node(s), {@link #drawCatmullRom(Interpolator)}
  * will draw the interpolated path too.
  * <h1>Picking and interaction</h1>
  * Refer to the {@link Graph} documentation for details about how picking and interaction works
@@ -1087,8 +1087,8 @@ public class Scene extends Graph implements PConstants {
       else
         drawGrid(radius(), _gridSubDiv);
     }
-    if (isHintEnable(INTERPOLATORS)) {
-      // TODO implement me
+    for (Interpolator interpolator : _interpolators) {
+      drawCatmullRom(interpolator);
     }
     context().popStyle();
   }
@@ -1468,33 +1468,6 @@ public class Scene extends Graph implements PConstants {
   // DRAWING
 
   /**
-   * Convenience function that simply calls {@code drawCatmullRom(interpolator, isEye(interpolator.node()) ? 3 : 5, 6, radius())}.
-   *
-   * @see #drawCatmullRom(Interpolator, int, int, float)
-   */
-  public void drawCatmullRom(Interpolator interpolator) {
-    drawCatmullRom(interpolator, isEye(interpolator.node()) ? 3 : 5, 6, radius());
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawCatmullRom(interpolator, mask, 6, radius())}
-   *
-   * @see #drawCatmullRom(Interpolator, int, int, float)
-   */
-  public void drawCatmullRom(Interpolator interpolator, int mask) {
-    drawCatmullRom(interpolator, mask, 6, radius());
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawCatmullRom(interpolator, mask, count, radius())}.
-   *
-   * @see #drawCatmullRom(Interpolator, int, int, float)
-   */
-  public void drawCatmullRom(Interpolator interpolator, int mask, int steps) {
-    drawCatmullRom(interpolator, mask, steps, radius());
-  }
-
-  /**
    * Draws the {@link Interpolator} path.
    * <p>
    * {@code mask} controls what is drawn: If ( (mask &amp; 1) != 0 ), the position path is
@@ -1514,37 +1487,51 @@ public class Scene extends Graph implements PConstants {
    * {@code scale} controls the scaling of the eye and axes drawing. A value of
    * {@link #radius()} should give good results.
    */
-  public void drawCatmullRom(Interpolator interpolator, int mask, int steps, float scale) {
-    context().pushStyle();
-    if (mask != 0) {
-      int nbSteps = 30;
-      context().strokeWeight(2 * context().strokeWeight);
+  // TODO drawSpline instead ?
+  public void drawCatmullRom(Interpolator interpolator) {
+    if (interpolator.hint() != 0) {
+      context().pushStyle();
       context().noFill();
       List<Node> path = interpolator.path();
-      if (((mask & 1) != 0) && path.size() > 1) {
+      if (interpolator.isHintEnable(Interpolator.SPLINE) && path.size() > 1) {
+        context().pushStyle();
+        context().colorMode(PApplet.RGB, 255);
+        context().strokeWeight(3);
+        context().stroke(interpolator.splineStroke());
         context().beginShape();
-        for (Node node : path)
-          vertex(node.position().x(), node.position().y(), node.position().z());
+        for (Node node : path) {
+          Vector position = node.position();
+          vertex(position.x(), position.y(), position.z());
+        }
         context().endShape();
+        context().popStyle();
       }
-      if ((mask & 6) != 0) {
+      if (interpolator.isHintEnable(Interpolator.AXES) || interpolator.isHintEnable(Interpolator.CAMERA)) {
+        int nbSteps = 30;
         int count = 0;
-        if (steps > nbSteps)
-          steps = nbSteps;
         float goal = 0.0f;
-        for (Node node : path)
+        for (Node node : path) {
           if ((count++) >= goal) {
-            goal += nbSteps / (float) steps;
+            goal += nbSteps / (float) interpolator.steps();
             _matrixHandler.pushMatrix();
             _matrixHandler.applyTransformation(node);
-            if ((mask & 2) != 0)
-              _drawEye(scale);
-            if ((mask & 4) != 0)
-              drawAxes(scale / 10.0f);
+            if (interpolator.isHintEnable(Interpolator.AXES)) {
+              // TODO test
+              drawAxes(interpolator.axesLength() == 0 ? radius() / 5 : interpolator.axesLength());
+            }
+            if (interpolator.isHintEnable(Interpolator.CAMERA)) {
+              // TODO test
+              context().pushStyle();
+              context().colorMode(PApplet.RGB, 255);
+              context().stroke(interpolator.cameraStroke());
+              _drawEye(interpolator.cameraLength() == 0 ? radius() : interpolator.cameraLength());
+              context().popStyle();
+            }
             _matrixHandler.popMatrix();
           }
+        }
       }
-      context().strokeWeight(context().strokeWeight / 2f);
+      context().popStyle();
     }
   }
 

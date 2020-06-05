@@ -62,24 +62,18 @@ public class Interpolation extends PApplet {
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
     interpolator.run();
+    interpolator.enableHint(Interpolator.AXES);
+    interpolator.enableHint(Interpolator.SPLINE);
+    interpolator.enableHint(Interpolator.CAMERA);
+    interpolator.configHint(Interpolator.SPLINE, color(255));
+    interpolator.configHint(Interpolator.CAMERA, color(255));
+    interpolator.setSteps(2);
   }
 
   public void draw() {
     background(125);
     scene.render();
-
-    pushStyle();
-    stroke(255);
-    // same as:scene.drawCatmullRom(interpolator, 5);
-    //scene.drawCatmullRom(interpolator, 4);
     scene.drawCatmullRom(interpolator);
-    popStyle();
-    for (Node node : interpolator.keyFrames().values()) {
-      pushMatrix();
-      scene.applyTransformation(node);
-      scene.drawAxes(scene.mouseTracks(node) ? 40 : 20);
-      popMatrix();
-    }
     if (showEyePath) {
       pushStyle();
       fill(255, 0, 0);

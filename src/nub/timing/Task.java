@@ -54,6 +54,7 @@ abstract public class Task {
    * {@link #period()}. Do not implement this method for drawing
    * since it will not necessarily be executed every frame.
    */
+  // TODO implement this as a functor
   abstract public void execute();
 
   /**
