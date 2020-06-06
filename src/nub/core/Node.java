@@ -491,6 +491,7 @@ public class Node {
    *
    * @see #detach()
    */
+  // TODO should hint be copied ?
   public Node get() {
     // Copying the shape (node.setShape(this.shape())) is incompatible with js
     // and it also would affect Interpolator addKeyFrame(eye)

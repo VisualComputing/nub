@@ -198,34 +198,6 @@ public class Interpolator {
   protected int _steps;
 
   /**
-   * Convenience constructor that simply calls {@code this(graph, new Node())}.
-   * <p>
-   * Creates an anonymous {@link #node()} to be interpolated by this
-   * interpolator.
-   *
-   * @see #Interpolator(Node)
-   */
-  // TODO remove?
-  /*
-  public Interpolator() {
-    this(new Node());
-  }
-
-   */
-
-  /**
-   * Convenience constructor that simply calls {@code this(graph.eye())}.
-   *
-   * @see #Interpolator(Node)
-   */
-  // TODO remove?
-  /*
-  public Interpolator(Graph graph) {
-    this(graph.eye());
-  }
-   */
-
-  /**
    * Creates an interpolator, with {@code node} as associated {@link #node()}.
    * <p>
    * The {@link #node()} can be set or changed using {@link #setNode(Node)}.
