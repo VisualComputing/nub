@@ -205,18 +205,25 @@ public class Interpolator {
    *
    * @see #Interpolator(Node)
    */
+  // TODO remove?
+  /*
   public Interpolator() {
     this(new Node());
   }
+
+   */
 
   /**
    * Convenience constructor that simply calls {@code this(graph.eye())}.
    *
    * @see #Interpolator(Node)
    */
+  // TODO remove?
+  /*
   public Interpolator(Graph graph) {
     this(graph.eye());
   }
+   */
 
   /**
    * Creates an interpolator, with {@code node} as associated {@link #node()}.
@@ -251,7 +258,7 @@ public class Interpolator {
     _cameraStroke = -16711936;
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
     _splineStroke = -65281;
-    _steps = 6;
+    _steps = 3;
   }
 
   protected Interpolator(Interpolator other) {

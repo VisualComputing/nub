@@ -858,7 +858,7 @@ public class Scene extends Graph implements PConstants {
    * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONArray into an interpolator.
    */
   protected Interpolator _toInterpolator(JSONArray jsonInterpolator) {
-    Interpolator interpolator = new Interpolator();
+    Interpolator interpolator = new Interpolator(new Node());
     for (int j = 0; j < jsonInterpolator.size(); j++) {
       Node node = new Node();
       node.set(_toNode(jsonInterpolator.getJSONObject(j)));
