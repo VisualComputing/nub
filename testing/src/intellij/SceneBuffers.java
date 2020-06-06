@@ -30,7 +30,7 @@ public class SceneBuffers extends PApplet {
       scene.randomize(shapes[i]);
     }
     scene.fit(1);
-    scene.setHint(Scene.AXES);
+    scene.enableHint(Scene.AXES);
   }
 
   public void draw() {

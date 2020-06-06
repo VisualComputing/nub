@@ -4728,15 +4728,11 @@ public class Graph {
   }
 
   public void resetHint() {
-    setHint(0);
+    _mask = 0;
   }
 
-  public void setHint(int mask) {
-    _mask = mask;
-  }
-
-  public void enableHint(int hint) {
-    _mask |= hint;
+  public void disableHint(int hint) {
+    _mask &= ~hint;
   }
 
   public void enableHint(int hint, Object... params) {
@@ -4744,8 +4740,8 @@ public class Graph {
     configHint(hint, params);
   }
 
-  public void disableHint(int hint) {
-    _mask &= ~hint;
+  public void enableHint(int hint) {
+    _mask |= hint;
   }
 
   public void toggleHint(int hint) {

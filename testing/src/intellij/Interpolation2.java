@@ -121,7 +121,7 @@ public class Interpolation2 extends PApplet {
     //int c = color(255, 0, 255, 125);
     //println(c);
 
-    scene.setHint(Scene.AXES | Scene.GRID);
+    scene.enableHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(255, 0, 0));
   }
 

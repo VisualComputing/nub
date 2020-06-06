@@ -191,7 +191,6 @@ public class Interpolator {
   public final static int AXES = Graph.AXES;
   public final static int CAMERA = Node.CAMERA;
   public final static int SPLINE = 1 << 2;
-  // TODO make protected
   protected float _axesLength;
   protected int _cameraStroke;
   protected float _cameraLength;
@@ -893,15 +892,14 @@ public class Interpolator {
   }
 
   public void resetHint() {
-    setHint(0);
+    _mask = 0;
+    Graph._interpolators.remove(this);
   }
 
-  public void setHint(int mask) {
-    _mask = mask;
-  }
-
-  public void enableHint(int hint) {
-    _mask |= hint;
+  public void disableHint(int hint) {
+    _mask &= ~hint;
+    if (_mask == 0)
+      Graph._interpolators.remove(this);
   }
 
   public void enableHint(int hint, Object... params) {
@@ -909,8 +907,10 @@ public class Interpolator {
     configHint(hint, params);
   }
 
-  public void disableHint(int hint) {
-    _mask &= ~hint;
+  public void enableHint(int hint) {
+    _mask |= hint;
+    if (_mask != 0)
+      Graph._interpolators.add(this);
   }
 
   public void toggleHint(int hint) {

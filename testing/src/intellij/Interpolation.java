@@ -62,9 +62,10 @@ public class Interpolation extends PApplet {
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
     interpolator.run();
-    interpolator.enableHint(Interpolator.AXES);
-    interpolator.enableHint(Interpolator.SPLINE);
-    interpolator.enableHint(Interpolator.CAMERA);
+    interpolator.enableHint(Interpolator.AXES | Interpolator.SPLINE | Interpolator.CAMERA);
+    interpolator.disableHint(Interpolator.SPLINE | Interpolator.CAMERA);
+    if (interpolator.isHintEnable(Interpolator.CAMERA))
+      println("yes");
     interpolator.configHint(Interpolator.SPLINE, color(255));
     interpolator.configHint(Interpolator.CAMERA, color(0, 255, 0));
     interpolator.setSteps(2);
@@ -134,6 +135,13 @@ public class Interpolation extends PApplet {
         task.disableConcurrence();
     if (key == 'p')
       println(Scene.nodes().size());
+
+    if (key == 't')
+      interpolator.toggleHint(Interpolator.AXES);
+    if (key == 'u')
+      interpolator.toggleHint(Interpolator.SPLINE);
+    if (key == 'v')
+      interpolator.toggleHint(Interpolator.CAMERA);
   }
 
   public static void main(String[] args) {

@@ -296,7 +296,7 @@ public class Node {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
     // TODO new
-    setHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
+    enableHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
   }
 
   /**
@@ -2464,7 +2464,6 @@ public class Node {
    * </pre>
    *
    * @see Graph#render()
-   * @see GLMatrixHandler#_draw(Object, Node)
    * @see #cull(boolean)
    * @see #isCulled()
    * @see #bypass()
@@ -2630,20 +2629,20 @@ public class Node {
     return _shape;
   }
 
+  public boolean isHintEnable(int hint) {
+    return (_mask & hint) != 0;
+  }
+
   public int hint() {
     return this._mask;
   }
 
   public void resetHint() {
-    setHint(0);
+    _mask = 0;
   }
 
-  public void setHint(int mask) {
-    _mask = mask;
-  }
-
-  public void enableHint(int hint) {
-    _mask |= hint;
+  public void disableHint(int hint) {
+    _mask &= ~hint;
   }
 
   public void enableHint(int hint, Object... params) {
@@ -2651,8 +2650,8 @@ public class Node {
     configHint(hint, params);
   }
 
-  public void disableHint(int hint) {
-    _mask &= ~hint;
+  public void enableHint(int hint) {
+    _mask |= hint;
   }
 
   public void toggleHint(int hint) {
@@ -2729,10 +2728,6 @@ public class Node {
         break;
     }
     System.out.println("Warning: some params in Node.configHint(hint, params) couldn't be parsed!");
-  }
-
-  public boolean isHintEnable(int hint) {
-    return (_mask & hint) != 0;
   }
 
   protected boolean _validateHint(int hint) {

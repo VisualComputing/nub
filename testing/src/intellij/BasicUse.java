@@ -34,7 +34,7 @@ public class BasicUse extends PApplet {
     node.setBullsEyeShape(Node.BullsEyeShape.CIRCLE);
     node.configHint(Node.BULLS_EYE, color(0, 255, 0));
     node.enableHint(Node.CAMERA, color(255, 255, 0), scene.radius() * 2);
-    scene.setHint(Scene.AXES | Scene.GRID);
+    scene.enableHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(255, 0, 0));
   }
 
