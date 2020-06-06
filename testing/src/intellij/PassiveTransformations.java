@@ -1,9 +1,7 @@
 package intellij;
 
 import nub.core.Graph;
-import nub.core.MatrixHandler;
 import nub.core.Node;
-import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
@@ -20,7 +18,8 @@ public class PassiveTransformations extends PApplet {
   public void setup() {
     graph = new Graph(g, width, height);
     // TODO pending
-    graph.setMatrixHandler(new MatrixHandler() {
+    /*
+    graph._setMatrixHandler(new MatrixHandler() {
       @Override
       protected void _setUniforms() {
         // TODO How to deal with this command. Seems related to: Scene._drawBackBuffer(Node node)
@@ -28,6 +27,7 @@ public class PassiveTransformations extends PApplet {
         Scene.setUniform(_shader, "nub_transform", transform());
       }
     });
+     */
     graph.setFOV(PI / 3);
     graph.fit(1);
     nodes = new Node[50];

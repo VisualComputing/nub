@@ -66,26 +66,13 @@ public class Interpolation extends PApplet {
     interpolator.enableHint(Interpolator.SPLINE);
     interpolator.enableHint(Interpolator.CAMERA);
     interpolator.configHint(Interpolator.SPLINE, color(255));
-    interpolator.configHint(Interpolator.CAMERA, color(255));
+    interpolator.configHint(Interpolator.CAMERA, color(0, 255, 0));
     interpolator.setSteps(2);
   }
 
   public void draw() {
     background(125);
     scene.render();
-    scene.drawCatmullRom(interpolator);
-    if (showEyePath) {
-      pushStyle();
-      fill(255, 0, 0);
-      stroke(0, 255, 0);
-      // same as:
-      // scene.drawCatmullRom(eyeInterpolator1, 3);
-      // scene.drawCatmullRom(eyeInterpolator2, 3);
-      scene.drawCatmullRom(eyeInterpolator1);
-      scene.drawCatmullRom(eyeInterpolator2);
-      popStyle();
-    }
-    println(frameRate);
   }
 
   public void mouseMoved() {

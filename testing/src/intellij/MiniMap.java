@@ -145,7 +145,7 @@ public class MiniMap extends PApplet {
       minimap.drawAxes();
       minimap.render();
       //minimap.context().stroke(255);
-      //minimap.drawBullsEye(scene.eye());
+      //minimap._drawBullsEye(scene.eye());
       minimap.endDraw();
       minimap.display(w / 2, h / 2);
       if (!scene.isOffscreen())

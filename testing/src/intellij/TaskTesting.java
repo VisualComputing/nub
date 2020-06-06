@@ -121,8 +121,6 @@ public class TaskTesting extends PApplet {
 
     pushStyle();
     stroke(255);
-    // same as:scene.drawCatmullRom(interpolator, 5);
-    scene.drawCatmullRom(interpolator);
     popStyle();
 
     for (Node node : interpolator.keyFrames().values()) {
@@ -130,17 +128,6 @@ public class TaskTesting extends PApplet {
       scene.applyTransformation(node);
       scene.drawAxes(scene.mouseTracks(node) ? 40 : 20);
       popMatrix();
-    }
-    if (showEyePath) {
-      pushStyle();
-      fill(255, 0, 0);
-      stroke(0, 255, 0);
-      // same as:
-      // scene.drawCatmullRom(eyeInterpolator1, 3);
-      // scene.drawCatmullRom(eyeInterpolator2, 3);
-      scene.drawCatmullRom(eyeInterpolator1);
-      scene.drawCatmullRom(eyeInterpolator2);
-      popStyle();
     }
   }
 

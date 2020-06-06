@@ -88,8 +88,6 @@ public class InterpolationExample extends PApplet {
     scene.render();
     //Render mesh with respect to the node
     stroke(255);
-    if (spline)
-      scene.drawCatmullRom(interpolator);
     scene.beginHUD();
     int i = 0;
     for (Node node : chain) {

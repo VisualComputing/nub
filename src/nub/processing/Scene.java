@@ -16,7 +16,6 @@ package nub.processing;
 
 import nub.core.Graph;
 import nub.core.Interpolator;
-import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
@@ -73,9 +72,9 @@ import java.util.Map;
  * {@link #drawTorusSolenoid(PGraphics, int, int, float, float)}.
  * <p>
  * Drawing functions that take a {@code PGraphics} parameter (including the above
- * static ones), such as {@link #beginHUD(PGraphics)},
- * {@link #endHUD(PGraphics)}, {@link #drawAxes(PGraphics, float)},
- * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
+ * static ones), such as {@link #beginHUD()},
+ * {@link #endHUD()}, {@link #drawAxes(PGraphics, float)},
+ * {@link #drawCross(float, float, float)} and {@link #drawGrid(PGraphics)}
  * among others, can be used to set a {@link Node#setShape(PShape)} (see
  * also {@link Node#graphics(PGraphics)}).
  * <p>
@@ -88,11 +87,11 @@ import java.util.Map;
  * {@code
  * void draw() {
  *   scene.render();
- *   scene.drawCatmullRom(interpolator, 5);
+ *   scene._drawSpline(interpolator, 5);
  * }
  * }
  * </pre>
- * while {@link #render()} will draw the animated node(s), {@link #drawCatmullRom(Interpolator)}
+ * while {@link #render()} will draw the animated node(s), {@link #_drawSpline(Interpolator)}
  * will draw the interpolated path too.
  * <h1>Picking and interaction</h1>
  * Refer to the {@link Graph} documentation for details about how picking and interaction works
@@ -282,44 +281,6 @@ public class Scene extends Graph implements PConstants {
     setLeftHanded();
   }
 
-  /**
-   * Returns a {@code MatrixHandler} instance according to the default target renderer context.
-   * <p>
-   * Together with {@link Scene#draw(Object, Node)} are the methods that should be
-   * re-implemented in js.
-   */
-  public static MatrixHandler matrixHandler(Object context) {
-    if (context instanceof PGraphics)
-      if (context instanceof PGraphicsOpenGL)
-        return new GLMatrixHandler((PGraphicsOpenGL) context);
-      else
-        throw new RuntimeException("Only OpenGL renderers are currently supported");
-    return new MatrixHandler();
-  }
-
-  /**
-   * Renders the node onto context. Used by the rendering algorithms.
-   * <p>
-   * Warning: don't forget to set the {@code PGraphics} {@code shapeMode()} if
-   * the node {@link Node#shape()} context is different than {@code pGraphics}.
-   * <p>
-   * Together with {@link Scene#matrixHandler(Object)} are the methods
-   * that should be re-implemented in js.
-   */
-  public static void draw(Object context, Node node) {
-    PGraphicsOpenGL pGraphics = (PGraphicsOpenGL) context;
-    pGraphics.pushStyle();
-    pGraphics.pushMatrix();
-    if (node.rmrShape() != null) {
-      pGraphics.shape(node.rmrShape());
-    } else {
-      node.drawIMRShape(pGraphics);
-      node.graphics(pGraphics);
-    }
-    pGraphics.popStyle();
-    pGraphics.popMatrix();
-  }
-
   // P5 STUFF
 
   /**
@@ -376,16 +337,6 @@ public class Scene extends Graph implements PConstants {
    */
   public static void applyWorldTransformation(PApplet pApplet, Node node) {
     applyWorldTransformation(pApplet.g, node);
-  }
-
-  /**
-   * Renders the node onto the main {@code pApplet} context.
-   * Same as {@code draw(pApplet.g, node)}.
-   *
-   * @see #draw(Object, Node)
-   */
-  public static void draw(PApplet pApplet, Node node) {
-    draw(pApplet.g, node);
   }
 
   // PICKING BUFFER
@@ -514,35 +465,17 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Disables z-buffer.
+   * Disables z-buffer on {@link #context()}.
    */
   public void disableDepthTest() {
-    disableDepthTest(context());
+    context().hint(PApplet.DISABLE_DEPTH_TEST);
   }
 
   /**
-   * Disables depth test on the PGraphics instance.
-   *
-   * @see #enableDepthTest(PGraphics)
-   */
-  public void disableDepthTest(PGraphics pGraphics) {
-    pGraphics.hint(PApplet.DISABLE_DEPTH_TEST);
-  }
-
-  /**
-   * Enables z-buffer.
+   * Enables z-buffer on {@link #context()}.
    */
   public void enableDepthTest() {
-    enableDepthTest(context());
-  }
-
-  /**
-   * Enables depth test on the PGraphics instance.
-   *
-   * @see #disableDepthTest(PGraphics)
-   */
-  public void enableDepthTest(PGraphics pGraphics) {
-    pGraphics.hint(PApplet.ENABLE_DEPTH_TEST);
+    context().hint(PApplet.ENABLE_DEPTH_TEST);
   }
 
   // 3. Drawing methods
@@ -1011,7 +944,7 @@ public class Scene extends Graph implements PConstants {
       pGraphics.pushStyle();
       pGraphics.colorMode(PApplet.RGB, 255);
       pGraphics.stroke(node.bullsEyeStroke());
-      drawBullsEye(node);
+      _drawBullsEye(node);
       pGraphics.popStyle();
     }
     if (node.isHintEnable(Node.CAMERA)) {
@@ -1088,7 +1021,7 @@ public class Scene extends Graph implements PConstants {
         drawGrid(radius(), _gridSubDiv);
     }
     for (Interpolator interpolator : _interpolators) {
-      drawCatmullRom(interpolator);
+      _drawSpline(interpolator);
     }
     context().popStyle();
   }
@@ -1208,81 +1141,43 @@ public class Scene extends Graph implements PConstants {
   // HUD
 
   /**
-   * Same as {@code beginHUD(context())}.
+   * Same as {@code super.beginHUD()}, but disables Processing {@code DISABLE_OPTIMIZED_STROKE}
+   * and z-buffering (see {@link #disableDepthTest()}).
    *
-   * @see #context()
-   * @see #beginHUD(PGraphics)
+   * @see Graph#beginHUD()
+   * @see #endHUD()
    */
   @Override
   public void beginHUD() {
-    beginHUD(context());
-  }
-
-  /**
-   * Begins Heads Up Display (HUD) on the {@code pGraphics} so that drawing can be done
-   * using 2D screen coordinates. Don't forget to call {@link #endHUD(PGraphics)} after screen
-   * drawing ends.
-   * <p>
-   * All screen drawing should be enclosed between {@link #beginHUD(PGraphics)} and
-   * {@link #endHUD(PGraphics)}. Then you can just begin drawing your screen nodes.
-   * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d graph
-   * then draw first all your 3d before doing any call to a {@link #beginHUD(PGraphics)}
-   * and {@link #endHUD(PGraphics)} pair.
-   *
-   * @see #endHUD(PGraphics)
-   * @see #beginHUD()
-   */
-  public void beginHUD(PGraphics pGraphics) {
     if (_hudCalls != 0)
       throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
           + "endHUD() and they cannot be nested. Check your implementation!");
     _hudCalls++;
     // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
     if (is3D())
-      pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);
-    disableDepthTest(pGraphics);
-    // if-else same as:
-    // matrixHandler(p).beginHUD();
-    // but perhaps a bit more efficient
-    if (pGraphics == context())
-      _matrixHandler.beginHUD(width(), height());
-    else
-      matrixHandler(pGraphics).beginHUD(pGraphics.width, pGraphics.height);
+      context().hint(PApplet.DISABLE_OPTIMIZED_STROKE);
+    disableDepthTest();
+    _matrixHandler.beginHUD(width(), height());
   }
 
   /**
-   * Same as {@code endHUD(context())}.
+   * Same as {@code super.endHUD()}, but enables Processing {@code DISABLE_OPTIMIZED_STROKE}
+   * and z-buffering (see {@link #disableDepthTest()}).
    *
-   * @see #context()
-   * @see #endHUD(PGraphics)
+   * @see Graph#endHUD()
+   * @see #beginHUD()
    */
   @Override
   public void endHUD() {
-    endHUD(context());
-  }
-
-  /**
-   * Ends Heads Up Display (HUD) on the {@code pGraphics}. See {@link #beginHUD(PGraphics)} for details.
-   *
-   * @see #beginHUD(PGraphics)
-   * @see #endHUD()
-   */
-  public void endHUD(PGraphics pGraphics) {
     _hudCalls--;
     if (_hudCalls != 0)
       throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
           + "endHUD() and they cannot be nested. Check your implementation!");
-    // if-else same as:
-    // matrixHandler(p).endHUD();
-    // but perhaps a bit more efficient
-    if (pGraphics == context())
-      _matrixHandler.endHUD();
-    else
-      matrixHandler(pGraphics).endHUD();
-    enableDepthTest(pGraphics);
+    _matrixHandler.endHUD();
+    enableDepthTest();
     // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
     if (is3D())
-      pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);
+      context().hint(PApplet.ENABLE_OPTIMIZED_STROKE);
   }
 
   // drawing
@@ -1474,9 +1369,9 @@ public class Scene extends Graph implements PConstants {
    * drawn. If ( (mask &amp; 2) != 0 ), an eye representation is regularly drawn and if
    * ( (mask &amp; 4) != 0 ), oriented axes are regularly drawn. Examples:
    * <p>
-   * {@code drawCatmullRom(1); // Simply draws the interpolation path} <br>
-   * {@code drawCatmullRom(3); // Draws path and eyes} <br>
-   * {@code drawCatmullRom(5); // Draws path and axes} <br>
+   * {@code _drawSpline(1); // Simply draws the interpolation path} <br>
+   * {@code _drawSpline(3); // Draws path and eyes} <br>
+   * {@code _drawSpline(5); // Draws path and axes} <br>
    * <p>
    * In the case where the eye or axes are drawn, {@code steps} controls the number of
    * objects (axes or eyes) drawn between two successive keyframes. When
@@ -1487,8 +1382,7 @@ public class Scene extends Graph implements PConstants {
    * {@code scale} controls the scaling of the eye and axes drawing. A value of
    * {@link #radius()} should give good results.
    */
-  // TODO drawSpline instead ?
-  public void drawCatmullRom(Interpolator interpolator) {
+  protected void _drawSpline(Interpolator interpolator) {
     if (interpolator.hint() != 0) {
       context().pushStyle();
       context().noFill();
@@ -2518,33 +2412,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawProjector(context(), graph, vector)}.
+   * Same as {@code drawProjectors(eye, Arrays.asList(point))}.
    *
-   * @see #drawProjector(PGraphics, Graph, Vector)
    * @see #drawProjectors(Graph, List)
    */
-  public void drawProjector(Graph graph, Vector vector) {
-    drawProjector(context(), graph, vector);
-  }
-
-  /**
-   * Same as {@code drawProjectors(pGraphics, eye, Arrays.asList(point))}.
-   *
-   * @see #drawProjector(PGraphics, Graph, Vector)
-   * @see #drawProjectors(PGraphics, Graph, List)
-   */
-  public void drawProjector(PGraphics pGraphics, Graph eye, Vector point) {
-    drawProjectors(pGraphics, eye, Arrays.asList(point));
-  }
-
-  /**
-   * Same as {@code drawProjectors(context(), graph, points)}.
-   *
-   * @see #drawProjectors(PGraphics, Graph, List)
-   * @see #drawProjector(Graph, Vector)
-   */
-  public void drawProjectors(Graph graph, List<Vector> points) {
-    drawProjectors(context(), graph, points);
+  public void drawProjector(Graph eye, Vector point) {
+    drawProjectors(eye, Arrays.asList(point));
   }
 
   /**
@@ -2554,51 +2427,52 @@ public class Scene extends Graph implements PConstants {
    * <p>
    * Note that if {@code graph == this} this method has not effect at all.
    *
-   * @see #drawProjector(PGraphics, Graph, Vector)
+   * @see #drawProjector(Graph, Vector)
    */
-  public void drawProjectors(PGraphics pGraphics, Graph graph, List<Vector> points) {
+  // TODO needs testing
+  public void drawProjectors(Graph graph, List<Vector> points) {
     if (graph == this) {
       System.out.println("Warning: No drawProjectors done!");
       return;
     }
-    pGraphics.pushStyle();
+    context().pushStyle();
     if (is2D()) {
-      pGraphics.beginShape(PApplet.POINTS);
+      context().beginShape(PApplet.POINTS);
       for (Vector s : points)
-        Scene.vertex(pGraphics, s.x(), s.y());
-      pGraphics.endShape();
+        Scene.vertex(context(), s.x(), s.y());
+      context().endShape();
     } else {
       // if ORTHOGRAPHIC: do it in the eye coordinate system
       // if PERSPECTIVE: do it in the world coordinate system
       Vector o = new Vector();
       if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
-        pGraphics.pushMatrix();
-        matrixHandler(pGraphics).applyTransformation(graph.eye());
+        context().pushMatrix();
+        _matrixHandler.applyTransformation(graph.eye());
       }
       // in PERSPECTIVE cache the transformed origin
       else
         o = graph.eye().worldLocation(new Vector());
-      pGraphics.beginShape(PApplet.LINES);
+      context().beginShape(PApplet.LINES);
       for (Vector s : points) {
         if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
           Vector v = graph.eye().location(s);
-          Scene.vertex(pGraphics, v.x(), v.y(), v.z());
+          Scene.vertex(context(), v.x(), v.y(), v.z());
           // Key here is to represent the eye zNear param (which is given in world units)
           // in eye units.
           // Hence it should be multiplied by: 1 / eye.eye().magnitude()
           // The neg sign is because the zNear is positive but the eye view direction is
           // the negative Z-axis
-          Scene.vertex(pGraphics, v.x(), v.y(), -(graph.zNear() * 1 / graph.eye().magnitude()));
+          Scene.vertex(context(), v.x(), v.y(), -(graph.zNear() * 1 / graph.eye().magnitude()));
         } else {
-          Scene.vertex(pGraphics, s.x(), s.y(), s.z());
-          Scene.vertex(pGraphics, o.x(), o.y(), o.z());
+          Scene.vertex(context(), s.x(), s.y(), s.z());
+          Scene.vertex(context(), o.x(), o.y(), o.z());
         }
       }
-      pGraphics.endShape();
+      context().endShape();
       if (graph.type() == Graph.Type.ORTHOGRAPHIC)
-        pGraphics.popMatrix();
+        context().popMatrix();
     }
-    pGraphics.popStyle();
+    context().popStyle();
   }
 
   /**
@@ -2608,7 +2482,8 @@ public class Scene extends Graph implements PConstants {
    * If node a Node instance and it is {@link #hasTag(Node)} it also applies
    * a stroke highlight.
    *
-   * @see #drawSquaredBullsEye(Node, float)
+   * @see #drawCircledBullsEye(float, float, float)
+   * @see #drawSquaredBullsEye(float, float, float)
    */
   public void drawCross(Node node) {
     context().pushStyle();
@@ -2642,31 +2517,22 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawCross(context(), x, y, length)}.
-   *
-   * @see #drawCross(PGraphics, float, float, float)
+   * Draws a cross on the screen centered under pixel {@code (x, y)}, and edge of size
+   * {@code length} onto {@link #context()}.
    */
   public void drawCross(float x, float y, float length) {
-    drawCross(context(), x, y, length);
-  }
-
-  /**
-   * Draws a cross on the screen centered under pixel {@code (x, y)}, and edge of size
-   * {@code length} onto {@code pGraphics}.
-   */
-  public void drawCross(PGraphics pGraphics, float x, float y, float length) {
     float half_size = length / 2f;
-    pGraphics.pushStyle();
-    beginHUD(pGraphics);
-    pGraphics.noFill();
-    pGraphics.beginShape(LINES);
-    vertex(pGraphics, x - half_size, y);
-    vertex(pGraphics, x + half_size, y);
-    vertex(pGraphics, x, y - half_size);
-    vertex(pGraphics, x, y + half_size);
-    pGraphics.endShape();
-    endHUD(pGraphics);
-    pGraphics.popStyle();
+    context().pushStyle();
+    beginHUD();
+    context().noFill();
+    context().beginShape(LINES);
+    vertex(context(), x - half_size, y);
+    vertex(context(), x + half_size, y);
+    vertex(context(), x, y - half_size);
+    vertex(context(), x, y + half_size);
+    context().endShape();
+    endHUD();
+    context().popStyle();
   }
 
   /**
@@ -2677,177 +2543,136 @@ public class Scene extends Graph implements PConstants {
    *
    * @see Node#bullsEyeSize()
    * @see Node#position()
-   * @see #drawSquaredBullsEye(Node)
-   * @see #drawCircledBullsEye(Node)
+   * @see #_drawSquaredBullsEye(Node)
+   * @see #_drawCircledBullsEye(Node)
    */
-  public void drawBullsEye(Node node) {
+  protected void _drawBullsEye(Node node) {
     if (node.bullsEyeShape() == Node.BullsEyeShape.SQUARE)
-      drawSquaredBullsEye(node);
+      _drawSquaredBullsEye(node);
     else
-      drawCircledBullsEye(node);
+      _drawCircledBullsEye(node);
   }
 
   /**
-   * {@link #drawSquaredBullsEye(float, float, float)} centered at the projected node origin.
-   * The length of the target is the node {@link Node#bullsEyeSize()}.
-   * If node {@link #hasTag(Node)} it also applies a stroke highlight.
+   * Calls {@link #drawSquaredBullsEye(float, float, float)} centered
+   * at the projected node origin. The length of the target is the node
+   * {@link Node#bullsEyeSize()}. If node {@link #hasTag(Node)} it also
+   * applies a stroke highlight.
    *
-   * @see #drawSquaredBullsEye(Node, float)
-   * @see #drawCircledBullsEye(Node)
-   * @see #drawBullsEye(Node)
+   * @see #_drawCircledBullsEye(Node)
+   * @see #_drawBullsEye(Node)
    */
-  public void drawSquaredBullsEye(Node node) {
+  protected void _drawSquaredBullsEye(Node node) {
+    if (eye() == node) {
+      return;
+    }
     context().pushStyle();
     if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
-    drawSquaredBullsEye(node, node.bullsEyeSize() < 1 ?
+    Vector center = screenLocation(node.position());
+    drawSquaredBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ?
         200 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) : node.bullsEyeSize());
     context().popStyle();
   }
 
   /**
-   * {@link #drawSquaredBullsEye(float, float, float)} centered at the projected node origin, having
-   * {@code length} pixels.
-   *
-   * @see #drawSquaredBullsEye(float, float, float)
-   * @see #drawCircledBullsEye(float, float, float)
-   */
-  public void drawSquaredBullsEye(Node node, float length) {
-    if (eye() == node) {
-      return;
-    }
-    Vector center = screenLocation(node.position());
-    drawSquaredBullsEye(center.x(), center.y(), length);
-  }
-
-  /**
-   * Same as {@code drawSquaredBullsEye(context(), x, y, radius() / 5)}.
+   * Same as {@code drawSquaredBullsEye(x, y, radius() / 5)}.
    *
    * @see #drawSquaredBullsEye(float, float, float)
    * @see #drawCircledBullsEye(float, float, float)
    */
   public void drawSquaredBullsEye(float x, float y) {
-    drawSquaredBullsEye(context(), x, y, radius() / 5);
+    drawSquaredBullsEye(x, y, radius() / 5);
   }
 
   /**
-   * Same as {@code drawSquaredBullsEye(context(), center, length)}.
-   *
-   * @see #drawSquaredBullsEye(PGraphics, float, float, float)
-   * @see #drawCircledBullsEye(PGraphics, float, float, float)
-   */
-  public void drawSquaredBullsEye(float x, float y, float length) {
-    drawSquaredBullsEye(context(), x, y, length);
-  }
-
-  /**
-   * Draws a squared bullseye onto {@code pGraphics}, centered at {@code (x, y)},
+   * Draws a squared bullseye onto {@link #context()}, centered at {@code (x, y)},
    * having {@code length} pixels.
    *
-   * @see #drawCircledBullsEye(PGraphics, float, float, float)
+   * @see #drawSquaredBullsEye(float, float, float)
+   * @see #drawCircledBullsEye(float, float, float)
    */
-  public void drawSquaredBullsEye(PGraphics pGraphics, float x, float y, float length) {
+  public void drawSquaredBullsEye(float x, float y, float length) {
     float half_length = length / 2f;
-    pGraphics.pushStyle();
-    beginHUD(pGraphics);
-    pGraphics.noFill();
-
-    pGraphics.beginShape();
-    vertex(pGraphics, (x - half_length), (y - half_length) + (0.6f * half_length));
-    vertex(pGraphics, (x - half_length), (y - half_length));
-    vertex(pGraphics, (x - half_length) + (0.6f * half_length), (y - half_length));
-    pGraphics.endShape();
-
-    pGraphics.beginShape();
-    vertex(pGraphics, (x + half_length) - (0.6f * half_length), (y - half_length));
-    vertex(pGraphics, (x + half_length), (y - half_length));
-    vertex(pGraphics, (x + half_length), ((y - half_length) + (0.6f * half_length)));
-    pGraphics.endShape();
-
-    pGraphics.beginShape();
-    vertex(pGraphics, (x + half_length), ((y + half_length) - (0.6f * half_length)));
-    vertex(pGraphics, (x + half_length), (y + half_length));
-    vertex(pGraphics, ((x + half_length) - (0.6f * half_length)), (y + half_length));
-    pGraphics.endShape();
-
-    pGraphics.beginShape();
-    vertex(pGraphics, (x - half_length) + (0.6f * half_length), (y + half_length));
-    vertex(pGraphics, (x - half_length), (y + half_length));
-    vertex(pGraphics, (x - half_length), ((y + half_length) - (0.6f * half_length)));
-    pGraphics.endShape();
-    endHUD(pGraphics);
-    drawCross(x, y, 0.6f * length);
-    pGraphics.popStyle();
-  }
-
-  /**
-   * {@link #drawCircledBullsEye(float, float, float)} centered at the projected node origin.
-   * The length of the target is the node {@link Node#bullsEyeSize()}.
-   * If node {@link #hasTag(Node)} it also applies a stroke highlight.
-   *
-   * @see #drawSquaredBullsEye(Node, float)
-   * @see #drawCircledBullsEye(Node)
-   * @see #drawBullsEye(Node)
-   */
-  public void drawCircledBullsEye(Node node) {
     context().pushStyle();
-    if (isTagged(node))
-      context().strokeWeight(2 + context().strokeWeight);
-    drawCircledBullsEye(node, node.bullsEyeSize() < 1 ?
-        200 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) : node.bullsEyeSize());
+    beginHUD();
+    context().noFill();
+
+    context().beginShape();
+    vertex(context(), (x - half_length), (y - half_length) + (0.6f * half_length));
+    vertex(context(), (x - half_length), (y - half_length));
+    vertex(context(), (x - half_length) + (0.6f * half_length), (y - half_length));
+    context().endShape();
+
+    context().beginShape();
+    vertex(context(), (x + half_length) - (0.6f * half_length), (y - half_length));
+    vertex(context(), (x + half_length), (y - half_length));
+    vertex(context(), (x + half_length), ((y - half_length) + (0.6f * half_length)));
+    context().endShape();
+
+    context().beginShape();
+    vertex(context(), (x + half_length), ((y + half_length) - (0.6f * half_length)));
+    vertex(context(), (x + half_length), (y + half_length));
+    vertex(context(), ((x + half_length) - (0.6f * half_length)), (y + half_length));
+    context().endShape();
+
+    context().beginShape();
+    vertex(context(), (x - half_length) + (0.6f * half_length), (y + half_length));
+    vertex(context(), (x - half_length), (y + half_length));
+    vertex(context(), (x - half_length), ((y + half_length) - (0.6f * half_length)));
+    context().endShape();
+    endHUD();
+    drawCross(x, y, 0.6f * length);
     context().popStyle();
   }
 
   /**
-   * {@link #drawCircledBullsEye(float, float, float)} centered at the projected node origin, having
-   * {@code length} pixels.
+   * Calls {@link #drawCircledBullsEye(float, float, float)} centered
+   * at the projected node origin. The length of the target is the node
+   * {@link Node#bullsEyeSize()}. If node {@link #hasTag(Node)} it
+   * also applies a stroke highlight.
    *
-   * @see #drawCircledBullsEye(float, float, float)
-   * @see #drawSquaredBullsEye(float, float, float)
+   * @see #_drawSquaredBullsEye(Node)
+   * @see #_drawCircledBullsEye(Node)
+   * @see #_drawBullsEye(Node)
    */
-  public void drawCircledBullsEye(Node node, float length) {
+  protected void _drawCircledBullsEye(Node node) {
     if (eye() == node) {
       return;
     }
+    context().pushStyle();
+    if (isTagged(node))
+      context().strokeWeight(2 + context().strokeWeight);
     Vector center = screenLocation(node.position());
-    drawCircledBullsEye(center.x(), center.y(), length);
+    drawCircledBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) : node.bullsEyeSize());
+    context().popStyle();
   }
 
   /**
-   * Same as {@code drawCircledBullsEye(context(), x, y, radius() / 5)}.
+   * Same as {@code drawCircledBullsEye(x, y, radius() / 5)}.
    *
    * @see #drawCircledBullsEye(float, float, float)
    * @see #drawSquaredBullsEye(float, float, float)
    */
   public void drawCircledBullsEye(float x, float y) {
-    drawCircledBullsEye(context(), x, y, radius() / 5);
+    drawCircledBullsEye(x, y, radius() / 5);
   }
 
   /**
-   * Same as {@code drawCircledBullsEye(context(), x, y, diameter)}.
-   *
-   * @see #drawCircledBullsEye(PGraphics, float, float, float)
-   * @see #drawSquaredBullsEye(PGraphics, float, float, float)
-   */
-  public void drawCircledBullsEye(float x, float y, float diameter) {
-    drawCircledBullsEye(context(), x, y, diameter);
-  }
-
-  /**
-   * Draws a circled bullseye onto {@code pGraphics}, centered at {@code (x, y)},
+   * Draws a circled bullseye onto {@link #context()}, centered at {@code (x, y)},
    * having {@code length} pixels.
    *
-   * @see #drawSquaredBullsEye(PGraphics, float, float, float)
+   * @see #drawSquaredBullsEye(float, float, float)
    */
-  public void drawCircledBullsEye(PGraphics pGraphics, float x, float y, float diameter) {
-    pGraphics.pushStyle();
-    beginHUD(pGraphics);
-    pGraphics.noFill();
-    pGraphics.ellipseMode(CENTER);
-    pGraphics.circle(x, y, diameter);
-    endHUD(pGraphics);
+  public void drawCircledBullsEye(float x, float y, float diameter) {
+    context().pushStyle();
+    beginHUD();
+    context().noFill();
+    context().ellipseMode(CENTER);
+    context().circle(x, y, diameter);
+    endHUD();
     drawCross(x, y, 0.6f * diameter);
-    pGraphics.popStyle();
+    context().popStyle();
   }
 
   /**

@@ -30,7 +30,7 @@ public class Graph1 extends PApplet {
       public void applyTransformation(Node node) {
         super.applyTransformation(node);
         shader(framesShader);
-        pmv = Matrix.multiply(matrixHandler().projection(), matrixHandler().model());
+        pmv = Matrix.multiply(_matrixHandler().projection(), _matrixHandler().model());
         pmatrix.set(pmv.get(new float[16]));
         framesShader.set("nub_transform", pmatrix);
       }

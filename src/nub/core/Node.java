@@ -2464,7 +2464,7 @@ public class Node {
    * </pre>
    *
    * @see Graph#render()
-   * @see nub.processing.Scene#draw(Object, Node)
+   * @see GLMatrixHandler#_draw(Object, Node)
    * @see #cull(boolean)
    * @see #isCulled()
    * @see #bypass()

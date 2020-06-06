@@ -36,10 +36,10 @@ public class Basics extends PApplet {
         else
           pg.rect(10, 10, 200, 200);
         pg.stroke(255, 255, 0);
-        scene.drawSquaredBullsEye(this);
         pg.popStyle();
       }
     };
+    node.enableHint(Node.BULLS_EYE);
     node.setRotation(Quaternion.random());
     //shape = new Node(scene, shape());
     shape = new Node();

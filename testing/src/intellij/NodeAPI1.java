@@ -357,6 +357,7 @@ public class NodeAPI1 extends PApplet {
 
     public InteractiveNode(Scene graph, int color) {
       super();
+      setHint(Node.BULLS_EYE | Node.AXES);
       scene = graph;
       _c = color;
       pnt = new Vector(40, 30, 20);
@@ -364,20 +365,10 @@ public class NodeAPI1 extends PApplet {
 
     public InteractiveNode(Scene graph, Node node, int color) {
       super(node);
+      setHint(Node.BULLS_EYE | Node.AXES);
       scene = graph;
       _c = color;
       pnt = new Vector(40, 30, 20);
-    }
-
-    @Override
-    public void visit() {
-      pushStyle();
-      scene.drawAxes(40);
-      stroke(_c);
-      scene.drawSquaredBullsEye(this);
-      strokeWeight(10);
-      point(pnt.x(), pnt.y(), pnt.z());
-      popStyle();
     }
   }
 

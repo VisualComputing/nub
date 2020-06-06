@@ -9,11 +9,11 @@
  * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
  ***************************************************************************************/
 
-package nub.processing;
+package nub.core;
 
-import nub.core.MatrixHandler;
-import nub.core.Node;
 import nub.primitives.Matrix;
+import nub.processing.Scene;
+import processing.core.PGraphics;
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
@@ -26,6 +26,18 @@ class GLMatrixHandler extends MatrixHandler {
 
   public GLMatrixHandler(PGraphicsOpenGL pggl) {
     _pggl = pggl;
+  }
+
+  /**
+   * Returns a {@code MatrixHandler} instance according to the default target renderer context.
+   */
+  protected static MatrixHandler _matrixHandler(Object context) {
+    if (context instanceof PGraphics)
+      if (context instanceof PGraphicsOpenGL)
+        return new GLMatrixHandler((PGraphicsOpenGL) context);
+      else
+        throw new RuntimeException("Only OpenGL renderers are currently supported");
+    return new MatrixHandler();
   }
 
   @Override

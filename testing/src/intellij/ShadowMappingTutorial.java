@@ -1,7 +1,6 @@
 package intellij;
 
 import nub.core.Graph;
-import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Vector;
@@ -42,7 +41,8 @@ public class ShadowMappingTutorial extends PApplet {
   public void setup() {
     scene = new Scene(this);
     // TODO pending
-    scene.setMatrixHandler(new MatrixHandler() {
+    /*
+    scene._setMatrixHandler(new MatrixHandler() {
       @Override
       protected void _setUniforms() {
         // TODO How to deal with this command. Seems related to: Scene._drawBackBuffer(Node node)
@@ -52,6 +52,7 @@ public class ShadowMappingTutorial extends PApplet {
         Scene.setUniform(shadowShader, "nub_model", model());
       }
     });
+     */
     scene.togglePerspective();
     scene.setRadius(max(w, h) / 3);
     scene.fit(1);

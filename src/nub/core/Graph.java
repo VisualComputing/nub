@@ -390,9 +390,9 @@ public class Graph {
         System.out.println("Warning: all timing-tasks made non-concurrent");
     }
     _fb = front;
-    _matrixHandler = nub.processing.Scene.matrixHandler(_fb);
+    _matrixHandler = GLMatrixHandler._matrixHandler(_fb);
     _bb = back;
-    _bbMatrixHandler = _bb == null ? null : nub.processing.Scene.matrixHandler(_bb);
+    _bbMatrixHandler = _bb == null ? null : GLMatrixHandler._matrixHandler(_bb);
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
@@ -1042,23 +1042,23 @@ public class Graph {
     _matrixHandler.endHUD();
   }
 
-  // TODO remove this getter and setter for matrixHandler
+  // TODO remove this getter and setter for _matrixHandler
 
   /**
    * Sets the {@link MatrixHandler} defining how matrices are to be handled.
    *
-   * @see #matrixHandler()
+   * @see #_matrixHandler()
    */
-  public void setMatrixHandler(MatrixHandler matrixHandler) {
+  protected void _setMatrixHandler(MatrixHandler matrixHandler) {
     _matrixHandler = matrixHandler;
   }
 
   /**
    * Returns the {@link MatrixHandler}.
    *
-   * @see #setMatrixHandler(MatrixHandler)
+   * @see #_setMatrixHandler(MatrixHandler)
    */
-  public MatrixHandler matrixHandler() {
+  protected MatrixHandler _matrixHandler() {
     return _matrixHandler;
   }
 
@@ -2438,7 +2438,7 @@ public class Graph {
    * @see #applyWorldTransformation(Object, Node)
    */
   public static void applyTransformation(Object context, Node node) {
-    nub.processing.Scene.matrixHandler(context).applyTransformation(node);
+    GLMatrixHandler._matrixHandler(context).applyTransformation(node);
   }
 
   /**
@@ -2462,7 +2462,7 @@ public class Graph {
    * @see #applyWorldTransformation(Node)
    */
   public static void applyWorldTransformation(Object context, Node node) {
-    nub.processing.Scene.matrixHandler(context).applyWorldTransformation(node);
+    GLMatrixHandler._matrixHandler(context).applyWorldTransformation(node);
   }
 
   // Other stuff
@@ -3127,7 +3127,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Type type, Node subtree, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    _render(nub.processing.Scene.matrixHandler(context), context, type, subtree, eye, width, height, zNear, zFar, leftHanded);
+    _render(GLMatrixHandler._matrixHandler(context), context, type, subtree, eye, width, height, zNear, zFar, leftHanded);
   }
 
   /**
@@ -3195,7 +3195,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Node subtree, Matrix projection, Matrix view) {
-    _render(nub.processing.Scene.matrixHandler(context), context, subtree, projection, view);
+    _render(GLMatrixHandler._matrixHandler(context), context, subtree, projection, view);
   }
 
   /**
@@ -3226,21 +3226,12 @@ public class Graph {
     matrixHandler.applyTransformation(node);
     node.visit();
     if (!node.isCulled()) {
-      if (node._bypass != TimingHandler.frameCount)
-        nub.processing.Scene.draw(context, node);
+      //if (node._bypass != TimingHandler.frameCount)
+      //nub.processing.Scene._draw(context, node);
       for (Node child : node.children())
         _render(matrixHandler, context, child);
     }
     matrixHandler.popMatrix();
-  }
-
-  /**
-   * Renders the node onto {@link #context()}. Same as {@code draw(context(), node)}.
-   *
-   * @see nub.processing.Scene#draw(Object, Node)
-   */
-  public void draw(Node node) {
-    nub.processing.Scene.draw(_fb, node);
   }
 
   /**

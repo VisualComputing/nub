@@ -134,8 +134,8 @@ public class Interpolation2 extends PApplet {
     /*
     pushStyle();
     stroke(255);
-    // same as:scene.drawCatmullRom(interpolator, 5);
-    scene.drawCatmullRom(interpolator);
+    // same as:scene._drawSpline(interpolator, 5);
+    scene._drawSpline(interpolator);
     popStyle();
     for (Node node : interpolator.keyFrames().values()) {
       pushMatrix();
@@ -148,10 +148,10 @@ public class Interpolation2 extends PApplet {
       fill(255, 0, 0);
       stroke(0, 255, 0);
       // same as:
-      // scene.drawCatmullRom(eyeInterpolator1, 3);
-      // scene.drawCatmullRom(eyeInterpolator2, 3);
-      scene.drawCatmullRom(eyeInterpolator1);
-      scene.drawCatmullRom(eyeInterpolator2);
+      // scene._drawSpline(eyeInterpolator1, 3);
+      // scene._drawSpline(eyeInterpolator2, 3);
+      scene._drawSpline(eyeInterpolator1);
+      scene._drawSpline(eyeInterpolator2);
       popStyle();
     }
      */

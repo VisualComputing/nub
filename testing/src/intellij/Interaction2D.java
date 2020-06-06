@@ -40,7 +40,7 @@ public class Interaction2D extends PApplet {
         pGraphics.rect(10, 10, 200, 200);
         pGraphics.stroke(255, 0, 0);
         /*
-        scene.drawSquaredBullsEye(this);
+        scene._drawSquaredBullsEye(this);
         scene.beginHUD(pGraphics);
         Vector position = scene.screenLocation(position());
         pGraphics.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
@@ -51,6 +51,7 @@ public class Interaction2D extends PApplet {
         pGraphics.popStyle();
       }
     };
+    shape1.enableHint(Node.BULLS_EYE);
     //shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, 0);
 
@@ -68,7 +69,6 @@ public class Interaction2D extends PApplet {
     scene.drawAxes();
     scene.render();
 
-    scene.drawSquaredBullsEye(shape1);
     scene.beginHUD();
     Vector position = scene.screenLocation(shape1.position());
     fill(shape1.isTagged(scene) ? 0 : 255, shape1.isTagged(scene) ? 255 : 0, shape1.isTagged(scene) ? 0 : 255);

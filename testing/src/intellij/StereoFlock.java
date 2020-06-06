@@ -69,7 +69,8 @@ public class StereoFlock extends PApplet {
     for (Node node : nodes) {
       scene.context().pushMatrix();
       scene.applyTransformation(node);
-      scene.draw(node);
+      // TODO handle this
+      // scene.draw(node);
       scene.context().popMatrix();
     }
     scene.endDraw();

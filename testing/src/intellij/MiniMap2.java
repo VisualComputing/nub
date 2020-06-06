@@ -39,6 +39,7 @@ public class MiniMap2 extends PApplet {
     scene = onScreen ? new Scene(this, eye) : new Scene(this, renderer, eye);
     // */
     scene = onScreen ? new Scene(this) : new Scene(this, renderer);
+    scene.eye().enableHint(Node.BULLS_EYE);
     scene.setRadius(1000);
     rectMode(CENTER);
     scene.fit(1);
@@ -151,7 +152,6 @@ public class MiniMap2 extends PApplet {
       minimap.context().strokeWeight(2);
       minimap.context().stroke(0, 0, 255);
       minimap.drawFrustum(scene);
-      minimap.drawBullsEye(scene.eye());
       // */
       minimap.endDraw();
       minimap.display(w / 2, h / 2);

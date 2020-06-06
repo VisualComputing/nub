@@ -44,11 +44,6 @@ public class BasicInterpolation extends PApplet {
     background(0);
 
     pushStyle();
-    stroke(255);
-    scene.drawCatmullRom(interpolator);
-    popStyle();
-
-    pushStyle();
     fill(255, 0, 0, 125);
     pushMatrix();
     scene.applyTransformation(interpolator.node());
