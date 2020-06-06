@@ -885,6 +885,14 @@ public class Interpolator {
       Graph._interpolators.add(this);
   }
 
+  public void toggleHint() {
+    _mask = ~_mask;
+    if (_mask == 0)
+      Graph._interpolators.remove(this);
+    else
+      Graph._interpolators.add(this);
+  }
+
   public void toggleHint(int hint) {
     if (isHintEnable(hint))
       disableHint(hint);

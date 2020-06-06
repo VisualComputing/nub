@@ -142,6 +142,8 @@ public class Interpolation extends PApplet {
       interpolator.toggleHint(Interpolator.SPLINE);
     if (key == 'v')
       interpolator.toggleHint(Interpolator.CAMERA);
+    if (key == 'z')
+      interpolator.toggleHint();
   }
 
   public static void main(String[] args) {

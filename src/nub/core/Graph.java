@@ -4744,6 +4744,10 @@ public class Graph {
     _mask |= hint;
   }
 
+  public void toggleHint() {
+    _mask = ~_mask;
+  }
+
   public void toggleHint(int hint) {
     if (isHintEnable(hint))
       disableHint(hint);

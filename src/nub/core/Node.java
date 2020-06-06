@@ -2655,6 +2655,10 @@ public class Node {
     _mask |= hint;
   }
 
+  public void toggleHint() {
+    _mask = ~_mask;
+  }
+
   public void toggleHint(int hint) {
     if (isHintEnable(hint))
       disableHint(hint);
