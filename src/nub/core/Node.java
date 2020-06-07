@@ -17,7 +17,6 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
-import processing.core.PShape;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -2527,7 +2526,7 @@ public class Node {
   /**
    * Sets the node immediate mode rendering (imr) procedure.
    *
-   * @see #setRMRShape(PShape)
+   * @see #setRMRShape(processing.core.PShape)
    * @see #resetIMRShape()
    */
   public void setIMRShape(Consumer<processing.core.PGraphics> callback) {
@@ -2594,7 +2593,7 @@ public class Node {
   */
 
   /**
-   * @deprecated use {@link #setRMRShape(PShape)} instead.
+   * @deprecated use {@link #setRMRShape(processing.core.PShape)} instead.
    */
   @Deprecated
   public void setShape(processing.core.PShape shape) {

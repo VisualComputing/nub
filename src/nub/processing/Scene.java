@@ -1149,15 +1149,11 @@ public class Scene extends Graph implements PConstants {
    */
   @Override
   public void beginHUD() {
-    if (_hudCalls != 0)
-      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
-          + "endHUD() and they cannot be nested. Check your implementation!");
-    _hudCalls++;
     // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
     if (is3D())
       context().hint(PApplet.DISABLE_OPTIMIZED_STROKE);
     disableDepthTest();
-    _matrixHandler.beginHUD(width(), height());
+    super.beginHUD();
   }
 
   /**
@@ -1169,11 +1165,7 @@ public class Scene extends Graph implements PConstants {
    */
   @Override
   public void endHUD() {
-    _hudCalls--;
-    if (_hudCalls != 0)
-      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
-          + "endHUD() and they cannot be nested. Check your implementation!");
-    _matrixHandler.endHUD();
+    super.endHUD();
     enableDepthTest();
     // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
     if (is3D())

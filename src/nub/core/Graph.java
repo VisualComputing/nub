@@ -170,9 +170,8 @@ public class Graph {
   protected boolean _coefficientsUpdate;
   protected Vector[] _normal;
   protected float[] _distance;
-  // handed and HUD
+  // handed
   protected boolean _rightHanded;
-  protected int _hudCalls;
 
   // 2. Matrix handler
   protected int _width, _height;
@@ -1019,10 +1018,6 @@ public class Graph {
    * @see MatrixHandler#beginHUD(int, int)
    */
   public void beginHUD() {
-    if (_hudCalls != 0)
-      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
-          + "endHUD() and they cannot be nested. Check your implementation!");
-    _hudCalls++;
     _matrixHandler.beginHUD(width(), height());
   }
 
@@ -1035,10 +1030,6 @@ public class Graph {
    * @see MatrixHandler#endHUD()
    */
   public void endHUD() {
-    _hudCalls--;
-    if (_hudCalls != 0)
-      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
-          + "endHUD() and they cannot be nested. Check your implementation!");
     _matrixHandler.endHUD();
   }
 
