@@ -280,7 +280,7 @@ public class MatrixHandler {
    * @see Matrix#hudView(int, int)
    */
   public void beginHUD(int width, int height) {
-    if (_hudCalls != 0)
+    if (_hudCalls < 0)
       throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
           + "endHUD() and they cannot be nested. Check your implementation!");
     _hudCalls++;
@@ -300,7 +300,7 @@ public class MatrixHandler {
    */
   public void endHUD() {
     _hudCalls--;
-    if (_hudCalls != 0)
+    if (_hudCalls < 0)
       throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
           + "endHUD() and they cannot be nested. Check your implementation!");
     popProjection();

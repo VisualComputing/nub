@@ -36,9 +36,7 @@ public class MiniMap extends PApplet {
     scene.eye().disableHint(Node.HIGHLIGHT);
     scene.eye().enableHint(Node.BULLS_EYE);
     scene.eye().enableHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
-    //scene.eye().configHint(Node.FRUSTUM, scene);
-    //scene.eye().configHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
-    //scene.eye().configHint(Node.FRUSTUM, color(255, 0, 0,125), scene);
+    scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
     models = new Node[30];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
@@ -49,7 +47,6 @@ public class MiniMap extends PApplet {
         models[i] = new Node();
         models[i].enableHint(Node.BULLS_EYE);
         models[i].enableHint(Node.TORUS);
-        //models[i].configHint(Node.TORUS, color(0, 255, 0), 5);
         models[i].setBullsEyeSize(50);
         models[i].scale(3);
       }
@@ -64,6 +61,7 @@ public class MiniMap extends PApplet {
     if (renderer == P3D)
       minimap.togglePerspective();
     minimap.fit(1);
+    minimap.enableHint(Scene.BACKGROUND, color(125, 80, 90));
   }
 
   PShape shape() {
@@ -125,10 +123,8 @@ public class MiniMap extends PApplet {
   @Override
   public void draw() {
     focus = minimap.hasMouseFocus() ? minimap : scene;
-    background(75, 25, 15);
     if (scene.isOffscreen()) {
       scene.beginDraw();
-      scene.context().background(75, 25, 15);
       scene.drawAxes();
       scene.render();
       scene.endDraw();
@@ -141,7 +137,6 @@ public class MiniMap extends PApplet {
       if (!scene.isOffscreen())
         scene.beginHUD();
       minimap.beginDraw();
-      minimap.context().background(125, 80, 90);
       minimap.drawAxes();
       minimap.render();
       //minimap.context().stroke(255);
