@@ -34,7 +34,7 @@ public class MatrixHandler {
   protected int _matrixStackDepth;
   protected float[][] _projectionStack = new float[STACK_DEPTH][16];
   protected int _projectionStackDepth;
-  protected int _hudCalls;
+  protected static int _hudCalls;
 
   /**
    * Returns a {@code MatrixHandler} instance according to the default target renderer context.
