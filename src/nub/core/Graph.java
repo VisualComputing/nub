@@ -1022,7 +1022,19 @@ public class Graph {
   }
 
   /**
-   * Ends Heads Up Display (HUD). Throws an exception if {@link #beginHUD()} wasn't properly called before.
+   * Begin Heads Up Display (HUD) on {@code context} so that drawing can
+   * be done using 2D screen coordinates.
+   *
+   * @param width  of {@code context}.
+   * @param height of {@code context}.
+   */
+  public static void beginHUD(Object context, int width, int height) {
+    MatrixHandler.get(context).beginHUD(width, height);
+  }
+
+  /**
+   * Ends Heads Up Display (HUD). Throws an exception if
+   * {@link #beginHUD()} wasn't properly called before.
    * <p>
    * Wrapper for {@link MatrixHandler#endHUD()}.
    *
@@ -1031,6 +1043,19 @@ public class Graph {
    */
   public void endHUD() {
     _matrixHandler.endHUD();
+  }
+
+  /**
+   * Ends Heads Up Display (HUD) on {@code pGraphics}. Throws an exception if
+   * {@link #beginHUD()} wasn't properly called before.
+   * <p>
+   * Wrapper for {@link MatrixHandler#endHUD()}.
+   *
+   * @see #beginHUD()
+   * @see MatrixHandler#endHUD()
+   */
+  public static void endHUD(Object context) {
+    MatrixHandler.get(context).endHUD();
   }
 
   // Eye stuff

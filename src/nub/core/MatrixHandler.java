@@ -265,7 +265,7 @@ public class MatrixHandler {
 
   // 2. WARNING don't override from here ever!
 
-  // heads up display
+  // HUD
 
   /**
    * Begins Heads Up Display (HUD).

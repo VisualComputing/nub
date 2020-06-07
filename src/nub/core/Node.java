@@ -172,6 +172,12 @@ public class Node {
   // TODO update constraint examples
   public final static int CONSTRAINT = 1 << 8;
   public final static int BONE = 1 << 9;
+  // TODO HUD?
+  /*
+  public final static int HUD = 1 << 8;
+  public final static int CONSTRAINT = 1 << 9;
+  public final static int BONE = 1 << 10;
+  // */
   protected float _highlight;
   protected int _bullStroke;
   protected float _axesLength;

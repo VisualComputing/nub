@@ -478,6 +478,20 @@ public class Scene extends Graph implements PConstants {
     context().hint(PApplet.ENABLE_DEPTH_TEST);
   }
 
+  /**
+   * Disables z-buffer on {@code pGraphics}.
+   */
+  public static void disableDepthTest(PGraphics pGraphics) {
+    pGraphics.hint(PApplet.DISABLE_DEPTH_TEST);
+  }
+
+  /**
+   * Enables z-buffer on {@code pGraphics}.
+   */
+  public static void enableDepthTest(PGraphics pGraphics) {
+    pGraphics.hint(PApplet.ENABLE_DEPTH_TEST);
+  }
+
   // 3. Drawing methods
 
   /**
@@ -1141,35 +1155,12 @@ public class Scene extends Graph implements PConstants {
   // HUD
 
   /**
-   * Same as {@code super.beginHUD()}, but disables Processing {@code DISABLE_OPTIMIZED_STROKE}
-   * and z-buffering (see {@link #disableDepthTest()}).
+   * Same as {@code Graph.beginHUD(pGraphics, pGraphics.width, pGraphics.height)}.
    *
-   * @see Graph#beginHUD()
-   * @see #endHUD()
+   * @see Graph#beginHUD(Object, int, int)
    */
-  @Override
-  public void beginHUD() {
-    // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
-    if (is3D())
-      context().hint(PApplet.DISABLE_OPTIMIZED_STROKE);
-    disableDepthTest();
-    super.beginHUD();
-  }
-
-  /**
-   * Same as {@code super.endHUD()}, but enables Processing {@code DISABLE_OPTIMIZED_STROKE}
-   * and z-buffering (see {@link #disableDepthTest()}).
-   *
-   * @see Graph#endHUD()
-   * @see #beginHUD()
-   */
-  @Override
-  public void endHUD() {
-    super.endHUD();
-    enableDepthTest();
-    // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
-    if (is3D())
-      context().hint(PApplet.ENABLE_OPTIMIZED_STROKE);
+  public static void beginHUD(PGraphics pGraphics) {
+    Graph.beginHUD(pGraphics, pGraphics.width, pGraphics.height);
   }
 
   // drawing

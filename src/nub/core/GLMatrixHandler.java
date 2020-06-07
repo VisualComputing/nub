@@ -34,6 +34,31 @@ class GLMatrixHandler extends MatrixHandler {
     _bindMatrix(view);
   }
 
+  /**
+   * Same as {@code beginHUD(_pggl.width, _pggl.height)}.
+   */
+  public void beginHUD() {
+    beginHUD(_pggl.width, _pggl.height);
+  }
+
+  @Override
+  public void beginHUD(int width, int height) {
+    // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
+    if (_pggl.is3D())
+      _pggl.hint(_pggl.DISABLE_OPTIMIZED_STROKE);
+    Scene.disableDepthTest(_pggl);
+    super.beginHUD(width, height);
+  }
+
+  @Override
+  public void endHUD() {
+    super.endHUD();
+    Scene.enableDepthTest(_pggl);
+    // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
+    if (_pggl.is3D())
+      _pggl.hint(_pggl.ENABLE_OPTIMIZED_STROKE);
+  }
+
   @Override
   protected void _bindProjection(Matrix matrix) {
     _pggl.setProjection(Scene.toPMatrix(matrix));
