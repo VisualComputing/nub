@@ -389,9 +389,9 @@ public class Graph {
         System.out.println("Warning: all timing-tasks made non-concurrent");
     }
     _fb = front;
-    _matrixHandler = GLMatrixHandler._matrixHandler(_fb);
+    _matrixHandler = MatrixHandler.get(_fb);
     _bb = back;
-    _bbMatrixHandler = _bb == null ? null : GLMatrixHandler._matrixHandler(_bb);
+    _bbMatrixHandler = _bb == null ? null : MatrixHandler.get(_bb);
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
@@ -1031,26 +1031,6 @@ public class Graph {
    */
   public void endHUD() {
     _matrixHandler.endHUD();
-  }
-
-  // TODO remove this getter and setter for _matrixHandler
-
-  /**
-   * Sets the {@link MatrixHandler} defining how matrices are to be handled.
-   *
-   * @see #_matrixHandler()
-   */
-  protected void _setMatrixHandler(MatrixHandler matrixHandler) {
-    _matrixHandler = matrixHandler;
-  }
-
-  /**
-   * Returns the {@link MatrixHandler}.
-   *
-   * @see #_setMatrixHandler(MatrixHandler)
-   */
-  protected MatrixHandler _matrixHandler() {
-    return _matrixHandler;
   }
 
   // Eye stuff
@@ -2429,7 +2409,7 @@ public class Graph {
    * @see #applyWorldTransformation(Object, Node)
    */
   public static void applyTransformation(Object context, Node node) {
-    GLMatrixHandler._matrixHandler(context).applyTransformation(node);
+    MatrixHandler.get(context).applyTransformation(node);
   }
 
   /**
@@ -2453,7 +2433,7 @@ public class Graph {
    * @see #applyWorldTransformation(Node)
    */
   public static void applyWorldTransformation(Object context, Node node) {
-    GLMatrixHandler._matrixHandler(context).applyWorldTransformation(node);
+    MatrixHandler.get(context).applyWorldTransformation(node);
   }
 
   // Other stuff
@@ -3118,7 +3098,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Type type, Node subtree, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    _render(GLMatrixHandler._matrixHandler(context), context, type, subtree, eye, width, height, zNear, zFar, leftHanded);
+    _render(MatrixHandler.get(context), context, type, subtree, eye, width, height, zNear, zFar, leftHanded);
   }
 
   /**
@@ -3186,7 +3166,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Node subtree, Matrix projection, Matrix view) {
-    _render(GLMatrixHandler._matrixHandler(context), context, subtree, projection, view);
+    _render(MatrixHandler.get(context), context, subtree, projection, view);
   }
 
   /**

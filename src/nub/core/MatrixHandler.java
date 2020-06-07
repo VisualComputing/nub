@@ -36,6 +36,18 @@ public class MatrixHandler {
   protected int _projectionStackDepth;
   protected int _hudCalls;
 
+  /**
+   * Returns a {@code MatrixHandler} instance according to the default target renderer context.
+   */
+  public static MatrixHandler get(Object context) {
+    if (context instanceof processing.core.PGraphics)
+      if (context instanceof processing.opengl.PGraphicsOpenGL)
+        return new GLMatrixHandler((processing.opengl.PGraphicsOpenGL) context);
+      else
+        throw new RuntimeException("Only OpenGL renderers are currently supported");
+    return new MatrixHandler();
+  }
+
   // 1. May be overridden
 
   // bind
