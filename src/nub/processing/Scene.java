@@ -1029,10 +1029,13 @@ public class Scene extends Graph implements PConstants {
     if (isHintEnable(GRID)) {
       context().colorMode(PApplet.RGB, 255);
       context().stroke(_gridStroke);
-      if (_dotted)
+      if (_gridType == GridType.DOTS) {
+        context().strokeWeight(5);
         drawDottedGrid(radius(), _gridSubDiv);
-      else
+      } else {
+        context().strokeWeight(1);
         drawGrid(radius(), _gridSubDiv);
+      }
     }
     for (Interpolator interpolator : _interpolators) {
       _drawSpline(interpolator);

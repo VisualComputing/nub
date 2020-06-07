@@ -137,8 +137,14 @@ public class Graph {
   public final static int GRID = 1 << 1;
   // TODO pending
   public final static int BACKGROUND = 1 << 2;
+
   //public final static int HUD = 1 << 3;
-  protected boolean _dotted;
+  public enum GridType {
+    LINES, DOTS
+  }
+
+  ;
+  protected GridType _gridType;
   protected int _gridStroke;
   protected int _gridSubDiv;
   protected static HashSet<Interpolator> _interpolators = new HashSet<Interpolator>();
@@ -427,6 +433,7 @@ public class Graph {
     setZClippingCoefficient((float) Math.sqrt(3.0f));
     // middle grey encoded as a processing int rgb color
     _gridStroke = -8553091;
+    _gridType = GridType.DOTS;
     _gridSubDiv = 10;
   }
 
@@ -4759,8 +4766,8 @@ public class Graph {
             _gridStroke = castToInt(params[0]);
             return;
           }
-          if (params[0] instanceof Boolean) {
-            _dotted = (Boolean) params[0];
+          if (params[0] instanceof GridType) {
+            _gridType = (GridType) params[0];
             return;
           }
         }
@@ -4772,13 +4779,13 @@ public class Graph {
             _gridSubDiv = castToInt(params[1]);
             return;
           }
-          if (isNumInstance(params[0]) && params[1] instanceof Boolean) {
+          if (isNumInstance(params[0]) && params[1] instanceof GridType) {
             _gridStroke = castToInt(params[0]);
-            _dotted = (Boolean) params[1];
+            _gridType = (GridType) params[1];
             return;
           }
-          if (params[1] instanceof Boolean && isNumInstance(params[0])) {
-            _dotted = (Boolean) params[0];
+          if (params[1] instanceof GridType && isNumInstance(params[0])) {
+            _gridType = (GridType) params[0];
             _gridStroke = castToInt(params[1]);
             return;
           }
@@ -4786,10 +4793,10 @@ public class Graph {
         break;
       case 3:
         if (hint == GRID) {
-          if (isNumInstance(params[0]) && isNumInstance(params[1]) && params[2] instanceof Boolean) {
+          if (isNumInstance(params[0]) && isNumInstance(params[1]) && params[2] instanceof GridType) {
             _gridStroke = castToInt(params[0]);
             _gridSubDiv = castToInt(params[1]);
-            _dotted = (Boolean) params[2];
+            _gridType = (GridType) params[2];
             return;
           }
         }
