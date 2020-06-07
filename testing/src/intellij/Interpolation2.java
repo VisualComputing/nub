@@ -13,9 +13,9 @@ import processing.event.MouseEvent;
  */
 public class Interpolation2 extends PApplet {
   Scene scene;
-  Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
+  Interpolator interpolator;
+  boolean displayInterpolator;
   Node shape;
-  boolean showEyePath = true;
   float speed = 1;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
@@ -29,34 +29,7 @@ public class Interpolation2 extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this);
     scene.setRadius(150);
-
-    // interpolation 1. Default eye interpolations
     scene.fit(1);
-
-    // interpolation 2. Custom eye interpolations
-    eyeInterpolator1 = new Interpolator(scene.eye());
-    eyeInterpolator2 = new Interpolator(scene.eye());
-
-    // interpolation 3. Custom (arbitrary) node interpolations
-
-    /*
-    shape = new Node() {
-      // Note that within render() geometry is defined at the
-      // node local coordinate system.
-      @Override
-      public void graphics(PGraphics pg) {
-        pg.pushStyle();
-        pg.fill(0, 255, 255, 125);
-        pg.stroke(0, 0, 255);
-        pg.strokeWeight(2);
-        if (pg.is2D())
-          pg.rect(0, 0, 100, 100);
-        else
-          pg.box(30);
-        pg.popStyle();
-      }
-    };
-    // */
     shape = new Node((pg) -> {
       pg.pushStyle();
       //pg.fill(0, 255, 255, 125);
@@ -71,7 +44,7 @@ public class Interpolation2 extends PApplet {
     });
     /*
     shape = new Node();
-    shape.hint((pg) -> {
+    shape.setIMRShape((pg) -> {
       pg.pushStyle();
       pg.fill(0, 255, 255, 125);
       pg.stroke(0, 0, 255);
@@ -82,80 +55,37 @@ public class Interpolation2 extends PApplet {
         pg.box(30);
       pg.popStyle();
     });
-    */
+    // */
     interpolator = new Interpolator(shape);
     interpolator.enableRecurrence();
     // Create an initial path
-    for (int i = 0; i < random(4, 10); i++)
-      interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+    for (int i = 0; i < random(4, 10); i++) {
+      Node node = scene.randomNode();
+      node.disableTagging();
+      node.setPickingPolicy(Node.PickingPolicy.BULLS_EYE);
+      interpolator.addKeyFrame(node, i % 2 == 1 ? 1 : 4);
+    }
     interpolator.run();
 
-    /*
-    println(shape.isHintEnable(Node.AXES) ? "yep axes" : "nope exes");
-    println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
-    shape.resetHint(Node.AXES | Node.BULLS_EYE);
-    println(shape.isHintEnable(Node.AXES) ? "yep axes" : "nope exes");
-    println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
-    shape.toggleHint(Node.AXES);
-    println(shape.isHintEnable(Node.AXES) ? "yep axes" : "nope exes");
-    println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
-     */
-    /*
-    println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
+
     //shape.disableHint(Node.IMR);
-    //shape.configHint(Node.AXES, 500);
     shape.enableHint(Node.AXES);
     shape.enableHint(Node.BULLS_EYE);
     shape.configHint(Node.BULLS_EYE, color(255, 0, 0));
-    println(shape.isHintEnable(Node.BULLS_EYE) ? "yep bulls" : "nope bulls");
-    shape.setPickingThreshold(50);
-     */
-    shape.disableHint(Node.IMR);
-    shape.enableHint(Node.AXES);
-    shape.enableHint(Node.BULLS_EYE);
-    //shape.configHint(Node.BULLS_EYE, color(0, 255, 0));
     shape.enableHint(Node.CAMERA);
     shape.configHint(Node.CAMERA, color(255, 0, 255), scene.radius() * 2);
     shape.setBullsEyeSize(50);
 
-    //int c = color(255, 0, 255, 125);
-    //println(c);
-
     scene.enableHint(Scene.AXES | Scene.GRID);
-    scene.configHint(Scene.GRID, color(255, 0, 0));
+    scene.configHint(Scene.GRID, color(0, 255, 0));
+    scene.enableHint(Scene.BACKGROUND, color(125));
+
+    interpolator.configHint(Interpolator.SPLINE, color(255));
+    //interpolator.configHint(Interpolator.CAMERA, color(0, 255, 0));
   }
 
   public void draw() {
-    int c = color(0, 255, 0);
-    println(c);
-    background(c);
     scene.render();
-
-    /*
-    pushStyle();
-    stroke(255);
-    // same as:scene._drawSpline(interpolator, 5);
-    scene._drawSpline(interpolator);
-    popStyle();
-    for (Node node : interpolator.keyFrames().values()) {
-      pushMatrix();
-      scene.applyTransformation(node);
-      scene.drawAxes(scene.mouseTracks(node) ? 40 : 20);
-      popMatrix();
-    }
-    if (showEyePath) {
-      pushStyle();
-      fill(255, 0, 0);
-      stroke(0, 255, 0);
-      // same as:
-      // scene._drawSpline(eyeInterpolator1, 3);
-      // scene._drawSpline(eyeInterpolator2, 3);
-      scene._drawSpline(eyeInterpolator1);
-      scene._drawSpline(eyeInterpolator2);
-      popStyle();
-    }
-     */
-    //println(frameRate);
   }
 
   public void mouseMoved() {
@@ -179,22 +109,22 @@ public class Interpolation2 extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == ' ')
-      showEyePath = !showEyePath;
-
-    if (key == '1')
-      eyeInterpolator1.addKeyFrame(scene.eye().get());
-    if (key == 'a')
-      eyeInterpolator1.toggle();
-    if (key == 'b')
-      eyeInterpolator1.clear();
-
-    if (key == '2')
-      eyeInterpolator2.addKeyFrame(scene.eye().get());
-    if (key == 'c')
-      eyeInterpolator2.toggle();
-    if (key == 'd')
-      eyeInterpolator2.clear();
+    if (key == ' ') {
+      displayInterpolator = !displayInterpolator;
+      if (displayInterpolator) {
+        interpolator.enableHint(Interpolator.SPLINE | Interpolator.AXES);
+        for (Node node : interpolator.keyFrames().values()) {
+          node.enableTagging();
+          node.enableHint(Node.BULLS_EYE);
+        }
+      } else {
+        interpolator.disableHint(Interpolator.SPLINE | Interpolator.AXES);
+        for (Node node : interpolator.keyFrames().values()) {
+          node.disableTagging();
+          node.disableHint(Node.BULLS_EYE);
+        }
+      }
+    }
 
     if (key == '-' || key == '+') {
       if (key == '-')
