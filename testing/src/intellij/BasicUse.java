@@ -38,6 +38,8 @@ public class BasicUse extends PApplet {
       pg.popStyle();
     });
     node.translate(50, 50, 50);
+    node.disableHint(Node.IMR);
+    node.setPickingPolicy(Node.PickingPolicy.BULLS_EYE);
     node.enableHint(Node.AXES);
     node.enableHint(Node.BULLS_EYE);
     //node.setPickingPolicy(Node.PickingPolicy.BULLS_EYE);
@@ -52,6 +54,13 @@ public class BasicUse extends PApplet {
   public void draw() {
     background(125);
     scene.render();
+    //push();
+    fill(0, 255, 255 /*, 125*/);
+    stroke(0, 0, 255);
+    strokeWeight(2);
+    translate(-20, -20);
+    rect(0, 0, 100, 100);
+    //pop();
   }
 
   public void mouseMoved() {
@@ -75,6 +84,31 @@ public class BasicUse extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == ' ')
+      node.resetHint();
+    if (key == '1')
+      node.toggleHint(Node.AXES);
+    if (key == '2')
+      node.toggleHint(Node.CAMERA);
+    if (key == '3')
+      node.toggleHint(Node.BULLS_EYE);
+    if (key == '4')
+      node.toggleHint(Node.IMR);
+    if (key == '5')
+      node.toggleHint(Node.RMR);
+    if (key == '6')
+      node.toggleHint(Node.HIGHLIGHT);
+    if (key == '7')
+      node.toggleHint(Node.FRUSTUM);
+    if (key == '8')
+      node.toggleHint(Node.TORUS);
+    if (key == '9')
+      node.toggleHint(Node.CONSTRAINT);
+    if (key == 'q')
+      node.toggleHint(Node.BONE);
+    if (key == '0')
+      node.toggleHint();
+
     if (key == 's')
       scene.fit(1);
     if (key == 'f')
@@ -86,8 +120,30 @@ public class BasicUse extends PApplet {
     if (key == 'y')
       for (Task task : Scene.timingHandler().tasks())
         task.disableConcurrence();
-    if (key == 'p')
+    if (key == 'p') {
       println(Scene.nodes().size());
+      println("node hint: " + node.hint());
+      if (node.isHintEnable(Node.AXES))
+        println("Node.AXES");
+      if (node.isHintEnable(Node.CAMERA))
+        println("Node.CAMERA");
+      if (node.isHintEnable(Node.BULLS_EYE))
+        println("Node.BULLS_EYE");
+      if (node.isHintEnable(Node.IMR))
+        println("Node.IMR");
+      if (node.isHintEnable(Node.RMR))
+        println("Node.RMR");
+      if (node.isHintEnable(Node.HIGHLIGHT))
+        println("Node.HIGHLIGHT");
+      if (node.isHintEnable(Node.FRUSTUM))
+        println("Node.FRUSTUM");
+      if (node.isHintEnable(Node.TORUS))
+        println("Node.TORUS");
+      if (node.isHintEnable(Node.CONSTRAINT))
+        println("Node.CONSTRAINT");
+      if (node.isHintEnable(Node.BONE))
+        println("Node.BONE");
+    }
   }
 
   public static void main(String[] args) {

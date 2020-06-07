@@ -137,7 +137,7 @@ public class Graph {
   public final static int GRID = 1 << 1;
   // TODO pending
   public final static int BACKGROUND = 1 << 2;
-  //public final static int INTERPOLATORS = 1 << 3;
+  //public final static int HUD = 1 << 3;
   protected boolean _dotted;
   protected int _gridStroke;
   protected int _gridSubDiv;
@@ -4796,10 +4796,6 @@ public class Graph {
         break;
     }
     System.out.println("Warning: some params in Scene.configHint(hint, params) couldn't be parsed!");
-  }
-
-  protected boolean _validateHint(int hint) {
-    return hint == AXES || hint == GRID || hint == BACKGROUND;
   }
 
   // TODO add visual hint getters as with Node and Interpolator

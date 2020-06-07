@@ -2740,11 +2740,6 @@ public class Node {
     System.out.println("Warning: some params in Node.configHint(hint, params) couldn't be parsed!");
   }
 
-  protected boolean _validateHint(int hint) {
-    return hint == AXES || hint == CAMERA || hint == BULLS_EYE || hint == IMR || hint == RMR || hint == HIGHLIGHT
-        || hint == FRUSTUM || hint == TORUS || hint == CONSTRAINT || hint == BONE;
-  }
-
   /**
    * Returns the highlighting magnitude use to scale the node when it's tagged.
    *

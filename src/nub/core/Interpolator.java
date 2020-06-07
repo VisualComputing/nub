@@ -957,8 +957,4 @@ public class Interpolator {
     else
       System.out.println("Warning: spline steps should be in [1..30]. Nothing done!");
   }
-
-  protected boolean _validateHint(int hint) {
-    return hint == AXES || hint == CAMERA || hint == SPLINE;
-  }
 }

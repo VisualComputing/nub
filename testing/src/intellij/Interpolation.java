@@ -133,8 +133,10 @@ public class Interpolation extends PApplet {
     if (key == 'y')
       for (Task task : Scene.timingHandler().tasks())
         task.disableConcurrence();
-    if (key == 'p')
-      println(Scene.nodes().size());
+    if (key == 'p') {
+      println("number of nodes: " + Scene.nodes().size());
+      println("interpolator hint: " + interpolator.hint());
+    }
 
     if (key == 't')
       interpolator.toggleHint(Interpolator.AXES);
