@@ -1,5 +1,6 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -38,18 +39,17 @@ public class HolaMundo extends PApplet {
     mainScene.fit(1);
     mainScene.enableHint(Scene.AXES | Scene.GRID);
     mainScene.configHint(Scene.GRID, color(0, 255, 0));
+    mainScene.enableHint(Graph.BACKGROUND);
     //mainScene.configHint(Scene.GRID, Graph.GridType.LINE);
     // 2. Hint (offscreen) Scene
     hintScene = new Scene(this, P3D, hintSceneWidth, hintSceneHeight);
+    hintScene.enableHint(Graph.BACKGROUND, color(0, 123, 240));
     hintScene.setRadius(300);
     // B. Nodes
     // 1. torus
-    torus = new Node((pg) -> {
-      pg.push();
-      pg.fill(255, 0, 0);
-      Scene.drawTorusSolenoid(pg);
-      pg.pop();
-    });
+    torus = new Node();
+    torus.enableHint(Node.TORUS, color(255, 0, 0));
+    torus.setPickingPolicy(Node.PickingPolicy.PRECISE);
     torus.scale(10);
     torus.translate(-200, -200, 0);
     // 3. box
@@ -57,25 +57,17 @@ public class HolaMundo extends PApplet {
     pbox.setFill(color(255, 255, 0));
     box = new Node(pbox);
     box.translate(200, 200, 0);
-    // 4. can (canScene only)
-    //can = new Node(createCan(100, 200, 32, mainScene.context()));
-    //can = new Node(createCan(100, 200, 32, loadImage("/home/pierre/IdeaProjects/nub/testing/data/texture/lachoy.jpg")));
-    println(color(0));
   }
 
   @Override
   public void draw() {
     scene = hintScene.hasMouseFocus() ? hintScene : mainScene;
-    background(0);
-    // subtree rendering
     mainScene.render();
     if (pup != null) {
       // debug
       drawRay();
       mainScene.beginHUD();
       hintScene.beginDraw();
-      hintScene.context().background(color(0, 123, 240));
-      // subtree rendering
       hintScene.render();
       hintScene.endDraw();
       hintScene.display(atX, atY);
