@@ -137,16 +137,14 @@ public class Graph {
   public final static int GRID = 1 << 1;
   // TODO pending
   public final static int BACKGROUND = 1 << 2;
-
   //public final static int HUD = 1 << 3;
   public enum GridType {
     LINES, DOTS
   }
-
-  ;
   protected GridType _gridType;
   protected int _gridStroke;
   protected int _gridSubDiv;
+  protected Object _background;
   protected static HashSet<Interpolator> _interpolators = new HashSet<Interpolator>();
 
   // offscreen
@@ -435,6 +433,7 @@ public class Graph {
     _gridStroke = -8553091;
     _gridType = GridType.DOTS;
     _gridSubDiv = 10;
+    _background = -16777216;
   }
 
   /**
@@ -2900,6 +2899,7 @@ public class Graph {
       updateBoundaryEquations();
       _lastEqUpdate = TimingHandler.frameCount;
     }
+    _displayBackgroundHint();
   }
 
   // caches
@@ -3267,6 +3267,9 @@ public class Graph {
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
   protected void _displayHints() {
+  }
+
+  protected void _displayBackgroundHint() {
   }
 
   /**
@@ -4768,6 +4771,16 @@ public class Graph {
           }
           if (params[0] instanceof GridType) {
             _gridType = (GridType) params[0];
+            return;
+          }
+        }
+        if (hint == BACKGROUND) {
+          if (isNumInstance(params[0])) {
+            _background = castToInt(params[0]);
+            return;
+          }
+          if (params[0] instanceof processing.core.PImage) {
+            _background = (processing.core.PImage) params[0];
             return;
           }
         }

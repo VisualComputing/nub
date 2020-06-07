@@ -60,6 +60,7 @@ public class HolaMundo extends PApplet {
     // 4. can (canScene only)
     //can = new Node(createCan(100, 200, 32, mainScene.context()));
     //can = new Node(createCan(100, 200, 32, loadImage("/home/pierre/IdeaProjects/nub/testing/data/texture/lachoy.jpg")));
+    println(color(0));
   }
 
   @Override

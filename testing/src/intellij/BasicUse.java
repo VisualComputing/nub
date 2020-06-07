@@ -1,5 +1,6 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.processing.Scene;
 import nub.timing.Task;
@@ -49,10 +50,12 @@ public class BasicUse extends PApplet {
     node.enableHint(Node.CAMERA, color(255, 255, 0), scene.radius() * 2);
     scene.enableHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(255, 0, 0));
+    scene.enableHint(Graph.BACKGROUND);
+    //scene.enableHint(Graph.BACKGROUND, color(100, 155, 255));
   }
 
   public void draw() {
-    background(125);
+    //background(125);
     scene.render();
     //push();
     fill(0, 255, 255 /*, 125*/);

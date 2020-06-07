@@ -1043,6 +1043,19 @@ public class Scene extends Graph implements PConstants {
     context().popStyle();
   }
 
+  @Override
+  protected void _displayBackgroundHint() {
+    context().pushStyle();
+    if (isHintEnable(BACKGROUND)) {
+      if (isNumInstance(_background)) {
+        context().background(castToInt(_background));
+      } else if (_background instanceof PImage) {
+        context().background((PImage) _background);
+      }
+    }
+    context().popStyle();
+  }
+
   /**
    * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and remaining frustum
    * parameters. Useful to compute a shadow map taking the {@code eye} as the light point-of-view.
