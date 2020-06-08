@@ -287,8 +287,9 @@ public class Interpolator {
    * Sets the interpolator {@link #node()}.
    */
   public void setNode(Node node) {
-    if (node == _node)
-      return;
+    if (node == null) {
+      throw new RuntimeException("Interpolator node should be non-null!");
+    }
     _node = node;
   }
 
