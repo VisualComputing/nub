@@ -42,21 +42,34 @@ public class Task {
   protected long _period;
   protected long _startTime;
 
+  /**
+   * Constructs a sequential recurrent task that will execute {@code callback}
+   * (see {@link #setCallback(Callback)}) with a {@link #period()} of 40ms
+   * (i.e., a {@link #frequency()} of 25 Hz).
+   */
   public Task(TimingHandler timingHandler, Callback callback) {
-    this(timingHandler);
+    _init(timingHandler);
     setCallback(callback);
   }
 
   /**
    * Constructs a sequential recurrent task with a {@link #period()} of 40ms
-   * (i.e., a {@link #frequency()} of 25 Hz).
+   * (i.e., a {@link #frequency()} of 25 Hz). The task {@link #execute()} is
+   * set as its {@link #callback()} method.
    */
   public Task(TimingHandler timingHandler) {
+    _init(timingHandler);
+    setCallback(this::execute);
+  }
+
+  /**
+   * Internally used by constructors.
+   */
+  protected void _init(TimingHandler timingHandler) {
     _timingHandler = timingHandler;
     _timingHandler.registerTask(this);
     _recurrence = true;
     _period = 40;
-    setCallback(this::execute);
   }
 
   /**

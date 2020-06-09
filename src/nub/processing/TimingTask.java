@@ -34,6 +34,11 @@ public class TimingTask extends Task {
   java.util.Timer _timer;
   java.util.TimerTask _timerTask;
 
+  /**
+   * Constructs a sequential recurrent task that will execute {@code callback}
+   * (see {@link #setCallback(Callback)}) with a {@link #period()} of 40ms
+   * (i.e., a {@link #frequency()} of 25 Hz).
+   */
   public TimingTask(Callback callback) {
     super(Graph.timingHandler(), callback);
     if (!Graph._seeded)
@@ -42,7 +47,8 @@ public class TimingTask extends Task {
 
   /**
    * Constructs a sequential recurrent task with a {@link #period()} of 40ms
-   * (i.e., a {@link #frequency()} of 25 Hz).
+   * (i.e., a {@link #frequency()} of 25 Hz). The task {@link #execute()} is
+   * set as its {@link #callback()} method.
    */
   public TimingTask() {
     super(Graph.timingHandler());
