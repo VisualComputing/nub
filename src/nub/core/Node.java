@@ -190,10 +190,10 @@ public class Node {
 
   // Rendering
   // Immediate mode rendering
-  protected Consumer<processing.core.PGraphics> _graphics;
+  protected Consumer<processing.core.PGraphics> _imrShape;
   // Retained mode rendering
   // PShape is only available in Java
-  protected processing.core.PShape _shape;
+  protected processing.core.PShape _rmrShape;
   protected long _bypass = -1;
 
   // Tasks
@@ -301,6 +301,7 @@ public class Node {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
     // TODO new
+    setIMRShape(this::graphics);
     enableHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
   }
 
@@ -2536,7 +2537,7 @@ public class Node {
    * @see #resetIMRShape()
    */
   public void setIMRShape(Consumer<processing.core.PGraphics> callback) {
-    _graphics = callback;
+    _imrShape = callback;
   }
 
   /**
@@ -2547,7 +2548,7 @@ public class Node {
    * @see #rmrShape()
    */
   public Consumer<processing.core.PGraphics> imrShape() {
-    return _graphics;
+    return _imrShape;
   }
 
   /**
@@ -2555,18 +2556,14 @@ public class Node {
    * given {@code pGraphics} context.
    */
   public void drawIMRShape(processing.core.PGraphics pGraphics) {
-    if (_graphics != null)
-      _graphics.accept(pGraphics);
+    if (_imrShape != null)
+      _imrShape.accept(pGraphics);
   }
 
   /**
    * Override this method to set an immediate mode graphics procedure on the Processing
-   * {@code PGraphics}. Return {@code true} if succeeded and {@code false} otherwise.
-   * <p>
-   *
-   * @deprecated use {@link #setIMRShape(Consumer)} instead.
+   * {@code PGraphics} or use {@link #setIMRShape(Consumer)} instead.
    */
-  @Deprecated
   public void graphics(processing.core.PGraphics pGraphics) {
   }
 
@@ -2613,7 +2610,7 @@ public class Node {
    * @see #resetRMRShape()
    */
   public void setRMRShape(processing.core.PShape shape) {
-    _shape = shape;
+    _rmrShape = shape;
   }
 
   /**
@@ -2632,7 +2629,7 @@ public class Node {
    * @see #imrShape()
    */
   public processing.core.PShape rmrShape() {
-    return _shape;
+    return _rmrShape;
   }
 
   public boolean isHintEnable(int hint) {

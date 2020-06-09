@@ -32,6 +32,7 @@ import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing mouse-driven {@link Graph}.
@@ -75,8 +76,8 @@ import java.util.Map;
  * static ones), such as {@link #beginHUD()},
  * {@link #endHUD()}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(float, float, float)} and {@link #drawGrid(PGraphics)}
- * among others, can be used to set a {@link Node#setShape(PShape)} (see
- * also {@link Node#graphics(PGraphics)}).
+ * among others, can be used to set a {@link Node#setRMRShape(PShape)} (see
+ * also {@link Node#setIMRShape(Consumer)}).
  * <p>
  * Another scene's eye (different than the graph {@link Graph#eye()}) can be drawn with
  * {@link #drawFrustum(Graph)}. Typical usage include interactive minimaps and
@@ -925,16 +926,8 @@ public class Scene extends Graph implements PConstants {
       pGraphics.shapeMode(context().shapeMode);
       pGraphics.shape(node.rmrShape());
     }
-    /*
-    if (node.isHintEnable(Node.IMR) && node.imr() != null) {
-      node.drawHint(pGraphics);
-    }
-    // */
-    if (node.isHintEnable(Node.IMR)) {
-      // TODO discard this form, since graphics should be deprecated
-      node.graphics(pGraphics);
-      if (node.imrShape() != null)
-        node.drawIMRShape(pGraphics);
+    if (node.isHintEnable(Node.IMR) && node.imrShape() != null) {
+      node.drawIMRShape(pGraphics);
     }
     // 2nd conditions is not strictly necessary but made more robust
     if (node.isHintEnable(Node.FRUSTUM) && (node.frustumGraph() != null && node.frustumGraph() != this)) {
@@ -997,16 +990,8 @@ public class Scene extends Graph implements PConstants {
         pGraphics.shapeMode(context().shapeMode);
         pGraphics.shape(node.shape());
       }
-      /*
-      if (node.isHintEnable(Node.IMR) && node.imr() != null) {
-        node.drawHint(pGraphics);
-      }
-      // */
-      if (node.isHintEnable(Node.IMR)) {
-        // TODO discard this form, since graphics should be deprecated
-        node.graphics(pGraphics);
-        if (node.imrShape() != null)
-          node.drawIMRShape(pGraphics);
+      if (node.isHintEnable(Node.IMR) && node.imrShape() != null) {
+        node.drawIMRShape(pGraphics);
       }
       // 2nd conditions is not strictly necessary but made more robust
       if (node.isHintEnable(Node.FRUSTUM) && (node.frustumGraph() != null && node.frustumGraph() != this)) {
