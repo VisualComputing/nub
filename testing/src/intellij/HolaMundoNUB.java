@@ -3,6 +3,7 @@ package intellij;
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -46,12 +47,15 @@ public class HolaMundoNUB extends PApplet {
     root = new Node();
     root.disableTagging();
     // 2. torus
+    torus = new Node(root, this::torus);
+    /*
     torus = new Node(root, (pg) -> {
       pg.push();
       pg.fill(255, 0, 0);
       Scene.drawTorusSolenoid(pg);
       pg.pop();
     });
+     */
     torus.scale(10);
     torus.translate(-200, -200, 0);
     // 3. box
@@ -61,6 +65,13 @@ public class HolaMundoNUB extends PApplet {
     box.translate(200, 200, 0);
     // 4. can (canScene only)
     can = new Node(createCan(100, 200, 32, mainScene.context()));
+  }
+
+  public void torus(PGraphics pg) {
+    pg.push();
+    pg.fill(255, 0, 0);
+    Scene.drawTorusSolenoid(pg);
+    pg.pop();
   }
 
   @Override

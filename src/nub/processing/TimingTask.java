@@ -30,9 +30,15 @@ import java.util.TimerTask;
  * <p>
  * Call {@link Scene#unregisterTask(Task)} to cancel the task.
  */
-public abstract class TimingTask extends Task {
+public class TimingTask extends Task {
   java.util.Timer _timer;
   java.util.TimerTask _timerTask;
+
+  public TimingTask(Callback callback) {
+    super(Graph.timingHandler(), callback);
+    if (!Graph._seeded)
+      enableConcurrence();
+  }
 
   /**
    * Constructs a sequential recurrent task with a {@link #period()} of 40ms
@@ -50,8 +56,10 @@ public abstract class TimingTask extends Task {
       stop();
       _timer = new Timer();
       _timerTask = new TimerTask() {
+        @Override
         public void run() {
-          execute();
+          if (_callback != null)
+            _callback.execute();
         }
       };
       if (isRecurrent()) {

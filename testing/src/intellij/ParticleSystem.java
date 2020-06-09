@@ -86,6 +86,20 @@ public class ParticleSystem extends PApplet {
       speed = new PVector();
       pos = new PVector();
       init();
+      task = new TimingTask(this::run);
+      /*
+      task = new TimingTask(() -> {
+        speed.z -= 0.05f;
+        pos = PVector.add(pos, PVector.mult(speed, 10f));
+        if (pos.z < 0.0) {
+          speed.z = -0.8f * speed.z;
+          pos.z = 0.0f;
+        }
+        if (++age == ageMax)
+          init();
+      });
+      // */
+      /*
       task = new TimingTask() {
         @Override
         public void execute() {
@@ -99,6 +113,8 @@ public class ParticleSystem extends PApplet {
             init();
         }
       };
+      // */
+      //task.enableConcurrence();
       task.run();
     }
 
@@ -144,6 +160,17 @@ public class ParticleSystem extends PApplet {
       speed = new PVector(norm * cos(angle), norm * sin(angle), ParticleSystem.this.random(1));
       age = 0;
       ageMax = 50 + (int) ParticleSystem.this.random(100);
+    }
+
+    void run() {
+      speed.z -= 0.05f;
+      pos = PVector.add(pos, PVector.mult(speed, 10f));
+      if (pos.z < 0.0) {
+        speed.z = -0.8f * speed.z;
+        pos.z = 0.0f;
+      }
+      if (++age == ageMax)
+        init();
     }
   }
 }
