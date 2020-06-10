@@ -11,7 +11,6 @@ import processing.event.MouseEvent;
 public class CajasOrientadas extends PApplet {
   Scene scene;
   Box[] cajas;
-  boolean drawAxes = true;
   Sphere esfera;
 
   public void settings() {
@@ -19,58 +18,77 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void setup() {
+    // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
     scene = new Scene(this);
     scene.setRadius(200);
     scene.togglePerspective();
     scene.fit();
-    esfera = new Sphere();
-    esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
-    esfera.setColor(color(0, 0, 255));
-
-    cajas = new Box[30];
+    esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);
+    esfera.setPosition(new Vector(0, 1.4f, 0));
+    cajas = new Box[15];
     for (int i = 0; i < cajas.length; i++)
-      cajas[i] = new Box();
-
+      cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)),
+          random(10, 40), random(10, 40), random(10, 40));
     scene.fit();
-    scene.tag("keyboard", esfera.iNode);
+    scene.tag("keyboard", esfera);
   }
 
   public void draw() {
     background(0);
     scene.render();
-    //scene.render(g);
+  }
+
+  public void mouseClicked() {
+    scene.focusEye();
   }
 
   public void mouseMoved() {
     scene.mouseTag();
-    //scene.updateMouseTag();
   }
 
   public void mouseDragged() {
-    if (mouseButton == LEFT) {
-      if (!scene.mouseSpinTag())
+    if (!scene.mouseTranslateTag()) {
+      if (mouseButton == LEFT)
         scene.mouseSpinEye();
-    } else if (mouseButton == RIGHT) {
-      if (!scene.mouseTranslateTag())
+      else if (mouseButton == RIGHT)
         scene.mouseTranslateEye();
-    } else
-      scene.scale(mouseX - pmouseX);
+      else
+        scene.scaleEye(mouseX - pmouseX);
+    }
+  }
+
+  public void updateCajaOrientation(Node node) {
+    Vector to = Vector.subtract(esfera.position(), node.position());
+    node.setOrientation(Quaternion.from(Vector.plusJ, to));
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.moveForward(event.getCount() * 20, 0.8f);
+    scene.moveForward(event.getCount() * 20);
   }
 
   public void keyPressed() {
     if (key == ' ')
       for (Box caja : cajas)
-        if (caja.iNode.bullsEyeSize() != 0)
-          if (caja.iNode.bullsEyeSize() < 1)
-            caja.iNode.setBullsEyeSize(100 * caja.iNode.bullsEyeSize());
-          else
-            caja.iNode.setBullsEyeSize(caja.iNode.bullsEyeSize() / 100);
+        caja.setPickingPolicy(caja.pickingPolicy() == Node.PickingPolicy.PRECISE ?
+            Node.PickingPolicy.BULLS_EYE :
+            Node.PickingPolicy.PRECISE);
+    if (key == 'c')
+      for (Box caja : cajas)
+        if (caja.bullsEyeSize() < 1)
+          caja.setBullsEyeSize(caja.bullsEyeSize() * 200);
+        else
+          caja.setBullsEyeSize(caja.bullsEyeSize() / 200);
+    if (key == 'd')
+      for (Box caja : cajas)
+        caja.setBullsEyeShape(caja.bullsEyeShape() == Node.BullsEyeShape.CIRCLE ?
+            Node.BullsEyeShape.SQUARE :
+            Node.BullsEyeShape.CIRCLE);
     if (key == 'a')
-      drawAxes = !drawAxes;
+      for (Box caja : cajas)
+        caja.toggleHint(Node.AXES);
+    if (key == 'p')
+      for (Box caja : cajas)
+        caja.toggleHint(Node.BULLS_EYE);
     if (key == 'e')
       scene.togglePerspective();
     if (key == 's')
@@ -78,10 +96,10 @@ public class CajasOrientadas extends PApplet {
     if (key == 'S')
       scene.fit();
     if (key == 'u')
-      if (scene.node("keyboard") == null)
-        scene.tag("keyboard", esfera.iNode);
-      else
+      if (scene.isTagValid("keyboard"))
         scene.removeTag("keyboard");
+      else
+        scene.tag("keyboard", esfera);
     if (key == CODED)
       if (keyCode == UP)
         scene.translate("keyboard", 0, -10, 0);
@@ -93,140 +111,62 @@ public class CajasOrientadas extends PApplet {
         scene.translate("keyboard", 10, 0, 0);
   }
 
-  public class Box {
-    public Node iNode;
-    float w, h, d;
-    int c;
+  public class Box extends Node {
+    float _w, _h, _d;
+    int _color;
 
-    public Box() {
-      iNode = new Node() {
-        // note that within visit() geometry is defined
-        // at the node local coordinate system
-        @Override
-        public void graphics(PGraphics pg) {
-          pg.pushStyle();
-          Box.this.setOrientation(CajasOrientadas.this.esfera.getPosition());
-          if (drawAxes)
-            Scene.drawAxes(pg, PApplet.max(w, h, d) * 1.3f);
-          pg.noStroke();
-          if (isTagged(scene))
-            pg.fill(255, 0, 0);
-          else
-            pg.fill(getColor());
-          pg.box(w, h, d);
-          pg.stroke(0, 225, 0);
-          pg.popStyle();
-        }
-      };
-      iNode.setBullsEyeSize(0.15f);
-      setSize();
-      setColor();
-      scene.randomize(iNode);
+    public Box(int tint, float w, float h, float d) {
+      _color = tint;
+      _w = w;
+      _h = h;
+      _d = d;
+      setBullsEyeSize(max(_w, _h, _d) / scene.radius());
+      scene.randomize(this);
+      enableHint(Node.AXES | Node.BULLS_EYE);
     }
 
-    public void setSize() {
-      w = random(10, 40);
-      h = random(10, 40);
-      d = random(10, 40);
-      //iNode.setBullsEyeSize(PApplet.max(w, h, d));
+    // geometry is defined at the node local coordinate system
+    @Override
+    public void graphics(PGraphics pg) {
+      pg.pushStyle();
+      pg.noStroke();
+      pg.fill(_color);
+      pg.box(_w, _h, _d);
+      pg.popStyle();
     }
 
-    public void setSize(float myW, float myH, float myD) {
-      w = myW;
-      h = myH;
-      d = myD;
-    }
-
-    public int getColor() {
-      return c;
-    }
-
-    public void setColor() {
-      c = color(random(0, 255), random(0, 255), random(0, 255));
-    }
-
-    public void setColor(int myC) {
-      c = myC;
-    }
-
-    public Vector getPosition() {
-      return iNode.position();
-    }
-
-    public void setPosition(Vector pos) {
-      iNode.setPosition(pos);
-    }
-
-    public Quaternion getOrientation() {
-      return iNode.orientation();
-    }
-
-    public void setOrientation(Vector v) {
-      Vector to = Vector.subtract(v, iNode.position());
-      iNode.setOrientation(new Quaternion(new Vector(0, 1, 0), to));
+    @Override
+    public void visit() {
+      updateCajaOrientation(this);
     }
   }
 
-  class Sphere {
-    Node iNode;
-    float r;
-    int c;
+  class Sphere extends Node {
+    float _radius;
+    int _color;
 
-    public Sphere() {
-      iNode = new Node() {
-        // note that within visit() geometry is defined
-        // at the node local coordinate system
-        @Override
-        public void graphics(PGraphics pg) {
-          pg.pushStyle();
-          if (drawAxes)
-            //DrawingUtils.drawAxes(parent, radius()*1.3f);
-            Scene.drawAxes(pg, radius() * 1.3f);
-          pg.noStroke();
-          if (iNode.isTagged(scene)) {
-            pg.fill(255, 0, 0);
-            pg.sphere(radius() * 1.2f);
-          } else {
-            pg.fill(getColor());
-            pg.sphere(radius());
-          }
-          pg.stroke(255);
-          pg.popStyle();
-        }
-      };
-      iNode.setBullsEyeSize(0.15f);
-      setRadius(10);
+    public Sphere(int tint, float radius) {
+      _color = tint;
+      _radius = radius;
+      setPickingPolicy(Node.PickingPolicy.PRECISE);
     }
 
-    public float radius() {
-      return r;
+    @Override
+    public void graphics(PGraphics pg) {
+      pg.pushStyle();
+      pg.noStroke();
+      pg.fill(_color);
+      pg.sphere(_radius);
+      pg.popStyle();
     }
 
-    public void setRadius(float myR) {
-      r = myR;
-      iNode.setBullsEyeSize(2 * r);
-    }
-
-    public int getColor() {
-      return c;
-    }
-
-    public void setColor() {
-      c = color(random(0, 255), random(0, 255), random(0, 255));
-    }
-
-    public void setColor(int myC) {
-      c = myC;
-    }
-
-    public void setPosition(Vector pos) {
-      iNode.setPosition(pos);
-    }
-
-    public Vector getPosition() {
-      return iNode.position();
+    @Override
+    public void visit() {
+      for (Box caja : cajas)
+        updateCajaOrientation(caja);
     }
   }
+
 
   public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.CajasOrientadas"});

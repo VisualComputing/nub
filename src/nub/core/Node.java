@@ -302,7 +302,6 @@ public class Node {
     setReference(reference);
     // TODO new
     setIMRShape(this::graphics);
-    enableHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
   }
 
   /**
@@ -314,7 +313,7 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    //setHint(Node.IMR | Node.RMR);
+    enableHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
     setPickingPolicy(PickingPolicy.BULLS_EYE);
     _id = ++_counter;
     // unlikely but theoretically possible

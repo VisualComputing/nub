@@ -5,19 +5,22 @@ class Sphere extends Node {
   public Sphere(int tint, float radius) {
     _color = tint;
     _radius = radius;
+    setPickingPolicy(Node.PickingPolicy.PRECISE);
+    enableHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
   }
 
   @Override
   public void graphics(PGraphics pg) {
     pg.pushStyle();
-    if (drawAxes)
-      Scene.drawAxes(pg, _radius * 1.3);
     pg.noStroke();
-    pg.fill(isTagged(scene) ? color(255, 0, 0) : _color);
-    pg.sphere(isTagged(scene) ? _radius * 1.2 : _radius);
-    pg.stroke(255);
-    if (bullseye)
-      scene.drawBullsEye(this);
+    pg.fill(_color);
+    pg.sphere(_radius);
     pg.popStyle();
+  }
+
+  @Override
+  public void visit() {
+    for (Box caja : cajas)
+      updateCajaOrientation(caja);
   }
 }

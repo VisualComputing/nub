@@ -9,8 +9,9 @@
  * right mouse button. Use also the arrow keys to select and move the sphere.
  * See how the boxes will always remain oriented towards the sphere.
  *
- * Press ' ' the change the picking policy adaptive/fixed.
- * Press 'c' to change the bullseye shape.
+ * Press ' ' the change the picking policy.
+ * Press 'c' to change the bullseye shape space.
+ * Press 'c' to change the bullseye shape space.
  */
 
 import nub.primitives.*;
@@ -19,12 +20,7 @@ import nub.processing.*;
 
 Scene scene;
 Box[] cajas;
-boolean drawAxes = true, bullseye = true;
 Sphere esfera;
-Vector orig = new Vector();
-Vector dir = new Vector();
-Vector end = new Vector();
-Vector pup;
 
 void setup() {
   size(800, 800, P3D);
@@ -37,7 +33,7 @@ void setup() {
   esfera.setPosition(new Vector(0, 1.4, 0));
   cajas = new Box[15];
   for (int i = 0; i < cajas.length; i++)
-    cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)),
+    cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)), 
       random(10, 40), random(10, 40), random(10, 40));
   scene.fit();
   scene.tag("keyboard", esfera);
@@ -45,34 +41,11 @@ void setup() {
 
 void draw() {
   background(0);
-  // calls render() on all scene nodes applying all their transformations
   scene.render();
-  drawRay();
 }
 
-void drawRay() {
-  if (pup != null) {
-    pushStyle();
-    strokeWeight(20);
-    stroke(255, 255, 0);
-    point(pup.x(), pup.y(), pup.z());
-    strokeWeight(8);
-    stroke(0, 0, 255);
-    line(orig.x(), orig.y(), orig.z(), end.x(), end.y(), end.z());
-    popStyle();
-  }
-}
-
-void mouseClicked(MouseEvent event) {
-  if (event.getButton() == RIGHT) {
-    pup = scene.mouseLocation();
-    if (pup != null) {
-      scene.mouseToLine(orig, dir);
-      end = Vector.add(orig, Vector.multiply(dir, 4000));
-    }
-  } else {
-    scene.focusEye();
-  }
+void mouseClicked() {
+  scene.focusEye();
 }
 
 void mouseMoved() {
@@ -80,41 +53,48 @@ void mouseMoved() {
 }
 
 void mouseDragged() {
-  if (mouseButton == LEFT)
-    scene.mouseSpin();
-  else if (mouseButton == RIGHT)
-    scene.mouseTranslate();
-  else
-    scene.scale(mouseX - pmouseX);
+  if (!scene.mouseTranslateTag()) {
+    if (mouseButton == LEFT)
+      scene.mouseSpinEye();
+    else if (mouseButton == RIGHT)
+      scene.mouseTranslateEye();
+    else
+      scene.scaleEye(mouseX - pmouseX);
+  }
+}
+
+void updateCajaOrientation(Node node) {
+  Vector to = Vector.subtract(esfera.position(), node.position());
+  node.setOrientation(Quaternion.from(Vector.plusJ, to));
 }
 
 void mouseWheel(MouseEvent event) {
   scene.moveForward(event.getCount() * 20);
 }
 
-int randomColor() {
-  return color(random(0, 255), random(0, 255), random(0, 255));
-}
-
-int randomLength(int min, int max) {
-  return int(random(min, max));
-}
-
 void keyPressed() {
   if (key == ' ')
     for (Box caja : cajas)
-      if (caja.pickingThreshold() != 0)
-        if (abs(caja.pickingThreshold()) < 1)
-          caja.setPickingThreshold(100 * caja.pickingThreshold());
-        else
-          caja.setPickingThreshold(caja.pickingThreshold() / 100);
+      caja.setPickingPolicy(caja.pickingPolicy() == Node.PickingPolicy.PRECISE ?
+        Node.PickingPolicy.BULLS_EYE :
+        Node.PickingPolicy.PRECISE);
   if (key == 'c')
     for (Box caja : cajas)
-      caja.setPickingThreshold(-1 * caja.pickingThreshold());
+      if (caja.bullsEyeSize() < 1)
+        caja.setBullsEyeSize(caja.bullsEyeSize() * 200);
+      else
+        caja.setBullsEyeSize(caja.bullsEyeSize() / 200);
+  if (key == 'd')
+    for (Box caja : cajas)
+      caja.setBullsEyeShape(caja.bullsEyeShape() == Node.BullsEyeShape.CIRCLE ?
+        Node.BullsEyeShape.SQUARE :
+        Node.BullsEyeShape.CIRCLE);
   if (key == 'a')
-    drawAxes = !drawAxes;
+    for (Box caja : cajas)
+      caja.toggleHint(Node.AXES);
   if (key == 'p')
-    bullseye = !bullseye;
+    for (Box caja : cajas)
+      caja.toggleHint(Node.BULLS_EYE);
   if (key == 'e')
     scene.togglePerspective();
   if (key == 's')
