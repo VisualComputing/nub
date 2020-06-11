@@ -4797,7 +4797,7 @@ public class Graph {
             _gridType = (GridType) params[1];
             return;
           }
-          if (params[1] instanceof GridType && isNumInstance(params[0])) {
+          if (params[0] instanceof GridType && isNumInstance(params[1])) {
             _gridType = (GridType) params[0];
             _gridStroke = castToInt(params[1]);
             return;
@@ -4810,6 +4810,12 @@ public class Graph {
             _gridStroke = castToInt(params[0]);
             _gridSubDiv = castToInt(params[1]);
             _gridType = (GridType) params[2];
+            return;
+          }
+          if (params[0] instanceof GridType && isNumInstance(params[1]) && isNumInstance(params[2])) {
+            _gridType = (GridType) params[0];
+            _gridStroke = castToInt(params[1]);
+            _gridSubDiv = castToInt(params[2]);
             return;
           }
         }

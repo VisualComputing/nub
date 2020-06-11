@@ -40,24 +40,16 @@ void setup() {
   rotDir = 0;
   activeConstraint = 0;
 
-  node = new Node() {
-    // Note that within render() geometry is defined at the
-    // node local coordinate system.
-    @Override
-    public void graphics(PGraphics pg) {
-      Scene.drawAxes(pg, 40);
-      pg.fill(isTagged(scene) ? 255 : 0, 0, 255);
-      Scene.drawTorusSolenoid(pg);
-    }
-  };
+  node = new Node();
+  node.enableHint(Node.TORUS | Node.BULLSEYE);
   scene.randomize(node);
   node.translate(new Vector(20, 20, 0));
   node.setConstraint(constraints[activeConstraint]);
+  scene.enableHint(Scene.GRID | Scene.AXES | Scene.BACKGROUND);
+  scene.configHint(Scene.GRID, Scene.GridType.LINES, color(0, 255, 0));
 }
 
 void draw() {
-  background(0);
-  scene.drawAxes();
   scene.render();
   fill(0, 255, 255);
   scene.beginHUD();

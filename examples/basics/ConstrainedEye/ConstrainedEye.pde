@@ -39,13 +39,11 @@ void setup() {
   rotDir = 0;
   activeConstraint = 0;
   scene.eye().setConstraint(constraints[activeConstraint]);
+  scene.enableHint(Scene.GRID | Scene.AXES | Scene.BACKGROUND);
+  scene.configHint(Scene.GRID, color(0, 255, 0));
 }
 
 void draw() {
-  background(0);
-  scene.drawAxes();
-  stroke(255);
-  scene.drawDottedGrid();
   fill(204, 102, 0, 150);
   scene.drawTorusSolenoid();
   fill(0, 255, 255);
