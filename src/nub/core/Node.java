@@ -145,7 +145,7 @@ public class Node {
   }
   protected BullsEyeShape _bullsEyeShape;
   public enum PickingPolicy {
-    PRECISE, BULLS_EYE
+    PRECISE, BULLSEYE
   }
   protected PickingPolicy _pickingPolicy;
 
@@ -162,7 +162,7 @@ public class Node {
   protected int _mask;
   public final static int AXES = Graph.AXES;
   public final static int CAMERA = 1 << 1;
-  public final static int BULLS_EYE = 1 << 2;
+  public final static int BULLSEYE = 1 << 2;
   public final static int IMR = 1 << 3;
   public final static int RMR = 1 << 4;
   public final static int HIGHLIGHT = 1 << 5;
@@ -314,7 +314,7 @@ public class Node {
     setRotation(rotation);
     setScaling(scaling);
     enableHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
-    setPickingPolicy(PickingPolicy.BULLS_EYE);
+    setPickingPolicy(PickingPolicy.BULLSEYE);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -2671,7 +2671,7 @@ public class Node {
     switch (params.length) {
       case 1:
         if (Graph.isNumInstance(params[0])) {
-          if (hint == BULLS_EYE) {
+          if (hint == BULLSEYE) {
             _bullStroke = Graph.castToInt(params[0]);
             return;
           }

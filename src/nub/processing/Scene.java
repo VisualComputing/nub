@@ -947,7 +947,7 @@ public class Scene extends Graph implements PConstants {
     if (node.isHintEnable(Node.AXES)) {
       drawAxes(node.axesLength() == 0 ? radius() / 5 : node.axesLength());
     }
-    if (node.isHintEnable(Node.BULLS_EYE)) {
+    if (node.isHintEnable(Node.BULLSEYE)) {
       pGraphics.pushStyle();
       pGraphics.colorMode(PApplet.RGB, 255);
       pGraphics.stroke(node.bullsEyeStroke());

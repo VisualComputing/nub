@@ -40,11 +40,11 @@ public class BasicUse extends PApplet {
     node.translate(50, 50, 50);
     // node.disableHint(Node.IMR);
     node.enableHint(Node.AXES);
-    node.enableHint(Node.BULLS_EYE);
+    node.enableHint(Node.BULLSEYE);
     //node.setPickingPolicy(Node.PickingPolicy.BULLS_EYE);
     //node.setBullsEyeSize(50);
     node.setBullsEyeShape(Node.BullsEyeShape.CIRCLE);
-    node.configHint(Node.BULLS_EYE, color(0, 255, 0));
+    node.configHint(Node.BULLSEYE, color(0, 255, 0));
     node.enableHint(Node.CAMERA, color(255, 255, 0), scene.radius() * 2);
     scene.enableHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(255, 0, 0));
@@ -84,7 +84,7 @@ public class BasicUse extends PApplet {
     if (key == '2')
       node.toggleHint(Node.CAMERA);
     if (key == '3')
-      node.toggleHint(Node.BULLS_EYE);
+      node.toggleHint(Node.BULLSEYE);
     if (key == '4')
       node.toggleHint(Node.IMR);
     if (key == '5')
@@ -120,7 +120,7 @@ public class BasicUse extends PApplet {
         println("Node.AXES");
       if (node.isHintEnable(Node.CAMERA))
         println("Node.CAMERA");
-      if (node.isHintEnable(Node.BULLS_EYE))
+      if (node.isHintEnable(Node.BULLSEYE))
         println("Node.BULLS_EYE");
       if (node.isHintEnable(Node.IMR))
         println("Node.IMR");

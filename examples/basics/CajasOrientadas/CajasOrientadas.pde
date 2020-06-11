@@ -33,7 +33,7 @@ void setup() {
   esfera.setPosition(new Vector(0, 1.4, 0));
   cajas = new Box[15];
   for (int i = 0; i < cajas.length; i++)
-    cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)), 
+    cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)),
       random(10, 40), random(10, 40), random(10, 40));
   scene.fit();
   scene.tag("keyboard", esfera);
@@ -71,7 +71,7 @@ void keyPressed() {
   if (key == ' ')
     for (Box caja : cajas)
       caja.setPickingPolicy(caja.pickingPolicy() == Node.PickingPolicy.PRECISE ?
-        Node.PickingPolicy.BULLS_EYE :
+        Node.PickingPolicy.BULLSEYE :
         Node.PickingPolicy.PRECISE);
   if (key == 'c')
     for (Box caja : cajas)
@@ -89,7 +89,7 @@ void keyPressed() {
       caja.toggleHint(Node.AXES);
   if (key == 'p')
     for (Box caja : cajas)
-      caja.toggleHint(Node.BULLS_EYE);
+      caja.toggleHint(Node.BULLSEYE);
   if (key == 'e')
     scene.togglePerspective();
   if (key == 's')

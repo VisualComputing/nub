@@ -51,7 +51,7 @@ public class Interaction2D extends PApplet {
         pGraphics.popStyle();
       }
     };
-    shape1.enableHint(Node.BULLS_EYE);
+    shape1.enableHint(Node.BULLSEYE);
     //shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, 0);
 

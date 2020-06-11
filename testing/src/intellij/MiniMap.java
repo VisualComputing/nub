@@ -34,7 +34,7 @@ public class MiniMap extends PApplet {
     scene.fit(1);
     scene.eye().setBullsEyeSize(50);
     scene.eye().disableHint(Node.HIGHLIGHT);
-    scene.eye().enableHint(Node.BULLS_EYE);
+    scene.eye().enableHint(Node.BULLSEYE);
     scene.eye().enableHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
     scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
     models = new Node[30];
@@ -42,10 +42,10 @@ public class MiniMap extends PApplet {
       if ((i & 1) == 0) {
         models[i] = new Node(shape());
         models[i].setBullsEyeSize(50);
-        models[i].enableHint(Node.BULLS_EYE);
+        models[i].enableHint(Node.BULLSEYE);
       } else {
         models[i] = new Node();
-        models[i].enableHint(Node.BULLS_EYE);
+        models[i].enableHint(Node.BULLSEYE);
         models[i].enableHint(Node.TORUS);
         models[i].setBullsEyeSize(50);
         models[i].scale(3);

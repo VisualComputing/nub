@@ -39,7 +39,7 @@ public class MiniMap2 extends PApplet {
     scene = onScreen ? new Scene(this, eye) : new Scene(this, renderer, eye);
     // */
     scene = onScreen ? new Scene(this) : new Scene(this, renderer);
-    scene.eye().enableHint(Node.BULLS_EYE);
+    scene.eye().enableHint(Node.BULLSEYE);
     scene.setRadius(1000);
     rectMode(CENTER);
     scene.fit(1);

@@ -357,7 +357,7 @@ public class NodeAPI1 extends PApplet {
 
     public InteractiveNode(Scene graph, int color) {
       super();
-      enableHint(Node.BULLS_EYE | Node.AXES);
+      enableHint(Node.BULLSEYE | Node.AXES);
       scene = graph;
       _c = color;
       pnt = new Vector(40, 30, 20);
@@ -365,7 +365,7 @@ public class NodeAPI1 extends PApplet {
 
     public InteractiveNode(Scene graph, Node node, int color) {
       super(node);
-      enableHint(Node.BULLS_EYE | Node.AXES);
+      enableHint(Node.BULLSEYE | Node.AXES);
       scene = graph;
       _c = color;
       pnt = new Vector(40, 30, 20);

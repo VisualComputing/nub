@@ -70,7 +70,7 @@ public class CajasOrientadas extends PApplet {
     if (key == ' ')
       for (Box caja : cajas)
         caja.setPickingPolicy(caja.pickingPolicy() == Node.PickingPolicy.PRECISE ?
-            Node.PickingPolicy.BULLS_EYE :
+            Node.PickingPolicy.BULLSEYE :
             Node.PickingPolicy.PRECISE);
     if (key == 'c')
       for (Box caja : cajas)
@@ -88,7 +88,7 @@ public class CajasOrientadas extends PApplet {
         caja.toggleHint(Node.AXES);
     if (key == 'p')
       for (Box caja : cajas)
-        caja.toggleHint(Node.BULLS_EYE);
+        caja.toggleHint(Node.BULLSEYE);
     if (key == 'e')
       scene.togglePerspective();
     if (key == 's')
@@ -122,7 +122,7 @@ public class CajasOrientadas extends PApplet {
       _d = d;
       setBullsEyeSize(max(_w, _h, _d) / scene.radius());
       scene.randomize(this);
-      enableHint(Node.AXES | Node.BULLS_EYE);
+      enableHint(Node.AXES | Node.BULLSEYE);
     }
 
     // geometry is defined at the node local coordinate system

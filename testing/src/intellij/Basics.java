@@ -39,7 +39,7 @@ public class Basics extends PApplet {
         pg.popStyle();
       }
     };
-    node.enableHint(Node.BULLS_EYE);
+    node.enableHint(Node.BULLSEYE);
     node.setRotation(Quaternion.random());
     //shape = new Node(scene, shape());
     shape = new Node();

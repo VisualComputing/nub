@@ -9,7 +9,7 @@ public class Box extends Node {
     _d = d;
     setBullsEyeSize(max(_w, _h, _d) / scene.radius());
     scene.randomize(this);
-    enableHint(Node.AXES | Node.BULLS_EYE);
+    enableHint(Node.AXES | Node.BULLSEYE);
   }
 
   // geometry is defined at the node local coordinate system
@@ -21,7 +21,7 @@ public class Box extends Node {
     pg.box(_w, _h, _d);
     pg.popStyle();
   }
-  
+
   @Override
   public void visit() {
     Vector to = Vector.subtract(esfera.position(), position());

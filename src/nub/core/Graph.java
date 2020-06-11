@@ -3276,7 +3276,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.PickingPolicy.BULLS_EYE) {
+    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.PickingPolicy.BULLSEYE) {
       Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {

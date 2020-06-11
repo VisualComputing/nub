@@ -62,7 +62,7 @@ public class Interpolation2 extends PApplet {
     for (int i = 0; i < random(4, 10); i++) {
       Node node = scene.randomNode();
       node.disableTagging();
-      node.setPickingPolicy(Node.PickingPolicy.BULLS_EYE);
+      node.setPickingPolicy(Node.PickingPolicy.BULLSEYE);
       interpolator.addKeyFrame(node, i % 2 == 1 ? 1 : 4);
     }
     interpolator.run();
@@ -70,8 +70,8 @@ public class Interpolation2 extends PApplet {
 
     //shape.disableHint(Node.IMR);
     shape.enableHint(Node.AXES);
-    shape.enableHint(Node.BULLS_EYE);
-    shape.configHint(Node.BULLS_EYE, color(255, 0, 0));
+    shape.enableHint(Node.BULLSEYE);
+    shape.configHint(Node.BULLSEYE, color(255, 0, 0));
     shape.enableHint(Node.CAMERA);
     shape.configHint(Node.CAMERA, color(255, 0, 255), scene.radius() * 2);
     shape.setBullsEyeSize(50);
@@ -115,13 +115,13 @@ public class Interpolation2 extends PApplet {
         interpolator.enableHint(Interpolator.SPLINE | Interpolator.AXES);
         for (Node node : interpolator.keyFrames().values()) {
           node.enableTagging();
-          node.enableHint(Node.BULLS_EYE);
+          node.enableHint(Node.BULLSEYE);
         }
       } else {
         interpolator.disableHint(Interpolator.SPLINE | Interpolator.AXES);
         for (Node node : interpolator.keyFrames().values()) {
           node.disableTagging();
-          node.disableHint(Node.BULLS_EYE);
+          node.disableHint(Node.BULLSEYE);
         }
       }
     }
