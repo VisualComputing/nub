@@ -4780,7 +4780,7 @@ public class Graph {
             return;
           }
           if (params[0] instanceof processing.core.PImage) {
-            _background = (processing.core.PImage) params[0];
+            _background = params[0];
             return;
           }
         }

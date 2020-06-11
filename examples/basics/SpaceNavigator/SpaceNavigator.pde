@@ -42,11 +42,10 @@ void setup() {
     scene.randomize(shapes[i]);
   }
   smooth();
+  scene.enableHint(Scene.BACKGROUND | Scene.AXES);
 }
 
 void draw() {
-  background(0);
-  scene.drawAxes();
   scene.render();
   if (snPicking)
     spaceNavigatorPicking();
