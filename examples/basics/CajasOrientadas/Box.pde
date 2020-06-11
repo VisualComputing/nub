@@ -24,6 +24,7 @@ public class Box extends Node {
   
   @Override
   public void visit() {
-    updateCajaOrientation(this);
+    Vector to = Vector.subtract(esfera.position(), position());
+    setOrientation(Quaternion.from(Vector.plusJ, to));
   }
 }

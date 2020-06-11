@@ -17,10 +17,4 @@ class Sphere extends Node {
     pg.sphere(_radius);
     pg.popStyle();
   }
-
-  @Override
-  public void visit() {
-    for (Box caja : cajas)
-      updateCajaOrientation(caja);
-  }
 }

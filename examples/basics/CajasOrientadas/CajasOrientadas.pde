@@ -63,11 +63,6 @@ void mouseDragged() {
   }
 }
 
-void updateCajaOrientation(Node node) {
-  Vector to = Vector.subtract(esfera.position(), node.position());
-  node.setOrientation(Quaternion.from(Vector.plusJ, to));
-}
-
 void mouseWheel(MouseEvent event) {
   scene.moveForward(event.getCount() * 20);
 }
