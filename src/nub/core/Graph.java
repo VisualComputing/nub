@@ -132,12 +132,10 @@ public class Graph {
   public static Random random = new Random();
   // Visual hints
   protected int _mask;
-  public final static int AXES = 1 << 0;
-  // TODO improve dotted, maybe with an enum, following node bullseye related patterns
-  public final static int GRID = 1 << 1;
-  // TODO pending
-  public final static int BACKGROUND = 1 << 2;
-  //public final static int HUD = 1 << 3;
+  public final static int HUD = 1 << 0;
+  public final static int AXES = 1 << 1;
+  public final static int GRID = 1 << 2;
+  public final static int BACKGROUND = 1 << 3;
   public enum GridType {
     LINES, DOTS
   }
@@ -3229,6 +3227,7 @@ public class Graph {
     matrixHandler.applyTransformation(node);
     node.visit();
     if (!node.isCulled()) {
+      // TODO missed
       //if (node._bypass != TimingHandler.frameCount)
       //nub.processing.Scene._draw(context, node);
       for (Node child : node.children())

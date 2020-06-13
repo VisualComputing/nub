@@ -340,34 +340,6 @@ public class Scene extends Graph implements PConstants {
     applyWorldTransformation(pApplet.g, node);
   }
 
-  // PICKING BUFFER
-
-  @Override
-  protected PGraphics _backBuffer() {
-    return (PGraphics) _bb;
-  }
-
-  /**
-   * Internal use. Traverse the scene {@link #nodes()}) into the
-   * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
-   * <p>
-   * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
-   * scenes).
-   */
-  @Override
-  protected void _renderBackBuffer() {
-    if (_bb != null && _bbCount < _bbNeed) {
-      _backBuffer().beginDraw();
-      _backBuffer().pushStyle();
-      _backBuffer().background(0);
-      super._renderBackBuffer();
-      _backBuffer().popStyle();
-      _backBuffer().endDraw();
-      _backBuffer().loadPixels();
-      _bbCount = _bbNeed;
-    }
-  }
-
   // OPENGL
 
   /**
@@ -914,6 +886,32 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
+  protected PGraphics _backBuffer() {
+    return (PGraphics) _bb;
+  }
+
+  /**
+   * Internal use. Traverse the scene {@link #nodes()}) into the
+   * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
+   * <p>
+   * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
+   * scenes).
+   */
+  @Override
+  protected void _renderBackBuffer() {
+    if (_bb != null && _bbCount < _bbNeed) {
+      _backBuffer().beginDraw();
+      _backBuffer().pushStyle();
+      _backBuffer().background(0);
+      super._renderBackBuffer();
+      _backBuffer().popStyle();
+      _backBuffer().endDraw();
+      _backBuffer().loadPixels();
+      _bbCount = _bbNeed;
+    }
+  }
+
+  @Override
   protected void _drawFrontBuffer(Node node) {
     PGraphics pGraphics = context();
     pGraphics.pushStyle();
@@ -986,9 +984,9 @@ public class Scene extends Graph implements PConstants {
       _triangleShader.set("id", new PVector(r, g, b));
       _lineShader.set("id", new PVector(r, g, b));
       _pointShader.set("id", new PVector(r, g, b));
-      if (node.isHintEnable(Node.RMR) && node.shape() != null) {
+      if (node.isHintEnable(Node.RMR) && node.rmrShape() != null) {
         pGraphics.shapeMode(context().shapeMode);
-        pGraphics.shape(node.shape());
+        pGraphics.shape(node.rmrShape());
       }
       if (node.isHintEnable(Node.IMR) && node.imrShape() != null) {
         node.drawIMRShape(pGraphics);

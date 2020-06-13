@@ -145,7 +145,7 @@ public class Node {
   }
   protected BullsEyeShape _bullsEyeShape;
   public enum PickingPolicy {
-    PRECISE, BULLSEYE
+    PRECISE, BULLSEYE, HUD
   }
   protected PickingPolicy _pickingPolicy;
 
@@ -160,24 +160,17 @@ public class Node {
 
   // Visual hints
   protected int _mask;
+  public final static int HUD = Graph.HUD;
   public final static int AXES = Graph.AXES;
-  public final static int CAMERA = 1 << 1;
-  public final static int BULLSEYE = 1 << 2;
-  public final static int IMR = 1 << 3;
-  public final static int RMR = 1 << 4;
-  public final static int HIGHLIGHT = 1 << 5;
-  public final static int FRUSTUM = 1 << 6;
-  public final static int TORUS = 1 << 7;
-  // TODO pending flags
-  // TODO update constraint examples
-  public final static int CONSTRAINT = 1 << 8;
-  public final static int BONE = 1 << 9;
-  // TODO HUD?
-  /*
-  public final static int HUD = 1 << 8;
+  public final static int CAMERA = 1 << 2;
+  public final static int BULLSEYE = 1 << 3;
+  public final static int IMR = 1 << 4;
+  public final static int RMR = 1 << 5;
+  public final static int HIGHLIGHT = 1 << 6;
+  public final static int FRUSTUM = 1 << 7;
+  public final static int TORUS = 1 << 8;
   public final static int CONSTRAINT = 1 << 9;
   public final static int BONE = 1 << 10;
-  // */
   protected float _highlight;
   protected int _bullStroke;
   protected float _axesLength;
