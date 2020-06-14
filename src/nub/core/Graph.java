@@ -16,6 +16,8 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
+import processing.core.PApplet;
+import processing.core.PGraphics;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -3227,9 +3229,12 @@ public class Graph {
     matrixHandler.applyTransformation(node);
     node.visit();
     if (!node.isCulled()) {
-      // TODO missed
-      //if (node._bypass != TimingHandler.frameCount)
-      //nub.processing.Scene._draw(context, node);
+      if (node._bypass != TimingHandler.frameCount) {
+        MatrixHandler.drawRMRHint(context, node);
+        MatrixHandler.drawIMRHint(context, node);
+        // TODO test
+        MatrixHandler.drawFrustumHint(context, node);
+      }
       for (Node child : node.children())
         _render(matrixHandler, context, child);
     }
@@ -3238,10 +3243,24 @@ public class Graph {
 
   /**
    * Renders the node onto the front buffer. Used by the rendering algorithms.
-   * <p>
-   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
   protected void _drawFrontBuffer(Node node) {
+    if (isTagged(node)) {
+      if (node.isHintEnable(Node.HIGHLIGHT)) {
+        float scl = 1 + node.highlighting();
+        if (is2D())
+          _matrixHandler.scale(scl, scl);
+        else
+          _matrixHandler.scale(scl, scl, scl);
+      }
+    }
+    MatrixHandler.drawRMRHint(context(), node);
+    MatrixHandler.drawIMRHint(context(), node);
+    MatrixHandler.drawTorusHint(context(), node);
+    // condition is not strictly necessary but made more robust
+    if (node.frustumGraph() != this) {
+      MatrixHandler.drawFrustumHint(context(), node);
+    }
   }
 
   /**

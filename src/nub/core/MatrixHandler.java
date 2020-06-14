@@ -12,6 +12,7 @@
 package nub.core;
 
 import nub.primitives.Matrix;
+import nub.processing.Scene;
 
 /**
  * The matrix handler specifies (and implements) various matrix operations needed by the
@@ -46,6 +47,60 @@ public class MatrixHandler {
       else
         throw new RuntimeException("Only OpenGL renderers are currently supported");
     return new MatrixHandler();
+  }
+
+  public static void drawRMRHint(Object context, Node node) {
+    if (!node.isHintEnable(Node.RMR))
+      return;
+    if (!(context instanceof processing.core.PGraphics))
+      throw new RuntimeException("Drawing the node RMR hint require a PGraphics context");
+    processing.core.PGraphics pg = (processing.core.PGraphics) context;
+    pg.push();
+    if (node.rmrShape() != null) {
+      pg.shapeMode(pg.shapeMode);
+      pg.shape(node.rmrShape());
+    }
+    pg.pop();
+  }
+
+  public static void drawIMRHint(Object context, Node node) {
+    if (!node.isHintEnable(Node.IMR))
+      return;
+    if (!(context instanceof processing.core.PGraphics))
+      throw new RuntimeException("Drawing the node IMR hint require a PGraphics context");
+    processing.core.PGraphics pg = (processing.core.PGraphics) context;
+    pg.push();
+    if (node.imrShape() != null)
+      node.drawIMRShape(pg);
+    pg.pop();
+  }
+
+  public static void drawFrustumHint(Object context, Node node) {
+    if (!node.isHintEnable(Node.FRUSTUM))
+      return;
+    if (node.frustumGraph() != null) {
+      if (!(context instanceof processing.core.PGraphics))
+        throw new RuntimeException("Drawing the node FRUSTUM hint require a PGraphics context");
+      processing.core.PGraphics pg = (processing.core.PGraphics) context;
+      pg.push();
+      pg.colorMode(processing.core.PApplet.RGB, 255);
+      pg.fill(node.frustumColor());
+      Scene.drawFrustum(pg, node.frustumGraph());
+      pg.pop();
+    }
+  }
+
+  public static void drawTorusHint(Object context, Node node) {
+    if (!node.isHintEnable(Node.TORUS))
+      return;
+    if (!(context instanceof processing.core.PGraphics))
+      throw new RuntimeException("Drawing the node TORUS hint require a PGraphics context");
+    processing.core.PGraphics pg = (processing.core.PGraphics) context;
+    pg.push();
+    pg.colorMode(processing.core.PApplet.RGB, 255);
+    pg.fill(node.torusColor());
+    Scene.drawTorusSolenoid(pg, node.torusFaces(), 5);
+    pg.pop();
   }
 
   // 1. May be overridden

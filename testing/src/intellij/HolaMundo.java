@@ -27,7 +27,7 @@ public class HolaMundo extends PApplet {
 
   @Override
   public void settings() {
-    size(1400, 1200, P3D);
+    size(800, 600, P3D);
   }
 
   @Override

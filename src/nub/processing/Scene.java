@@ -16,6 +16,7 @@ package nub.processing;
 
 import nub.core.Graph;
 import nub.core.Interpolator;
+import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
@@ -913,35 +914,8 @@ public class Scene extends Graph implements PConstants {
 
   @Override
   protected void _drawFrontBuffer(Node node) {
+    super._drawFrontBuffer(node);
     PGraphics pGraphics = context();
-    pGraphics.pushStyle();
-    pGraphics.pushMatrix();
-    if (isTagged(node)) {
-      if (node.isHintEnable(Node.HIGHLIGHT))
-        pGraphics.scale(1 + node.highlighting());
-    }
-    if (node.isHintEnable(Node.RMR) && node.rmrShape() != null) {
-      pGraphics.shapeMode(context().shapeMode);
-      pGraphics.shape(node.rmrShape());
-    }
-    if (node.isHintEnable(Node.IMR) && node.imrShape() != null) {
-      node.drawIMRShape(pGraphics);
-    }
-    // 2nd conditions is not strictly necessary but made more robust
-    if (node.isHintEnable(Node.FRUSTUM) && (node.frustumGraph() != null && node.frustumGraph() != this)) {
-      pGraphics.pushStyle();
-      pGraphics.colorMode(PApplet.RGB, 255);
-      pGraphics.fill(node.frustumColor());
-      drawFrustum(pGraphics, node.frustumGraph());
-      pGraphics.popStyle();
-    }
-    if (node.isHintEnable(Node.TORUS)) {
-      pGraphics.pushStyle();
-      pGraphics.colorMode(PApplet.RGB, 255);
-      pGraphics.fill(node.torusColor());
-      drawTorusSolenoid(pGraphics, node.torusFaces(), 5);
-      pGraphics.popStyle();
-    }
     if (node.isHintEnable(Node.AXES)) {
       drawAxes(node.axesLength() == 0 ? radius() / 5 : node.axesLength());
     }
@@ -961,8 +935,6 @@ public class Scene extends Graph implements PConstants {
     }
     if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && node.isTaggingEnabled())
       _bbNeed = frameCount();
-    pGraphics.popStyle();
-    pGraphics.popMatrix();
   }
 
   @Override
