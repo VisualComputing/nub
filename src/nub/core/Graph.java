@@ -2826,9 +2826,7 @@ public class Graph {
   /**
    * Internal use. Traverse the scene {@link #nodes()}) into the
    * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
-   * <p>
-   * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
-   * scenes).
+   * Use it as a {@code _postDraw()}.
    */
   protected void _renderBackBuffer() {
     if (_bb != null && _bbCount < _bbNeed) {
@@ -3271,9 +3269,7 @@ public class Graph {
     MatrixHandler._draw(context(), node);
   }
 
-  protected void _initBackBufferShader(float r, float g, float b) {
-
-  }
+  protected void _emitBackBufferUniforms(float r, float g, float b) {}
 
   /**
    * Renders the node onto the back-buffer.
@@ -3292,7 +3288,7 @@ public class Graph {
         float r = (float) (node.id() & 255) / 255.f;
         float g = (float) ((node.id() >> 8) & 255) / 255.f;
         float b = (float) ((node.id() >> 16) & 255) / 255.f;
-        _initBackBufferShader(r, g, b);
+        _emitBackBufferUniforms(r, g, b);
         MatrixHandler._draw(_backBuffer(), node);
       }
   }

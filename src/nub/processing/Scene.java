@@ -905,7 +905,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  protected void _initBackBufferShader(float r, float g, float b) {
+  protected void _emitBackBufferUniforms(float r, float g, float b) {
     // TODO How to deal with these commands: breaks picking in Luxo when they're moved to the constructor
     // Seems related to: PassiveTransformations
     // funny, only safe way. Otherwise break things horribly when setting node shapes

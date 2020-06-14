@@ -13,8 +13,8 @@ import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 public class Luxo extends PApplet {
-  int w = 1200;
-  int h = 800;
+  int w = 800;
+  int h = 600;
 
   public void settings() {
     size(w, h, P3D);
@@ -81,6 +81,7 @@ public class Luxo extends PApplet {
       for (int i = 0; i < 4; ++i) {
         pieces[i] = new Piece();
         node(i).setReference(i > 0 ? pieces[i - 1] : null);
+        pieces[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
       }
 
       // Initialize nodes
