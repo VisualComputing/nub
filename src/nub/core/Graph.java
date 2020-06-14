@@ -16,8 +16,6 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
-import processing.core.PApplet;
-import processing.core.PGraphics;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -180,6 +178,8 @@ public class Graph {
   // 2. Matrix handler
   protected int _width, _height;
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
+  // _bb : picking buffer
+  protected long _bbNeed, _bbCount;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected boolean _isProjectionViewInverseCached;
 
@@ -393,9 +393,9 @@ public class Graph {
         System.out.println("Warning: all timing-tasks made non-concurrent");
     }
     _fb = front;
-    _matrixHandler = MatrixHandler.get(_fb);
+    _matrixHandler = MatrixHandler._get(_fb);
     _bb = back;
-    _bbMatrixHandler = _bb == null ? null : MatrixHandler.get(_bb);
+    _bbMatrixHandler = _bb == null ? null : MatrixHandler._get(_bb);
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
@@ -1035,7 +1035,7 @@ public class Graph {
    * @param height of {@code context}.
    */
   public static void beginHUD(Object context, int width, int height) {
-    MatrixHandler.get(context).beginHUD(width, height);
+    MatrixHandler._get(context).beginHUD(width, height);
   }
 
   /**
@@ -1061,7 +1061,7 @@ public class Graph {
    * @see MatrixHandler#endHUD()
    */
   public static void endHUD(Object context) {
-    MatrixHandler.get(context).endHUD();
+    MatrixHandler._get(context).endHUD();
   }
 
   // Eye stuff
@@ -2440,7 +2440,7 @@ public class Graph {
    * @see #applyWorldTransformation(Object, Node)
    */
   public static void applyTransformation(Object context, Node node) {
-    MatrixHandler.get(context).applyTransformation(node);
+    MatrixHandler._get(context).applyTransformation(node);
   }
 
   /**
@@ -2464,7 +2464,7 @@ public class Graph {
    * @see #applyWorldTransformation(Node)
    */
   public static void applyWorldTransformation(Object context, Node node) {
-    MatrixHandler.get(context).applyWorldTransformation(node);
+    MatrixHandler._get(context).applyWorldTransformation(node);
   }
 
   // Other stuff
@@ -2819,26 +2819,39 @@ public class Graph {
     return _bb;
   }
 
+  protected void _initBackBuffer() {}
+
+  protected void _endBackBuffer() {}
+
   /**
-   * Render the scene into the back-buffer used for picking.
+   * Internal use. Traverse the scene {@link #nodes()}) into the
+   * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
+   * <p>
+   * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
+   * scenes).
    */
   protected void _renderBackBuffer() {
-    _bbMatrixHandler.bind(projection(), view());
-    if (_subtree == null) {
-      for (Node node : _leadingNodes())
-        _renderBackBuffer(node);
-    } else {
-      if (_subtree.reference() != null) {
-        _bbMatrixHandler.pushMatrix();
-        _bbMatrixHandler.applyWorldTransformation(_subtree.reference());
+    if (_bb != null && _bbCount < _bbNeed) {
+      _initBackBuffer();
+      _bbMatrixHandler.bind(projection(), view());
+      if (_subtree == null) {
+        for (Node node : _leadingNodes())
+          _renderBackBuffer(node);
+      } else {
+        if (_subtree.reference() != null) {
+          _bbMatrixHandler.pushMatrix();
+          _bbMatrixHandler.applyWorldTransformation(_subtree.reference());
+        }
+        _renderBackBuffer(_subtree);
+        if (_subtree.reference() != null) {
+          _bbMatrixHandler.popMatrix();
+        }
       }
-      _renderBackBuffer(_subtree);
-      if (_subtree.reference() != null) {
-        _bbMatrixHandler.popMatrix();
-      }
+      if (isOffscreen())
+        _rays.clear();
+      _endBackBuffer();
+      _bbCount = _bbNeed;
     }
-    if (isOffscreen())
-      _rays.clear();
   }
 
   /**
@@ -3130,7 +3143,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Type type, Node subtree, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    _render(MatrixHandler.get(context), context, type, subtree, eye, width, height, zNear, zFar, leftHanded);
+    _render(MatrixHandler._get(context), context, type, subtree, eye, width, height, zNear, zFar, leftHanded);
   }
 
   /**
@@ -3198,7 +3211,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Node subtree, Matrix projection, Matrix view) {
-    _render(MatrixHandler.get(context), context, subtree, projection, view);
+    _render(MatrixHandler._get(context), context, subtree, projection, view);
   }
 
   /**
@@ -3230,10 +3243,7 @@ public class Graph {
     node.visit();
     if (!node.isCulled()) {
       if (node._bypass != TimingHandler.frameCount) {
-        MatrixHandler.drawRMRHint(context, node);
-        MatrixHandler.drawIMRHint(context, node);
-        // TODO test
-        MatrixHandler.drawFrustumHint(context, node);
+        MatrixHandler._draw(context, node);
       }
       for (Node child : node.children())
         _render(matrixHandler, context, child);
@@ -3245,28 +3255,28 @@ public class Graph {
    * Renders the node onto the front buffer. Used by the rendering algorithms.
    */
   protected void _drawFrontBuffer(Node node) {
+    if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && node.isTaggingEnabled())
+      if (node.isHintEnable(Node.RMR) || node.isHintEnable(Node.IMR) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM))
+        _bbNeed = frameCount();
     if (isTagged(node)) {
       if (node.isHintEnable(Node.HIGHLIGHT)) {
         float scl = 1 + node.highlighting();
+        // TODO 2d case needs testing
         if (is2D())
           _matrixHandler.scale(scl, scl);
         else
           _matrixHandler.scale(scl, scl, scl);
       }
     }
-    MatrixHandler.drawRMRHint(context(), node);
-    MatrixHandler.drawIMRHint(context(), node);
-    MatrixHandler.drawTorusHint(context(), node);
-    // condition is not strictly necessary but made more robust
-    if (node.frustumGraph() != this) {
-      MatrixHandler.drawFrustumHint(context(), node);
-    }
+    MatrixHandler._draw(context(), node);
+  }
+
+  protected void _initBackBufferShader(float r, float g, float b) {
+
   }
 
   /**
    * Renders the node onto the back-buffer.
-   * <p>
-   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    *
    * @see #render()
    * @see Node#cull(boolean)
@@ -3277,6 +3287,14 @@ public class Graph {
    * @see Node#setRMRShape(processing.core.PShape)
    */
   protected void _drawBackBuffer(Node node) {
+    if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && node.isTaggingEnabled())
+      if (node.isHintEnable(Node.RMR) || node.isHintEnable(Node.IMR) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM)) {
+        float r = (float) (node.id() & 255) / 255.f;
+        float g = (float) ((node.id() >> 8) & 255) / 255.f;
+        float b = (float) ((node.id() >> 16) & 255) / 255.f;
+        _initBackBufferShader(r, g, b);
+        MatrixHandler._draw(_backBuffer(), node);
+      }
   }
 
   /**

@@ -40,7 +40,7 @@ public class MatrixHandler {
   /**
    * Returns a {@code MatrixHandler} instance according to the default target renderer context.
    */
-  public static MatrixHandler get(Object context) {
+  protected static MatrixHandler _get(Object context) {
     if (context instanceof processing.core.PGraphics)
       if (context instanceof processing.opengl.PGraphicsOpenGL)
         return new GLMatrixHandler((processing.opengl.PGraphicsOpenGL) context);
@@ -49,7 +49,14 @@ public class MatrixHandler {
     return new MatrixHandler();
   }
 
-  public static void drawRMRHint(Object context, Node node) {
+  protected static void _draw(Object context, Node node) {
+    _drawRMRHint(context, node);
+    _drawIMRHint(context, node);
+    _drawTorusHint(context, node);
+    _drawFrustumHint(context, node);
+  }
+
+  protected static void _drawRMRHint(Object context, Node node) {
     if (!node.isHintEnable(Node.RMR))
       return;
     if (!(context instanceof processing.core.PGraphics))
@@ -63,7 +70,7 @@ public class MatrixHandler {
     pg.pop();
   }
 
-  public static void drawIMRHint(Object context, Node node) {
+  protected static void _drawIMRHint(Object context, Node node) {
     if (!node.isHintEnable(Node.IMR))
       return;
     if (!(context instanceof processing.core.PGraphics))
@@ -75,7 +82,7 @@ public class MatrixHandler {
     pg.pop();
   }
 
-  public static void drawFrustumHint(Object context, Node node) {
+  protected static void _drawFrustumHint(Object context, Node node) {
     if (!node.isHintEnable(Node.FRUSTUM))
       return;
     if (node.frustumGraph() != null) {
@@ -90,7 +97,7 @@ public class MatrixHandler {
     }
   }
 
-  public static void drawTorusHint(Object context, Node node) {
+  protected static void _drawTorusHint(Object context, Node node) {
     if (!node.isHintEnable(Node.TORUS))
       return;
     if (!(context instanceof processing.core.PGraphics))

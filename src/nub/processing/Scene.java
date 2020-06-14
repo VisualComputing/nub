@@ -125,7 +125,6 @@ public class Scene extends Graph implements PConstants {
   protected int _beginOffScreenDrawingCalls;
 
   // _bb : picking buffer
-  protected long _bbNeed, _bbCount;
   protected PShader _triangleShader, _lineShader, _pointShader;
 
   // mouse speed
@@ -891,25 +890,32 @@ public class Scene extends Graph implements PConstants {
     return (PGraphics) _bb;
   }
 
-  /**
-   * Internal use. Traverse the scene {@link #nodes()}) into the
-   * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
-   * <p>
-   * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
-   * scenes).
-   */
   @Override
-  protected void _renderBackBuffer() {
-    if (_bb != null && _bbCount < _bbNeed) {
-      _backBuffer().beginDraw();
-      _backBuffer().pushStyle();
-      _backBuffer().background(0);
-      super._renderBackBuffer();
-      _backBuffer().popStyle();
-      _backBuffer().endDraw();
-      _backBuffer().loadPixels();
-      _bbCount = _bbNeed;
-    }
+  protected void _initBackBuffer() {
+    _backBuffer().beginDraw();
+    _backBuffer().pushStyle();
+    _backBuffer().background(0);
+  }
+
+  @Override
+  protected void _endBackBuffer() {
+    _backBuffer().popStyle();
+    _backBuffer().endDraw();
+    _backBuffer().loadPixels();
+  }
+
+  @Override
+  protected void _initBackBufferShader(float r, float g, float b) {
+    // TODO How to deal with these commands: breaks picking in Luxo when they're moved to the constructor
+    // Seems related to: PassiveTransformations
+    // funny, only safe way. Otherwise break things horribly when setting node shapes
+    // and there are more than one node holding a shape
+    _backBuffer().shader(_triangleShader);
+    _backBuffer().shader(_lineShader, PApplet.LINES);
+    _backBuffer().shader(_pointShader, PApplet.POINTS);
+    _triangleShader.set("id", new PVector(r, g, b));
+    _lineShader.set("id", new PVector(r, g, b));
+    _pointShader.set("id", new PVector(r, g, b));
   }
 
   @Override
@@ -932,46 +938,6 @@ public class Scene extends Graph implements PConstants {
       pGraphics.stroke(node.cameraStroke());
       _drawEye(node.cameraLength() == 0 ? radius() : node.cameraLength());
       pGraphics.popStyle();
-    }
-    if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && node.isTaggingEnabled())
-      _bbNeed = frameCount();
-  }
-
-  @Override
-  protected void _drawBackBuffer(Node node) {
-    PGraphics pGraphics = _backBuffer();
-    if (node.pickingPolicy() == Node.PickingPolicy.PRECISE) {
-      pGraphics.pushStyle();
-      pGraphics.pushMatrix();
-      float r = (float) (node.id() & 255) / 255.f;
-      float g = (float) ((node.id() >> 8) & 255) / 255.f;
-      float b = (float) ((node.id() >> 16) & 255) / 255.f;
-      // TODO How to deal with these commands: breaks picking in Luxo when they're moved to the constructor
-      // Seems related to: PassiveTransformations
-      // funny, only safe way. Otherwise break things horribly when setting node shapes
-      // and there are more than one node holding a shape
-      pGraphics.shader(_triangleShader);
-      pGraphics.shader(_lineShader, PApplet.LINES);
-      pGraphics.shader(_pointShader, PApplet.POINTS);
-      _triangleShader.set("id", new PVector(r, g, b));
-      _lineShader.set("id", new PVector(r, g, b));
-      _pointShader.set("id", new PVector(r, g, b));
-      if (node.isHintEnable(Node.RMR) && node.rmrShape() != null) {
-        pGraphics.shapeMode(context().shapeMode);
-        pGraphics.shape(node.rmrShape());
-      }
-      if (node.isHintEnable(Node.IMR) && node.imrShape() != null) {
-        node.drawIMRShape(pGraphics);
-      }
-      // 2nd conditions is not strictly necessary but made more robust
-      if (node.isHintEnable(Node.FRUSTUM) && (node.frustumGraph() != null && node.frustumGraph() != this)) {
-        Scene.drawFrustum(pGraphics, node.frustumGraph());
-      }
-      if (node.isHintEnable(Node.TORUS)) {
-        drawTorusSolenoid(pGraphics, node.torusFaces(), 5);
-      }
-      pGraphics.popStyle();
-      pGraphics.popMatrix();
     }
   }
 
