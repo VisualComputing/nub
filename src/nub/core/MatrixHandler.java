@@ -91,6 +91,7 @@ public class MatrixHandler {
       processing.core.PGraphics pg = (processing.core.PGraphics) context;
       pg.push();
       pg.colorMode(processing.core.PApplet.RGB, 255);
+      pg.stroke(node.frustumColor());
       pg.fill(node.frustumColor());
       Scene.drawFrustum(pg, node.frustumGraph());
       pg.pop();

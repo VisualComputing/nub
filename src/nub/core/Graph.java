@@ -132,10 +132,11 @@ public class Graph {
   public static Random random = new Random();
   // Visual hints
   protected int _mask;
-  public final static int HUD = 1 << 0;
-  public final static int AXES = 1 << 1;
-  public final static int GRID = 1 << 2;
-  public final static int BACKGROUND = 1 << 3;
+  public final static int BACKGROUND = 1 << 0;
+  public final static int HUD = 1 << 1;
+  public final static int AXES = 1 << 2;
+  public final static int FRUSTUM = 1 << 3;
+  public final static int GRID = 1 << 4;
   public enum GridType {
     LINES, DOTS
   }
@@ -144,6 +145,8 @@ public class Graph {
   protected int _gridSubDiv;
   protected Object _background;
   protected static HashSet<Interpolator> _interpolators = new HashSet<Interpolator>();
+  protected int _frustumColor;
+  protected Graph _frustumGraph;
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
@@ -434,6 +437,8 @@ public class Graph {
     _gridType = GridType.DOTS;
     _gridSubDiv = 10;
     _background = -16777216;
+    // yellow (with alpha: color(255, 255, 0, 125)) encoded as a processing int rgb color
+    _frustumColor = 2113928960;
   }
 
   /**
@@ -4806,6 +4811,16 @@ public class Graph {
             return;
           }
         }
+        if (hint == FRUSTUM) {
+          if (isNumInstance(params[0])) {
+            _frustumColor = Graph.castToInt(params[0]);
+            return;
+          }
+          if (params[0] instanceof Graph) {
+            _frustumGraph = (Graph) params[0];
+            return;
+          }
+        }
         if (hint == BACKGROUND) {
           if (isNumInstance(params[0])) {
             _background = castToInt(params[0]);
@@ -4818,6 +4833,18 @@ public class Graph {
         }
         break;
       case 2:
+        if (hint == FRUSTUM) {
+          if (Graph.isNumInstance(params[0]) && params[1] instanceof Graph) {
+            _frustumColor = Graph.castToInt(params[0]);
+            _frustumGraph = (Graph) params[1];
+            return;
+          }
+          if (params[0] instanceof Graph && Graph.isNumInstance(params[1])) {
+            _frustumGraph = (Graph) params[0];
+            _frustumColor = Graph.castToInt(params[1]);
+            return;
+          }
+        }
         if (hint == GRID) {
           if (isNumInstance(params[0]) && isNumInstance(params[1])) {
             _gridStroke = castToInt(params[0]);

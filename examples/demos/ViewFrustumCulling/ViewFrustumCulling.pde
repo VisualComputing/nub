@@ -34,16 +34,17 @@ void settings() {
 void setup() {
   // main scene
   mainScene = new Scene(this, P3D, w, h /2);
+  mainScene.enableHint(Scene.BACKGROUND, color(255));
   mainScene.togglePerspective();
   mainScene.enableBoundaryEquations();
   mainScene.fit(1);
-
   // declare and build the octree hierarchy
   root = new OctreeNode();
   buildOctree(root);
-
   // secondary scene
   secondaryScene = new Scene(this, P3D, w, h / 2);
+  secondaryScene.enableHint(Scene.BACKGROUND, color(185));
+  secondaryScene.enableHint(Node.FRUSTUM, mainScene, color(255, 0, 255, 160));
   secondaryScene.togglePerspective();
   secondaryScene.setRadius(200);
   secondaryScene.fit();
@@ -57,9 +58,7 @@ void buildOctree(OctreeNode parent) {
 
 void draw() {
   focus = mainScene.hasMouseFocus() ? mainScene : secondaryScene;
-  background(255);
   mainScene.beginDraw();
-  mainScene.context().background(255);
   // culling condition should be retested every frame
   root.cull(false);
   bypass = false;
@@ -68,14 +67,7 @@ void draw() {
   mainScene.display();
   bypass = true;
   secondaryScene.beginDraw();
-  secondaryScene.context().background(185);
   secondaryScene.render();
-  secondaryScene.context().pushStyle();
-  secondaryScene.context().strokeWeight(2);
-  secondaryScene.context().stroke(255, 0, 255);
-  secondaryScene.context().fill(255, 0, 255, 160);
-  secondaryScene.drawFrustum(mainScene);
-  secondaryScene.context().popStyle();
   secondaryScene.endDraw();
   secondaryScene.display(0, h / 2);
 }

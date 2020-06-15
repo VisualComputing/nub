@@ -160,14 +160,14 @@ public class Node {
 
   // Visual hints
   protected int _mask;
+  public final static int CAMERA = 1 << 0;
   public final static int HUD = Graph.HUD;
   public final static int AXES = Graph.AXES;
-  public final static int CAMERA = 1 << 2;
-  public final static int BULLSEYE = 1 << 3;
-  public final static int IMR = 1 << 4;
-  public final static int RMR = 1 << 5;
-  public final static int HIGHLIGHT = 1 << 6;
-  public final static int FRUSTUM = 1 << 7;
+  public final static int FRUSTUM = Graph.FRUSTUM;
+  public final static int BULLSEYE = 1 << 4;
+  public final static int IMR = 1 << 5;
+  public final static int RMR = 1 << 6;
+  public final static int HIGHLIGHT = 1 << 7;
   public final static int TORUS = 1 << 8;
   public final static int CONSTRAINT = 1 << 9;
   public final static int BONE = 1 << 10;

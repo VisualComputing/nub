@@ -958,6 +958,14 @@ public class Scene extends Graph implements PConstants {
         drawGrid(radius(), _gridSubDiv);
       }
     }
+    if (isHintEnable(FRUSTUM) && _frustumGraph != null) {
+      context().push();
+      context().colorMode(processing.core.PApplet.RGB, 255);
+      context().stroke(_frustumColor);
+      context().fill(_frustumColor);
+      drawFrustum(_frustumGraph);
+      context().pop();
+    }
     for (Interpolator interpolator : _interpolators) {
       _drawSpline(interpolator);
     }
