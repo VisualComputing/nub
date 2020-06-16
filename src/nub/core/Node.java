@@ -161,8 +161,8 @@ public class Node {
   // Visual hints
   protected int _mask;
   public final static int CAMERA = 1 << 0;
-  public final static int HUD = Graph.HUD;
   public final static int AXES = Graph.AXES;
+  public final static int HUD = Graph.HUD;
   public final static int FRUSTUM = Graph.FRUSTUM;
   public final static int BULLSEYE = 1 << 4;
   public final static int IMR = 1 << 5;
@@ -2547,7 +2547,7 @@ public class Node {
    * Execs the node {@link #imrShape()} immediate mode rendering procedure on the
    * given {@code pGraphics} context.
    */
-  public void drawIMRShape(processing.core.PGraphics pGraphics) {
+  protected void _drawIMRShape(processing.core.PGraphics pGraphics) {
     if (_imrShape != null)
       _imrShape.accept(pGraphics);
   }

@@ -40,6 +40,12 @@ public class HolaMundo extends PApplet {
     mainScene.enableHint(Scene.AXES | Scene.GRID);
     mainScene.configHint(Scene.GRID, color(0, 255, 0));
     mainScene.enableHint(Graph.BACKGROUND);
+    mainScene.enableHint(Graph.HUD);
+    mainScene.setIMRHUD(this::hud);
+    PShape pshape = createShape(RECT, 300, 50, 200, 200);
+    pshape.setFill(color(255, 255, 0, 125));
+    mainScene.setRMRHUD(pshape);
+    //mainScene.setHUD(this::hud);
     //mainScene.configHint(Scene.GRID, Graph.GridType.LINE);
     // 2. Hint (offscreen) Scene
     hintScene = new Scene(this, P3D, hintSceneWidth, hintSceneHeight);
@@ -57,6 +63,11 @@ public class HolaMundo extends PApplet {
     pbox.setFill(color(255, 255, 0));
     box = new Node(pbox);
     box.translate(200, 200, 0);
+  }
+
+  public void hud(PGraphics pg) {
+    pg.fill(255, 0, 255, 125);
+    pg.rect(50,50, 200, 200);
   }
 
   @Override

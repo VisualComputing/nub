@@ -78,7 +78,7 @@ public class MatrixHandler {
     processing.core.PGraphics pg = (processing.core.PGraphics) context;
     pg.push();
     if (node.imrShape() != null)
-      node.drawIMRShape(pg);
+      node._drawIMRShape(pg);
     pg.pop();
   }
 

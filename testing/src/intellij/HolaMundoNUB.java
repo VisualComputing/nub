@@ -16,7 +16,7 @@ public class HolaMundoNUB extends PApplet {
   Scene mainScene;
   // 3. can off-screen scene
   Scene canScene;
-  int canSceneWidth = 500, canSceneHeight = 500;
+  int canSceneWidth = 300, canSceneHeight = 300;
   boolean displayCan;
   PShader texShader;
   // 4. Scene handler
@@ -24,7 +24,7 @@ public class HolaMundoNUB extends PApplet {
 
   @Override
   public void settings() {
-    size(1400, 1200, P3D);
+    size(800, 600, P3D);
   }
 
   @Override
@@ -36,12 +36,14 @@ public class HolaMundoNUB extends PApplet {
     mainScene.fit(1);
     mainScene.enableHint(Scene.AXES | Scene.GRID);
     mainScene.configHint(Scene.GRID, color(0, 255, 0));
+    mainScene.enableHint(Scene.HUD);
+    mainScene.setIMRHUD(this::hud);
     // 2. Can (offscreen) Scene
     canScene = new Scene(this, P3D, canSceneWidth, canSceneHeight);
     canScene.setRadius(300);
     canScene.fit();
-    texShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/texture/texfrag.glsl");
-    canScene.context().shader(texShader);
+    //texShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/texture/texfrag.glsl");
+    //canScene.context().shader(texShader);
     // B. Nodes
     // 1. root (mainScene and hintScene only)
     root = new Node();
@@ -72,6 +74,11 @@ public class HolaMundoNUB extends PApplet {
     pg.fill(255, 0, 0);
     Scene.drawTorusSolenoid(pg);
     pg.pop();
+  }
+
+  public void hud(PGraphics pg) {
+    pg.fill(255, 0, 255, 125);
+    pg.rect(50,50, 200, 200);
   }
 
   @Override

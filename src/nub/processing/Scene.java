@@ -16,7 +16,6 @@ package nub.processing;
 
 import nub.core.Graph;
 import nub.core.Interpolator;
-import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
@@ -943,11 +942,13 @@ public class Scene extends Graph implements PConstants {
 
   @Override
   protected void _displayHints() {
-    context().pushStyle();
     if (isHintEnable(AXES)) {
+      context().pushStyle();
       drawAxes();
+      context().popStyle();
     }
     if (isHintEnable(GRID)) {
+      context().pushStyle();
       context().colorMode(PApplet.RGB, 255);
       context().stroke(_gridStroke);
       if (_gridType == GridType.DOTS) {
@@ -957,19 +958,31 @@ public class Scene extends Graph implements PConstants {
         context().strokeWeight(1);
         drawGrid(radius(), _gridSubDiv);
       }
+      context().popStyle();
     }
     if (isHintEnable(FRUSTUM) && _frustumGraph != null) {
-      context().push();
-      context().colorMode(processing.core.PApplet.RGB, 255);
+      context().pushStyle();
+      context().colorMode(PApplet.RGB, 255);
       context().stroke(_frustumColor);
       context().fill(_frustumColor);
       drawFrustum(_frustumGraph);
-      context().pop();
+      context().popStyle();
+    }
+    if (isHintEnable(HUD) && (_imrHUD != null) || _rmrHUD != null) {
+      context().pushStyle();
+      beginHUD();
+      if(_imrHUD != null)
+        _imrHUD.accept(context());
+      if(_rmrHUD != null)
+        context().shape(_rmrHUD);
+      endHUD();
+      context().popStyle();
     }
     for (Interpolator interpolator : _interpolators) {
+      context().pushStyle();
       _drawSpline(interpolator);
+      context().popStyle();
     }
-    context().popStyle();
   }
 
   @Override

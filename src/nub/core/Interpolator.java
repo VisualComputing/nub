@@ -189,8 +189,8 @@ public class Interpolator {
   // Visual hint
   protected int _mask;
   public final static int CAMERA = Node.CAMERA;
-  public final static int SPLINE = 1 << 1;
-  public final static int AXES = Graph.AXES;
+  public final static int AXES = Node.AXES;
+  public final static int SPLINE = 1 << 2;
   protected float _axesLength;
   protected int _cameraStroke;
   protected float _cameraLength;

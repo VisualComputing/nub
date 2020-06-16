@@ -132,11 +132,13 @@ public class Graph {
   public static Random random = new Random();
   // Visual hints
   protected int _mask;
-  public final static int BACKGROUND = 1 << 0;
-  public final static int HUD = 1 << 1;
-  public final static int AXES = 1 << 2;
+  public final static int GRID = 1 << 0;
+  public final static int AXES = 1 << 1;
+  public final static int HUD = 1 << 2;
   public final static int FRUSTUM = 1 << 3;
-  public final static int GRID = 1 << 4;
+  public final static int BACKGROUND = 1 << 4;
+  protected Consumer<processing.core.PGraphics> _imrHUD;
+  protected processing.core.PShape _rmrHUD;
   public enum GridType {
     LINES, DOTS
   }
@@ -2893,8 +2895,10 @@ public class Graph {
    * @see #projection(Node, Type, float, float, float, float, boolean)
    * @see Node#view()
    */
+  // TODO remove this
   public void preDraw() {
     _preDraw();
+    // TODO never called this in predraw
     _displayHints();
   }
 
@@ -4883,5 +4887,28 @@ public class Graph {
     System.out.println("Warning: some params in Scene.configHint(hint, params) couldn't be parsed!");
   }
 
+  public void resetIMRHUD() {
+    setIMRHUD(null);
+  }
+
+  public void setIMRHUD(Consumer<processing.core.PGraphics> hud) {
+    _imrHUD = hud;
+  }
+
+  public Consumer<processing.core.PGraphics> imrHUD() {
+    return _imrHUD;
+  }
+
+  public void resetRMRHUD() {
+    setRMRHUD(null);
+  }
+
+  public void setRMRHUD(processing.core.PShape hud) {
+    _rmrHUD = hud;
+  }
+
+  public processing.core.PShape rmrHUD() {
+    return _rmrHUD;
+  }
   // TODO add visual hint getters as with Node and Interpolator
 }
