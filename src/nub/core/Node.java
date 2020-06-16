@@ -88,7 +88,7 @@ import java.util.function.Consumer;
  * Hierarchical traversals of the node hierarchy which automatically apply the local
  * node transformations described above may be achieved with {@link Graph#render()},
  * {@link Graph#render(Object)}, {@link Graph#render(Object, Matrix, Matrix)} and
- * {@link Graph#render(Object, Graph.Type, Node, int, int, float, float, boolean)}.
+ * {@link Graph#render(Object, Node, Graph.Type, int, int, float, float, boolean)}.
  * Customize the rendering traversal algorithm by overriding {@link #visit()} (see
  * also {@link #cull(boolean)} and {@link #bypass()}).
  * <h2>Constraints</h2>

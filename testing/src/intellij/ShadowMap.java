@@ -38,7 +38,7 @@ public class ShadowMap extends PApplet {
           if (scene.node("light") == this) {
             Scene.drawAxes(pg, 150);
             pg.fill(0, scene.hasTag(this) ? 255 : 0, 255, 120);
-            Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
+            Scene.drawFrustum(pg, shadowMap, this, shadowMapType, zNear, zFar);
           } else {
             if (pg == shadowMap)
               pg.noStroke();
@@ -75,7 +75,7 @@ public class ShadowMap extends PApplet {
     if (scene.node("light") != null) {
       shadowMap.beginDraw();
       shadowMap.background(140, 160, 125);
-      scene.render(shadowMap, shadowMapType, scene.node("light"), zNear, zFar);
+      scene.render(shadowMap, scene.node("light"), shadowMapType, zNear, zFar);
       shadowMap.endDraw();
       // 3. Display shadow map
       scene.beginHUD();

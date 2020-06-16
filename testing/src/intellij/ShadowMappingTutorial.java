@@ -77,7 +77,7 @@ public class ShadowMappingTutorial extends PApplet {
         pg.pushStyle();
         if (debug) {
           pg.fill(0, scene.hasTag(this) ? 255 : 0, 255, 120);
-          Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
+          Scene.drawFrustum(pg, shadowMap, this, shadowMapType, zNear, zFar);
         }
         Scene.drawAxes(pg, 300);
         pg.noStroke();
@@ -122,7 +122,7 @@ public class ShadowMappingTutorial extends PApplet {
     shadowMap.beginDraw();
     shadowMap.noStroke();
     shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
-    Scene.render(shadowMap, shadowMapType, light, zNear, zFar);
+    Scene.render(shadowMap, light, shadowMapType, zNear, zFar);
     shadowMap.endDraw();
 
     // 2. Render the scene from the scene.eye() node

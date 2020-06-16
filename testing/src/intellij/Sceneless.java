@@ -69,7 +69,7 @@ public class Sceneless extends PApplet {
   public void draw() {
     background(0);
     eye.orbit(new Vector(0, g.is3D() ? 1 : 0, g.is3D() ? 0 : 1), 0.01f);
-    Graph.render(g, type, eye, g.width, g.height, zNear, zFar, leftHanded);
+    Graph.render(g, eye, type, g.width, g.height, zNear, zFar, leftHanded);
   }
 
   public static void main(String args[]) {

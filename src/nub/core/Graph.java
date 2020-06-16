@@ -295,55 +295,55 @@ public class Graph {
   /**
    * Same as {@code this(Type.PERSPECTIVE, null, w, h)}.
    *
-   * @see #Graph(Object, Object, Type, Node, int, int)
+   * @see #Graph(Object, Object, Node, Type, int, int)
    */
   public Graph(Object context, int width, int height) {
-    this(context, null, Type.PERSPECTIVE, null, width, height);
+    this(context, null, null, Type.PERSPECTIVE, width, height);
   }
 
   /**
    * Same as {@code this(front, back, Type.PERSPECTIVE, null, width, height)}.
    *
-   * @see #Graph(Object, Object, Type, Node, int, int)
+   * @see #Graph(Object, Object, Node, Type, int, int)
    */
   protected Graph(Object front, Object back, int width, int height) {
-    this(front, back, Type.PERSPECTIVE, null, width, height);
+    this(front, back, null, Type.PERSPECTIVE, width, height);
   }
 
   /**
    * Same as {@code this(context, null, Type.PERSPECTIVE, eye, width, height)}.
    *
-   * @see #Graph(Object, Object, Type, Node, int, int)
+   * @see #Graph(Object, Object, Node, Type, int, int)
    */
   public Graph(Object context, Node eye, int width, int height) {
-    this(context, null, Type.PERSPECTIVE, eye, width, height);
+    this(context, null, eye, Type.PERSPECTIVE, width, height);
   }
 
   /**
    * Same as {@code this(front, back, Type.PERSPECTIVE, eye, width, height)}.
    *
-   * @see #Graph(Object, Object, Type, Node, int, int)
+   * @see #Graph(Object, Object, Node, Type, int, int)
    */
   protected Graph(Object front, Object back, Node eye, int width, int height) {
-    this(front, back, Type.PERSPECTIVE, eye, width, height);
+    this(front, back, eye, Type.PERSPECTIVE, width, height);
   }
 
   /**
    * Same as {@code this(context, null, type, null, width, height)}.
    *
-   * @see #Graph(Object, Object, Type, Node, int, int)
+   * @see #Graph(Object, Object, Node, Type, int, int)
    */
   public Graph(Object context, Type type, int width, int height) {
-    this(context, null, type, null, width, height);
+    this(context, null, null, type, width, height);
   }
 
   /**
    * Same as {@code this(front, back, type, null, width, height)}.
    *
-   * @see #Graph(Object, Object, Type, Node, int, int)
+   * @see #Graph(Object, Object, Node, Type, int, int)
    */
   protected Graph(Object front, Object back, Type type, int width, int height) {
-    this(front, back, type, null, width, height);
+    this(front, back, null, type, width, height);
   }
 
   /**
@@ -362,10 +362,10 @@ public class Graph {
    * @see #timingHandler()
    * @see #setRightHanded()
    * @see #setEye(Node)
-   * @see #Graph(Object, Object, Type, Node, int, int)
+   * @see #Graph(Object, Object, Node, Type, int, int)
    */
-  public Graph(Object context, Type type, Node eye, int width, int height) {
-    this(context, null, type, eye, width, height);
+  public Graph(Object context, Node eye, Type type, int width, int height) {
+    this(context, null, eye, type, width, height);
   }
 
   /**
@@ -383,7 +383,7 @@ public class Graph {
    * @see #setRightHanded()
    * @see #setEye(Node)
    */
-  protected Graph(Object front, Object back, Type type, Node eye, int width, int height) {
+  protected Graph(Object front, Object back, Node eye, Type type, int width, int height) {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
@@ -3059,12 +3059,12 @@ public class Graph {
    * @see #render(Node)
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(Object, Node, Type, int, int, float, float, boolean)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
    * @see Node#bypass()
-   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(Consumer)
    * @see Node#setShape(processing.core.PShape)
    */
   public void render() {
@@ -3078,12 +3078,12 @@ public class Graph {
    *
    * @see #render(Object, Node)
    * @see #render(Object, Node, Matrix, Matrix)
-   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
+   * @see #render(Object, Node, Node, Type, int, int, float, float, boolean)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
    * @see Node#bypass()
-   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(Consumer)
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
@@ -3128,15 +3128,15 @@ public class Graph {
    * Renders the node tree onto context from the {@code eye} viewpoint with the given frustum parameters.
    * Same as {@code render(context, type, null, eye, width, height, zNear, zFar, leftHanded)}.
    *
-   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
+   * @see #render(Object, Node, Node, Type, int, int, float, float, boolean)
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
-   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */
-  public static void render(Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    render(context, type, null, eye, width, height, zNear, zFar, leftHanded);
+  public static void render(Object context, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded) {
+    render(context, null, eye, type, width, height, zNear, zFar, leftHanded);
   }
 
   /**
@@ -3146,17 +3146,17 @@ public class Graph {
    * @see #render(Node)
    * @see #render(Object, Node)
    * @see #render(Object, Node, Matrix, Matrix)
-   * @see Node#graphics(processing.core.PGraphics)
+   * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */
-  public static void render(Object context, Type type, Node subtree, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    _render(MatrixHandler._get(context), context, type, subtree, eye, width, height, zNear, zFar, leftHanded);
+  public static void render(Object context, Node subtree, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded) {
+    _render(MatrixHandler._get(context), context, subtree, eye, type, width, height, zNear, zFar, leftHanded);
   }
 
   /**
-   * used by {@link #render(Object, Type, Node, int, int, float, float, boolean)}.
+   * used by {@link #render(Object, Node, Type, int, int, float, float, boolean)}.
    */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Type type, Node subtree, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
+  protected static void _render(MatrixHandler matrixHandler, Object context, Node subtree, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded) {
     _render(matrixHandler, context, subtree, projection(eye, type, width, height, zNear, zFar, leftHanded), eye.view());
   }
 
@@ -3167,8 +3167,8 @@ public class Graph {
    * @see #render(Object, Node)
    * @see #render()
    * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see Node#graphics(processing.core.PGraphics)
+   * @see #render(Object, Node, Type, int, int, float, float, boolean)
+   * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Object context) {
@@ -3181,8 +3181,8 @@ public class Graph {
    *
    * @see #render(Node)
    * @see #render(Object, Node, Matrix, Matrix)
-   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
-   * @see Node#graphics(processing.core.PGraphics)
+   * @see #render(Object, Node, Node, Type, int, int, float, float, boolean)
+   * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Object context, Node subtree) {
@@ -3199,8 +3199,8 @@ public class Graph {
    * @see #render(Object, Node, Matrix, Matrix)
    * @see #render()
    * @see #render(Object)
-   * @see #render(Object, Type, Node, int, int, float, float, boolean)
-   * @see Node#graphics(processing.core.PGraphics)
+   * @see #render(Object, Node, Type, int, int, float, float, boolean)
+   * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Matrix projection, Matrix view) {
@@ -3213,8 +3213,8 @@ public class Graph {
    *
    * @see #render(Node)
    * @see #render(Object, Node)
-   * @see #render(Object, Type, Node, Node, int, int, float, float, boolean)
-   * @see Node#graphics(processing.core.PGraphics)
+   * @see #render(Object, Node, Node, Type, int, int, float, float, boolean)
+   * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */
   public static void render(Object context, Node subtree, Matrix projection, Matrix view) {
@@ -3544,6 +3544,12 @@ public class Graph {
         _map(vector.z(), 0, 1, -1, 1));
   }
 
+  /*
+  // goal:
+  public Vector screenLocation(Object context, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded)
+  public Vector _screenLocation(MatrixHandler matrixHandler, Object context, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded)
+   */
+
   /**
    * Converts the {@code node} origin location to screen space.
    * Same as {@code return screenLocation(new Vector(), node)}.
@@ -3580,20 +3586,23 @@ public class Graph {
    * @see #location(Vector)
    */
   public Vector screenLocation(Vector vector, Node node) {
-    float[] xyz = new float[3];
+    Vector screen;
     if (node != null) {
       Vector tmp = node.worldLocation(vector);
-      _screenLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
-    } else
-      _screenLocation(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
-    return new Vector(xyz[0], xyz[1], xyz[2]);
+      screen = _screenLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2]);
+    } else {
+      screen = _screenLocation(vector._vector[0], vector._vector[1], vector._vector[2]);
+    }
+    return screen;
   }
 
   // TODO key to rendering make this one available on an arbitrary context
-  // returned value should be windowCoordinate
   // cached version
-  protected boolean _screenLocation(float objx, float objy, float objz, float[] windowCoordinate) {
-    Matrix projectionViewMatrix = projectionView();
+  protected Vector _screenLocation(float objx, float objy, float objz) {
+    return _screenLocation(objx, objy, objz, projectionView(), width(), height());
+  }
+
+  protected Vector _screenLocation(float objx, float objy, float objz, Matrix projectionViewMatrix, int width, int height) {
     float[] in = new float[4];
     float[] out = new float[4];
     in[0] = objx;
@@ -3601,20 +3610,20 @@ public class Graph {
     in[2] = objz;
     in[3] = 1.0f;
     out[0] = projectionViewMatrix._matrix[0] * in[0] + projectionViewMatrix._matrix[4] * in[1] + projectionViewMatrix._matrix[8] * in[2]
-        + projectionViewMatrix._matrix[12] * in[3];
+            + projectionViewMatrix._matrix[12] * in[3];
     out[1] = projectionViewMatrix._matrix[1] * in[0] + projectionViewMatrix._matrix[5] * in[1] + projectionViewMatrix._matrix[9] * in[2]
-        + projectionViewMatrix._matrix[13] * in[3];
+            + projectionViewMatrix._matrix[13] * in[3];
     out[2] = projectionViewMatrix._matrix[2] * in[0] + projectionViewMatrix._matrix[6] * in[1] + projectionViewMatrix._matrix[10] * in[2]
-        + projectionViewMatrix._matrix[14] * in[3];
+            + projectionViewMatrix._matrix[14] * in[3];
     out[3] = projectionViewMatrix._matrix[3] * in[0] + projectionViewMatrix._matrix[7] * in[1] + projectionViewMatrix._matrix[11] * in[2]
-        + projectionViewMatrix._matrix[15] * in[3];
+            + projectionViewMatrix._matrix[15] * in[3];
     if (out[3] == 0.0)
-      return false;
+      return null;
     int[] viewport = new int[4];
     viewport[0] = 0;
-    viewport[1] = height();
-    viewport[2] = width();
-    viewport[3] = -height();
+    viewport[1] = height;
+    viewport[2] = width;
+    viewport[3] = -height;
     // ndc, but y is inverted
     out[0] /= out[3];
     out[1] /= out[3];
@@ -3626,10 +3635,7 @@ public class Graph {
     // Map x,y to viewport
     out[0] = out[0] * viewport[2] + viewport[0];
     out[1] = out[1] * viewport[3] + viewport[1];
-    windowCoordinate[0] = out[0];
-    windowCoordinate[1] = out[1];
-    windowCoordinate[2] = out[2];
-    return true;
+    return new Vector(out[0], out[1], out[2]);
   }
 
   /**
@@ -3674,12 +3680,11 @@ public class Graph {
    * @see #setHeight(int)
    */
   public Vector location(Vector pixel, Node node) {
-    float[] xyz = new float[3];
-    _location(pixel._vector[0], pixel._vector[1], pixel._vector[2], xyz);
+    Vector worldLocation = _location(pixel._vector[0], pixel._vector[1], pixel._vector[2]);
     if (node != null)
-      return node.location(new Vector(xyz[0], xyz[1], xyz[2]));
+      return node.location(worldLocation);
     else
-      return new Vector(xyz[0], xyz[1], xyz[2]);
+      return worldLocation;
   }
 
   /**
@@ -3688,10 +3693,13 @@ public class Graph {
    * @param winx          Specify the window x coordinate.
    * @param winy          Specify the window y coordinate.
    * @param winz          Specify the window z coordinate.
-   * @param objCoordinate Return the computed object coordinates.
    */
   // TODO objCoordinate
-  protected boolean _location(float winx, float winy, float winz, float[] objCoordinate) {
+  // note that static version taking the cache matrix as a param
+  // allows to implement a different cache idea:
+  // i) Always cache the conxtext() inverse
+  // ii) Move cache to user-space for other contexts
+  protected Vector _location(float winx, float winy, float winz) {
     Matrix projectionViewInverseMatrix;
     if (isProjectionViewInverseCached())
       projectionViewInverseMatrix = projectionViewInverse();
@@ -3719,14 +3727,11 @@ public class Graph {
     in[2] = in[2] * 2 - 1;
     projectionViewInverseMatrix.multiply(in, out);
     if (out[3] == 0)
-      return false;
+      return null;
     out[0] /= out[3];
     out[1] /= out[3];
     out[2] /= out[3];
-    objCoordinate[0] = out[0];
-    objCoordinate[1] = out[1];
-    objCoordinate[2] = out[2];
-    return true;
+    return new Vector(out[0], out[1], out[2]);
   }
 
   /**
