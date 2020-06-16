@@ -4887,28 +4887,24 @@ public class Graph {
     System.out.println("Warning: some params in Scene.configHint(hint, params) couldn't be parsed!");
   }
 
-  public void resetIMRHUD() {
-    setIMRHUD(null);
-  }
-
-  public void setIMRHUD(Consumer<processing.core.PGraphics> hud) {
-    _imrHUD = hud;
-  }
-
-  public Consumer<processing.core.PGraphics> imrHUD() {
-    return _imrHUD;
-  }
-
-  public void resetRMRHUD() {
-    setRMRHUD(null);
-  }
-
-  public void setRMRHUD(processing.core.PShape hud) {
+  public void setHUD(processing.core.PShape hud) {
     _rmrHUD = hud;
   }
 
-  public processing.core.PShape rmrHUD() {
-    return _rmrHUD;
+  public void setHUD(Consumer<processing.core.PGraphics> hud) {
+    _imrHUD = hud;
   }
-  // TODO add visual hint getters as with Node and Interpolator
+
+  public void resetHUD() {
+    _imrHUD = null;
+    _rmrHUD = null;
+  }
+
+  public void resetIMRHUD() {
+    _imrHUD = null;
+  }
+
+  public void resetRMRHUD() {
+    _rmrHUD = null;
+  }
 }

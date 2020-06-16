@@ -37,7 +37,7 @@ public class HolaMundoNUB extends PApplet {
     mainScene.enableHint(Scene.AXES | Scene.GRID);
     mainScene.configHint(Scene.GRID, color(0, 255, 0));
     mainScene.enableHint(Scene.HUD);
-    mainScene.setIMRHUD(this::hud);
+    mainScene.setHUD(this::hud);
     // 2. Can (offscreen) Scene
     canScene = new Scene(this, P3D, canSceneWidth, canSceneHeight);
     canScene.setRadius(300);
