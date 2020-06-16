@@ -76,8 +76,8 @@ import java.util.function.Consumer;
  * static ones), such as {@link #beginHUD()},
  * {@link #endHUD()}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(float, float, float)} and {@link #drawGrid(PGraphics)}
- * among others, can be used to set a {@link Node#setRMRShape(PShape)} (see
- * also {@link Node#setIMRShape(Consumer)}).
+ * among others, can be used to set a {@link Node#setShape(PShape)} (see
+ * also {@link Node#setShape(Consumer)}).
  * <p>
  * Another scene's eye (different than the graph {@link Graph#eye()}) can be drawn with
  * {@link #drawFrustum(Graph)}. Typical usage include interactive minimaps and
@@ -919,6 +919,8 @@ public class Scene extends Graph implements PConstants {
 
   @Override
   protected void _drawFrontBuffer(Node node) {
+    // TODO: should go in Graph, which requires making static
+    // (draw on an arbitrary context)
     super._drawFrontBuffer(node);
     PGraphics pGraphics = context();
     if (node.isHintEnable(Node.AXES)) {
@@ -928,6 +930,8 @@ public class Scene extends Graph implements PConstants {
       pGraphics.pushStyle();
       pGraphics.colorMode(PApplet.RGB, 255);
       pGraphics.stroke(node._bullsEyeStroke);
+      // TODO above key tough line is the one below
+      // which requires making _screenLocation available on an arbitrary context
       _drawBullsEye(node);
       pGraphics.popStyle();
     }

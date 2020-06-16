@@ -3288,8 +3288,8 @@ public class Graph {
    * @see Node#isCulled()
    * @see Node#bypass()
    * @see Node#visit()
-   * @see Node#setIMRShape(Consumer)
-   * @see Node#setRMRShape(processing.core.PShape)
+   * @see Node#setShape(Consumer)
+   * @see Node#setShape(processing.core.PShape)
    */
   protected void _drawBackBuffer(Node node) {
     if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && node.isTaggingEnabled())
@@ -3589,6 +3589,8 @@ public class Graph {
     return new Vector(xyz[0], xyz[1], xyz[2]);
   }
 
+  // TODO key to rendering make this one available on an arbitrary context
+  // returned value should be windowCoordinate
   // cached version
   protected boolean _screenLocation(float objx, float objy, float objz, float[] windowCoordinate) {
     Matrix projectionViewMatrix = projectionView();
@@ -3688,6 +3690,7 @@ public class Graph {
    * @param winz          Specify the window z coordinate.
    * @param objCoordinate Return the computed object coordinates.
    */
+  // TODO objCoordinate
   protected boolean _location(float winx, float winy, float winz, float[] objCoordinate) {
     Matrix projectionViewInverseMatrix;
     if (isProjectionViewInverseCached())
