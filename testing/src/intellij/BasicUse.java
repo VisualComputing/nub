@@ -86,18 +86,16 @@ public class BasicUse extends PApplet {
     if (key == '3')
       node.toggleHint(Node.BULLSEYE);
     if (key == '4')
-      node.toggleHint(Node.IMR);
+      node.toggleHint(Node.SHAPE);
     if (key == '5')
-      node.toggleHint(Node.RMR);
-    if (key == '6')
       node.toggleHint(Node.HIGHLIGHT);
-    if (key == '7')
+    if (key == '6')
       node.toggleHint(Node.FRUSTUM);
-    if (key == '8')
+    if (key == '7')
       node.toggleHint(Node.TORUS);
-    if (key == '9')
+    if (key == '8')
       node.toggleHint(Node.CONSTRAINT);
-    if (key == 'q')
+    if (key == '9')
       node.toggleHint(Node.BONE);
     if (key == '0')
       node.toggleHint();
@@ -122,10 +120,8 @@ public class BasicUse extends PApplet {
         println("Node.CAMERA");
       if (node.isHintEnable(Node.BULLSEYE))
         println("Node.BULLS_EYE");
-      if (node.isHintEnable(Node.IMR))
-        println("Node.IMR");
-      if (node.isHintEnable(Node.RMR))
-        println("Node.RMR");
+      if (node.isHintEnable(Node.SHAPE))
+        println("Node.SHAPE");
       if (node.isHintEnable(Node.HIGHLIGHT))
         println("Node.HIGHLIGHT");
       if (node.isHintEnable(Node.FRUSTUM))

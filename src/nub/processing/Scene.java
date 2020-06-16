@@ -922,20 +922,20 @@ public class Scene extends Graph implements PConstants {
     super._drawFrontBuffer(node);
     PGraphics pGraphics = context();
     if (node.isHintEnable(Node.AXES)) {
-      drawAxes(node.axesLength() == 0 ? radius() / 5 : node.axesLength());
+      drawAxes(node._axesLength == 0 ? radius() / 5 : node._axesLength);
     }
     if (node.isHintEnable(Node.BULLSEYE)) {
       pGraphics.pushStyle();
       pGraphics.colorMode(PApplet.RGB, 255);
-      pGraphics.stroke(node.bullsEyeStroke());
+      pGraphics.stroke(node._bullsEyeStroke);
       _drawBullsEye(node);
       pGraphics.popStyle();
     }
     if (node.isHintEnable(Node.CAMERA)) {
       pGraphics.pushStyle();
       pGraphics.colorMode(PApplet.RGB, 255);
-      pGraphics.stroke(node.cameraStroke());
-      _drawEye(node.cameraLength() == 0 ? radius() : node.cameraLength());
+      pGraphics.stroke(node._cameraStroke);
+      _drawEye(node._cameraLength == 0 ? radius() : node._cameraLength);
       pGraphics.popStyle();
     }
   }

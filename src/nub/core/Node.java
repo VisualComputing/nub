@@ -108,7 +108,7 @@ import java.util.function.Consumer;
  * A node shape can be set from a retained-mode rendering object, see {@link #setShape(processing.core.PShape)};
  * or from an immediate-mode rendering procedure, see {@link #graphics(processing.core.PGraphics)}.
  * Picking a node is done according to a {@link #bullsEyeSize()}. When a node is tagged
- * it will be highlighted (scaled) according to a {@link #highlighting()} magnitude.
+ * it will be highlighted (scaled) according to a {@link #HIGHLIGHT} hint.
  * See also {@link #enableTagging(boolean)}.
  * <h2>Custom behavior</h2>
  * Implementing a custom behavior for node is a two step process:
@@ -164,22 +164,22 @@ public class Node {
   public final static int AXES = Graph.AXES;
   public final static int HUD = Graph.HUD;
   public final static int FRUSTUM = Graph.FRUSTUM;
-  public final static int BULLSEYE = 1 << 4;
-  public final static int IMR = 1 << 5;
-  public final static int RMR = 1 << 6;
-  public final static int HIGHLIGHT = 1 << 7;
-  public final static int TORUS = 1 << 8;
-  public final static int CONSTRAINT = 1 << 9;
-  public final static int BONE = 1 << 10;
+  public final static int SHAPE = 1 << 4;
+  public final static int HIGHLIGHT = 1 << 5;
+  public final static int BULLSEYE = 1 << 6;
+  public final static int TORUS = 1 << 7;
+  public final static int CONSTRAINT = 1 << 8;
+  public final static int BONE = 1 << 9;
   protected float _highlight;
-  protected int _bullStroke;
-  protected float _axesLength;
-  protected int _cameraStroke;
-  protected float _cameraLength;
   protected int _frustumColor;
   protected Graph _frustumGraph;
   protected int _torusColor;
   protected int _torusFaces;
+  // TODO public because Scene._drawFrontBuffer
+  public int _bullsEyeStroke;
+  public float _axesLength;
+  public int _cameraStroke;
+  public float _cameraLength;
 
   // Rendering
   // Immediate mode rendering
@@ -287,14 +287,14 @@ public class Node {
    * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
    * as {@link #constraint()}, having {@code translation}, {@code rotation} and {@code scaling} as
    * the {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
-   * The {@link #bullsEyeSize()} is set to {@code 0.2} and the {@link #highlighting()}
+   * The {@link #bullsEyeSize()} is set to {@code 0.2} and the {@link #HIGHLIGHT} hint
    * magnitude to {@code 0.15}.
    */
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
     // TODO new
-    setIMRShape(this::graphics);
+    setShape(this::graphics);
   }
 
   /**
@@ -306,7 +306,7 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    enableHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
+    enableHint(Node.SHAPE | Node.HIGHLIGHT);
     setPickingPolicy(PickingPolicy.BULLSEYE);
     _id = ++_counter;
     // unlikely but theoretically possible
@@ -326,7 +326,7 @@ public class Node {
     float b = (float) Graph.random.nextInt(max - min + 1) + min;
     _torusColor = Graph._color(r, g, b);
     // cyan (color(0, 255, 255)) encoded as a processing int rgb color
-    _bullStroke = -16711681;
+    _bullsEyeStroke = -16711681;
     // yellow (with alpha: color(255, 255, 0, 125)) encoded as a processing int rgb color
     _frustumColor = 2113928960;
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
@@ -390,20 +390,20 @@ public class Node {
 
   public Node(Node reference, Constraint constraint, Consumer<processing.core.PGraphics> shape, Vector translation, Quaternion rotation, float scaling) {
     this(reference, constraint, translation, rotation, scaling);
-    setIMRShape(shape);
+    setShape(shape);
     setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
    * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
-   * as {@link #constraint()}, {@code shape} as {@link #shape()}, having {@code translation},
+   * as {@link #constraint()}, {@code shape}, having {@code translation},
    * {@code rotation} and {@code scaling} as the {@link #translation()}, {@link #rotation()}
    * and {@link #scaling()}, respectively. The {@link #bullsEyeSize()} is set to
-   * {@code 0} and the {@link #highlighting()} magnitude to {@code 0.15}.
+   * {@code 0} and the {@link #HIGHLIGHT} hint to {@code 0.15}.
    */
   public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
     this(reference, constraint, translation, rotation, scaling);
-    setRMRShape(shape);
+    setShape(shape);
     setPickingPolicy(PickingPolicy.PRECISE);
   }
 
@@ -948,7 +948,6 @@ public class Node {
    * Default picking precision is defined with {@code threshold = 0}.
    *
    * @see #setBullsEyeSize(float)
-   * @see #highlighting()
    */
   public float bullsEyeSize() {
     return _bullsEyeSize;
@@ -2518,53 +2517,9 @@ public class Node {
   // js go:
   // public void graphics(Object context) {}
 
-  public void resetIMRShape() {
-    setIMRShape(null);
-  }
-
-  /**
-   * Sets the node immediate mode rendering (imr) procedure.
-   *
-   * @see #setRMRShape(processing.core.PShape)
-   * @see #resetIMRShape()
-   */
-  public void setIMRShape(Consumer<processing.core.PGraphics> callback) {
-    _imrShape = callback;
-  }
-
-  /**
-   * Returns the node immediate mode rendering procedure. Maybe null.
-   *
-   * @see #resetIMRShape()
-   * @see #imrShape()
-   * @see #rmrShape()
-   */
-  public Consumer<processing.core.PGraphics> imrShape() {
-    return _imrShape;
-  }
-
-  /**
-   * Execs the node {@link #imrShape()} immediate mode rendering procedure on the
-   * given {@code pGraphics} context.
-   */
-  protected void _drawIMRShape(processing.core.PGraphics pGraphics) {
-    if (_imrShape != null)
-      _imrShape.accept(pGraphics);
-  }
-
-  /**
-   * Override this method to set an immediate mode graphics procedure on the Processing
-   * {@code PGraphics} or use {@link #setIMRShape(Consumer)} instead.
-   */
-  public void graphics(processing.core.PGraphics pGraphics) {
-  }
-
-  /**
-   * @deprecated use {@link #resetRMRShape()} instead.
-   */
-  @Deprecated
   public void resetShape() {
-    resetRMRShape();
+    _rmrShape = null;
+    _imrShape = null;
   }
 
   /**
@@ -2573,55 +2528,40 @@ public class Node {
    * @see #setShape(processing.core.PShape)
    */
   public void resetRMRShape() {
-    setRMRShape(null);
+    _rmrShape = null;
   }
 
-  // TODO study alternative possiblity for setShape, such as:
-  /*
-  public void setShape(Object shape) {
-    if (shape instanceof processing.core.PShape)
-      setRMRShape((processing.core.PShape)shape);
-    else if (shape instanceof Consumer)
-      setIMRShape((Consumer) shape);
-    //setIMRShape((Consumer<processing.core.PGraphics>) shape);
-  }
-  */
-
-  /**
-   * @deprecated use {@link #setRMRShape(processing.core.PShape)} instead.
-   */
-  @Deprecated
-  public void setShape(processing.core.PShape shape) {
-    setRMRShape(shape);
+  public void resetIMRShape() {
+    _imrShape = null;
   }
 
   /**
    * Sets the node retained mode rendering (rmr) shape.
    *
-   * @see #setIMRShape(Consumer)
-   * @see #resetRMRShape()
+   * @see #resetShape()
    */
-  public void setRMRShape(processing.core.PShape shape) {
+  public void setShape(processing.core.PShape shape) {
     _rmrShape = shape;
   }
 
   /**
-   * @deprecated use {@link #rmrShape()} instead.
+   * Sets the node immediate mode rendering (imr) procedure.
+   *
+   * @see #setShape(processing.core.PShape)
+   * @see #resetIMRShape()
    */
-  @Deprecated
-  public processing.core.PShape shape() {
-    return rmrShape();
+  public void setShape(Consumer<processing.core.PGraphics> callback) {
+    _imrShape = callback;
   }
 
   /**
-   * Returns the node retained mode rendering shape. Maybe null.
+   * Override this method to set an immediate mode graphics procedure on the Processing
+   * {@code PGraphics} or use {@link #setShape(Consumer)} instead.
    *
-   * @see #resetRMRShape()
-   * @see #rmrShape()
-   * @see #imrShape()
+   * @deprecated use {@link #setShape(Consumer)} instead.
    */
-  public processing.core.PShape rmrShape() {
-    return _rmrShape;
+  @Deprecated
+  public void graphics(processing.core.PGraphics pGraphics) {
   }
 
   public boolean isHintEnable(int hint) {
@@ -2665,7 +2605,7 @@ public class Node {
       case 1:
         if (Graph.isNumInstance(params[0])) {
           if (hint == BULLSEYE) {
-            _bullStroke = Graph.castToInt(params[0]);
+            _bullsEyeStroke = Graph.castToInt(params[0]);
             return;
           }
           if (hint == AXES) {
@@ -2727,46 +2667,5 @@ public class Node {
         break;
     }
     System.out.println("Warning: some params in Node.configHint(hint, params) couldn't be parsed!");
-  }
-
-  /**
-   * Returns the highlighting magnitude use to scale the node when it's tagged.
-   *
-   * @see #bullsEyeSize()
-   */
-  public float highlighting() {
-    return _highlight;
-  }
-
-  public int bullsEyeStroke() {
-    return _bullStroke;
-  }
-
-  public float axesLength() {
-    return _axesLength;
-  }
-
-  public float cameraLength() {
-    return _cameraLength;
-  }
-
-  public int cameraStroke() {
-    return _cameraStroke;
-  }
-
-  public int frustumColor() {
-    return _frustumColor;
-  }
-
-  public int torusColor() {
-    return _torusColor;
-  }
-
-  public int torusFaces() {
-    return _torusFaces;
-  }
-
-  public Graph frustumGraph() {
-    return _frustumGraph;
   }
 }

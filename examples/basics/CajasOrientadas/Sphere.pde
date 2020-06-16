@@ -6,7 +6,7 @@ class Sphere extends Node {
     _color = tint;
     _radius = radius;
     setPickingPolicy(Node.PickingPolicy.PRECISE);
-    enableHint(Node.IMR | Node.RMR | Node.HIGHLIGHT);
+    enableHint(Node.SHAPE | Node.HIGHLIGHT);
   }
 
   @Override

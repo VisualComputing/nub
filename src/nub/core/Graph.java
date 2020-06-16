@@ -3263,11 +3263,11 @@ public class Graph {
    */
   protected void _drawFrontBuffer(Node node) {
     if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && node.isTaggingEnabled())
-      if (node.isHintEnable(Node.RMR) || node.isHintEnable(Node.IMR) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM))
+      if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM))
         _bbNeed = frameCount();
     if (isTagged(node)) {
       if (node.isHintEnable(Node.HIGHLIGHT)) {
-        float scl = 1 + node.highlighting();
+        float scl = 1 + node._highlight;
         // TODO 2d case needs testing
         if (is2D())
           _matrixHandler.scale(scl, scl);
@@ -3293,7 +3293,7 @@ public class Graph {
    */
   protected void _drawBackBuffer(Node node) {
     if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && node.isTaggingEnabled())
-      if (node.isHintEnable(Node.RMR) || node.isHintEnable(Node.IMR) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM)) {
+      if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM)) {
         float r = (float) (node.id() & 255) / 255.f;
         float g = (float) ((node.id() >> 8) & 255) / 255.f;
         float b = (float) ((node.id() >> 16) & 255) / 255.f;

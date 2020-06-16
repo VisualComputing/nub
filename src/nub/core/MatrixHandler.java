@@ -50,50 +50,40 @@ public class MatrixHandler {
   }
 
   protected static void _draw(Object context, Node node) {
-    _drawRMRHint(context, node);
-    _drawIMRHint(context, node);
+    _drawShapeHint(context, node);
     _drawTorusHint(context, node);
     _drawFrustumHint(context, node);
   }
 
-  protected static void _drawRMRHint(Object context, Node node) {
-    if (!node.isHintEnable(Node.RMR))
+  protected static void _drawShapeHint(Object context, Node node) {
+    if (!node.isHintEnable(Node.SHAPE))
       return;
     if (!(context instanceof processing.core.PGraphics))
       throw new RuntimeException("Drawing the node RMR hint require a PGraphics context");
     processing.core.PGraphics pg = (processing.core.PGraphics) context;
     pg.push();
-    if (node.rmrShape() != null) {
+    if (node._rmrShape != null) {
       pg.shapeMode(pg.shapeMode);
-      pg.shape(node.rmrShape());
+      pg.shape(node._rmrShape);
     }
-    pg.pop();
-  }
-
-  protected static void _drawIMRHint(Object context, Node node) {
-    if (!node.isHintEnable(Node.IMR))
-      return;
-    if (!(context instanceof processing.core.PGraphics))
-      throw new RuntimeException("Drawing the node IMR hint require a PGraphics context");
-    processing.core.PGraphics pg = (processing.core.PGraphics) context;
-    pg.push();
-    if (node.imrShape() != null)
-      node._drawIMRShape(pg);
+    if (node._imrShape != null) {
+      node._imrShape.accept(pg);
+    }
     pg.pop();
   }
 
   protected static void _drawFrustumHint(Object context, Node node) {
     if (!node.isHintEnable(Node.FRUSTUM))
       return;
-    if (node.frustumGraph() != null) {
+    if (node._frustumGraph != null) {
       if (!(context instanceof processing.core.PGraphics))
         throw new RuntimeException("Drawing the node FRUSTUM hint require a PGraphics context");
       processing.core.PGraphics pg = (processing.core.PGraphics) context;
       pg.push();
       pg.colorMode(processing.core.PApplet.RGB, 255);
-      pg.stroke(node.frustumColor());
-      pg.fill(node.frustumColor());
-      Scene.drawFrustum(pg, node.frustumGraph());
+      pg.stroke(node._frustumColor);
+      pg.fill(node._frustumColor);
+      Scene.drawFrustum(pg, node._frustumGraph);
       pg.pop();
     }
   }
@@ -106,8 +96,8 @@ public class MatrixHandler {
     processing.core.PGraphics pg = (processing.core.PGraphics) context;
     pg.push();
     pg.colorMode(processing.core.PApplet.RGB, 255);
-    pg.fill(node.torusColor());
-    Scene.drawTorusSolenoid(pg, node.torusFaces(), 5);
+    pg.fill(node._torusColor);
+    Scene.drawTorusSolenoid(pg, node._torusFaces, 5);
     pg.pop();
   }
 
