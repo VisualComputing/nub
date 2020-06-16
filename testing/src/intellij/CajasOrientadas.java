@@ -12,6 +12,7 @@ public class CajasOrientadas extends PApplet {
   Scene scene;
   Box[] cajas;
   Sphere esfera;
+  boolean circle;
 
   public void settings() {
     size(800, 800, P3D);
@@ -72,17 +73,18 @@ public class CajasOrientadas extends PApplet {
         caja.setPickingPolicy(caja.pickingPolicy() == Node.PickingPolicy.PRECISE ?
             Node.PickingPolicy.BULLSEYE :
             Node.PickingPolicy.PRECISE);
-    if (key == 'c')
+    if (key == 'c') {
       for (Box caja : cajas)
         if (caja.bullsEyeSize() < 1)
           caja.setBullsEyeSize(caja.bullsEyeSize() * 200);
         else
           caja.setBullsEyeSize(caja.bullsEyeSize() / 200);
-    if (key == 'd')
+    }
+    if (key == 'd') {
+      circle = !circle;
       for (Box caja : cajas)
-        caja.setBullsEyeShape(caja.bullsEyeShape() == Node.BullsEyeShape.CIRCLE ?
-            Node.BullsEyeShape.SQUARE :
-            Node.BullsEyeShape.CIRCLE);
+        caja.configHint(Node.BULLSEYE, circle ?  Node.BullsEyeShape.CIRCLE : Node.BullsEyeShape.SQUARE);
+    }
     if (key == 'a')
       for (Box caja : cajas)
         caja.toggleHint(Node.AXES);

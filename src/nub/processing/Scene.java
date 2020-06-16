@@ -2488,7 +2488,7 @@ public class Scene extends Graph implements PConstants {
    * @see #_drawCircledBullsEye(Node)
    */
   protected void _drawBullsEye(Node node) {
-    if (node.bullsEyeShape() == Node.BullsEyeShape.SQUARE)
+    if (node._bullsEyeShape == Node.BullsEyeShape.SQUARE)
       _drawSquaredBullsEye(node);
     else
       _drawCircledBullsEye(node);

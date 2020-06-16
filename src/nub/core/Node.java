@@ -139,11 +139,14 @@ public class Node {
   protected long _lastUpdate;
 
   // Tagging & Precision
+  // TODO I think this should be modeled as an enum with bullseye SPACE
+  // think bout hud_space
   protected float _bullsEyeSize;
   public enum BullsEyeShape {
     SQUARE, CIRCLE
   }
-  protected BullsEyeShape _bullsEyeShape;
+  // TODO public because of scene.drawBullsEye
+  public BullsEyeShape _bullsEyeShape;
   public enum PickingPolicy {
     PRECISE, BULLSEYE, HUD
   }
@@ -909,14 +912,6 @@ public class Node {
 
   public PickingPolicy pickingPolicy() {
     return _pickingPolicy;
-  }
-
-  public void setBullsEyeShape(BullsEyeShape shape) {
-    _bullsEyeShape = shape;
-  }
-
-  public BullsEyeShape bullsEyeShape() {
-    return _bullsEyeShape;
   }
 
   /**
@@ -2603,34 +2598,36 @@ public class Node {
   public void configHint(int hint, Object... params) {
     switch (params.length) {
       case 1:
-        if (Graph.isNumInstance(params[0])) {
-          if (hint == BULLSEYE) {
-            _bullsEyeStroke = Graph.castToInt(params[0]);
+        if (hint == BULLSEYE && params[0] instanceof BullsEyeShape) {
+          _bullsEyeShape = (BullsEyeShape) params[0];
+          return;
+        }
+        if (hint == BULLSEYE && Graph.isNumInstance(params[0])) {
+          _bullsEyeStroke = Graph.castToInt(params[0]);
+          return;
+        }
+        if (hint == AXES && Graph.isNumInstance(params[0])) {
+          _axesLength = Graph.castToFloat(params[0]);
+          return;
+        }
+        if (hint == HIGHLIGHT && Graph.isNumInstance(params[0])) {
+          float highlight = Graph.castToFloat(params[0]);
+          if (0 < highlight && highlight <= 1) {
+            _highlight = highlight;
             return;
           }
-          if (hint == AXES) {
-            _axesLength = Graph.castToFloat(params[0]);
-            return;
-          }
-          if (hint == HIGHLIGHT) {
-            float highlight = Graph.castToFloat(params[0]);
-            if (0 < highlight && highlight <= 1) {
-              _highlight = highlight;
-              return;
-            }
-          }
-          if (hint == CAMERA) {
-            _cameraStroke = Graph.castToInt(params[0]);
-            return;
-          }
-          if (hint == FRUSTUM) {
-            _frustumColor = Graph.castToInt(params[0]);
-            return;
-          }
-          if (hint == TORUS) {
-            _torusColor = Graph.castToInt(params[0]);
-            return;
-          }
+        }
+        if (hint == CAMERA && Graph.isNumInstance(params[0])) {
+          _cameraStroke = Graph.castToInt(params[0]);
+          return;
+        }
+        if (hint == FRUSTUM && Graph.isNumInstance(params[0])) {
+          _frustumColor = Graph.castToInt(params[0]);
+          return;
+        }
+        if (hint == TORUS && Graph.isNumInstance(params[0])) {
+          _torusColor = Graph.castToInt(params[0]);
+          return;
         }
         if (hint == FRUSTUM && params[0] instanceof Graph) {
           _frustumGraph = (Graph) params[0];
@@ -2638,6 +2635,16 @@ public class Node {
         }
         break;
       case 2:
+        if (hint == BULLSEYE && params[0] instanceof BullsEyeShape && Graph.isNumInstance(params[1])) {
+          _bullsEyeShape = (BullsEyeShape) params[0];
+          _bullsEyeStroke = Graph.castToInt(params[1]);
+          return;
+        }
+        if (hint == BULLSEYE && Graph.isNumInstance(params[0]) && params[1] instanceof BullsEyeShape) {
+          _bullsEyeStroke = Graph.castToInt(params[0]);
+          _bullsEyeShape = (BullsEyeShape) params[1];
+          return;
+        }
         if (hint == CAMERA) {
           if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
             _cameraStroke = Graph.castToInt(params[0]);

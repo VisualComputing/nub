@@ -2741,7 +2741,7 @@ public class Graph {
     float threshold = node.bullsEyeSize() < 1 ?
         100 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) :
         node.bullsEyeSize() / 2;
-    return node.bullsEyeShape() == Node.BullsEyeShape.SQUARE ?
+    return node._bullsEyeShape == Node.BullsEyeShape.SQUARE ?
         ((Math.abs(pixelX - projection._vector[0]) < threshold) && (Math.abs(pixelY - projection._vector[1]) < threshold)) :
         (float) Math.sqrt((float) Math.pow((projection._vector[0] - pixelX), 2.0) + (float) Math.pow((projection._vector[1] - pixelY), 2.0)) < threshold;
   }

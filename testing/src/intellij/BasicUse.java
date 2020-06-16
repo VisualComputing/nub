@@ -43,7 +43,7 @@ public class BasicUse extends PApplet {
     node.enableHint(Node.BULLSEYE);
     //node.setPickingPolicy(Node.PickingPolicy.BULLS_EYE);
     //node.setBullsEyeSize(50);
-    node.setBullsEyeShape(Node.BullsEyeShape.CIRCLE);
+    node.configHint(Node.BULLSEYE, Node.BullsEyeShape.CIRCLE);
     node.configHint(Node.BULLSEYE, color(0, 255, 0));
     node.enableHint(Node.CAMERA, color(255, 255, 0), scene.radius() * 2);
     scene.enableHint(Scene.AXES | Scene.GRID);

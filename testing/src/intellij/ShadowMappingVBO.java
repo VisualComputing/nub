@@ -71,7 +71,7 @@ public class ShadowMappingVBO extends PApplet {
     light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
     light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
     light.setBullsEyeSize(50);
-    light.setBullsEyeShape(Node.BullsEyeShape.CIRCLE);
+    light.configHint(Node.BULLSEYE, Node.BullsEyeShape.CIRCLE);
 
     PShape box = createShape(BOX, 360, 5, 360);
     //rectMode(CENTER);
