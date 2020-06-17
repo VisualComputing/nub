@@ -125,7 +125,7 @@ public class PUP extends PApplet {
     if (key == ' ')
       scene.togglePerspective();
     if (key == 'f')
-      scene.flip();
+      Scene.leftHanded = !Scene.leftHanded;
   }
 
   public static void main(String[] args) {

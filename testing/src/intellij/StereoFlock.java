@@ -127,7 +127,7 @@ public class StereoFlock extends PApplet {
       lrCount = leftEye.frameCount();
     }
     lrCount++;
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftEye.isRightHanded() ? -deltaY : deltaY);
+    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), Scene.leftHanded ? deltaY : -deltaY);
     Quaternion rotY = new Quaternion(head.displacement(upVector), -deltaX);
     quaternion = Quaternion.multiply(rotY, rotX);
     head.rotate(quaternion);

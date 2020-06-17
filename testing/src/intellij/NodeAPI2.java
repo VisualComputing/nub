@@ -313,7 +313,7 @@ public class NodeAPI2 extends PApplet {
           break;
       }
     if (key == 'v' || key == 'V')
-      scene.flip();
+      Scene.leftHanded = !Scene.leftHanded;
     if (key == '+')
       scene.eye().setScaling(scene.eye().scaling() * 1.1f);
     if (key == '-')

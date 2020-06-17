@@ -278,7 +278,7 @@ public class Scene extends Graph implements PConstants {
     // TODO buggy
     pApplet().registerMethod("dispose", this);
     // 4. Handed
-    setLeftHanded();
+    leftHanded = true;
   }
 
   // P5 STUFF
@@ -1002,116 +1002,45 @@ public class Scene extends Graph implements PConstants {
     context().popStyle();
   }
 
-  /**
-   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and remaining frustum
-   * parameters. Useful to compute a shadow map taking the {@code eye} as the light point-of-view.
-   * Same as {@code render(pGraphics, type, null, eye, zNear, zFar, true)}.
-   *
-   * @see #render(PGraphics, Node, Node, Type, float, float, boolean)
-   * @see #render(PGraphics, Node, Node, Type, float, float)
-   * @see #render(PGraphics, Node, Type, float, float, boolean)
-   */
-  public static void render(PGraphics pGraphics, Node eye, Type type, float zNear, float zFar) {
-    render(pGraphics, null, eye, type, zNear, zFar, true);
+  public static Vector screenLocation(PGraphics pGraphics, Vector vector, Node node, Node eye, Type type, float zNear, float zFar) {
+    return screenLocation(vector, node, eye, type, pGraphics.width, pGraphics.height, zNear, zFar);
   }
 
-  /**
-   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto
-   * {@code pGraphics} using the {@code eye} viewpoint and remaining frustum parameters.
-   * Useful to compute a shadow map taking the {@code eye} as the light point-of-view.
-   * Same as {@code render(pGraphics, type, subtree, eye, zNear, zFar, true)}.
-   *
-   * @see #render(PGraphics, Node, Type, float, float)
-   * @see #render(PGraphics, Node, Node, Type, float, float, boolean)
-   * @see #render(PGraphics, Node, Type, float, float, boolean)
-   */
-  public static void render(PGraphics pGraphics, Node subtree, Node eye, Type type, float zNear, float zFar) {
-    render(pGraphics, subtree, eye, type, zNear, zFar, true);
+  public static Vector screenLocation(PGraphics pGraphics, Vector vector, Node node, Matrix view, Matrix projection) {
+    return screenLocation(vector, node, view, projection, pGraphics.width, pGraphics.height);
+  }
+
+  public static Vector screenLocation(PGraphics pGraphics, Vector vector, Node node, Matrix projectionView) {
+    return screenLocation(vector, node, projectionView, pGraphics.width, pGraphics.height);
   }
 
   /**
    * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and remaining frustum parameters.
    * Useful to compute a shadow map taking the {@code eye} as the light point-of-view. Same as
-   * {@code render(pGraphics, type, null, eye, zNear, zFar, leftHanded)}.
+   * {@code render(pGraphics, type, null, eye, zNear, zFar)}.
    *
    * @see #render(PGraphics, Node, Type, float, float)
    * @see #render(PGraphics, Node, Node, Type, float, float)
-   * @see #render(PGraphics, Node, Node, Type, float, float, boolean)
    */
-  public static void render(PGraphics pGraphics, Node eye, Type type, float zNear, float zFar, boolean leftHanded) {
-    render(pGraphics, null, eye, type, zNear, zFar, leftHanded);
+  public static void render(PGraphics pGraphics, Node eye, Type type, float zNear, float zFar) {
+    render(pGraphics, null, eye, type, zNear, zFar);
   }
 
   /**
    * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto {@code pGraphics}
    * using the {@code eye} viewpoint and remaining frustum parameters. Useful to compute a shadow map taking the
    * {@code eye} as the light point-of-view. Same as
-   * {@code render(pGraphics, type, subtree, eye, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded)}.
+   * {@code render(pGraphics, type, subtree, eye, pGraphics.width, pGraphics.height, zNear, zFar)}.
    *
    * @see #render(PGraphics, Node, Type, float, float)
    * @see #render(PGraphics, Node, Node, Type, float, float)
-   * @see #render(PGraphics, Node, Type, float, float, boolean)
-   * @see Graph#render(Object, Node, Node, Type, int, int, float, float, boolean)
+   * @see Graph#render(Object, Node, Node, Type, int, int, float, float)
    */
-  public static void render(PGraphics pGraphics, Node subtree, Node eye, Type type, float zNear, float zFar, boolean leftHanded) {
+  public static void render(PGraphics pGraphics, Node subtree, Node eye, Type type, float zNear, float zFar) {
     if (pGraphics instanceof PGraphicsOpenGL)
-      render(pGraphics, subtree, eye, type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded);
+      render(pGraphics, subtree, eye, type, pGraphics.width, pGraphics.height, zNear, zFar);
     else
       System.out.println("Nothing done: pGraphics should be instance of PGraphicsOpenGL in render()");
-  }
-
-  /**
-   * Same as {@code return projection(eye, type, width, height, zNear, zFar, true)}.
-   *
-   * @see #projection(Node, Type, float, float, float, float, boolean)
-   */
-  public static Matrix projection(Node eye, Type type, float width, float height, float zNear, float zFar) {
-    return projection(eye, type, width, height, zNear, zFar, true);
-  }
-
-  /**
-   * Same as {@code return perspective(eye, aspectRatio, zNear, zFar, true)}.
-   *
-   * @see #perspective(Node, float, float, float, boolean)
-   */
-  public static Matrix perspective(Node eye, float aspectRatio, float zNear, float zFar) {
-    return perspective(eye, aspectRatio, zNear, zFar, true);
-  }
-
-  /**
-   * Same as {@code return orthographic(eye, width, height, zNear, zFar, true)}.
-   *
-   * @see #orthographic(Node, float, float, float, float, boolean)
-   */
-  public static Matrix orthographic(Node eye, float width, float height, float zNear, float zFar) {
-    return orthographic(eye, width, height, zNear, zFar, true);
-  }
-
-  /**
-   * Same as {@code return projectionView(eye, type, width, height, zNear, zFar, true)}.
-   *
-   * @see #projectionView(Node, Type, float, float, float, float, boolean)
-   */
-  public static Matrix projectionView(Node eye, Type type, float width, float height, float zNear, float zFar) {
-    return projectionView(eye, type, width, height, zNear, zFar, true);
-  }
-
-  /**
-   * Same as {@code return perspectiveView(eye, aspectRatio, zNear, zFar, true)}.
-   *
-   * @see #perspectiveView(Node, float, float, float, boolean)
-   */
-  public static Matrix perspectiveView(Node eye, float aspectRatio, float zNear, float zFar) {
-    return perspectiveView(eye, aspectRatio, zNear, zFar, true);
-  }
-
-  /**
-   * Same as {@code return orthographicView(eye, width, height, zNear, zFar, true)}.
-   *
-   * @see #orthographicView(Node, float, float, float, float, boolean)
-   */
-  public static Matrix orthographicView(Node eye, float width, float height, float zNear, float zFar) {
-    return orthographicView(eye, width, height, zNear, zFar, true);
   }
 
   // HUD
@@ -1412,7 +1341,7 @@ public class Scene extends Graph implements PConstants {
     // Base
     context().beginShape(PApplet.QUADS);
 
-    if (isLeftHanded()) {
+    if (leftHanded) {
       vertex(baseHalfWidth, -halfHeight, -dist);
       vertex(-baseHalfWidth, -halfHeight, -dist);
       vertex(-baseHalfWidth, -baseHeight, -dist);
@@ -1428,7 +1357,7 @@ public class Scene extends Graph implements PConstants {
     // Arrow
     context().beginShape(PApplet.TRIANGLES);
 
-    if (isLeftHanded()) {
+    if (leftHanded) {
       vertex(0.0f, -arrowHeight, -dist);
       vertex(arrowHalfWidth, -baseHeight, -dist);
       vertex(-arrowHalfWidth, -baseHeight, -dist);
@@ -1825,35 +1754,25 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code drawAxes(context(), length, isLeftHanded())}.
    *
-   * @see #drawAxes(PGraphics, float, boolean)
+   * @see #drawAxes(PGraphics, float)
    */
   public void drawAxes(float length) {
-    drawAxes(context(), length, isLeftHanded());
+    drawAxes(context(), length);
   }
 
   /**
    * Same as {@code drawAxes(pGraphics, radius(), isLeftHanded())}.
    *
-   * @see #drawAxes(PGraphics, float, boolean)
-   */
-  public void drawAxes(PGraphics pGraphics) {
-    drawAxes(pGraphics, radius(), isLeftHanded());
-  }
-
-  /**
-   * Same as {@code drawAxes(pGraphics, length, true)}.
-   *
    * @see #drawAxes(PGraphics, float)
    */
-  public static void drawAxes(PGraphics pGraphics, float length) {
-    drawAxes(pGraphics, length, true);
+  public void drawAxes(PGraphics pGraphics) {
+    drawAxes(pGraphics, radius());
   }
 
   /**
-   * Draws axes of {@code length} onto {@code pGraphics} taking into account
-   * {@code leftHanded}.
+   * Draws axes of {@code length} onto {@code pGraphics}.
    */
-  public static void drawAxes(PGraphics pGraphics, float length, boolean leftHanded) {
+  public static void drawAxes(PGraphics pGraphics, float length) {
     pGraphics.pushStyle();
     pGraphics.colorMode(PApplet.RGB, 255);
     float charWidth = length / 40.0f;
@@ -2082,7 +2001,6 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #drawFrustum(PGraphics, Graph)
    * @see #drawFrustum(PGraphics, PGraphics, Node, Type, float, float)
-   * @see #drawFrustum(PGraphics, PGraphics, Node, Type, float, float, boolean)
    */
   public void drawFrustum(Graph graph) {
     _matrixHandler.pushMatrix();
@@ -2099,7 +2017,6 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #drawFrustum(Graph)
    * @see #drawFrustum(PGraphics, PGraphics, Node, Type, float, float)
-   * @see #drawFrustum(PGraphics, PGraphics, Node, Type, float, float, boolean)
    */
   public static void drawFrustum(PGraphics pGraphics, Graph graph) {
     if (pGraphics == graph.context())
@@ -2110,23 +2027,12 @@ public class Scene extends Graph implements PConstants {
     switch (graph.type()) {
       case TWO_D:
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph.eye().magnitude(), graph.width(), graph.isLeftHanded() ? -graph.height() : graph.height(), graph.zNear(), graph.zFar());
+        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph.eye().magnitude(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.zNear(), graph.zFar());
         break;
       case PERSPECTIVE:
-        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph.eye().magnitude(), graph.isLeftHanded() ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar());
+        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph.eye().magnitude(), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar());
         break;
     }
-  }
-
-  /**
-   * Same as {@code drawFrustum(pGraphics, eyeBuffer, type, eye, zNear, zFar, true)}.
-   *
-   * @see #drawFrustum(Graph)
-   * @see #drawFrustum(PGraphics, Graph)
-   * @see #drawFrustum(PGraphics, PGraphics, Node, Type, float, float, boolean)
-   */
-  public static void drawFrustum(PGraphics pGraphics, PGraphics eyeBuffer, Node eye, Type type, float zNear, float zFar) {
-    drawFrustum(pGraphics, eyeBuffer, eye, type, zNear, zFar, true);
   }
 
   /**
@@ -2134,14 +2040,14 @@ public class Scene extends Graph implements PConstants {
    * {@code type}, eye {@link Node#magnitude()}, {@code zNear} and {@code zFar}, while taking into account
    * whether or not the scene is {@code leftHanded}.
    * <p>
-   * Use it in conjunction with {@link #render(PGraphics, Node, Type, float, float, boolean)} as when rendering
+   * Use it in conjunction with {@link #render(PGraphics, Node, Type, float, float)} as when rendering
    * a shadow map.
    *
    * @see #drawFrustum(Graph)
    * @see #drawFrustum(PGraphics, Graph)
    * @see #drawFrustum(PGraphics, PGraphics, Node, Type, float, float)
    */
-  public static void drawFrustum(PGraphics pGraphics, PGraphics eyeBuffer, Node eye, Type type, float zNear, float zFar, boolean leftHanded) {
+  public static void drawFrustum(PGraphics pGraphics, PGraphics eyeBuffer, Node eye, Type type, float zNear, float zFar) {
     switch (type) {
       case TWO_D:
       case ORTHOGRAPHIC:

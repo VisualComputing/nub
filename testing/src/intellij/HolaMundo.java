@@ -126,7 +126,7 @@ public class HolaMundo extends PApplet {
   @Override
   public void keyPressed() {
     if (key == 'f') {
-      scene.flip();
+      Scene.leftHanded = !Scene.leftHanded;
     } else if (key == 'g') {
       scene.toggleHint(Scene.GRID);
     } else if (key == 'a') {

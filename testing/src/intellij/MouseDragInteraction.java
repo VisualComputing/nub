@@ -97,7 +97,7 @@ public class MouseDragInteraction extends PApplet {
         node.resetReference();
     }
     if (key == 'i')
-      scene.flip();
+      Scene.leftHanded = !Scene.leftHanded;
     if (key == 's')
       scene.fit();
     if (key == 'f')
@@ -118,7 +118,7 @@ public class MouseDragInteraction extends PApplet {
     if (key == 'a')
       lookAround = !lookAround;
     if (key == 'r')
-      scene.flip();
+      Scene.leftHanded = !Scene.leftHanded;
     if (key == 'p')
       if (scene.type() == Graph.Type.PERSPECTIVE)
         scene.setType(Graph.Type.ORTHOGRAPHIC);

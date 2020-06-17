@@ -66,7 +66,7 @@ public class Orbit extends PApplet {
     if (key == 'i')
       scene.tag(scene.hasTag(shape1) ? shape2 : shape1);
     if (key == 'f')
-      scene.flip();
+      Scene.leftHanded = !Scene.leftHanded;
   }
 
   public void mouseDragged() {

@@ -84,7 +84,7 @@ public class Interaction2D extends PApplet {
 
   public void keyPressed() {
     if (key == 'f')
-      scene.flip();
+      Scene.leftHanded = !Scene.leftHanded;
     if (key == 's')
       scene.fit(1);
     if (key == 'f')

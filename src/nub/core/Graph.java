@@ -30,7 +30,7 @@ import java.util.function.Consumer;
  * and {@link #setZNearCoefficient(float)} for a 3d graph.
  * <p>
  * The way the projection matrix is computed (see
- * {@link #projection(Node, Type, float, float, float, float, boolean)}), defines the type of the
+ * {@link #projection(Node, Type, float, float, float, float)}), defines the type of the
  * graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC} for 3d graphs and {@link Type#TWO_D}
  * for a 2d graph.
  * <h1>2. Scene-graph handling</h1>
@@ -178,7 +178,7 @@ public class Graph {
   protected Vector[] _normal;
   protected float[] _distance;
   // handed
-  protected boolean _rightHanded;
+  public static boolean leftHanded;
 
   // 2. Matrix handler
   protected int _width, _height;
@@ -360,7 +360,6 @@ public class Graph {
    * Same as {@code this(context, null, type, eye, width, height)}.
    *
    * @see #timingHandler()
-   * @see #setRightHanded()
    * @see #setEye(Node)
    * @see #Graph(Object, Object, Node, Type, int, int)
    */
@@ -380,7 +379,6 @@ public class Graph {
    * matrix-handlers (see {@link MatrixHandler}) and {@link #timingHandler()}.
    *
    * @see #timingHandler()
-   * @see #setRightHanded()
    * @see #setEye(Node)
    */
   protected Graph(Object front, Object back, Node eye, Type type, int width, int height) {
@@ -430,7 +428,6 @@ public class Graph {
     if (is3D())
       setFOV((float) Math.PI / 3);
     fit();
-    setRightHanded();
     enableBoundaryEquations(false);
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
@@ -530,7 +527,7 @@ public class Graph {
    * nodes will be constrained so that they will remain at the x-y plane. See
    * {@link nub.core.constraint.Constraint}.
    *
-   * @see #projection(Node, Type, float, float, float, float, boolean)
+   * @see #projection(Node, Type, float, float, float, float)
    * @see Node#magnitude()
    */
   public void setType(Type type) {
@@ -560,7 +557,7 @@ public class Graph {
 
   /**
    * Sets the {@link #eye()} {@link Node#magnitude()} (which is used to compute the
-   * {@link #projection(Node, Type, float, float, float, float, boolean)} matrix),
+   * {@link #projection(Node, Type, float, float, float, float)} matrix),
    * according to {@code fov} (field-of-view) which is expressed in radians. Meaningless
    * if the graph {@link #is2D()}. If the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}
    * it will match the perspective projection obtained using {@code fov} of an image
@@ -591,7 +588,7 @@ public class Graph {
    * Retrieves the graph field-of-view in radians. Meaningless if the graph {@link #is2D()}.
    * See {@link #setFOV(float)} for details. The value is related to the {@link #eye()}
    * {@link Node#magnitude()} (which in turn is used to compute the
-   * {@link #projection(Node, Type, float, float, float, float, boolean)} matrix) as follows:
+   * {@link #projection(Node, Type, float, float, float, float)} matrix) as follows:
    * <p>
    * <ol>
    * <li>It returns {@code 2 * Math.atan(eye().magnitude())}, when the
@@ -602,7 +599,7 @@ public class Graph {
    * Set this value with {@link #setFOV(float)} or {@link #setHFOV(float)}.
    *
    * @see Node#magnitude()
-   * @see #perspective(Node, float, float, float, boolean)
+   * @see #perspective(Node, float, float, float)
    * @see #setType(Type)
    * @see #setHFOV(float)
    * @see #hfov()
@@ -656,7 +653,7 @@ public class Graph {
 
   /**
    * Returns the near clipping plane distance used by the eye node
-   * {@link #projection(Node, Type, float, float, float, float, boolean)} matrix in
+   * {@link #projection(Node, Type, float, float, float, float)} matrix in
    * world units.
    * <p>
    * The clipping planes' positions depend on the {@link #radius()} and {@link #center()}
@@ -707,7 +704,7 @@ public class Graph {
 
   /**
    * Returns the far clipping plane distance used by the
-   * {@link #projection(Node, Type, float, float, float, float, boolean) matrix in world units.
+   * {@link #projection(Node, Type, float, float, float, float) matrix in world units.
    * <p>
    * The far clipping plane is positioned at a distance equal to
    * {@code zClippingCoefficient() * radius()} behind the {@link #center()}:
@@ -1108,17 +1105,6 @@ public class Graph {
     else
       _interpolator.setNode(_eye);
     _modified();
-  }
-
-  /**
-   * If {@link #isLeftHanded()} calls {@link #setRightHanded()}, otherwise calls
-   * {@link #setLeftHanded()}.
-   */
-  public void flip() {
-    if (isLeftHanded())
-      setRightHanded();
-    else
-      setLeftHanded();
   }
 
   /**
@@ -1553,8 +1539,8 @@ public class Graph {
    * Returns {@code true} if the given face is back-facing the eye. Otherwise returns
    * {@code false}.
    * <p>
-   * Vertices must given in clockwise order if {@link Graph#isLeftHanded()} or in counter-clockwise
-   * order if {@link Graph#isRightHanded()}.
+   * Vertices must given in clockwise order if graph is not {@link Graph#leftHanded}
+   * or in counter-clockwise order if {@link Graph#leftHanded}.
    *
    * @param a first face vertex
    * @param b second face vertex
@@ -1563,7 +1549,7 @@ public class Graph {
    * @see #isConeBackFacing(Vector, Vector, float)
    */
   public boolean isFaceBackFacing(Vector a, Vector b, Vector c) {
-    return isFaceBackFacing(a, isLeftHanded() ?
+    return isFaceBackFacing(a, leftHanded ?
         Vector.subtract(b, a).cross(Vector.subtract(c, a)) :
         Vector.subtract(c, a).cross(Vector.subtract(b, a)));
   }
@@ -2371,7 +2357,7 @@ public class Graph {
     switch (type()) {
       case PERSPECTIVE:
         // left-handed coordinate system correction
-        if (isLeftHanded())
+        if (leftHanded)
           pixelY = height() - pixelY;
         origin.set(eye().position());
         direction.set(new Vector(((2.0f * pixelX / width()) - 1.0f) * eye().magnitude() * aspectRatio(),
@@ -2477,40 +2463,66 @@ public class Graph {
   // Other stuff
 
   /**
+   * If {@link #isLeftHanded()} calls {@link #setRightHanded()}, otherwise calls
+   * {@link #setLeftHanded()}.
+   */
+  /*
+  public static void flip() {
+    if (isLeftHanded())
+      setRightHanded();
+    else
+      setLeftHanded();
+  }
+
+   */
+
+  /**
    * Returns true if graph is left handed. Note that the graph is right handed by default.
    *
    * @see #setLeftHanded()
    */
-  public boolean isLeftHanded() {
-    return !_rightHanded;
+  /*
+  public static boolean isLeftHanded() {
+    return leftHanded;
   }
 
+
+   */
   /**
    * Returns true if graph is right handed. Note that the graph is right handed by default.
    *
    * @see #setRightHanded()
    */
-  public boolean isRightHanded() {
-    return _rightHanded;
+  /*
+  public static boolean isRightHanded() {
+    return rightHanded;
   }
 
+
+   */
   /**
    * Set the graph as right handed.
    *
    * @see #isRightHanded()
    */
-  public void setRightHanded() {
-    _rightHanded = true;
+  /*
+  public static void setRightHanded() {
+    rightHanded = true;
   }
+
+   */
 
   /**
    * Set the graph as left handed.
    *
    * @see #isLeftHanded()
    */
-  public void setLeftHanded() {
-    _rightHanded = false;
+  /*
+  public static void setLeftHanded() {
+    rightHanded = false;
   }
+
+   */
 
   /**
    * @return true if the graph is 2D.
@@ -2892,7 +2904,7 @@ public class Graph {
    *
    * @see #fov()
    * @see TimingHandler#handle()
-   * @see #projection(Node, Type, float, float, float, float, boolean)
+   * @see #projection(Node, Type, float, float, float, float)
    * @see Node#view()
    */
   // TODO remove this
@@ -2909,7 +2921,7 @@ public class Graph {
   protected void _preDraw() {
     if (_seededGraph)
       timingHandler().handle();
-    _projection = projection(eye(), type(), width(), height(), zNear(), zFar(), isLeftHanded());
+    _projection = projection(eye(), type(), width(), height(), zNear(), zFar());
     _view = eye().view();
     _projectionView = Matrix.multiply(_projection, _view);
     if (isProjectionViewInverseCached())
@@ -2993,10 +3005,10 @@ public class Graph {
    * <p>
    * Override this method to set a {@link Graph.Type#CUSTOM} projection.
    *
-   * @see #perspective(Node, float, float, float, boolean)
-   * @see #orthographic(Node, float, float, float, float, boolean)
+   * @see #perspective(Node, float, float, float)
+   * @see #orthographic(Node, float, float, float, float)
    */
-  public static Matrix projection(Node eye, Graph.Type type, float width, float height, float zNear, float zFar, boolean leftHanded) {
+  public static Matrix projection(Node eye, Graph.Type type, float width, float height, float zNear, float zFar) {
     if (type == Graph.Type.PERSPECTIVE)
       return Matrix.perspective(leftHanded ? -eye.magnitude() : eye.magnitude(), width / height, zNear, zFar);
     else
@@ -3008,7 +3020,7 @@ public class Graph {
    *
    * @see Matrix#perspective(float, float, float, float)
    */
-  public static Matrix perspective(Node eye, float aspectRatio, float zNear, float zFar, boolean leftHanded) {
+  public static Matrix perspective(Node eye, float aspectRatio, float zNear, float zFar) {
     return Matrix.perspective(leftHanded ? -eye.magnitude() : eye.magnitude(), aspectRatio, zNear, zFar);
   }
 
@@ -3017,38 +3029,38 @@ public class Graph {
    *
    * @see Matrix#orthographic(float, float, float, float)
    */
-  public static Matrix orthographic(Node eye, float width, float height, float zNear, float zFar, boolean leftHanded) {
+  public static Matrix orthographic(Node eye, float width, float height, float zNear, float zFar) {
     return Matrix.orthographic(width * eye.magnitude(), (leftHanded ? -height : height) * eye.magnitude(), zNear, zFar);
   }
 
   /**
-   * Same as {@code return Matrix.multiply(projection(eye, type, width, height, zNear, zFar, leftHanded), eye.view())}.
+   * Same as {@code return Matrix.multiply(projection(eye, type, width, height, zNear, zFar), eye.view())}.
    *
-   * @see #projection(Node, Type, float, float, float, float, boolean)
+   * @see #projection(Node, Type, float, float, float, float)
    * @see Node#view()
    */
-  public static Matrix projectionView(Node eye, Graph.Type type, float width, float height, float zNear, float zFar, boolean leftHanded) {
-    return Matrix.multiply(projection(eye, type, width, height, zNear, zFar, leftHanded), eye.view());
+  public static Matrix projectionView(Node eye, Graph.Type type, float width, float height, float zNear, float zFar) {
+    return Matrix.multiply(projection(eye, type, width, height, zNear, zFar), eye.view());
   }
 
   /**
-   * Same as {@code return Matrix.multiply(perspective(eye, aspectRatio, zNear, zFar, leftHanded), eye.view())}.
+   * Same as {@code return Matrix.multiply(perspective(eye, aspectRatio, zNear, zFar), eye.view())}.
    *
-   * @see #perspective(Node, float, float, float, boolean)
+   * @see #perspective(Node, float, float, float)
    * @see Node#view()
    */
-  public static Matrix perspectiveView(Node eye, float aspectRatio, float zNear, float zFar, boolean leftHanded) {
-    return Matrix.multiply(perspective(eye, aspectRatio, zNear, zFar, leftHanded), eye.view());
+  public static Matrix perspectiveView(Node eye, float aspectRatio, float zNear, float zFar) {
+    return Matrix.multiply(perspective(eye, aspectRatio, zNear, zFar), eye.view());
   }
 
   /**
-   * Same as {@code return Matrix.multiply(orthographic(eye, width, height, zNear, zFar, leftHanded), eye.view())}.
+   * Same as {@code return Matrix.multiply(orthographic(eye, width, height, zNear, zFar), eye.view())}.
    *
-   * @see #orthographic(Node, float, float, float, float, boolean)
+   * @see #orthographic(Node, float, float, float, float)
    * @see Node#view()
    */
-  public static Matrix orthographicView(Node eye, float width, float height, float zNear, float zFar, boolean leftHanded) {
-    return Matrix.multiply(orthographic(eye, width, height, zNear, zFar, leftHanded), eye.view());
+  public static Matrix orthographicView(Node eye, float width, float height, float zNear, float zFar) {
+    return Matrix.multiply(orthographic(eye, width, height, zNear, zFar), eye.view());
   }
 
   /**
@@ -3126,7 +3138,7 @@ public class Graph {
 
   /**
    * Renders the node tree onto context from the {@code eye} viewpoint with the given frustum parameters.
-   * Same as {@code render(context, type, null, eye, width, height, zNear, zFar, leftHanded)}.
+   * Same as {@code render(context, type, null, eye, width, height, zNear, zFar)}.
    *
    * @see #render(Object, Node, Node, Type, int, int, float, float, boolean)
    * @see #render()
@@ -3135,8 +3147,8 @@ public class Graph {
    * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */
-  public static void render(Object context, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    render(context, null, eye, type, width, height, zNear, zFar, leftHanded);
+  public static void render(Object context, Node eye, Type type, int width, int height, float zNear, float zFar) {
+    render(context, null, eye, type, width, height, zNear, zFar);
   }
 
   /**
@@ -3149,15 +3161,15 @@ public class Graph {
    * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */
-  public static void render(Object context, Node subtree, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    _render(MatrixHandler._get(context), context, subtree, eye, type, width, height, zNear, zFar, leftHanded);
+  public static void render(Object context, Node subtree, Node eye, Type type, int width, int height, float zNear, float zFar) {
+    _render(MatrixHandler._get(context), context, subtree, eye, type, width, height, zNear, zFar);
   }
 
   /**
    * used by {@link #render(Object, Node, Type, int, int, float, float, boolean)}.
    */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Node subtree, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded) {
-    _render(matrixHandler, context, subtree, projection(eye, type, width, height, zNear, zFar, leftHanded), eye.view());
+  protected static void _render(MatrixHandler matrixHandler, Object context, Node subtree, Node eye, Type type, int width, int height, float zNear, float zFar) {
+    _render(matrixHandler, context, subtree, projection(eye, type, width, height, zNear, zFar), eye.view());
   }
 
   /**
@@ -3546,8 +3558,8 @@ public class Graph {
 
   /*
   // goal:
-  public Vector screenLocation(Object context, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded)
-  public Vector _screenLocation(MatrixHandler matrixHandler, Object context, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded)
+  public Vector screenLocation(Object context, Vector vector, Node node, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded)
+  public Vector _screenLocation(MatrixHandler matrixHandler, Object context, Vector vector, Node node, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded)
    */
 
   /**
@@ -3586,23 +3598,29 @@ public class Graph {
    * @see #location(Vector)
    */
   public Vector screenLocation(Vector vector, Node node) {
+    return screenLocation(vector, node, projectionView(), width(), height());
+  }
+
+  public static Vector screenLocation(Vector vector, Node node, Node eye, Type type, int width, int height, float zNear, float zFar) {
+    return screenLocation(vector, node, Matrix.multiply(projection(eye, type, width, height, zNear, zFar), eye.view()), width, height);
+  }
+
+  public static Vector screenLocation(Vector vector, Node node, Matrix view, Matrix projection, int width, int height) {
+    return screenLocation(vector, node, Matrix.multiply(projection, view), width, height);
+  }
+
+  public static Vector screenLocation(Vector vector, Node node, Matrix projectionView, int width, int height) {
     Vector screen;
     if (node != null) {
       Vector tmp = node.worldLocation(vector);
-      screen = _screenLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2]);
+      screen = _screenLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2], projectionView, width, height);
     } else {
-      screen = _screenLocation(vector._vector[0], vector._vector[1], vector._vector[2]);
+      screen = _screenLocation(vector._vector[0], vector._vector[1], vector._vector[2], projectionView, width, height);
     }
     return screen;
   }
 
-  // TODO key to rendering make this one available on an arbitrary context
-  // cached version
-  protected Vector _screenLocation(float objx, float objy, float objz) {
-    return _screenLocation(objx, objy, objz, projectionView(), width(), height());
-  }
-
-  protected Vector _screenLocation(float objx, float objy, float objz, Matrix projectionViewMatrix, int width, int height) {
+  protected static Vector _screenLocation(float objx, float objy, float objz, Matrix projectionViewMatrix, int width, int height) {
     float[] in = new float[4];
     float[] out = new float[4];
     in[0] = objx;
@@ -3784,7 +3802,7 @@ public class Graph {
    */
   public Vector displacement(Vector vector, Node node) {
     float dx = vector.x();
-    float dy = isRightHanded() ? -vector.y() : vector.y();
+    float dy = leftHanded ? vector.y() : -vector.y();
     // Scale to fit the screen relative vector displacement
     if (type() == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.position();
@@ -3824,7 +3842,7 @@ public class Graph {
   public Vector screenDisplacement(Vector vector, Node node) {
     Vector eyeVector = eye().displacement(vector, node);
     float dx = eyeVector.x();
-    float dy = isRightHanded() ? -eyeVector.y() : eyeVector.y();
+    float dy = leftHanded ? eyeVector.y() : -eyeVector.y();
     if (type() == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.position();
       float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
@@ -4438,7 +4456,7 @@ public class Graph {
       pitch = 0;
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
-    Quaternion quaternion = new Quaternion(isLeftHanded() ? roll : -roll, -pitch, isLeftHanded() ? yaw : -yaw);
+    Quaternion quaternion = new Quaternion(leftHanded ? roll : -roll, -pitch, leftHanded ? yaw : -yaw);
     node.rotate(new Quaternion(node.displacement(quaternion.axis(), eye()), quaternion.angle()), inertia);
   }
 
@@ -4465,7 +4483,7 @@ public class Graph {
       pitch = 0;
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
-    eye().orbit(new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw), anchor(), inertia);
+    eye().orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), anchor(), inertia);
   }
 
   // 6. Spin
@@ -4582,9 +4600,9 @@ public class Graph {
     int centerX = (int) center.x();
     int centerY = (int) center.y();
     float px = sensitivity * (pixel1X - centerX) / width();
-    float py = sensitivity * (isLeftHanded() ? (pixel1Y - centerY) : (centerY - pixel1Y)) / height();
+    float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / height();
     float dx = sensitivity * (pixel2X - centerX) / width();
-    float dy = sensitivity * (isLeftHanded() ? (pixel2Y - centerY) : (centerY - pixel2Y)) / height();
+    float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / height();
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
@@ -4621,9 +4639,9 @@ public class Graph {
     int centerX = (int) center.x();
     int centerY = (int) center.y();
     float px = sensitivity * (pixel1X - centerX) / width();
-    float py = sensitivity * (isLeftHanded() ? (pixel1Y - centerY) : (centerY - pixel1Y)) / height();
+    float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / height();
     float dx = sensitivity * (pixel2X - centerX) / width();
-    float dy = sensitivity * (isLeftHanded() ? (pixel2Y - centerY) : (centerY - pixel2Y)) / height();
+    float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / height();
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
@@ -4712,7 +4730,7 @@ public class Graph {
       _lookAroundCount = this.frameCount();
     }
     _lookAroundCount++;
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_lookAroundTask._y : _lookAroundTask._y);
+    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _lookAroundTask._y : -_lookAroundTask._y);
     Quaternion rotY = new Quaternion(eye().displacement(_upVector), -_lookAroundTask._x);
     Quaternion quaternion = Quaternion.multiply(rotY, rotX);
     eye().rotate(quaternion);
@@ -4769,7 +4787,7 @@ public class Graph {
    */
   protected void _rotateCAD() {
     Vector _up = eye().displacement(_eyeUp);
-    eye().orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -_cadRotateTask._y : _cadRotateTask._y)), anchor());
+    eye().orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _cadRotateTask._y : -_cadRotateTask._y)), anchor());
   }
 
   // visual hints

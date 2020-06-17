@@ -100,8 +100,7 @@ public class ViewFrustumCulling extends PApplet {
     if (key == ' ')
       focus.togglePerspective();
     if (key == 'f') {
-      mainScene.flip();
-      secondaryScene.flip();
+      Scene.leftHanded = !Scene.leftHanded;
     }
   }
 

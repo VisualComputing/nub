@@ -106,7 +106,7 @@ public class DebugEye extends PApplet {
 
   public void keyPressed() {
     if (key == 'f')
-      scene.flip();
+      Scene.leftHanded = !Scene.leftHanded;
     if (key == 'p')
       peasy = !peasy;
     if (key == 'c')

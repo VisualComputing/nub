@@ -118,8 +118,7 @@ public class ViewingVolume extends PApplet {
       else
         focus.setType(Graph.Type.PERSPECTIVE);
     if (key == 'f') {
-      scene1.flip();
-      scene2.flip();
+      Scene.leftHanded = !Scene.leftHanded;
     }
     if (key == 's')
       scene1.fit(1);
