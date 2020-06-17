@@ -147,6 +147,7 @@ public class Graph {
   protected int _gridSubDiv;
   protected Object _background;
   protected static HashSet<Interpolator> _interpolators = new HashSet<Interpolator>();
+  protected static HashSet<Node> _hudSet = new HashSet<Node>();
   protected int _frustumColor;
   protected Graph _frustumGraph;
 
@@ -431,6 +432,7 @@ public class Graph {
     enableBoundaryEquations(false);
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
+    enableHint(HUD);
     // middle grey encoded as a processing int rgb color
     _gridStroke = -8553091;
     _gridType = GridType.DOTS;
@@ -3071,7 +3073,7 @@ public class Graph {
    * @see #render(Node)
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Node, Type, int, int, float, float, boolean)
+   * @see #render(Object, Node, Type, int, int, float, float)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
@@ -3090,7 +3092,7 @@ public class Graph {
    *
    * @see #render(Object, Node)
    * @see #render(Object, Node, Matrix, Matrix)
-   * @see #render(Object, Node, Node, Type, int, int, float, float, boolean)
+   * @see #render(Object, Node, Node, Type, int, int, float, float)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
@@ -3140,7 +3142,7 @@ public class Graph {
    * Renders the node tree onto context from the {@code eye} viewpoint with the given frustum parameters.
    * Same as {@code render(context, type, null, eye, width, height, zNear, zFar)}.
    *
-   * @see #render(Object, Node, Node, Type, int, int, float, float, boolean)
+   * @see #render(Object, Node, Node, Type, int, int, float, float)
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
@@ -3166,7 +3168,7 @@ public class Graph {
   }
 
   /**
-   * used by {@link #render(Object, Node, Type, int, int, float, float, boolean)}.
+   * used by {@link #render(Object, Node, Type, int, int, float, float)}.
    */
   protected static void _render(MatrixHandler matrixHandler, Object context, Node subtree, Node eye, Type type, int width, int height, float zNear, float zFar) {
     _render(matrixHandler, context, subtree, projection(eye, type, width, height, zNear, zFar), eye.view());
@@ -3179,7 +3181,7 @@ public class Graph {
    * @see #render(Object, Node)
    * @see #render()
    * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Node, Type, int, int, float, float, boolean)
+   * @see #render(Object, Node, Type, int, int, float, float)
    * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */
@@ -3193,7 +3195,7 @@ public class Graph {
    *
    * @see #render(Node)
    * @see #render(Object, Node, Matrix, Matrix)
-   * @see #render(Object, Node, Node, Type, int, int, float, float, boolean)
+   * @see #render(Object, Node, Node, Type, int, int, float, float)
    * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */
@@ -3211,7 +3213,7 @@ public class Graph {
    * @see #render(Object, Node, Matrix, Matrix)
    * @see #render()
    * @see #render(Object)
-   * @see #render(Object, Node, Type, int, int, float, float, boolean)
+   * @see #render(Object, Node, Type, int, int, float, float)
    * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */
@@ -3225,7 +3227,7 @@ public class Graph {
    *
    * @see #render(Node)
    * @see #render(Object, Node)
-   * @see #render(Object, Node, Node, Type, int, int, float, float, boolean)
+   * @see #render(Object, Node, Node, Type, int, int, float, float)
    * @see Node#setShape(Consumer<processing.core.PGraphics>)
    * @see Node#setShape(processing.core.PShape)
    */

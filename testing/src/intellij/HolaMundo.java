@@ -40,8 +40,7 @@ public class HolaMundo extends PApplet {
     mainScene.enableHint(Scene.AXES | Scene.GRID);
     mainScene.configHint(Scene.GRID, color(0, 255, 0));
     mainScene.enableHint(Graph.BACKGROUND);
-    mainScene.enableHint(Graph.HUD);
-    mainScene.setHUD(this::hud);
+    //mainScene.setHUD(this::hud);
     PShape pshape = createShape(RECT, 300, 50, 200, 200);
     pshape.setFill(color(255, 255, 0, 125));
     mainScene.setHUD(pshape);
@@ -54,6 +53,8 @@ public class HolaMundo extends PApplet {
     // B. Nodes
     // 1. torus
     torus = new Node();
+    //torus.setHUD(pshape);
+    torus.setHUD(this::hud);
     torus.enableHint(Node.TORUS, color(255, 0, 0));
     torus.setPickingPolicy(Node.PickingPolicy.PRECISE);
     torus.scale(10);
@@ -132,6 +133,10 @@ public class HolaMundo extends PApplet {
     } else if (key == 'a') {
       scene.toggleHint(Scene.AXES);
     }
+    if (key == 's')
+      scene.toggleHint(Scene.HUD);
+    if (key == 'n')
+      torus.toggleHint(Node.HUD);
   }
 
   // debug ray

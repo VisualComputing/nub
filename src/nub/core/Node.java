@@ -69,7 +69,7 @@ import java.util.function.Consumer;
  * {@code // Draw your object here, in the local node coordinate system.} <br>
  * {@code popMatrix();} <br>
  * <p>
- * Use {@link #view()} and {@link Graph#projection(Node, Graph.Type, float, float, float, float, boolean)}
+ * Use {@link #view()} and {@link Graph#projection(Node, Graph.Type, float, float, float, float)}
  * when rendering the scene from the node point-of-view. Note that these methods are used by
  * the graph when a node is set as its eye, see {@link Graph#preDraw()}.
  * <p>
@@ -88,7 +88,7 @@ import java.util.function.Consumer;
  * Hierarchical traversals of the node hierarchy which automatically apply the local
  * node transformations described above may be achieved with {@link Graph#render()},
  * {@link Graph#render(Object)}, {@link Graph#render(Object, Matrix, Matrix)} and
- * {@link Graph#render(Object, Node, Graph.Type, int, int, float, float, boolean)}.
+ * {@link Graph#render(Object, Node, Graph.Type, int, int, float, float)}.
  * Customize the rendering traversal algorithm by overriding {@link #visit()} (see
  * also {@link #cull(boolean)} and {@link #bypass()}).
  * <h2>Constraints</h2>
@@ -183,7 +183,8 @@ public class Node {
   public float _axesLength;
   public int _cameraStroke;
   public float _cameraLength;
-
+  public Consumer<processing.core.PGraphics> _imrHUD;
+  public processing.core.PShape _rmrHUD;
   // Rendering
   // Immediate mode rendering
   protected Consumer<processing.core.PGraphics> _imrShape;
@@ -309,7 +310,7 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    enableHint(Node.SHAPE | Node.HIGHLIGHT);
+    enableHint(Node.SHAPE | Node.HIGHLIGHT | Node.HUD);
     setPickingPolicy(PickingPolicy.BULLSEYE);
     _id = ++_counter;
     // unlikely but theoretically possible
@@ -1465,14 +1466,14 @@ public class Node {
    * Returns the magnitude of the node, defined in the world coordinate system.
    * <p>
    * Note that the magnitude is used to compute the node
-   * {@link Graph#projection(Node, Graph.Type, float, float, float, float, boolean)} which is useful to render a
+   * {@link Graph#projection(Node, Graph.Type, float, float, float, float)} which is useful to render a
    * scene from the node point-of-view.
    *
    * @see #orientation()
    * @see #position()
    * @see #setPosition(Vector)
    * @see #translation()
-   * @see Graph#projection(Node, Graph.Type, float, float, float, float, boolean)
+   * @see Graph#projection(Node, Graph.Type, float, float, float, float)
    */
   public float magnitude() {
     return reference() != null ? reference().magnitude() * scaling() : scaling();
@@ -2559,6 +2560,57 @@ public class Node {
   public void graphics(processing.core.PGraphics pGraphics) {
   }
 
+  protected void _updateHUD() {
+    if ((_rmrHUD == null && _imrHUD == null) || !isHintEnable(HUD)) {
+      Graph._hudSet.remove(this);
+    }
+    else {
+      Graph._hudSet.add(this);
+    }
+  }
+
+  public void resetHUD() {
+    _rmrHUD = null;
+    _imrHUD = null;
+    _updateHUD();
+  }
+
+  /**
+   * Same as {@code setRMRShape(null)}.
+   *
+   * @see #setShape(processing.core.PShape)
+   */
+  public void resetRMRHUD() {
+    _rmrHUD = null;
+    _updateHUD();
+  }
+
+  public void resetIMRHUD() {
+    _imrHUD = null;
+    _updateHUD();
+  }
+
+  /**
+   * Sets the node retained mode rendering (rmr) shape.
+   *
+   * @see #resetShape()
+   */
+  public void setHUD(processing.core.PShape shape) {
+    _rmrHUD = shape;
+    _updateHUD();
+  }
+
+  /**
+   * Sets the node immediate mode rendering (imr) procedure.
+   *
+   * @see #setShape(processing.core.PShape)
+   * @see #resetIMRShape()
+   */
+  public void setHUD(Consumer<processing.core.PGraphics> callback) {
+    _imrHUD = callback;
+    _updateHUD();
+  }
+
   public boolean isHintEnable(int hint) {
     return (_mask & hint) != 0;
   }
@@ -2573,6 +2625,7 @@ public class Node {
 
   public void disableHint(int hint) {
     _mask &= ~hint;
+    _updateHUD();
   }
 
   public void enableHint(int hint, Object... params) {
@@ -2582,10 +2635,12 @@ public class Node {
 
   public void enableHint(int hint) {
     _mask |= hint;
+    _updateHUD();
   }
 
   public void toggleHint() {
     _mask = ~_mask;
+    _updateHUD();
   }
 
   public void toggleHint(int hint) {

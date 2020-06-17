@@ -972,19 +972,27 @@ public class Scene extends Graph implements PConstants {
       drawFrustum(_frustumGraph);
       context().popStyle();
     }
-    if (isHintEnable(HUD) && (_imrHUD != null) || _rmrHUD != null) {
-      context().pushStyle();
-      beginHUD();
-      if(_imrHUD != null)
-        _imrHUD.accept(context());
-      if(_rmrHUD != null)
-        context().shape(_rmrHUD);
-      endHUD();
-      context().popStyle();
-    }
     for (Interpolator interpolator : _interpolators) {
       context().pushStyle();
       _drawSpline(interpolator);
+      context().popStyle();
+    }
+    if (!_hudSet.isEmpty() || (isHintEnable(HUD) && ((_imrHUD != null) || _rmrHUD != null))) {
+      context().pushStyle();
+      beginHUD();
+      for (Node node : _hudSet) {
+        if(node._imrHUD != null)
+          node._imrHUD.accept(context());
+        if(node._rmrHUD != null)
+          context().shape(node._rmrHUD);
+      }
+      if (isHintEnable(HUD) && ((_imrHUD != null) || _rmrHUD != null)) {
+        if(_imrHUD != null)
+          _imrHUD.accept(context());
+        if(_rmrHUD != null)
+          context().shape(_rmrHUD);
+      }
+      endHUD();
       context().popStyle();
     }
   }
