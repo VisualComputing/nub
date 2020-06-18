@@ -3598,22 +3598,15 @@ public class Graph {
   }
 
   public static Vector screenLocation(Vector vector, Node node, Matrix projectionView, int width, int height) {
-    Vector screen;
-    if (node != null) {
-      Vector tmp = node.worldLocation(vector);
-      screen = _screenLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2], projectionView, width, height);
-    } else {
-      screen = _screenLocation(vector._vector[0], vector._vector[1], vector._vector[2], projectionView, width, height);
-    }
-    return screen;
+    return _screenLocation(node != null ? node.worldLocation(vector) : vector, projectionView, width, height);
   }
 
-  protected static Vector _screenLocation(float objx, float objy, float objz, Matrix projectionViewMatrix, int width, int height) {
+  protected static Vector _screenLocation(Vector obj, Matrix projectionViewMatrix, int width, int height) {
     float[] in = new float[4];
     float[] out = new float[4];
-    in[0] = objx;
-    in[1] = objy;
-    in[2] = objz;
+    in[0] = obj.x();
+    in[1] = obj.y();
+    in[2] = obj.z();
     in[3] = 1.0f;
     out[0] = projectionViewMatrix._matrix[0] * in[0] + projectionViewMatrix._matrix[4] * in[1] + projectionViewMatrix._matrix[8] * in[2]
             + projectionViewMatrix._matrix[12] * in[3];
