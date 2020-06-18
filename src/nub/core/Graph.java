@@ -3558,12 +3558,6 @@ public class Graph {
         _map(vector.z(), 0, 1, -1, 1));
   }
 
-  /*
-  // goal:
-  public Vector screenLocation(Object context, Vector vector, Node node, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded)
-  public Vector _screenLocation(MatrixHandler matrixHandler, Object context, Vector vector, Node node, Node eye, Type type, int width, int height, float zNear, float zFar, boolean leftHanded)
-   */
-
   /**
    * Converts the {@code node} origin location to screen space.
    * Same as {@code return screenLocation(new Vector(), node)}.
@@ -3601,14 +3595,6 @@ public class Graph {
    */
   public Vector screenLocation(Vector vector, Node node) {
     return screenLocation(vector, node, projectionView(), width(), height());
-  }
-
-  public static Vector screenLocation(Vector vector, Node node, Node eye, Type type, int width, int height, float zNear, float zFar) {
-    return screenLocation(vector, node, Matrix.multiply(projection(eye, type, width, height, zNear, zFar), eye.view()), width, height);
-  }
-
-  public static Vector screenLocation(Vector vector, Node node, Matrix view, Matrix projection, int width, int height) {
-    return screenLocation(vector, node, Matrix.multiply(projection, view), width, height);
   }
 
   public static Vector screenLocation(Vector vector, Node node, Matrix projectionView, int width, int height) {

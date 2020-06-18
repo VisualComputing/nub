@@ -148,7 +148,7 @@ public class Node {
   // TODO public because of scene.drawBullsEye
   public BullsEyeShape _bullsEyeShape;
   public enum PickingPolicy {
-    PRECISE, BULLSEYE, HUD
+    PRECISE, BULLSEYE
   }
   protected PickingPolicy _pickingPolicy;
 

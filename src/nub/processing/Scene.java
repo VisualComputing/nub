@@ -1018,14 +1018,6 @@ public class Scene extends Graph implements PConstants {
     context().popStyle();
   }
 
-  public static Vector screenLocation(PGraphics pGraphics, Vector vector, Node node, Node eye, Type type, float zNear, float zFar) {
-    return screenLocation(vector, node, eye, type, pGraphics.width, pGraphics.height, zNear, zFar);
-  }
-
-  public static Vector screenLocation(PGraphics pGraphics, Vector vector, Node node, Matrix view, Matrix projection) {
-    return screenLocation(vector, node, view, projection, pGraphics.width, pGraphics.height);
-  }
-
   public static Vector screenLocation(PGraphics pGraphics, Vector vector, Node node, Matrix projectionView) {
     return screenLocation(vector, node, projectionView, pGraphics.width, pGraphics.height);
   }
