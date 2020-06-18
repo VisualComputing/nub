@@ -67,8 +67,11 @@ public class HolaMundo extends PApplet {
   }
 
   public void hud(PGraphics pg) {
+    pg.pushStyle();
+    pg.rectMode(CENTER);
     pg.fill(255, 0, 255, 125);
-    pg.rect(50,50, 200, 200);
+    pg.rect(0,0, 200, 200);
+    pg.popStyle();
   }
 
   @Override
