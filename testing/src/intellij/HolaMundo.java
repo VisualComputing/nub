@@ -35,6 +35,10 @@ public class HolaMundo extends PApplet {
     // A. Scenes
     // 1. Main (onscreen) Scene
     mainScene = new Scene(this);
+    if (mainScene.isProjectionViewInverseCached())
+      println("yes 1");
+    else
+      println("no 1");
     mainScene.setRadius(500);
     mainScene.fit(1);
     mainScene.enableHint(Scene.AXES | Scene.GRID);
@@ -64,6 +68,11 @@ public class HolaMundo extends PApplet {
     pbox.setFill(color(255, 255, 0));
     box = new Node(pbox);
     box.translate(200, 200, 0);
+    if (mainScene.isProjectionViewInverseCached())
+      println("yes 2");
+    else
+      println("no 2");
+    mainScene.cacheProjectionViewInverse(true);
   }
 
   public void hud(PGraphics pg) {
@@ -140,6 +149,12 @@ public class HolaMundo extends PApplet {
       scene.toggleHint(Scene.HUD);
     if (key == 'n')
       torus.toggleHint(Node.HUD);
+    if (key == 'p') {
+      if (mainScene.isProjectionViewInverseCached())
+        println("yes key");
+      else
+        println("no key");
+    }
   }
 
   // debug ray

@@ -2963,9 +2963,13 @@ public class Graph {
    * Returns the cached projection times view inverse matrix computed at {@link #preDraw()}.
    */
   public Matrix projectionViewInverse() {
-    if (!isProjectionViewInverseCached())
-      throw new RuntimeException("cacheProjectionViewInverse(true) should be called first");
-    return _projectionViewInverse;
+    if (isProjectionViewInverseCached())
+      return _projectionViewInverse;
+    else {
+      Matrix projectionViewInverse = projectionView().get();
+      projectionViewInverse.invert();
+      return projectionViewInverse;
+    }
   }
 
   // cache setters for projection times view and its inverse
@@ -3640,10 +3644,20 @@ public class Graph {
   /**
    * Convenience function that simply returns {@code location(pixel, null)}.
    * <p>
-   * #see {@link #location(Vector, Node)}
+   * @see #location(Vector, Node)
    */
   public Vector location(Vector pixel) {
-    return this.location(pixel, null);
+    return location(pixel, null);
+  }
+
+  /**
+   * Convenience function that simply returns {@code location(pixel, node, projectionViewInverse(), width(), height())}.
+   * <p>
+   * @see #location(Vector, Node, Matrix, int, int)
+   * @see #projectionViewInverse()
+   */
+  public Vector location(Vector pixel, Node node) {
+    return location(pixel, node, projectionViewInverse(), width(), height());
   }
 
   /**
@@ -3678,44 +3692,27 @@ public class Graph {
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
-  public Vector location(Vector pixel, Node node) {
-    Vector worldLocation = _location(pixel._vector[0], pixel._vector[1], pixel._vector[2]);
-    if (node != null)
-      return node.location(worldLocation);
-    else
-      return worldLocation;
+  public static Vector location(Vector pixel, Node node, Matrix projectionViewInverseMatrix, int width, int height) {
+    Vector worldLocation = _location(pixel, projectionViewInverseMatrix, width, height);
+    return node != null ? node.location(worldLocation) : worldLocation;
   }
 
   /**
    * Similar to {@code gluUnProject}: map window coordinates to object coordinates.
    *
-   * @param winx          Specify the window x coordinate.
-   * @param winy          Specify the window y coordinate.
-   * @param winz          Specify the window z coordinate.
+   * @param win          Specify the window x-y-z coordinates.
    */
-  // TODO objCoordinate
-  // note that static version taking the cache matrix as a param
-  // allows to implement a different cache idea:
-  // i) Always cache the conxtext() inverse
-  // ii) Move cache to user-space for other contexts
-  protected Vector _location(float winx, float winy, float winz) {
-    Matrix projectionViewInverseMatrix;
-    if (isProjectionViewInverseCached())
-      projectionViewInverseMatrix = projectionViewInverse();
-    else {
-      projectionViewInverseMatrix = Matrix.multiply(projection(), view());
-      projectionViewInverseMatrix.invert();
-    }
+  protected static Vector _location(Vector win, Matrix projectionViewInverseMatrix, int width, int height) {
     int[] viewport = new int[4];
     viewport[0] = 0;
-    viewport[1] = height();
-    viewport[2] = width();
-    viewport[3] = -height();
+    viewport[1] = height;
+    viewport[2] = width;
+    viewport[3] = -height;
     float[] in = new float[4];
     float[] out = new float[4];
-    in[0] = winx;
-    in[1] = winy;
-    in[2] = winz;
+    in[0] = win.x();
+    in[1] = win.y();
+    in[2] = win.z();
     in[3] = 1.0f;
     /* Map x and y from window coordinates */
     in[0] = (in[0] - viewport[0]) / viewport[2];
