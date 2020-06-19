@@ -129,7 +129,7 @@ import java.util.function.Consumer;
  * @see MatrixHandler
  */
 public class Graph {
-  public static Graph onscreenGraph;
+  protected static Graph _onscreenGraph;
   public static Random random = new Random();
   // Visual hints
   protected int _mask;

@@ -261,8 +261,8 @@ public class Scene extends Graph implements PConstants {
     // 1. P5 objects
     _parent = pApplet;
     _offscreen = pGraphics != pApplet.g;
-    if (!_offscreen && onscreenGraph == null)
-      onscreenGraph = this;
+    if (!_offscreen && _onscreenGraph == null)
+      _onscreenGraph = this;
     // 2. Back buffer
     _backBuffer().noSmooth();
     _triangleShader = pApplet().loadShader("PickingBuffer.frag");
@@ -633,13 +633,13 @@ public class Scene extends Graph implements PConstants {
     if (!isOffscreen()) {
       throw new RuntimeException("scene.display() only works if scene is offscreen.");
     }
-    if (onscreenGraph != null) {
-      onscreenGraph.beginHUD();
+    if (_onscreenGraph != null) {
+      _onscreenGraph.beginHUD();
       beginDraw();
       render(subtree);
       endDraw();
       image(x, y);
-      onscreenGraph.endHUD();
+      _onscreenGraph.endHUD();
     }
     else {
       beginDraw();
@@ -674,7 +674,7 @@ public class Scene extends Graph implements PConstants {
     _setUpperLeftCorner(pixelX, pixelY);
     _lastOffDisplayed = frameCount();
     pApplet().imageMode(CORNER);
-    pApplet().image(context(), _upperLeftCornerX, _upperLeftCornerY);
+    pApplet().image(context(), pixelX, pixelY);
     pApplet().popStyle();
   }
 
@@ -683,10 +683,10 @@ public class Scene extends Graph implements PConstants {
   }
 
   public void displayBackBuffer(int x, int y) {
-    if (onscreenGraph != null) {
-      onscreenGraph.beginHUD();
+    if (_onscreenGraph != null) {
+      _onscreenGraph.beginHUD();
       _imageBackBuffer(x, y);
-      onscreenGraph.endHUD();
+      _onscreenGraph.endHUD();
     }
     else {
       _imageBackBuffer(x, y);
