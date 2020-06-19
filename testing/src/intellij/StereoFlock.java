@@ -74,7 +74,7 @@ public class StereoFlock extends PApplet {
       scene.context().popMatrix();
     }
     scene.endDraw();
-    scene.display(pixelX, pixelY);
+    scene.image(pixelX, pixelY);
   }
 
   void walls(PGraphics pg) {

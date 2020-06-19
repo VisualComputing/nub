@@ -56,7 +56,7 @@ public class ViewFrustumCulling extends PApplet {
     bypass = false;
     mainScene.render();
     mainScene.endDraw();
-    mainScene.display();
+    mainScene.image();
     bypass = true;
     secondaryScene.beginDraw();
     secondaryScene.context().background(185);
@@ -68,7 +68,7 @@ public class ViewFrustumCulling extends PApplet {
     secondaryScene.drawFrustum(mainScene);
     secondaryScene.context().popStyle();
     secondaryScene.endDraw();
-    secondaryScene.display(0, h / 2);
+    secondaryScene.image(0, h / 2);
   }
 
   void handleMouse() {

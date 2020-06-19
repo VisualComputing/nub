@@ -90,12 +90,23 @@ public class HolaMundo extends PApplet {
     if (pup != null) {
       // debug
       drawRay();
+      /*
       mainScene.beginHUD();
       hintScene.beginDraw();
       hintScene.render();
       hintScene.endDraw();
       hintScene.display(atX, atY);
       mainScene.endHUD();
+      // */
+      /*
+      Scene.beginHUD(g);
+      hintScene.beginDraw();
+      hintScene.render();
+      hintScene.endDraw();
+      hintScene.display(atX, atY);
+      Scene.endHUD(g);
+      // */
+      hintScene.display(atX, atY);
     }
   }
 

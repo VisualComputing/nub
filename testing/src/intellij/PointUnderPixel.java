@@ -49,7 +49,7 @@ public class PointUnderPixel extends PApplet {
       drawRay();
       scene.render();
       scene.endDraw();
-      scene.display();
+      scene.image();
     } else {
       background(0);
       drawRay();

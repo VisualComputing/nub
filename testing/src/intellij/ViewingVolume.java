@@ -58,7 +58,7 @@ public class ViewingVolume extends PApplet {
     canvas1.sphere(scene1.radius());
     // */
     scene1.endDraw();
-    scene1.display();
+    scene1.image();
 
     scene2.beginDraw();
     canvas2.background(255);
@@ -83,7 +83,7 @@ public class ViewingVolume extends PApplet {
 
     scene2.context().popStyle();
     scene2.endDraw();
-    scene2.display(0, h / 2);
+    scene2.image(0, h / 2);
   }
 
   public void mouseDragged() {

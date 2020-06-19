@@ -134,7 +134,7 @@ public class MiniMap2 extends PApplet {
       scene.drawAxes();
       scene.render();
       scene.endDraw();
-      scene.display();
+      scene.image();
     } else {
       scene.drawAxes();
       scene.render();
@@ -154,7 +154,7 @@ public class MiniMap2 extends PApplet {
       minimap.drawFrustum(scene);
       // */
       minimap.endDraw();
-      minimap.display(w / 2, h / 2);
+      minimap.image(w / 2, h / 2);
       if (!scene.isOffscreen())
         scene.endHUD();
     }

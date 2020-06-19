@@ -171,7 +171,7 @@ public class GraphTypes extends PApplet {
     scene.drawAxes();
 
     scene.endDraw();
-    scene.display();
+    scene.image();
 
     auxScene.beginDraw();
     auxCanvas.background(0);
@@ -209,7 +209,7 @@ public class GraphTypes extends PApplet {
     auxCanvas.popMatrix();
 
     auxScene.endDraw();
-    auxScene.display(0, h / 2);
+    auxScene.image(0, h / 2);
   }
 
   public static void main(String args[]) {

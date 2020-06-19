@@ -15,8 +15,8 @@ public class MiniMap extends PApplet {
   boolean onScreen = true;
   boolean interactiveEye;
 
-  int w = 1200;
-  int h = 1200;
+  int w = 800;
+  int h = 600;
 
   //Choose P2D or P3D
   String renderer = P2D;
@@ -124,27 +124,12 @@ public class MiniMap extends PApplet {
   public void draw() {
     focus = minimap.hasMouseFocus() ? minimap : scene;
     if (scene.isOffscreen()) {
-      scene.beginDraw();
-      scene.drawAxes();
-      scene.render();
-      scene.endDraw();
       scene.display();
     } else {
-      scene.drawAxes();
       scene.render();
     }
     if (displayMinimap) {
-      if (!scene.isOffscreen())
-        scene.beginHUD();
-      minimap.beginDraw();
-      minimap.drawAxes();
-      minimap.render();
-      //minimap.context().stroke(255);
-      //minimap._drawBullsEye(scene.eye());
-      minimap.endDraw();
       minimap.display(w / 2, h / 2);
-      if (!scene.isOffscreen())
-        scene.endHUD();
     }
   }
 

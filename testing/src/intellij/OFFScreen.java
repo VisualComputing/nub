@@ -56,7 +56,7 @@ public class OFFScreen extends PApplet {
     scene.drawAxes();
     scene.render();
     scene.endDraw();
-    scene.display(400, 200);
+    scene.image(400, 200);
   }
 
   @Override

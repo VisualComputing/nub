@@ -130,7 +130,7 @@ public class TwoScenes extends PApplet {
     draw(scene1);
     scene1.drawAxes();
     scene1.endDraw();
-    scene1.display();
+    scene1.image();
 
     scene2.beginDraw();
     scene2.context().background(0);
@@ -151,7 +151,7 @@ public class TwoScenes extends PApplet {
     scene2.context().popMatrix();
 
     scene2.endDraw();
-    scene2.display(0, h / 2);
+    scene2.image(0, h / 2);
   }
 
   public static void main(String args[]) {

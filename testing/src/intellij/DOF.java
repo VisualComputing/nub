@@ -84,11 +84,11 @@ public class DOF extends PApplet {
 
     // display one of the 3 buffers
     if (mode == 0)
-      scene.display();
+      image(scene.context(), 0, 0);
     else if (mode == 1)
-      scene.display(depthPGraphics);
+      image(depthPGraphics, 0, 0);
     else
-      scene.display(dofPGraphics);
+      image(dofPGraphics, 0, 0);
   }
 
   PShape boxShape() {

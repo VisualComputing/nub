@@ -121,7 +121,7 @@ public class ShiftViewers extends PApplet {
       scene1.drawAxes();
       scene1.render();
       scene1.endDraw();
-      scene1.display();
+      scene1.image();
     } else {
       scene1.drawAxes();
       scene1.render();
@@ -134,7 +134,7 @@ public class ShiftViewers extends PApplet {
       scene2.drawAxes();
       scene2.render();
       scene2.endDraw();
-      scene2.display(w / 2, 0);
+      scene2.image(w / 2, 0);
       if (!scene1.isOffscreen())
         scene1.endHUD();
       if (!scene1.isOffscreen())
@@ -144,7 +144,7 @@ public class ShiftViewers extends PApplet {
       scene3.drawAxes();
       scene3.render();
       scene3.endDraw();
-      scene3.display(w / 2, h / 2);
+      scene3.image(w / 2, h / 2);
       if (!scene1.isOffscreen())
         scene1.endHUD();
     }

@@ -241,14 +241,10 @@ public class Scene extends Graph implements PConstants {
   /**
    * Main constructor defining a left-handed Processing compatible scene.
    * <p>
-   * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. In this
-   * case the {@code x} and {@code y} parameters define the position of the upper-left corner
-   * where the off-screen scene is expected to be displayed, see {@link #display()}. If
+   * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. If
    * {@code pGraphics == pApplet.g}) (which defines an on-screen scene, see also
-   * {@link #isOffscreen()}), the values of x and y are meaningless (both are set to 0 to be
-   * taken as dummy values). Render into an off-screen graph requires the drawing code to be
-   * enclose by {@link #beginDraw()} and {@link #endDraw()}. To display an off-screen scene
-   * call {@link #display()}.
+   * {@link #isOffscreen()}). To display an off-screen scene call
+   * {@link #display(Node, int, int)} ()}.
    *
    * @see Graph#Graph(Object, nub.core.Graph.Type, int, int)
    * @see #Scene(PApplet)
@@ -265,6 +261,8 @@ public class Scene extends Graph implements PConstants {
     // 1. P5 objects
     _parent = pApplet;
     _offscreen = pGraphics != pApplet.g;
+    if (!_offscreen && onscreenGraph == null)
+      onscreenGraph = this;
     // 2. Back buffer
     _backBuffer().noSmooth();
     _triangleShader = pApplet().loadShader("PickingBuffer.frag");
@@ -598,50 +596,100 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code display(context())}.
+   * Same as {@code display(null, 0, 0)}.
    *
-   * @see #display(PGraphics)
-   * @see #context()
+   * @see #display(Node, int, int)
    */
   public void display() {
-    display(context());
+    display(null, 0, 0);
   }
 
   /**
-   * Same as {@code display(pgraphics, 0, 0)}.
+   * Same as {@code display(null, x, y)}.
    *
-   * @see #display(PGraphics, int, int)
+   * @see #display(Node, int, int)
    */
-  public void display(PGraphics pgraphics) {
-    display(pgraphics, 0, 0);
+  public void display(int x, int y) {
+    display(null, x, y);
   }
 
   /**
-   * Same as {@code display(context(), pixelX, pixelY)}.
+   * Same as {@code display(subtree, 0, 0)}.
    *
-   * @see #display(PGraphics, int, int)
-   * @see #context()
+   * @see #display(Node, int, int)
    */
-  public void display(int pixelX, int pixelY) {
-    display(context(), pixelX, pixelY);
+  public void display(Node subtree) {
+    display(subtree, 0, 0);
   }
 
   /**
-   * Displays the {@code pgraphics} on top of the main sketch canvas at the upper left
-   * corner: {@code (pixelX, pixelY)}. Only meaningful if the graph {@link #isOffscreen()}.
+   * Renders the {@code subtree} onto the off-screen scene {@link #context()} and displays it
+   * at the upper left corner: {@code (pixelX, pixelY)} of the {@link #pApplet()}. Only
+   * meaningful if the graph {@link #isOffscreen()}.
    * <p>
-   * Displaying the {@code pgraphics} requires a call to the PApplet {@code image()}.
-   * However, to make {@link #hasMouseFocus()} work, calling this method instead is
-   * always necessary. It is always safe to call this method.
+   * Calls {@link #render(Node)} followed by {@link #image(int, int)}.
    */
-  public void display(PGraphics pgraphics, int pixelX, int pixelY) {
-    if (isOffscreen()) {
-      pApplet().pushStyle();
-      _setUpperLeftCorner(pixelX, pixelY);
-      _lastOffDisplayed = frameCount();
-      pApplet().imageMode(CORNER);
-      pApplet().image(pgraphics, _upperLeftCornerX, _upperLeftCornerY);
-      pApplet().popStyle();
+  public void display(Node subtree, int x, int y) {
+    if (!isOffscreen()) {
+      throw new RuntimeException("scene.display() only works if scene is offscreen.");
+    }
+    if (onscreenGraph != null) {
+      onscreenGraph.beginHUD();
+      beginDraw();
+      render(subtree);
+      endDraw();
+      image(x, y);
+      onscreenGraph.endHUD();
+    }
+    else {
+      beginDraw();
+      render(subtree);
+      endDraw();
+      image(x, y);
+    }
+  }
+
+  /**
+   * Same as {@code image(0, 0)}.
+   *
+   * @see #image(int, int)
+   */
+  public void image() {
+    image(0, 0);
+  }
+
+  /**
+   * Similar to {@link #pApplet()} {@code image()}. Used to display the offscreen scene {@link #context()}.
+   * <p>
+   * Call this method, instead of {@link #pApplet()} {@code image()}, to make {@link #hasMouseFocus()}
+   * work always properly.
+   *
+   * @see #display(Node, int, int)
+   */
+  public void image(int pixelX, int pixelY) {
+    if (!isOffscreen()) {
+      throw new RuntimeException("scene.image() only works if scene is offscreen.");
+    }
+    pApplet().pushStyle();
+    _setUpperLeftCorner(pixelX, pixelY);
+    _lastOffDisplayed = frameCount();
+    pApplet().imageMode(CORNER);
+    pApplet().image(context(), _upperLeftCornerX, _upperLeftCornerY);
+    pApplet().popStyle();
+  }
+
+  public void displayBackBuffer() {
+    displayBackBuffer(0, 0);
+  }
+
+  public void displayBackBuffer(int x, int y) {
+    if (onscreenGraph != null) {
+      onscreenGraph.beginHUD();
+      _imageBackBuffer(x, y);
+      onscreenGraph.endHUD();
+    }
+    else {
+      _imageBackBuffer(x, y);
     }
   }
 
@@ -650,7 +698,7 @@ public class Scene extends Graph implements PConstants {
    * on top of the main sketch canvas at the upper left corner:
    * {@code (pixelX, pixelY)}. Mainly for debugging.
    */
-  public void displayBackBuffer(int pixelX, int pixelY) {
+  public void _imageBackBuffer(int pixelX, int pixelY) {
     if (_backBuffer() != null) {
       pApplet().pushStyle();
       pApplet().imageMode(CORNER);

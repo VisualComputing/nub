@@ -92,7 +92,7 @@ public class HUDPicking extends PApplet {
       hintScene.beginDraw();
       hintScene.render();
       hintScene.endDraw();
-      hintScene.display(atX, atY);
+      hintScene.image(atX, atY);
       mainScene.endHUD();
     }
   }

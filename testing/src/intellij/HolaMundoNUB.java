@@ -37,9 +37,11 @@ public class HolaMundoNUB extends PApplet {
     mainScene.enableHint(Scene.AXES | Scene.GRID);
     mainScene.configHint(Scene.GRID, color(0, 255, 0));
     mainScene.enableHint(Scene.HUD);
+    mainScene.enableHint(Scene.BACKGROUND, color(125));
     mainScene.setHUD(this::hud);
     // 2. Can (offscreen) Scene
     canScene = new Scene(this, P3D, canSceneWidth, canSceneHeight);
+    canScene.enableHint(Scene.BACKGROUND, color(25, 170, 150));
     canScene.setRadius(300);
     canScene.fit();
     //texShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/texture/texfrag.glsl");
@@ -85,19 +87,10 @@ public class HolaMundoNUB extends PApplet {
   public void draw() {
     scene = canScene.hasMouseFocus() ? canScene : mainScene;
     // subtree rendering
-    displayOFFScreenScene(mainScene, root, color(125), 0, 0);
+    mainScene.display(root);
     if (displayCan) {
-      displayOFFScreenScene(canScene, can, color(25, 170, 150), width - canSceneWidth, height - canSceneHeight);
+      canScene.display(can, width - canSceneWidth, height - canSceneHeight);
     }
-  }
-
-  void displayOFFScreenScene(Scene offscreeScene, Node subtree, int background, int x, int y) {
-    offscreeScene.beginDraw();
-    offscreeScene.context().background(background);
-    // subtree rendering
-    offscreeScene.render(subtree);
-    offscreeScene.endDraw();
-    offscreeScene.display(x, y);
   }
 
   @Override
