@@ -137,9 +137,12 @@ public class Graph {
   public final static int AXES = 1 << 1;
   public final static int HUD = 1 << 2;
   public final static int FRUSTUM = 1 << 3;
-  public final static int BACKGROUND = 1 << 4;
+  public final static int SHAPE = 1 << 4;
+  public final static int BACKGROUND = 1 << 5;
   protected Consumer<processing.core.PGraphics> _imrHUD;
   protected processing.core.PShape _rmrHUD;
+  protected Consumer<processing.core.PGraphics> _imrShape;
+  protected processing.core.PShape _rmrShape;
   public enum GridType {
     LINES, DOTS
   }
@@ -433,7 +436,7 @@ public class Graph {
     enableBoundaryEquations(false);
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
-    enableHint(HUD);
+    enableHint(HUD | SHAPE);
     // middle grey encoded as a processing int rgb color
     _gridStroke = -8553091;
     _gridType = GridType.DOTS;
@@ -4911,5 +4914,50 @@ public class Graph {
 
   public void resetRMRHUD() {
     _rmrHUD = null;
+  }
+
+  /**
+   * Calls {@link #resetIMRShape()} and {@link #resetRMRShape()} .
+   */
+  public void resetShape() {
+    _rmrShape = null;
+    _imrShape = null;
+  }
+
+  /**
+   * Resets the retained-mode rendering shape.
+   *
+   * @see #setShape(Consumer)
+   */
+  public void resetRMRShape() {
+    _rmrShape = null;
+  }
+
+  /**
+   * Resets the immediate-mode rendering shape.
+   *
+   * @see #setShape(processing.core.PShape)
+   */
+  public void resetIMRShape() {
+    _imrShape = null;
+  }
+
+  /**
+   * Sets the node retained-mode rendering shape.
+   *
+   * @see #resetShape()
+   */
+  public void setShape(processing.core.PShape shape) {
+    _rmrShape = shape;
+  }
+
+  /**
+   * Sets the node immediate-mode rendering procedure.
+   *
+   * @see #setShape(processing.core.PShape)
+   * @see #resetIMRShape()
+   */
+  public void setShape(Consumer<processing.core.PGraphics> callback) {
+    _imrShape = callback;
   }
 }

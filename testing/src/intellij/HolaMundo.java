@@ -5,6 +5,7 @@ import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -35,10 +36,6 @@ public class HolaMundo extends PApplet {
     // A. Scenes
     // 1. Main (onscreen) Scene
     mainScene = new Scene(this);
-    if (mainScene.isProjectionViewInverseCached())
-      println("yes 1");
-    else
-      println("no 1");
     mainScene.setRadius(500);
     mainScene.fit(1);
     mainScene.enableHint(Scene.AXES | Scene.GRID);
@@ -48,6 +45,9 @@ public class HolaMundo extends PApplet {
     PShape pshape = createShape(RECT, 300, 50, 200, 200);
     pshape.setFill(color(255, 255, 0, 125));
     mainScene.setHUD(pshape);
+    // mainScene.disableHint(Graph.SHAPE);
+    mainScene.setShape(this::sphere);
+    //mainScene.setShape(pshape);
     //mainScene.setHUD(this::hud);
     //mainScene.configHint(Scene.GRID, Graph.GridType.LINE);
     // 2. Hint (offscreen) Scene
@@ -68,11 +68,6 @@ public class HolaMundo extends PApplet {
     pbox.setFill(color(255, 255, 0));
     box = new Node(pbox);
     box.translate(200, 200, 0);
-    if (mainScene.isProjectionViewInverseCached())
-      println("yes 2");
-    else
-      println("no 2");
-    mainScene.cacheProjectionViewInverse(true);
   }
 
   public void hud(PGraphics pg) {
@@ -83,6 +78,14 @@ public class HolaMundo extends PApplet {
     pg.popStyle();
   }
 
+  public void sphere(PGraphics pg) {
+    pg.pushStyle();
+    pg.rectMode(CENTER);
+    pg.fill(255, 0, 255, 125);
+    pg.sphere(200);
+    pg.popStyle();
+  }
+
   @Override
   public void draw() {
     scene = hintScene.hasMouseFocus() ? hintScene : mainScene;
@@ -90,22 +93,6 @@ public class HolaMundo extends PApplet {
     if (pup != null) {
       // debug
       drawRay();
-      /*
-      mainScene.beginHUD();
-      hintScene.beginDraw();
-      hintScene.render();
-      hintScene.endDraw();
-      hintScene.display(atX, atY);
-      mainScene.endHUD();
-      // */
-      /*
-      Scene.beginHUD(g);
-      hintScene.beginDraw();
-      hintScene.render();
-      hintScene.endDraw();
-      hintScene.display(atX, atY);
-      Scene.endHUD(g);
-      // */
       hintScene.display(atX, atY);
     }
   }
@@ -160,12 +147,6 @@ public class HolaMundo extends PApplet {
       scene.toggleHint(Scene.HUD);
     if (key == 'n')
       torus.toggleHint(Node.HUD);
-    if (key == 'p') {
-      if (mainScene.isProjectionViewInverseCached())
-        println("yes key");
-      else
-        println("no key");
-    }
   }
 
   // debug ray

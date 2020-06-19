@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static nub.core.Graph.SHAPE;
+
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing mouse-driven {@link Graph}.
  * <h1>Usage</h1>
@@ -1011,6 +1013,17 @@ public class Scene extends Graph implements PConstants {
         drawGrid(radius(), _gridSubDiv);
       }
       context().popStyle();
+    }
+    if (isHintEnable(Graph.SHAPE) && (_rmrShape != null || _imrShape != null)) {
+      context().push();
+      if (_rmrShape != null) {
+        context().shapeMode(context().shapeMode);
+        context().shape(_rmrShape);
+      }
+      if (_imrShape != null) {
+        _imrShape.accept(context());
+      }
+      context().pop();
     }
     if (isHintEnable(FRUSTUM) && _frustumGraph != null) {
       context().pushStyle();

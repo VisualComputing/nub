@@ -167,7 +167,7 @@ public class Node {
   public final static int AXES = Graph.AXES;
   public final static int HUD = Graph.HUD;
   public final static int FRUSTUM = Graph.FRUSTUM;
-  public final static int SHAPE = 1 << 4;
+  public final static int SHAPE = Graph.SHAPE;
   public final static int HIGHLIGHT = 1 << 5;
   public final static int BULLSEYE = 1 << 6;
   public final static int TORUS = 1 << 7;
@@ -310,7 +310,7 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    enableHint(Node.SHAPE | Node.HIGHLIGHT | Node.HUD);
+    enableHint(HUD | SHAPE | HIGHLIGHT);
     setPickingPolicy(PickingPolicy.BULLSEYE);
     _id = ++_counter;
     // unlikely but theoretically possible
@@ -2513,26 +2513,34 @@ public class Node {
   // js go:
   // public void graphics(Object context) {}
 
+  /**
+   * Calls {@link #resetIMRShape()} and {@link #resetRMRShape()} .
+   */
   public void resetShape() {
     _rmrShape = null;
     _imrShape = null;
   }
 
   /**
-   * Same as {@code setRMRShape(null)}.
+   * Resets the retained-mode rendering shape.
    *
-   * @see #setShape(processing.core.PShape)
+   * @see #setShape(Consumer)
    */
   public void resetRMRShape() {
     _rmrShape = null;
   }
 
+  /**
+   * Resets the immediate-mode rendering shape.
+   *
+   * @see #setShape(processing.core.PShape)
+   */
   public void resetIMRShape() {
     _imrShape = null;
   }
 
   /**
-   * Sets the node retained mode rendering (rmr) shape.
+   * Sets the node retained-mode rendering shape.
    *
    * @see #resetShape()
    */
@@ -2541,7 +2549,7 @@ public class Node {
   }
 
   /**
-   * Sets the node immediate mode rendering (imr) procedure.
+   * Sets the node immediate-mode rendering procedure.
    *
    * @see #setShape(processing.core.PShape)
    * @see #resetIMRShape()
