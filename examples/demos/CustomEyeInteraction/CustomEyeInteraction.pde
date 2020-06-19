@@ -37,8 +37,8 @@ Scene scene;
 boolean keyMode;
 
 // size
-int w = 1240;
-int h = 840;
+int w = 1200;
+int h = 700;
 float step = 5 * TWO_PI / w;
 
 void settings() {

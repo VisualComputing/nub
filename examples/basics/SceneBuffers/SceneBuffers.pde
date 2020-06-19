@@ -17,8 +17,8 @@ Node[] shapes;
 
 //Choose P2D or P3D
 String renderer = P3D;
-int w = 1000;
-int h = 1000;
+int w = 700;
+int h = 700;
 
 void settings() {
   size(w, h, renderer);
@@ -28,6 +28,7 @@ void setup() {
   rectMode(CENTER);
   // same as: scene = new Scene(this, createGraphics(w, h / 2, renderer));
   scene = new Scene(this, renderer, w, h /2);
+  scene.enableHint(Scene.BACKGROUND, color(10, 50, 25));
   scene.setRadius(max(w, h));
 
   shapes = new Node[100];
@@ -40,10 +41,6 @@ void setup() {
 
 void draw() {
   // 1. Fill in and display front-buffer
-  scene.beginDraw();
-  scene.context().background(10,50,25);
-  scene.render();
-  scene.endDraw();
   scene.display();
   // 2. Display back buffer
   scene.displayBackBuffer(0, h / 2);

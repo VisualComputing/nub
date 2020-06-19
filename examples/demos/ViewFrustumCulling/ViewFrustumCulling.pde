@@ -21,8 +21,8 @@ OctreeNode root;
 Scene mainScene, secondaryScene, focus;
 boolean bypass;
 
-int w = 1000;
-int h = 800;
+int w = 900;
+int h = 700;
 //octree
 float a = 220, b = 100, c = 280;
 int levels = 4;
@@ -58,17 +58,11 @@ void buildOctree(OctreeNode parent) {
 
 void draw() {
   focus = mainScene.hasMouseFocus() ? mainScene : secondaryScene;
-  mainScene.beginDraw();
   // culling condition should be retested every frame
   root.cull(false);
   bypass = false;
-  mainScene.render();
-  mainScene.endDraw();
   mainScene.display();
   bypass = true;
-  secondaryScene.beginDraw();
-  secondaryScene.render();
-  secondaryScene.endDraw();
   secondaryScene.display(0, h / 2);
 }
 
@@ -97,7 +91,6 @@ void keyPressed() {
   if (key == ' ')
     focus.togglePerspective();
   if (key == 'f') {
-    mainScene.flip();
-    secondaryScene.flip();
+    Scene.leftHanded = !Scene.leftHanded;
   }
 }

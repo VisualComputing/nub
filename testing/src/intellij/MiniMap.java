@@ -41,17 +41,13 @@ public class MiniMap extends PApplet {
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
         models[i] = new Node(shape());
-        models[i].setBullsEyeSize(50);
-        models[i].enableHint(Node.BULLSEYE);
       } else {
         models[i] = new Node();
-        models[i].enableHint(Node.BULLSEYE);
         models[i].enableHint(Node.TORUS);
-        models[i].setBullsEyeSize(50);
         models[i].scale(3);
       }
       // set picking precision to the pixels of the node projection
-      //models[i].setBullsEyeSize(0);
+      models[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
       scene.randomize(models[i]);
     }
     // Note that we pass the upper left corner coordinates where the minimap

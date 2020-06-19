@@ -18,15 +18,15 @@ import nub.primitives.*;
 import nub.core.*;
 import nub.processing.*;
 
-Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
+Scene.Type shadowMapType = Scene.Type.ORTHOGRAPHIC;
 Scene scene;
 Node[] shapes;
 PGraphics shadowMap;
 PShader depthShader;
 float zNear = 50;
-float zFar = 1000;
-int w = 1000;
-int h = 1000;
+float zFar = 700;
+int w = 700;
+int h = 700;
 
 void settings() {
   size(w, h, P3D);
@@ -45,7 +45,7 @@ void setup() {
         if (scene.node("light") == this) {
           Scene.drawAxes(pg, 150);
           pg.fill(0, isTagged(scene) ? 255 : 0, 255, 120);
-          Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
+          Scene.drawFrustum(pg, shadowMap, this, shadowMapType, zNear, zFar);
         } else {
           if (pg == shadowMap)
             pg.noStroke();
@@ -59,8 +59,10 @@ void setup() {
         pg.popStyle();
       }
     };
+    shapes[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
+    shapes[i].configHint(Node.FRUSTUM, color(0, 255, 255, 125));
     scene.randomize(shapes[i]);
-    shapes[i].setHighlighting(0);
+    shapes[i].disableHint(Node.HIGHLIGHT);
   }
   shadowMap = createGraphics(w / 2, h / 2, P3D);
   depthShader = loadShader("depth.glsl");
@@ -80,7 +82,7 @@ void draw() {
   if (scene.isTagValid("light")) {
     shadowMap.beginDraw();
     shadowMap.background(140, 160, 125);
-    Scene.render(shadowMap, shadowMapType, scene.node("light"), zNear, zFar);
+    Scene.render(shadowMap, scene.node("light"), shadowMapType, zNear, zFar);
     shadowMap.endDraw();
     // 3. Display shadow map
     scene.beginHUD();

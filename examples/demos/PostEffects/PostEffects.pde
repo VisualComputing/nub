@@ -22,11 +22,12 @@ Node[] models;
 PFont font;
 
 public void setup() {
-  size(900, 900, P3D);
+  size(700, 700, P3D);
   font = loadFont("FreeSans-13.vlw");
   textFont(font);
   colorMode(HSB, 255);
   scene = new Scene(this, P3D);
+  scene.enableHint(Scene.BACKGROUND, color(0));
   scene.setRadius(1000);
   models = new Node[100];
   for (int i = 0; i < models.length; i++) {
@@ -81,7 +82,6 @@ public void draw() {
 
   // 1. Draw into main buffer
   scene.beginDraw();
-  graphics.background(0);
   scene.render();
   scene.endDraw();
 
@@ -140,7 +140,7 @@ public void draw() {
     raysGraphics.endDraw();
     drawGraphics = raysGraphics;
   }
-  scene.display(drawGraphics);
+  image(drawGraphics, 0, 0);
   drawText();
 }
 

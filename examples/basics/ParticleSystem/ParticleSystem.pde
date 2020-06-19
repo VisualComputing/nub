@@ -22,7 +22,7 @@ int nbPart;
 Particle[] particles;
 
 void setup() {
-  size(1000, 800, P3D);
+  size(1000, 700, P3D);
   scene = new Scene(this);
   nbPart = 2000;
   particles = new Particle[nbPart];

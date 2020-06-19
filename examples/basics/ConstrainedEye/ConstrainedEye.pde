@@ -25,7 +25,7 @@ int activeConstraint;
 String renderer = P3D;
 
 void setup() {
-  size(800, 800, renderer);
+  size(700, 700, renderer);
   font = loadFont("FreeSans-16.vlw");
   textFont(font);
   scene = new Scene(this);

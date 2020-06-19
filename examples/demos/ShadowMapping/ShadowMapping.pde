@@ -34,8 +34,8 @@ boolean debug;
 Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
 float zNear = 10;
 float zFar = 600;
-int w = 1000;
-int h = 1000;
+int w = 700;
+int h = 700;
 
 void settings() {
   size(w, h, P3D);
@@ -112,7 +112,7 @@ void setup() {
       pg.pushStyle();
       if (debug) {
         pg.fill(0, isTagged(scene) ? 255 : 0, 255);
-        Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
+        Scene.drawFrustum(pg, shadowMap, this, shadowMapType, zNear, zFar);
       } else {
         pg.fill(0, 255, 255);
         Scene.drawCone(pg, 150.0, 60.0, 240.0);
@@ -154,7 +154,7 @@ void draw() {
   shadowMap.beginDraw();
   shadowMap.noStroke();
   shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
-  Scene.render(shadowMap, shadowMapType, light, zNear, zFar);
+  Scene.render(shadowMap, light, shadowMapType, zNear, zFar);
   shadowMap.endDraw();
 
   // 2. Render the scene from the scene.eye() node

@@ -21,12 +21,12 @@ public class Flock extends PApplet {
   static Node avatar;
 
   public void settings() {
-    size(1000, 800, P3D);
+    size(1000, 700, P3D);
   }
 
   public void setup() {
-    size(1000, 800, P3D);
     scene = new Scene(this);
+    scene.enableHint(Scene.BACKGROUND, color(10, 50, 25));
     scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.fit();
     // create and fill the list of boids
@@ -36,7 +36,6 @@ public class Flock extends PApplet {
   }
 
   public void draw() {
-    background(10, 50, 25);
     ambientLight(128, 128, 128);
     directionalLight(255, 255, 255, 0, 1, -100);
     walls();

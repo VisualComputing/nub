@@ -25,6 +25,7 @@ public class ViewFrustumCulling extends PApplet {
   public void setup() {
     // main scene
     mainScene = new Scene(this, P3D, w, h / 2);
+    mainScene.enableHint(Scene.BACKGROUND, color(255));
     mainScene.togglePerspective();
     mainScene.enableBoundaryEquations();
     mainScene.fit(1);
@@ -35,6 +36,7 @@ public class ViewFrustumCulling extends PApplet {
 
     // secondary scene
     secondaryScene = new Scene(this, P3D, w, h / 2);
+    secondaryScene.enableHint(Scene.BACKGROUND, color(185));
     secondaryScene.togglePerspective();
     secondaryScene.setRadius(200);
     secondaryScene.fit();
@@ -47,28 +49,13 @@ public class ViewFrustumCulling extends PApplet {
   }
 
   public void draw() {
-    handleMouse();
-    background(255);
-    mainScene.beginDraw();
-    mainScene.context().background(255);
+    focus = mainScene.hasMouseFocus() ? mainScene : secondaryScene;
     // culling condition should be retested every frame
     root.cull(false);
     bypass = false;
-    mainScene.render();
-    mainScene.endDraw();
-    mainScene.image();
+    mainScene.display();
     bypass = true;
-    secondaryScene.beginDraw();
-    secondaryScene.context().background(185);
-    secondaryScene.render();
-    secondaryScene.context().pushStyle();
-    secondaryScene.context().strokeWeight(2);
-    secondaryScene.context().stroke(255, 0, 255);
-    secondaryScene.context().fill(255, 0, 255, 160);
-    secondaryScene.drawFrustum(mainScene);
-    secondaryScene.context().popStyle();
-    secondaryScene.endDraw();
-    secondaryScene.image(0, h / 2);
+    secondaryScene.display(0, h / 2);
   }
 
   void handleMouse() {

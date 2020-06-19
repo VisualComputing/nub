@@ -25,12 +25,10 @@ int activeConstraint;
 String renderer = P3D;
 
 void setup() {
-  size(800, 800, renderer);
+  size(700, 700, renderer);
   font = loadFont("FreeSans-16.vlw");
   textFont(font);
-
   scene = new Scene(this);
-
   constraints[0] = new LocalConstraint();
   // Note that an EyeConstraint(eye) would produce the same results:
   // An EyeConstraint is a LocalConstraint when applied to the eye
@@ -39,9 +37,8 @@ void setup() {
   transDir = 0;
   rotDir = 0;
   activeConstraint = 0;
-
   node = new Node();
-  node.enableHint(Node.TORUS | Node.BULLSEYE);
+  node.enableHint(Node.TORUS | Node.BULLSEYE | Node.AXES);
   scene.randomize(node);
   node.translate(new Vector(20, 20, 0));
   node.setConstraint(constraints[activeConstraint]);

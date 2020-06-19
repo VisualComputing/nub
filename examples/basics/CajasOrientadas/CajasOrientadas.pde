@@ -10,8 +10,8 @@
  * See how the boxes will always remain oriented towards the sphere.
  *
  * Press ' ' the change the picking policy.
- * Press 'c' to change the bullseye shape space.
- * Press 'c' to change the bullseye shape space.
+ * Press 'c' to change the bullseye space.
+ * Press 'd' to change the bullseye shape.
  */
 
 import nub.primitives.*;
@@ -21,11 +21,13 @@ import nub.processing.*;
 Scene scene;
 Box[] cajas;
 Sphere esfera;
+boolean circle;
 
 void setup() {
-  size(800, 800, P3D);
+  size(800, 600, P3D);
   // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
   scene = new Scene(this);
+  scene.enableHint(Scene.BACKGROUND, color(0));
   scene.setRadius(200);
   scene.togglePerspective();
   scene.fit();
@@ -33,14 +35,13 @@ void setup() {
   esfera.setPosition(new Vector(0, 1.4, 0));
   cajas = new Box[15];
   for (int i = 0; i < cajas.length; i++)
-    cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)),
+    cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)), 
       random(10, 40), random(10, 40), random(10, 40));
   scene.fit();
   scene.tag("keyboard", esfera);
 }
 
 void draw() {
-  background(0);
   scene.render();
 }
 
@@ -68,40 +69,50 @@ void mouseWheel(MouseEvent event) {
 }
 
 void keyPressed() {
-  if (key == ' ')
+  if (key == ' ') {
     for (Box caja : cajas)
       caja.setPickingPolicy(caja.pickingPolicy() == Node.PickingPolicy.PRECISE ?
         Node.PickingPolicy.BULLSEYE :
         Node.PickingPolicy.PRECISE);
-  if (key == 'c')
+  }
+  if (key == 'c') {
     for (Box caja : cajas)
       if (caja.bullsEyeSize() < 1)
         caja.setBullsEyeSize(caja.bullsEyeSize() * 200);
       else
         caja.setBullsEyeSize(caja.bullsEyeSize() / 200);
-  if (key == 'd')
+  }
+  if (key == 'd') {
+    circle = !circle;
     for (Box caja : cajas)
-      caja.setBullsEyeShape(caja.bullsEyeShape() == Node.BullsEyeShape.CIRCLE ?
-        Node.BullsEyeShape.SQUARE :
-        Node.BullsEyeShape.CIRCLE);
-  if (key == 'a')
+      caja.configHint(Node.BULLSEYE, circle ?
+        Node.BullsEyeShape.CIRCLE :
+        Node.BullsEyeShape.SQUARE);
+  }
+  if (key == 'a') {
     for (Box caja : cajas)
       caja.toggleHint(Node.AXES);
-  if (key == 'p')
+  }
+  if (key == 'p') {
     for (Box caja : cajas)
       caja.toggleHint(Node.BULLSEYE);
-  if (key == 'e')
+  }
+  if (key == 'e') {
     scene.togglePerspective();
-  if (key == 's')
+  }
+  if (key == 's') {
     scene.fit(1);
-  if (key == 'S')
+  }
+  if (key == 'S') {
     scene.fit();
-  if (key == 'u')
+  }
+  if (key == 'u') {
     if (scene.isTagValid("keyboard"))
       scene.removeTag("keyboard");
     else
       scene.tag("keyboard", esfera);
-  if (key == CODED)
+  }
+  if (key == CODED) {
     if (keyCode == UP)
       scene.translate("keyboard", 0, -10, 0);
     else if (keyCode == DOWN)
@@ -110,4 +121,5 @@ void keyPressed() {
       scene.translate("keyboard", -10, 0, 0);
     else if (keyCode == RIGHT)
       scene.translate("keyboard", 10, 0, 0);
+  }
 }

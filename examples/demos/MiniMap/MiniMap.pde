@@ -25,8 +25,8 @@ boolean displayMinimap = true;
 boolean onScreen = true;
 boolean interactiveEye;
 
-int w = 1200;
-int h = 1200;
+int w = 700;
+int h = 700;
 
 //Choose P2D or P3D
 String renderer = P2D;
@@ -47,8 +47,7 @@ void setup() {
       pg.popStyle();
     }
   };
-  eye.setPickingThreshold(50);
-  eye.setHighlighting(0);
+  eye.disableHint(Node.HIGHLIGHT);
   scene = onScreen ? new Scene(this, eye) : new Scene(this, renderer, eye);
   scene.setRadius(1000);
   rectMode(CENTER);

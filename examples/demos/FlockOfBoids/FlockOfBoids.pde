@@ -42,7 +42,7 @@ ArrayList<Boid> flock;
 Node avatar;
 
 void setup() {
-  size(1000, 800, P3D);
+  size(1000, 700, P3D);
   scene = new Scene(this);
   scene.setFrustum(Vector.zero, new Vector(flockWidth, flockHeight, flockDepth));
   scene.fit();

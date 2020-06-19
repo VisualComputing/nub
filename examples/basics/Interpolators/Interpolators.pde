@@ -26,7 +26,7 @@ Node shape;
 String renderer = P3D;
 
 void setup() {
-  size(1000, 800, renderer);
+  size(1000, 700, renderer);
   scene = new Scene(this);
   scene.setRadius(150);
   scene.fit(1);
@@ -114,7 +114,7 @@ void keyPressed() {
     else
       node.disableHint(Node.BULLSEYE);
     node.setBullsEyeSize(40);
-    node.setBullsEyeShape(Node.BullsEyeShape.CIRCLE);
+    node.configHint(Node.BULLSEYE, Node.BullsEyeShape.CIRCLE);
     eyeInterpolator.addKeyFrame(node);
   }
   if (key == 'a')

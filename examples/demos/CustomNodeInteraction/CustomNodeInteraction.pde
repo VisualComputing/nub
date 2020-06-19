@@ -28,11 +28,13 @@ int totalShapes;
 String renderer = P3D;
 
 void settings() {
-  size(1240, 840, renderer);
+  size(1200, 700, renderer);
 }
 
 void setup() {
   scene = new Scene(this);
+  scene.enableHint(Scene.AXES | Scene.BACKGROUND);
+  scene.configHint(Scene.BACKGROUND, color(0));
   scene.fit(1);
   shapes = new Node[10];
   for (int i = 0; i < shapes.length; i++) {
@@ -44,12 +46,12 @@ void setup() {
         pg.pushStyle();
         pg.fill(_color);
         Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
-        scene.beginHUD(pg);
+        Scene.beginHUD(pg);
         Vector position = scene.screenLocation(position());
         pg.fill(isTagged(scene) ? 0 : 255, isTagged(scene) ? 255 : 0, isTagged(scene) ? 0 : 255);
         pg.textFont(font36);
         pg.text(_id, position.x(), position.y());
-        scene.endHUD(pg);
+        Scene.endHUD(pg);
         pg.popStyle();
       }
 
@@ -85,8 +87,6 @@ int randomFaces() {
 }
 
 void draw() {
-  background(0);
-  scene.drawAxes();
   scene.render();
 }
 

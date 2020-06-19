@@ -2752,7 +2752,7 @@ public class Graph {
    * Cached version of {@link #tracks(Node, int, int)}.
    */
   protected boolean _tracks(Node node, int pixelX, int pixelY, Vector projection) {
-    if (node == null || isEye(node))
+    if (node == null || isEye(node) || projection == null)
       return false;
     if (!node.isTaggingEnabled())
       return false;
@@ -3287,17 +3287,19 @@ public class Graph {
     if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && node.isTaggingEnabled())
       if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM))
         _bbNeed = frameCount();
-    if (isTagged(node)) {
-      if (node.isHintEnable(Node.HIGHLIGHT)) {
-        float scl = 1 + node._highlight;
-        // TODO 2d case needs testing
-        if (is2D())
-          _matrixHandler.scale(scl, scl);
-        else
-          _matrixHandler.scale(scl, scl, scl);
-      }
+    if (isTagged(node) && node.isHintEnable(Node.HIGHLIGHT)) {
+      _matrixHandler.pushMatrix();
+      float scl = 1 + node._highlight;
+      // TODO 2d case needs testing
+      if (is2D())
+        _matrixHandler.scale(scl, scl);
+      else
+        _matrixHandler.scale(scl, scl, scl);
+      MatrixHandler._draw(context(), node);
+      _matrixHandler.popMatrix();
+    } else {
+      MatrixHandler._draw(context(), node);
     }
-    MatrixHandler._draw(context(), node);
   }
 
   protected void _emitBackBufferUniforms(float r, float g, float b) {}
