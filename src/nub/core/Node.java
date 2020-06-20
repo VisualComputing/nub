@@ -174,8 +174,15 @@ public class Node {
   public final static int CONSTRAINT = 1 << 8;
   public final static int BONE = 1 << 9;
   protected float _highlight;
+  // Frustum
   protected int _frustumColor;
+  // 1st form
   protected Graph _frustumGraph;
+  // 2nd form
+  protected Object _eyeBuffer;
+  protected Graph.Type _frustumtype;
+  protected float _zNear, _zFar;
+  // torus
   protected int _torusColor;
   protected int _torusFaces;
   // TODO public because Scene._drawFrontBuffer
@@ -2693,6 +2700,7 @@ public class Node {
           return;
         }
         if (hint == FRUSTUM && params[0] instanceof Graph) {
+          _eyeBuffer = null;
           _frustumGraph = (Graph) params[0];
           return;
         }
@@ -2719,9 +2727,11 @@ public class Node {
           if (Graph.isNumInstance(params[0]) && params[1] instanceof Graph) {
             _frustumColor = Graph.castToInt(params[0]);
             _frustumGraph = (Graph) params[1];
+            _eyeBuffer = null;
             return;
           }
           if (params[0] instanceof Graph && Graph.isNumInstance(params[1])) {
+            _eyeBuffer = null;
             _frustumGraph = (Graph) params[0];
             _frustumColor = Graph.castToInt(params[1]);
             return;
@@ -2731,6 +2741,40 @@ public class Node {
           if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
             _torusColor = Graph.castToInt(params[0]);
             _torusFaces = Graph.castToInt(params[1]);
+            return;
+          }
+        }
+        break;
+      case 4:
+        if (hint == FRUSTUM) {
+          if (params[0] instanceof processing.core.PGraphics && params[1] instanceof Graph.Type && Graph.isNumInstance(params[2]) && Graph.isNumInstance(params[3])) {
+            _frustumGraph = null;
+            _eyeBuffer = params[0];
+            _frustumtype = (Graph.Type) params[1];
+            _zNear = Graph.castToFloat(params[2]);
+            _zFar = Graph.castToFloat(params[3]);
+            return;
+          }
+        }
+        break;
+      case 5:
+        if (hint == FRUSTUM) {
+          if (params[0] instanceof processing.core.PGraphics && params[1] instanceof Graph.Type && Graph.isNumInstance(params[2]) && Graph.isNumInstance(params[3]) && Graph.isNumInstance(params[4])) {
+            _frustumGraph = null;
+            _eyeBuffer = params[0];
+            _frustumtype = (Graph.Type) params[1];
+            _zNear = Graph.castToFloat(params[2]);
+            _zFar = Graph.castToFloat(params[3]);
+            _frustumColor = Graph.castToInt(params[4]);
+            return;
+          }
+          if (Graph.isNumInstance(params[0]) && params[1] instanceof processing.core.PGraphics && params[2] instanceof Graph.Type && Graph.isNumInstance(params[3]) && Graph.isNumInstance(params[4])) {
+            _frustumColor = Graph.castToInt(params[0]);
+            _frustumGraph = null;
+            _eyeBuffer = (processing.core.PGraphics) params[1];
+            _frustumtype = (Graph.Type) params[2];
+            _zNear = Graph.castToFloat(params[3]);
+            _zFar = Graph.castToFloat(params[4]);
             return;
           }
         }

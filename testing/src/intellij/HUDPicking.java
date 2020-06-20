@@ -88,12 +88,7 @@ public class HUDPicking extends PApplet {
     if (pup != null) {
       // debug
       drawRay();
-      mainScene.beginHUD();
-      hintScene.beginDraw();
-      hintScene.render();
-      hintScene.endDraw();
-      hintScene.image(atX, atY);
-      mainScene.endHUD();
+      hintScene.display(atX, atY);
     }
   }
 

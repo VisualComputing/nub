@@ -75,7 +75,7 @@ public class MatrixHandler {
   protected static void _drawFrustumHint(Object context, Node node) {
     if (!node.isHintEnable(Node.FRUSTUM))
       return;
-    if (node._frustumGraph != null) {
+    if (node._frustumGraph instanceof Graph || node._eyeBuffer instanceof processing.core.PGraphics) {
       if (!(context instanceof processing.core.PGraphics))
         throw new RuntimeException("Drawing the node FRUSTUM hint require a PGraphics context");
       processing.core.PGraphics pg = (processing.core.PGraphics) context;
@@ -83,7 +83,12 @@ public class MatrixHandler {
       pg.colorMode(processing.core.PApplet.RGB, 255);
       pg.stroke(node._frustumColor);
       pg.fill(node._frustumColor);
-      Scene.drawFrustum(pg, node._frustumGraph);
+      if (node._frustumGraph instanceof Graph) {
+        Scene.drawFrustum(pg, node._frustumGraph);
+      }
+      else if (node._eyeBuffer instanceof processing.core.PGraphics) {
+        Scene.drawFrustum(pg, (processing.core.PGraphics) node._eyeBuffer, node, node._frustumtype, node._zNear, node._zFar);
+      }
       pg.pop();
     }
   }
