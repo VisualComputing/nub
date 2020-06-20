@@ -3607,6 +3607,10 @@ public class Graph {
     return screenLocation(vector, node, projectionView(), width(), height());
   }
 
+  /**
+   * Static cached version of {@link #screenLocation(Vector, Node)}. Requires the programmer
+   * to suply the cached {@code projectionView} matrix.
+   */
   public static Vector screenLocation(Vector vector, Node node, Matrix projectionView, int width, int height) {
     return _screenLocation(node != null ? node.worldLocation(vector) : vector, projectionView, width, height);
   }
@@ -3657,16 +3661,6 @@ public class Graph {
   }
 
   /**
-   * Convenience function that simply returns {@code location(pixel, node, projectionViewInverse(), width(), height())}.
-   * <p>
-   * @see #location(Vector, Node, Matrix, int, int)
-   * @see #projectionViewInverse()
-   */
-  public Vector location(Vector pixel, Node node) {
-    return location(pixel, node, projectionViewInverse(), width(), height());
-  }
-
-  /**
    * Returns the {@code node} coordinates of {@code pixel}.
    * <p>
    * The pixel (0,0) corresponds to the upper left corner of the window. The
@@ -3697,6 +3691,14 @@ public class Graph {
    * @see #screenDisplacement(Vector, Node)
    * @see #setWidth(int)
    * @see #setHeight(int)
+   */
+  public Vector location(Vector pixel, Node node) {
+    return location(pixel, node, projectionViewInverse(), width(), height());
+  }
+
+  /**
+   * Static cached version of {@link #_location(Vector, Matrix, int, int)}. Requires the programmer
+   * to suply the cached {@code projectionViewInverseMatrix} matrix.
    */
   public static Vector location(Vector pixel, Node node, Matrix projectionViewInverseMatrix, int width, int height) {
     Vector worldLocation = _location(pixel, projectionViewInverseMatrix, width, height);
