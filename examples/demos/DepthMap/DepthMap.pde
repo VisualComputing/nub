@@ -21,7 +21,6 @@ import nub.processing.*;
 Scene.Type shadowMapType = Scene.Type.ORTHOGRAPHIC;
 Scene scene;
 Node[] shapes;
-Node cacheLight;
 PGraphics shadowMap;
 PShader depthShader;
 float zNear = 50;
@@ -46,7 +45,7 @@ void setup() {
   for (int i = 0; i < shapes.length; i++) {
     shapes[i] = new Node() {
       @Override
-      public void graphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
         pg.pushStyle();
         if (pg == shadowMap)
           pg.noStroke();
@@ -66,11 +65,9 @@ void setup() {
   }
 
   scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
-  cacheLight = scene.node("light");
-  cacheLight.disableHint(Node.SHAPE);
-  cacheLight.enableHint(Node.FRUSTUM);
-  cacheLight.enableHint(Node.AXES);
-  cacheLight.setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
+  scene.node("light").disableHint(Node.SHAPE);
+  scene.node("light").enableHint(Node.FRUSTUM | Node.AXES);
+  scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
 }
 
 void draw() {
@@ -92,16 +89,22 @@ void draw() {
 
 void mouseMoved(MouseEvent event) {
   if (event.isShiftDown()) {
-    if (cacheLight != null) {
-      cacheLight.enableHint(Node.SHAPE);
-      cacheLight.disableHint(Node.FRUSTUM);
-      cacheLight.disableHint(Node.AXES);
+    if (scene.node("light") != null) {
+      //scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+      // /*
+      scene.node("light").enableHint(Node.SHAPE);
+      scene.node("light").disableHint(Node.FRUSTUM);
+      scene.node("light").disableHint(Node.AXES);
+      //*/
     }
-    cacheLight = scene.updateMouseTag("light");
-    if (cacheLight != null) {
-      cacheLight.disableHint(Node.SHAPE);
-      cacheLight.enableHint(Node.FRUSTUM);
-      cacheLight.enableHint(Node.AXES);
+    scene.updateMouseTag("light");
+    if (scene.node("light") != null) {
+      //scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+      ///*
+      scene.node("light").disableHint(Node.SHAPE);
+      scene.node("light").enableHint(Node.FRUSTUM);
+      scene.node("light").enableHint(Node.AXES);
+      //*/
     }
   } else
     scene.mouseTag();
@@ -119,7 +122,7 @@ void mouseDragged() {
 void mouseWheel(MouseEvent event) {
   if (event.isShiftDown() && scene.isTagValid("light")) {
     depthShader.set("far", zFar += event.getCount() * 20);
-    cacheLight.configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
+    scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
   }
   else
     scene.scale(event.getCount() * 20);
@@ -128,7 +131,7 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   if (key == ' ' && scene.isTagValid("light")) {
     shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
-    cacheLight.configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
+    scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
   }
   if (key == 'p')
     scene.togglePerspective();
