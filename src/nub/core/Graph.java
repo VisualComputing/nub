@@ -4776,7 +4776,7 @@ public class Graph {
   // visual hints
 
   public boolean isHintEnable(int hint) {
-    return (_mask & hint) != 0;
+    return ~(_mask | ~hint) == 0;
   }
 
   public int hint() {
