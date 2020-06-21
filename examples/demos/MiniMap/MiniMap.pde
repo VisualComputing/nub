@@ -22,63 +22,44 @@ Node[] models;
 boolean displayMinimap = true;
 // whilst scene is either on-screen or not, the minimap is always off-screen
 // test both cases here:
-boolean onScreen = true;
+boolean onScreen = false;
 boolean interactiveEye;
-
-int w = 700;
-int h = 700;
 
 //Choose P2D or P3D
 String renderer = P2D;
 
-void settings() {
-  size(w, h, renderer);
-}
-
 void setup() {
-  Node eye = new Node() {
-    @Override
-    public void graphics(PGraphics pg) {
-      pg.pushStyle();
-      pg.fill(isTagged(minimap) ? 255 : 25, isTagged(minimap) ? 0 : 255, 255, 125);
-      pg.strokeWeight(2);
-      pg.stroke(0, 0, 255);
-      Scene.drawFrustum(pg, scene);
-      pg.popStyle();
-    }
-  };
-  eye.disableHint(Node.HIGHLIGHT);
-  scene = onScreen ? new Scene(this, eye) : new Scene(this, renderer, eye);
+  size(800, 600, renderer);
+  scene = onScreen ? new Scene(this) : new Scene(this, renderer);
   scene.setRadius(1000);
   rectMode(CENTER);
   scene.fit(1);
+  scene.eye().setBullsEyeSize(50);
+  scene.eye().disableHint(Node.HIGHLIGHT);
+  scene.eye().enableHint(Node.BULLSEYE);
+  scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
   models = new Node[30];
   for (int i = 0; i < models.length; i++) {
     if ((i & 1) == 0) {
       models[i] = new Node(shape());
     } else {
-      models[i] = new Node() {
-        int _faces = (int) MiniMap.this.random(3, 15);
-        // We need to call the PApplet random function instead of the node random version
-        int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
-        @Override
-          public void graphics(PGraphics pg) {
-          pg.pushStyle();
-          pg.fill(_color);
-          Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
-          pg.popStyle();
-        }
-      };
+      models[i] = new Node();
+      models[i].enableHint(Node.TORUS);
+      models[i].scale(3);
     }
+    // set picking precision to the pixels of the node projection
+    models[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
     scene.randomize(models[i]);
   }
   // Note that we pass the upper left corner coordinates where the minimap
   // is to be drawn (see drawing code below) to its constructor.
-  minimap = new Scene(this, renderer, w / 2, h / 2);
+  minimap = new Scene(this, renderer, width / 2, height / 2);
   minimap.setRadius(2000);
   if (renderer == P3D)
     minimap.togglePerspective();
   minimap.fit(1);
+  minimap.enableHint(Scene.BACKGROUND, color(125, 80, 90));
+  minimap.enableHint(Scene.FRUSTUM, scene, color(255, 0, 0, 125));
 }
 
 PShape shape() {
@@ -134,30 +115,12 @@ void mouseClicked(MouseEvent event) {
 
 void draw() {
   focus = minimap.hasMouseFocus() ? minimap : scene;
-  background(75, 25, 15);
   if (scene.isOffscreen()) {
-    scene.beginDraw();
-    scene.context().background(75, 25, 15);
-    scene.drawAxes();
-    scene.render();
-    scene.endDraw();
     scene.display();
   } else {
-    scene.drawAxes();
     scene.render();
   }
   if (displayMinimap) {
-    if (!scene.isOffscreen())
-      scene.beginHUD();
-    minimap.beginDraw();
-    minimap.context().background(125, 80, 90);
-    minimap.drawAxes();
-    minimap.render();
-    minimap.context().stroke(255);
-    minimap.drawBullsEye(scene.eye());
-    minimap.endDraw();
-    minimap.display(w / 2, h / 2);
-    if (!scene.isOffscreen())
-      scene.endHUD();
+    minimap.display(width / 2, height / 2);
   }
 }

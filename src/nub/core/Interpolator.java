@@ -886,19 +886,10 @@ public class Interpolator {
       Graph._interpolators.add(this);
   }
 
-  public void toggleHint() {
-    _mask = ~_mask;
-    if (_mask == 0)
-      Graph._interpolators.remove(this);
-    else
-      Graph._interpolators.add(this);
-  }
-
   public void toggleHint(int hint) {
-    if (isHintEnable(hint))
-      disableHint(hint);
-    else
-      enableHint(hint);
+    _mask ^= hint;
+    if (_mask != 0)
+      Graph._interpolators.add(this);
   }
 
   public void configHint(int hint, Object... params) {
@@ -931,6 +922,8 @@ public class Interpolator {
     }
     System.out.println("Warning: some params in Interpolator.configHint(hint, params) couldn't be parsed!");
   }
+
+  // TODO remove these
 
   public float axesLength() {
     return _axesLength;

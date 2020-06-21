@@ -65,8 +65,7 @@ void setup() {
   }
 
   scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
-  scene.node("light").disableHint(Node.SHAPE);
-  scene.node("light").enableHint(Node.FRUSTUM | Node.AXES);
+  scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
   scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
 }
 
@@ -89,23 +88,12 @@ void draw() {
 
 void mouseMoved(MouseEvent event) {
   if (event.isShiftDown()) {
-    if (scene.node("light") != null) {
-      //scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
-      // /*
-      scene.node("light").enableHint(Node.SHAPE);
-      scene.node("light").disableHint(Node.FRUSTUM);
-      scene.node("light").disableHint(Node.AXES);
-      //*/
-    }
+    if (scene.isTagValid("light"))
+      scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+    // no calling mouseTag since we need to immediately update the tagged node
     scene.updateMouseTag("light");
-    if (scene.node("light") != null) {
-      //scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
-      ///*
-      scene.node("light").disableHint(Node.SHAPE);
-      scene.node("light").enableHint(Node.FRUSTUM);
-      scene.node("light").enableHint(Node.AXES);
-      //*/
-    }
+    if (scene.isTagValid("light"))
+      scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
   } else
     scene.mouseTag();
 }

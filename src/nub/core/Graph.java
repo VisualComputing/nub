@@ -4809,15 +4809,11 @@ public class Graph {
     }
   }
 
-  public void toggleHint() {
-    _mask = ~_mask;
-  }
-
   public void toggleHint(int hint) {
-    if (isHintEnable(hint))
-      disableHint(hint);
-    else
-      enableHint(hint);
+    _mask ^= hint;
+    if (isHintEnable(FRUSTUM) && _frustumEye != null) {
+      _frustumEye.enableHint(Node.FRUSTUM);
+    }
   }
 
   public void configHint(int hint, Object... params) {

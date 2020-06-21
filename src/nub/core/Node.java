@@ -2653,16 +2653,9 @@ public class Node {
     _updateHUD();
   }
 
-  public void toggleHint() {
-    _mask = ~_mask;
-    _updateHUD();
-  }
-
   public void toggleHint(int hint) {
-    if (isHintEnable(hint))
-      disableHint(hint);
-    else
-      enableHint(hint);
+    _mask ^= hint;
+    _updateHUD();
   }
 
   public void configHint(int hint, Object... params) {

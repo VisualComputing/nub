@@ -97,8 +97,6 @@ public class BasicUse extends PApplet {
       node.toggleHint(Node.CONSTRAINT);
     if (key == '9')
       node.toggleHint(Node.BONE);
-    if (key == '0')
-      node.toggleHint();
 
     if (key == 's')
       scene.fit(1);
