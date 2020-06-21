@@ -2695,13 +2695,13 @@ public class Node {
           _frustumColor = Graph.castToInt(params[0]);
           return;
         }
-        if (hint == TORUS && Graph.isNumInstance(params[0])) {
-          _torusColor = Graph.castToInt(params[0]);
-          return;
-        }
         if (hint == FRUSTUM && params[0] instanceof Graph) {
           _eyeBuffer = null;
           _frustumGraph = (Graph) params[0];
+          return;
+        }
+        if (hint == TORUS && Graph.isNumInstance(params[0])) {
+          _torusColor = Graph.castToInt(params[0]);
           return;
         }
         break;
@@ -2771,7 +2771,7 @@ public class Node {
           if (Graph.isNumInstance(params[0]) && params[1] instanceof processing.core.PGraphics && params[2] instanceof Graph.Type && Graph.isNumInstance(params[3]) && Graph.isNumInstance(params[4])) {
             _frustumColor = Graph.castToInt(params[0]);
             _frustumGraph = null;
-            _eyeBuffer = (processing.core.PGraphics) params[1];
+            _eyeBuffer = params[1];
             _frustumtype = (Graph.Type) params[2];
             _zNear = Graph.castToFloat(params[3]);
             _zFar = Graph.castToFloat(params[4]);

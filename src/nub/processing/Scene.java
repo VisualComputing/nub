@@ -1025,14 +1025,6 @@ public class Scene extends Graph implements PConstants {
       }
       context().pop();
     }
-    if (isHintEnable(FRUSTUM) && _frustumGraph != null) {
-      context().pushStyle();
-      context().colorMode(PApplet.RGB, 255);
-      context().stroke(_frustumColor);
-      context().fill(_frustumColor);
-      drawFrustum(_frustumGraph);
-      context().popStyle();
-    }
     for (Interpolator interpolator : _interpolators) {
       context().pushStyle();
       _drawSpline(interpolator);

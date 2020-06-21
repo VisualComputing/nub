@@ -152,8 +152,7 @@ public class Graph {
   protected Object _background;
   protected static HashSet<Interpolator> _interpolators = new HashSet<Interpolator>();
   protected static HashSet<Node> _hudSet = new HashSet<Node>();
-  protected int _frustumColor;
-  protected Graph _frustumGraph;
+  protected Node _frustumEye;
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
@@ -442,8 +441,6 @@ public class Graph {
     _gridType = GridType.DOTS;
     _gridSubDiv = 10;
     _background = -16777216;
-    // yellow (with alpha: color(255, 255, 0, 125)) encoded as a processing int rgb color
-    _frustumColor = 2113928960;
   }
 
   /**
@@ -4792,15 +4789,24 @@ public class Graph {
 
   public void disableHint(int hint) {
     _mask &= ~hint;
+    if (!isHintEnable(FRUSTUM) && _frustumEye != null) {
+      _frustumEye.disableHint(Node.FRUSTUM);
+    }
   }
 
   public void enableHint(int hint, Object... params) {
     enableHint(hint);
     configHint(hint, params);
+    if (isHintEnable(FRUSTUM) && _frustumEye != null) {
+      _frustumEye.enableHint(Node.FRUSTUM);
+    }
   }
 
   public void enableHint(int hint) {
     _mask |= hint;
+    if (isHintEnable(FRUSTUM) && _frustumEye != null) {
+      _frustumEye.enableHint(Node.FRUSTUM);
+    }
   }
 
   public void toggleHint() {
@@ -4828,12 +4834,13 @@ public class Graph {
           }
         }
         if (hint == FRUSTUM) {
-          if (isNumInstance(params[0])) {
-            _frustumColor = Graph.castToInt(params[0]);
+          if (isNumInstance(params[0]) && _frustumEye != null) {
+            _frustumEye.configHint(Node.FRUSTUM, params[0]);
             return;
           }
-          if (params[0] instanceof Graph) {
-            _frustumGraph = (Graph) params[0];
+          if (params[0] instanceof Graph && params[0] != this) {
+            _frustumEye = ((Graph) params[0]).eye();
+            _frustumEye.configHint(Node.FRUSTUM, params[0]);
             return;
           }
         }
@@ -4851,13 +4858,13 @@ public class Graph {
       case 2:
         if (hint == FRUSTUM) {
           if (Graph.isNumInstance(params[0]) && params[1] instanceof Graph) {
-            _frustumColor = Graph.castToInt(params[0]);
-            _frustumGraph = (Graph) params[1];
+            _frustumEye = ((Graph) params[1]).eye();
+            _frustumEye.configHint(Node.FRUSTUM, params[0], params[1]);
             return;
           }
           if (params[0] instanceof Graph && Graph.isNumInstance(params[1])) {
-            _frustumGraph = (Graph) params[0];
-            _frustumColor = Graph.castToInt(params[1]);
+            _frustumEye = ((Graph) params[0]).eye();
+            _frustumEye.configHint(Node.FRUSTUM, params[0], params[1]);
             return;
           }
         }

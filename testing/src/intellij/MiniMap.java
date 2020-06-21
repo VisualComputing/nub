@@ -12,14 +12,14 @@ public class MiniMap extends PApplet {
   boolean displayMinimap = true;
   // whilst scene is either on-screen or not, the minimap is always off-screen
   // test both cases here:
-  boolean onScreen = true;
+  boolean onScreen = false;
   boolean interactiveEye;
 
   int w = 800;
   int h = 600;
 
   //Choose P2D or P3D
-  String renderer = P2D;
+  String renderer = P3D;
 
   @Override
   public void settings() {
@@ -35,7 +35,7 @@ public class MiniMap extends PApplet {
     scene.eye().setBullsEyeSize(50);
     scene.eye().disableHint(Node.HIGHLIGHT);
     scene.eye().enableHint(Node.BULLSEYE);
-    scene.eye().enableHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
+    //scene.eye().enableHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
     scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
     models = new Node[30];
     for (int i = 0; i < models.length; i++) {
@@ -58,6 +58,7 @@ public class MiniMap extends PApplet {
       minimap.togglePerspective();
     minimap.fit(1);
     minimap.enableHint(Scene.BACKGROUND, color(125, 80, 90));
+    minimap.enableHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
   }
 
   PShape shape() {
