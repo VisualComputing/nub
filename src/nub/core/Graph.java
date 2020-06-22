@@ -4580,6 +4580,8 @@ public class Graph {
       return;
     }
     Vector center = screenLocation(node.position());
+    if (center == null)
+      return;
     int centerX = (int) center.x();
     int centerY = (int) center.y();
     float px = sensitivity * (pixel1X - centerX) / width();
@@ -4619,6 +4621,8 @@ public class Graph {
   public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
     float sensitivity = 1;
     Vector center = screenLocation(anchor());
+    if (center == null)
+      return;
     int centerX = (int) center.x();
     int centerY = (int) center.y();
     float px = sensitivity * (pixel1X - centerX) / width();

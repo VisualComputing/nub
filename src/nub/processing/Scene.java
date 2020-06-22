@@ -1036,12 +1036,14 @@ public class Scene extends Graph implements PConstants {
       for (Node node : _hudSet) {
         context().pushMatrix();
         Vector location = screenLocation(node);
-        context().translate(location.x(), location.y());
-        if (node._imrHUD != null) {
-          node._imrHUD.accept(context());
-        }
-        if (node._rmrHUD != null) {
-          context().shape(node._rmrHUD);
+        if (location != null) {
+          context().translate(location.x(), location.y());
+          if (node._imrHUD != null) {
+            node._imrHUD.accept(context());
+          }
+          if (node._rmrHUD != null) {
+            context().shape(node._rmrHUD);
+          }
         }
         context().popMatrix();
       }
@@ -2416,7 +2418,8 @@ public class Scene extends Graph implements PConstants {
       return;
     }
     Vector center = screenLocation(node);
-    drawCross(center.x(), center.y(), length);
+    if (center != null)
+      drawCross(center.x(), center.y(), length);
   }
 
   /**
@@ -2482,8 +2485,8 @@ public class Scene extends Graph implements PConstants {
     if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
     Vector center = screenLocation(node);
-    drawSquaredBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ?
-        200 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) : node.bullsEyeSize());
+    if (center != null)
+      drawSquaredBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) : node.bullsEyeSize());
     context().popStyle();
   }
 
@@ -2556,7 +2559,8 @@ public class Scene extends Graph implements PConstants {
     if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
     Vector center = screenLocation(node);
-    drawCircledBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) : node.bullsEyeSize());
+    if (center != null)
+      drawCircledBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) : node.bullsEyeSize());
     context().popStyle();
   }
 

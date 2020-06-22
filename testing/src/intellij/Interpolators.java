@@ -49,10 +49,7 @@ public class Interpolators extends PApplet {
     shapeInterpolator.enableRecurrence();
     // Create an initial shape interpolator path
     for (int i = 0; i < random(4, 10); i++) {
-      Node node = scene.randomNode();
-      node.disableTagging();
-      node.setPickingPolicy(Node.PickingPolicy.BULLSEYE);
-      shapeInterpolator.addKeyFrame(node, i % 2 == 1 ? 1 : 4);
+      shapeInterpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
     }
     shapeInterpolator.run();
 
@@ -89,31 +86,20 @@ public class Interpolators extends PApplet {
       scene.scaleEye(event.getCount() * 20);
   }
 
-  void allowEdit(Interpolator interpolator) {
-    for (Node node : interpolator.keyFrames().values()) {
-      if (edit) {
-        node.enableTagging();
-        node.enableHint(Node.BULLSEYE);
-      }
-      else {
-        node.disableTagging();
-        node.disableHint(Node.BULLSEYE);
-      }
-    }
-  }
-
   public void keyPressed() {
     if (key == ' ') {
       edit = !edit;
       if (edit) {
         shapeInterpolator.enableHint(Interpolator.SPLINE | Interpolator.AXES);
         eyeInterpolator.enableHint(Interpolator.SPLINE | Interpolator.CAMERA);
+        shapeInterpolator.edit();
+        eyeInterpolator.edit();
       } else {
         shapeInterpolator.disableHint(Interpolator.SPLINE | Interpolator.AXES);
         eyeInterpolator.disableHint(Interpolator.SPLINE | Interpolator.CAMERA);
+        shapeInterpolator.keep();
+        eyeInterpolator.keep();
       }
-      allowEdit(shapeInterpolator);
-      allowEdit(eyeInterpolator);
     }
 
     if (key == '-' || key == '+') {
@@ -121,14 +107,7 @@ public class Interpolators extends PApplet {
     }
 
     if (key == '1') {
-      Node node = scene.eye().get();
-      if (edit)
-        node.enableHint(Node.BULLSEYE);
-      else
-        node.disableHint(Node.BULLSEYE);
-      node.setBullsEyeSize(40);
-      node.configHint(Node.BULLSEYE, Node.BullsEyeShape.CIRCLE);
-      eyeInterpolator.addKeyFrame(node);
+      eyeInterpolator.addKeyFrame(scene.eye().get());
     }
     if (key == 'a')
       eyeInterpolator.toggle();

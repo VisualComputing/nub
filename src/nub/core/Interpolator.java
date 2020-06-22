@@ -923,6 +923,42 @@ public class Interpolator {
     System.out.println("Warning: some params in Interpolator.configHint(hint, params) couldn't be parsed!");
   }
 
+  public void edit() {
+    for (Node node : keyFrames().values()) {
+      // TODO readd condition when Node.graphics is removed
+      //if (!node.isHintEnable(Node.SHAPE)) {
+        node.enableHint(Node.BULLSEYE);
+        node.setPickingPolicy(Node.PickingPolicy.BULLSEYE);
+        if (!node.isTaggingEnabled()) {
+          node.enableTagging();
+        }
+      //}
+      if (isHintEnable(Interpolator.AXES)) {
+        node.enableHint(Node.AXES);
+      }
+      if (isHintEnable(Interpolator.CAMERA)) {
+        node.enableHint(Node.CAMERA);
+      }
+    }
+  }
+
+  public void keep() {
+    for (Node node : keyFrames().values()) {
+      //if (!node.isHintEnable(Node.SHAPE)) {
+        node.disableHint(Node.BULLSEYE);
+        //if (node.isTaggingEnabled()) {
+          node.disableTagging();
+        //}
+      //}
+      if (!isHintEnable(Interpolator.AXES)) {
+        node.disableHint(Node.AXES);
+      }
+      if (!isHintEnable(Interpolator.CAMERA)) {
+        node.disableHint(Node.CAMERA);
+      }
+    }
+  }
+
   // TODO remove these
 
   public float axesLength() {

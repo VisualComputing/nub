@@ -18,20 +18,20 @@ import nub.core.*;
 import nub.processing.*;
 
 Scene scene;
-Node landscape1, landscape2, landscape3, floor, light;
+Node landscape1, landscape2, landscape3, light;
 TimingTask animation;
 PShader depthShader;
 PShader shadowShader;
 PGraphics shadowMap;
 float fov = THIRD_PI;
 Matrix biasMatrix = new Matrix(
-  0.5,   0,   0, 0,
-    0, 0.5,   0, 0,
-    0,   0, 0.5, 0,
+  0.5, 0, 0, 0, 
+  0, 0.5, 0, 0, 
+  0, 0, 0.5, 0, 
   0.5, 0.5, 0.5, 1
   );
 boolean debug;
-Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
+Scene.Type shadowMapType = Scene.Type.ORTHOGRAPHIC;
 float zNear = 10;
 float zFar = 600;
 int w = 700;
@@ -43,6 +43,9 @@ void settings() {
 
 void setup() {
   scene = new Scene(this);
+  scene.enableHint(Scene.BACKGROUND, color(0));
+  scene.setShape(floor());
+  scene.enableHint(Graph.SHAPE);
   scene.togglePerspective();
   scene.setRadius(max(w, h) / 3);
   scene.fit(1);
@@ -50,6 +53,8 @@ void setup() {
     @Override
     public void graphics(PGraphics pg) {
       if (!isCulled()) {
+        pg.pushStyle();
+        pg.noStroke();
         float offset = -frameCount * 0.01;
         pg.fill(0xffff5500);
         for (int z = -5; z < 6; ++z)
@@ -59,6 +64,7 @@ void setup() {
             pg.box(10, 100, 10);
             pg.popMatrix();
           }
+        pg.popStyle();
       }
     }
   };
@@ -66,6 +72,8 @@ void setup() {
     @Override
     public void graphics(PGraphics pg) {
       if (!isCulled()) {
+        pg.pushStyle();
+        pg.noStroke();
         float angle = -frameCount * 0.0015, rotation = TWO_PI / 20;
         pg.fill(0xffff5500);
         for (int n = 0; n < 20; ++n, angle += rotation) {
@@ -76,6 +84,7 @@ void setup() {
         }
         pg.fill(0xff0055ff);
         pg.sphere(50);
+        pg.popStyle();
       }
     }
   };
@@ -84,6 +93,8 @@ void setup() {
     @Override
     public void graphics(PGraphics pg) {
       if (!isCulled()) {
+        pg.pushStyle();
+        pg.noStroke();
         float angle = -frameCount * 0.0015, rotation = TWO_PI / 20;
         pg.fill(0xffff5500);
         for (int n = 0; n < 20; ++n, angle += rotation) {
@@ -94,34 +105,24 @@ void setup() {
         }
         pg.fill(0xff00ff55);
         pg.sphere(50);
+        pg.popStyle();
       }
     }
   };
   landscape3.cull();
-  floor = new Node() {
-    @Override
-    public void graphics(PGraphics pg) {
-      pg.fill(0xff222222);
-      pg.box(360, 5, 360);
-    }
-  };
-  floor.disableTagging();
-  light = new Node() {
-    @Override
-    public void graphics(PGraphics pg) {
-      pg.pushStyle();
-      if (debug) {
-        pg.fill(0, isTagged(scene) ? 255 : 0, 255);
-        Scene.drawFrustum(pg, shadowMap, this, shadowMapType, zNear, zFar);
-      } else {
-        pg.fill(0, 255, 255);
-        Scene.drawCone(pg, 150.0, 60.0, 240.0);
-      }
-      Scene.drawAxes(pg, 300);
-      pg.pushStyle();
-    }
-  };
-  light.setMagnitude(0.195);
+  // initShadowPass
+  depthShader = loadShader("depth_frag.glsl");
+  shadowMap = createGraphics(2048, 2048, P3D);
+  shadowMap.shader(depthShader);
+  // Testing the appearance of artifacts first
+  //shadowMap.noSmooth();
+  // initDefaultPass
+  shadowShader = loadShader("shadow_frag.glsl", "shadow_vert.glsl");
+  shader(shadowShader);
+  
+  light = new Node();
+  light.enableHint(Node.BULLSEYE | Node.AXES | Node.CAMERA);
+  light.configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
 
   animation = new TimingTask() {
     @Override
@@ -135,18 +136,13 @@ void setup() {
     }
   };
   animation.run(60);
+}
 
-  // initShadowPass
-  depthShader = loadShader("depth_frag.glsl");
-  shadowMap = createGraphics(2048, 2048, P3D);
-  shadowMap.shader(depthShader);
-  // Testing the appearance of artifacts first
-  //shadowMap.noSmooth();
-
-  // initDefaultPass
-  shadowShader = loadShader("shadow_frag.glsl", "shadow_vert.glsl");
-  shader(shadowShader);
-  noStroke();
+PShape floor() {
+  PShape shape = createShape(BOX, 360, 5, 360);
+  shape.noStroke();
+  shape.setFill(0xff222222);
+  return shape;
 }
 
 void draw() {
@@ -158,7 +154,6 @@ void draw() {
   shadowMap.endDraw();
 
   // 2. Render the scene from the scene.eye() node
-  background(0);
   if (!debug) {
     Matrix projectionView = Scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
     Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
@@ -178,8 +173,10 @@ void keyPressed() {
   } else if (key == ' ') {
     shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
     light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 0.195 : tan(fov / 2));
-  } else if (key == 'd') {
+  }
+  if (key == 'd') {
     debug = !debug;
+    light.toggleHint(Node.AXES | Node.BULLSEYE | Node.CAMERA | Node.FRUSTUM);
     if (debug)
       resetShader();
     else

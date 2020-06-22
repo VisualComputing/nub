@@ -304,8 +304,9 @@ public class Node {
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
-    // TODO new
+    // TODO these two are deprecated
     setShape(this::graphics);
+    enableHint(SHAPE);
   }
 
   /**
@@ -317,13 +318,13 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    enableHint(HUD | SHAPE | HIGHLIGHT);
+    enableHint(HUD | HIGHLIGHT);
     setPickingPolicy(PickingPolicy.BULLSEYE);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
-    setBullsEyeSize(.2f);
+    setBullsEyeSize(30);
     _bullsEyeShape = BullsEyeShape.SQUARE;
     _tagging = true;
     // hints
@@ -402,6 +403,7 @@ public class Node {
   public Node(Node reference, Constraint constraint, Consumer<processing.core.PGraphics> shape, Vector translation, Quaternion rotation, float scaling) {
     this(reference, constraint, translation, rotation, scaling);
     setShape(shape);
+    enableHint(SHAPE);
     setPickingPolicy(PickingPolicy.PRECISE);
   }
 
@@ -415,6 +417,7 @@ public class Node {
   public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
     this(reference, constraint, translation, rotation, scaling);
     setShape(shape);
+    enableHint(SHAPE);
     setPickingPolicy(PickingPolicy.PRECISE);
   }
 

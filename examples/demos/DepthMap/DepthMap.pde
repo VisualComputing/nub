@@ -39,6 +39,7 @@ void setup() {
   depthShader.set("far", zFar);
   shadowMap.shader(depthShader);
   scene = new Scene(this);
+  scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
   scene.setRadius(max(w, h));
   scene.fit(1);
   shapes = new Node[20];
@@ -70,7 +71,6 @@ void setup() {
 }
 
 void draw() {
-  background(75, 25, 15);
   // 1. Fill in and display front-buffer
   scene.render();
   // 2. Fill in shadow map using the light point of view
