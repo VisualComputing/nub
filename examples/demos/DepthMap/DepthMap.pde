@@ -118,7 +118,7 @@ void mouseWheel(MouseEvent event) {
 
 void keyPressed() {
   if (key == ' ' && scene.isTagValid("light")) {
-    shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
+    shadowMapType = shadowMapType == Scene.Type.ORTHOGRAPHIC ? Scene.Type.PERSPECTIVE : Scene.Type.ORTHOGRAPHIC;
     scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
   }
   if (key == 'p')

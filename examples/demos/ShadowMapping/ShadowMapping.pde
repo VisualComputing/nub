@@ -45,7 +45,7 @@ void setup() {
   scene = new Scene(this);
   scene.enableHint(Scene.BACKGROUND, color(0));
   scene.setShape(floor());
-  scene.enableHint(Graph.SHAPE);
+  scene.enableHint(Scene.SHAPE);
   scene.togglePerspective();
   scene.setRadius(max(w, h) / 3);
   scene.fit(1);
@@ -171,8 +171,8 @@ void keyPressed() {
     landscape2.cull(key != '2');
     landscape3.cull(key != '3');
   } else if (key == ' ') {
-    shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
-    light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 0.195 : tan(fov / 2));
+    shadowMapType = shadowMapType == Scene.Type.ORTHOGRAPHIC ? Scene.Type.PERSPECTIVE : Scene.Type.ORTHOGRAPHIC;
+    light.setMagnitude(shadowMapType == Scene.Type.ORTHOGRAPHIC ? 0.195 : tan(fov / 2));
   }
   if (key == 'd') {
     debug = !debug;

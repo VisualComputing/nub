@@ -115,7 +115,7 @@ import static nub.core.Graph.SHAPE;
  * @see Interpolator
  * @see TimingTask
  */
-public class Scene extends Graph implements PConstants {
+public class Scene extends Graph {
   public static String prettyVersion = "0.7.0";
   public static String version = "7";
 
@@ -259,7 +259,7 @@ public class Scene extends Graph implements PConstants {
    * @see #Scene(PApplet, String, Node)
    */
   public Scene(PApplet pApplet, PGraphics pGraphics, Node eye) {
-    super(pGraphics, pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? P3D : P2D), eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
+    super(pGraphics, pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D), eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
     // 1. P5 objects
     _parent = pApplet;
     _offscreen = pGraphics != pApplet.g;
@@ -675,7 +675,7 @@ public class Scene extends Graph implements PConstants {
     pApplet().pushStyle();
     _setUpperLeftCorner(pixelX, pixelY);
     _lastOffDisplayed = frameCount();
-    pApplet().imageMode(CORNER);
+    pApplet().imageMode(PApplet.CORNER);
     pApplet().image(context(), pixelX, pixelY);
     pApplet().popStyle();
   }
@@ -703,7 +703,7 @@ public class Scene extends Graph implements PConstants {
   public void _imageBackBuffer(int pixelX, int pixelY) {
     if (_backBuffer() != null) {
       pApplet().pushStyle();
-      pApplet().imageMode(CORNER);
+      pApplet().imageMode(PApplet.CORNER);
       pApplet().image(_backBuffer(), pixelX, pixelY);
       pApplet().popStyle();
     }
@@ -1963,7 +1963,7 @@ public class Scene extends Graph implements PConstants {
    */
   public static void drawGrid(PGraphics pGraphics, float size, int subdivisions) {
     pGraphics.pushStyle();
-    pGraphics.beginShape(LINES);
+    pGraphics.beginShape(PApplet.LINES);
     for (int i = 0; i <= subdivisions; ++i) {
       float pos = size * (2.0f * i / subdivisions - 1.0f);
       vertex(pGraphics, pos, -size);
@@ -2027,7 +2027,7 @@ public class Scene extends Graph implements PConstants {
   public static void drawDottedGrid(PGraphics pGraphics, float size, int subdivisions) {
     pGraphics.pushStyle();
     float posi, posj;
-    pGraphics.beginShape(POINTS);
+    pGraphics.beginShape(PApplet.POINTS);
     for (int i = 0; i <= subdivisions; ++i) {
       posi = size * (2.0f * i / subdivisions - 1.0f);
       for (int j = 0; j <= subdivisions; ++j) {
@@ -2039,13 +2039,13 @@ public class Scene extends Graph implements PConstants {
     int internalSub = 5;
     int subSubdivisions = subdivisions * internalSub;
     float currentWeight = pGraphics.strokeWeight;
-    pGraphics.colorMode(HSB, 255);
+    pGraphics.colorMode(PApplet.HSB, 255);
     float hue = pGraphics.hue(pGraphics.strokeColor);
     float saturation = pGraphics.saturation(pGraphics.strokeColor);
     float brightness = pGraphics.brightness(pGraphics.strokeColor);
     pGraphics.stroke(hue, saturation, brightness * 10f / 17f);
     pGraphics.strokeWeight(currentWeight / 2);
-    pGraphics.beginShape(POINTS);
+    pGraphics.beginShape(PApplet.POINTS);
     for (int i = 0; i <= subSubdivisions; ++i) {
       posi = size * (2.0f * i / subSubdivisions - 1.0f);
       for (int j = 0; j <= subSubdivisions; ++j) {
@@ -2308,7 +2308,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.beginShape(PApplet.QUAD);
     pGraphics.normal(normal.x(), normal.y(), normal.z());
     if (eyeBuffer != null) {
-      pGraphics.textureMode(NORMAL);
+      pGraphics.textureMode(PApplet.NORMAL);
       pGraphics.tint(255, 126); // Apply transparency without changing color
       pGraphics.texture(eyeBuffer);
       Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, lh ? 1 : 0);
@@ -2440,7 +2440,7 @@ public class Scene extends Graph implements PConstants {
     context().pushStyle();
     beginHUD();
     context().noFill();
-    context().beginShape(LINES);
+    context().beginShape(PApplet.LINES);
     vertex(context(), x - half_size, y);
     vertex(context(), x + half_size, y);
     vertex(context(), x, y - half_size);
@@ -2584,7 +2584,7 @@ public class Scene extends Graph implements PConstants {
     context().pushStyle();
     beginHUD();
     context().noFill();
-    context().ellipseMode(CENTER);
+    context().ellipseMode(PApplet.CENTER);
     context().circle(x, y, diameter);
     endHUD();
     drawCross(x, y, 0.6f * diameter);
@@ -2813,7 +2813,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseRADX(float)
    */
   public float mouseRADX() {
-    return mouseRADX(HALF_PI / width());
+    return mouseRADX(PApplet.HALF_PI / width());
   }
 
   /**
@@ -2837,7 +2837,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseRADY(float)
    */
   public float mouseRADY() {
-    return mouseRADY(HALF_PI / height());
+    return mouseRADY(PApplet.HALF_PI / height());
   }
 
   /**
