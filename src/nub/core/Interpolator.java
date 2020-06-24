@@ -959,24 +959,6 @@ public class Interpolator {
     }
   }
 
-  // TODO remove these
-
-  public float axesLength() {
-    return _axesLength;
-  }
-
-  public float cameraLength() {
-    return _cameraLength;
-  }
-
-  public int cameraStroke() {
-    return _cameraStroke;
-  }
-
-  public int splineStroke() {
-    return _splineStroke;
-  }
-
   public int steps() {
     return _steps;
   }

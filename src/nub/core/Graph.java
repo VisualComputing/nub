@@ -4971,4 +4971,22 @@ public class Graph {
   public void setShape(Consumer<processing.core.PGraphics> callback) {
     _imrShape = callback;
   }
+
+  // Hack to hide interpolator hint properties
+
+  protected float _axesLength(Interpolator interpolator) {
+    return interpolator._axesLength;
+  }
+
+  protected float _cameraLength(Interpolator interpolator) {
+    return interpolator._cameraLength;
+  }
+
+  protected int _cameraStroke(Interpolator interpolator) {
+    return interpolator._cameraStroke;
+  }
+
+  protected int _splineStroke(Interpolator interpolator) {
+    return interpolator._splineStroke;
+  }
 }

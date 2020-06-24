@@ -1328,7 +1328,7 @@ public class Scene extends Graph {
         context().pushStyle();
         context().colorMode(PApplet.RGB, 255);
         context().strokeWeight(3);
-        context().stroke(interpolator.splineStroke());
+        context().stroke(_splineStroke(interpolator));
         context().beginShape();
         for (Node node : path) {
           Vector position = node.position();
@@ -1348,14 +1348,14 @@ public class Scene extends Graph {
             _matrixHandler.applyTransformation(node);
             if (interpolator.isHintEnable(Interpolator.AXES)) {
               // TODO test
-              drawAxes(interpolator.axesLength() == 0 ? radius() / 5 : interpolator.axesLength());
+              drawAxes(_axesLength(interpolator) == 0 ? radius() / 5 : _axesLength(interpolator));
             }
             if (interpolator.isHintEnable(Interpolator.CAMERA)) {
               // TODO test
               context().pushStyle();
               context().colorMode(PApplet.RGB, 255);
-              context().stroke(interpolator.cameraStroke());
-              _drawEye(interpolator.cameraLength() == 0 ? radius() : interpolator.cameraLength());
+              context().stroke(_cameraStroke(interpolator));
+              _drawEye(_cameraLength(interpolator) == 0 ? radius() : _cameraLength(interpolator));
               context().popStyle();
             }
             _matrixHandler.popMatrix();
