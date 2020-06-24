@@ -37,7 +37,7 @@ public class Interpolators extends PApplet {
     else {
       pshape = createShape(BOX, 30);
     }
-    pshape.setFill(color(0, 255, 255 , 125));
+    pshape.setFill(color(0, 255, 255, 125));
     shape = new Node(pshape);
     shape.enableHint(Node.AXES);
     shape.enableHint(Node.BULLSEYE);

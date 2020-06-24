@@ -34,8 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static nub.core.Graph.SHAPE;
-
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing mouse-driven {@link Graph}.
  * <h1>Usage</h1>
@@ -511,7 +509,7 @@ public class Scene extends Graph {
       setWidth(context().width);
       setHeight(context().height);
     }
-    _preDraw();
+    preDraw();
     _matrixHandler.pushMatrix();
   }
 
@@ -532,7 +530,7 @@ public class Scene extends Graph {
   public void draw() {
     _matrixHandler.popMatrix();
     // display visual hints in the world
-    _displayHints();
+    _displayHUD();
     _renderBackBuffer();
   }
 
@@ -564,7 +562,7 @@ public class Scene extends Graph {
       setHeight(context().height);
     // open off-screen pgraphics for drawing:
     context().beginDraw();
-    _preDraw();
+    preDraw();
     _matrixHandler.pushMatrix();
   }
 
@@ -592,7 +590,7 @@ public class Scene extends Graph {
       throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
           + "endDraw() and they cannot be nested. Check your implementation!");
     _matrixHandler.popMatrix();
-    _displayHints();
+    _displayHUD();
     context().endDraw();
     _renderBackBuffer();
   }
@@ -995,41 +993,7 @@ public class Scene extends Graph {
   }
 
   @Override
-  protected void _displayHints() {
-    if (isHintEnable(AXES)) {
-      context().pushStyle();
-      drawAxes();
-      context().popStyle();
-    }
-    if (isHintEnable(GRID)) {
-      context().pushStyle();
-      context().colorMode(PApplet.RGB, 255);
-      context().stroke(_gridStroke);
-      if (_gridType == GridType.DOTS) {
-        context().strokeWeight(5);
-        drawDottedGrid(radius(), _gridSubDiv);
-      } else {
-        context().strokeWeight(1);
-        drawGrid(radius(), _gridSubDiv);
-      }
-      context().popStyle();
-    }
-    if (isHintEnable(Graph.SHAPE) && (_rmrShape != null || _imrShape != null)) {
-      context().push();
-      if (_rmrShape != null) {
-        context().shapeMode(context().shapeMode);
-        context().shape(_rmrShape);
-      }
-      if (_imrShape != null) {
-        _imrShape.accept(context());
-      }
-      context().pop();
-    }
-    for (Interpolator interpolator : _interpolators) {
-      context().pushStyle();
-      _drawSpline(interpolator);
-      context().popStyle();
-    }
+  protected void _displayHUD() {
     if (!_hudSet.isEmpty() || (isHintEnable(HUD) && ((_imrHUD != null) || _rmrHUD != null))) {
       context().pushStyle();
       beginHUD();
@@ -1061,7 +1025,7 @@ public class Scene extends Graph {
   }
 
   @Override
-  protected void _displayBackgroundHint() {
+  protected void _displayHints() {
     context().pushStyle();
     if (isHintEnable(BACKGROUND)) {
       if (isNumInstance(_background)) {
@@ -1069,6 +1033,40 @@ public class Scene extends Graph {
       } else if (_background instanceof PImage) {
         context().background((PImage) _background);
       }
+    }
+    if (isHintEnable(AXES)) {
+      context().pushStyle();
+      drawAxes();
+      context().popStyle();
+    }
+    if (isHintEnable(GRID)) {
+      context().pushStyle();
+      context().colorMode(PApplet.RGB, 255);
+      context().stroke(_gridStroke);
+      if (_gridType == GridType.DOTS) {
+        context().strokeWeight(5);
+        drawDottedGrid(radius(), _gridSubDiv);
+      } else {
+        context().strokeWeight(1);
+        drawGrid(radius(), _gridSubDiv);
+      }
+      context().popStyle();
+    }
+    for (Interpolator interpolator : _interpolators) {
+      context().pushStyle();
+      _drawSpline(interpolator);
+      context().popStyle();
+    }
+    if (isHintEnable(Graph.SHAPE) && (_rmrShape != null || _imrShape != null)) {
+      context().push();
+      if (_rmrShape != null) {
+        context().shapeMode(context().shapeMode);
+        context().shape(_rmrShape);
+      }
+      if (_imrShape != null) {
+        _imrShape.accept(context());
+      }
+      context().pop();
     }
     context().popStyle();
   }

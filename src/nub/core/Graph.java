@@ -2910,18 +2910,7 @@ public class Graph {
    * @see #projection(Node, Type, float, float, float, float)
    * @see Node#view()
    */
-  // TODO remove this
   public void preDraw() {
-    _preDraw();
-    // TODO never called this in predraw
-    _displayHints();
-  }
-
-  /**
-   * {@link #preDraw()} without calling {@link #_displayHints()} to handle background in Processing.
-   * See: https://github.com/processing/processing/wiki/Library-Basics
-   */
-  protected void _preDraw() {
     if (_seededGraph)
       timingHandler().handle();
     _projection = projection(eye(), type(), width(), height(), zNear(), zFar());
@@ -2934,7 +2923,6 @@ public class Graph {
       updateBoundaryEquations();
       _lastEqUpdate = TimingHandler.frameCount;
     }
-    _displayBackgroundHint();
   }
 
   // caches
@@ -3106,6 +3094,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
+    _displayHints();
     _subtree = subtree;
     if (subtree == null) {
       for (Node node : _leadingNodes())
@@ -3328,10 +3317,10 @@ public class Graph {
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
-  protected void _displayHints() {
+  protected void _displayHUD() {
   }
 
-  protected void _displayBackgroundHint() {
+  protected void _displayHints() {
   }
 
   /**

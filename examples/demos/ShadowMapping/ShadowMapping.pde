@@ -68,6 +68,7 @@ void setup() {
       }
     }
   };
+  landscape1.setPickingPolicy(Node.PickingPolicy.PRECISE);
   landscape2 = new Node() {
     @Override
     public void graphics(PGraphics pg) {
@@ -88,6 +89,7 @@ void setup() {
       }
     }
   };
+  landscape2.setPickingPolicy(Node.PickingPolicy.PRECISE);
   landscape2.cull();
   landscape3 = new Node() {
     @Override
@@ -109,6 +111,7 @@ void setup() {
       }
     }
   };
+  landscape3.setPickingPolicy(Node.PickingPolicy.PRECISE);
   landscape3.cull();
   // initShadowPass
   depthShader = loadShader("depth_frag.glsl");
@@ -140,7 +143,6 @@ void setup() {
 
 PShape floor() {
   PShape shape = createShape(BOX, 360, 5, 360);
-  shape.noStroke();
   shape.setFill(0xff222222);
   return shape;
 }
