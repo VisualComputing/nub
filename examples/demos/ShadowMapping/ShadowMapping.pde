@@ -44,11 +44,20 @@ void settings() {
 void setup() {
   scene = new Scene(this);
   scene.enableHint(Scene.BACKGROUND, color(0));
-  scene.setShape(floor());
-  scene.enableHint(Scene.SHAPE);
   scene.togglePerspective();
   scene.setRadius(max(w, h) / 3);
   scene.fit(1);
+  Node floor = new Node() {
+    @Override
+    public void graphics(PGraphics pg) {
+      pg.pushStyle();
+      pg.noStroke();
+      pg.fill(0xff222222);
+      pg.box(360, 5, 360);
+      pg.popStyle();
+    }
+  };
+  floor.disableTagging();
   landscape1 = new Node() {
     @Override
     public void graphics(PGraphics pg) {
@@ -139,12 +148,6 @@ void setup() {
     }
   };
   animation.run(60);
-}
-
-PShape floor() {
-  PShape shape = createShape(BOX, 360, 5, 360);
-  shape.setFill(0xff222222);
-  return shape;
 }
 
 void draw() {

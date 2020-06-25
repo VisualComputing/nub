@@ -137,6 +137,7 @@ public class Graph {
   public final static int AXES = 1 << 1;
   public final static int HUD = 1 << 2;
   public final static int FRUSTUM = 1 << 3;
+  // TODO remove SHAPE hint?
   public final static int SHAPE = 1 << 4;
   public final static int BACKGROUND = 1 << 5;
   protected Consumer<processing.core.PGraphics> _imrHUD;
@@ -3313,13 +3314,18 @@ public class Graph {
   }
 
   /**
-   * Renders the graph visual hints.
+   * Displays the graph and nodes hud hints.
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
   protected void _displayHUD() {
   }
 
+  /**
+   * Displays the graph and interpolator hints. Called from within {@link #render(Node)}.
+   * <p>
+   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   */
   protected void _displayHints() {
   }
 

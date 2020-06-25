@@ -49,12 +49,18 @@ public class MatrixHandler {
     return new MatrixHandler();
   }
 
+  /**
+   * Draws node hints.
+   */
   protected static void _draw(Object context, Node node) {
     _drawShapeHint(context, node);
     _drawTorusHint(context, node);
     _drawFrustumHint(context, node);
   }
 
+  /**
+   * Draws node shape hint.
+   */
   protected static void _drawShapeHint(Object context, Node node) {
     if (!node.isHintEnable(Node.SHAPE))
       return;
@@ -72,6 +78,9 @@ public class MatrixHandler {
     pg.pop();
   }
 
+  /**
+   * Draws node frustum hint.
+   */
   protected static void _drawFrustumHint(Object context, Node node) {
     if (!node.isHintEnable(Node.FRUSTUM))
       return;
@@ -93,6 +102,9 @@ public class MatrixHandler {
     }
   }
 
+  /**
+   * Draws node torus hint.
+   */
   protected static void _drawTorusHint(Object context, Node node) {
     if (!node.isHintEnable(Node.TORUS))
       return;

@@ -1071,6 +1071,11 @@ public class Scene extends Graph {
     context().popStyle();
   }
 
+  /**
+   * Same as {@code return screenLocation(vector, node, projectionView, pGraphics.width, pGraphics.height)}.
+   *
+   * @see #screenLocation(Vector, Node, Matrix, int, int)
+   */
   public static Vector screenLocation(PGraphics pGraphics, Vector vector, Node node, Matrix projectionView) {
     return screenLocation(vector, node, projectionView, pGraphics.width, pGraphics.height);
   }
