@@ -4774,18 +4774,74 @@ public class Graph {
 
   // visual hints
 
+  /**
+   * Returns whether or not all single visual hints encoded in the bitwise-or
+   * {@code hint} mask are enable or not.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #resetHint()
+   */
   public boolean isHintEnable(int hint) {
     return ~(_mask | ~hint) == 0;
   }
 
+  /**
+   * Returns the current visual hint mask. The mask is a bitwise-or of the following
+   * single visual hints available for the graph:
+   * <p>
+   * <ol>
+   * <li>GRID</li>
+   * <li>AXES</li>
+   * <li>HUD</li>
+   * <li>FRUSTUM</li>
+   * <li>SHAPE</li>
+   * <li>BACKGROUND</li>
+   * </ol>
+   *
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #isHintEnable(int)
+   * @see #resetHint()
+   */
   public int hint() {
     return this._mask;
   }
 
+  /**
+   * Resets the current {@link #hint()}, i.e., disables all single
+   * visual hints available for the node.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #isHintEnable(int)
+   */
   public void resetHint() {
     _mask = 0;
   }
 
+  /**
+   * Disables all single visual hints encoded in the bitwise-or {@code hint} mask.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #resetHint()
+   * @see #toggleHint(int)
+   * @see #isHintEnable(int)
+   */
   public void disableHint(int hint) {
     _mask &= ~hint;
     if (!isHintEnable(FRUSTUM) && _frustumEye != null) {
@@ -4793,6 +4849,17 @@ public class Graph {
     }
   }
 
+  /**
+   * Calls {@link #enableHint(int)} followed by {@link #configHint(int, Object...)}.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #resetHint()
+   * @see #toggleHint(int)
+   * @see #isHintEnable(int)
+   */
   public void enableHint(int hint, Object... params) {
     enableHint(hint);
     configHint(hint, params);
@@ -4801,6 +4868,17 @@ public class Graph {
     }
   }
 
+  /**
+   * Enables all single visual hints encoded in the bitwise-or {@code hint} mask.
+   *
+   * @see #hint()
+   * @see #disableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #resetHint()
+   * @see #toggleHint(int)
+   * @see #isHintEnable(int)
+   */
   public void enableHint(int hint) {
     _mask |= hint;
     if (isHintEnable(FRUSTUM) && _frustumEye != null) {
@@ -4808,6 +4886,17 @@ public class Graph {
     }
   }
 
+  /**
+   * Toggles all single visual hints encoded in the bitwise-or {@code hint} mask.
+   *
+   * @see #hint()
+   * @see #disableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #resetHint()
+   * @see #enableHint(int)
+   * @see #isHintEnable(int)
+   */
   public void toggleHint(int hint) {
     _mask ^= hint;
     if (isHintEnable(FRUSTUM) && _frustumEye != null) {
@@ -4969,18 +5058,30 @@ public class Graph {
 
   // Hack to hide interpolator hint properties
 
+  /**
+   * Used to display the interpolator in {@link #_displayHints()}.
+   */
   protected float _axesLength(Interpolator interpolator) {
     return interpolator._axesLength;
   }
 
+  /**
+   * Used to display the interpolator in {@link #_displayHints()}.
+   */
   protected float _cameraLength(Interpolator interpolator) {
     return interpolator._cameraLength;
   }
 
+  /**
+   * Used to display the interpolator in {@link #_displayHints()}.
+   */
   protected int _cameraStroke(Interpolator interpolator) {
     return interpolator._cameraStroke;
   }
 
+  /**
+   * Used to display the interpolator in {@link #_displayHints()}.
+   */
   protected int _splineStroke(Interpolator interpolator) {
     return interpolator._splineStroke;
   }
