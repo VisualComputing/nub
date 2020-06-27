@@ -4844,7 +4844,6 @@ public class Graph {
    * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #isHintEnable()
    */
   public void disableHint(int hint) {
     _mask &= ~hint;
@@ -4863,7 +4862,6 @@ public class Graph {
    * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #isHintEnable()
    */
   public void enableHint(int hint, Object... params) {
     enableHint(hint);
@@ -4883,7 +4881,6 @@ public class Graph {
    * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #isHintEnable()
    */
   public void enableHint(int hint) {
     _mask |= hint;
@@ -4902,7 +4899,6 @@ public class Graph {
    * @see #resetHint()
    * @see #enableHint(int)
    * @see #isHintEnable(int)
-   * @see #isHintEnable()
    */
   public void toggleHint(int hint) {
     _mask ^= hint;
