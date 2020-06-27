@@ -877,10 +877,16 @@ public class Interpolator {
    * single visual hints available for the interpolator:
    * <p>
    * <ol>
-   * <li>CAMERA</li>
-   * <li>AXES</li>
-   * <li>SPLINE</li>
+   * <li>{@link #CAMERA}</li>
+   * <li>{@link #AXES}</li>
+   * <li>{@link #SPLINE}</li>
    * </ol>
+   * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
+   * calling a {@link Graph} rendering algorithm. Note that the {@link #AXES}, {@link #CAMERA}
+   * and {@link #SPLINE} hints are display only when calling {@link Graph#render(Node)} or
+   * {@link Graph#render()} (but no when calling a static {@link Graph} rendering algorithm
+   * such as {@link Graph#render(Object, Node, Node, Graph.Type, int, int, float, float)} or
+   * {@link Graph#render(Object, Node, Graph.Type, int, int, float, float)}).
    *
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
