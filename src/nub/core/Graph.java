@@ -4775,23 +4775,6 @@ public class Graph {
   // visual hints
 
   /**
-   * Returns {@code true} if at least a single node visual hint is enabled
-   * and {@code false} otherwise.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #disableHint()
-   * @see #isHintEnable(int)
-   */
-  public boolean isHintEnable() {
-    return _mask != 0;
-  }
-
-  /**
    * Returns whether or not all single visual hints encoded in the bitwise-or
    * {@code hint} mask are enable or not.
    *
@@ -4801,8 +4784,7 @@ public class Graph {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #disableHint()
-   * @see #isHintEnable()
+   * @see #resetHint()
    */
   public boolean isHintEnable(int hint) {
     return ~(_mask | ~hint) == 0;
@@ -4827,8 +4809,7 @@ public class Graph {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #isHintEnable()
-   * @see #disableHint()
+   * @see #resetHint()
    */
   public int hint() {
     return this._mask;
@@ -4845,9 +4826,8 @@ public class Graph {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #isHintEnable()
    */
-  public void disableHint() {
+  public void resetHint() {
     _mask = 0;
     if (isHintEnable(FRUSTUM) && _frustumEye != null) {
       _frustumEye.disableHint(Node.FRUSTUM);
@@ -4861,7 +4841,7 @@ public class Graph {
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #disableHint()
+   * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
    * @see #isHintEnable()
@@ -4880,7 +4860,7 @@ public class Graph {
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
    * @see #disableHint(int)
-   * @see #disableHint()
+   * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
    * @see #isHintEnable()
@@ -4900,7 +4880,7 @@ public class Graph {
    * @see #disableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #disableHint()
+   * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
    * @see #isHintEnable()
@@ -4919,7 +4899,7 @@ public class Graph {
    * @see #disableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #disableHint()
+   * @see #resetHint()
    * @see #enableHint(int)
    * @see #isHintEnable(int)
    * @see #isHintEnable()

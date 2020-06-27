@@ -78,7 +78,7 @@ public class BasicUse extends PApplet {
 
   public void keyPressed() {
     if (key == ' ')
-      node.disableHint();
+      node.resetHint();
     if (key == '1')
       node.toggleHint(Node.AXES);
     if (key == '2')
