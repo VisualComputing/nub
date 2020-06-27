@@ -1025,7 +1025,7 @@ public class Scene extends Graph {
   }
 
   @Override
-  protected void _displayHints() {
+  protected void _displayHint() {
     context().pushStyle();
     if (isHintEnable(BACKGROUND)) {
       if (isNumInstance(_background)) {

@@ -3095,7 +3095,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
-    _displayHints();
+    _displayHint();
     _subtree = subtree;
     if (subtree == null) {
       for (Node node : _leadingNodes())
@@ -3259,7 +3259,7 @@ public class Graph {
     node.visit();
     if (!node.isCulled()) {
       if (node._bypass != TimingHandler.frameCount) {
-        MatrixHandler._draw(context, node);
+        MatrixHandler._displayHint(context, node);
       }
       for (Node child : node.children())
         _render(matrixHandler, context, child);
@@ -3282,10 +3282,10 @@ public class Graph {
         _matrixHandler.scale(scl, scl);
       else
         _matrixHandler.scale(scl, scl, scl);
-      MatrixHandler._draw(context(), node);
+      MatrixHandler._displayHint(context(), node);
       _matrixHandler.popMatrix();
     } else {
-      MatrixHandler._draw(context(), node);
+      MatrixHandler._displayHint(context(), node);
     }
   }
 
@@ -3309,7 +3309,7 @@ public class Graph {
         float g = (float) ((node.id() >> 8) & 255) / 255.f;
         float b = (float) ((node.id() >> 16) & 255) / 255.f;
         _emitBackBufferUniforms(r, g, b);
-        MatrixHandler._draw(_backBuffer(), node);
+        MatrixHandler._displayHint(_backBuffer(), node);
       }
   }
 
@@ -3322,11 +3322,11 @@ public class Graph {
   }
 
   /**
-   * Displays the graph and interpolator hints. Called from within {@link #render(Node)}.
+   * Draws the graph {@link #hint()}.
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
-  protected void _displayHints() {
+  protected void _displayHint() {
   }
 
   /**
@@ -4775,6 +4775,23 @@ public class Graph {
   // visual hints
 
   /**
+   * Returns {@code true} if at least a single node visual hint is enabled
+   * and {@code false} otherwise.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #disableHint()
+   * @see #isHintEnable(int)
+   */
+  public boolean isHintEnable() {
+    return _mask != 0;
+  }
+
+  /**
    * Returns whether or not all single visual hints encoded in the bitwise-or
    * {@code hint} mask are enable or not.
    *
@@ -4784,7 +4801,8 @@ public class Graph {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #resetHint()
+   * @see #disableHint()
+   * @see #isHintEnable()
    */
   public boolean isHintEnable(int hint) {
     return ~(_mask | ~hint) == 0;
@@ -4809,7 +4827,8 @@ public class Graph {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #resetHint()
+   * @see #isHintEnable()
+   * @see #disableHint()
    */
   public int hint() {
     return this._mask;
@@ -4826,21 +4845,26 @@ public class Graph {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
-  public void resetHint() {
+  public void disableHint() {
     _mask = 0;
+    if (isHintEnable(FRUSTUM) && _frustumEye != null) {
+      _frustumEye.disableHint(Node.FRUSTUM);
+    }
   }
 
   /**
-   * Disables all single visual hints encoded in the bitwise-or {@code hint} mask.
+   * Disables all the single visual hints encoded in the bitwise-or {@code hint} mask.
    *
    * @see #hint()
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void disableHint(int hint) {
     _mask &= ~hint;
@@ -4856,9 +4880,10 @@ public class Graph {
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
    * @see #disableHint(int)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void enableHint(int hint, Object... params) {
     enableHint(hint);
@@ -4875,9 +4900,10 @@ public class Graph {
    * @see #disableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void enableHint(int hint) {
     _mask |= hint;
@@ -4893,9 +4919,10 @@ public class Graph {
    * @see #disableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #enableHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void toggleHint(int hint) {
     _mask ^= hint;
@@ -5059,28 +5086,28 @@ public class Graph {
   // Hack to hide interpolator hint properties
 
   /**
-   * Used to display the interpolator in {@link #_displayHints()}.
+   * Used to display the interpolator in {@link #_displayHint()}.
    */
   protected float _axesLength(Interpolator interpolator) {
     return interpolator._axesLength;
   }
 
   /**
-   * Used to display the interpolator in {@link #_displayHints()}.
+   * Used to display the interpolator in {@link #_displayHint()}.
    */
   protected float _cameraLength(Interpolator interpolator) {
     return interpolator._cameraLength;
   }
 
   /**
-   * Used to display the interpolator in {@link #_displayHints()}.
+   * Used to display the interpolator in {@link #_displayHint()}.
    */
   protected int _cameraStroke(Interpolator interpolator) {
     return interpolator._cameraStroke;
   }
 
   /**
-   * Used to display the interpolator in {@link #_displayHints()}.
+   * Used to display the interpolator in {@link #_displayHint()}.
    */
   protected int _splineStroke(Interpolator interpolator) {
     return interpolator._splineStroke;

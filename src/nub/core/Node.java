@@ -2630,6 +2630,23 @@ public class Node {
   }
 
   /**
+   * Returns {@code true} if at least a single node visual hint is enabled
+   * and {@code false} otherwise.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #disableHint()
+   * @see #isHintEnable(int)
+   */
+  public boolean isHintEnable() {
+    return _mask != 0;
+  }
+
+  /**
    * Returns whether or not all single visual hints encoded in the bitwise-or
    * {@code hint} mask are enable or not.
    *
@@ -2639,7 +2656,8 @@ public class Node {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #resetHint()
+   * @see #disableHint()
+   * @see #isHintEnable()
    */
   public boolean isHintEnable(int hint) {
     return ~(_mask | ~hint) == 0;
@@ -2650,15 +2668,21 @@ public class Node {
    * single visual hints available for the node:
    * <p>
    * <ol>
-   * <li>CAMERA</li>
-   * <li>AXES</li>
-   * <li>HUD</li>
-   * <li>FRUSTUM</li>
-   * <li>SHAPE</li>
-   * <li>HIGHLIGHT</li>
-   * <li>BULLSEYE</li>
-   * <li>TORUS</li>
+   * <li>{@link #CAMERA}</li>
+   * <li>{@link #AXES}</li>
+   * <li>{@link #HUD}</li>
+   * <li>{@link #FRUSTUM}</li>
+   * <li>{@link #SHAPE}</li>
+   * <li>{@link #HIGHLIGHT}</li>
+   * <li>{@link #BULLSEYE}</li>
+   * <li>{@link #TORUS}</li>
    * </ol>
+   * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
+   * calling a {@link Graph} rendering algorithm. Note that the {@link #AXES}, {@link #CAMERA}
+   * and {@link #BULLSEYE} hints are display only when calling {@link Graph#render(Node)} or
+   * {@link Graph#render()} (but no when calling a static {@link Graph} rendering algorithm
+   * such as {@link Graph#render(Object, Node, Node, Graph.Type, int, int, float, float)} or
+   * {@link Graph#render(Object, Node, Graph.Type, int, int, float, float)}).
    *
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
@@ -2666,7 +2690,8 @@ public class Node {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #resetHint()
+   * @see #isHintEnable()
+   * @see #disableHint()
    */
   public int hint() {
     return this._mask;
@@ -2683,21 +2708,24 @@ public class Node {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
-  public void resetHint() {
+  public void disableHint() {
     _mask = 0;
+    _updateHUD();
   }
 
   /**
-   * Disables all single visual hints encoded in the bitwise-or {@code hint} mask.
+   * Disables all the single visual hints encoded in the bitwise-or {@code hint} mask.
    *
    * @see #hint()
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void disableHint(int hint) {
     _mask &= ~hint;
@@ -2711,9 +2739,10 @@ public class Node {
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
    * @see #disableHint(int)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void enableHint(int hint, Object... params) {
     enableHint(hint);
@@ -2727,9 +2756,10 @@ public class Node {
    * @see #disableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void enableHint(int hint) {
     _mask |= hint;
@@ -2743,9 +2773,10 @@ public class Node {
    * @see #disableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #enableHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void toggleHint(int hint) {
     _mask ^= hint;

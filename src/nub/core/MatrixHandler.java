@@ -50,45 +50,28 @@ public class MatrixHandler {
   }
 
   /**
-   * Draws node hints.
+   * Draws {@link Node#hint()}.
    */
-  protected static void _draw(Object context, Node node) {
-    _drawShapeHint(context, node);
-    _drawTorusHint(context, node);
-    _drawFrustumHint(context, node);
-  }
-
-  /**
-   * Draws node shape hint.
-   */
-  protected static void _drawShapeHint(Object context, Node node) {
-    if (!node.isHintEnable(Node.SHAPE))
-      return;
+  protected static void _displayHint(Object context, Node node) {
     if (!(context instanceof processing.core.PGraphics))
-      throw new RuntimeException("Drawing the node RMR hint require a PGraphics context");
+      throw new RuntimeException("Displaying the node hints requires a PGraphics context");
     processing.core.PGraphics pg = (processing.core.PGraphics) context;
     pg.push();
-    if (node._rmrShape != null) {
-      pg.shapeMode(pg.shapeMode);
-      pg.shape(node._rmrShape);
+    if (node.isHintEnable(Node.SHAPE)) {
+      if (node._rmrShape != null) {
+        pg.shapeMode(pg.shapeMode);
+        pg.shape(node._rmrShape);
+      }
+      if (node._imrShape != null) {
+        node._imrShape.accept(pg);
+      }
     }
-    if (node._imrShape != null) {
-      node._imrShape.accept(pg);
+    if (node.isHintEnable(Node.TORUS)) {
+      pg.colorMode(processing.core.PApplet.RGB, 255);
+      pg.fill(node._torusColor);
+      Scene.drawTorusSolenoid(pg, node._torusFaces, 5);
     }
-    pg.pop();
-  }
-
-  /**
-   * Draws node frustum hint.
-   */
-  protected static void _drawFrustumHint(Object context, Node node) {
-    if (!node.isHintEnable(Node.FRUSTUM))
-      return;
-    if (node._frustumGraph instanceof Graph || node._eyeBuffer instanceof processing.core.PGraphics) {
-      if (!(context instanceof processing.core.PGraphics))
-        throw new RuntimeException("Drawing the node FRUSTUM hint require a PGraphics context");
-      processing.core.PGraphics pg = (processing.core.PGraphics) context;
-      pg.push();
+    if (node.isHintEnable(Node.FRUSTUM)) {
       pg.colorMode(processing.core.PApplet.RGB, 255);
       pg.stroke(node._frustumColor);
       pg.fill(node._frustumColor);
@@ -98,23 +81,7 @@ public class MatrixHandler {
       else if (node._eyeBuffer instanceof processing.core.PGraphics) {
         Scene.drawFrustum(pg, (processing.core.PGraphics) node._eyeBuffer, node, node._frustumtype, node._zNear, node._zFar);
       }
-      pg.pop();
     }
-  }
-
-  /**
-   * Draws node torus hint.
-   */
-  protected static void _drawTorusHint(Object context, Node node) {
-    if (!node.isHintEnable(Node.TORUS))
-      return;
-    if (!(context instanceof processing.core.PGraphics))
-      throw new RuntimeException("Drawing the node TORUS hint require a PGraphics context");
-    processing.core.PGraphics pg = (processing.core.PGraphics) context;
-    pg.push();
-    pg.colorMode(processing.core.PApplet.RGB, 255);
-    pg.fill(node._torusColor);
-    Scene.drawTorusSolenoid(pg, node._torusFaces, 5);
     pg.pop();
   }
 

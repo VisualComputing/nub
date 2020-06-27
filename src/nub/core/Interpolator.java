@@ -857,6 +857,23 @@ public class Interpolator {
   }
 
   /**
+   * Returns {@code true} if at least a single node visual hint is enabled
+   * and {@code false} otherwise.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #disableHint()
+   * @see #isHintEnable(int)
+   */
+  public boolean isHintEnable() {
+    return _mask != 0;
+  }
+
+  /**
    * Returns whether or not all single visual hints encoded in the bitwise-or
    * {@code hint} mask are enable or not.
    *
@@ -866,7 +883,8 @@ public class Interpolator {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #resetHint()
+   * @see #disableHint()
+   * @see #isHintEnable()
    */
   public boolean isHintEnable(int hint) {
     return ~(_mask | ~hint) == 0;
@@ -888,7 +906,8 @@ public class Interpolator {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #resetHint()
+   * @see #isHintEnable()
+   * @see #disableHint()
    */
   public int hint() {
     return this._mask;
@@ -905,22 +924,24 @@ public class Interpolator {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
-  public void resetHint() {
+  public void disableHint() {
     _mask = 0;
     Graph._interpolators.remove(this);
   }
 
   /**
-   * Disables all single visual hints encoded in the bitwise-or {@code hint} mask.
+   * Disables all the single visual hints encoded in the bitwise-or {@code hint} mask.
    *
    * @see #hint()
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void disableHint(int hint) {
     _mask &= ~hint;
@@ -935,9 +956,10 @@ public class Interpolator {
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
    * @see #disableHint(int)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void enableHint(int hint, Object... params) {
     enableHint(hint);
@@ -951,9 +973,10 @@ public class Interpolator {
    * @see #disableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void enableHint(int hint) {
     _mask |= hint;
@@ -968,9 +991,10 @@ public class Interpolator {
    * @see #disableHint(int)
    * @see #configHint(int, Object...)
    * @see #enableHint(int, Object...)
-   * @see #resetHint()
+   * @see #disableHint()
    * @see #enableHint(int)
    * @see #isHintEnable(int)
+   * @see #isHintEnable()
    */
   public void toggleHint(int hint) {
     _mask ^= hint;
