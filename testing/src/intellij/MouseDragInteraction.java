@@ -79,7 +79,7 @@ public class MouseDragInteraction extends PApplet {
     if (key == 'd') {
       if (node == null) {
         node = shape1.detach();
-        node.setPickingPolicy(Node.PickingPolicy.PRECISE);
+        node.setPickingPolicy(Node.SHAPE);
         scene.randomize(node);
         node.setShape(shape());
         node.setReference(shape2);

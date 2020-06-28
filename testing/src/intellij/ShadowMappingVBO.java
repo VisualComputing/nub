@@ -48,7 +48,7 @@ public class ShadowMappingVBO extends PApplet {
       tint(random(0, 255), random(0, 255), random(0, 255), random(150, 255));
       shapes[i] = new Node(loadShape("/home/pierre/IdeaProjects/nub/testing/data/interaction/rocket.obj"));
       scene.randomize(shapes[i]);
-      shapes[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
+      shapes[i].setPickingPolicy(Node.SHAPE);
       shapes[i].scale(0.2f);
     }
     light = new Node() {

@@ -47,7 +47,7 @@ public class MiniMap extends PApplet {
         models[i].scale(3);
       }
       // set picking precision to the pixels of the node projection
-      models[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
+      models[i].setPickingPolicy(Node.SHAPE);
       scene.randomize(models[i]);
     }
     // Note that we pass the upper left corner coordinates where the minimap

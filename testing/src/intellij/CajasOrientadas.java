@@ -70,9 +70,9 @@ public class CajasOrientadas extends PApplet {
   public void keyPressed() {
     if (key == ' ')
       for (Box caja : cajas)
-        caja.setPickingPolicy(caja.pickingPolicy() == Node.PickingPolicy.PRECISE ?
-            Node.PickingPolicy.BULLSEYE :
-            Node.PickingPolicy.PRECISE);
+        caja.setPickingPolicy(caja.pickingPolicy() == Node.SHAPE ?
+            Node.BULLSEYE :
+            Node.SHAPE);
     if (key == 'c') {
       for (Box caja : cajas)
         if (caja.bullsEyeSize() < 1)
@@ -150,7 +150,7 @@ public class CajasOrientadas extends PApplet {
     public Sphere(int tint, float radius) {
       _color = tint;
       _radius = radius;
-      setPickingPolicy(Node.PickingPolicy.PRECISE);
+      setPickingPolicy(Node.SHAPE);
     }
 
     @Override

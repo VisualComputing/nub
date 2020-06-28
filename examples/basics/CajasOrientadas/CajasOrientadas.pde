@@ -71,9 +71,7 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   if (key == ' ') {
     for (Box caja : cajas)
-      caja.setPickingPolicy(caja.pickingPolicy() == Node.PickingPolicy.PRECISE ?
-        Node.PickingPolicy.BULLSEYE :
-        Node.PickingPolicy.PRECISE);
+      caja.setPickingPolicy(caja.pickingPolicy() == Node.SHAPE ? Node.BULLSEYE : Node.SHAPE);
   }
   if (key == 'c') {
     for (Box caja : cajas)

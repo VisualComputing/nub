@@ -17,6 +17,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
+import processing.core.PShape;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -147,10 +148,7 @@ public class Node {
   }
   // TODO public because of scene.drawBullsEye
   public BullsEyeShape _bullsEyeShape;
-  public enum PickingPolicy {
-    PRECISE, BULLSEYE
-  }
-  protected PickingPolicy _pickingPolicy;
+  protected int _pickingPolicy;
 
   // ID
   protected static int _counter;
@@ -319,7 +317,7 @@ public class Node {
     setRotation(rotation);
     setScaling(scaling);
     enableHint(HUD | HIGHLIGHT);
-    setPickingPolicy(PickingPolicy.BULLSEYE);
+    setPickingPolicy(BULLSEYE);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -404,7 +402,7 @@ public class Node {
     this(reference, constraint, translation, rotation, scaling);
     setShape(shape);
     enableHint(SHAPE);
-    setPickingPolicy(PickingPolicy.PRECISE);
+    setPickingPolicy(SHAPE);
   }
 
   /**
@@ -418,7 +416,7 @@ public class Node {
     this(reference, constraint, translation, rotation, scaling);
     setShape(shape);
     enableHint(SHAPE);
-    setPickingPolicy(PickingPolicy.PRECISE);
+    setPickingPolicy(SHAPE);
   }
 
   /**
@@ -917,16 +915,27 @@ public class Node {
 
   // PRECISION
 
-  public void setPickingPolicy(PickingPolicy policy) {
-    _pickingPolicy = policy;
+  /**
+   * Sets the node ray-casting {@link #pickingPolicy()}. Either the {@link #BULLSEYE} or
+   * the {@link #SHAPE} {@link #hint()}.
+   */
+  public void setPickingPolicy(int policy) {
+    if (policy == SHAPE || policy == BULLSEYE)
+      _pickingPolicy = policy;
+    else
+      System.out.println("Warning: the node picking policy should be set either to SHAPE or BULLSEYE. Nothing done");
   }
 
-  public PickingPolicy pickingPolicy() {
+  /**
+   * Returns the node ray-casting {@link #pickingPolicy()}. Either the {@link #BULLSEYE} or
+   * {@link #SHAPE} {@link #hint()}.
+   */
+  public int pickingPolicy() {
     return _pickingPolicy;
   }
 
   /**
-   * Sets the {@link #bullsEyeSize()}.
+   * Sets the {@link #bullsEyeSize()} of the {@link #BULLSEYE} {@link #hint()}.
    *
    * @see #bullsEyeSize()
    */
@@ -937,13 +946,12 @@ public class Node {
   }
 
   /**
-   * Returns the node picking threshold. Set it with {@link #setBullsEyeSize(float)}.
+   * Returns the node {@link #BULLSEYE} {@link #hint()} size. Set it with
+   * {@link #setBullsEyeSize(float)}.
    * <p>
    * Picking a node is done with ray casting against a screen-space shape defined according
    * to a {@link #bullsEyeSize()} as follows:
    * <ul>
-   * <li>The projected pixels of the node visual representation (see {@link #graphics(processing.core.PGraphics)}
-   * and {@link #setShape(processing.core.PShape)}). Set it with {@code threshold = 0}.</li>
    * <li>A node bounding box whose length is defined as percentage of the graph diameter
    * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
    * <li>A squared 'bullseye' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
@@ -2524,7 +2532,10 @@ public class Node {
   // public void graphics(Object context) {}
 
   /**
-   * Calls {@link #resetIMRShape()} and {@link #resetRMRShape()} .
+   * Calls {@link #resetIMRShape()} and {@link #resetRMRShape()}.
+   *
+   * @see #setShape(PShape)
+   * @see #setShape(Consumer)
    */
   public void resetShape() {
     _rmrShape = null;
@@ -2550,19 +2561,30 @@ public class Node {
   }
 
   /**
-   * Sets the node retained-mode rendering shape.
+   * Sets the node retained mode rendering (rmr) {@link #SHAPE} hint
+   * (see {@link #hint()}). Use {@code enableHint(Node.SHAPE)},
+   * {@code disableHint(Node.SHAPE)} and {@code toggleHint(Node.SHAPE)}
+   * to (dis)enable the hint.
    *
+   * @see #setShape(Consumer)
    * @see #resetShape()
+   * @see #resetIMRShape()
+   * @see #resetRMRShape()
    */
   public void setShape(processing.core.PShape shape) {
     _rmrShape = shape;
   }
 
   /**
-   * Sets the node immediate-mode rendering procedure.
+   * Sets the node immediate mode rendering (imr) {@link #SHAPE} procedure
+   * hint (see {@link #hint()}). Use {@code enableHint(Node.SHAPE)},
+   * {@code disableHint(Node.SHAPE)} and {@code toggleHint(Node.SHAPE)}
+   * to (dis)enable the hint.
    *
-   * @see #setShape(processing.core.PShape)
+   * @see #setShape(PShape)
+   * @see #resetShape()
    * @see #resetIMRShape()
+   * @see #resetRMRShape()
    */
   public void setShape(Consumer<processing.core.PGraphics> callback) {
     _imrShape = callback;
@@ -2587,6 +2609,9 @@ public class Node {
     }
   }
 
+  /**
+   * Same as calling {@link #resetRMRHUD()} and {@link #resetIMRHUD()}.
+   */
   public void resetHUD() {
     _rmrHUD = null;
     _imrHUD = null;
@@ -2603,15 +2628,28 @@ public class Node {
     _updateHUD();
   }
 
+  /**
+   * Same as {@code setIMRShape(null)}.
+   *
+   * @see #setShape(Consumer)
+   */
   public void resetIMRHUD() {
     _imrHUD = null;
     _updateHUD();
   }
 
   /**
-   * Sets the node retained mode rendering (rmr) shape.
+   * Sets the node retained mode rendering (rmr) shape {@link #HUD} hint
+   * (see {@link #hint()}). The 2D {@code shape} screen coordinates are
+   * interpreted relative to the node {@link #position()} screen projection
+   * when the hint is rendered ({@link Graph#render(Node)}). Use
+   * {@code enableHint(Node.HUD)}, {@code disableHint(Node.HUD)} and
+   * {@code toggleHint(Node.HUD)} to (dis)enable the hint.
    *
-   * @see #resetShape()
+   * @see #setHUD(Consumer)
+   * @see #resetHUD()
+   * @see #resetIMRHUD()
+   * @see #resetRMRHUD()
    */
   public void setHUD(processing.core.PShape shape) {
     _rmrHUD = shape;
@@ -2619,10 +2657,17 @@ public class Node {
   }
 
   /**
-   * Sets the node immediate mode rendering (imr) procedure.
+   * Sets the node immediate mode rendering (imr) drawing procedure
+   * {@link #HUD} hint (see {@link #hint()}). The 2D {@code shape} screen
+   * coordinates are interpreted relative to the node {@link #position()}
+   * screen projection when the hint is rendered ({@link Graph#render(Node)}).
+   * Use {@code enableHint(Node.HUD)}, {@code disableHint(Node.HUD)} and
+   * {@code toggleHint(Node.HUD)} to (dis)enable the hint.
    *
    * @see #setShape(processing.core.PShape)
-   * @see #resetIMRShape()
+   * @see #resetHUD()
+   * @see #resetIMRHUD()
+   * @see #resetRMRHUD()
    */
   public void setHUD(Consumer<processing.core.PGraphics> callback) {
     _imrHUD = callback;
@@ -2650,21 +2695,32 @@ public class Node {
    * single visual hints available for the node:
    * <p>
    * <ol>
-   * <li>{@link #CAMERA}</li>
-   * <li>{@link #AXES}</li>
-   * <li>{@link #HUD}</li>
-   * <li>{@link #FRUSTUM}</li>
-   * <li>{@link #SHAPE}</li>
-   * <li>{@link #HIGHLIGHT}</li>
-   * <li>{@link #BULLSEYE}</li>
-   * <li>{@link #TORUS}</li>
+   * <li>{@link #CAMERA} which displays a camera hint centered at the node screen
+   * projection.</li>
+   * <li>{@link #AXES} which displays an axes hint centered at the node
+   * {@link #position()} an oriented according to the node {@link #orientation()}.</li>
+   * <li>{@link #HUD} which displays the node Heads-Up-Display set with
+   * {@link #setHUD(PShape)} and {@link #setHUD(Consumer)}.</li>
+   * <li>{@link #FRUSTUM} which displays a frustum visual representation which origin is
+   * located a the note {@link #position()}. The frustum may be set up from a given
+   * {@link Graph} or from low-level frustum plane params.</li>
+   * <li>{@link #SHAPE} which displays the node shape set with
+   * {@link #setShape(PShape)} and {@link #setShape(Consumer)}.</li>
+   * <li>{@link #HIGHLIGHT} which represents the scale factor to be applied to the node
+   * when it gets tagged (see {@link Graph#tag(String, Node)}).</li>
+   * <li>{@link #BULLSEYE} which displays a bullseye centered at the node
+   * {@link #position()} screen projection. Call {@link #setBullsEyeSize(float)}
+   * to set the size of the hint</li>
+   * <li>{@link #TORUS} which displays a torus solenoid.</li>
    * </ol>
    * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
-   * calling a {@link Graph} rendering algorithm. Note that the {@link #AXES}, {@link #CAMERA}
-   * and {@link #BULLSEYE} hints are display only when calling {@link Graph#render(Node)} or
-   * {@link Graph#render()} (but no when calling a static {@link Graph} rendering algorithm
-   * such as {@link Graph#render(Object, Node, Node, Graph.Type, int, int, float, float)} or
+   * calling a {@link Graph} rendering algorithm. Note that the {@link #AXES}, {@link #CAMERA},
+   * {@link #HIGHLIGHT}, and {@link #BULLSEYE} hints are display only when calling
+   * {@link Graph#render(Node)} or {@link Graph#render()} (but no when calling a static
+   * {@link Graph} rendering algorithm such as
+   * {@link Graph#render(Object, Node, Node, Graph.Type, int, int, float, float)} or
    * {@link Graph#render(Object, Node, Graph.Type, int, int, float, float)}).
+   * Use {@link #configHint(int, Object...)} to configure the hint different visual aspects.
    *
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
@@ -2759,6 +2815,42 @@ public class Node {
     _updateHUD();
   }
 
+  /**
+   * Configures the hint using varargs as follows:
+   * <p>
+   * <ol>
+   * <li>{@link #CAMERA} hint: {@code configHint(Node.CAMERA, cameraStroke)} or
+   * {@code configHint(Node.CAMERA, cameraStroke, cameraLength)}.</li>
+   * <li>{@link #AXES} hint: {@code configHint(Node.AXES, axesLength)}.</li>
+   * <li>{@link #FRUSTUM} hint: {@code configHint(Node.FRUSTUM, frustumColor)}
+   * or {@code configHint(Node.FRUSTUM, graph)} or
+   * {@code configHint(Node.FRUSTUM, frustumColor, graph)} or
+   * {@code configHint(Node.FRUSTUM, eyeBuffer, frustumType, zNear, zFar)} or
+   * {@code configHint(Node.FRUSTUM, frustumColor, eyeBuffer, frustumType, zNear, zFar)}.</li>
+   * <li>{@link #HIGHLIGHT} hint: {@code configHint(Node.HIGHLIGHT, highlight)}.</li>
+   * <li>{@link #BULLSEYE} hint: {@code configHint(Node.BULLSEYE, bullseyeStroke)},
+   * {@code configHint(Node.BULLSEYE, bullseyeShape)}, or
+   * {@code configHint(Node.BULLSEYE, bullseyeStroke, bullseyeShape)}.</li>
+   * <li>{@link #TORUS} hint: configHint(Node.TORUS, torusStroke)}, or
+   * configHint(Node.TORUS, torusStroke, torusFaces)}.</li>
+   * </ol>
+   * Note that the {@code cameraStroke}, {@code splineStroke}, {@code bullseyeStroke},
+   * {@code torusStroke} and {@code frustumColor}, are color {@code int} vars;
+   * {@code cameraLength} and {@code exesLength}
+   * are world magnitude numerical values; {@code highlight} is a numerical value in
+   * {@code [0..1]} which represents the scale factor to be applied to the node when
+   * it gets tagged (see {@link Graph#tag(String, Node)}); {@code bullseyeShape}
+   * is of type {@link BullsEyeShape}; {@code graph} is of type {@link Graph};
+   * and, {@code graph} may be of type {@link processing.core.PGraphics}.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #isHintEnable(int)
+   * @see #resetHint()
+   */
   public void configHint(int hint, Object... params) {
     switch (params.length) {
       case 1:

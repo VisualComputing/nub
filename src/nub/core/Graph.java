@@ -2725,7 +2725,7 @@ public class Graph {
    * @see Node#setBullsEyeSize(float)
    */
   public boolean tracks(Node node, int pixelX, int pixelY) {
-    if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && _bb != null)
+    if (node.pickingPolicy() == Node.SHAPE && _bb != null)
       return _tracks(node, pixelX, pixelY);
     else
       return _tracks(node, pixelX, pixelY, screenLocation(node.position()));
@@ -3271,7 +3271,7 @@ public class Graph {
    * Renders the node onto the front buffer. Used by the rendering algorithms.
    */
   protected void _drawFrontBuffer(Node node) {
-    if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && node.isTaggingEnabled())
+    if (node.pickingPolicy() == Node.SHAPE && node.isTaggingEnabled())
       if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM))
         _bbNeed = frameCount();
     if (isTagged(node) && node.isHintEnable(Node.HIGHLIGHT)) {
@@ -3303,7 +3303,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   protected void _drawBackBuffer(Node node) {
-    if (node.pickingPolicy() == Node.PickingPolicy.PRECISE && node.isTaggingEnabled())
+    if (node.pickingPolicy() == Node.SHAPE && node.isTaggingEnabled())
       if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM)) {
         float r = (float) (node.id() & 255) / 255.f;
         float g = (float) ((node.id() >> 8) & 255) / 255.f;
@@ -3333,7 +3333,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.PickingPolicy.BULLSEYE) {
+    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.BULLSEYE) {
       Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
@@ -3351,7 +3351,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.PickingPolicy.PRECISE && _bb != null) {
+    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.SHAPE && _bb != null) {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
@@ -4795,13 +4795,19 @@ public class Graph {
    * single visual hints available for the graph:
    * <p>
    * <ol>
-   * <li>GRID</li>
-   * <li>AXES</li>
-   * <li>HUD</li>
-   * <li>FRUSTUM</li>
-   * <li>SHAPE</li>
-   * <li>BACKGROUND</li>
+   * <li>{@link #GRID}</li>
+   * <li>{@link #AXES}</li>
+   * <li>{@link #HUD}</li>
+   * <li>{@link #FRUSTUM}</li>
+   * <li>{@link #SHAPE}</li>
+   * <li>{@link #BACKGROUND}</li>
    * </ol>
+   * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
+   * calling either {@link #render(Node)} or {@link #render()}. Note that the hint
+   * is not display when calling a static rendering algorithm such as
+   * {@link #render(Object, Node, Node, Graph.Type, int, int, float, float)} or
+   * {@link #render(Object, Node, Graph.Type, int, int, float, float)}).
+   * Use {@link #configHint(int, Object...)} to configure the hint different visual aspects.
    *
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
@@ -4907,6 +4913,31 @@ public class Graph {
     }
   }
 
+  /**
+   * Configures the hint using varargs as follows:
+   * <p>
+   * <ol>
+   * <li>{@link #GRID} hint: {@code configHint(Graph.GRID, gridStroke)}
+   * or {@code configHint(Interpolator.CAMERA, cameraStroke, cameraLength)}.</li>
+   * <li>{@link #FRUSTUM} hint: {@code configHint(Graph.FRUSTUM, otherGraph)} or
+   * {@code configHint(Graph.FRUSTUM, frustumColor)} or
+   * {@code configHint(Graph.FRUSTUM, otherGraph, frustumColor)}, or
+   * {@code configHint(Graph.FRUSTUM, frustumColor, otherGraph)}.</li>
+   * <li>{@link #BACKGROUND} hint: {@code configHint(Graph.BACKGROUND, background)}.</li>
+   * </ol>
+   * Note that the {@code gridStroke}, {@code cameraStroke} and {@code frustumColor}
+   * are color {@code int} vars; {@code otherGraph} is of type {@link Graph}; and,
+   * {@code background} is either a color {@code int} var, or a
+   * {@code processing.core.PImage} type.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #isHintEnable(int)
+   * @see #resetHint()
+   */
   public void configHint(int hint, Object... params) {
     switch (params.length) {
       case 1:

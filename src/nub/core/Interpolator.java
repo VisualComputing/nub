@@ -877,16 +877,17 @@ public class Interpolator {
    * single visual hints available for the interpolator:
    * <p>
    * <ol>
-   * <li>{@link #CAMERA}</li>
+   * <li>{@link #CAMERA} which displays a camera hint centered at the node screen
+   * projection.</li>
    * <li>{@link #AXES}</li>
    * <li>{@link #SPLINE}</li>
    * </ol>
    * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
-   * calling a {@link Graph} rendering algorithm. Note that the {@link #AXES}, {@link #CAMERA}
-   * and {@link #SPLINE} hints are display only when calling {@link Graph#render(Node)} or
-   * {@link Graph#render()} (but no when calling a static {@link Graph} rendering algorithm
-   * such as {@link Graph#render(Object, Node, Node, Graph.Type, int, int, float, float)} or
+   * calling either {@link Graph#render(Node)} or {@link Graph#render()}. Note that the hint
+   * is not display when calling a static {@link Graph} rendering algorithm such as
+   * {@link Graph#render(Object, Node, Node, Graph.Type, int, int, float, float)} or
    * {@link Graph#render(Object, Node, Graph.Type, int, int, float, float)}).
+   * Use {@link #configHint(int, Object...)} to configure the hint different visual aspects.
    *
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
@@ -984,6 +985,27 @@ public class Interpolator {
       Graph._interpolators.add(this);
   }
 
+  /**
+   * Configures the hint using varargs as follows:
+   * <p>
+   * <ol>
+   * <li>{@link #CAMERA} hint: {@code configHint(Interpolator.CAMERA, cameraStroke)}
+   * or {@code configHint(Interpolator.CAMERA, cameraStroke, cameraLength)}.</li>
+   * <li>{@link #AXES} hint: {@code configHint(Interpolator.AXES, axesLength)}.</li>
+   * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke)}.</li>
+   * </ol>
+   * Note that the {@code cameraStroke} and {@code splineStroke} are color {@code int}
+   * vars; and, {@code cameraLength} and {@code exesLength} are world magnitude
+   * numerical values.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #isHintEnable(int)
+   * @see #resetHint()
+   */
   public void configHint(int hint, Object... params) {
     switch (params.length) {
       case 1:
@@ -1020,7 +1042,7 @@ public class Interpolator {
       // TODO readd condition when Node.graphics is removed
       //if (!node.isHintEnable(Node.SHAPE)) {
         node.enableHint(Node.BULLSEYE);
-        node.setPickingPolicy(Node.PickingPolicy.BULLSEYE);
+        node.setPickingPolicy(Node.BULLSEYE);
         if (!node.isTaggingEnabled()) {
           node.enableTagging();
         }

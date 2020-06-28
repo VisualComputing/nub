@@ -5,7 +5,6 @@ import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
-import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -60,7 +59,7 @@ public class HolaMundo extends PApplet {
     //torus.setHUD(pshape);
     torus.setHUD(this::hud);
     torus.enableHint(Node.TORUS, color(255, 0, 0));
-    torus.setPickingPolicy(Node.PickingPolicy.PRECISE);
+    torus.setPickingPolicy(Node.SHAPE);
     torus.scale(10);
     torus.translate(-200, -200, 0);
     // 3. box
