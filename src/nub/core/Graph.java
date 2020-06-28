@@ -16,6 +16,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
+import processing.core.PShape;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -106,13 +107,21 @@ import java.util.function.Consumer;
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
  * such as {@link #fit(float)}, {@link #fit(int, int, int, int)}, {@link #fit(Node)} and {@link #fit(Node, float)}.
  * Refer to the {@link Interpolator} documentation for details.
- * <h1>5. Visibility and culling techniques</h1>
+ * <h1>5. Visual hints</h2>
+ * The world space visual representation may be configured using the following hints:
+ * {@link #AXES}, {@link #HUD}, {@link #FRUSTUM}, {@link #GRID}, {@link #BACKGROUND},
+ * {@link #SHAPE}.
+ * <p>
+ * See {@link #hint()}, {@link #configHint(int, Object...)} {@link #enableHint(int)},
+ * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
+ * and {@link #resetHint()}.
+ * <h1>6. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
  * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}. Make sure
  * to call {@link #enableBoundaryEquations()} first, since update of the viewing volume
  * boundary equations are disabled by default (see {@link #enableBoundaryEquations()} and
  * {@link #areBoundaryEquationsEnabled()}).
- * <h1>6. Matrix handling</h1>
+ * <h1>7. Matrix handling</h1>
  * The graph performs matrix handling through a matrix-handler. Refer to the {@link MatrixHandler}
  * documentation for details.
  * <p>
@@ -4795,12 +4804,15 @@ public class Graph {
    * single visual hints available for the graph:
    * <p>
    * <ol>
-   * <li>{@link #GRID}</li>
-   * <li>{@link #AXES}</li>
-   * <li>{@link #HUD}</li>
-   * <li>{@link #FRUSTUM}</li>
-   * <li>{@link #SHAPE}</li>
-   * <li>{@link #BACKGROUND}</li>
+   * <li>{@link #GRID} which displays a grid hint centered at the world origin.</li>
+   * <li>{@link #AXES} which displays a grid hint centered at the world origin.</li>
+   * <li>{@link #HUD} which displays the graph Heads-Up-Display set with
+   * {@link #setHUD(PShape)} and {@link #setHUD(Consumer)}.</li>
+   * <li>{@link #FRUSTUM} which is an interface to set up the {@link Node#FRUSTUM}
+   * for a given graph {@link #eye()}.</li>
+   * <li>{@link #SHAPE}  which displays the node shape set with
+   * {@link #setShape(PShape)} and {@link #setShape(Consumer)}.</li>
+   * <li>{@link #BACKGROUND} which sets up the graph background to be displayed.</li>
    * </ol>
    * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
    * calling either {@link #render(Node)} or {@link #render()}. Note that the hint
@@ -4917,8 +4929,11 @@ public class Graph {
    * Configures the hint using varargs as follows:
    * <p>
    * <ol>
-   * <li>{@link #GRID} hint: {@code configHint(Graph.GRID, gridStroke)}
-   * or {@code configHint(Interpolator.CAMERA, cameraStroke, cameraLength)}.</li>
+   * <li>{@link #GRID} hint: {@code configHint(Graph.GRID, gridStroke)},
+   * {@code configHint(Graph.GRID, gridType)},
+   * {@code configHint(Graph.GRID, gridStroke, gridType)},
+   * {@code configHint(Graph.GRID, gridStroke, gridSubdivs)}
+   * {@code configHint(Graph.GRID, gridStroke, gridSubdivs, gridType)}.</li>
    * <li>{@link #FRUSTUM} hint: {@code configHint(Graph.FRUSTUM, otherGraph)} or
    * {@code configHint(Graph.FRUSTUM, frustumColor)} or
    * {@code configHint(Graph.FRUSTUM, otherGraph, frustumColor)}, or
@@ -4926,7 +4941,9 @@ public class Graph {
    * <li>{@link #BACKGROUND} hint: {@code configHint(Graph.BACKGROUND, background)}.</li>
    * </ol>
    * Note that the {@code gridStroke}, {@code cameraStroke} and {@code frustumColor}
-   * are color {@code int} vars; {@code otherGraph} is of type {@link Graph}; and,
+   * are color {@code int} vars; {@code otherGraph} is of type {@link Graph};
+   * {@code gridType} is either {@link GridType#DOTS} or {@link GridType#LINES};
+   * {@code gridSubdivs} is the number of grid subdivisions to be displayed; and,
    * {@code background} is either a color {@code int} var, or a
    * {@code processing.core.PImage} type.
    *
@@ -5024,23 +5041,56 @@ public class Graph {
     System.out.println("Warning: some params in Scene.configHint(hint, params) couldn't be parsed!");
   }
 
+  /**
+   * Sets the graph retained mode rendering (rmr) shape {@link #HUD} hint
+   * (see {@link #hint()}). Use {@code enableHint(Node.HUD)},
+   * {@code disableHint(Node.HUD)} and {@code toggleHint(Node.HUD)} to (dis)enable the hint.
+   *
+   * @see #setHUD(Consumer)
+   * @see #resetHUD()
+   * @see #resetIMRHUD()
+   * @see #resetRMRHUD()
+   */
   public void setHUD(processing.core.PShape hud) {
     _rmrHUD = hud;
   }
 
+  /**
+   * Sets the node immediate mode rendering (imr) drawing procedure
+   * {@link #HUD} hint (see {@link #hint()}). Use {@code enableHint(Node.HUD)},
+   * {@code disableHint(Node.HUD)} and {@code toggleHint(Node.HUD)} to (dis)enable the hint.
+   *
+   * @see #setShape(processing.core.PShape)
+   * @see #resetHUD()
+   * @see #resetIMRHUD()
+   * @see #resetRMRHUD()
+   */
   public void setHUD(Consumer<processing.core.PGraphics> hud) {
     _imrHUD = hud;
   }
 
+  /**
+   * Same as calling {@link #resetRMRHUD()} and {@link #resetIMRHUD()}.
+   */
   public void resetHUD() {
     _imrHUD = null;
     _rmrHUD = null;
   }
 
+  /**
+   * Same as {@code setIMRShape(null)}.
+   *
+   * @see #setShape(Consumer)
+   */
   public void resetIMRHUD() {
     _imrHUD = null;
   }
 
+  /**
+   * Same as {@code setRMRShape(null)}.
+   *
+   * @see #setShape(processing.core.PShape)
+   */
   public void resetRMRHUD() {
     _rmrHUD = null;
   }
@@ -5072,19 +5122,30 @@ public class Graph {
   }
 
   /**
-   * Sets the node retained-mode rendering shape.
+   * Sets the node retained mode rendering (rmr) {@link #SHAPE} hint
+   * (see {@link #hint()}). Use {@code enableHint(Node.SHAPE)},
+   * {@code disableHint(Node.SHAPE)} and {@code toggleHint(Node.SHAPE)}
+   * to (dis)enable the hint.
    *
+   * @see #setShape(Consumer)
    * @see #resetShape()
+   * @see #resetIMRShape()
+   * @see #resetRMRShape()
    */
   public void setShape(processing.core.PShape shape) {
     _rmrShape = shape;
   }
 
   /**
-   * Sets the node immediate-mode rendering procedure.
+   * Sets the node immediate mode rendering (imr) {@link #SHAPE} procedure
+   * hint (see {@link #hint()}). Use {@code enableHint(Node.SHAPE)},
+   * {@code disableHint(Node.SHAPE)} and {@code toggleHint(Node.SHAPE)}
+   * to (dis)enable the hint.
    *
-   * @see #setShape(processing.core.PShape)
+   * @see #setShape(PShape)
+   * @see #resetShape()
    * @see #resetIMRShape()
+   * @see #resetRMRShape()
    */
   public void setShape(Consumer<processing.core.PGraphics> callback) {
     _imrShape = callback;

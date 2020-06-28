@@ -874,13 +874,15 @@ public class Interpolator {
 
   /**
    * Returns the current visual hint mask. The mask is a bitwise-or of the following
-   * single visual hints available for the interpolator:
+   * single visual hints available the interpolator:
    * <p>
    * <ol>
-   * <li>{@link #CAMERA} which displays a camera hint centered at the node screen
-   * projection.</li>
-   * <li>{@link #AXES}</li>
-   * <li>{@link #SPLINE}</li>
+   * <li>{@link #CAMERA} which displays a camera hint for each interpolator key-frame
+   * centered at the screen projection of its {@link Node#position()}.</li>
+   * <li>{@link #AXES} which displays an axes hint for each key-frame centered at
+   * the screen projection of its {@link Node#position()}.</li>
+   * <li>{@link #SPLINE} which displays a Catmull-Rom spline having the key-frames
+   * as its control points.</li>
    * </ol>
    * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
    * calling either {@link Graph#render(Node)} or {@link Graph#render()}. Note that the hint
@@ -1037,6 +1039,14 @@ public class Interpolator {
     System.out.println("Warning: some params in Interpolator.configHint(hint, params) couldn't be parsed!");
   }
 
+  /**
+   * Allows edition of the interpolator by enabling the {@link Node#BULLSEYE},
+   * {@link Node#AXES} and {@link Node#CAMERA} hints for each ot its key-frames.
+   * Note that {@link #keep()} does the opposite.
+   *
+   * @see #keep()
+   * @see Node#hint()
+   */
   public void edit() {
     for (Node node : keyFrames().values()) {
       // TODO readd condition when Node.graphics is removed
@@ -1056,6 +1066,14 @@ public class Interpolator {
     }
   }
 
+  /**
+   * Disallows edition of the interpolator by disabling the {@link Node#BULLSEYE},
+   * {@link Node#AXES} and {@link Node#CAMERA} hints for each ot its key-frames.
+   * Note that {@link #edit()} does the opposite.
+   *
+   * @see #edit()
+   * @see Node#hint()
+   */
   public void keep() {
     for (Node node : keyFrames().values()) {
       //if (!node.isHintEnable(Node.SHAPE)) {
@@ -1073,10 +1091,23 @@ public class Interpolator {
     }
   }
 
+  /**
+   * Returns the number of steps between two consecutive key-frames
+   * to be drawn by the interpolator hint. Sets this value with {@link #setSteps(int)}.
+   *
+   * @see #hint()
+   */
   public int steps() {
     return _steps;
   }
 
+  /**
+   * Sets the number of steps between two consecutive key-frames to be drawn
+   * by the interpolator hint.
+   *
+   * @see #steps()
+   * @see #hint()
+   */
   public void setSteps(int steps) {
     if (1 <= steps && steps <= 30)
       _steps = steps;

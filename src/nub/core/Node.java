@@ -105,12 +105,16 @@ import java.util.function.Consumer;
  * {@link nub.core.constraint.WorldConstraint} and
  * {@link nub.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
- * <h2>Shapes</h2>
- * A node shape can be set from a retained-mode rendering object, see {@link #setShape(processing.core.PShape)};
- * or from an immediate-mode rendering procedure, see {@link #graphics(processing.core.PGraphics)}.
- * Picking a node is done according to a {@link #bullsEyeSize()}. When a node is tagged
- * it will be highlighted (scaled) according to a {@link #HIGHLIGHT} hint.
- * See also {@link #enableTagging(boolean)}.
+ * <h2>Visual hints</h2>
+ * The node space visual representation may be configured using the following hints:
+ * {@link #CAMERA}, {@link #AXES}, {@link #HUD}, {@link #FRUSTUM}, {@link #SHAPE},
+ * {@link #HIGHLIGHT}, {@link #BULLSEYE}, and {@link #TORUS}.
+ * <p>
+ * See {@link #hint()}, {@link #configHint(int, Object...)} {@link #enableHint(int)},
+ * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
+ * and {@link #resetHint()}.
+ * <h2>Ray casting</h2>
+ * The ray-casting node {@link #pickingPolicy()} may be set with {@link #setPickingPolicy(int)}.
  * <h2>Custom behavior</h2>
  * Implementing a custom behavior for node is a two step process:
  * <ul>
@@ -2840,8 +2844,9 @@ public class Node {
    * are world magnitude numerical values; {@code highlight} is a numerical value in
    * {@code [0..1]} which represents the scale factor to be applied to the node when
    * it gets tagged (see {@link Graph#tag(String, Node)}); {@code bullseyeShape}
-   * is of type {@link BullsEyeShape}; {@code graph} is of type {@link Graph};
-   * and, {@code graph} may be of type {@link processing.core.PGraphics}.
+   * is either of type {@link BullsEyeShape#SQUARE} or {@link BullsEyeShape#CIRCLE};
+   * {@code graph} is of type {@link Graph}; and, {@code graph} may be of type
+   * {@link processing.core.PGraphics}.
    *
    * @see #hint()
    * @see #enableHint(int)
