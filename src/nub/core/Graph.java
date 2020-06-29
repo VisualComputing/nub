@@ -2734,7 +2734,7 @@ public class Graph {
    * @see Node#setBullsEyeSize(float)
    */
   public boolean tracks(Node node, int pixelX, int pixelY) {
-    if (node.pickingPolicy() == Node.SHAPE && _bb != null)
+    if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && _bb != null)
       return _tracks(node, pixelX, pixelY);
     else
       return _tracks(node, pixelX, pixelY, screenLocation(node.position()));
@@ -3280,7 +3280,7 @@ public class Graph {
    * Renders the node onto the front buffer. Used by the rendering algorithms.
    */
   protected void _drawFrontBuffer(Node node) {
-    if (node.pickingPolicy() == Node.SHAPE && node.isTaggingEnabled())
+    if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && node.isTaggingEnabled())
       if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM))
         _bbNeed = frameCount();
     if (isTagged(node) && node.isHintEnable(Node.HIGHLIGHT)) {
@@ -3312,7 +3312,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   protected void _drawBackBuffer(Node node) {
-    if (node.pickingPolicy() == Node.SHAPE && node.isTaggingEnabled())
+    if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && node.isTaggingEnabled())
       if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM)) {
         float r = (float) (node.id() & 255) / 255.f;
         float g = (float) ((node.id() >> 8) & 255) / 255.f;
@@ -3342,7 +3342,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.BULLSEYE) {
+    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.BULLSEYE && node.isHintEnable(Node.BULLSEYE) ) {
       Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
@@ -3360,7 +3360,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.SHAPE && _bb != null) {
+    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && _bb != null) {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
@@ -4810,8 +4810,8 @@ public class Graph {
    * {@link #setHUD(PShape)} or {@link #setHUD(Consumer)}.</li>
    * <li>{@link #FRUSTUM} which is an interface to set up the {@link Node#FRUSTUM}
    * for a given graph {@link #eye()}.</li>
-   * <li>{@link #SHAPE}  which displays the node shape set with
-   * {@link #setShape(PShape)} and {@link #setShape(Consumer)}.</li>
+   * <li>{@link #SHAPE} which displays the node shape set with
+   * {@link #setShape(PShape)} or {@link #setShape(Consumer)}.</li>
    * <li>{@link #BACKGROUND} which sets up the graph background to be displayed.</li>
    * </ol>
    * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
