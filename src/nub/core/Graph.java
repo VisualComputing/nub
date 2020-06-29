@@ -2855,6 +2855,10 @@ public class Graph {
 
   protected void _endBackBuffer() {}
 
+  public void disableBB() {
+    _bb = null;
+  }
+
   /**
    * Internal use. Traverse the scene {@link #nodes()}) into the
    * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
@@ -3077,9 +3081,7 @@ public class Graph {
    * <p>
    * Used by {@link #render(Node)}. Default implementation is empty.
    *
-   * @see #draw()
    * @see #render()
-   * @see #pre()
    * @see #isOffscreen()
    * @see #context()
    */
@@ -3099,9 +3101,7 @@ public class Graph {
    * <p>
    * Used by {@link #render(Node)}. Default implementation is empty.
    *
-   * @see #draw()
    * @see #render()
-   * @see #pre()
    * @see #isOffscreen()
    * @see #context()
    */

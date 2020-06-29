@@ -17,7 +17,7 @@ import nub.primitives.*;
 import nub.core.*;
 import nub.processing.*;
 
-Scene scene;
+Scene scene, shadowMapScene;
 Node landscape1, landscape2, landscape3, light;
 TimingTask animation;
 PShader depthShader;
@@ -25,9 +25,9 @@ PShader shadowShader;
 PGraphics shadowMap;
 float fov = THIRD_PI;
 Matrix biasMatrix = new Matrix(
-  0.5, 0, 0, 0, 
-  0, 0.5, 0, 0, 
-  0, 0, 0.5, 0, 
+  0.5, 0, 0, 0,
+  0, 0.5, 0, 0,
+  0, 0, 0.5, 0,
   0.5, 0.5, 0.5, 1
   );
 boolean debug;
@@ -131,7 +131,7 @@ void setup() {
   // initDefaultPass
   shadowShader = loadShader("shadow_frag.glsl", "shadow_vert.glsl");
   shader(shadowShader);
-  
+
   light = new Node();
   light.enableHint(Node.BULLSEYE | Node.AXES | Node.CAMERA);
   light.configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
@@ -148,15 +148,23 @@ void setup() {
     }
   };
   animation.run(60);
+
+  shadowMapScene = new Scene(this, shadowMap, light);
+  shadowMapScene.enableHint(Scene.BACKGROUND, color(0xffffffff));
 }
 
 void draw() {
   // 1. Render the shadowmap from light node 'point-of-view'
+  //shadowMapScene.render();
+  // /*
+  shadowMapScene.render();
   shadowMap.beginDraw();
   shadowMap.noStroke();
   shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
-  Scene.render(shadowMap, light, shadowMapType, zNear, zFar);
+  //Scene.render(shadowMap, light, shadowMapType, zNear, zFar);
+  shadowMapScene.render(shadowMap);
   shadowMap.endDraw();
+  // */
 
   // 2. Render the scene from the scene.eye() node
   if (!debug) {
