@@ -4807,7 +4807,7 @@ public class Graph {
    * <li>{@link #GRID} which displays a grid hint centered at the world origin.</li>
    * <li>{@link #AXES} which displays a grid hint centered at the world origin.</li>
    * <li>{@link #HUD} which displays the graph Heads-Up-Display set with
-   * {@link #setHUD(PShape)} and {@link #setHUD(Consumer)}.</li>
+   * {@link #setHUD(PShape)} or {@link #setHUD(Consumer)}.</li>
    * <li>{@link #FRUSTUM} which is an interface to set up the {@link Node#FRUSTUM}
    * for a given graph {@link #eye()}.</li>
    * <li>{@link #SHAPE}  which displays the node shape set with

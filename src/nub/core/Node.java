@@ -2704,12 +2704,12 @@ public class Node {
    * <li>{@link #AXES} which displays an axes hint centered at the node
    * {@link #position()} an oriented according to the node {@link #orientation()}.</li>
    * <li>{@link #HUD} which displays the node Heads-Up-Display set with
-   * {@link #setHUD(PShape)} and {@link #setHUD(Consumer)}.</li>
+   * {@link #setHUD(PShape)} or {@link #setHUD(Consumer)}.</li>
    * <li>{@link #FRUSTUM} which displays a frustum visual representation which origin is
-   * located a the note {@link #position()}. The frustum may be set up from a given
+   * located at the node {@link #position()}. The frustum may be set up from a given
    * {@link Graph} or from low-level frustum plane params.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
-   * {@link #setShape(PShape)} and {@link #setShape(Consumer)}.</li>
+   * {@link #setShape(PShape)} or {@link #setShape(Consumer)}.</li>
    * <li>{@link #HIGHLIGHT} which represents the scale factor to be applied to the node
    * when it gets tagged (see {@link Graph#tag(String, Node)}).</li>
    * <li>{@link #BULLSEYE} which displays a bullseye centered at the node
