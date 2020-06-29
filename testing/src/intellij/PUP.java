@@ -43,14 +43,7 @@ public class PUP extends PApplet {
     scene.drawAxes();
     scene.render();
     if (pup != null) {
-      scene.beginHUD();
-      visualHint.beginDraw();
-      visualHint.context().background(125, 80, 90);
-      visualHint.drawAxes();
-      visualHint.render();
-      visualHint.endDraw();
-      visualHint.image(atX, atY);
-      scene.endHUD();
+      visualHint.display(atX, atY);
     }
   }
 

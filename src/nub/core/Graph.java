@@ -3069,6 +3069,49 @@ public class Graph {
   }
 
   /**
+   * Only if the scene {@link #isOffscreen()}. Calls {@code context().beginDraw()}
+   * (hence there's no need to explicitly call it).
+   * <p>
+   * If {@link #context()} is resized then (re)sets the graph {@link #width()} and
+   * {@link #height()}, and calls {@link #setWidth(int)} and {@link #setHeight(int)}.
+   * <p>
+   * Used by {@link #render(Node)}. Default implementation is empty.
+   *
+   * @see #draw()
+   * @see #render()
+   * @see #pre()
+   * @see #isOffscreen()
+   * @see #context()
+   */
+  protected void _beginDraw() {
+    if (!isOffscreen()) {
+      return;
+    }
+  }
+
+  /**
+   * Only if the scene {@link #isOffscreen()}. Should call:
+   *
+   * <ol>
+   * <li>{@code context().endDraw()} and hence there's no need to explicitly call it</li>
+   * <li>{@code _updateBackBuffer()}: Render the back buffer (useful for picking)</li>
+   * </ol>
+   * <p>
+   * Used by {@link #render(Node)}. Default implementation is empty.
+   *
+   * @see #draw()
+   * @see #render()
+   * @see #pre()
+   * @see #isOffscreen()
+   * @see #context()
+   */
+  protected void _endDraw() {
+    if (!isOffscreen()) {
+      return;
+    }
+  }
+
+  /**
    * Renders the node tree onto the {@link #context()} from the {@link #eye()} viewpoint.
    * Calls {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
    * Same as {@code render(null)}.
@@ -3104,6 +3147,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
+    _beginDraw();
     _displayHint();
     _subtree = subtree;
     if (subtree == null) {
@@ -3120,6 +3164,7 @@ public class Graph {
       }
     }
     _rays.clear();
+    _endDraw();
   }
 
   /**

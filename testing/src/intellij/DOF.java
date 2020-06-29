@@ -26,6 +26,7 @@ public class DOF extends PApplet {
   @Override
   public void setup() {
     scene = new Scene(this, P3D, width, height);
+    scene.enableHint(Scene.BACKGROUND, color(0));
     scene.setRadius(1000);
     scene.fit(1);
     models = new Node[100];
@@ -57,11 +58,8 @@ public class DOF extends PApplet {
 
   @Override
   public void draw() {
-    // 1. Draw into main buffer
-    scene.beginDraw();
-    scene.context().background(0);
+    // 1. Render into main buffer
     scene.render();
-    scene.endDraw();
 
     // 2. Draw into depth buffer
     depthPGraphics.beginDraw();

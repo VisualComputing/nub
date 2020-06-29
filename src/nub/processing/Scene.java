@@ -120,9 +120,6 @@ public class Scene extends Graph {
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
 
-  // E X C E P T I O N H A N D L I N G
-  protected int _beginOffScreenDrawingCalls;
-
   // _bb : picking buffer
   protected PShader _triangleShader, _lineShader, _pointShader;
 
@@ -500,8 +497,6 @@ public class Scene extends Graph {
    *
    * @see #draw()
    * @see #render()
-   * @see #beginDraw()
-   * @see #endDraw()
    * @see #isOffscreen()
    */
   public void pre() {
@@ -523,8 +518,6 @@ public class Scene extends Graph {
    *
    * @see #pre()
    * @see #render()
-   * @see #beginDraw()
-   * @see #endDraw()
    * @see #isOffscreen()
    */
   public void draw() {
@@ -534,28 +527,11 @@ public class Scene extends Graph {
     _renderBackBuffer();
   }
 
-  /**
-   * Only if the scene {@link #isOffscreen()}. Calls {@code context().beginDraw()}
-   * (hence there's no need to explicitly call it).
-   * <p>
-   * If {@link #context()} is resized then (re)sets the graph {@link #width()} and
-   * {@link #height()}, and calls {@link #setWidth(int)} and {@link #setHeight(int)}.
-   *
-   * @see #draw()
-   * @see #render()
-   * @see #pre()
-   * @see #endDraw()
-   * @see #isOffscreen()
-   * @see #context()
-   */
-  public void beginDraw() {
-    if (!isOffscreen())
-      throw new RuntimeException(
-          "begin(/end)Draw() should be used only within offscreen scenes. Check your implementation!");
-    if (_beginOffScreenDrawingCalls != 0)
-      throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
-          + "endDraw() and they cannot be nested. Check your implementation!");
-    _beginOffScreenDrawingCalls++;
+  @Override
+  protected void _beginDraw() {
+    if (!isOffscreen()) {
+      return;
+    }
     if ((width() != context().width))
       setWidth(context().width);
     if ((height() != context().height))
@@ -566,29 +542,11 @@ public class Scene extends Graph {
     _matrixHandler.pushMatrix();
   }
 
-  /**
-   * Only if the scene {@link #isOffscreen()}. Calls:
-   *
-   * <ol>
-   * <li>{@code context().endDraw()} and hence there's no need to explicitly call it</li>
-   * <li>{@code _updateBackBuffer()}: Render the back buffer (useful for picking)</li>
-   * </ol>
-   *
-   * @see #draw()
-   * @see #render()
-   * @see #beginDraw()
-   * @see #pre()
-   * @see #isOffscreen()
-   * @see #context()
-   */
-  public void endDraw() {
-    if (!isOffscreen())
-      throw new RuntimeException(
-          "(begin/)endDraw() should be used only within offscreen scenes. Check your implementation!");
-    _beginOffScreenDrawingCalls--;
-    if (_beginOffScreenDrawingCalls != 0)
-      throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
-          + "endDraw() and they cannot be nested. Check your implementation!");
+  @Override
+  protected void _endDraw() {
+    if (!isOffscreen()) {
+      return;
+    }
     _matrixHandler.popMatrix();
     _displayHUD();
     context().endDraw();
@@ -596,12 +554,18 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code display(null, 0, 0)}.
+   * Same as {@code if (!isOffscreen()) render(); else display(null, 0, 0)}.
    *
+   * @see #render()
    * @see #display(Node, int, int)
    */
   public void display() {
-    display(null, 0, 0);
+    if (!isOffscreen()) {
+      render();
+    }
+    else {
+      display(null, 0, 0);
+    }
   }
 
   /**
@@ -614,12 +578,18 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code display(subtree, 0, 0)}.
+   * Same as {@code if (!isOffscreen()) render(subtree); else display(subtree, 0, 0)}.
    *
+   * @see #render(Node)
    * @see #display(Node, int, int)
    */
   public void display(Node subtree) {
-    display(subtree, 0, 0);
+    if (!isOffscreen()) {
+      render(subtree);
+    }
+    else {
+      display(subtree, 0, 0);
+    }
   }
 
   /**
@@ -635,16 +605,12 @@ public class Scene extends Graph {
     }
     if (_onscreenGraph != null) {
       _onscreenGraph.beginHUD();
-      beginDraw();
       render(subtree);
-      endDraw();
       image(x, y);
       _onscreenGraph.endHUD();
     }
     else {
-      beginDraw();
       render(subtree);
-      endDraw();
       image(x, y);
     }
   }
@@ -698,7 +664,7 @@ public class Scene extends Graph {
    * on top of the main sketch canvas at the upper left corner:
    * {@code (pixelX, pixelY)}. Mainly for debugging.
    */
-  public void _imageBackBuffer(int pixelX, int pixelY) {
+  protected void _imageBackBuffer(int pixelX, int pixelY) {
     if (_backBuffer() != null) {
       pApplet().pushStyle();
       pApplet().imageMode(PApplet.CORNER);

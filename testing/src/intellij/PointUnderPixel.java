@@ -24,13 +24,16 @@ public class PointUnderPixel extends PApplet {
 
   @Override
   public void settings() {
-    size(1000, 800, P3D);
+    size(800, 800, P3D);
     //noSmooth();
   }
 
   public void setup() {
     scene = offScreen ? new Scene(this, P3D, width, height) : new Scene(this);
     scene.setRadius(1000);
+    scene.enableHint(Scene.BACKGROUND, color(0));
+    scene.enableHint(Scene.SHAPE);
+    scene.setShape(this::drawRay);
     scene.fit(1);
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
@@ -43,22 +46,10 @@ public class PointUnderPixel extends PApplet {
   }
 
   public void draw() {
-    if (offScreen) {
-      scene.beginDraw();
-      scene.context().background(0);
-      drawRay();
-      scene.render();
-      scene.endDraw();
-      scene.image();
-    } else {
-      background(0);
-      drawRay();
-      scene.render();
-    }
+    scene.display();
   }
 
-  void drawRay() {
-    PGraphics pg = scene.context();
+  void drawRay(PGraphics pg) {
     if (pup != null) {
       pg.pushStyle();
       pg.strokeWeight(20);

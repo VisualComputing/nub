@@ -16,13 +16,15 @@ public class OFFScreen extends PApplet {
   String renderer = P3D;
 
   public void settings() {
-    size(1800, 1200, renderer);
+    size(800, 600, renderer);
   }
 
   public void setup() {
     // TODO render at 400, 200
     //scene = new Scene(this, createGraphics(1300, 900, renderer));
-    scene = new Scene(this, P3D, 1300, 900);
+    scene = new Scene(this, P3D, 800, 600);
+    scene.enableHint(Scene.BACKGROUND | Scene.AXES);
+    scene.configHint(Scene.BACKGROUND, color(0));
     scene.setFOV(PI / 3);
     scene.setRadius(300);
     scene.fit(1);
@@ -43,20 +45,20 @@ public class OFFScreen extends PApplet {
     };
     shape1.setRotation(Quaternion.random());
     shape1.translate(-55, -55, -55);
+    //shape1.setPickingPolicy(Node.SHAPE);
+    shape1.setPickingPolicy(Node.BULLSEYE);
+    shape1.enableHint(Node.BULLSEYE);
 
     shape2 = new Node(shape1);
+    shape2.enableHint(Node.BULLSEYE);
     shape2.setShape(shape());
     shape2.translate(-55, -85, 135);
+    //shape2.setPickingPolicy(Node.SHAPE);
+    shape2.setPickingPolicy(Node.BULLSEYE);
   }
 
   public void draw() {
-    background(255);
-    scene.beginDraw();
-    scene.context().background(0);
-    scene.drawAxes();
-    scene.render();
-    scene.endDraw();
-    scene.image(400, 200);
+    scene.display(50, 50);
   }
 
   @Override

@@ -12,8 +12,8 @@ public class SceneBuffers extends PApplet {
 
   //Choose one of P3D for a 3D scene or P2D for a 2D one.
   String renderer = P3D;
-  int w = 1000;
-  int h = 1000;
+  int w = 700;
+  int h = 700;
 
   public void settings() {
     size(w, h, renderer);
@@ -21,7 +21,8 @@ public class SceneBuffers extends PApplet {
 
   public void setup() {
     rectMode(CENTER);
-    scene = new Scene(this, createGraphics(w, h / 2, renderer));
+    //scene = new Scene(this, createGraphics(w, h / 2, renderer));
+    scene = new Scene(this);
     scene.setRadius(max(w, h));
 
     shapes = new Node[100];
@@ -35,13 +36,9 @@ public class SceneBuffers extends PApplet {
 
   public void draw() {
     // 1. Fill in and display front-buffer
-    scene.beginDraw();
-    scene.context().background(10, 50, 25);
-    scene.render();
-    scene.endDraw();
-    scene.image();
+    scene.display();
     // 2. Display back buffer
-    scene._imageBackBuffer(0, h / 2);
+    scene.displayBackBuffer(0, h / 2);
   }
 
   public void mouseMoved() {
