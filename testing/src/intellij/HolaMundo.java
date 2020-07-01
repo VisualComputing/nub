@@ -35,6 +35,7 @@ public class HolaMundo extends PApplet {
     // A. Scenes
     // 1. Main (onscreen) Scene
     mainScene = new Scene(this);
+    //mainScene.togglePicking();
     mainScene.setRadius(500);
     mainScene.fit(1);
     mainScene.enableHint(Scene.AXES | Scene.GRID);

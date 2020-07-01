@@ -198,6 +198,7 @@ public class Graph {
   protected int _width, _height;
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
   // _bb : picking buffer
+  protected boolean _picking;
   protected long _bbNeed, _bbCount;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected boolean _isProjectionViewInverseCached;
@@ -446,6 +447,7 @@ public class Graph {
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
     enableHint(HUD | SHAPE);
+    enablePicking(true);
     // middle grey encoded as a processing int rgb color
     _gridStroke = -8553091;
     _gridType = GridType.DOTS;
@@ -2734,6 +2736,10 @@ public class Graph {
    * @see Node#setBullsEyeSize(float)
    */
   public boolean tracks(Node node, int pixelX, int pixelY) {
+    if (!_picking) {
+      System.out.println("Warning: enable picking for scene.tracks() to work!");
+      return false;
+    }
     if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && _bb != null)
       return _tracks(node, pixelX, pixelY);
     else
@@ -2855,8 +2861,16 @@ public class Graph {
 
   protected void _endBackBuffer() {}
 
-  public void disableBB() {
-    _bb = null;
+  public void enablePicking(boolean enable) {
+    _picking = enable;
+  }
+
+  public void togglePicking() {
+    _picking = !_picking;
+  }
+
+  public boolean isPickingEnabled() {
+    return _picking;
   }
 
   /**
@@ -2865,6 +2879,9 @@ public class Graph {
    * Use it as a {@code _postDraw()}.
    */
   protected void _renderBackBuffer() {
+    if (!_picking) {
+      return;
+    }
     if (_bb != null && _bbCount < _bbNeed) {
       _initBackBuffer();
       _bbMatrixHandler.bind(projection(), view());
@@ -3325,9 +3342,10 @@ public class Graph {
    * Renders the node onto the front buffer. Used by the rendering algorithms.
    */
   protected void _drawFrontBuffer(Node node) {
-    if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && node.isTaggingEnabled())
-      if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM))
-        _bbNeed = frameCount();
+    if (_picking)
+      if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && node.isTaggingEnabled())
+        if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM))
+          _bbNeed = frameCount();
     if (isTagged(node) && node.isHintEnable(Node.HIGHLIGHT)) {
       _matrixHandler.pushMatrix();
       float scl = 1 + node._highlight;
@@ -3357,7 +3375,11 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   protected void _drawBackBuffer(Node node) {
-    if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && node.isTaggingEnabled())
+    if (!_picking) {
+      System.out.println("Warning: enable picking for scene._drawBackBuffer() to work!");
+      return;
+    }
+    if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && node.isTaggingEnabled()) {
       if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM)) {
         float r = (float) (node.id() & 255) / 255.f;
         float g = (float) ((node.id() >> 8) & 255) / 255.f;
@@ -3365,6 +3387,7 @@ public class Graph {
         _emitBackBufferUniforms(r, g, b);
         MatrixHandler._displayHint(_backBuffer(), node);
       }
+    }
   }
 
   /**
@@ -3387,6 +3410,9 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
+    if (!_picking) {
+      return;
+    }
     if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.BULLSEYE && node.isHintEnable(Node.BULLSEYE) ) {
       Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
@@ -3405,6 +3431,10 @@ public class Graph {
    * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
+    if (!_picking) {
+      System.out.println("Warning: enable picking for scene._trackBackBuffer() to work!");
+      return;
+    }
     if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && _bb != null) {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
