@@ -500,10 +500,7 @@ public class Scene extends Graph {
    * @see #isOffscreen()
    */
   public void pre() {
-    if ((width() != context().width) || (height() != context().height)) {
-      setWidth(context().width);
-      setHeight(context().height);
-    }
+    _resize();
     preDraw();
     _matrixHandler.pushMatrix();
   }
@@ -528,14 +525,19 @@ public class Scene extends Graph {
   }
 
   @Override
-  protected void _beginDraw() {
-    if (!isOffscreen()) {
-      return;
-    }
+  protected void _resize() {
     if ((width() != context().width))
       setWidth(context().width);
     if ((height() != context().height))
       setHeight(context().height);
+  }
+
+  @Override
+  protected void _beginDraw() {
+    if (!isOffscreen()) {
+      return;
+    }
+    _resize();
     // open off-screen pgraphics for drawing:
     context().beginDraw();
     preDraw();

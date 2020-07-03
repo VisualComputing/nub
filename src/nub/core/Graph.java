@@ -2861,6 +2861,8 @@ public class Graph {
 
   protected void _endBackBuffer() {}
 
+  protected void _resize() {}
+
   public void enablePicking(boolean enable) {
     _picking = enable;
   }
