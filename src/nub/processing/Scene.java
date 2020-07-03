@@ -537,7 +537,6 @@ public class Scene extends Graph {
     if (!isOffscreen()) {
       return;
     }
-    _resize();
     // open off-screen pgraphics for drawing:
     context().beginDraw();
     preDraw();
