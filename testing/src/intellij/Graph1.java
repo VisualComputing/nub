@@ -56,7 +56,8 @@ public class Graph1 extends PApplet {
   }
 
   public void draw() {
-    graph.preDraw();
+    // TODO needs testing
+    //graph.preDraw();
     background(0);
     graph.render();
   }

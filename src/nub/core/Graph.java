@@ -2861,7 +2861,9 @@ public class Graph {
 
   protected void _endBackBuffer() {}
 
-  protected void _resize() {}
+  protected void _initFrontBuffer() {}
+
+  protected void _endFrontBuffer() {}
 
   public void enablePicking(boolean enable) {
     _picking = enable;
@@ -2925,64 +2927,31 @@ public class Graph {
     _bbMatrixHandler.popMatrix();
   }
 
-  /**
-   * Called before your main drawing and performs the following:
-   * <ol>
-   * <li>Calls {@link TimingHandler#handle()}.</li>
-   * <li>Updates the projection matrix by calling
-   * {@code eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded())}.</li>
-   * <li>Updates the view matrix by calling {@code eye().view()}.</li>
-   * <li>Updates the {@link #projectionView()} matrix.</li>
-   * <li>Updates the {@link #projectionViewInverse()} matrix if
-   * {@link #isProjectionViewInverseCached()}.</li>
-   * <li>Calls {@link #updateBoundaryEquations()} if {@link #areBoundaryEquationsEnabled()}</li>
-   * </ol>
-   *
-   * @see #fov()
-   * @see TimingHandler#handle()
-   * @see #projection(Node, Type, float, float, float, float)
-   * @see Node#view()
-   */
-  public void preDraw() {
-    if (_seededGraph)
-      timingHandler().handle();
-    _projection = projection(eye(), type(), width(), height(), zNear(), zFar());
-    _view = eye().view();
-    _projectionView = Matrix.multiply(_projection, _view);
-    if (isProjectionViewInverseCached())
-      _projectionViewInverse = Matrix.inverse(_projectionView);
-    _matrixHandler.bind(_projection, _view);
-    if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
-      updateBoundaryEquations();
-      _lastEqUpdate = TimingHandler.frameCount;
-    }
-  }
-
   // caches
 
   /**
-   * Returns the cached projection matrix computed at {@link #preDraw()}.
+   * Returns the cached projection matrix computed at {@link #_beginDraw()}.
    */
   public Matrix projection() {
     return _projection;
   }
 
   /**
-   * Returns the cached view matrix computed at {@link #preDraw()}.
+   * Returns the cached view matrix computed at {@link #_bind()}.
    */
   public Matrix view() {
     return _view;
   }
 
   /**
-   * Returns the projection times view cached matrix computed at {@link #preDraw()}.
+   * Returns the projection times view cached matrix computed at {@link #_beginDraw()}}.
    */
   public Matrix projectionView() {
     return _projectionView;
   }
 
   /**
-   * Returns the cached projection times view inverse matrix computed at {@link #preDraw()}.
+   * Returns the cached projection times view inverse matrix computed at {@link #_beginDraw()}}.
    */
   public Matrix projectionViewInverse() {
     if (isProjectionViewInverseCached())
@@ -3092,42 +3061,79 @@ public class Graph {
   }
 
   /**
+   * Called by {@link #render(Node)} and performs the following:
+   * <ol>
+   * <li>Updates the projection matrix by calling
+   * {@code eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded())}.</li>
+   * <li>Updates the view matrix by calling {@code eye().view()}.</li>
+   * <li>Updates the {@link #projectionView()} matrix.</li>
+   * <li>Updates the {@link #projectionViewInverse()} matrix if
+   * {@link #isProjectionViewInverseCached()}.</li>
+   * </ol>
+   *
+   * @see #fov()
+   * @see #projection(Node, Type, float, float, float, float)
+   * @see Node#view()
+   */
+  protected void _bind() {
+    _projection = projection(eye(), type(), width(), height(), zNear(), zFar());
+    _view = eye().view();
+    _projectionView = Matrix.multiply(_projection, _view);
+    if (isProjectionViewInverseCached())
+      _projectionViewInverse = Matrix.inverse(_projectionView);
+    _matrixHandler.bind(_projection, _view);
+  }
+
+  /**
    * Only if the scene {@link #isOffscreen()}. Calls {@code context().beginDraw()}
    * (hence there's no need to explicitly call it).
    * <p>
    * If {@link #context()} is resized then (re)sets the graph {@link #width()} and
    * {@link #height()}, and calls {@link #setWidth(int)} and {@link #setHeight(int)}.
    * <p>
+   * <li>Calls {@link #updateBoundaryEquations()} if
+   * {@link #areBoundaryEquationsEnabled()}</li>
    * Used by {@link #render(Node)}. Default implementation is empty.
    *
    * @see #render()
+   * @see #isOffscreen()
+   * @see #context()
+   */
+
+  /**
+   * Begins the rendering process (see {@link #render(Node)}). Use it always before
+   * {@link #_endDraw()}. Calls {@link #_bind()}, updates the boundary equations
+   * (see {@link #updateBoundaryEquations()}) and displays the scene {@link #hint()}.
+   *
+   * @see #render(Node)
+   * @see #_endDraw()
    * @see #isOffscreen()
    * @see #context()
    */
   protected void _beginDraw() {
-    if (!isOffscreen()) {
-      return;
+    _initFrontBuffer();
+    _bind();
+    if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
+      updateBoundaryEquations();
+      _lastEqUpdate = TimingHandler.frameCount;
     }
+    _matrixHandler.pushMatrix();
+    _displayHint();
   }
 
   /**
-   * Only if the scene {@link #isOffscreen()}. Should call:
+   * Ends the rendering process (see {@link #render(Node)}). Use it always after
+   * {@link #_beginDraw()}. Displays the scene HUD.
    *
-   * <ol>
-   * <li>{@code context().endDraw()} and hence there's no need to explicitly call it</li>
-   * <li>{@code _updateBackBuffer()}: Render the back buffer (useful for picking)</li>
-   * </ol>
-   * <p>
-   * Used by {@link #render(Node)}. Default implementation is empty.
-   *
-   * @see #render()
+   * @see #render(Node)
+   * @see #_beginDraw()
    * @see #isOffscreen()
    * @see #context()
    */
   protected void _endDraw() {
-    if (!isOffscreen()) {
-      return;
-    }
+    _matrixHandler.popMatrix();
+    _displayHUD();
+    _endFrontBuffer();
   }
 
   /**
@@ -3166,8 +3172,9 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
+    // TODO: make public _beginDraw / _endDraw
     _beginDraw();
-    _displayHint();
+    // TODO ... requires a public traverse() with the code below
     _subtree = subtree;
     if (subtree == null) {
       for (Node node : _leadingNodes())

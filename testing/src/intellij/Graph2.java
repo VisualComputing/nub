@@ -46,7 +46,8 @@ public class Graph2 extends PApplet {
 
   public void draw() {
     background(0);
-    graph.preDraw();
+    // TODO needs testing
+    // graph.preDraw();
     pushStyle();
     fill(0, 255, 0);
     Scene.drawTorusSolenoid(g);

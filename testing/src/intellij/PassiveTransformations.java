@@ -51,7 +51,8 @@ public class PassiveTransformations extends PApplet {
 
   public void draw() {
     background(0);
-    graph.preDraw();
+    // TODO needs testing
+    //graph.preDraw();
     graph.render();
   }
 

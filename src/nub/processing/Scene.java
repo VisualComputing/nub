@@ -20,6 +20,7 @@ import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.timing.TimingHandler;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -266,10 +267,8 @@ public class Scene extends Graph {
     _lineShader = pApplet().loadShader("PickingBuffer.frag");
     _pointShader = pApplet().loadShader("PickingBuffer.frag");
     // 3. Register P5 methods
-    if (!isOffscreen()) {
-      pApplet().registerMethod("pre", this);
-      pApplet().registerMethod("draw", this);
-    }
+    pApplet().registerMethod("pre", this);
+    pApplet().registerMethod("draw", this);
     // TODO buggy
     pApplet().registerMethod("dispose", this);
     // 4. Handed
@@ -487,29 +486,25 @@ public class Scene extends Graph {
   //protected abstract void drawPointUnderPixelHint();
 
   /**
-   * Paint method which is called just before your {@code PApplet.draw()} method. Simply
-   * handles resize events. This method is registered at the PApplet and hence you
-   * don't need to call it. Only meaningful if the graph is on-screen (it the graph
-   * {@link #isOffscreen()} it even doesn't get registered at the PApplet.
-   * <p>
-   * If {@link #context()} is resized then (re)sets the graph {@link #width()} and
-   * {@link #height()}, and calls {@link #setWidth(int)} and {@link #setHeight(int)}.
+   * Paint method which is called just before your {@code PApplet.draw()} method.
+   * Handles timing tasks (see {@link TimingHandler#handle()}) and resize events.
+   * This method is registered at the PApplet and hence you don't need to call it.
    *
+   * @see TimingHandler#handle()
    * @see #draw()
    * @see #render()
    * @see #isOffscreen()
    */
   public void pre() {
+    if (_seededGraph)
+      timingHandler().handle();
     _resize();
-    preDraw();
-    _matrixHandler.pushMatrix();
   }
 
   /**
    * Paint method which is called just after your {@code PApplet.draw()} method. Simply
    * render the back buffer (useful for picking). This method is registered at the PApplet
-   * and hence you don't need to call it. Only meaningful if the graph is on-screen (it
-   * the graph {@link #isOffscreen()} it even doesn't get registered at the PApplet.
+   * and hence you don't need to call it. Only meaningful if the graph is on-screen
    * <p>
    * If {@link #isOffscreen()} does nothing.
    *
@@ -518,40 +513,21 @@ public class Scene extends Graph {
    * @see #isOffscreen()
    */
   public void draw() {
-    _matrixHandler.popMatrix();
     // display visual hints in the world
-    _displayHUD();
-    _renderBackBuffer();
+    if (!isOffscreen())
+      _renderBackBuffer();
   }
 
-  @Override
+  /**
+   * Handles resizes events to update the scene {@link #width()} and {@link #height()}.
+   */
   protected void _resize() {
+    if (isOffscreen())
+      return;
     if ((width() != context().width))
       setWidth(context().width);
     if ((height() != context().height))
       setHeight(context().height);
-  }
-
-  @Override
-  protected void _beginDraw() {
-    if (!isOffscreen()) {
-      return;
-    }
-    // open off-screen pgraphics for drawing:
-    context().beginDraw();
-    preDraw();
-    _matrixHandler.pushMatrix();
-  }
-
-  @Override
-  protected void _endDraw() {
-    if (!isOffscreen()) {
-      return;
-    }
-    _matrixHandler.popMatrix();
-    _displayHUD();
-    context().endDraw();
-    _renderBackBuffer();
   }
 
   /**
@@ -916,6 +892,21 @@ public class Scene extends Graph {
     _backBuffer().popStyle();
     _backBuffer().endDraw();
     _backBuffer().loadPixels();
+  }
+
+  @Override
+  protected void _initFrontBuffer() {
+    if (isOffscreen()) {
+      context().beginDraw();
+    }
+  }
+
+  @Override
+  protected void _endFrontBuffer() {
+    if (isOffscreen()) {
+      context().endDraw();
+      _renderBackBuffer();
+    }
   }
 
   @Override
