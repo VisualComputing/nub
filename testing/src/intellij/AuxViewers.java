@@ -15,7 +15,7 @@ public class AuxViewers extends PApplet {
   boolean displayAuxiliarViewers = true;
   // whilst scene1 is either on-screen or not; scene2 and scene3 are off-screen
   // test both cases here
-  boolean onScreen = true;
+  boolean onScreen = false;
 
   int w = 700;
   int h = 700;
@@ -75,6 +75,8 @@ public class AuxViewers extends PApplet {
     if (key == 'f')
       focus.fit(1);
     if (key == 't') {
+      if (focus == null)
+        return;
       if (focus.type() == Graph.Type.PERSPECTIVE) {
         focus.setType(Graph.Type.ORTHOGRAPHIC);
       } else {
@@ -85,11 +87,15 @@ public class AuxViewers extends PApplet {
 
   @Override
   public void mouseMoved() {
+    if (focus == null)
+      return;
     focus.mouseTag();
   }
 
   @Override
   public void mouseDragged() {
+    if (focus == null)
+      return;
     if (mouseButton == LEFT)
       focus.mouseSpin();
     else if (mouseButton == RIGHT)
@@ -100,11 +106,15 @@ public class AuxViewers extends PApplet {
 
   @Override
   public void mouseWheel(MouseEvent event) {
+    if (focus == null)
+      return;
     focus.scale(event.getCount() * 20);
   }
 
   @Override
   public void mouseClicked(MouseEvent event) {
+    if (focus == null)
+      return;
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         focus.focus();
@@ -113,13 +123,13 @@ public class AuxViewers extends PApplet {
   }
 
   public void draw() {
-    focus = scene2.hasMouseFocus() ? scene2 : scene3.hasMouseFocus() ? scene3 : scene1;
+    focus = scene2.hasMouseFocus() ? scene2 : scene3.hasMouseFocus() ? scene3 : scene1.hasMouseFocus() ? scene1 : null;
     scene1.display();
     if (displayAuxiliarViewers) {
       scene2.display(w / 2, 0);
       scene3.display(w / 2, h / 2);
     }
-    println(frameCount + " " + Scene.TimingHandler.frameCount);
+    //scene1.display();
   }
 
   public static void main(String[] args) {

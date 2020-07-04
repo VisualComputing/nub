@@ -100,8 +100,8 @@ import java.util.function.Consumer;
  * </li>
  * </ol>
  * <h1>4. Timing handling</h1>
- * The graph performs timing handling through a {@link #timingHandler()}. Several
- * {@link TimingHandler} wrapper functions, such as {@link #registerTask(Task)}
+ * The graph performs timing handling through a {@link #TimingHandler}. Several
+ * {@link TimingHandler} wrapper functions, such as {@link TimingHandler#registerTask(Task)}
  * are provided for convenience.
  * <p>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
@@ -166,7 +166,8 @@ public class Graph {
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
-  protected long _lastOffDisplayed;
+  // TODO make protected (debug)
+  public long _lastDisplayed;
   protected boolean _offscreen;
 
   // 0. Contexts
@@ -2771,10 +2772,7 @@ public class Graph {
    * Returns whether or not the scene has focus or not under the given pixel.
    */
   public boolean hasFocus(int pixelX, int pixelY) {
-    return (!isOffscreen() ||
-        _lastOffDisplayed + 1 >= TimingHandler.frameCount
-        // _lastOffRendered == frameCount()
-    )
+    return _lastDisplayed + 1 >= TimingHandler.frameCount
         && _upperLeftCornerX <= pixelX && pixelX < _upperLeftCornerX + width()
         && _upperLeftCornerY <= pixelY && pixelY < _upperLeftCornerY + height();
   }
@@ -3063,7 +3061,8 @@ public class Graph {
    * @see #context()
    */
   protected void _beginDraw() {
-    _initFrontBuffer();
+    if (isOffscreen())
+      _initFrontBuffer();
     _bind();
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
       updateBoundaryEquations();
@@ -3085,7 +3084,10 @@ public class Graph {
   protected void _endDraw() {
     _matrixHandler.popMatrix();
     _displayHUD();
-    _endFrontBuffer();
+    if (isOffscreen())
+      _endFrontBuffer();
+    else
+      _lastDisplayed = TimingHandler.frameCount;
   }
 
   /**

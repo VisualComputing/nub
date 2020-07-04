@@ -615,7 +615,7 @@ public class Scene extends Graph {
     }
     pApplet().pushStyle();
     _setUpperLeftCorner(pixelX, pixelY);
-    _lastOffDisplayed = TimingHandler.frameCount;
+    _lastDisplayed = TimingHandler.frameCount;
     pApplet().imageMode(PApplet.CORNER);
     pApplet().image(context(), pixelX, pixelY);
     pApplet().popStyle();
