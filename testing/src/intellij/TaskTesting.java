@@ -79,7 +79,7 @@ public class TaskTesting extends PApplet {
           lapse = current - lapse;
         totalLapse += lapse;
         targetLapse += period;
-        println(scene.frameCount() + " target fps: " + fps + " nub fps: " + scene.frameRate() + " period: " + period + " lapse: " + lapse + " targetLapse: " + targetLapse + " totalLapse: " + totalLapse);
+        println(scene.TimingHandler.frameCount + " target fps: " + fps + " nub fps: " + scene.TimingHandler.frameRate + " period: " + period + " lapse: " + lapse + " targetLapse: " + targetLapse + " totalLapse: " + totalLapse);
         lapse = current;
       }
     };
@@ -213,7 +213,7 @@ public class TaskTesting extends PApplet {
     }
 
     if (key == 'p') {
-      println("count: p5 " + frameCount + " nub " + scene.frameCount() + " fps: p5 " + frameRate + " nub " + scene.frameRate());
+      println("count: p5 " + frameCount + " nub " + Scene.TimingHandler.frameCount + " fps: p5 " + frameRate + " nub " + Scene.TimingHandler.frameRate);
     }
 
     if (key == 'h' || key == 'H')

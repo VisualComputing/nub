@@ -119,6 +119,7 @@ public class AuxViewers extends PApplet {
       scene2.display(w / 2, 0);
       scene3.display(w / 2, h / 2);
     }
+    println(frameCount + " " + Scene.TimingHandler.frameCount);
   }
 
   public static void main(String[] args) {

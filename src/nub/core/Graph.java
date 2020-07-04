@@ -262,7 +262,7 @@ public class Graph {
     }
   }
 
-  protected static TimingHandler _timingHandler = new TimingHandler();
+  public static TimingHandler TimingHandler = new TimingHandler();
   public static boolean _seeded;
   protected boolean _seededGraph;
   protected HashMap<String, Node> _tags;
@@ -370,11 +370,11 @@ public class Graph {
    * calls {@link #fit()}, so that the entire scene fits the screen dimensions.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and {@code back-buffer}
-   * matrix-handlers (see {@link MatrixHandler}) and {@link #timingHandler()}.
+   * matrix-handlers (see {@link MatrixHandler}) and {@link #TimingHandler}.
    * <p>
    * Same as {@code this(context, null, type, eye, width, height)}.
    *
-   * @see #timingHandler()
+   * @see #TimingHandler
    * @see #setEye(Node)
    * @see #Graph(Object, Object, Node, Type, int, int)
    */
@@ -391,9 +391,9 @@ public class Graph {
    * calls {@link #fit()}, so that the entire scene fits the screen dimensions.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and {@code back-buffer}
-   * matrix-handlers (see {@link MatrixHandler}) and {@link #timingHandler()}.
+   * matrix-handlers (see {@link MatrixHandler}) and {@link #TimingHandler}.
    *
-   * @see #timingHandler()
+   * @see #TimingHandler
    * @see #setEye(Node)
    */
   protected Graph(Object front, Object back, Node eye, Type type, int width, int height) {
@@ -402,7 +402,7 @@ public class Graph {
       _seeded = true;
       // only Java disable concurrence
       boolean message = false;
-      for (Task task : timingHandler().tasks()) {
+      for (Task task : TimingHandler.tasks()) {
         if (task.isConcurrent())
           message = true;
         task.disableConcurrence();
@@ -856,7 +856,7 @@ public class Graph {
    * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #render()} algorithm.
    * <p>
-   * Note that all the node inertial tasks are unregistered from the {@link #timingHandler()}.
+   * Note that all the node inertial tasks are unregistered from the {@link #TimingHandler}.
    * <p>
    * To make all the nodes in the branch reachable again, call {@link Node#setReference(Node)}
    * on the pruned node.
@@ -869,10 +869,10 @@ public class Graph {
     if (isReachable(node)) {
       List<Node> branch = branch(node);
       for (Node nodeBranch : branch) {
-        unregisterTask(nodeBranch._translationTask);
-        unregisterTask(nodeBranch._rotationTask);
-        unregisterTask(nodeBranch._orbitTask);
-        unregisterTask(nodeBranch._scalingTask);
+        TimingHandler.unregisterTask(nodeBranch._translationTask);
+        TimingHandler.unregisterTask(nodeBranch._rotationTask);
+        TimingHandler.unregisterTask(nodeBranch._orbitTask);
+        TimingHandler.unregisterTask(nodeBranch._scalingTask);
       }
       if (node.reference() != null) {
         node.reference()._removeChild(node);
@@ -953,54 +953,6 @@ public class Graph {
   }
 
   // Timing stuff
-
-  /**
-   * Returns the graph {@link TimingHandler}.
-   */
-  public static TimingHandler timingHandler() {
-    return _timingHandler;
-  }
-
-  /**
-   * Returns the current frame-rate.
-   */
-  public static float frameRate() {
-    return TimingHandler.frameRate;
-  }
-
-  /**
-   * Returns the number of frames displayed since the first graph was instantiated.
-   */
-  public static long frameCount() {
-    return TimingHandler.frameCount;
-  }
-
-  /**
-   * Convenience wrapper function that simply calls {@code timingHandler().registerTask(task)}.
-   *
-   * @see TimingHandler#registerTask(Task)
-   */
-  public static void registerTask(Task task) {
-    timingHandler().registerTask(task);
-  }
-
-  /**
-   * Convenience wrapper function that simply calls {@code timingHandler().unregisterTask(task)}.
-   *
-   * @see TimingHandler#unregisterTask(Task)
-   */
-  public static void unregisterTask(Task task) {
-    timingHandler().unregisterTask(task);
-  }
-
-  /**
-   * Convenience wrapper function that simply returns {@code timingHandler().isTaskRegistered(task)}.
-   *
-   * @see TimingHandler#isTaskRegistered(Task)
-   */
-  public static boolean isTaskRegistered(Task task) {
-    return timingHandler().isTaskRegistered(task);
-  }
 
   /**
    * Returns the translation inertial task.
@@ -2820,7 +2772,7 @@ public class Graph {
    */
   public boolean hasFocus(int pixelX, int pixelY) {
     return (!isOffscreen() ||
-        _lastOffDisplayed + 1 >= frameCount()
+        _lastOffDisplayed + 1 >= TimingHandler.frameCount
         // _lastOffRendered == frameCount()
     )
         && _upperLeftCornerX <= pixelX && pixelX < _upperLeftCornerX + width()
@@ -3354,7 +3306,7 @@ public class Graph {
     if (_picking)
       if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && node.isTaggingEnabled())
         if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM))
-          _bbNeed = frameCount();
+          _bbNeed = TimingHandler.frameCount;
     if (isTagged(node) && node.isHintEnable(Node.HIGHLIGHT)) {
       _matrixHandler.pushMatrix();
       float scl = 1 + node._highlight;
@@ -4800,9 +4752,9 @@ public class Graph {
    * {@link #lookAround(float, float)}  procedure}.
    */
   protected void _lookAround() {
-    if (frameCount() > _lookAroundCount) {
+    if (TimingHandler.frameCount > _lookAroundCount) {
       _upVector = eye().yAxis();
-      _lookAroundCount = this.frameCount();
+      _lookAroundCount = TimingHandler.frameCount;
     }
     _lookAroundCount++;
     Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _lookAroundTask._y : -_lookAroundTask._y);

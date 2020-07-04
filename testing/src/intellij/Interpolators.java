@@ -120,10 +120,10 @@ public class Interpolators extends PApplet {
       scene.fit();
 
     if (key == 'x')
-      for (Task task : Scene.timingHandler().tasks())
+      for (Task task : Scene.TimingHandler.tasks())
         task.enableConcurrence();
     if (key == 'y')
-      for (Task task : Scene.timingHandler().tasks())
+      for (Task task : Scene.TimingHandler.tasks())
         task.disableConcurrence();
   }
 

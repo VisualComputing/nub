@@ -72,7 +72,7 @@ import java.util.function.Consumer;
  * <p>
  * Use {@link #view()} and {@link Graph#projection(Node, Graph.Type, float, float, float, float)}
  * when rendering the scene from the node point-of-view. Note that these methods are used by
- * the graph when a node is set as its eye, see {@link Graph#preDraw()}.
+ * the graph when a node is set as its eye, see {@link Graph#render(Node)}.
  * <p>
  * To transform a point from one node to another use {@link #location(Vector, Node)} and
  * {@link #worldLocation(Vector)}. To transform a vector (such as a normal) use
@@ -755,7 +755,7 @@ public class Node {
    * Used by {@link #_restoredTasks(Node)}.
    */
   protected void _registerTasks() {
-    if (!Graph.isTaskRegistered(_translationTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
       _translationTask = new InertialTask() {
         @Override
         public void action() {
@@ -763,7 +763,7 @@ public class Node {
         }
       };
     }
-    if (!Graph.isTaskRegistered(_rotationTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_rotationTask)) {
       _rotationTask = new InertialTask() {
         @Override
         public void action() {
@@ -771,7 +771,7 @@ public class Node {
         }
       };
     }
-    if (!Graph.isTaskRegistered(_orbitTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_orbitTask)) {
       _orbitTask = new InertialTask() {
         @Override
         public void action() {
@@ -779,7 +779,7 @@ public class Node {
         }
       };
     }
-    if (!Graph.isTaskRegistered(_scalingTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_scalingTask)) {
       _scalingTask = new InertialTask() {
         @Override
         public void action() {
@@ -1083,7 +1083,7 @@ public class Node {
    */
   public void translate(Vector vector, float inertia) {
     translate(vector);
-    if (!Graph.isTaskRegistered(_translationTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use translate(vector) instead");
       return;
     }
@@ -1220,7 +1220,7 @@ public class Node {
    */
   public void rotate(Quaternion quaternion, float inertia) {
     rotate(quaternion);
-    if (!Graph.isTaskRegistered(_rotationTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_rotationTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use rotate(quaternion) instead");
       return;
     }
@@ -1295,7 +1295,7 @@ public class Node {
    */
   public void orbit(Quaternion quaternion, Vector center, float inertia) {
     orbit(quaternion, center);
-    if (!Graph.isTaskRegistered(_orbitTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_orbitTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use orbit(quaternion, center) instead");
       return;
     }
@@ -1462,7 +1462,7 @@ public class Node {
    */
   public void scale(float scaling, float inertia) {
     scale(scaling);
-    if (!Graph.isTaskRegistered(_scalingTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_scalingTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use scale(scaling) instead");
       return;
     }
