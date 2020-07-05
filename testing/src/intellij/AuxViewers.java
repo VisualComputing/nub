@@ -129,12 +129,11 @@ public class AuxViewers extends PApplet {
 
   public void draw() {
     focus = scene2.hasMouseFocus() ? scene2 : scene3.hasMouseFocus() ? scene3 : scene1.hasMouseFocus() ? scene1 : null;
-    //scene1.display();
+    scene1.display();
     if (displayAuxiliarViewers) {
       scene2.display(w / 2, 0);
       scene3.display(w / 2, h / 2);
     }
-    scene1.display();
   }
 
   public static void main(String[] args) {

@@ -196,6 +196,7 @@ public class Graph {
   public static boolean leftHanded;
 
   // 2. Matrix handler
+  protected int _renderCount;
   protected int _width, _height;
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
   // _bb : picking buffer
@@ -2880,7 +2881,7 @@ public class Graph {
   // caches
 
   /**
-   * Returns the cached projection matrix computed at {@link #beginDraw()}.
+   * Returns the cached projection matrix computed at {@link #beginRender()}.
    */
   public Matrix projection() {
     return _projection;
@@ -2894,14 +2895,14 @@ public class Graph {
   }
 
   /**
-   * Returns the projection times view cached matrix computed at {@link #beginDraw()}}.
+   * Returns the projection times view cached matrix computed at {@link #beginRender()}}.
    */
   public Matrix projectionView() {
     return _projectionView;
   }
 
   /**
-   * Returns the cached projection times view inverse matrix computed at {@link #beginDraw()}}.
+   * Returns the cached projection times view inverse matrix computed at {@link #beginRender()}}.
    */
   public Matrix projectionViewInverse() {
     if (isProjectionViewInverseCached())
@@ -3035,60 +3036,74 @@ public class Graph {
   }
 
   /**
-   * Only if the scene {@link #isOffscreen()}. Calls {@code context().beginDraw()}
-   * (hence there's no need to explicitly call it).
-   * <p>
-   * If {@link #context()} is resized then (re)sets the graph {@link #width()} and
-   * {@link #height()}, and calls {@link #setWidth(int)} and {@link #setHeight(int)}.
-   * <p>
-   * <li>Calls {@link #updateBoundaryEquations()} if
-   * {@link #areBoundaryEquationsEnabled()}</li>
-   * Used by {@link #render(Node)}. Default implementation is empty.
-   *
-   * @see #render()
-   * @see #isOffscreen()
-   * @see #context()
-   */
-
-  /**
    * Begins the rendering process (see {@link #render(Node)}). Use it always before
-   * {@link #endDraw()}. Calls {@link #_bind()}, updates the boundary equations
+   * {@link #endRender()}. Binds the matrices to the renderer, updates the boundary equations
    * (see {@link #updateBoundaryEquations()}) and displays the scene {@link #hint()}.
+   * <p>
+   * This method is automatically called by {@link #render(Node)}. Call it explicitly only
+   * when the scene {@link #hint()} is reset (see also {@link #resetHint()}) and you need
+   * to customize that which is to be rendered, as follows:
+   * <pre>
+   * {@code
+   * scene.beginRender();
+   * scene.render(subtree);
+   * // render your world located stuff here
+   * // enable also the hud here if you want too:
+   * // scene.beginHUD();
+   * // draw your screen located stuff here
+   * // scene.endHUD();
+   * scene.endRender();
+   * // call scene.image(pixelX, pixelY) to display the customized rendered scene:
+   * scene.image();
+   * }
+   * </pre>
    *
    * @see #render(Node)
-   * @see #endDraw()
+   * @see #endRender()
    * @see #isOffscreen()
    * @see #context()
    */
-  public void beginDraw() {
-    if (isOffscreen())
-      _initFrontBuffer();
-    _bind();
-    if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
-      updateBoundaryEquations();
-      _lastEqUpdate = TimingHandler.frameCount;
+  public void beginRender() {
+    _renderCount++;
+    if (_renderCount < 1 || _renderCount > 2) {
+      throw new RuntimeException("Error: render() should be nested within a single beginRender() / endRender() call!");
     }
-    _matrixHandler.pushMatrix();
-    _displayHint();
+    if (_renderCount == 1) {
+      if (isOffscreen())
+        _initFrontBuffer();
+      _bind();
+      if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
+        updateBoundaryEquations();
+        _lastEqUpdate = TimingHandler.frameCount;
+      }
+      _matrixHandler.pushMatrix();
+      _displayHint();
+    }
   }
 
   /**
    * Ends the rendering process (see {@link #render(Node)}). Use it always after
-   * {@link #beginDraw()}. Clears the picking cache. Displays the scene HUD.
+   * {@link #beginRender()}. Clears the picking cache. Displays the scene HUD.
    *
    * @see #render(Node)
-   * @see #beginDraw()
+   * @see #beginRender()
    * @see #isOffscreen()
    * @see #context()
    */
-  public void endDraw() {
-    _rays.clear();
-    _matrixHandler.popMatrix();
-    _displayHUD();
-    if (isOffscreen())
-      _endFrontBuffer();
-    else
-      _lastDisplayed = TimingHandler.frameCount;
+  public void endRender() {
+    _renderCount--;
+    if (_renderCount < 0 || _renderCount > 1) {
+      throw new RuntimeException("Error: render() should be nested within a single beginRender() / endRender() call!");
+    }
+    if (_renderCount == 0) {
+      _rays.clear();
+      _displayHUD();
+      _matrixHandler.popMatrix();
+      if (isOffscreen())
+        _endFrontBuffer();
+      else
+        _lastDisplayed = TimingHandler.frameCount;
+    }
   }
 
   /**
@@ -3112,9 +3127,12 @@ public class Graph {
   }
 
   /**
-   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null})
-   * onto the {@link #context()} from the {@link #eye()} viewpoint.
-   * Calls {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
+   * Calls {@link #beginRender()}, then renders the node {@code subtree} (or the whole tree
+   * when {@code subtree} is {@code null}) onto the {@link #context()} from the {@link #eye()}
+   * viewpoint, and calls {@link #endRender()}.
+   * <p>
+   * Note that the rendering algorithm calls {@link Node#visit()} on each visited node
+   * (refer to the {@link Node} documentation).
    *
    * @see #render(Object, Node)
    * @see #render(Object, Node, Matrix, Matrix)
@@ -3127,16 +3145,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
-    beginDraw();
-    traverse(subtree);
-    endDraw();
-  }
-
-  public void traverse() {
-    traverse(null);
-  }
-
-  public void traverse(Node subtree) {
+    beginRender();
     _subtree = subtree;
     if (subtree == null) {
       for (Node node : _leadingNodes())
@@ -3151,6 +3160,7 @@ public class Graph {
         _matrixHandler.popMatrix();
       }
     }
+    endRender();
   }
 
   /**
