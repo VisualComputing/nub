@@ -578,7 +578,7 @@ public class Scene extends Graph {
    */
   public void display(Node subtree, int x, int y) {
     if (!isOffscreen()) {
-      throw new RuntimeException("scene.display() only works if scene is offscreen.");
+      render(subtree);
     }
     if (_onscreenGraph != null) {
       _onscreenGraph.beginHUD();

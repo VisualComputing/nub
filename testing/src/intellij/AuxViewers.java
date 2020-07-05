@@ -4,7 +4,6 @@ import nub.core.Graph;
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
-import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
@@ -15,7 +14,7 @@ public class AuxViewers extends PApplet {
   boolean displayAuxiliarViewers = true;
   // whilst scene1 is either on-screen or not; scene2 and scene3 are off-screen
   // test both cases here
-  boolean onScreen = false;
+  boolean onScreen = true;
 
   int w = 700;
   int h = 700;
@@ -26,7 +25,7 @@ public class AuxViewers extends PApplet {
 
   public void setup() {
     scene1 = onScreen ? new Scene(this) : new Scene(this, P3D);
-    scene1.enableHint(Scene.BACKGROUND, color(75, 25, 15));
+    scene1.enableHint(Scene.BACKGROUND, color(75, 25, 15, 100));
     scene1.enableHint(Scene.GRID, color(0, 225, 15));
     scene1.eye().disableTagging();
     scene1.setRadius(1000);
@@ -34,6 +33,8 @@ public class AuxViewers extends PApplet {
     shapes = new Node[15];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(boxShape());
+      shapes[i].enableHint(Node.BULLSEYE);
+      shapes[i].setPickingPolicy(Node.BULLSEYE);
       scene1.randomize(shapes[i]);
     }
     toruses = new Node[15];
@@ -41,7 +42,9 @@ public class AuxViewers extends PApplet {
       toruses[i] = new Node();
       toruses[i].scale(8);
       toruses[i].enableHint(Node.TORUS);
-      toruses[i].setPickingPolicy(Node.SHAPE);
+      toruses[i].enableHint(Node.BULLSEYE);
+      toruses[i].setPickingPolicy(Node.BULLSEYE);
+      //toruses[i].setPickingPolicy(Node.SHAPE);
       scene1.randomize(toruses[i]);
     }
 
@@ -49,7 +52,8 @@ public class AuxViewers extends PApplet {
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(this, P3D, w / 2, h / 2);
     scene2.enableHint(Scene.BACKGROUND | Scene.AXES);
-    scene2.configHint(Scene.BACKGROUND, color(75, 25, 175, 100));
+    //scene2.configHint(Scene.BACKGROUND, color(75, 25, 175, 100));
+    scene2.configHint(Scene.BACKGROUND, color(75, 25, 175));
     scene2.eye().disableTagging();
     scene2.setRadius(1000);
     scene2.fit(1);
@@ -57,7 +61,8 @@ public class AuxViewers extends PApplet {
     // idem here
     scene3 = new Scene(this, P3D, w / 2, h / 2);
     scene3.enableHint(Scene.BACKGROUND | Scene.AXES);
-    scene3.configHint(Scene.BACKGROUND, color(175, 200, 20, 170));
+    //scene3.configHint(Scene.BACKGROUND, color(175, 200, 20, 170));
+    scene3.configHint(Scene.BACKGROUND, color(175, 200, 20));
     scene3.eye().disableTagging();
     scene3.setRadius(1000);
     scene3.fit(1);
@@ -124,12 +129,12 @@ public class AuxViewers extends PApplet {
 
   public void draw() {
     focus = scene2.hasMouseFocus() ? scene2 : scene3.hasMouseFocus() ? scene3 : scene1.hasMouseFocus() ? scene1 : null;
-    scene1.display();
+    //scene1.display();
     if (displayAuxiliarViewers) {
       scene2.display(w / 2, 0);
       scene3.display(w / 2, h / 2);
     }
-    //scene1.display();
+    scene1.display();
   }
 
   public static void main(String[] args) {

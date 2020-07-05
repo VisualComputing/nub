@@ -2880,7 +2880,7 @@ public class Graph {
   // caches
 
   /**
-   * Returns the cached projection matrix computed at {@link #_beginDraw()}.
+   * Returns the cached projection matrix computed at {@link #beginDraw()}.
    */
   public Matrix projection() {
     return _projection;
@@ -2894,14 +2894,14 @@ public class Graph {
   }
 
   /**
-   * Returns the projection times view cached matrix computed at {@link #_beginDraw()}}.
+   * Returns the projection times view cached matrix computed at {@link #beginDraw()}}.
    */
   public Matrix projectionView() {
     return _projectionView;
   }
 
   /**
-   * Returns the cached projection times view inverse matrix computed at {@link #_beginDraw()}}.
+   * Returns the cached projection times view inverse matrix computed at {@link #beginDraw()}}.
    */
   public Matrix projectionViewInverse() {
     if (isProjectionViewInverseCached())
@@ -3052,15 +3052,15 @@ public class Graph {
 
   /**
    * Begins the rendering process (see {@link #render(Node)}). Use it always before
-   * {@link #_endDraw()}. Calls {@link #_bind()}, updates the boundary equations
+   * {@link #endDraw()}. Calls {@link #_bind()}, updates the boundary equations
    * (see {@link #updateBoundaryEquations()}) and displays the scene {@link #hint()}.
    *
    * @see #render(Node)
-   * @see #_endDraw()
+   * @see #endDraw()
    * @see #isOffscreen()
    * @see #context()
    */
-  protected void _beginDraw() {
+  public void beginDraw() {
     if (isOffscreen())
       _initFrontBuffer();
     _bind();
@@ -3074,14 +3074,15 @@ public class Graph {
 
   /**
    * Ends the rendering process (see {@link #render(Node)}). Use it always after
-   * {@link #_beginDraw()}. Displays the scene HUD.
+   * {@link #beginDraw()}. Clears the picking cache. Displays the scene HUD.
    *
    * @see #render(Node)
-   * @see #_beginDraw()
+   * @see #beginDraw()
    * @see #isOffscreen()
    * @see #context()
    */
-  protected void _endDraw() {
+  public void endDraw() {
+    _rays.clear();
     _matrixHandler.popMatrix();
     _displayHUD();
     if (isOffscreen())
@@ -3126,9 +3127,16 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
-    // TODO: make public _beginDraw / _endDraw
-    _beginDraw();
-    // TODO ... requires a public traverse() with the code below
+    beginDraw();
+    traverse(subtree);
+    endDraw();
+  }
+
+  public void traverse() {
+    traverse(null);
+  }
+
+  public void traverse(Node subtree) {
     _subtree = subtree;
     if (subtree == null) {
       for (Node node : _leadingNodes())
@@ -3143,8 +3151,6 @@ public class Graph {
         _matrixHandler.popMatrix();
       }
     }
-    _rays.clear();
-    _endDraw();
   }
 
   /**
