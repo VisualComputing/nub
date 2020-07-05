@@ -610,15 +610,14 @@ public class Scene extends Graph {
    * @see #display(Node, int, int)
    */
   public void image(int pixelX, int pixelY) {
-    if (!isOffscreen()) {
-      throw new RuntimeException("scene.image() only works if scene is offscreen.");
+    if (isOffscreen()) {
+      pApplet().pushStyle();
+      _setUpperLeftCorner(pixelX, pixelY);
+      _lastDisplayed = TimingHandler.frameCount;
+      pApplet().imageMode(PApplet.CORNER);
+      pApplet().image(context(), pixelX, pixelY);
+      pApplet().popStyle();
     }
-    pApplet().pushStyle();
-    _setUpperLeftCorner(pixelX, pixelY);
-    _lastDisplayed = TimingHandler.frameCount;
-    pApplet().imageMode(PApplet.CORNER);
-    pApplet().image(context(), pixelX, pixelY);
-    pApplet().popStyle();
   }
 
   public void displayBackBuffer() {
