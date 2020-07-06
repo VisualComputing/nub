@@ -2840,10 +2840,7 @@ public class Graph {
    * Use it as a {@code _postDraw()}.
    */
   protected void _renderBackBuffer() {
-    if (!_picking) {
-      return;
-    }
-    if (_bb != null && _bbCount < _bbNeed) {
+    if (_picking && _bb != null && _bbCount < _bbNeed) {
       _initBackBuffer();
       _bbMatrixHandler.bind(projection(), view());
       if (_subtree == null) {
