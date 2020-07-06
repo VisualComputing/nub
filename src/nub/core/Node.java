@@ -114,7 +114,8 @@ import java.util.function.Consumer;
  * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
  * and {@link #resetHint()}.
  * <h2>Ray casting</h2>
- * The ray-casting node {@link #pickingPolicy()} may be set with {@link #setPickingPolicy(int)}.
+ * The ray-casting node {@link #pickingPolicy()} may be set with
+ * {@link #setPickingPolicy(PickingPolicy)}.
  * <h2>Custom behavior</h2>
  * Implementing a custom behavior for node is a two step process:
  * <ul>
@@ -152,7 +153,10 @@ public class Node {
   }
   // TODO public because of scene.drawBullsEye
   public BullsEyeShape _bullsEyeShape;
-  protected int _pickingPolicy;
+  public enum PickingPolicy {
+    PRECISE, BULLSEYE, NONE
+  }
+  protected PickingPolicy _pickingPolicy;
 
   // ID
   protected static int _counter;
@@ -306,9 +310,10 @@ public class Node {
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
-    // TODO these two are deprecated
+    // TODO these three are deprecated
     setShape(this::graphics);
     enableHint(SHAPE);
+    setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
@@ -321,7 +326,7 @@ public class Node {
     setRotation(rotation);
     setScaling(scaling);
     enableHint(HUD | HIGHLIGHT);
-    setPickingPolicy(BULLSEYE);
+    setPickingPolicy(PickingPolicy.NONE);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -406,7 +411,7 @@ public class Node {
     this(reference, constraint, translation, rotation, scaling);
     setShape(shape);
     enableHint(SHAPE);
-    setPickingPolicy(SHAPE);
+    setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
@@ -420,7 +425,7 @@ public class Node {
     this(reference, constraint, translation, rotation, scaling);
     setShape(shape);
     enableHint(SHAPE);
-    setPickingPolicy(SHAPE);
+    setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
@@ -923,18 +928,15 @@ public class Node {
    * Sets the node ray-casting {@link #pickingPolicy()}. Either the {@link #BULLSEYE} or
    * the {@link #SHAPE} {@link #hint()}.
    */
-  public void setPickingPolicy(int policy) {
-    if (policy == SHAPE || policy == BULLSEYE)
-      _pickingPolicy = policy;
-    else
-      System.out.println("Warning: the node picking policy should be set either to SHAPE or BULLSEYE. Nothing done");
+  public void setPickingPolicy(PickingPolicy policy) {
+    _pickingPolicy = policy;
   }
 
   /**
    * Returns the node ray-casting {@link #pickingPolicy()}. Either the {@link #BULLSEYE} or
    * {@link #SHAPE} {@link #hint()}.
    */
-  public int pickingPolicy() {
+  public PickingPolicy pickingPolicy() {
     return _pickingPolicy;
   }
 

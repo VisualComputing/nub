@@ -112,10 +112,10 @@ public class DOF extends PApplet {
     if (key == 'p') {
       exact = !exact;
       for (int i = 0; i < models.length; i++)
-        if (models[i].pickingPolicy() == Node.SHAPE)
-          models[i].setPickingPolicy(Node.BULLSEYE);
+        if (models[i].pickingPolicy() == Node.PickingPolicy.PRECISE)
+          models[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
         else
-          models[i].setPickingPolicy(Node.SHAPE);
+          models[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
     }
   }
 

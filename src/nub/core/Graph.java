@@ -2677,6 +2677,15 @@ public class Graph {
         _track(tag, child, pixelX, pixelY);
   }
 
+  protected boolean _precisePicking(Node node) {
+    return _picking && node.isTaggingEnabled() && node.pickingPolicy() == Node.PickingPolicy.PRECISE && _bb != null &&
+            (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM) || node.isHintEnable(Node.BONE));
+  }
+
+  protected boolean _bullseyePicking(Node node) {
+    return _picking && node.isTaggingEnabled() && node.pickingPolicy() == Node.PickingPolicy.BULLSEYE && node.isHintEnable(Node.BULLSEYE);
+  }
+
   /**
    * Casts a ray at pixel position {@code (pixelX, pixelY)} and returns {@code true} if the ray picks the {@code node} and
    * {@code false} otherwise. The node is picked according to the {@link Node#bullsEyeSize()}.
@@ -2690,14 +2699,11 @@ public class Graph {
    * @see Node#setBullsEyeSize(float)
    */
   public boolean tracks(Node node, int pixelX, int pixelY) {
-    if (!_picking) {
-      System.out.println("Warning: enable picking for scene.tracks() to work!");
-      return false;
-    }
-    if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && _bb != null)
+    if (_precisePicking(node))
       return _tracks(node, pixelX, pixelY);
-    else
+    else if(_bullseyePicking(node))
       return _tracks(node, pixelX, pixelY, screenLocation(node.position()));
+    return false;
   }
 
   /**
@@ -3321,10 +3327,8 @@ public class Graph {
    * Renders the node onto the front buffer. Used by the rendering algorithms.
    */
   protected void _drawFrontBuffer(Node node) {
-    if (_picking)
-      if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && node.isTaggingEnabled())
-        if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM))
-          _bbNeed = TimingHandler.frameCount;
+    if (_precisePicking(node))
+      _bbNeed = TimingHandler.frameCount;
     if (isTagged(node) && node.isHintEnable(Node.HIGHLIGHT)) {
       _matrixHandler.pushMatrix();
       float scl = 1 + node._highlight;
@@ -3354,18 +3358,12 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   protected void _drawBackBuffer(Node node) {
-    if (!_picking) {
-      System.out.println("Warning: enable picking for scene._drawBackBuffer() to work!");
-      return;
-    }
-    if (node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && node.isTaggingEnabled()) {
-      if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM)) {
-        float r = (float) (node.id() & 255) / 255.f;
-        float g = (float) ((node.id() >> 8) & 255) / 255.f;
-        float b = (float) ((node.id() >> 16) & 255) / 255.f;
-        _emitBackBufferUniforms(r, g, b);
-        MatrixHandler._displayHint(_backBuffer(), node);
-      }
+    if (_precisePicking(node)) {
+      float r = (float) (node.id() & 255) / 255.f;
+      float g = (float) ((node.id() >> 8) & 255) / 255.f;
+      float b = (float) ((node.id() >> 16) & 255) / 255.f;
+      _emitBackBufferUniforms(r, g, b);
+      MatrixHandler._displayHint(_backBuffer(), node);
     }
   }
 
@@ -3389,10 +3387,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (!_picking) {
-      return;
-    }
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.BULLSEYE && node.isHintEnable(Node.BULLSEYE) ) {
+    if (_bullseyePicking(node) && !_rays.isEmpty()) {
       Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
@@ -3410,11 +3405,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
-    if (!_picking) {
-      System.out.println("Warning: enable picking for scene._trackBackBuffer() to work!");
-      return;
-    }
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.SHAPE && node.isHintEnable(Node.SHAPE) && _bb != null) {
+    if (_precisePicking(node) && !_rays.isEmpty()) {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();

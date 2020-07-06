@@ -159,7 +159,7 @@ public class ShadowMappingTutorial extends PApplet {
         shader(shadowShader);
       light.configHint(Node.BULLSEYE, Node.BullsEyeShape.CIRCLE);
       if (debug)
-        light.setPickingPolicy(Node.SHAPE);
+        light.setPickingPolicy(Node.PickingPolicy.PRECISE);
     }
   }
 

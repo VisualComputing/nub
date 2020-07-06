@@ -53,7 +53,7 @@ public class DepthMap extends PApplet {
           pg.popStyle();
         }
       };
-      shapes[i].setPickingPolicy(Node.SHAPE);
+      shapes[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
       shapes[i].configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
       scene.randomize(shapes[i]);
       shapes[i].disableHint(Node.HIGHLIGHT);

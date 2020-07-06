@@ -63,7 +63,7 @@ public class ShadowMapping extends PApplet {
       // set picking precision to the pixels of the node projection
       shapes[i].setBullsEyeSize(20);
       if (debug)
-        shapes[i].setPickingPolicy(Node.SHAPE);
+        shapes[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
       //shapes[i].setHighlighting(Node.Highlighting.NONE);
     }
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
@@ -147,7 +147,7 @@ public class ShadowMapping extends PApplet {
         shader(shadowShader);
       for (Node shape : shapes)
         if (debug)
-          shape.setPickingPolicy(Node.SHAPE);
+          shape.setPickingPolicy(Node.PickingPolicy.PRECISE);
     }
     if (key == 'p')
       scene.togglePerspective();

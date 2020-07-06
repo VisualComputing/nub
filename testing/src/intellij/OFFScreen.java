@@ -46,7 +46,7 @@ public class OFFScreen extends PApplet {
     shape1.setRotation(Quaternion.random());
     shape1.translate(-55, -55, -55);
     //shape1.setPickingPolicy(Node.SHAPE);
-    shape1.setPickingPolicy(Node.BULLSEYE);
+    shape1.setPickingPolicy(Node.PickingPolicy.BULLSEYE);
     shape1.enableHint(Node.BULLSEYE);
 
     shape2 = new Node(shape1);
@@ -54,7 +54,7 @@ public class OFFScreen extends PApplet {
     shape2.setShape(shape());
     shape2.translate(-55, -85, 135);
     //shape2.setPickingPolicy(Node.SHAPE);
-    shape2.setPickingPolicy(Node.BULLSEYE);
+    shape2.setPickingPolicy(Node.PickingPolicy.PRECISE.BULLSEYE);
   }
 
   public void draw() {

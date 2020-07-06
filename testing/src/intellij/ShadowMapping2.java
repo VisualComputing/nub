@@ -68,7 +68,7 @@ public class ShadowMapping2 extends PApplet {
         }
       }
     };
-    landscape1.setPickingPolicy(Node.SHAPE);
+    landscape1.setPickingPolicy(Node.PickingPolicy.PRECISE);
     landscape2 = new Node() {
       @Override
       public void graphics(PGraphics pg) {
@@ -89,7 +89,7 @@ public class ShadowMapping2 extends PApplet {
         }
       }
     };
-    landscape2.setPickingPolicy(Node.SHAPE);
+    landscape2.setPickingPolicy(Node.PickingPolicy.PRECISE);
     landscape2.cull();
     landscape3 = new Node() {
       @Override
@@ -111,7 +111,7 @@ public class ShadowMapping2 extends PApplet {
         }
       }
     };
-    landscape3.setPickingPolicy(Node.SHAPE);
+    landscape3.setPickingPolicy(Node.PickingPolicy.PRECISE);
     landscape3.cull();
     // initShadowPass
     shadowMap = createGraphics(2048, 2048, P3D);
