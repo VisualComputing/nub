@@ -9,6 +9,8 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
 
+import java.nio.file.Paths;
+
 public class DOF extends PApplet {
   String depthPath;
   PShader depthShader, dofShader;
@@ -20,7 +22,7 @@ public class DOF extends PApplet {
 
   @Override
   public void settings() {
-    size(1000, 800, P3D);
+    size(700, 700, P3D);
   }
 
   @Override
@@ -37,15 +39,14 @@ public class DOF extends PApplet {
 
     // Depth shader
     // Test all the different versions
-    //depthPath = "depth_frag.glsl";
-    depthPath = "depth_linear.glsl";
-    //depthPath = "depth_nonlinear.glsl";
-    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/" + depthPath);
+    //depthPath = Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString();
+    depthPath = Paths.get("testing/data/depth/depth_nonlinear.glsl").toAbsolutePath().toString();
+    depthShader = loadShader(depthPath);
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
     // DOF shader
-    dofShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/dof.glsl");
+    dofShader = loadShader(Paths.get("testing/data/dof/dof.glsl").toAbsolutePath().toString());
     dofShader.set("aspect", width / (float) height);
     dofShader.set("maxBlur", (float) 0.015);
     dofShader.set("aperture", (float) 0.02);
@@ -89,6 +90,7 @@ public class DOF extends PApplet {
       image(depthPGraphics, 0, 0);
     else
       image(dofPGraphics, 0, 0);
+    println("-> frameRate: " + Scene.frameRate() + " (nub) " + frameRate + " (p5)");
   }
 
   PShape boxShape() {
