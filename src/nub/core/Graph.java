@@ -2884,7 +2884,7 @@ public class Graph {
   // caches
 
   /**
-   * Returns the cached projection matrix computed at {@link #beginRender()}.
+   * Returns the cached projection matrix computed at {@link #openContext()}.
    */
   public Matrix projection() {
     return _projection;
@@ -2898,14 +2898,14 @@ public class Graph {
   }
 
   /**
-   * Returns the projection times view cached matrix computed at {@link #beginRender()}}.
+   * Returns the projection times view cached matrix computed at {@link #openContext()}}.
    */
   public Matrix projectionView() {
     return _projectionView;
   }
 
   /**
-   * Returns the cached projection times view inverse matrix computed at {@link #beginRender()}}.
+   * Returns the cached projection times view inverse matrix computed at {@link #openContext()}}.
    */
   public Matrix projectionViewInverse() {
     if (isProjectionViewInverseCached())
@@ -3040,7 +3040,7 @@ public class Graph {
 
   /**
    * Begins the rendering process (see {@link #render(Node)}). Use it always before
-   * {@link #endRender()}. Binds the matrices to the renderer, updates the boundary equations
+   * {@link #closeContext()}. Binds the matrices to the renderer, updates the boundary equations
    * (see {@link #updateBoundaryEquations()}) and displays the scene {@link #hint()}.
    * <p>
    * This method is automatically called by {@link #render(Node)}. Call it explicitly only
@@ -3062,14 +3062,14 @@ public class Graph {
    * </pre>
    *
    * @see #render(Node)
-   * @see #endRender()
+   * @see #closeContext()
    * @see #isOffscreen()
    * @see #context()
    */
-  public void beginRender() {
+  public void openContext() {
     _renderCount++;
     if (_renderCount < 1 || _renderCount > 2) {
-      throw new RuntimeException("Error: render() should be nested within a single beginRender() / endRender() call!");
+      throw new RuntimeException("Error: render() should be nested within a single openContext() / closeContext() call!");
     }
     if (_renderCount == 1) {
       if (isOffscreen())
@@ -3086,17 +3086,17 @@ public class Graph {
 
   /**
    * Ends the rendering process (see {@link #render(Node)}). Use it always after
-   * {@link #beginRender()}. Clears the picking cache. Displays the scene HUD.
+   * {@link #openContext()}. Clears the picking cache. Displays the scene HUD.
    *
    * @see #render(Node)
-   * @see #beginRender()
+   * @see #openContext()
    * @see #isOffscreen()
    * @see #context()
    */
-  public void endRender() {
+  public void closeContext() {
     _renderCount--;
     if (_renderCount < 0 || _renderCount > 1) {
-      throw new RuntimeException("Error: render() should be nested within a single beginRender() / endRender() call!");
+      throw new RuntimeException("Error: render() should be nested within a single openContext() / closeContext() call!");
     }
     if (_renderCount == 0) {
       _rays.clear();
@@ -3130,9 +3130,9 @@ public class Graph {
   }
 
   /**
-   * Calls {@link #beginRender()}, then renders the node {@code subtree} (or the whole tree
+   * Calls {@link #openContext()}, then renders the node {@code subtree} (or the whole tree
    * when {@code subtree} is {@code null}) onto the {@link #context()} from the {@link #eye()}
-   * viewpoint, and calls {@link #endRender()}.
+   * viewpoint, and calls {@link #closeContext()}.
    * <p>
    * Note that the rendering algorithm calls {@link Node#visit()} on each visited node
    * (refer to the {@link Node} documentation).
@@ -3148,7 +3148,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
-    beginRender();
+    openContext();
     _subtree = subtree;
     if (subtree == null) {
       for (Node node : _leadingNodes())
@@ -3163,7 +3163,7 @@ public class Graph {
         _matrixHandler.popMatrix();
       }
     }
-    endRender();
+    closeContext();
   }
 
   /**

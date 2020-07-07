@@ -10,6 +10,9 @@ import processing.core.PGraphics;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class ShadowMap extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
@@ -18,8 +21,8 @@ public class ShadowMap extends PApplet {
   PShader depthShader;
   float zNear = 50;
   float zFar = 1000;
-  int w = 1000;
-  int h = 1000;
+  int w = 700;
+  int h = 700;
 
   public void settings() {
     size(w, h, P3D);
@@ -57,12 +60,10 @@ public class ShadowMap extends PApplet {
       shapes[i].disableHint(Node.HIGHLIGHT);
     }
     shadowMap = createGraphics(w / 2, h / 2, P3D);
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
-    //depthShader.set("near", zNear);
-    //depthShader.set("far", zFar);
-    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_nonlinear.glsl");
+    depthShader = loadShader(Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString());
+    depthShader.set("near", zNear);
+    depthShader.set("far", zFar);
     shadowMap.shader(depthShader);
-
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
     scene.node("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.node("light").position()));
   }
@@ -82,6 +83,8 @@ public class ShadowMap extends PApplet {
       image(shadowMap, w / 2, h / 2);
       scene.endHUD();
     }
+    //println("frameCount: " + Scene.TimingHandler.frameCount + " (nub) " + frameCount + " (p5) ");
+    println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");
   }
 
   public void mouseMoved(MouseEvent event) {
