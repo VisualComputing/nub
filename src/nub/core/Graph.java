@@ -2678,12 +2678,13 @@ public class Graph {
   }
 
   protected boolean _precisePicking(Node node) {
-    return _picking && node.isTaggingEnabled() && node.pickingPolicy() == Node.PickingPolicy.PRECISE && _bb != null &&
+    return _picking && node.isTaggingEnabled() && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.PRECISE && _bb != null &&
             (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM) || node.isHintEnable(Node.BONE));
   }
 
   protected boolean _bullseyePicking(Node node) {
-    return _picking && node.isTaggingEnabled() && node.pickingPolicy() == Node.PickingPolicy.BULLSEYE && node.isHintEnable(Node.BULLSEYE);
+    return _picking && node.isTaggingEnabled() && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.BULLSEYE
+            /* && node.isHintEnable(Node.BULLSEYE) */;
   }
 
   /**

@@ -262,7 +262,7 @@ public class Scene extends Graph {
     if (!_offscreen && _onscreenGraph == null)
       _onscreenGraph = this;
     // 2. Back buffer
-    _backBuffer().noSmooth();
+    if (_backBuffer() != null) _backBuffer().noSmooth();
     _triangleShader = pApplet().loadShader("PickingBuffer.frag");
     _lineShader = pApplet().loadShader("PickingBuffer.frag");
     _pointShader = pApplet().loadShader("PickingBuffer.frag");
@@ -514,8 +514,9 @@ public class Scene extends Graph {
    */
   public void draw() {
     // display visual hints in the world
-    if (!isOffscreen())
+    if (!isOffscreen()) {
       _renderBackBuffer();
+    }
   }
 
   /**

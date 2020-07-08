@@ -43,18 +43,16 @@ public class ShadowMap extends PApplet {
     shapes = new Node[20];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(this::cube);
-      shapes[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
+      //shapes[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
+      shapes[i].enableHint(Node.BULLSEYE);
       shapes[i].configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
       scene.randomize(shapes[i]);
       shapes[i].disableHint(Node.HIGHLIGHT);
     }
-
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
     scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
     scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
-
-    scene.enablePicking(false);
-
+    // scene.enablePicking(false);
     ///*
     //shadowMapScene = new Scene(this, shadowMap, light);
     shadowMapScene = new ShadowScene(this, shadowMap, scene.node("light"));
@@ -64,7 +62,6 @@ public class ShadowMap extends PApplet {
     //shadowMapScene.setRadius(300);
     shadowMapScene.setType(shadowMapType);
     // */
-
     frameRate(1000);
   }
 
