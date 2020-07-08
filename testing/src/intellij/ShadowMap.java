@@ -16,11 +16,13 @@ import java.nio.file.Paths;
 public class ShadowMap extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
+  //Scene shadowMapScene;
+  ShadowScene shadowMapScene;
   Node[] shapes;
   PGraphics shadowMap;
   PShader depthShader;
   float zNear = 50;
-  float zFar = 1000;
+  float zFar = 700;
   int w = 700;
   int h = 700;
 
@@ -29,68 +31,78 @@ public class ShadowMap extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this);
-    scene.setRadius(max(w, h));
-    scene.fit(1);
-    shapes = new Node[20];
-    for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Node() {
-        @Override
-        public void graphics(PGraphics pg) {
-          pg.pushStyle();
-          if (scene.node("light") == this) {
-            Scene.drawAxes(pg, 150);
-            pg.fill(0, scene.hasTag(this) ? 255 : 0, 255, 120);
-            Scene.drawFrustum(pg, shadowMap, this, shadowMapType, zNear, zFar);
-          } else {
-            if (pg == shadowMap)
-              pg.noStroke();
-            else {
-              pg.strokeWeight(3);
-              pg.stroke(0, 255, 255);
-            }
-            pg.fill(255, 0, 0);
-            pg.box(80);
-          }
-          pg.popStyle();
-        }
-      };
-      scene.randomize(shapes[i]);
-      //shapes[i].setHighlighting(0);
-      shapes[i].disableHint(Node.HIGHLIGHT);
-    }
     shadowMap = createGraphics(w / 2, h / 2, P3D);
     depthShader = loadShader(Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString());
     depthShader.set("near", zNear);
     depthShader.set("far", zFar);
     shadowMap.shader(depthShader);
+    scene = new Scene(this);
+    scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
+    scene.setRadius(max(w, h));
+    scene.fit(1);
+    shapes = new Node[20];
+    for (int i = 0; i < shapes.length; i++) {
+      shapes[i] = new Node(this::cube);
+      shapes[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
+      shapes[i].configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
+      scene.randomize(shapes[i]);
+      shapes[i].disableHint(Node.HIGHLIGHT);
+    }
+
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
-    scene.node("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.node("light").position()));
+    scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+    scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
+
+    scene.enablePicking(false);
+
+    ///*
+    //shadowMapScene = new Scene(this, shadowMap, light);
+    shadowMapScene = new ShadowScene(this, shadowMap, scene.node("light"));
+    shadowMapScene.resetHint();
+    shadowMapScene.enableHint(Scene.BACKGROUND, color(140, 160, 125));
+    shadowMapScene.enablePicking(false);
+    //shadowMapScene.setRadius(300);
+    shadowMapScene.setType(shadowMapType);
+    // */
+
+    frameRate(1000);
+  }
+
+  public void cube(PGraphics pg) {
+    pg.pushStyle();
+    if (pg == shadowMap)
+      pg.noStroke();
+    else {
+      pg.strokeWeight(3);
+      pg.stroke(0, 255, 255);
+    }
+    pg.fill(255, 0, 0);
+    pg.box(80);
+    pg.popStyle();
   }
 
   public void draw() {
-    background(75, 25, 15);
     // 1. Fill in and display front-buffer
     scene.render();
     // 2. Fill in shadow map using the light point of view
-    if (scene.node("light") != null) {
-      shadowMap.beginDraw();
-      shadowMap.background(140, 160, 125);
-      scene.render(shadowMap, scene.node("light"), shadowMapType, zNear, zFar);
-      shadowMap.endDraw();
-      // 3. Display shadow map
-      scene.beginHUD();
-      image(shadowMap, w / 2, h / 2);
-      scene.endHUD();
+    if (scene.isTagValid("light")) {
+      shadowMapScene.display(w / 2, h / 2);
     }
     //println("frameCount: " + Scene.TimingHandler.frameCount + " (nub) " + frameCount + " (p5) ");
     println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");
   }
 
   public void mouseMoved(MouseEvent event) {
-    if (event.isShiftDown())
-      scene.mouseTag("light");
-    else
+    if (event.isShiftDown()) {
+      if (scene.isTagValid("light"))
+        scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+      // no calling mouseTag since we need to immediately update the tagged node
+      scene.updateMouseTag("light");
+      if (scene.isTagValid("light")) {
+        scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+        shadowMapScene.setEye(scene.node("light"));
+      }
+    } else
       scene.mouseTag();
   }
 
@@ -104,21 +116,37 @@ public class ShadowMap extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    if (event.isShiftDown()) {
-      // custom interaction of the light node: setting the light
-      // zFar plane is implemented as a custom behavior by node.interact()
-      if (scene.node("light") != null)
-        depthShader.set("far", zFar += event.getCount() * 20);
+    if (event.isShiftDown() && scene.isTagValid("light")) {
+      depthShader.set("far", zFar += event.getCount() * 20);
+      scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
     }
     else
       scene.scale(event.getCount() * 20);
   }
 
   public void keyPressed() {
-    if (key == ' ')
-      shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
+    if (key == ' ' && scene.isTagValid("light")) {
+      shadowMapType = shadowMapType == Scene.Type.ORTHOGRAPHIC ? Scene.Type.PERSPECTIVE : Scene.Type.ORTHOGRAPHIC;
+      scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
+    }
     if (key == 'p')
       scene.togglePerspective();
+  }
+
+  public class ShadowScene extends Scene {
+    public ShadowScene(PApplet pApplet, PGraphics pGraphics, Node eye) {
+      super(pApplet, pGraphics, eye);
+    }
+
+    @Override
+    public float zNear() {
+      return zNear;
+    }
+
+    @Override
+    public float zFar() {
+      return zFar;
+    }
   }
 
   public static void main(String[] args) {
