@@ -28,57 +28,54 @@ public class ShadowMap extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this);
-    scene.setRadius(max(w, h));
-    scene.fit(1);
-    shapes = new Node[20];
-    for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Node() {
-        @Override
-        public void graphics(PGraphics pg) {
-          pg.pushStyle();
-          if (scene.node("light") == this) {
-            Scene.drawAxes(pg, 150);
-            pg.fill(0, scene.hasTag(this) ? 255 : 0, 255, 120);
-            Scene.drawFrustum(pg, shadowMap, this, shadowMapType, zNear, zFar);
-          } else {
-            if (pg == shadowMap)
-              pg.noStroke();
-            else {
-              pg.strokeWeight(3);
-              pg.stroke(0, 255, 255);
-            }
-            pg.fill(255, 0, 0);
-            pg.box(80);
-          }
-          pg.popStyle();
-        }
-      };
-      scene.randomize(shapes[i]);
-      //shapes[i].setHighlighting(0);
-      shapes[i].disableHint(Node.HIGHLIGHT);
-    }
     shadowMap = createGraphics(w / 2, h / 2, P3D);
     //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
     //depthShader.set("near", zNear);
     //depthShader.set("far", zFar);
     depthShader = loadShader(Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString());
     shadowMap.shader(depthShader);
-
+    scene = new Scene(this);
+    scene.setRadius(max(w, h));
+    scene.fit(1);
+    scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
+    shapes = new Node[20];
+    for (int i = 0; i < shapes.length; i++) {
+      shapes[i] = new Node(this::cube);
+      //shapes[i].setPickingPolicy(Node.BULLSEYE);
+      shapes[i].configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
+      scene.randomize(shapes[i]);
+      shapes[i].disableHint(Node.HIGHLIGHT);
+      // shapes[i].disableTagging();
+    }
+    // /*
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
-    scene.node("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.node("light").position()));
+    scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+    scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
+    // */
     frameRate(1000);
   }
 
+  public void cube(PGraphics pg) {
+    pg.pushStyle();
+    if (pg == shadowMap)
+      pg.noStroke();
+    else {
+      pg.strokeWeight(3);
+      pg.stroke(0, 255, 255);
+    }
+    pg.fill(255, 0, 0);
+    pg.box(80);
+    pg.popStyle();
+  }
+
   public void draw() {
-    background(75, 25, 15);
     // 1. Fill in and display front-buffer
     scene.render();
     // 2. Fill in shadow map using the light point of view
     if (scene.node("light") != null) {
       shadowMap.beginDraw();
       shadowMap.background(140, 160, 125);
-      scene.render(shadowMap, scene.node("light"), shadowMapType, zNear, zFar);
+      Scene.render(shadowMap, scene.node("light"), shadowMapType, zNear, zFar);
       shadowMap.endDraw();
       // 3. Display shadow map
       scene.beginHUD();
@@ -89,9 +86,14 @@ public class ShadowMap extends PApplet {
   }
 
   public void mouseMoved(MouseEvent event) {
-    if (event.isShiftDown())
-      scene.mouseTag("light");
-    else
+    if (event.isShiftDown()) {
+      if (scene.isTagValid("light"))
+        scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+      // no calling mouseTag since we need to immediately update the tagged node
+      scene.updateMouseTag("light");
+      if (scene.isTagValid("light"))
+        scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+    } else
       scene.mouseTag();
   }
 
@@ -116,8 +118,10 @@ public class ShadowMap extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == ' ')
-      shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
+    if (key == ' ' && scene.isTagValid("light")) {
+      shadowMapType = shadowMapType == Scene.Type.ORTHOGRAPHIC ? Scene.Type.PERSPECTIVE : Scene.Type.ORTHOGRAPHIC;
+      scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
+    }
     if (key == 'p')
       scene.togglePerspective();
   }
