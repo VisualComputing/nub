@@ -315,16 +315,7 @@ public class Graph {
    * @see #Graph(Object, Object, Node, Type, int, int)
    */
   public Graph(Object context, int width, int height) {
-    this(context, null, null, Type.PERSPECTIVE, width, height);
-  }
-
-  /**
-   * Same as {@code this(front, back, Type.PERSPECTIVE, null, width, height)}.
-   *
-   * @see #Graph(Object, Object, Node, Type, int, int)
-   */
-  protected Graph(Object front, Object back, int width, int height) {
-    this(front, back, null, Type.PERSPECTIVE, width, height);
+    this(context, null, Type.PERSPECTIVE, width, height);
   }
 
   /**
@@ -333,16 +324,7 @@ public class Graph {
    * @see #Graph(Object, Object, Node, Type, int, int)
    */
   public Graph(Object context, Node eye, int width, int height) {
-    this(context, null, eye, Type.PERSPECTIVE, width, height);
-  }
-
-  /**
-   * Same as {@code this(front, back, Type.PERSPECTIVE, eye, width, height)}.
-   *
-   * @see #Graph(Object, Object, Node, Type, int, int)
-   */
-  protected Graph(Object front, Object back, Node eye, int width, int height) {
-    this(front, back, eye, Type.PERSPECTIVE, width, height);
+    this(context, eye, Type.PERSPECTIVE, width, height);
   }
 
   /**
@@ -351,16 +333,7 @@ public class Graph {
    * @see #Graph(Object, Object, Node, Type, int, int)
    */
   public Graph(Object context, Type type, int width, int height) {
-    this(context, null, null, type, width, height);
-  }
-
-  /**
-   * Same as {@code this(front, back, type, null, width, height)}.
-   *
-   * @see #Graph(Object, Object, Node, Type, int, int)
-   */
-  protected Graph(Object front, Object back, Type type, int width, int height) {
-    this(front, back, null, type, width, height);
+    this(context, null, type, width, height);
   }
 
   /**
@@ -381,24 +354,6 @@ public class Graph {
    * @see #Graph(Object, Object, Node, Type, int, int)
    */
   public Graph(Object context, Node eye, Type type, int width, int height) {
-    this(context, null, eye, type, width, height);
-  }
-
-  /**
-   * Default constructor defines a right-handed graph with the specified {@code width} and
-   * {@code height} screen window dimensions. The graph {@link #center()} and
-   * {@link #anchor()} are set to {@code (0,0,0)} and its {@link #radius()} to {@code 100}.
-   * <p>
-   * The constructor sets a {@link Node} instance as the graph {@link #eye()} and then
-   * calls {@link #fit()}, so that the entire scene fits the screen dimensions.
-   * <p>
-   * The constructor also instantiates the graph main {@link #context()} and {@code back-buffer}
-   * matrix-handlers (see {@link MatrixHandler}) and {@link #TimingHandler}.
-   *
-   * @see #TimingHandler
-   * @see #setEye(Node)
-   */
-  protected Graph(Object front, Object back, Node eye, Type type, int width, int height) {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
@@ -412,10 +367,9 @@ public class Graph {
       if (message)
         System.out.println("Warning: all timing-tasks made non-concurrent");
     }
-    _fb = front;
-    _matrixHandler = MatrixHandler._get(_fb);
-    _bb = back;
-    _bbMatrixHandler = _bb == null ? null : MatrixHandler._get(_bb);
+    _fb = context;
+    _matrixHandler = new MatrixHandler();
+    _bbMatrixHandler = new MatrixHandler();
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
@@ -1001,17 +955,6 @@ public class Graph {
   }
 
   /**
-   * Begin Heads Up Display (HUD) on {@code context} so that drawing can
-   * be done using 2D screen coordinates.
-   *
-   * @param width  of {@code context}.
-   * @param height of {@code context}.
-   */
-  public static void beginHUD(Object context, int width, int height) {
-    MatrixHandler._get(context).beginHUD(width, height);
-  }
-
-  /**
    * Ends Heads Up Display (HUD). Throws an exception if
    * {@link #beginHUD()} wasn't properly called before.
    * <p>
@@ -1022,19 +965,6 @@ public class Graph {
    */
   public void endHUD() {
     _matrixHandler.endHUD();
-  }
-
-  /**
-   * Ends Heads Up Display (HUD) on {@code pGraphics}. Throws an exception if
-   * {@link #beginHUD()} wasn't properly called before.
-   * <p>
-   * Wrapper for {@link MatrixHandler#endHUD()}.
-   *
-   * @see #beginHUD()
-   * @see MatrixHandler#endHUD()
-   */
-  public static void endHUD(Object context) {
-    MatrixHandler._get(context).endHUD();
   }
 
   // Eye stuff
@@ -2344,91 +2274,6 @@ public class Graph {
     }
   }
 
-  // Nice stuff :P
-
-  /**
-   * Apply the local transformation defined by {@code node}, i.e., respect to its
-   * {@link Node#reference()}. The {@code node} is first translated, then rotated around
-   * the new translated origin and then scaled.
-   * <p>
-   * This method may be used to modify the transform matrix from a node hierarchy. For
-   * example, with this node hierarchy:
-   * <p>
-   * {@code Node body = new Node();} <br>
-   * {@code Node leftArm = new Node(body);} <br>
-   * {@code Node rightArm = new Node(body);} <br>
-   * <p>
-   * The associated drawing code should look like:
-   * <p>
-   * {@code pushMatrix();} <br>
-   * {@code this.applyTransformation(body);} <br>
-   * {@code drawBody();} <br>
-   * {@code pushMatrix();} <br>
-   * {@code this.applyTransformation(leftArm);} <br>
-   * {@code drawArm();} <br>
-   * {@code popMatrix();} <br>
-   * {@code pushMatrix();} <br>
-   * {@code applyTransformation(rightArm);} <br>
-   * {@code drawArm();} <br>
-   * {@code popMatrix();} <br>
-   * {@code popMatrix();} <br>
-   * <p>
-   * Note the use of nested {@code pushMatrix()} and {@code popMatrix()} blocks to
-   * represent the node hierarchy: {@code leftArm} and {@code rightArm} are both
-   * correctly drawn with respect to the {@code body} coordinate system.
-   * <p>
-   * Note that {@link #render()} traverses the scene-graph hierarchy and automatically applies
-   * the geometry transformations on all nodes.
-   *
-   * @see #render()
-   * @see #applyTransformation(Object, Node)
-   * @see #applyWorldTransformation(Node)
-   * @see #applyWorldTransformation(Object, Node)
-   */
-  public void applyTransformation(Node node) {
-    applyTransformation(_fb, node);
-  }
-
-  /**
-   * Apply the local transformation defined by the {@code node} on {@code context}.
-   * Needed by {@link #applyWorldTransformation(Object, Node)}.
-   * <p>
-   * Note that {@link #render(Object)} traverses the scene-graph hierarchy and automatically
-   * applies all the node geometry transformations on a given context.
-   *
-   * @see #render(Object)
-   * @see #applyTransformation(Node)
-   * @see #applyWorldTransformation(Node)
-   * @see #applyWorldTransformation(Object, Node)
-   */
-  public static void applyTransformation(Object context, Node node) {
-    MatrixHandler._get(context).applyTransformation(node);
-  }
-
-  /**
-   * Similar to {@link #applyTransformation(Node)}, but applies the global transformation
-   * defined by the node.
-   *
-   * @see #applyWorldTransformation(Node)
-   * @see #applyTransformation(Object, Node)
-   * @see #applyWorldTransformation(Object, Node)
-   */
-  public void applyWorldTransformation(Node node) {
-    applyWorldTransformation(_fb, node);
-  }
-
-  /**
-   * Similar to {@link #applyTransformation(Object, Node)}, but applies the global
-   * transformation defined by the {@code node} on {@code context}.
-   *
-   * @see #applyWorldTransformation(Node)
-   * @see #applyTransformation(Object, Node)
-   * @see #applyWorldTransformation(Node)
-   */
-  public static void applyWorldTransformation(Object context, Node node) {
-    MatrixHandler._get(context).applyWorldTransformation(node);
-  }
-
   // Other stuff
 
   /**
@@ -2684,7 +2529,7 @@ public class Graph {
 
   protected boolean _bullseyePicking(Node node) {
     return _picking && node.isTaggingEnabled() && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.BULLSEYE
-            /* && node.isHintEnable(Node.BULLSEYE) */;
+            && (node.isHintEnable(Node.BULLSEYE) || node.isHintEnable(Node.AXES) || node.isHintEnable(Node.CAMERA));
   }
 
   /**
@@ -3185,140 +3030,6 @@ public class Graph {
         _render(child);
     }
     _matrixHandler.popMatrix();
-  }
-
-  /**
-   * Renders the node tree onto context from the {@code eye} viewpoint with the given frustum parameters.
-   * Same as {@code render(context, type, null, eye, width, height, zNear, zFar)}.
-   *
-   * @see #render(Object, Node, Node, Type, int, int, float, float)
-   * @see #render()
-   * @see #render(Object)
-   * @see #render(Object, Matrix, Matrix)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public static void render(Object context, Node eye, Type type, int width, int height, float zNear, float zFar) {
-    render(context, null, eye, type, width, height, zNear, zFar);
-  }
-
-  /**
-   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto context
-   * from the {@code eye} viewpoint with the given frustum parameters.
-   *
-   * @see #render(Node)
-   * @see #render(Object, Node)
-   * @see #render(Object, Node, Matrix, Matrix)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public static void render(Object context, Node subtree, Node eye, Type type, int width, int height, float zNear, float zFar) {
-    _render(MatrixHandler._get(context), context, subtree, eye, type, width, height, zNear, zFar);
-  }
-
-  /**
-   * used by {@link #render(Object, Node, Type, int, int, float, float)}.
-   */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Node subtree, Node eye, Type type, int width, int height, float zNear, float zFar) {
-    _render(matrixHandler, context, subtree, projection(eye, type, width, height, zNear, zFar), eye.view());
-  }
-
-  /**
-   * Renders the node tree onto {@code context} from the {@link #eye()} viewpoint.
-   * Same as {@code render(context, null)}.
-   *
-   * @see #render(Object, Node)
-   * @see #render()
-   * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Node, Type, int, int, float, float)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public void render(Object context) {
-    render(context, null);
-  }
-
-  /**
-   * Renders the node {@code subtree} (or the whole tree when {@code subtree}
-   * is {@code null}) onto {@code context} from the {@link #eye()} viewpoint.
-   *
-   * @see #render(Node)
-   * @see #render(Object, Node, Matrix, Matrix)
-   * @see #render(Object, Node, Node, Type, int, int, float, float)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public void render(Object context, Node subtree) {
-    if (context == _fb && !_rays.isEmpty())
-      render(subtree);
-    else
-      render(context, subtree, projection(), view());
-  }
-
-  /**
-   * Renders the node tree onto context with the given {@code projection} and {@code view} matrices.
-   * Same as {@code render(context, null, projection, view)}.
-   *
-   * @see #render(Object, Node, Matrix, Matrix)
-   * @see #render()
-   * @see #render(Object)
-   * @see #render(Object, Node, Type, int, int, float, float)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public static void render(Object context, Matrix projection, Matrix view) {
-    render(context, null, projection, view);
-  }
-
-  /**
-   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto
-   * context with the given {@code projection} and {@code view} matrices.
-   *
-   * @see #render(Node)
-   * @see #render(Object, Node)
-   * @see #render(Object, Node, Node, Type, int, int, float, float)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public static void render(Object context, Node subtree, Matrix projection, Matrix view) {
-    _render(MatrixHandler._get(context), context, subtree, projection, view);
-  }
-
-  /**
-   * Used by {@link #render(Object, Node, Matrix, Matrix)}.
-   */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Node subtree, Matrix projection, Matrix view) {
-    matrixHandler.bind(projection, view);
-    if (subtree == null) {
-      for (Node node : _leadingNodes())
-        _render(matrixHandler, context, node);
-    } else {
-      if (subtree.reference() != null) {
-        matrixHandler.pushMatrix();
-        matrixHandler.applyWorldTransformation(subtree.reference());
-      }
-      _render(matrixHandler, context, subtree);
-      if (subtree.reference() != null) {
-        matrixHandler.popMatrix();
-      }
-    }
-  }
-
-  /**
-   * Used by the {@link #_render(MatrixHandler, Object, Node, Matrix, Matrix)} algorithm.
-   */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Node node) {
-    matrixHandler.pushMatrix();
-    matrixHandler.applyTransformation(node);
-    node.visit();
-    if (!node.isCulled()) {
-      if (node._bypass != TimingHandler.frameCount) {
-        MatrixHandler._displayHint(context, node);
-      }
-      for (Node child : node.children())
-        _render(matrixHandler, context, child);
-    }
-    matrixHandler.popMatrix();
   }
 
   /**

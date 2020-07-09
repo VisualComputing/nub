@@ -125,6 +125,10 @@ public class SMHL extends PApplet {
     String depthPath = Paths.get("testing/data/depth/depth_frag.glsl").toAbsolutePath().toString();
     depthShader = loadShader(depthPath);
     shadowMap = createGraphics(2048, 2048, P3D);
+    if (shadowMap.parent == this)
+      println("win!");
+    else
+      println("not just yet!");
     shadowMap.shader(depthShader);
     // Testing the appearance of artifacts first
     //shadowMap.noSmooth();
@@ -161,7 +165,7 @@ public class SMHL extends PApplet {
 
     ///*
     //shadowMapScene = new Scene(this, shadowMap, light);
-    shadowMapScene = new ShadowScene(this, shadowMap, light);
+    shadowMapScene = new ShadowScene(shadowMap, light);
     shadowMapScene.resetHint();
     shadowMapScene.enableHint(Scene.BACKGROUND, 0xffffffff);
     shadowMapScene.enablePicking(false);
@@ -278,8 +282,8 @@ public class SMHL extends PApplet {
   }
 
   public class ShadowScene extends Scene {
-    public ShadowScene(PApplet pApplet, PGraphics pGraphics, Node eye) {
-      super(pApplet, pGraphics, eye);
+    public ShadowScene(PGraphics pGraphics, Node eye) {
+      super(pGraphics, eye);
     }
 
     @Override

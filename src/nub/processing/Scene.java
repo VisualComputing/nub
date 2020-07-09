@@ -14,9 +14,7 @@
 
 package nub.processing;
 
-import nub.core.Graph;
-import nub.core.Interpolator;
-import nub.core.Node;
+import nub.core.*;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -142,7 +140,7 @@ public class Scene extends Graph {
    * @see #Scene(PApplet, String, Node)
    */
   public Scene(PApplet pApplet) {
-    this(pApplet, pApplet.g);
+    this(pApplet.g);
   }
 
   /**
@@ -157,42 +155,13 @@ public class Scene extends Graph {
    * @see #Scene(PApplet, String, Node)
    */
   public Scene(PApplet pApplet, Node eye) {
-    this(pApplet, pApplet.g, eye);
+    this(pApplet.g, eye);
   }
 
   /**
-   * Same as {@code this(pApplet, renderer, pApplet.width, pApplet.height)}.
+   * Same as {@code this(pGraphics, null)}.
    *
    * @see #Scene(PApplet)
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
-   */
-  public Scene(PApplet pApplet, String renderer) {
-    this(pApplet, renderer, pApplet.width, pApplet.height);
-  }
-
-  /**
-   * Same as {@code this(pApplet, renderer, eye, pApplet.width, pApplet.height)}.
-   *
-   * @see #Scene(PApplet)
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String)
-   * @see #Scene(PApplet, String, Node, int, int)
-   */
-  public Scene(PApplet pApplet, String renderer, Node eye) {
-    this(pApplet, renderer, eye, pApplet.width, pApplet.height);
-  }
-
-  /**
-   * Same as {@code this(pApplet, pApplet.createGraphics(width, height, renderer))}.
-   *
-   * @see #Scene(PApplet)
-   * @see #Scene(PApplet, String, int, int)
    * @see #Scene(PApplet, PGraphics)
    * @see #Scene(PApplet, String)
    * @see #Scene(PApplet, Node)
@@ -200,40 +169,8 @@ public class Scene extends Graph {
    * @see #Scene(PApplet, String, Node, int, int)
    * @see #Scene(PApplet, String, Node)
    */
-  public Scene(PApplet pApplet, String renderer, int width, int height) {
-    this(pApplet, pApplet.createGraphics(width, height, renderer));
-  }
-
-  /**
-   * Same as {@code this(pApplet, pApplet.createGraphics(width, height, renderer), eye)}.
-   *
-   * @see #Scene(PApplet)
-   * @see #Scene(PApplet, String, int, int)
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String)
-   * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
-   */
-  public Scene(PApplet pApplet, String renderer, Node eye, int width, int height) {
-    this(pApplet, pApplet.createGraphics(width, height, renderer), eye);
-  }
-
-  /**
-   * Same as {@code this(pApplet, pGraphics, null)}.
-   *
-   * @see #Scene(PApplet)
-   * @see #Scene(PApplet, String, int, int)
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String)
-   * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
-   */
-  public Scene(PApplet pApplet, PGraphics pGraphics) {
-    this(pApplet, pGraphics, null);
+  public Scene(PGraphics pGraphics) {
+    this(pGraphics, null);
   }
 
   /**
@@ -246,19 +183,21 @@ public class Scene extends Graph {
    *
    * @see Graph#Graph(Object, nub.core.Graph.Type, int, int)
    * @see #Scene(PApplet)
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String, int, int)
-   * @see #Scene(PApplet, String)
+   * @see #Scene(PGraphics)
    * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
+   * @see #Scene(PGraphics, Node)
    */
-  public Scene(PApplet pApplet, PGraphics pGraphics, Node eye) {
-    super(pGraphics, pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D), eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
+  public Scene(PGraphics pGraphics, Node eye) {
+    super(pGraphics, eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
     // 1. P5 objects
-    _parent = pApplet;
-    _offscreen = pGraphics != pApplet.g;
+    _parent = pGraphics.parent;
+    _offscreen = pGraphics != _parent.g;
+    if (pGraphics instanceof PGraphicsOpenGL)
+      _matrixHandler = new GLMatrixHandler((PGraphicsOpenGL) pGraphics);
+    else
+      throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
+    _bb = _parent.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D);
+    _bbMatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb);
     if (!_offscreen && _onscreenGraph == null)
       _onscreenGraph = this;
     // 2. Back buffer
@@ -311,26 +250,6 @@ public class Scene extends Graph {
   public static void setUniform(PShader shader, String name, Vector vector) {
     PVector pvector = new PVector(vector.x(), vector.y(), vector.z());
     shader.set(name, pvector);
-  }
-
-  /**
-   * Applies the {@code node} transformation on {@code pApplet}.
-   * Same as {@code applyTransformation(pApplet.g, node)}.
-   *
-   * @see #applyTransformation(Object, Node)
-   */
-  public static void applyTransformation(PApplet pApplet, Node node) {
-    applyTransformation(pApplet.g, node);
-  }
-
-  /**
-   * Applies the {@code node} world transformation on {@code pApplet}.
-   * Same as {@code applyWorldTransformation(pApplet.g, node)}.
-   *
-   * @see #applyWorldTransformation(Object, Node)
-   */
-  public static void applyWorldTransformation(PApplet pApplet, Node node) {
-    applyWorldTransformation(pApplet.g, node);
   }
 
   // OPENGL
@@ -1036,46 +955,6 @@ public class Scene extends Graph {
    */
   public static Vector screenLocation(PGraphics pGraphics, Vector vector, Node node, Matrix projectionView) {
     return screenLocation(vector, node, projectionView, pGraphics.width, pGraphics.height);
-  }
-
-  /**
-   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and remaining frustum parameters.
-   * Useful to compute a shadow map taking the {@code eye} as the light point-of-view. Same as
-   * {@code render(pGraphics, type, null, eye, zNear, zFar)}.
-   *
-   * @see #render(PGraphics, Node, Type, float, float)
-   * @see #render(PGraphics, Node, Node, Type, float, float)
-   */
-  public static void render(PGraphics pGraphics, Node eye, Type type, float zNear, float zFar) {
-    render(pGraphics, null, eye, type, zNear, zFar);
-  }
-
-  /**
-   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto {@code pGraphics}
-   * using the {@code eye} viewpoint and remaining frustum parameters. Useful to compute a shadow map taking the
-   * {@code eye} as the light point-of-view. Same as
-   * {@code render(pGraphics, type, subtree, eye, pGraphics.width, pGraphics.height, zNear, zFar)}.
-   *
-   * @see #render(PGraphics, Node, Type, float, float)
-   * @see #render(PGraphics, Node, Node, Type, float, float)
-   * @see Graph#render(Object, Node, Node, Type, int, int, float, float)
-   */
-  public static void render(PGraphics pGraphics, Node subtree, Node eye, Type type, float zNear, float zFar) {
-    if (pGraphics instanceof PGraphicsOpenGL)
-      render(pGraphics, subtree, eye, type, pGraphics.width, pGraphics.height, zNear, zFar);
-    else
-      System.out.println("Nothing done: pGraphics should be instance of PGraphicsOpenGL in render()");
-  }
-
-  // HUD
-
-  /**
-   * Same as {@code Graph.beginHUD(pGraphics, pGraphics.width, pGraphics.height)}.
-   *
-   * @see Graph#beginHUD(Object, int, int)
-   */
-  public static void beginHUD(PGraphics pGraphics) {
-    Graph.beginHUD(pGraphics, pGraphics.width, pGraphics.height);
   }
 
   // drawing

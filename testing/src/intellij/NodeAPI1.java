@@ -283,7 +283,8 @@ public class NodeAPI1 extends PApplet {
   void drawArrow(Node node, Vector from, Vector to) {
     if (node != null) {
       pushMatrix();
-      scene.applyWorldTransformation(node);
+      // TODO fix me!
+      // scene.applyWorldTransformation(node);
       scene.drawArrow(from, to, 1);
       popMatrix();
     } else

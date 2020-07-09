@@ -38,18 +38,6 @@ public class MatrixHandler {
   protected static int _hudCalls;
 
   /**
-   * Returns a {@code MatrixHandler} instance according to the default target renderer context.
-   */
-  protected static MatrixHandler _get(Object context) {
-    if (context instanceof processing.core.PGraphics)
-      if (context instanceof processing.opengl.PGraphicsOpenGL)
-        return new GLMatrixHandler((processing.opengl.PGraphicsOpenGL) context);
-      else
-        throw new RuntimeException("Only OpenGL renderers are currently supported");
-    return new MatrixHandler();
-  }
-
-  /**
    * Draws {@link Node#hint()}.
    */
   protected static void _displayHint(Object context, Node node) {

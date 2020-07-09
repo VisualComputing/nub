@@ -32,7 +32,7 @@ public class PUP extends PApplet {
       models[i] = new Node(boxShape());
       scene.randomize(models[i]);
     }
-    visualHint = new Scene(this, P3D, w, h);
+    visualHint = new Scene(createGraphics(w, h, P3D));
     visualHint.setRadius(300);
   }
 

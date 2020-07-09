@@ -51,7 +51,7 @@ public class HolaMundo extends PApplet {
     //mainScene.setHUD(this::hud);
     //mainScene.configHint(Scene.GRID, Graph.GridType.LINE);
     // 2. Hint (offscreen) Scene
-    hintScene = new Scene(this, P3D, hintSceneWidth, hintSceneHeight);
+    hintScene = new Scene(createGraphics(hintSceneWidth, hintSceneHeight, P3D));
     hintScene.enableHint(Graph.BACKGROUND, color(0, 123, 240));
     hintScene.setRadius(300);
     // B. Nodes

@@ -24,7 +24,7 @@ public class AuxViewers extends PApplet {
   }
 
   public void setup() {
-    scene1 = onScreen ? new Scene(this) : new Scene(this, P3D);
+    scene1 = onScreen ? new Scene(g) : new Scene(createGraphics(w, h, P3D));
     scene1.enableHint(Scene.BACKGROUND, color(75, 25, 15, 100));
     scene1.enableHint(Scene.GRID, color(0, 225, 15));
     scene1.eye().disableTagging();
@@ -50,7 +50,7 @@ public class AuxViewers extends PApplet {
 
     // Note that we pass the upper left corner coordinates where the scene1
     // is to be drawn (see drawing code below) to its constructor.
-    scene2 = new Scene(this, P3D, w / 2, h / 2);
+    scene2 = new Scene(createGraphics(w / 2, h / 2, P3D));
     scene2.enableHint(Scene.BACKGROUND | Scene.AXES);
     //scene2.configHint(Scene.BACKGROUND, color(75, 25, 175, 100));
     scene2.configHint(Scene.BACKGROUND, color(75, 25, 175));
@@ -59,7 +59,7 @@ public class AuxViewers extends PApplet {
     scene2.fit(1);
 
     // idem here
-    scene3 = new Scene(this, P3D, w / 2, h / 2);
+    scene3 = new Scene(createGraphics(w / 2, h / 2, P3D));
     scene3.enableHint(Scene.BACKGROUND | Scene.AXES);
     //scene3.configHint(Scene.BACKGROUND, color(175, 200, 20, 170));
     scene3.configHint(Scene.BACKGROUND, color(175, 200, 20));

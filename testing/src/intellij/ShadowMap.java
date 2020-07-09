@@ -43,8 +43,8 @@ public class ShadowMap extends PApplet {
     shapes = new Node[20];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(this::cube);
-      //shapes[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
-      shapes[i].enableHint(Node.BULLSEYE);
+      shapes[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
+      //shapes[i].enableHint(Node.BULLSEYE);
       shapes[i].configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
       scene.randomize(shapes[i]);
       shapes[i].disableHint(Node.HIGHLIGHT);
@@ -55,7 +55,7 @@ public class ShadowMap extends PApplet {
     // scene.enablePicking(false);
     ///*
     //shadowMapScene = new Scene(this, shadowMap, light);
-    shadowMapScene = new ShadowScene(this, shadowMap, scene.node("light"));
+    shadowMapScene = new ShadowScene(shadowMap, scene.node("light"));
     shadowMapScene.resetHint();
     shadowMapScene.enableHint(Scene.BACKGROUND, color(140, 160, 125));
     shadowMapScene.enablePicking(false);
@@ -131,8 +131,8 @@ public class ShadowMap extends PApplet {
   }
 
   public class ShadowScene extends Scene {
-    public ShadowScene(PApplet pApplet, PGraphics pGraphics, Node eye) {
-      super(pApplet, pGraphics, eye);
+    public ShadowScene(PGraphics pGraphics, Node eye) {
+      super(pGraphics, eye);
     }
 
     @Override

@@ -47,7 +47,7 @@ public class HUDPicking extends PApplet {
     //mainScene.setHUD(this::hud);
     //mainScene.configHint(Scene.GRID, Graph.GridType.LINE);
     // 2. Hint (offscreen) Scene
-    hintScene = new Scene(this, P3D, hintSceneWidth, hintSceneHeight);
+    hintScene = new Scene(createGraphics(hintSceneWidth, hintSceneHeight, P3D));
     hintScene.enableHint(Graph.BACKGROUND, color(0, 123, 240));
     hintScene.setRadius(300);
     // B. Nodes
@@ -69,8 +69,9 @@ public class HUDPicking extends PApplet {
     box.translate(200, 200, 0);
   }
 
+  // TODO better way?
   public void imr(PGraphics pg) {
-    Scene.beginHUD(pg);
+    scene.beginHUD();
     pg.push();
     Vector location = mainScene.screenLocation(hudPicking);
     pg.translate(location.x(), location.y());
@@ -78,7 +79,7 @@ public class HUDPicking extends PApplet {
     pg.fill(255, 0, 255, 125);
     pg.rect(0,0, 200, 200);
     pg.pop();
-    Scene.endHUD(pg);
+    scene.endHUD();
   }
 
   @Override

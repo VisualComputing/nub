@@ -22,7 +22,7 @@ public class ViewingVolume extends PApplet {
 
   @Override
   public void setup() {
-    scene1 = new Scene(this, P3D, w, h / 2);
+    scene1 = new Scene(createGraphics(w, h / 2, P3D));
     scene1.enableHint(Scene.BACKGROUND, color(125));
     scene1.enableHint(Scene.AXES | Scene.SHAPE);
     scene1.setShape(this::draw1);
@@ -33,7 +33,7 @@ public class ViewingVolume extends PApplet {
 
     // Note that we pass the upper left corner coordinates where the scene
     // is to be drawn (see drawing code below) to its constructor.
-    scene2 = new Scene(this, P3D, w, h / 2);
+    scene2 = new Scene(createGraphics(w, h / 2, P3D));
     scene2.enableHint(Scene.FRUSTUM, scene1);
     scene2.enableHint(Scene.SHAPE);
     scene2.setShape(this::draw2);

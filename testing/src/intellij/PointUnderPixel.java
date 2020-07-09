@@ -29,7 +29,7 @@ public class PointUnderPixel extends PApplet {
   }
 
   public void setup() {
-    scene = offScreen ? new Scene(this, P3D, width, height) : new Scene(this);
+    scene = offScreen ? new Scene(createGraphics(width, height, P3D)) : new Scene(this);
     scene.setRadius(1000);
     scene.enableHint(Scene.BACKGROUND, color(0));
     scene.enableHint(Scene.SHAPE);
