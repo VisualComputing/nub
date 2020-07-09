@@ -17,7 +17,6 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
-import processing.core.PShape;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -2486,6 +2485,7 @@ public class Node {
    * @see #isCulled()
    * @see #bypass()
    */
+  // TODO move to the Graph
   public void visit() {
   }
 

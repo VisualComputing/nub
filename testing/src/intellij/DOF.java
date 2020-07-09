@@ -34,23 +34,22 @@ public class DOF extends PApplet {
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
       models[i] = new Node(boxShape());
-      models[i].setBullsEyeSize(0.7f);
+      //models[i].setBullsEyeSize(0.7f);
       scene.randomize(models[i]);
     }
-
     // Depth shader
     // Test all the different versions
     depthPath = Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString();
     //depthPath = Paths.get("testing/data/depth/depth_nonlinear.glsl").toAbsolutePath().toString();
     depthShader = loadShader(depthPath);
-    depthScene = new Scene(createGraphics(width, height, P3D), scene.eye());
     // TODO add proper constructor to share eye node
+    depthScene = new Scene(createGraphics(width, height, P3D), scene.eye());
     depthScene.setRadius(1000);
+    //depthScene.fit();
     depthScene.context().shader(depthShader);
     // TODO make API more consistent
     depthScene.enablePicking(false);
     depthScene.enableHint(Scene.BACKGROUND, color(0));
-
     // DOF shader
     dofShader = loadShader(Paths.get("testing/data/dof/dof.glsl").toAbsolutePath().toString());
     dofShader.set("aspect", width / (float) height);
@@ -66,28 +65,26 @@ public class DOF extends PApplet {
   public void draw() {
     // 1. Render into main buffer
     scene.render();
-
     // 2. Draw into depth buffer
     depthScene.openContext();
     if (depthPath.matches("depth_linear.glsl")) {
-      depthShader.set("near", scene.zNear());
-      depthShader.set("far", scene.zFar());
+      depthShader.set("near", depthScene.zNear());
+      depthShader.set("far", depthScene.zFar());
     }
     depthScene.render();
     depthScene.closeContext();
-
     // 3. Draw destination buffer
     dofPGraphics.beginDraw();
     dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
     dofShader.set("tDepth", depthScene.context());
     dofPGraphics.image(scene.context(), 0, 0);
     dofPGraphics.endDraw();
-
     // display one of the 3 buffers
     if (mode == 0)
       scene.image();
     else if (mode == 1)
-      depthScene.image();
+      //depthScene.image();
+      image(depthScene.context(), 0, 0);
     else
       image(dofPGraphics, 0, 0);
     println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");

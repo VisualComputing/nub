@@ -10,7 +10,6 @@ import processing.core.PGraphics;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class ShadowMap extends PApplet {

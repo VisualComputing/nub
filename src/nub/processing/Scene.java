@@ -117,7 +117,7 @@ public class Scene extends Graph {
   public static String version = "7";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
-  protected PApplet _parent;
+  public static PApplet pApplet;
 
   // _bb : picking buffer
   protected PShader _triangleShader, _lineShader, _pointShader;
@@ -129,30 +129,22 @@ public class Scene extends Graph {
 
   /**
    * Constructor that defines an on-screen Processing scene. Same as
-   * {@code this(pApplet, pApplet.g)}.
+   * {@code this(pApplet.g)}.
    *
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String, int, int)
-   * @see #Scene(PApplet, String)
+   * @see #Scene(PGraphics)
    * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
+   * @see #Scene(PGraphics, Node)
    */
   public Scene(PApplet pApplet) {
     this(pApplet.g);
   }
 
   /**
-   * Same as {@code this(pApplet, pApplet.g, eye)}.
+   * Same as {@code this(pApplet.g, eye)}.
    *
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String, int, int)
-   * @see #Scene(PApplet, String)
    * @see #Scene(PApplet)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
+   * @see #Scene(PGraphics)
+   * @see #Scene(PGraphics, Node)
    */
   public Scene(PApplet pApplet, Node eye) {
     this(pApplet.g, eye);
@@ -162,12 +154,8 @@ public class Scene extends Graph {
    * Same as {@code this(pGraphics, null)}.
    *
    * @see #Scene(PApplet)
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String)
    * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
+   * @see #Scene(PGraphics, Node)
    */
   public Scene(PGraphics pGraphics) {
     this(pGraphics, null);
@@ -176,52 +164,43 @@ public class Scene extends Graph {
   /**
    * Main constructor defining a left-handed Processing compatible scene.
    * <p>
-   * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. If
-   * {@code pGraphics == pApplet.g}) (which defines an on-screen scene, see also
-   * {@link #isOffscreen()}). To display an off-screen scene call
-   * {@link #display(Node, int, int)} ()}.
+   * An off-screen Processing scene is created if {@code pGraphics} is different
+   * than the main PApplet context, otherwise it creates an on-screen Processing
+   * scene. To display an off-screen scene call {@link #display(Node, int, int)}.
    *
    * @see Graph#Graph(Object, nub.core.Graph.Type, int, int)
    * @see #Scene(PApplet)
    * @see #Scene(PGraphics)
    * @see #Scene(PApplet, Node)
-   * @see #Scene(PGraphics, Node)
    */
   public Scene(PGraphics pGraphics, Node eye) {
     super(pGraphics, eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
     // 1. P5 objects
-    _parent = pGraphics.parent;
-    _offscreen = pGraphics != _parent.g;
+    if (pApplet == null) pApplet = pGraphics.parent;
+    _offscreen = pGraphics != pApplet.g;
     if (pGraphics instanceof PGraphicsOpenGL)
       _matrixHandler = new GLMatrixHandler((PGraphicsOpenGL) pGraphics);
     else
       throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
-    _bb = _parent.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D);
+    _bb = pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D);
     _bbMatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb);
     if (!_offscreen && _onscreenGraph == null)
       _onscreenGraph = this;
     // 2. Back buffer
     if (_backBuffer() != null) _backBuffer().noSmooth();
-    _triangleShader = pApplet().loadShader("PickingBuffer.frag");
-    _lineShader = pApplet().loadShader("PickingBuffer.frag");
-    _pointShader = pApplet().loadShader("PickingBuffer.frag");
+    _triangleShader = pApplet.loadShader("PickingBuffer.frag");
+    _lineShader = pApplet.loadShader("PickingBuffer.frag");
+    _pointShader = pApplet.loadShader("PickingBuffer.frag");
     // 3. Register P5 methods
-    pApplet().registerMethod("pre", this);
-    pApplet().registerMethod("draw", this);
+    pApplet.registerMethod("pre", this);
+    pApplet.registerMethod("draw", this);
     // TODO buggy
-    pApplet().registerMethod("dispose", this);
+    pApplet.registerMethod("dispose", this);
     // 4. Handed
     leftHanded = true;
   }
 
   // P5 STUFF
-
-  /**
-   * Returns the PApplet instance this scene is related to.
-   */
-  public PApplet pApplet() {
-    return _parent;
-  }
 
   /**
    * Returns the PGraphics instance this scene is related to. It may be the PApplet's,
@@ -491,7 +470,7 @@ public class Scene extends Graph {
 
   /**
    * Renders the {@code subtree} onto the off-screen scene {@link #context()} and displays it
-   * at the upper left corner: {@code (pixelX, pixelY)} of the {@link #pApplet()}. Only
+   * at the upper left corner: {@code (pixelX, pixelY)} of the {@link #pApplet}. Only
    * meaningful if the graph {@link #isOffscreen()}.
    * <p>
    * Calls {@link #render(Node)} followed by {@link #image(int, int)}.
@@ -522,21 +501,21 @@ public class Scene extends Graph {
   }
 
   /**
-   * Similar to {@link #pApplet()} {@code image()}. Used to display the offscreen scene {@link #context()}.
+   * Similar to {@link #pApplet} {@code image()}. Used to display the offscreen scene {@link #context()}.
    * <p>
-   * Call this method, instead of {@link #pApplet()} {@code image()}, to make {@link #hasMouseFocus()}
+   * Call this method, instead of {@link #pApplet} {@code image()}, to make {@link #hasMouseFocus()}
    * work always properly.
    *
    * @see #display(Node, int, int)
    */
   public void image(int pixelX, int pixelY) {
     if (isOffscreen()) {
-      pApplet().pushStyle();
+      pApplet.pushStyle();
       _setUpperLeftCorner(pixelX, pixelY);
       _lastDisplayed = TimingHandler.frameCount;
-      pApplet().imageMode(PApplet.CORNER);
-      pApplet().image(context(), pixelX, pixelY);
-      pApplet().popStyle();
+      pApplet.imageMode(PApplet.CORNER);
+      pApplet.image(context(), pixelX, pixelY);
+      pApplet.popStyle();
     }
   }
 
@@ -562,10 +541,10 @@ public class Scene extends Graph {
    */
   protected void _imageBackBuffer(int pixelX, int pixelY) {
     if (_backBuffer() != null) {
-      pApplet().pushStyle();
-      pApplet().imageMode(PApplet.CORNER);
-      pApplet().image(_backBuffer(), pixelX, pixelY);
-      pApplet().popStyle();
+      pApplet.pushStyle();
+      pApplet.imageMode(PApplet.CORNER);
+      pApplet.image(_backBuffer(), pixelX, pixelY);
+      pApplet.popStyle();
     }
   }
 
@@ -628,7 +607,7 @@ public class Scene extends Graph {
     }
     json.setJSONArray("paths", jsonPaths);
     //*/
-    pApplet().saveJSONObject(json, fileName);
+    pApplet.saveJSONObject(json, fileName);
   }
 
   /**
@@ -657,7 +636,7 @@ public class Scene extends Graph {
   public void loadConfig(String fileName) {
     JSONObject json = null;
     try {
-      json = pApplet().loadJSONObject(fileName);
+      json = pApplet.loadJSONObject(fileName);
     } catch (Exception e) {
       System.out.println("No such " + fileName + " found!");
     }
@@ -946,6 +925,40 @@ public class Scene extends Graph {
       context().pop();
     }
     context().popStyle();
+  }
+
+  @Override
+  public void _displayHint(Object context, Node node) {
+    if (!(context instanceof PGraphics))
+      throw new RuntimeException("Displaying the node hints requires a PGraphics context");
+    PGraphics pg = (PGraphics) context;
+    pg.push();
+    if (node.isHintEnable(Node.SHAPE)) {
+      if (_rmrShape(node) != null) {
+        pg.shapeMode(pg.shapeMode);
+        pg.shape(_rmrShape(node));
+      }
+      if (_imrShape(node) != null) {
+        _imrShape(node).accept(pg);
+      }
+    }
+    if (node.isHintEnable(Node.TORUS)) {
+      pg.colorMode(PApplet.RGB, 255);
+      pg.fill(_torusColor(node));
+      drawTorusSolenoid(pg, _torusFaces(node), 5);
+    }
+    if (node.isHintEnable(Node.FRUSTUM)) {
+      pg.colorMode(PApplet.RGB, 255);
+      pg.stroke(_frustumColor(node));
+      pg.fill(_frustumColor(node));
+      if (_frustumGraph(node) instanceof Graph) {
+        drawFrustum(pg, _frustumGraph(node));
+      }
+      else if (_eyeBuffer(node) instanceof PGraphics) {
+        drawFrustum(pg, (PGraphics) _eyeBuffer(node), node, _frustumType(node), _zNear(node), _zFar(node));
+      }
+    }
+    pg.pop();
   }
 
   /**
@@ -1899,8 +1912,8 @@ public class Scene extends Graph {
   }
 
   /**
-   * Applies the {@code graph.eye()} transformation (see {@link #applyTransformation(Node)})
-   * and then calls {@link #drawFrustum(PGraphics, Graph)} on the scene {@link #context()}.
+   * Applies the {@code graph.eye()} transformation and then calls
+   * {@link #drawFrustum(PGraphics, Graph)} on the scene {@link #context()}.
    *
    * @see #drawFrustum(PGraphics, Graph)
    * @see #drawFrustum(PGraphics, PGraphics, Node, Type, float, float)
@@ -1942,9 +1955,6 @@ public class Scene extends Graph {
    * Draws a representation of the {@code eyeBuffer} frustum onto {@code pGraphics} according to frustum parameters:
    * {@code type}, eye {@link Node#magnitude()}, {@code zNear} and {@code zFar}, while taking into account
    * whether or not the scene is {@code leftHanded}.
-   * <p>
-   * Use it in conjunction with {@link #render(PGraphics, Node, Type, float, float)} as when rendering
-   * a shadow map.
    *
    * @see #drawFrustum(Graph)
    * @see #drawFrustum(PGraphics, Graph)
@@ -2632,19 +2642,19 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code return hasFocus(pApplet().mouseX, pApplet().mouseY)}.
+   * Same as {@code return hasFocus(pApplet.mouseX, pApplet.mouseY)}.
    *
    * @see #hasFocus(int, int)
    */
   public boolean hasMouseFocus() {
-    return hasFocus(pApplet().mouseX, pApplet().mouseY);
+    return hasFocus(pApplet.mouseX, pApplet.mouseY);
   }
 
   /**
    * Returns the last horizontal mouse displacement.
    */
   public float mouseDX() {
-    return pApplet().mouseX - pApplet().pmouseX;
+    return pApplet.mouseX - pApplet.pmouseX;
   }
 
   /**
@@ -2668,7 +2678,7 @@ public class Scene extends Graph {
    * Returns the last vertical mouse displacement.
    */
   public float mouseDY() {
-    return pApplet().mouseY - pApplet().pmouseY;
+    return pApplet.mouseY - pApplet.pmouseY;
   }
 
   /**
@@ -2692,28 +2702,28 @@ public class Scene extends Graph {
    * Returns the current mouse x coordinate.
    */
   public int mouseX() {
-    return pApplet().mouseX - _upperLeftCornerX;
+    return pApplet.mouseX - _upperLeftCornerX;
   }
 
   /**
    * Returns the current mouse y coordinate.
    */
   public int mouseY() {
-    return pApplet().mouseY - _upperLeftCornerY;
+    return pApplet.mouseY - _upperLeftCornerY;
   }
 
   /**
    * Returns the previous mouse x coordinate.
    */
   public int pmouseX() {
-    return pApplet().pmouseX - _upperLeftCornerX;
+    return pApplet.pmouseX - _upperLeftCornerX;
   }
 
   /**
    * Returns the previous mouse y coordinate.
    */
   public int pmouseY() {
-    return pApplet().pmouseY - _upperLeftCornerY;
+    return pApplet.pmouseY - _upperLeftCornerY;
   }
 
   /**

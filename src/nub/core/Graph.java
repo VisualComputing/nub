@@ -36,9 +36,7 @@ import java.util.function.Consumer;
  * for a 2d graph.
  * <h1>2. Scene-graph handling</h1>
  * A graph forms a tree of {@link Node}s whose visual representations may be
- * {@link #render()}. To render a subtree call {@link #render(Node)}. To render into an arbitrary
- * rendering context (different than {@link #context()}) call {@link #render(Object, Node)},
- * {@link #render(Object, Matrix, Matrix)} or {@link #render(Object, Node, Matrix, Matrix)}.
+ * {@link #render()}. To render a subtree call {@link #render(Node)}.
  * Note that rendering routines should be called within your main-event loop.
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
@@ -124,10 +122,6 @@ import java.util.function.Consumer;
  * <h1>7. Matrix handling</h1>
  * The graph performs matrix handling through a matrix-handler. Refer to the {@link MatrixHandler}
  * documentation for details.
- * <p>
- * To apply the transformation defined by a node call {@link #applyTransformation(Node)}
- * (see also {@link #applyWorldTransformation(Node)}). Note that the node transformations are
- * applied automatically by the above rendering routines.
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
  * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
@@ -312,7 +306,7 @@ public class Graph {
   /**
    * Same as {@code this(Type.PERSPECTIVE, null, w, h)}.
    *
-   * @see #Graph(Object, Object, Node, Type, int, int)
+   * @see #Graph(Object, Node, Type, int, int)
    */
   public Graph(Object context, int width, int height) {
     this(context, null, Type.PERSPECTIVE, width, height);
@@ -321,16 +315,16 @@ public class Graph {
   /**
    * Same as {@code this(context, null, Type.PERSPECTIVE, eye, width, height)}.
    *
-   * @see #Graph(Object, Object, Node, Type, int, int)
+   * @see #Graph(Object, Node, Type, int, int)
    */
   public Graph(Object context, Node eye, int width, int height) {
     this(context, eye, Type.PERSPECTIVE, width, height);
   }
 
   /**
-   * Same as {@code this(context, null, type, null, width, height)}.
+   * Same as {@code this(context, null, type, width, height)}.
    *
-   * @see #Graph(Object, Object, Node, Type, int, int)
+   * @see #Graph(Object, Node, Type, int, int)
    */
   public Graph(Object context, Type type, int width, int height) {
     this(context, null, type, width, height);
@@ -351,7 +345,7 @@ public class Graph {
    *
    * @see #TimingHandler
    * @see #setEye(Node)
-   * @see #Graph(Object, Object, Node, Type, int, int)
+   * @see #Graph(Object, Type, int, int)
    */
   public Graph(Object context, Node eye, Type type, int width, int height) {
     if (!_seeded) {
@@ -657,7 +651,6 @@ public class Graph {
    */
   public float zNear() {
     float z = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) - zClippingCoefficient() * radius();
-
     // Prevents negative or null zNear values.
     float zMin = zNearCoefficient() * zClippingCoefficient() * radius();
     if (z < zMin)
@@ -2529,7 +2522,7 @@ public class Graph {
 
   protected boolean _bullseyePicking(Node node) {
     return _picking && node.isTaggingEnabled() && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.BULLSEYE
-            && (node.isHintEnable(Node.BULLSEYE) || node.isHintEnable(Node.AXES) || node.isHintEnable(Node.CAMERA));
+            /* && (node.isHintEnable(Node.BULLSEYE) || node.isHintEnable(Node.AXES) || node.isHintEnable(Node.CAMERA)) */;
   }
 
   /**
@@ -2961,9 +2954,6 @@ public class Graph {
    * Same as {@code render(null)}.
    *
    * @see #render(Node)
-   * @see #render(Object)
-   * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Node, Type, int, int, float, float)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
@@ -2983,9 +2973,6 @@ public class Graph {
    * Note that the rendering algorithm calls {@link Node#visit()} on each visited node
    * (refer to the {@link Node} documentation).
    *
-   * @see #render(Object, Node)
-   * @see #render(Object, Node, Matrix, Matrix)
-   * @see #render(Object, Node, Node, Type, int, int, float, float)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
@@ -3046,10 +3033,10 @@ public class Graph {
         _matrixHandler.scale(scl, scl);
       else
         _matrixHandler.scale(scl, scl, scl);
-      MatrixHandler._displayHint(context(), node);
+      _displayHint(context(), node);
       _matrixHandler.popMatrix();
     } else {
-      MatrixHandler._displayHint(context(), node);
+      _displayHint(context(), node);
     }
   }
 
@@ -3072,7 +3059,7 @@ public class Graph {
       float g = (float) ((node.id() >> 8) & 255) / 255.f;
       float b = (float) ((node.id() >> 16) & 255) / 255.f;
       _emitBackBufferUniforms(r, g, b);
-      MatrixHandler._displayHint(_backBuffer(), node);
+      _displayHint(_backBuffer(), node);
     }
   }
 
@@ -3090,6 +3077,14 @@ public class Graph {
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
   protected void _displayHint() {
+  }
+
+  /**
+   * Draws the node {@link Node#hint()}.
+   * <p>
+   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   */
+  protected void _displayHint(Object context, Node node) {
   }
 
   /**
@@ -4569,11 +4564,7 @@ public class Graph {
    * <li>{@link #BACKGROUND} which sets up the graph background to be displayed.</li>
    * </ol>
    * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
-   * calling either {@link #render(Node)} or {@link #render()}. Note that the hint
-   * is not display when calling a static rendering algorithm such as
-   * {@link #render(Object, Node, Node, Graph.Type, int, int, float, float)} or
-   * {@link #render(Object, Node, Graph.Type, int, int, float, float)}).
-   * Use {@link #configHint(int, Object...)} to configure the hint different visual aspects.
+   * calling either {@link #render(Node)} or {@link #render()}.
    *
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
@@ -4905,7 +4896,51 @@ public class Graph {
     _imrShape = callback;
   }
 
-  // Hack to hide interpolator hint properties
+  // Hack to hide node & interpolator hint properties
+
+  // Node
+
+  protected Consumer<processing.core.PGraphics> _imrShape(Node node) {
+    return node._imrShape;
+  }
+
+  protected processing.core.PShape _rmrShape(Node node) {
+    return node._rmrShape;
+  }
+
+  protected int _torusColor(Node node) {
+    return node._torusColor;
+  }
+
+  protected int _torusFaces(Node node) {
+    return node._torusFaces;
+  }
+
+  protected int _frustumColor(Node node) {
+    return node._frustumColor;
+  }
+
+  protected Graph _frustumGraph(Node node) {
+    return node._frustumGraph;
+  }
+
+  protected Object _eyeBuffer(Node node) {
+    return node._eyeBuffer;
+  }
+
+  protected Type _frustumType(Node node) {
+    return node._frustumtype;
+  }
+
+  protected float _zNear(Node node) {
+    return node._zNear;
+  }
+
+  protected float _zFar(Node node) {
+    return node._zFar;
+  }
+
+  // Interpolator
 
   /**
    * Used to display the interpolator in {@link #_displayHint()}.

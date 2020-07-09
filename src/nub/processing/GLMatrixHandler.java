@@ -14,7 +14,6 @@ package nub.processing;
 import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
-import nub.processing.Scene;
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;

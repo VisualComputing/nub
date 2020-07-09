@@ -39,19 +39,19 @@ class Boid extends TimingTask {
         //Scene.drawAxes(pg, 10);
 
         pg.strokeWeight(2);
-        pg.stroke(scene.pApplet().color(40, 255, 40));
-        pg.fill(scene.pApplet().color(0, 255, 0, 125));
+        pg.stroke(scene.pApplet.color(40, 255, 40));
+        pg.fill(scene.pApplet.color(0, 255, 0, 125));
 
         // highlight boids under the mouse
         if (scene.node("mouseMoved") == this) {
-          pg.stroke(scene.pApplet().color(0, 0, 255));
-          pg.fill(scene.pApplet().color(0, 0, 255));
+          pg.stroke(scene.pApplet.color(0, 0, 255));
+          pg.fill(scene.pApplet.color(0, 0, 255));
         }
 
         // highlight avatar
         if (this == Flock.avatar) {
-          pg.stroke(scene.pApplet().color(255, 0, 0));
-          pg.fill(scene.pApplet().color(255, 0, 0));
+          pg.stroke(scene.pApplet.color(255, 0, 0));
+          pg.fill(scene.pApplet.color(255, 0, 0));
         }
 
         //draw boid
@@ -79,7 +79,7 @@ class Boid extends TimingTask {
     position = new Vector();
     position.set(inPos);
     node.setPosition(new Vector(position.x(), position.y(), position.z()));
-    velocity = new Vector(scene.pApplet().random(-1, 1), scene.pApplet().random(-1, 1), scene.pApplet().random(1, -1));
+    velocity = new Vector(scene.pApplet.random(-1, 1), scene.pApplet.random(-1, 1), scene.pApplet.random(1, -1));
     acceleration = new Vector(0, 0, 0);
     neighborhoodRadius = 100;
     run();
@@ -88,7 +88,7 @@ class Boid extends TimingTask {
   @Override
   public void execute() {
     t += 0.1;
-    flap = 10 * scene.pApplet().sin(t);
+    flap = 10 * scene.pApplet.sin(t);
     // acceleration.add(steer(new Vector(mouseX,mouseY,300),true));
     // acceleration.add(new Vector(0,.05,0));
     if (Flock.avoidWalls) {
@@ -117,7 +117,7 @@ class Boid extends TimingTask {
         alignmentCount++;
       }
       //cohesion
-      float dist = scene.pApplet().dist(position.x(), position.y(), boid.position.x(), boid.position.y());
+      float dist = scene.pApplet.dist(position.x(), position.y(), boid.position.x(), boid.position.y());
       if (dist > 0 && dist <= neighborhoodRadius) {
         posSum.add(boid.position);
         cohesionCount++;
@@ -152,7 +152,7 @@ class Boid extends TimingTask {
   Vector avoid(Vector target) {
     Vector steer = new Vector(); // creates vector for steering
     steer.set(Vector.subtract(position, target)); // steering vector points away from
-    steer.multiply(1 / scene.pApplet().sq(Vector.distance(position, target)));
+    steer.multiply(1 / scene.pApplet.sq(Vector.distance(position, target)));
     return steer;
   }
 
@@ -164,8 +164,8 @@ class Boid extends TimingTask {
     // exceed maxSpeed
     position.add(velocity); // add velocity to position
     node.setPosition(position);
-    node.setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), scene.pApplet().atan2(-velocity.z(), velocity.x())),
-        new Quaternion(new Vector(0, 0, 1), scene.pApplet().asin(velocity.y() / velocity.magnitude()))));
+    node.setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), scene.pApplet.atan2(-velocity.z(), velocity.x())),
+        new Quaternion(new Vector(0, 0, 1), scene.pApplet.asin(velocity.y() / velocity.magnitude()))));
     acceleration.multiply(0); // reset acceleration
   }
 
