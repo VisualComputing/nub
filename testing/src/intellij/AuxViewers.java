@@ -14,7 +14,7 @@ public class AuxViewers extends PApplet {
   boolean displayAuxiliarViewers = true;
   // whilst scene1 is either on-screen or not; scene2 and scene3 are off-screen
   // test both cases here
-  boolean onScreen = true;
+  boolean onScreen = false;
 
   int w = 700;
   int h = 700;
@@ -25,7 +25,8 @@ public class AuxViewers extends PApplet {
 
   public void setup() {
     scene1 = onScreen ? new Scene(g) : new Scene(createGraphics(w, h, P3D));
-    scene1.enableHint(Scene.BACKGROUND, color(75, 25, 15, 100));
+    //scene1.enableHint(Scene.BACKGROUND, color(75, 25, 15, 100));
+    scene1.enableHint(Scene.BACKGROUND, color(75, 25, 15));
     scene1.enableHint(Scene.GRID, color(0, 225, 15));
     scene1.eye().disableTagging();
     scene1.setRadius(1000);
@@ -134,6 +135,7 @@ public class AuxViewers extends PApplet {
       scene2.display(w / 2, 0);
       scene3.display(w / 2, h / 2);
     }
+    println(frameRate);
   }
 
   public static void main(String[] args) {

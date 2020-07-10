@@ -49,7 +49,7 @@ public class DOF extends PApplet {
     depthScene.context().shader(depthShader);
     // TODO make API more consistent
     depthScene.enablePicking(false);
-    depthScene.enableHint(Scene.BACKGROUND, color(0));
+    depthScene.enableHint(Scene.BACKGROUND, color(125));
     // DOF shader
     dofShader = loadShader(Paths.get("testing/data/dof/dof.glsl").toAbsolutePath().toString());
     dofShader.set("aspect", width / (float) height);
@@ -83,8 +83,8 @@ public class DOF extends PApplet {
     if (mode == 0)
       scene.image();
     else if (mode == 1)
-      //depthScene.image();
-      image(depthScene.context(), 0, 0);
+      depthScene.image();
+      //image(depthScene.context(), 0, 0);
     else
       image(dofPGraphics, 0, 0);
     println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");

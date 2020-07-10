@@ -476,19 +476,8 @@ public class Scene extends Graph {
    * Calls {@link #render(Node)} followed by {@link #image(int, int)}.
    */
   public void display(Node subtree, int x, int y) {
-    if (!isOffscreen()) {
-      render(subtree);
-    }
-    if (_onscreenGraph != null) {
-      _onscreenGraph.beginHUD();
-      render(subtree);
-      image(x, y);
-      _onscreenGraph.endHUD();
-    }
-    else {
-      render(subtree);
-      image(x, y);
-    }
+    render(subtree);
+    image(x, y);
   }
 
   /**
@@ -510,12 +499,16 @@ public class Scene extends Graph {
    */
   public void image(int pixelX, int pixelY) {
     if (isOffscreen()) {
+      if (_onscreenGraph != null)
+        _onscreenGraph.beginHUD();
       pApplet.pushStyle();
       _setUpperLeftCorner(pixelX, pixelY);
       _lastDisplayed = TimingHandler.frameCount;
       pApplet.imageMode(PApplet.CORNER);
       pApplet.image(context(), pixelX, pixelY);
       pApplet.popStyle();
+      if (_onscreenGraph != null)
+        _onscreenGraph.endHUD();
     }
   }
 
