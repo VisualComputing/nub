@@ -36,9 +36,7 @@ import java.util.function.Consumer;
  * for a 2d graph.
  * <h1>2. Scene-graph handling</h1>
  * A graph forms a tree of {@link Node}s whose visual representations may be
- * {@link #render()}. To render a subtree call {@link #render(Node)}. To render into an arbitrary
- * rendering context (different than {@link #context()}) call {@link #render(Object, Node)},
- * {@link #render(Object, Matrix, Matrix)} or {@link #render(Object, Node, Matrix, Matrix)}.
+ * {@link #render()}. To render a subtree call {@link #render(Node)}.
  * Note that rendering routines should be called within your main-event loop.
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
@@ -100,8 +98,8 @@ import java.util.function.Consumer;
  * </li>
  * </ol>
  * <h1>4. Timing handling</h1>
- * The graph performs timing handling through a {@link #timingHandler()}. Several
- * {@link TimingHandler} wrapper functions, such as {@link #registerTask(Task)}
+ * The graph performs timing handling through a {@link #TimingHandler}. Several
+ * {@link TimingHandler} wrapper functions, such as {@link TimingHandler#registerTask(Task)}
  * are provided for convenience.
  * <p>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
@@ -124,10 +122,6 @@ import java.util.function.Consumer;
  * <h1>7. Matrix handling</h1>
  * The graph performs matrix handling through a matrix-handler. Refer to the {@link MatrixHandler}
  * documentation for details.
- * <p>
- * To apply the transformation defined by a node call {@link #applyTransformation(Node)}
- * (see also {@link #applyWorldTransformation(Node)}). Note that the node transformations are
- * applied automatically by the above rendering routines.
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
  * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
@@ -166,7 +160,8 @@ public class Graph {
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
-  protected long _lastOffDisplayed;
+  // TODO make protected (debug)
+  public long _lastDisplayed;
   protected boolean _offscreen;
 
   // 0. Contexts
@@ -195,9 +190,11 @@ public class Graph {
   public static boolean leftHanded;
 
   // 2. Matrix handler
+  protected int _renderCount;
   protected int _width, _height;
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
   // _bb : picking buffer
+  protected boolean _picking;
   protected long _bbNeed, _bbCount;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected boolean _isProjectionViewInverseCached;
@@ -261,7 +258,7 @@ public class Graph {
     }
   }
 
-  protected static TimingHandler _timingHandler = new TimingHandler();
+  public static TimingHandler TimingHandler = new TimingHandler();
   public static boolean _seeded;
   protected boolean _seededGraph;
   protected HashMap<String, Node> _tags;
@@ -309,55 +306,28 @@ public class Graph {
   /**
    * Same as {@code this(Type.PERSPECTIVE, null, w, h)}.
    *
-   * @see #Graph(Object, Object, Node, Type, int, int)
+   * @see #Graph(Object, Node, Type, int, int)
    */
   public Graph(Object context, int width, int height) {
-    this(context, null, null, Type.PERSPECTIVE, width, height);
-  }
-
-  /**
-   * Same as {@code this(front, back, Type.PERSPECTIVE, null, width, height)}.
-   *
-   * @see #Graph(Object, Object, Node, Type, int, int)
-   */
-  protected Graph(Object front, Object back, int width, int height) {
-    this(front, back, null, Type.PERSPECTIVE, width, height);
+    this(context, null, Type.PERSPECTIVE, width, height);
   }
 
   /**
    * Same as {@code this(context, null, Type.PERSPECTIVE, eye, width, height)}.
    *
-   * @see #Graph(Object, Object, Node, Type, int, int)
+   * @see #Graph(Object, Node, Type, int, int)
    */
   public Graph(Object context, Node eye, int width, int height) {
-    this(context, null, eye, Type.PERSPECTIVE, width, height);
+    this(context, eye, Type.PERSPECTIVE, width, height);
   }
 
   /**
-   * Same as {@code this(front, back, Type.PERSPECTIVE, eye, width, height)}.
+   * Same as {@code this(context, null, type, width, height)}.
    *
-   * @see #Graph(Object, Object, Node, Type, int, int)
-   */
-  protected Graph(Object front, Object back, Node eye, int width, int height) {
-    this(front, back, eye, Type.PERSPECTIVE, width, height);
-  }
-
-  /**
-   * Same as {@code this(context, null, type, null, width, height)}.
-   *
-   * @see #Graph(Object, Object, Node, Type, int, int)
+   * @see #Graph(Object, Node, Type, int, int)
    */
   public Graph(Object context, Type type, int width, int height) {
-    this(context, null, null, type, width, height);
-  }
-
-  /**
-   * Same as {@code this(front, back, type, null, width, height)}.
-   *
-   * @see #Graph(Object, Object, Node, Type, int, int)
-   */
-  protected Graph(Object front, Object back, Type type, int width, int height) {
-    this(front, back, null, type, width, height);
+    this(context, null, type, width, height);
   }
 
   /**
@@ -369,39 +339,21 @@ public class Graph {
    * calls {@link #fit()}, so that the entire scene fits the screen dimensions.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and {@code back-buffer}
-   * matrix-handlers (see {@link MatrixHandler}) and {@link #timingHandler()}.
+   * matrix-handlers (see {@link MatrixHandler}) and {@link #TimingHandler}.
    * <p>
    * Same as {@code this(context, null, type, eye, width, height)}.
    *
-   * @see #timingHandler()
+   * @see #TimingHandler
    * @see #setEye(Node)
-   * @see #Graph(Object, Object, Node, Type, int, int)
+   * @see #Graph(Object, Type, int, int)
    */
   public Graph(Object context, Node eye, Type type, int width, int height) {
-    this(context, null, eye, type, width, height);
-  }
-
-  /**
-   * Default constructor defines a right-handed graph with the specified {@code width} and
-   * {@code height} screen window dimensions. The graph {@link #center()} and
-   * {@link #anchor()} are set to {@code (0,0,0)} and its {@link #radius()} to {@code 100}.
-   * <p>
-   * The constructor sets a {@link Node} instance as the graph {@link #eye()} and then
-   * calls {@link #fit()}, so that the entire scene fits the screen dimensions.
-   * <p>
-   * The constructor also instantiates the graph main {@link #context()} and {@code back-buffer}
-   * matrix-handlers (see {@link MatrixHandler}) and {@link #timingHandler()}.
-   *
-   * @see #timingHandler()
-   * @see #setEye(Node)
-   */
-  protected Graph(Object front, Object back, Node eye, Type type, int width, int height) {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
       // only Java disable concurrence
       boolean message = false;
-      for (Task task : timingHandler().tasks()) {
+      for (Task task : TimingHandler.tasks()) {
         if (task.isConcurrent())
           message = true;
         task.disableConcurrence();
@@ -409,10 +361,9 @@ public class Graph {
       if (message)
         System.out.println("Warning: all timing-tasks made non-concurrent");
     }
-    _fb = front;
-    _matrixHandler = MatrixHandler._get(_fb);
-    _bb = back;
-    _bbMatrixHandler = _bb == null ? null : MatrixHandler._get(_bb);
+    _fb = context;
+    _matrixHandler = new MatrixHandler();
+    _bbMatrixHandler = new MatrixHandler();
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
@@ -446,6 +397,7 @@ public class Graph {
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
     enableHint(HUD | SHAPE);
+    enablePicking(true);
     // middle grey encoded as a processing int rgb color
     _gridStroke = -8553091;
     _gridType = GridType.DOTS;
@@ -699,7 +651,6 @@ public class Graph {
    */
   public float zNear() {
     float z = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) - zClippingCoefficient() * radius();
-
     // Prevents negative or null zNear values.
     float zMin = zNearCoefficient() * zClippingCoefficient() * radius();
     if (z < zMin)
@@ -854,7 +805,7 @@ public class Graph {
    * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #render()} algorithm.
    * <p>
-   * Note that all the node inertial tasks are unregistered from the {@link #timingHandler()}.
+   * Note that all the node inertial tasks are unregistered from the {@link #TimingHandler}.
    * <p>
    * To make all the nodes in the branch reachable again, call {@link Node#setReference(Node)}
    * on the pruned node.
@@ -867,10 +818,10 @@ public class Graph {
     if (isReachable(node)) {
       List<Node> branch = branch(node);
       for (Node nodeBranch : branch) {
-        unregisterTask(nodeBranch._translationTask);
-        unregisterTask(nodeBranch._rotationTask);
-        unregisterTask(nodeBranch._orbitTask);
-        unregisterTask(nodeBranch._scalingTask);
+        TimingHandler.unregisterTask(nodeBranch._translationTask);
+        TimingHandler.unregisterTask(nodeBranch._rotationTask);
+        TimingHandler.unregisterTask(nodeBranch._orbitTask);
+        TimingHandler.unregisterTask(nodeBranch._scalingTask);
       }
       if (node.reference() != null) {
         node.reference()._removeChild(node);
@@ -953,54 +904,6 @@ public class Graph {
   // Timing stuff
 
   /**
-   * Returns the graph {@link TimingHandler}.
-   */
-  public static TimingHandler timingHandler() {
-    return _timingHandler;
-  }
-
-  /**
-   * Returns the current frame-rate.
-   */
-  public static float frameRate() {
-    return TimingHandler.frameRate;
-  }
-
-  /**
-   * Returns the number of frames displayed since the first graph was instantiated.
-   */
-  public static long frameCount() {
-    return TimingHandler.frameCount;
-  }
-
-  /**
-   * Convenience wrapper function that simply calls {@code timingHandler().registerTask(task)}.
-   *
-   * @see TimingHandler#registerTask(Task)
-   */
-  public static void registerTask(Task task) {
-    timingHandler().registerTask(task);
-  }
-
-  /**
-   * Convenience wrapper function that simply calls {@code timingHandler().unregisterTask(task)}.
-   *
-   * @see TimingHandler#unregisterTask(Task)
-   */
-  public static void unregisterTask(Task task) {
-    timingHandler().unregisterTask(task);
-  }
-
-  /**
-   * Convenience wrapper function that simply returns {@code timingHandler().isTaskRegistered(task)}.
-   *
-   * @see TimingHandler#isTaskRegistered(Task)
-   */
-  public static boolean isTaskRegistered(Task task) {
-    return timingHandler().isTaskRegistered(task);
-  }
-
-  /**
    * Returns the translation inertial task.
    * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
    */
@@ -1045,17 +948,6 @@ public class Graph {
   }
 
   /**
-   * Begin Heads Up Display (HUD) on {@code context} so that drawing can
-   * be done using 2D screen coordinates.
-   *
-   * @param width  of {@code context}.
-   * @param height of {@code context}.
-   */
-  public static void beginHUD(Object context, int width, int height) {
-    MatrixHandler._get(context).beginHUD(width, height);
-  }
-
-  /**
    * Ends Heads Up Display (HUD). Throws an exception if
    * {@link #beginHUD()} wasn't properly called before.
    * <p>
@@ -1066,19 +958,6 @@ public class Graph {
    */
   public void endHUD() {
     _matrixHandler.endHUD();
-  }
-
-  /**
-   * Ends Heads Up Display (HUD) on {@code pGraphics}. Throws an exception if
-   * {@link #beginHUD()} wasn't properly called before.
-   * <p>
-   * Wrapper for {@link MatrixHandler#endHUD()}.
-   *
-   * @see #beginHUD()
-   * @see MatrixHandler#endHUD()
-   */
-  public static void endHUD(Object context) {
-    MatrixHandler._get(context).endHUD();
   }
 
   // Eye stuff
@@ -2388,91 +2267,6 @@ public class Graph {
     }
   }
 
-  // Nice stuff :P
-
-  /**
-   * Apply the local transformation defined by {@code node}, i.e., respect to its
-   * {@link Node#reference()}. The {@code node} is first translated, then rotated around
-   * the new translated origin and then scaled.
-   * <p>
-   * This method may be used to modify the transform matrix from a node hierarchy. For
-   * example, with this node hierarchy:
-   * <p>
-   * {@code Node body = new Node();} <br>
-   * {@code Node leftArm = new Node(body);} <br>
-   * {@code Node rightArm = new Node(body);} <br>
-   * <p>
-   * The associated drawing code should look like:
-   * <p>
-   * {@code pushMatrix();} <br>
-   * {@code this.applyTransformation(body);} <br>
-   * {@code drawBody();} <br>
-   * {@code pushMatrix();} <br>
-   * {@code this.applyTransformation(leftArm);} <br>
-   * {@code drawArm();} <br>
-   * {@code popMatrix();} <br>
-   * {@code pushMatrix();} <br>
-   * {@code applyTransformation(rightArm);} <br>
-   * {@code drawArm();} <br>
-   * {@code popMatrix();} <br>
-   * {@code popMatrix();} <br>
-   * <p>
-   * Note the use of nested {@code pushMatrix()} and {@code popMatrix()} blocks to
-   * represent the node hierarchy: {@code leftArm} and {@code rightArm} are both
-   * correctly drawn with respect to the {@code body} coordinate system.
-   * <p>
-   * Note that {@link #render()} traverses the scene-graph hierarchy and automatically applies
-   * the geometry transformations on all nodes.
-   *
-   * @see #render()
-   * @see #applyTransformation(Object, Node)
-   * @see #applyWorldTransformation(Node)
-   * @see #applyWorldTransformation(Object, Node)
-   */
-  public void applyTransformation(Node node) {
-    applyTransformation(_fb, node);
-  }
-
-  /**
-   * Apply the local transformation defined by the {@code node} on {@code context}.
-   * Needed by {@link #applyWorldTransformation(Object, Node)}.
-   * <p>
-   * Note that {@link #render(Object)} traverses the scene-graph hierarchy and automatically
-   * applies all the node geometry transformations on a given context.
-   *
-   * @see #render(Object)
-   * @see #applyTransformation(Node)
-   * @see #applyWorldTransformation(Node)
-   * @see #applyWorldTransformation(Object, Node)
-   */
-  public static void applyTransformation(Object context, Node node) {
-    MatrixHandler._get(context).applyTransformation(node);
-  }
-
-  /**
-   * Similar to {@link #applyTransformation(Node)}, but applies the global transformation
-   * defined by the node.
-   *
-   * @see #applyWorldTransformation(Node)
-   * @see #applyTransformation(Object, Node)
-   * @see #applyWorldTransformation(Object, Node)
-   */
-  public void applyWorldTransformation(Node node) {
-    applyWorldTransformation(_fb, node);
-  }
-
-  /**
-   * Similar to {@link #applyTransformation(Object, Node)}, but applies the global
-   * transformation defined by the {@code node} on {@code context}.
-   *
-   * @see #applyWorldTransformation(Node)
-   * @see #applyTransformation(Object, Node)
-   * @see #applyWorldTransformation(Node)
-   */
-  public static void applyWorldTransformation(Object context, Node node) {
-    MatrixHandler._get(context).applyWorldTransformation(node);
-  }
-
   // Other stuff
 
   /**
@@ -2721,6 +2515,16 @@ public class Graph {
         _track(tag, child, pixelX, pixelY);
   }
 
+  protected boolean _precisePicking(Node node) {
+    return _picking && node.isTaggingEnabled() && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.PRECISE && _bb != null &&
+            (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM) || node.isHintEnable(Node.BONE));
+  }
+
+  protected boolean _bullseyePicking(Node node) {
+    return _picking && node.isTaggingEnabled() && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.BULLSEYE
+            /* && (node.isHintEnable(Node.BULLSEYE) || node.isHintEnable(Node.AXES) || node.isHintEnable(Node.CAMERA)) */;
+  }
+
   /**
    * Casts a ray at pixel position {@code (pixelX, pixelY)} and returns {@code true} if the ray picks the {@code node} and
    * {@code false} otherwise. The node is picked according to the {@link Node#bullsEyeSize()}.
@@ -2734,10 +2538,11 @@ public class Graph {
    * @see Node#setBullsEyeSize(float)
    */
   public boolean tracks(Node node, int pixelX, int pixelY) {
-    if (node.pickingPolicy() == Node.SHAPE && _bb != null)
+    if (_precisePicking(node))
       return _tracks(node, pixelX, pixelY);
-    else
+    else if(_bullseyePicking(node))
       return _tracks(node, pixelX, pixelY, screenLocation(node.position()));
+    return false;
   }
 
   /**
@@ -2813,10 +2618,7 @@ public class Graph {
    * Returns whether or not the scene has focus or not under the given pixel.
    */
   public boolean hasFocus(int pixelX, int pixelY) {
-    return (!isOffscreen() ||
-        _lastOffDisplayed + 1 >= frameCount()
-        // _lastOffRendered == frameCount()
-    )
+    return _lastDisplayed + 1 >= TimingHandler.frameCount
         && _upperLeftCornerX <= pixelX && pixelX < _upperLeftCornerX + width()
         && _upperLeftCornerY <= pixelY && pixelY < _upperLeftCornerY + height();
   }
@@ -2855,111 +2657,47 @@ public class Graph {
 
   protected void _endBackBuffer() {}
 
-  /**
-   * Internal use. Traverse the scene {@link #nodes()}) into the
-   * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
-   * Use it as a {@code _postDraw()}.
-   */
-  protected void _renderBackBuffer() {
-    if (_bb != null && _bbCount < _bbNeed) {
-      _initBackBuffer();
-      _bbMatrixHandler.bind(projection(), view());
-      if (_subtree == null) {
-        for (Node node : _leadingNodes())
-          _renderBackBuffer(node);
-      } else {
-        if (_subtree.reference() != null) {
-          _bbMatrixHandler.pushMatrix();
-          _bbMatrixHandler.applyWorldTransformation(_subtree.reference());
-        }
-        _renderBackBuffer(_subtree);
-        if (_subtree.reference() != null) {
-          _bbMatrixHandler.popMatrix();
-        }
-      }
-      if (isOffscreen())
-        _rays.clear();
-      _endBackBuffer();
-      _bbCount = _bbNeed;
-    }
+  protected void _initFrontBuffer() {}
+
+  protected void _endFrontBuffer() {}
+
+  public void enablePicking(boolean enable) {
+    _picking = enable;
   }
 
-  /**
-   * Used by the {@link #_renderBackBuffer()} algorithm.
-   */
-  protected void _renderBackBuffer(Node node) {
-    _bbMatrixHandler.pushMatrix();
-    _bbMatrixHandler.applyTransformation(node);
-    if (!node.isCulled()) {
-      if (node._bypass != TimingHandler.frameCount) {
-        _drawBackBuffer(node);
-        if (!isOffscreen())
-          _trackBackBuffer(node);
-      }
-      for (Node child : node.children())
-        _renderBackBuffer(child);
-    }
-    _bbMatrixHandler.popMatrix();
+  public void togglePicking() {
+    _picking = !_picking;
   }
 
-  /**
-   * Called before your main drawing and performs the following:
-   * <ol>
-   * <li>Calls {@link TimingHandler#handle()}.</li>
-   * <li>Updates the projection matrix by calling
-   * {@code eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded())}.</li>
-   * <li>Updates the view matrix by calling {@code eye().view()}.</li>
-   * <li>Updates the {@link #projectionView()} matrix.</li>
-   * <li>Updates the {@link #projectionViewInverse()} matrix if
-   * {@link #isProjectionViewInverseCached()}.</li>
-   * <li>Calls {@link #updateBoundaryEquations()} if {@link #areBoundaryEquationsEnabled()}</li>
-   * </ol>
-   *
-   * @see #fov()
-   * @see TimingHandler#handle()
-   * @see #projection(Node, Type, float, float, float, float)
-   * @see Node#view()
-   */
-  public void preDraw() {
-    if (_seededGraph)
-      timingHandler().handle();
-    _projection = projection(eye(), type(), width(), height(), zNear(), zFar());
-    _view = eye().view();
-    _projectionView = Matrix.multiply(_projection, _view);
-    if (isProjectionViewInverseCached())
-      _projectionViewInverse = Matrix.inverse(_projectionView);
-    _matrixHandler.bind(_projection, _view);
-    if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
-      updateBoundaryEquations();
-      _lastEqUpdate = TimingHandler.frameCount;
-    }
+  public boolean isPickingEnabled() {
+    return _picking;
   }
 
   // caches
 
   /**
-   * Returns the cached projection matrix computed at {@link #preDraw()}.
+   * Returns the cached projection matrix computed at {@link #openContext()}.
    */
   public Matrix projection() {
     return _projection;
   }
 
   /**
-   * Returns the cached view matrix computed at {@link #preDraw()}.
+   * Returns the cached view matrix computed at {@link #_bind()}.
    */
   public Matrix view() {
     return _view;
   }
 
   /**
-   * Returns the projection times view cached matrix computed at {@link #preDraw()}.
+   * Returns the projection times view cached matrix computed at {@link #openContext()}}.
    */
   public Matrix projectionView() {
     return _projectionView;
   }
 
   /**
-   * Returns the cached projection times view inverse matrix computed at {@link #preDraw()}.
+   * Returns the cached projection times view inverse matrix computed at {@link #openContext()}}.
    */
   public Matrix projectionViewInverse() {
     if (isProjectionViewInverseCached())
@@ -3069,14 +2807,106 @@ public class Graph {
   }
 
   /**
+   * Called by {@link #render(Node)} and performs the following:
+   * <ol>
+   * <li>Updates the projection matrix by calling
+   * {@code eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded())}.</li>
+   * <li>Updates the view matrix by calling {@code eye().view()}.</li>
+   * <li>Updates the {@link #projectionView()} matrix.</li>
+   * <li>Updates the {@link #projectionViewInverse()} matrix if
+   * {@link #isProjectionViewInverseCached()}.</li>
+   * </ol>
+   *
+   * @see #fov()
+   * @see #projection(Node, Type, float, float, float, float)
+   * @see Node#view()
+   */
+  protected void _bind() {
+    _projection = projection(eye(), type(), width(), height(), zNear(), zFar());
+    _view = eye().view();
+    _projectionView = Matrix.multiply(_projection, _view);
+    if (isProjectionViewInverseCached())
+      _projectionViewInverse = Matrix.inverse(_projectionView);
+    _matrixHandler.bind(_projection, _view);
+  }
+
+  /**
+   * Begins the rendering process (see {@link #render(Node)}). Use it always before
+   * {@link #closeContext()}. Binds the matrices to the renderer, updates the boundary equations
+   * (see {@link #updateBoundaryEquations()}) and displays the scene {@link #hint()}.
+   * <p>
+   * This method is automatically called by {@link #render(Node)}. Call it explicitly only
+   * when the scene {@link #hint()} is reset (see also {@link #resetHint()}) and you need
+   * to customize that which is to be rendered, as follows:
+   * <pre>
+   * {@code
+   * scene.beginRender();
+   * scene.render(subtree);
+   * // render your world located stuff here
+   * // enable also the hud here if you want too:
+   * // scene.beginHUD();
+   * // draw your screen located stuff here
+   * // scene.endHUD();
+   * scene.endRender();
+   * // call scene.image(pixelX, pixelY) to display the customized rendered scene:
+   * scene.image();
+   * }
+   * </pre>
+   *
+   * @see #render(Node)
+   * @see #closeContext()
+   * @see #isOffscreen()
+   * @see #context()
+   */
+  public void openContext() {
+    _renderCount++;
+    if (_renderCount < 1 || _renderCount > 2) {
+      throw new RuntimeException("Error: render() should be nested within a single openContext() / closeContext() call!");
+    }
+    if (_renderCount == 1) {
+      if (isOffscreen())
+        _initFrontBuffer();
+      _bind();
+      if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
+        updateBoundaryEquations();
+        _lastEqUpdate = TimingHandler.frameCount;
+      }
+      _matrixHandler.pushMatrix();
+      _displayHint();
+    }
+  }
+
+  /**
+   * Ends the rendering process (see {@link #render(Node)}). Use it always after
+   * {@link #openContext()}. Clears the picking cache. Displays the scene HUD.
+   *
+   * @see #render(Node)
+   * @see #openContext()
+   * @see #isOffscreen()
+   * @see #context()
+   */
+  public void closeContext() {
+    _renderCount--;
+    if (_renderCount < 0 || _renderCount > 1) {
+      throw new RuntimeException("Error: render() should be nested within a single openContext() / closeContext() call!");
+    }
+    if (_renderCount == 0) {
+      _rays.clear();
+      _displayHUD();
+      _matrixHandler.popMatrix();
+      if (isOffscreen())
+        _endFrontBuffer();
+      else
+        _lastDisplayed = TimingHandler.frameCount;
+    }
+  }
+
+  /**
    * Renders the node tree onto the {@link #context()} from the {@link #eye()} viewpoint.
    * Calls {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
    * Same as {@code render(null)}.
    *
    * @see #render(Node)
-   * @see #render(Object)
-   * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Node, Type, int, int, float, float)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
@@ -3089,13 +2919,13 @@ public class Graph {
   }
 
   /**
-   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null})
-   * onto the {@link #context()} from the {@link #eye()} viewpoint.
-   * Calls {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
+   * Calls {@link #openContext()}, then renders the node {@code subtree} (or the whole tree
+   * when {@code subtree} is {@code null}) onto the {@link #context()} from the {@link #eye()}
+   * viewpoint, and calls {@link #closeContext()}.
+   * <p>
+   * Note that the rendering algorithm calls {@link Node#visit()} on each visited node
+   * (refer to the {@link Node} documentation).
    *
-   * @see #render(Object, Node)
-   * @see #render(Object, Node, Matrix, Matrix)
-   * @see #render(Object, Node, Node, Type, int, int, float, float)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
@@ -3104,7 +2934,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
-    _displayHint();
+    openContext();
     _subtree = subtree;
     if (subtree == null) {
       for (Node node : _leadingNodes())
@@ -3119,7 +2949,7 @@ public class Graph {
         _matrixHandler.popMatrix();
       }
     }
-    _rays.clear();
+    closeContext();
   }
 
   /**
@@ -3143,146 +2973,11 @@ public class Graph {
   }
 
   /**
-   * Renders the node tree onto context from the {@code eye} viewpoint with the given frustum parameters.
-   * Same as {@code render(context, type, null, eye, width, height, zNear, zFar)}.
-   *
-   * @see #render(Object, Node, Node, Type, int, int, float, float)
-   * @see #render()
-   * @see #render(Object)
-   * @see #render(Object, Matrix, Matrix)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public static void render(Object context, Node eye, Type type, int width, int height, float zNear, float zFar) {
-    render(context, null, eye, type, width, height, zNear, zFar);
-  }
-
-  /**
-   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto context
-   * from the {@code eye} viewpoint with the given frustum parameters.
-   *
-   * @see #render(Node)
-   * @see #render(Object, Node)
-   * @see #render(Object, Node, Matrix, Matrix)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public static void render(Object context, Node subtree, Node eye, Type type, int width, int height, float zNear, float zFar) {
-    _render(MatrixHandler._get(context), context, subtree, eye, type, width, height, zNear, zFar);
-  }
-
-  /**
-   * used by {@link #render(Object, Node, Type, int, int, float, float)}.
-   */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Node subtree, Node eye, Type type, int width, int height, float zNear, float zFar) {
-    _render(matrixHandler, context, subtree, projection(eye, type, width, height, zNear, zFar), eye.view());
-  }
-
-  /**
-   * Renders the node tree onto {@code context} from the {@link #eye()} viewpoint.
-   * Same as {@code render(context, null)}.
-   *
-   * @see #render(Object, Node)
-   * @see #render()
-   * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object, Node, Type, int, int, float, float)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public void render(Object context) {
-    render(context, null);
-  }
-
-  /**
-   * Renders the node {@code subtree} (or the whole tree when {@code subtree}
-   * is {@code null}) onto {@code context} from the {@link #eye()} viewpoint.
-   *
-   * @see #render(Node)
-   * @see #render(Object, Node, Matrix, Matrix)
-   * @see #render(Object, Node, Node, Type, int, int, float, float)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public void render(Object context, Node subtree) {
-    if (context == _fb && !_rays.isEmpty())
-      render(subtree);
-    else
-      render(context, subtree, projection(), view());
-  }
-
-  /**
-   * Renders the node tree onto context with the given {@code projection} and {@code view} matrices.
-   * Same as {@code render(context, null, projection, view)}.
-   *
-   * @see #render(Object, Node, Matrix, Matrix)
-   * @see #render()
-   * @see #render(Object)
-   * @see #render(Object, Node, Type, int, int, float, float)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public static void render(Object context, Matrix projection, Matrix view) {
-    render(context, null, projection, view);
-  }
-
-  /**
-   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto
-   * context with the given {@code projection} and {@code view} matrices.
-   *
-   * @see #render(Node)
-   * @see #render(Object, Node)
-   * @see #render(Object, Node, Node, Type, int, int, float, float)
-   * @see Node#setShape(Consumer<processing.core.PGraphics>)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  public static void render(Object context, Node subtree, Matrix projection, Matrix view) {
-    _render(MatrixHandler._get(context), context, subtree, projection, view);
-  }
-
-  /**
-   * Used by {@link #render(Object, Node, Matrix, Matrix)}.
-   */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Node subtree, Matrix projection, Matrix view) {
-    matrixHandler.bind(projection, view);
-    if (subtree == null) {
-      for (Node node : _leadingNodes())
-        _render(matrixHandler, context, node);
-    } else {
-      if (subtree.reference() != null) {
-        matrixHandler.pushMatrix();
-        matrixHandler.applyWorldTransformation(subtree.reference());
-      }
-      _render(matrixHandler, context, subtree);
-      if (subtree.reference() != null) {
-        matrixHandler.popMatrix();
-      }
-    }
-  }
-
-  /**
-   * Used by the {@link #_render(MatrixHandler, Object, Node, Matrix, Matrix)} algorithm.
-   */
-  protected static void _render(MatrixHandler matrixHandler, Object context, Node node) {
-    matrixHandler.pushMatrix();
-    matrixHandler.applyTransformation(node);
-    node.visit();
-    if (!node.isCulled()) {
-      if (node._bypass != TimingHandler.frameCount) {
-        MatrixHandler._displayHint(context, node);
-      }
-      for (Node child : node.children())
-        _render(matrixHandler, context, child);
-    }
-    matrixHandler.popMatrix();
-  }
-
-  /**
    * Renders the node onto the front buffer. Used by the rendering algorithms.
    */
   protected void _drawFrontBuffer(Node node) {
-    if (node.pickingPolicy() == Node.SHAPE && node.isTaggingEnabled())
-      if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM))
-        _bbNeed = frameCount();
+    if (_precisePicking(node))
+      _bbNeed = TimingHandler.frameCount;
     if (isTagged(node) && node.isHintEnable(Node.HIGHLIGHT)) {
       _matrixHandler.pushMatrix();
       float scl = 1 + node._highlight;
@@ -3291,14 +2986,59 @@ public class Graph {
         _matrixHandler.scale(scl, scl);
       else
         _matrixHandler.scale(scl, scl, scl);
-      MatrixHandler._displayHint(context(), node);
+      _displayHint(context(), node);
       _matrixHandler.popMatrix();
     } else {
-      MatrixHandler._displayHint(context(), node);
+      _displayHint(context(), node);
     }
   }
 
-  protected void _emitBackBufferUniforms(float r, float g, float b) {}
+  /**
+   * Internal use. Traverse the scene {@link #nodes()}) into the
+   * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
+   * Use it as a {@code _postDraw()}.
+   */
+  protected void _renderBackBuffer() {
+    if (_picking && _bb != null && _bbCount < _bbNeed) {
+      _initBackBuffer();
+      _bbMatrixHandler.bind(projection(), view());
+      if (_subtree == null) {
+        for (Node node : _leadingNodes())
+          _renderBackBuffer(node);
+      } else {
+        if (_subtree.reference() != null) {
+          _bbMatrixHandler.pushMatrix();
+          _bbMatrixHandler.applyWorldTransformation(_subtree.reference());
+        }
+        _renderBackBuffer(_subtree);
+        if (_subtree.reference() != null) {
+          _bbMatrixHandler.popMatrix();
+        }
+      }
+      if (isOffscreen())
+        _rays.clear();
+      _endBackBuffer();
+      _bbCount = _bbNeed;
+    }
+  }
+
+  /**
+   * Used by the {@link #_renderBackBuffer()} algorithm.
+   */
+  protected void _renderBackBuffer(Node node) {
+    _bbMatrixHandler.pushMatrix();
+    _bbMatrixHandler.applyTransformation(node);
+    if (!node.isCulled()) {
+      if (node._bypass != TimingHandler.frameCount) {
+        _drawBackBuffer(node);
+        if (!isOffscreen())
+          _trackBackBuffer(node);
+      }
+      for (Node child : node.children())
+        _renderBackBuffer(child);
+    }
+    _bbMatrixHandler.popMatrix();
+  }
 
   /**
    * Renders the node onto the back-buffer.
@@ -3312,15 +3052,16 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   protected void _drawBackBuffer(Node node) {
-    if (node.pickingPolicy() == Node.SHAPE && node.isTaggingEnabled())
-      if (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM)) {
-        float r = (float) (node.id() & 255) / 255.f;
-        float g = (float) ((node.id() >> 8) & 255) / 255.f;
-        float b = (float) ((node.id() >> 16) & 255) / 255.f;
-        _emitBackBufferUniforms(r, g, b);
-        MatrixHandler._displayHint(_backBuffer(), node);
-      }
+    if (_precisePicking(node)) {
+      float r = (float) (node.id() & 255) / 255.f;
+      float g = (float) ((node.id() >> 8) & 255) / 255.f;
+      float b = (float) ((node.id() >> 16) & 255) / 255.f;
+      _emitBackBufferUniforms(r, g, b);
+      _displayHint(_backBuffer(), node);
+    }
   }
+
+  protected void _emitBackBufferUniforms(float r, float g, float b) {}
 
   /**
    * Displays the graph and nodes hud hints.
@@ -3339,10 +3080,18 @@ public class Graph {
   }
 
   /**
+   * Draws the node {@link Node#hint()}.
+   * <p>
+   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   */
+  protected void _displayHint(Object context, Node node) {
+  }
+
+  /**
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.BULLSEYE) {
+    if (_bullseyePicking(node) && !_rays.isEmpty()) {
       Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
@@ -3360,7 +3109,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
-    if (node.isTaggingEnabled() && !_rays.isEmpty() && node.pickingPolicy() == Node.SHAPE && _bb != null) {
+    if (_precisePicking(node) && !_rays.isEmpty()) {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
@@ -4716,9 +4465,9 @@ public class Graph {
    * {@link #lookAround(float, float)}  procedure}.
    */
   protected void _lookAround() {
-    if (frameCount() > _lookAroundCount) {
+    if (TimingHandler.frameCount > _lookAroundCount) {
       _upVector = eye().yAxis();
-      _lookAroundCount = this.frameCount();
+      _lookAroundCount = TimingHandler.frameCount;
     }
     _lookAroundCount++;
     Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _lookAroundTask._y : -_lookAroundTask._y);
@@ -4810,16 +4559,12 @@ public class Graph {
    * {@link #setHUD(PShape)} or {@link #setHUD(Consumer)}.</li>
    * <li>{@link #FRUSTUM} which is an interface to set up the {@link Node#FRUSTUM}
    * for a given graph {@link #eye()}.</li>
-   * <li>{@link #SHAPE}  which displays the node shape set with
-   * {@link #setShape(PShape)} and {@link #setShape(Consumer)}.</li>
+   * <li>{@link #SHAPE} which displays the node shape set with
+   * {@link #setShape(PShape)} or {@link #setShape(Consumer)}.</li>
    * <li>{@link #BACKGROUND} which sets up the graph background to be displayed.</li>
    * </ol>
    * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
-   * calling either {@link #render(Node)} or {@link #render()}. Note that the hint
-   * is not display when calling a static rendering algorithm such as
-   * {@link #render(Object, Node, Node, Graph.Type, int, int, float, float)} or
-   * {@link #render(Object, Node, Graph.Type, int, int, float, float)}).
-   * Use {@link #configHint(int, Object...)} to configure the hint different visual aspects.
+   * calling either {@link #render(Node)} or {@link #render()}.
    *
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
@@ -5151,7 +4896,51 @@ public class Graph {
     _imrShape = callback;
   }
 
-  // Hack to hide interpolator hint properties
+  // Hack to hide node & interpolator hint properties
+
+  // Node
+
+  protected Consumer<processing.core.PGraphics> _imrShape(Node node) {
+    return node._imrShape;
+  }
+
+  protected processing.core.PShape _rmrShape(Node node) {
+    return node._rmrShape;
+  }
+
+  protected int _torusColor(Node node) {
+    return node._torusColor;
+  }
+
+  protected int _torusFaces(Node node) {
+    return node._torusFaces;
+  }
+
+  protected int _frustumColor(Node node) {
+    return node._frustumColor;
+  }
+
+  protected Graph _frustumGraph(Node node) {
+    return node._frustumGraph;
+  }
+
+  protected Object _eyeBuffer(Node node) {
+    return node._eyeBuffer;
+  }
+
+  protected Type _frustumType(Node node) {
+    return node._frustumtype;
+  }
+
+  protected float _zNear(Node node) {
+    return node._zNear;
+  }
+
+  protected float _zFar(Node node) {
+    return node._zFar;
+  }
+
+  // Interpolator
 
   /**
    * Used to display the interpolator in {@link #_displayHint()}.

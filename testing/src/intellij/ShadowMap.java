@@ -15,11 +15,13 @@ import java.nio.file.Paths;
 public class ShadowMap extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
+  //Scene shadowMapScene;
+  ShadowScene shadowMapScene;
   Node[] shapes;
   PGraphics shadowMap;
   PShader depthShader;
   float zNear = 50;
-  float zFar = 1000;
+  float zFar = 700;
   int w = 700;
   int h = 700;
 
@@ -29,28 +31,35 @@ public class ShadowMap extends PApplet {
 
   public void setup() {
     shadowMap = createGraphics(w / 2, h / 2, P3D);
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
-    //depthShader.set("near", zNear);
-    //depthShader.set("far", zFar);
     depthShader = loadShader(Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString());
+    depthShader.set("near", zNear);
+    depthShader.set("far", zFar);
     shadowMap.shader(depthShader);
     scene = new Scene(this);
+    scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
     scene.setRadius(max(w, h));
     scene.fit(1);
-    scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
     shapes = new Node[20];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(this::cube);
-      //shapes[i].setPickingPolicy(Node.BULLSEYE);
+      shapes[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
+      //shapes[i].enableHint(Node.BULLSEYE);
       shapes[i].configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
       scene.randomize(shapes[i]);
       shapes[i].disableHint(Node.HIGHLIGHT);
-      // shapes[i].disableTagging();
     }
-    // /*
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
     scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
     scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
+    // scene.enablePicking(false);
+    ///*
+    //shadowMapScene = new Scene(this, shadowMap, light);
+    shadowMapScene = new ShadowScene(shadowMap, scene.node("light"));
+    shadowMapScene.resetHint();
+    shadowMapScene.enableHint(Scene.BACKGROUND, color(140, 160, 125));
+    shadowMapScene.enablePicking(false);
+    //shadowMapScene.setRadius(300);
+    shadowMapScene.setType(shadowMapType);
     // */
     frameRate(1000);
   }
@@ -72,17 +81,11 @@ public class ShadowMap extends PApplet {
     // 1. Fill in and display front-buffer
     scene.render();
     // 2. Fill in shadow map using the light point of view
-    if (scene.node("light") != null) {
-      shadowMap.beginDraw();
-      shadowMap.background(140, 160, 125);
-      Scene.render(shadowMap, scene.node("light"), shadowMapType, zNear, zFar);
-      shadowMap.endDraw();
-      // 3. Display shadow map
-      scene.beginHUD();
-      image(shadowMap, w / 2, h / 2);
-      scene.endHUD();
+    if (scene.isTagValid("light")) {
+      shadowMapScene.display(w / 2, h / 2);
     }
-    println("-> frameRate: " + Scene.frameRate() + " (nub) " + frameRate + " (p5)");
+    //println("frameCount: " + Scene.TimingHandler.frameCount + " (nub) " + frameCount + " (p5) ");
+    println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");
   }
 
   public void mouseMoved(MouseEvent event) {
@@ -91,8 +94,10 @@ public class ShadowMap extends PApplet {
         scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
       // no calling mouseTag since we need to immediately update the tagged node
       scene.updateMouseTag("light");
-      if (scene.isTagValid("light"))
+      if (scene.isTagValid("light")) {
         scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+        shadowMapScene.setEye(scene.node("light"));
+      }
     } else
       scene.mouseTag();
   }
@@ -107,11 +112,9 @@ public class ShadowMap extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    if (event.isShiftDown()) {
-      // custom interaction of the light node: setting the light
-      // zFar plane is implemented as a custom behavior by node.interact()
-      if (scene.node("light") != null)
-        depthShader.set("far", zFar += event.getCount() * 20);
+    if (event.isShiftDown() && scene.isTagValid("light")) {
+      depthShader.set("far", zFar += event.getCount() * 20);
+      scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
     }
     else
       scene.scale(event.getCount() * 20);
@@ -124,6 +127,22 @@ public class ShadowMap extends PApplet {
     }
     if (key == 'p')
       scene.togglePerspective();
+  }
+
+  public class ShadowScene extends Scene {
+    public ShadowScene(PGraphics pGraphics, Node eye) {
+      super(pGraphics, eye);
+    }
+
+    @Override
+    public float zNear() {
+      return zNear;
+    }
+
+    @Override
+    public float zFar() {
+      return zFar;
+    }
   }
 
   public static void main(String[] args) {

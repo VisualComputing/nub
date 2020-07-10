@@ -885,10 +885,7 @@ public class Interpolator {
    * as its control points.</li>
    * </ol>
    * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
-   * calling either {@link Graph#render(Node)} or {@link Graph#render()}. Note that the hint
-   * is not display when calling a static {@link Graph} rendering algorithm such as
-   * {@link Graph#render(Object, Node, Node, Graph.Type, int, int, float, float)} or
-   * {@link Graph#render(Object, Node, Graph.Type, int, int, float, float)}).
+   * calling either {@link Graph#render(Node)} or {@link Graph#render()}.
    * Use {@link #configHint(int, Object...)} to configure the hint different visual aspects.
    *
    * @see #enableHint(int)
@@ -1052,7 +1049,7 @@ public class Interpolator {
       // TODO readd condition when Node.graphics is removed
       //if (!node.isHintEnable(Node.SHAPE)) {
         node.enableHint(Node.BULLSEYE);
-        node.setPickingPolicy(Node.BULLSEYE);
+        node.setPickingPolicy(Node.PickingPolicy.BULLSEYE);
         if (!node.isTaggingEnabled()) {
           node.enableTagging();
         }

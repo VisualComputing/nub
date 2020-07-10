@@ -32,9 +32,6 @@ public class BasicUse extends PApplet {
       pg.fill(0, 255, 255 /*, 125*/);
       pg.stroke(0, 0, 255);
       pg.strokeWeight(2);
-      Scene.beginHUD(pg);
-      pg.rect(200, 200, 100, 100);
-      Scene.endHUD(pg);
       pg.popStyle();
     });
     node.translate(50, 50, 50);
@@ -104,10 +101,10 @@ public class BasicUse extends PApplet {
       scene.fit();
 
     if (key == 'x')
-      for (Task task : Scene.timingHandler().tasks())
+      for (Task task : Scene.TimingHandler.tasks())
         task.enableConcurrence();
     if (key == 'y')
-      for (Task task : Scene.timingHandler().tasks())
+      for (Task task : Scene.TimingHandler.tasks())
         task.disableConcurrence();
     if (key == 'p') {
       println(Scene.nodes().size());

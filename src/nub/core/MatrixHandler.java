@@ -12,7 +12,6 @@
 package nub.core;
 
 import nub.primitives.Matrix;
-import nub.processing.Scene;
 
 /**
  * The matrix handler specifies (and implements) various matrix operations needed by the
@@ -36,54 +35,6 @@ public class MatrixHandler {
   protected float[][] _projectionStack = new float[STACK_DEPTH][16];
   protected int _projectionStackDepth;
   protected static int _hudCalls;
-
-  /**
-   * Returns a {@code MatrixHandler} instance according to the default target renderer context.
-   */
-  protected static MatrixHandler _get(Object context) {
-    if (context instanceof processing.core.PGraphics)
-      if (context instanceof processing.opengl.PGraphicsOpenGL)
-        return new GLMatrixHandler((processing.opengl.PGraphicsOpenGL) context);
-      else
-        throw new RuntimeException("Only OpenGL renderers are currently supported");
-    return new MatrixHandler();
-  }
-
-  /**
-   * Draws {@link Node#hint()}.
-   */
-  protected static void _displayHint(Object context, Node node) {
-    if (!(context instanceof processing.core.PGraphics))
-      throw new RuntimeException("Displaying the node hints requires a PGraphics context");
-    processing.core.PGraphics pg = (processing.core.PGraphics) context;
-    pg.push();
-    if (node.isHintEnable(Node.SHAPE)) {
-      if (node._rmrShape != null) {
-        pg.shapeMode(pg.shapeMode);
-        pg.shape(node._rmrShape);
-      }
-      if (node._imrShape != null) {
-        node._imrShape.accept(pg);
-      }
-    }
-    if (node.isHintEnable(Node.TORUS)) {
-      pg.colorMode(processing.core.PApplet.RGB, 255);
-      pg.fill(node._torusColor);
-      Scene.drawTorusSolenoid(pg, node._torusFaces, 5);
-    }
-    if (node.isHintEnable(Node.FRUSTUM)) {
-      pg.colorMode(processing.core.PApplet.RGB, 255);
-      pg.stroke(node._frustumColor);
-      pg.fill(node._frustumColor);
-      if (node._frustumGraph instanceof Graph) {
-        Scene.drawFrustum(pg, node._frustumGraph);
-      }
-      else if (node._eyeBuffer instanceof processing.core.PGraphics) {
-        Scene.drawFrustum(pg, (processing.core.PGraphics) node._eyeBuffer, node, node._frustumtype, node._zNear, node._zFar);
-      }
-    }
-    pg.pop();
-  }
 
   // 1. May be overridden
 

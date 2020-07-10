@@ -32,7 +32,7 @@ public class PUP extends PApplet {
       models[i] = new Node(boxShape());
       scene.randomize(models[i]);
     }
-    visualHint = new Scene(this, P3D, w, h);
+    visualHint = new Scene(createGraphics(w, h, P3D));
     visualHint.setRadius(300);
   }
 
@@ -43,14 +43,7 @@ public class PUP extends PApplet {
     scene.drawAxes();
     scene.render();
     if (pup != null) {
-      scene.beginHUD();
-      visualHint.beginDraw();
-      visualHint.context().background(125, 80, 90);
-      visualHint.drawAxes();
-      visualHint.render();
-      visualHint.endDraw();
-      visualHint.image(atX, atY);
-      scene.endHUD();
+      visualHint.display(atX, atY);
     }
   }
 

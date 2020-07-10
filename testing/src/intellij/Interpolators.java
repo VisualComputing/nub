@@ -22,7 +22,7 @@ public class Interpolators extends PApplet {
   String renderer = P3D;
 
   public void settings() {
-    size(600, 400, renderer);
+    size(700, 700, renderer);
   }
 
   public void setup() {
@@ -60,10 +60,13 @@ public class Interpolators extends PApplet {
     scene.enableHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(0, 255, 0));
     scene.enableHint(Scene.BACKGROUND, color(125));
+
+    frameRate(1000);
   }
 
   public void draw() {
     scene.render();
+    println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");
   }
 
   public void mouseMoved() {
@@ -120,10 +123,10 @@ public class Interpolators extends PApplet {
       scene.fit();
 
     if (key == 'x')
-      for (Task task : Scene.timingHandler().tasks())
+      for (Task task : Scene.TimingHandler.tasks())
         task.enableConcurrence();
     if (key == 'y')
-      for (Task task : Scene.timingHandler().tasks())
+      for (Task task : Scene.TimingHandler.tasks())
         task.disableConcurrence();
   }
 

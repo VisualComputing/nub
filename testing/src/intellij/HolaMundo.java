@@ -35,6 +35,7 @@ public class HolaMundo extends PApplet {
     // A. Scenes
     // 1. Main (onscreen) Scene
     mainScene = new Scene(this);
+    //mainScene.togglePicking();
     mainScene.setRadius(500);
     mainScene.fit(1);
     mainScene.enableHint(Scene.AXES | Scene.GRID);
@@ -50,7 +51,7 @@ public class HolaMundo extends PApplet {
     //mainScene.setHUD(this::hud);
     //mainScene.configHint(Scene.GRID, Graph.GridType.LINE);
     // 2. Hint (offscreen) Scene
-    hintScene = new Scene(this, P3D, hintSceneWidth, hintSceneHeight);
+    hintScene = new Scene(createGraphics(hintSceneWidth, hintSceneHeight, P3D));
     hintScene.enableHint(Graph.BACKGROUND, color(0, 123, 240));
     hintScene.setRadius(300);
     // B. Nodes
@@ -59,7 +60,7 @@ public class HolaMundo extends PApplet {
     //torus.setHUD(pshape);
     torus.setHUD(this::hud);
     torus.enableHint(Node.TORUS, color(255, 0, 0));
-    torus.setPickingPolicy(Node.SHAPE);
+    torus.setPickingPolicy(Node.PickingPolicy.PRECISE);
     torus.scale(10);
     torus.translate(-200, -200, 0);
     // 3. box

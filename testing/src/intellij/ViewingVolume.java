@@ -9,7 +9,6 @@ import processing.event.MouseEvent;
 
 public class ViewingVolume extends PApplet {
   Scene scene1, scene2, focus;
-  PGraphics canvas1, canvas2;
   Vector point;
 
   //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
@@ -23,17 +22,21 @@ public class ViewingVolume extends PApplet {
 
   @Override
   public void setup() {
-    canvas1 = createGraphics(w, h / 2, P3D);
-    scene1 = new Scene(this, canvas1);
+    scene1 = new Scene(createGraphics(w, h / 2, P3D));
+    scene1.enableHint(Scene.BACKGROUND, color(125));
+    scene1.enableHint(Scene.AXES | Scene.SHAPE);
+    scene1.setShape(this::draw1);
     //scene1.togglePerspective();
     scene1.setRadius(150);
     scene1.fit();
     //scene1.eye().setMagnitude(1);
 
-    canvas2 = createGraphics(w, h / 2, P3D);
     // Note that we pass the upper left corner coordinates where the scene
     // is to be drawn (see drawing code below) to its constructor.
-    scene2 = new Scene(this, canvas2);
+    scene2 = new Scene(createGraphics(w, h / 2, P3D));
+    scene2.enableHint(Scene.FRUSTUM, scene1);
+    scene2.enableHint(Scene.SHAPE);
+    scene2.setShape(this::draw2);
     scene2.setType(Graph.Type.ORTHOGRAPHIC);
     scene2.setRadius(600);
     scene2.fit();
@@ -43,30 +46,18 @@ public class ViewingVolume extends PApplet {
 
   @Override
   public void draw() {
-    handleMouse();
-    background(255);
-    scene1.beginDraw();
-    canvas1.background(125);
-    scene1.drawAxes(canvas1);
+    focus = scene1.hasMouseFocus() ? scene1 : scene2;
+    scene1.display();
+    scene2.display(0, h / 2);
+  }
 
-    ///*
-    canvas1.noStroke();
-    canvas1.fill(255, 255, 0, 125);
-    //canvas1.strokeWeight(20);
-    //canvas1.stroke(255, 255, 0);
-    //canvas1.point(point.x(),point.y(), point.z());
-    canvas1.sphere(scene1.radius());
-    // */
-    scene1.endDraw();
-    scene1.image();
+  public void draw1(PGraphics pg) {
+    pg.noStroke();
+    pg.fill(255, 255, 0, 125);
+    pg.sphere(scene1.radius());
+  }
 
-    scene2.beginDraw();
-    canvas2.background(255);
-    scene2.context().pushStyle();
-    scene2.context().strokeWeight(2);
-    scene2.context().stroke(255, 0, 255);
-    scene2.context().fill(255, 0, 255, 160);
-    scene2.drawFrustum(scene1);
+  public void draw2(PGraphics canvas2) {
     canvas2.noStroke();
     canvas2.fill(255, 255, 0, 125);
     canvas2.sphere(scene1.radius());
@@ -80,10 +71,6 @@ public class ViewingVolume extends PApplet {
     canvas2.strokeWeight(5);
     //pg.sphere(50);
     canvas2.line(v1.x(), v1.y(), v1.z(), v2.x(), v2.y(), v2.z());
-
-    scene2.context().popStyle();
-    scene2.endDraw();
-    scene2.image(0, h / 2);
   }
 
   public void mouseDragged() {

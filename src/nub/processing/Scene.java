@@ -14,12 +14,11 @@
 
 package nub.processing;
 
-import nub.core.Graph;
-import nub.core.Interpolator;
-import nub.core.Node;
+import nub.core.*;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.timing.TimingHandler;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -118,10 +117,7 @@ public class Scene extends Graph {
   public static String version = "7";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
-  protected PApplet _parent;
-
-  // E X C E P T I O N H A N D L I N G
-  protected int _beginOffScreenDrawingCalls;
+  public static PApplet pApplet;
 
   // _bb : picking buffer
   protected PShader _triangleShader, _lineShader, _pointShader;
@@ -133,160 +129,78 @@ public class Scene extends Graph {
 
   /**
    * Constructor that defines an on-screen Processing scene. Same as
-   * {@code this(pApplet, pApplet.g)}.
+   * {@code this(pApplet.g)}.
    *
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String, int, int)
-   * @see #Scene(PApplet, String)
+   * @see #Scene(PGraphics)
    * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
+   * @see #Scene(PGraphics, Node)
    */
   public Scene(PApplet pApplet) {
-    this(pApplet, pApplet.g);
+    this(pApplet.g);
   }
 
   /**
-   * Same as {@code this(pApplet, pApplet.g, eye)}.
+   * Same as {@code this(pApplet.g, eye)}.
    *
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String, int, int)
-   * @see #Scene(PApplet, String)
    * @see #Scene(PApplet)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
+   * @see #Scene(PGraphics)
+   * @see #Scene(PGraphics, Node)
    */
   public Scene(PApplet pApplet, Node eye) {
-    this(pApplet, pApplet.g, eye);
+    this(pApplet.g, eye);
   }
 
   /**
-   * Same as {@code this(pApplet, renderer, pApplet.width, pApplet.height)}.
+   * Same as {@code this(pGraphics, null)}.
    *
    * @see #Scene(PApplet)
-   * @see #Scene(PApplet, PGraphics)
    * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
+   * @see #Scene(PGraphics, Node)
    */
-  public Scene(PApplet pApplet, String renderer) {
-    this(pApplet, renderer, pApplet.width, pApplet.height);
-  }
-
-  /**
-   * Same as {@code this(pApplet, renderer, eye, pApplet.width, pApplet.height)}.
-   *
-   * @see #Scene(PApplet)
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String)
-   * @see #Scene(PApplet, String, Node, int, int)
-   */
-  public Scene(PApplet pApplet, String renderer, Node eye) {
-    this(pApplet, renderer, eye, pApplet.width, pApplet.height);
-  }
-
-  /**
-   * Same as {@code this(pApplet, pApplet.createGraphics(width, height, renderer))}.
-   *
-   * @see #Scene(PApplet)
-   * @see #Scene(PApplet, String, int, int)
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String)
-   * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
-   */
-  public Scene(PApplet pApplet, String renderer, int width, int height) {
-    this(pApplet, pApplet.createGraphics(width, height, renderer));
-  }
-
-  /**
-   * Same as {@code this(pApplet, pApplet.createGraphics(width, height, renderer), eye)}.
-   *
-   * @see #Scene(PApplet)
-   * @see #Scene(PApplet, String, int, int)
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String)
-   * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
-   */
-  public Scene(PApplet pApplet, String renderer, Node eye, int width, int height) {
-    this(pApplet, pApplet.createGraphics(width, height, renderer), eye);
-  }
-
-  /**
-   * Same as {@code this(pApplet, pGraphics, null)}.
-   *
-   * @see #Scene(PApplet)
-   * @see #Scene(PApplet, String, int, int)
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String)
-   * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
-   */
-  public Scene(PApplet pApplet, PGraphics pGraphics) {
-    this(pApplet, pGraphics, null);
+  public Scene(PGraphics pGraphics) {
+    this(pGraphics, null);
   }
 
   /**
    * Main constructor defining a left-handed Processing compatible scene.
    * <p>
-   * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. If
-   * {@code pGraphics == pApplet.g}) (which defines an on-screen scene, see also
-   * {@link #isOffscreen()}). To display an off-screen scene call
-   * {@link #display(Node, int, int)} ()}.
+   * An off-screen Processing scene is created if {@code pGraphics} is different
+   * than the main PApplet context, otherwise it creates an on-screen Processing
+   * scene. To display an off-screen scene call {@link #display(Node, int, int)}.
    *
    * @see Graph#Graph(Object, nub.core.Graph.Type, int, int)
    * @see #Scene(PApplet)
-   * @see #Scene(PApplet, PGraphics)
-   * @see #Scene(PApplet, String, int, int)
-   * @see #Scene(PApplet, String)
+   * @see #Scene(PGraphics)
    * @see #Scene(PApplet, Node)
-   * @see #Scene(PApplet, PGraphics, Node)
-   * @see #Scene(PApplet, String, Node, int, int)
-   * @see #Scene(PApplet, String, Node)
    */
-  public Scene(PApplet pApplet, PGraphics pGraphics, Node eye) {
-    super(pGraphics, pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D), eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
+  public Scene(PGraphics pGraphics, Node eye) {
+    super(pGraphics, eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
     // 1. P5 objects
-    _parent = pApplet;
+    if (pApplet == null) pApplet = pGraphics.parent;
     _offscreen = pGraphics != pApplet.g;
+    if (pGraphics instanceof PGraphicsOpenGL)
+      _matrixHandler = new GLMatrixHandler((PGraphicsOpenGL) pGraphics);
+    else
+      throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
+    _bb = pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D);
+    _bbMatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb);
     if (!_offscreen && _onscreenGraph == null)
       _onscreenGraph = this;
     // 2. Back buffer
-    _backBuffer().noSmooth();
-    _triangleShader = pApplet().loadShader("PickingBuffer.frag");
-    _lineShader = pApplet().loadShader("PickingBuffer.frag");
-    _pointShader = pApplet().loadShader("PickingBuffer.frag");
+    if (_backBuffer() != null) _backBuffer().noSmooth();
+    _triangleShader = pApplet.loadShader("PickingBuffer.frag");
+    _lineShader = pApplet.loadShader("PickingBuffer.frag");
+    _pointShader = pApplet.loadShader("PickingBuffer.frag");
     // 3. Register P5 methods
-    if (!isOffscreen()) {
-      pApplet().registerMethod("pre", this);
-      pApplet().registerMethod("draw", this);
-    }
+    pApplet.registerMethod("pre", this);
+    pApplet.registerMethod("draw", this);
     // TODO buggy
-    pApplet().registerMethod("dispose", this);
+    pApplet.registerMethod("dispose", this);
     // 4. Handed
     leftHanded = true;
   }
 
   // P5 STUFF
-
-  /**
-   * Returns the PApplet instance this scene is related to.
-   */
-  public PApplet pApplet() {
-    return _parent;
-  }
 
   /**
    * Returns the PGraphics instance this scene is related to. It may be the PApplet's,
@@ -315,26 +229,6 @@ public class Scene extends Graph {
   public static void setUniform(PShader shader, String name, Vector vector) {
     PVector pvector = new PVector(vector.x(), vector.y(), vector.z());
     shader.set(name, pvector);
-  }
-
-  /**
-   * Applies the {@code node} transformation on {@code pApplet}.
-   * Same as {@code applyTransformation(pApplet.g, node)}.
-   *
-   * @see #applyTransformation(Object, Node)
-   */
-  public static void applyTransformation(PApplet pApplet, Node node) {
-    applyTransformation(pApplet.g, node);
-  }
-
-  /**
-   * Applies the {@code node} world transformation on {@code pApplet}.
-   * Same as {@code applyWorldTransformation(pApplet.g, node)}.
-   *
-   * @see #applyWorldTransformation(Object, Node)
-   */
-  public static void applyWorldTransformation(PApplet pApplet, Node node) {
-    applyWorldTransformation(pApplet.g, node);
   }
 
   // OPENGL
@@ -490,114 +384,54 @@ public class Scene extends Graph {
   //protected abstract void drawPointUnderPixelHint();
 
   /**
-   * Paint method which is called just before your {@code PApplet.draw()} method. Simply
-   * handles resize events. This method is registered at the PApplet and hence you
-   * don't need to call it. Only meaningful if the graph is on-screen (it the graph
-   * {@link #isOffscreen()} it even doesn't get registered at the PApplet.
-   * <p>
-   * If {@link #context()} is resized then (re)sets the graph {@link #width()} and
-   * {@link #height()}, and calls {@link #setWidth(int)} and {@link #setHeight(int)}.
+   * Paint method which is called just before your {@code PApplet.draw()} method.
+   * Handles timing tasks (see {@link TimingHandler#handle()}) and resize events.
+   * This method is registered at the PApplet and hence you don't need to call it.
    *
+   * @see TimingHandler#handle()
    * @see #draw()
    * @see #render()
-   * @see #beginDraw()
-   * @see #endDraw()
    * @see #isOffscreen()
    */
   public void pre() {
-    if ((width() != context().width) || (height() != context().height)) {
-      setWidth(context().width);
-      setHeight(context().height);
-    }
-    preDraw();
-    _matrixHandler.pushMatrix();
+    if (_seededGraph)
+      TimingHandler.handle();
+    _resize();
   }
 
   /**
    * Paint method which is called just after your {@code PApplet.draw()} method. Simply
    * render the back buffer (useful for picking). This method is registered at the PApplet
-   * and hence you don't need to call it. Only meaningful if the graph is on-screen (it
-   * the graph {@link #isOffscreen()} it even doesn't get registered at the PApplet.
+   * and hence you don't need to call it. Only meaningful if the graph is on-screen
    * <p>
    * If {@link #isOffscreen()} does nothing.
    *
    * @see #pre()
    * @see #render()
-   * @see #beginDraw()
-   * @see #endDraw()
    * @see #isOffscreen()
    */
   public void draw() {
-    _matrixHandler.popMatrix();
-    // display visual hints in the world
-    _displayHUD();
-    _renderBackBuffer();
+    if (!isOffscreen()) {
+      _renderBackBuffer();
+    }
   }
 
   /**
-   * Only if the scene {@link #isOffscreen()}. Calls {@code context().beginDraw()}
-   * (hence there's no need to explicitly call it).
-   * <p>
-   * If {@link #context()} is resized then (re)sets the graph {@link #width()} and
-   * {@link #height()}, and calls {@link #setWidth(int)} and {@link #setHeight(int)}.
-   *
-   * @see #draw()
-   * @see #render()
-   * @see #pre()
-   * @see #endDraw()
-   * @see #isOffscreen()
-   * @see #context()
+   * Handles resizes events to update the scene {@link #width()} and {@link #height()}.
    */
-  public void beginDraw() {
-    if (!isOffscreen())
-      throw new RuntimeException(
-          "begin(/end)Draw() should be used only within offscreen scenes. Check your implementation!");
-    if (_beginOffScreenDrawingCalls != 0)
-      throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
-          + "endDraw() and they cannot be nested. Check your implementation!");
-    _beginOffScreenDrawingCalls++;
+  protected void _resize() {
+    if (isOffscreen())
+      return;
     if ((width() != context().width))
       setWidth(context().width);
     if ((height() != context().height))
       setHeight(context().height);
-    // open off-screen pgraphics for drawing:
-    context().beginDraw();
-    preDraw();
-    _matrixHandler.pushMatrix();
-  }
-
-  /**
-   * Only if the scene {@link #isOffscreen()}. Calls:
-   *
-   * <ol>
-   * <li>{@code context().endDraw()} and hence there's no need to explicitly call it</li>
-   * <li>{@code _updateBackBuffer()}: Render the back buffer (useful for picking)</li>
-   * </ol>
-   *
-   * @see #draw()
-   * @see #render()
-   * @see #beginDraw()
-   * @see #pre()
-   * @see #isOffscreen()
-   * @see #context()
-   */
-  public void endDraw() {
-    if (!isOffscreen())
-      throw new RuntimeException(
-          "(begin/)endDraw() should be used only within offscreen scenes. Check your implementation!");
-    _beginOffScreenDrawingCalls--;
-    if (_beginOffScreenDrawingCalls != 0)
-      throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
-          + "endDraw() and they cannot be nested. Check your implementation!");
-    _matrixHandler.popMatrix();
-    _displayHUD();
-    context().endDraw();
-    _renderBackBuffer();
   }
 
   /**
    * Same as {@code display(null, 0, 0)}.
    *
+   * @see #render()
    * @see #display(Node, int, int)
    */
   public void display() {
@@ -616,6 +450,7 @@ public class Scene extends Graph {
   /**
    * Same as {@code display(subtree, 0, 0)}.
    *
+   * @see #render(Node)
    * @see #display(Node, int, int)
    */
   public void display(Node subtree) {
@@ -623,30 +458,14 @@ public class Scene extends Graph {
   }
 
   /**
-   * Renders the {@code subtree} onto the off-screen scene {@link #context()} and displays it
-   * at the upper left corner: {@code (pixelX, pixelY)} of the {@link #pApplet()}. Only
-   * meaningful if the graph {@link #isOffscreen()}.
-   * <p>
-   * Calls {@link #render(Node)} followed by {@link #image(int, int)}.
+   * Same as {@code render(subtree); image(x, y);}.
+   *
+   * @see #render(Node)
+   * @see #image(int, int)
    */
   public void display(Node subtree, int x, int y) {
-    if (!isOffscreen()) {
-      throw new RuntimeException("scene.display() only works if scene is offscreen.");
-    }
-    if (_onscreenGraph != null) {
-      _onscreenGraph.beginHUD();
-      beginDraw();
-      render(subtree);
-      endDraw();
-      image(x, y);
-      _onscreenGraph.endHUD();
-    }
-    else {
-      beginDraw();
-      render(subtree);
-      endDraw();
-      image(x, y);
-    }
+    render(subtree);
+    image(x, y);
   }
 
   /**
@@ -659,37 +478,49 @@ public class Scene extends Graph {
   }
 
   /**
-   * Similar to {@link #pApplet()} {@code image()}. Used to display the offscreen scene {@link #context()}.
+   * Similar to {@link #pApplet} {@code image()}. Used to display the offscreen scene {@link #context()}.
+   * Does nothing if the scene is on-creen.
    * <p>
-   * Call this method, instead of {@link #pApplet()} {@code image()}, to make {@link #hasMouseFocus()}
+   * Call this method, instead of {@link #pApplet} {@code image()}, to make {@link #hasMouseFocus()}
    * work always properly.
    *
    * @see #display(Node, int, int)
    */
   public void image(int pixelX, int pixelY) {
-    if (!isOffscreen()) {
-      throw new RuntimeException("scene.image() only works if scene is offscreen.");
+    if (isOffscreen()) {
+      if (_onscreenGraph != null)
+        _onscreenGraph.beginHUD();
+      pApplet.pushStyle();
+      _setUpperLeftCorner(pixelX, pixelY);
+      _lastDisplayed = TimingHandler.frameCount;
+      pApplet.imageMode(PApplet.CORNER);
+      pApplet.image(context(), pixelX, pixelY);
+      pApplet.popStyle();
+      if (_onscreenGraph != null)
+        _onscreenGraph.endHUD();
     }
-    pApplet().pushStyle();
-    _setUpperLeftCorner(pixelX, pixelY);
-    _lastOffDisplayed = frameCount();
-    pApplet().imageMode(PApplet.CORNER);
-    pApplet().image(context(), pixelX, pixelY);
-    pApplet().popStyle();
   }
 
+  /**
+   * Same as {@code displayBackBuffer(0, 0)}.
+   *
+   * @see #displayBackBuffer(int, int)
+   */
   public void displayBackBuffer() {
     displayBackBuffer(0, 0);
   }
 
-  public void displayBackBuffer(int x, int y) {
+  /**
+   * Displays the buffer nub use for picking at the given pixel coordinates.
+   */
+  public void displayBackBuffer(int pixelX, int pixelY) {
     if (_onscreenGraph != null) {
       _onscreenGraph.beginHUD();
-      _imageBackBuffer(x, y);
+      _imageBackBuffer(pixelX, pixelY);
       _onscreenGraph.endHUD();
     }
     else {
-      _imageBackBuffer(x, y);
+      _imageBackBuffer(pixelX, pixelY);
     }
   }
 
@@ -698,12 +529,12 @@ public class Scene extends Graph {
    * on top of the main sketch canvas at the upper left corner:
    * {@code (pixelX, pixelY)}. Mainly for debugging.
    */
-  public void _imageBackBuffer(int pixelX, int pixelY) {
+  protected void _imageBackBuffer(int pixelX, int pixelY) {
     if (_backBuffer() != null) {
-      pApplet().pushStyle();
-      pApplet().imageMode(PApplet.CORNER);
-      pApplet().image(_backBuffer(), pixelX, pixelY);
-      pApplet().popStyle();
+      pApplet.pushStyle();
+      pApplet.imageMode(PApplet.CORNER);
+      pApplet.image(_backBuffer(), pixelX, pixelY);
+      pApplet.popStyle();
     }
   }
 
@@ -766,7 +597,7 @@ public class Scene extends Graph {
     }
     json.setJSONArray("paths", jsonPaths);
     //*/
-    pApplet().saveJSONObject(json, fileName);
+    pApplet.saveJSONObject(json, fileName);
   }
 
   /**
@@ -795,7 +626,7 @@ public class Scene extends Graph {
   public void loadConfig(String fileName) {
     JSONObject json = null;
     try {
-      json = pApplet().loadJSONObject(fileName);
+      json = pApplet.loadJSONObject(fileName);
     } catch (Exception e) {
       System.out.println("No such " + fileName + " found!");
     }
@@ -952,6 +783,21 @@ public class Scene extends Graph {
   }
 
   @Override
+  protected void _initFrontBuffer() {
+    if (isOffscreen()) {
+      context().beginDraw();
+    }
+  }
+
+  @Override
+  protected void _endFrontBuffer() {
+    if (isOffscreen()) {
+      context().endDraw();
+      _renderBackBuffer();
+    }
+  }
+
+  @Override
   protected void _emitBackBufferUniforms(float r, float g, float b) {
     // TODO How to deal with these commands: breaks picking in Luxo when they're moved to the constructor
     // Seems related to: PassiveTransformations
@@ -1071,6 +917,40 @@ public class Scene extends Graph {
     context().popStyle();
   }
 
+  @Override
+  public void _displayHint(Object context, Node node) {
+    if (!(context instanceof PGraphics))
+      throw new RuntimeException("Displaying the node hints requires a PGraphics context");
+    PGraphics pg = (PGraphics) context;
+    pg.push();
+    if (node.isHintEnable(Node.SHAPE)) {
+      if (_rmrShape(node) != null) {
+        pg.shapeMode(pg.shapeMode);
+        pg.shape(_rmrShape(node));
+      }
+      if (_imrShape(node) != null) {
+        _imrShape(node).accept(pg);
+      }
+    }
+    if (node.isHintEnable(Node.TORUS)) {
+      pg.colorMode(PApplet.RGB, 255);
+      pg.fill(_torusColor(node));
+      drawTorusSolenoid(pg, _torusFaces(node), 5);
+    }
+    if (node.isHintEnable(Node.FRUSTUM)) {
+      pg.colorMode(PApplet.RGB, 255);
+      pg.stroke(_frustumColor(node));
+      pg.fill(_frustumColor(node));
+      if (_frustumGraph(node) instanceof Graph) {
+        drawFrustum(pg, _frustumGraph(node));
+      }
+      else if (_eyeBuffer(node) instanceof PGraphics) {
+        drawFrustum(pg, (PGraphics) _eyeBuffer(node), node, _frustumType(node), _zNear(node), _zFar(node));
+      }
+    }
+    pg.pop();
+  }
+
   /**
    * Same as {@code return screenLocation(vector, node, projectionView, pGraphics.width, pGraphics.height)}.
    *
@@ -1078,46 +958,6 @@ public class Scene extends Graph {
    */
   public static Vector screenLocation(PGraphics pGraphics, Vector vector, Node node, Matrix projectionView) {
     return screenLocation(vector, node, projectionView, pGraphics.width, pGraphics.height);
-  }
-
-  /**
-   * Renders the node tree onto {@code pGraphics} using the {@code eye} viewpoint and remaining frustum parameters.
-   * Useful to compute a shadow map taking the {@code eye} as the light point-of-view. Same as
-   * {@code render(pGraphics, type, null, eye, zNear, zFar)}.
-   *
-   * @see #render(PGraphics, Node, Type, float, float)
-   * @see #render(PGraphics, Node, Node, Type, float, float)
-   */
-  public static void render(PGraphics pGraphics, Node eye, Type type, float zNear, float zFar) {
-    render(pGraphics, null, eye, type, zNear, zFar);
-  }
-
-  /**
-   * Renders the node {@code subtree} (or the whole tree when {@code subtree} is {@code null}) onto {@code pGraphics}
-   * using the {@code eye} viewpoint and remaining frustum parameters. Useful to compute a shadow map taking the
-   * {@code eye} as the light point-of-view. Same as
-   * {@code render(pGraphics, type, subtree, eye, pGraphics.width, pGraphics.height, zNear, zFar)}.
-   *
-   * @see #render(PGraphics, Node, Type, float, float)
-   * @see #render(PGraphics, Node, Node, Type, float, float)
-   * @see Graph#render(Object, Node, Node, Type, int, int, float, float)
-   */
-  public static void render(PGraphics pGraphics, Node subtree, Node eye, Type type, float zNear, float zFar) {
-    if (pGraphics instanceof PGraphicsOpenGL)
-      render(pGraphics, subtree, eye, type, pGraphics.width, pGraphics.height, zNear, zFar);
-    else
-      System.out.println("Nothing done: pGraphics should be instance of PGraphicsOpenGL in render()");
-  }
-
-  // HUD
-
-  /**
-   * Same as {@code Graph.beginHUD(pGraphics, pGraphics.width, pGraphics.height)}.
-   *
-   * @see Graph#beginHUD(Object, int, int)
-   */
-  public static void beginHUD(PGraphics pGraphics) {
-    Graph.beginHUD(pGraphics, pGraphics.width, pGraphics.height);
   }
 
   // drawing
@@ -2062,8 +1902,8 @@ public class Scene extends Graph {
   }
 
   /**
-   * Applies the {@code graph.eye()} transformation (see {@link #applyTransformation(Node)})
-   * and then calls {@link #drawFrustum(PGraphics, Graph)} on the scene {@link #context()}.
+   * Applies the {@code graph.eye()} transformation and then calls
+   * {@link #drawFrustum(PGraphics, Graph)} on the scene {@link #context()}.
    *
    * @see #drawFrustum(PGraphics, Graph)
    * @see #drawFrustum(PGraphics, PGraphics, Node, Type, float, float)
@@ -2105,9 +1945,6 @@ public class Scene extends Graph {
    * Draws a representation of the {@code eyeBuffer} frustum onto {@code pGraphics} according to frustum parameters:
    * {@code type}, eye {@link Node#magnitude()}, {@code zNear} and {@code zFar}, while taking into account
    * whether or not the scene is {@code leftHanded}.
-   * <p>
-   * Use it in conjunction with {@link #render(PGraphics, Node, Type, float, float)} as when rendering
-   * a shadow map.
    *
    * @see #drawFrustum(Graph)
    * @see #drawFrustum(PGraphics, Graph)
@@ -2795,19 +2632,19 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code return hasFocus(pApplet().mouseX, pApplet().mouseY)}.
+   * Same as {@code return hasFocus(pApplet.mouseX, pApplet.mouseY)}.
    *
    * @see #hasFocus(int, int)
    */
   public boolean hasMouseFocus() {
-    return hasFocus(pApplet().mouseX, pApplet().mouseY);
+    return hasFocus(pApplet.mouseX, pApplet.mouseY);
   }
 
   /**
    * Returns the last horizontal mouse displacement.
    */
   public float mouseDX() {
-    return pApplet().mouseX - pApplet().pmouseX;
+    return pApplet.mouseX - pApplet.pmouseX;
   }
 
   /**
@@ -2831,7 +2668,7 @@ public class Scene extends Graph {
    * Returns the last vertical mouse displacement.
    */
   public float mouseDY() {
-    return pApplet().mouseY - pApplet().pmouseY;
+    return pApplet.mouseY - pApplet.pmouseY;
   }
 
   /**
@@ -2855,28 +2692,28 @@ public class Scene extends Graph {
    * Returns the current mouse x coordinate.
    */
   public int mouseX() {
-    return pApplet().mouseX - _upperLeftCornerX;
+    return pApplet.mouseX - _upperLeftCornerX;
   }
 
   /**
    * Returns the current mouse y coordinate.
    */
   public int mouseY() {
-    return pApplet().mouseY - _upperLeftCornerY;
+    return pApplet.mouseY - _upperLeftCornerY;
   }
 
   /**
    * Returns the previous mouse x coordinate.
    */
   public int pmouseX() {
-    return pApplet().pmouseX - _upperLeftCornerX;
+    return pApplet.pmouseX - _upperLeftCornerX;
   }
 
   /**
    * Returns the previous mouse y coordinate.
    */
   public int pmouseY() {
-    return pApplet().pmouseY - _upperLeftCornerY;
+    return pApplet.pmouseY - _upperLeftCornerY;
   }
 
   /**

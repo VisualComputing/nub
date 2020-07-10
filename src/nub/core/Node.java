@@ -17,7 +17,6 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
-import processing.core.PShape;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -72,7 +71,7 @@ import java.util.function.Consumer;
  * <p>
  * Use {@link #view()} and {@link Graph#projection(Node, Graph.Type, float, float, float, float)}
  * when rendering the scene from the node point-of-view. Note that these methods are used by
- * the graph when a node is set as its eye, see {@link Graph#preDraw()}.
+ * the graph when a node is set as its eye, see {@link Graph#render(Node)}.
  * <p>
  * To transform a point from one node to another use {@link #location(Vector, Node)} and
  * {@link #worldLocation(Vector)}. To transform a vector (such as a normal) use
@@ -114,7 +113,8 @@ import java.util.function.Consumer;
  * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
  * and {@link #resetHint()}.
  * <h2>Ray casting</h2>
- * The ray-casting node {@link #pickingPolicy()} may be set with {@link #setPickingPolicy(int)}.
+ * The ray-casting node {@link #pickingPolicy()} may be set with
+ * {@link #setPickingPolicy(PickingPolicy)}.
  * <h2>Custom behavior</h2>
  * Implementing a custom behavior for node is a two step process:
  * <ul>
@@ -152,7 +152,10 @@ public class Node {
   }
   // TODO public because of scene.drawBullsEye
   public BullsEyeShape _bullsEyeShape;
-  protected int _pickingPolicy;
+  public enum PickingPolicy {
+    PRECISE, BULLSEYE, NONE
+  }
+  protected PickingPolicy _pickingPolicy;
 
   // ID
   protected static int _counter;
@@ -306,9 +309,10 @@ public class Node {
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
-    // TODO these two are deprecated
+    // TODO these three are deprecated
     setShape(this::graphics);
     enableHint(SHAPE);
+    setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
@@ -321,7 +325,7 @@ public class Node {
     setRotation(rotation);
     setScaling(scaling);
     enableHint(HUD | HIGHLIGHT);
-    setPickingPolicy(BULLSEYE);
+    setPickingPolicy(PickingPolicy.NONE);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -406,7 +410,7 @@ public class Node {
     this(reference, constraint, translation, rotation, scaling);
     setShape(shape);
     enableHint(SHAPE);
-    setPickingPolicy(SHAPE);
+    setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
@@ -420,7 +424,7 @@ public class Node {
     this(reference, constraint, translation, rotation, scaling);
     setShape(shape);
     enableHint(SHAPE);
-    setPickingPolicy(SHAPE);
+    setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
@@ -755,7 +759,7 @@ public class Node {
    * Used by {@link #_restoredTasks(Node)}.
    */
   protected void _registerTasks() {
-    if (!Graph.isTaskRegistered(_translationTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
       _translationTask = new InertialTask() {
         @Override
         public void action() {
@@ -763,7 +767,7 @@ public class Node {
         }
       };
     }
-    if (!Graph.isTaskRegistered(_rotationTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_rotationTask)) {
       _rotationTask = new InertialTask() {
         @Override
         public void action() {
@@ -771,7 +775,7 @@ public class Node {
         }
       };
     }
-    if (!Graph.isTaskRegistered(_orbitTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_orbitTask)) {
       _orbitTask = new InertialTask() {
         @Override
         public void action() {
@@ -779,7 +783,7 @@ public class Node {
         }
       };
     }
-    if (!Graph.isTaskRegistered(_scalingTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_scalingTask)) {
       _scalingTask = new InertialTask() {
         @Override
         public void action() {
@@ -923,18 +927,15 @@ public class Node {
    * Sets the node ray-casting {@link #pickingPolicy()}. Either the {@link #BULLSEYE} or
    * the {@link #SHAPE} {@link #hint()}.
    */
-  public void setPickingPolicy(int policy) {
-    if (policy == SHAPE || policy == BULLSEYE)
-      _pickingPolicy = policy;
-    else
-      System.out.println("Warning: the node picking policy should be set either to SHAPE or BULLSEYE. Nothing done");
+  public void setPickingPolicy(PickingPolicy policy) {
+    _pickingPolicy = policy;
   }
 
   /**
    * Returns the node ray-casting {@link #pickingPolicy()}. Either the {@link #BULLSEYE} or
    * {@link #SHAPE} {@link #hint()}.
    */
-  public int pickingPolicy() {
+  public PickingPolicy pickingPolicy() {
     return _pickingPolicy;
   }
 
@@ -1083,7 +1084,7 @@ public class Node {
    */
   public void translate(Vector vector, float inertia) {
     translate(vector);
-    if (!Graph.isTaskRegistered(_translationTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use translate(vector) instead");
       return;
     }
@@ -1220,7 +1221,7 @@ public class Node {
    */
   public void rotate(Quaternion quaternion, float inertia) {
     rotate(quaternion);
-    if (!Graph.isTaskRegistered(_rotationTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_rotationTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use rotate(quaternion) instead");
       return;
     }
@@ -1295,7 +1296,7 @@ public class Node {
    */
   public void orbit(Quaternion quaternion, Vector center, float inertia) {
     orbit(quaternion, center);
-    if (!Graph.isTaskRegistered(_orbitTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_orbitTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use orbit(quaternion, center) instead");
       return;
     }
@@ -1462,7 +1463,7 @@ public class Node {
    */
   public void scale(float scaling, float inertia) {
     scale(scaling);
-    if (!Graph.isTaskRegistered(_scalingTask)) {
+    if (!Graph.TimingHandler.isTaskRegistered(_scalingTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use scale(scaling) instead");
       return;
     }
@@ -2484,6 +2485,7 @@ public class Node {
    * @see #isCulled()
    * @see #bypass()
    */
+  // TODO move to the Graph
   public void visit() {
   }
 

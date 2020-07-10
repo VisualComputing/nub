@@ -31,10 +31,10 @@ public class TimingHandler {
    * several frames. As such, this value won't be valid until after 5-10 frames.
    */
   static public float frameRate = 60;
-  protected long _frameRateLastNanos;
+  protected static long _frameRateLastNanos;
 
   // T i m e r P o o l
-  protected HashSet<Task> _tasks;
+  protected static HashSet<Task> _tasks;
 
   /**
    * Main constructor.
@@ -48,7 +48,7 @@ public class TimingHandler {
    * It recomputes the frame rate, and executes all non-concurrent tasks found in
    * the {@link #tasks()}.
    */
-  public void handle() {
+  public static void handle() {
     _updateFrameRate();
     for (Task task : _tasks)
       if (!task.isConcurrent())
@@ -58,14 +58,14 @@ public class TimingHandler {
   /**
    * Returns the task set.
    */
-  public HashSet<Task> tasks() {
+  public static HashSet<Task> tasks() {
     return _tasks;
   }
 
   /**
    * Register a task in the set.
    */
-  public void registerTask(Task task) {
+  public static void registerTask(Task task) {
     if (task == null) {
       System.out.println("Nothing done. Task is null");
       return;
@@ -76,7 +76,7 @@ public class TimingHandler {
   /**
    * Unregisters the task.
    */
-  public void unregisterTask(Task task) {
+  public static void unregisterTask(Task task) {
     if (isTaskRegistered(task)) {
       task.stop();
       _tasks.remove(task);
@@ -86,7 +86,7 @@ public class TimingHandler {
   /**
    * Returns {@code true} if the task is registered and {@code false} otherwise.
    */
-  public boolean isTaskRegistered(Task task) {
+  public static boolean isTaskRegistered(Task task) {
     return _tasks.contains(task);
   }
 
@@ -98,10 +98,10 @@ public class TimingHandler {
    * Computation adapted from here (refer to handleDraw()):
    * https://github.com/processing/processing/blob/master/core/src/processing/core/PApplet.java
    */
-  protected void _updateFrameRate() {
+  protected static void _updateFrameRate() {
     long now = System.nanoTime();
     if (frameCount > 0) {
-      float frameTimeSecs = (now - this._frameRateLastNanos) / 1e9f;
+      float frameTimeSecs = (now - _frameRateLastNanos) / 1e9f;
       float avgFrameTimeSecs = 1.0f / frameRate;
       avgFrameTimeSecs = 0.95f * avgFrameTimeSecs + 0.05f * frameTimeSecs;
       frameRate = 1.0f / avgFrameTimeSecs;

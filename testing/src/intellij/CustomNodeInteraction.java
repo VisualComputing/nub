@@ -34,12 +34,6 @@ public class CustomNodeInteraction extends PApplet {
           pg.pushStyle();
           pg.fill(_color);
           Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
-          Scene.beginHUD(pg);
-          Vector position = scene.screenLocation(position());
-          pg.fill(isTagged(scene) ? 0 : 255, isTagged(scene) ? 255 : 0, isTagged(scene) ? 0 : 255);
-          pg.textFont(font36);
-          pg.text(_id, position.x(), position.y());
-          Scene.endHUD(pg);
           pg.popStyle();
         }
 
@@ -64,6 +58,13 @@ public class CustomNodeInteraction extends PApplet {
       scene.randomize(shapes[i]);
     }
     font36 = loadFont("FreeSans-36.vlw");
+  }
+
+  public void hud(PGraphics pg) {
+    pg.fill(2555, 0, 255);
+    pg.textFont(font36);
+    // TODO pending!
+    //pg.text(_id);
   }
 
   int randomColor() {

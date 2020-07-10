@@ -30,8 +30,8 @@ public class HolaMundoNUB extends PApplet {
   @Override
   public void setup() {
     // A. Scenes
-    // 1. Main (onscreen) Scene
-    mainScene = new Scene(this, P3D);
+    // 1. Main (Scene
+    mainScene = new Scene(createGraphics(width, height, P3D));
     mainScene.setRadius(500);
     mainScene.fit(1);
     mainScene.enableHint(Scene.AXES | Scene.GRID);
@@ -40,7 +40,7 @@ public class HolaMundoNUB extends PApplet {
     mainScene.enableHint(Scene.BACKGROUND, color(125));
     mainScene.setHUD(this::hud);
     // 2. Can (offscreen) Scene
-    canScene = new Scene(this, P3D, canSceneWidth, canSceneHeight);
+    canScene = new Scene(createGraphics(canSceneWidth, canSceneHeight, P3D));
     canScene.enableHint(Scene.BACKGROUND, color(25, 170, 150));
     canScene.setRadius(300);
     canScene.fit();

@@ -24,7 +24,7 @@ public class ViewFrustumCulling extends PApplet {
 
   public void setup() {
     // main scene
-    mainScene = new Scene(this, P3D, w, h / 2);
+    mainScene = new Scene(createGraphics(w, h / 2, P3D));
     mainScene.enableHint(Scene.BACKGROUND, color(255));
     mainScene.togglePerspective();
     mainScene.enableBoundaryEquations();
@@ -35,7 +35,7 @@ public class ViewFrustumCulling extends PApplet {
     buildOctree(root);
 
     // secondary scene
-    secondaryScene = new Scene(this, P3D, w, h / 2);
+    secondaryScene = new Scene(createGraphics(w, h / 2, P3D));
     secondaryScene.enableHint(Scene.BACKGROUND, color(185));
     secondaryScene.togglePerspective();
     secondaryScene.setRadius(200);

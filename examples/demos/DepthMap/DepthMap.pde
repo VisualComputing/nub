@@ -19,7 +19,7 @@ import nub.core.*;
 import nub.processing.*;
 
 Scene.Type shadowMapType = Scene.Type.ORTHOGRAPHIC;
-Scene scene;
+Scene scene, shadowMapScene;
 Node[] shapes;
 PGraphics shadowMap;
 PShader depthShader;
@@ -38,15 +38,17 @@ void setup() {
   depthShader.set("near", zNear);
   depthShader.set("far", zFar);
   shadowMap.shader(depthShader);
+
   scene = new Scene(this);
   scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
   scene.setRadius(max(w, h));
   scene.fit(1);
+
   shapes = new Node[20];
   for (int i = 0; i < shapes.length; i++) {
     shapes[i] = new Node() {
       @Override
-        public void graphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
         if (pg == shadowMap)
           pg.noStroke();
@@ -59,15 +61,23 @@ void setup() {
         pg.popStyle();
       }
     };
-    shapes[i].setPickingPolicy(Node.SHAPE);
+    //shapes[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
+    //shapes[i].enableHint(Node.BULLSEYE);
     shapes[i].configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
     scene.randomize(shapes[i]);
-    shapes[i].disableHint(Node.HIGHLIGHT);
+    //shapes[i].disableHint(Node.HIGHLIGHT);
   }
 
   scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
   scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
   scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
+
+  shadowMapScene = new Scene(shadowMap, scene.node("light"));
+  shadowMapScene.resetHint();
+  shadowMapScene.enableHint(Scene.BACKGROUND, color(140, 160, 125));
+  shadowMapScene.enablePicking(false);
+  //shadowMapScene.setRadius(300);
+  shadowMapScene.setType(shadowMapType);
 }
 
 void draw() {
@@ -75,14 +85,7 @@ void draw() {
   scene.render();
   // 2. Fill in shadow map using the light point of view
   if (scene.isTagValid("light")) {
-    shadowMap.beginDraw();
-    shadowMap.background(140, 160, 125);
-    Scene.render(shadowMap, scene.node("light"), shadowMapType, zNear, zFar);
-    shadowMap.endDraw();
-    // 3. Display shadow map
-    scene.beginHUD();
-    image(shadowMap, w / 2, h / 2);
-    scene.endHUD();
+    shadowMapScene.display(w / 2, h / 2);
   }
 }
 
@@ -92,8 +95,10 @@ void mouseMoved(MouseEvent event) {
       scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
     // no calling mouseTag since we need to immediately update the tagged node
     scene.updateMouseTag("light");
-    if (scene.isTagValid("light"))
+    if (scene.isTagValid("light")) {
       scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+      shadowMapScene.setEye(scene.node("light"));
+    }
   } else
     scene.mouseTag();
 }
@@ -111,8 +116,7 @@ void mouseWheel(MouseEvent event) {
   if (event.isShiftDown() && scene.isTagValid("light")) {
     depthShader.set("far", zFar += event.getCount() * 20);
     scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
-  }
-  else
+  } else
     scene.scale(event.getCount() * 20);
 }
 

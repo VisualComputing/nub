@@ -14,8 +14,8 @@ import java.nio.file.Paths;
 public class DOF extends PApplet {
   String depthPath;
   PShader depthShader, dofShader;
-  PGraphics depthPGraphics, dofPGraphics;
-  Scene scene;
+  PGraphics dofPGraphics;
+  Scene scene, depthScene;
   Node[] models;
   int mode = 2;
   boolean exact = true;
@@ -27,24 +27,30 @@ public class DOF extends PApplet {
 
   @Override
   public void setup() {
-    scene = new Scene(this, P3D, width, height);
+    scene = new Scene(createGraphics(width, height, P3D));
+    scene.enableHint(Scene.BACKGROUND, color(0));
     scene.setRadius(1000);
     scene.fit(1);
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
       models[i] = new Node(boxShape());
-      models[i].setBullsEyeSize(0.7f);
+      //models[i].setBullsEyeSize(0.7f);
       scene.randomize(models[i]);
     }
-
     // Depth shader
     // Test all the different versions
-    //depthPath = Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString();
-    depthPath = Paths.get("testing/data/depth/depth_nonlinear.glsl").toAbsolutePath().toString();
+    depthPath = Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString();
+    //depthPath = Paths.get("testing/data/depth/depth_nonlinear.glsl").toAbsolutePath().toString();
+    //depthPath = Paths.get("testing/data/depth/depth_frag.glsl").toAbsolutePath().toString();
     depthShader = loadShader(depthPath);
-    depthPGraphics = createGraphics(width, height, P3D);
-    depthPGraphics.shader(depthShader);
-
+    // TODO add proper constructor to share eye node
+    depthScene = new Scene(createGraphics(width, height, P3D), scene.eye());
+    depthScene.setRadius(1000);
+    //depthScene.fit();
+    depthScene.context().shader(depthShader);
+    // TODO make API more consistent
+    depthScene.enablePicking(false);
+    depthScene.enableHint(Scene.BACKGROUND, color(0));
     // DOF shader
     dofShader = loadShader(Paths.get("testing/data/dof/dof.glsl").toAbsolutePath().toString());
     dofShader.set("aspect", width / (float) height);
@@ -58,39 +64,29 @@ public class DOF extends PApplet {
 
   @Override
   public void draw() {
-    // 1. Draw into main buffer
-    scene.beginDraw();
-    scene.context().background(0);
+    // 1. Render into main buffer
     scene.render();
-    scene.endDraw();
-
     // 2. Draw into depth buffer
-    depthPGraphics.beginDraw();
-    depthPGraphics.background(0);
-    // only for depth_linear shader
-    // Don't pay attention to the doesn't have a uniform called "far/near" message
-    if (depthPath.matches("depth_linear.glsl")) {
-      depthShader.set("near", scene.zNear());
-      depthShader.set("far", scene.zFar());
-    }
-    scene.render(depthPGraphics);
-    depthPGraphics.endDraw();
-
+    depthScene.openContext();
+    depthShader.set("near", depthScene.zNear());
+    depthShader.set("far", depthScene.zFar());
+    depthScene.render();
+    depthScene.closeContext();
     // 3. Draw destination buffer
     dofPGraphics.beginDraw();
     dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
-    dofShader.set("tDepth", depthPGraphics);
+    dofShader.set("tDepth", depthScene.context());
     dofPGraphics.image(scene.context(), 0, 0);
     dofPGraphics.endDraw();
-
     // display one of the 3 buffers
     if (mode == 0)
-      image(scene.context(), 0, 0);
+      scene.image();
     else if (mode == 1)
-      image(depthPGraphics, 0, 0);
+      depthScene.image();
+      //image(depthScene.context(), 0, 0);
     else
       image(dofPGraphics, 0, 0);
-    println("-> frameRate: " + Scene.frameRate() + " (nub) " + frameRate + " (p5)");
+    println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");
   }
 
   PShape boxShape() {
@@ -116,10 +112,10 @@ public class DOF extends PApplet {
     if (key == 'p') {
       exact = !exact;
       for (int i = 0; i < models.length; i++)
-        if (models[i].pickingPolicy() == Node.SHAPE)
-          models[i].setPickingPolicy(Node.BULLSEYE);
+        if (models[i].pickingPolicy() == Node.PickingPolicy.PRECISE)
+          models[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
         else
-          models[i].setPickingPolicy(Node.SHAPE);
+          models[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
     }
   }
 

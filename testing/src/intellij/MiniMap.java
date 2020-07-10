@@ -12,14 +12,14 @@ public class MiniMap extends PApplet {
   boolean displayMinimap = true;
   // whilst scene is either on-screen or not, the minimap is always off-screen
   // test both cases here:
-  boolean onScreen = false;
+  boolean onScreen = true;
   boolean interactiveEye;
 
   int w = 800;
   int h = 600;
 
   //Choose P2D or P3D
-  String renderer = P3D;
+  String renderer = P2D;
 
   @Override
   public void settings() {
@@ -28,13 +28,14 @@ public class MiniMap extends PApplet {
 
   @Override
   public void setup() {
-    scene = onScreen ? new Scene(this) : new Scene(this, renderer);
+    scene = onScreen ? new Scene(this) : new Scene(createGraphics(w, h, renderer));
     scene.setRadius(1000);
     rectMode(CENTER);
     scene.fit(1);
     scene.eye().setBullsEyeSize(50);
     scene.eye().disableHint(Node.HIGHLIGHT);
-    scene.eye().enableHint(Node.BULLSEYE);
+    scene.eye().setPickingPolicy(Node.PickingPolicy.PRECISE);
+    //scene.eye().enableHint(Node.BULLSEYE);
     //scene.eye().enableHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
     scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
     models = new Node[30];
@@ -47,12 +48,12 @@ public class MiniMap extends PApplet {
         models[i].scale(3);
       }
       // set picking precision to the pixels of the node projection
-      models[i].setPickingPolicy(Node.SHAPE);
+      models[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
       scene.randomize(models[i]);
     }
     // Note that we pass the upper left corner coordinates where the minimap
     // is to be drawn (see drawing code below) to its constructor.
-    minimap = new Scene(this, renderer, w / 2, h / 2);
+    minimap = new Scene(createGraphics(w / 2, h / 2, renderer));
     minimap.setRadius(2000);
     if (renderer == P3D)
       minimap.togglePerspective();
@@ -120,11 +121,7 @@ public class MiniMap extends PApplet {
   @Override
   public void draw() {
     focus = minimap.hasMouseFocus() ? minimap : scene;
-    if (scene.isOffscreen()) {
-      scene.display();
-    } else {
-      scene.render();
-    }
+    scene.display();
     if (displayMinimap) {
       minimap.display(w / 2, h / 2);
     }

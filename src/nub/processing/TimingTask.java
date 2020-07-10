@@ -28,7 +28,7 @@ import java.util.TimerTask;
  * Do not use the task for drawing since it will not necessarily
  * run every frame.
  * <p>
- * Call {@link Scene#unregisterTask(Task)} to cancel the task.
+ * Call {@code Scene.TimingHandler.registerTask(Task)} to cancel the task.
  */
 public class TimingTask extends Task {
   java.util.Timer _timer;
@@ -40,7 +40,7 @@ public class TimingTask extends Task {
    * (i.e., a {@link #frequency()} of 25 Hz).
    */
   public TimingTask(Callback callback) {
-    super(Graph.timingHandler(), callback);
+    super(Graph.TimingHandler, callback);
     if (!Graph._seeded)
       enableConcurrence();
   }
@@ -51,7 +51,7 @@ public class TimingTask extends Task {
    * set as its {@link #callback()} method.
    */
   public TimingTask() {
-    super(Graph.timingHandler());
+    super(Graph.TimingHandler);
     if (!Graph._seeded)
       enableConcurrence();
   }
