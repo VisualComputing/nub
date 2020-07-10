@@ -411,7 +411,6 @@ public class Scene extends Graph {
    * @see #isOffscreen()
    */
   public void draw() {
-    // display visual hints in the world
     if (!isOffscreen()) {
       _renderBackBuffer();
     }
@@ -430,18 +429,13 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code if (!isOffscreen()) render(); else display(null, 0, 0)}.
+   * Same as {@code display(null, 0, 0)}.
    *
    * @see #render()
    * @see #display(Node, int, int)
    */
   public void display() {
-    if (!isOffscreen()) {
-      render();
-    }
-    else {
-      display(null, 0, 0);
-    }
+    display(null, 0, 0);
   }
 
   /**
@@ -454,26 +448,20 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code if (!isOffscreen()) render(subtree); else display(subtree, 0, 0)}.
+   * Same as {@code display(subtree, 0, 0)}.
    *
    * @see #render(Node)
    * @see #display(Node, int, int)
    */
   public void display(Node subtree) {
-    if (!isOffscreen()) {
-      render(subtree);
-    }
-    else {
-      display(subtree, 0, 0);
-    }
+    display(subtree, 0, 0);
   }
 
   /**
-   * Renders the {@code subtree} onto the off-screen scene {@link #context()} and displays it
-   * at the upper left corner: {@code (pixelX, pixelY)} of the {@link #pApplet}. Only
-   * meaningful if the graph {@link #isOffscreen()}.
-   * <p>
-   * Calls {@link #render(Node)} followed by {@link #image(int, int)}.
+   * Same as {@code render(subtree); image(x, y);}.
+   *
+   * @see #render(Node)
+   * @see #image(int, int)
    */
   public void display(Node subtree, int x, int y) {
     render(subtree);
@@ -491,6 +479,7 @@ public class Scene extends Graph {
 
   /**
    * Similar to {@link #pApplet} {@code image()}. Used to display the offscreen scene {@link #context()}.
+   * Does nothing if the scene is on-creen.
    * <p>
    * Call this method, instead of {@link #pApplet} {@code image()}, to make {@link #hasMouseFocus()}
    * work always properly.
@@ -512,18 +501,26 @@ public class Scene extends Graph {
     }
   }
 
+  /**
+   * Same as {@code displayBackBuffer(0, 0)}.
+   *
+   * @see #displayBackBuffer(int, int)
+   */
   public void displayBackBuffer() {
     displayBackBuffer(0, 0);
   }
 
-  public void displayBackBuffer(int x, int y) {
+  /**
+   * Displays the buffer nub use for picking at the given pixel coordinates.
+   */
+  public void displayBackBuffer(int pixelX, int pixelY) {
     if (_onscreenGraph != null) {
       _onscreenGraph.beginHUD();
-      _imageBackBuffer(x, y);
+      _imageBackBuffer(pixelX, pixelY);
       _onscreenGraph.endHUD();
     }
     else {
-      _imageBackBuffer(x, y);
+      _imageBackBuffer(pixelX, pixelY);
     }
   }
 
