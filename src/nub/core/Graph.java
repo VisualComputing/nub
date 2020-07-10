@@ -2673,53 +2673,6 @@ public class Graph {
     return _picking;
   }
 
-  /**
-   * Internal use. Traverse the scene {@link #nodes()}) into the
-   * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
-   * Use it as a {@code _postDraw()}.
-   */
-  protected void _renderBackBuffer() {
-    if (_picking && _bb != null && _bbCount < _bbNeed) {
-      _initBackBuffer();
-      _bbMatrixHandler.bind(projection(), view());
-      if (_subtree == null) {
-        for (Node node : _leadingNodes())
-          _renderBackBuffer(node);
-      } else {
-        if (_subtree.reference() != null) {
-          _bbMatrixHandler.pushMatrix();
-          _bbMatrixHandler.applyWorldTransformation(_subtree.reference());
-        }
-        _renderBackBuffer(_subtree);
-        if (_subtree.reference() != null) {
-          _bbMatrixHandler.popMatrix();
-        }
-      }
-      if (isOffscreen())
-        _rays.clear();
-      _endBackBuffer();
-      _bbCount = _bbNeed;
-    }
-  }
-
-  /**
-   * Used by the {@link #_renderBackBuffer()} algorithm.
-   */
-  protected void _renderBackBuffer(Node node) {
-    _bbMatrixHandler.pushMatrix();
-    _bbMatrixHandler.applyTransformation(node);
-    if (!node.isCulled()) {
-      if (node._bypass != TimingHandler.frameCount) {
-        _drawBackBuffer(node);
-        if (!isOffscreen())
-          _trackBackBuffer(node);
-      }
-      for (Node child : node.children())
-        _renderBackBuffer(child);
-    }
-    _bbMatrixHandler.popMatrix();
-  }
-
   // caches
 
   /**
@@ -3040,7 +2993,52 @@ public class Graph {
     }
   }
 
-  protected void _emitBackBufferUniforms(float r, float g, float b) {}
+  /**
+   * Internal use. Traverse the scene {@link #nodes()}) into the
+   * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
+   * Use it as a {@code _postDraw()}.
+   */
+  protected void _renderBackBuffer() {
+    if (_picking && _bb != null && _bbCount < _bbNeed) {
+      _initBackBuffer();
+      _bbMatrixHandler.bind(projection(), view());
+      if (_subtree == null) {
+        for (Node node : _leadingNodes())
+          _renderBackBuffer(node);
+      } else {
+        if (_subtree.reference() != null) {
+          _bbMatrixHandler.pushMatrix();
+          _bbMatrixHandler.applyWorldTransformation(_subtree.reference());
+        }
+        _renderBackBuffer(_subtree);
+        if (_subtree.reference() != null) {
+          _bbMatrixHandler.popMatrix();
+        }
+      }
+      if (isOffscreen())
+        _rays.clear();
+      _endBackBuffer();
+      _bbCount = _bbNeed;
+    }
+  }
+
+  /**
+   * Used by the {@link #_renderBackBuffer()} algorithm.
+   */
+  protected void _renderBackBuffer(Node node) {
+    _bbMatrixHandler.pushMatrix();
+    _bbMatrixHandler.applyTransformation(node);
+    if (!node.isCulled()) {
+      if (node._bypass != TimingHandler.frameCount) {
+        _drawBackBuffer(node);
+        if (!isOffscreen())
+          _trackBackBuffer(node);
+      }
+      for (Node child : node.children())
+        _renderBackBuffer(child);
+    }
+    _bbMatrixHandler.popMatrix();
+  }
 
   /**
    * Renders the node onto the back-buffer.
@@ -3062,6 +3060,8 @@ public class Graph {
       _displayHint(_backBuffer(), node);
     }
   }
+
+  protected void _emitBackBufferUniforms(float r, float g, float b) {}
 
   /**
    * Displays the graph and nodes hud hints.
