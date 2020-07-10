@@ -41,6 +41,7 @@ public class DOF extends PApplet {
     // Test all the different versions
     depthPath = Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString();
     //depthPath = Paths.get("testing/data/depth/depth_nonlinear.glsl").toAbsolutePath().toString();
+    //depthPath = Paths.get("testing/data/depth/depth_frag.glsl").toAbsolutePath().toString();
     depthShader = loadShader(depthPath);
     // TODO add proper constructor to share eye node
     depthScene = new Scene(createGraphics(width, height, P3D), scene.eye());
@@ -49,7 +50,7 @@ public class DOF extends PApplet {
     depthScene.context().shader(depthShader);
     // TODO make API more consistent
     depthScene.enablePicking(false);
-    depthScene.enableHint(Scene.BACKGROUND, color(125));
+    depthScene.enableHint(Scene.BACKGROUND, color(0));
     // DOF shader
     dofShader = loadShader(Paths.get("testing/data/dof/dof.glsl").toAbsolutePath().toString());
     dofShader.set("aspect", width / (float) height);
@@ -67,10 +68,8 @@ public class DOF extends PApplet {
     scene.render();
     // 2. Draw into depth buffer
     depthScene.openContext();
-    if (depthPath.matches("depth_linear.glsl")) {
-      depthShader.set("near", depthScene.zNear());
-      depthShader.set("far", depthScene.zFar());
-    }
+    depthShader.set("near", depthScene.zNear());
+    depthShader.set("far", depthScene.zFar());
     depthScene.render();
     depthScene.closeContext();
     // 3. Draw destination buffer
