@@ -49,7 +49,7 @@ public class DOF extends PApplet {
     //depthScene.fit();
     depthScene.context().shader(depthShader);
     // TODO make API more consistent
-    depthScene.enablePicking(false);
+    depthScene.picking = false;
     depthScene.enableHint(Scene.BACKGROUND, color(0));
     // DOF shader
     dofShader = loadShader(Paths.get("testing/data/dof/dof.glsl").toAbsolutePath().toString());

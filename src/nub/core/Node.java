@@ -86,11 +86,9 @@ import java.util.function.Consumer;
  * when the inertial parameter is omitted its value is defaulted to 0.
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the node hierarchy which automatically apply the local
- * node transformations described above may be achieved with {@link Graph#render()},
- * {@link Graph#render(Object)}, {@link Graph#render(Object, Matrix, Matrix)} and
- * {@link Graph#render(Object, Node, Graph.Type, int, int, float, float)}.
- * Customize the rendering traversal algorithm by overriding {@link #visit()} (see
- * also {@link #cull(boolean)} and {@link #bypass()}).
+ * node transformations described above may be achieved with {@link Graph#render()} and
+ * {@link Graph#render(Node)}. Customize the rendering traversal algorithm by
+ * overriding {@link #visit()} (see also {@link #cull} and {@link #bypass()}).
  * <h2>Constraints</h2>
  * One interesting feature of a node is that its displacements can be constrained.
  * When a {@link Constraint} is attached to a node, it filters the input of
@@ -150,8 +148,7 @@ public class Node {
   public enum BullsEyeShape {
     SQUARE, CIRCLE
   }
-  // TODO public because of scene.drawBullsEye
-  public BullsEyeShape _bullsEyeShape;
+  protected BullsEyeShape _bullsEyeShape;
   public enum PickingPolicy {
     PRECISE, BULLSEYE, NONE
   }
@@ -163,8 +160,8 @@ public class Node {
 
   // tree
   protected List<Node> _children;
-  protected boolean _culled;
-  protected boolean _tagging;
+  public boolean cull;
+  public boolean tagging;
 
   // Visual hints
   protected int _mask;
@@ -332,7 +329,7 @@ public class Node {
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
     setBullsEyeSize(30);
     _bullsEyeShape = BullsEyeShape.SQUARE;
-    _tagging = true;
+    tagging = true;
     // hints
     _highlight = 0.15f;
     int min = 2, max = 20;
@@ -1830,7 +1827,6 @@ public class Node {
    * transformation matrix (i.e., from the world to the Node coordinate system). These
    * two match when the {@link #reference()} is {@code null}.
    *
-   * @see Graph#applyTransformation(Node)
    * @see #set(Node)
    * @see #worldMatrix()
    * @see #view()
@@ -1872,7 +1868,6 @@ public class Node {
    * {@link #reference()}). These two match when the {@link #reference()} is
    * {@code null}.
    *
-   * @see Graph#applyWorldTransformation(Node)
    * @see #set(Node)
    * @see #matrix()
    * @see #view()
@@ -2382,53 +2377,6 @@ public class Node {
   // Attached nodes
 
   /**
-   * Returns {@code true} if tagging is enabled.
-   *
-   * @see #enableTagging(boolean)
-   * @see #enableTagging()
-   * @see #disableTagging()
-   */
-  public boolean isTaggingEnabled() {
-    return _tagging;
-  }
-
-  /**
-   * Same as {@code enableTagging(false)}.
-   *
-   * @see #isTaggingEnabled()
-   * @see #enableTagging()
-   * @see #enableTagging(boolean)
-   */
-  public void disableTagging() {
-    enableTagging(false);
-  }
-
-  /**
-   * Same as {@code enableTagging(true)}.
-   *
-   * @see #isTaggingEnabled()
-   * @see #enableTagging(boolean)
-   * @see #disableTagging()
-   */
-  public void enableTagging() {
-    enableTagging(true);
-  }
-
-  /**
-   * Enables tagging of the node according to {@code flag}. When tagging is disabled
-   * {@link Graph#tracks(Node, int, int)} returns {@code false} and the node cannot be
-   * tagged (i.e., {@link Graph#tag(String, Node)}, {@link Graph#updateTag(String, int, int)}
-   * and {@link Graph#tag(int, int)} never tag the node).
-   *
-   * @see #isTaggingEnabled()
-   * @see #enableTagging()
-   * @see #disableTagging()
-   */
-  public void enableTagging(boolean flag) {
-    _tagging = flag;
-  }
-
-  /**
    * Returns {@code true} if the {@code node} has been tagged by the {@code graph} at least once
    * and {@code false} otherwise.
    *
@@ -2452,7 +2400,7 @@ public class Node {
    * by derived classes.
    * <p>
    * Hierarchical culling, i.e., culling of the node and its children, should be decided here.
-   * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
+   * Set the culling flag with {@link #cull} according to your culling condition:
    *
    * <pre>
    * {@code
@@ -2481,8 +2429,6 @@ public class Node {
    * </pre>
    *
    * @see Graph#render()
-   * @see #cull(boolean)
-   * @see #isCulled()
    * @see #bypass()
    */
   // TODO move to the Graph
@@ -2490,45 +2436,8 @@ public class Node {
   }
 
   /**
-   * Same as {@code cull(true)}. Only meaningful if the node is attached to
-   * a {@code graph}.
-   *
-   * @see #cull(boolean)
-   * @see #isCulled()
-   * @see #bypass()
-   */
-  public void cull() {
-    cull(true);
-  }
-
-  /**
-   * Enables or disables {@link #visit()} of this node and its children during
-   * {@link Graph#render()}. Culling should be decided within {@link #visit()}.
-   * Only meaningful if the node is attached to a {@code graph}.
-   *
-   * @see #isCulled()
-   * @see #bypass()
-   */
-  public void cull(boolean cull) {
-    _culled = cull;
-  }
-
-  /**
-   * Returns whether or not the node culled or not. Culled nodes (and their children)
-   * will not be visited by the {@link Graph#render()} algorithm.
-   *
-   * @see #cull(boolean)
-   * @see #bypass()
-   */
-  public boolean isCulled() {
-    return _culled;
-  }
-
-  /**
    * Bypass rendering the node for the current frame. Set it before calling {@link Graph#render()}
    * or any rendering algorithm. Note that the node nor its children get culled.
-   *
-   * @see #cull(boolean)
    */
   public void bypass() {
     _bypass = TimingHandler.frameCount;
@@ -2540,7 +2449,7 @@ public class Node {
   /**
    * Calls {@link #resetIMRShape()} and {@link #resetRMRShape()}.
    *
-   * @see #setShape(PShape)
+   * @see #setShape(processing.core.PShape)
    * @see #setShape(Consumer)
    */
   public void resetShape() {
@@ -2587,7 +2496,7 @@ public class Node {
    * {@code disableHint(Node.SHAPE)} and {@code toggleHint(Node.SHAPE)}
    * to (dis)enable the hint.
    *
-   * @see #setShape(PShape)
+   * @see #setShape(processing.core.PShape)
    * @see #resetShape()
    * @see #resetIMRShape()
    * @see #resetRMRShape()
@@ -2706,12 +2615,12 @@ public class Node {
    * <li>{@link #AXES} which displays an axes hint centered at the node
    * {@link #position()} an oriented according to the node {@link #orientation()}.</li>
    * <li>{@link #HUD} which displays the node Heads-Up-Display set with
-   * {@link #setHUD(PShape)} or {@link #setHUD(Consumer)}.</li>
+   * {@link #setHUD(processing.core.PShape)} or {@link #setHUD(Consumer)}.</li>
    * <li>{@link #FRUSTUM} which displays a frustum visual representation which origin is
    * located at the node {@link #position()}. The frustum may be set up from a given
    * {@link Graph} or from low-level frustum plane params.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
-   * {@link #setShape(PShape)} or {@link #setShape(Consumer)}.</li>
+   * {@link #setShape(processing.core.PShape)} or {@link #setShape(Consumer)}.</li>
    * <li>{@link #HIGHLIGHT} which represents the scale factor to be applied to the node
    * when it gets tagged (see {@link Graph#tag(String, Node)}).</li>
    * <li>{@link #BULLSEYE} which displays a bullseye centered at the node
@@ -2720,13 +2629,7 @@ public class Node {
    * <li>{@link #TORUS} which displays a torus solenoid.</li>
    * </ol>
    * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
-   * calling a {@link Graph} rendering algorithm. Note that the {@link #AXES}, {@link #CAMERA},
-   * {@link #HIGHLIGHT}, and {@link #BULLSEYE} hints are display only when calling
-   * {@link Graph#render(Node)} or {@link Graph#render()} (but no when calling a static
-   * {@link Graph} rendering algorithm such as
-   * {@link Graph#render(Object, Node, Node, Graph.Type, int, int, float, float)} or
-   * {@link Graph#render(Object, Node, Graph.Type, int, int, float, float)}).
-   * Use {@link #configHint(int, Object...)} to configure the hint different visual aspects.
+   * calling a {@link Graph} rendering algorithm.
    *
    * @see #enableHint(int)
    * @see #configHint(int, Object...)

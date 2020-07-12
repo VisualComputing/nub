@@ -49,7 +49,7 @@ public class HolaMundoNUB extends PApplet {
     // B. Nodes
     // 1. root (mainScene and hintScene only)
     root = new Node();
-    root.disableTagging();
+    root.tagging = false;
     // 2. torus
     torus = new Node(root, this::torus);
     /*

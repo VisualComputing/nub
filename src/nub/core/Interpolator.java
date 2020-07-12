@@ -1050,8 +1050,8 @@ public class Interpolator {
       //if (!node.isHintEnable(Node.SHAPE)) {
         node.enableHint(Node.BULLSEYE);
         node.setPickingPolicy(Node.PickingPolicy.BULLSEYE);
-        if (!node.isTaggingEnabled()) {
-          node.enableTagging();
+        if (!node.tagging) {
+          node.tagging = true;
         }
       //}
       if (isHintEnable(Interpolator.AXES)) {
@@ -1076,7 +1076,7 @@ public class Interpolator {
       //if (!node.isHintEnable(Node.SHAPE)) {
         node.disableHint(Node.BULLSEYE);
         //if (node.isTaggingEnabled()) {
-          node.disableTagging();
+          node.tagging = false;
         //}
       //}
       if (!isHintEnable(Interpolator.AXES)) {

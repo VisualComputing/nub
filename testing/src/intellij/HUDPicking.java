@@ -56,7 +56,7 @@ public class HUDPicking extends PApplet {
     hudPicking.scale(10);
     hudPicking.translate(-200, -200, 0);
     Node torus = new Node(hudPicking);
-    torus.disableTagging();
+    torus.tagging = false;
     //torus.setHUD(pshape);
     //torus.setHUD(this::hud);
     torus.enableHint(Node.TORUS, color(255, 0, 0));

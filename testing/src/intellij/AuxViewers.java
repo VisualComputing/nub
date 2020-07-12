@@ -28,7 +28,7 @@ public class AuxViewers extends PApplet {
     //scene1.enableHint(Scene.BACKGROUND, color(75, 25, 15, 100));
     scene1.enableHint(Scene.BACKGROUND, color(75, 25, 15));
     scene1.enableHint(Scene.GRID, color(0, 225, 15));
-    scene1.eye().disableTagging();
+    scene1.eye().tagging = false;
     scene1.setRadius(1000);
     scene1.fit(1);
     shapes = new Node[15];
@@ -55,7 +55,7 @@ public class AuxViewers extends PApplet {
     scene2.enableHint(Scene.BACKGROUND | Scene.AXES);
     //scene2.configHint(Scene.BACKGROUND, color(75, 25, 175, 100));
     scene2.configHint(Scene.BACKGROUND, color(75, 25, 175));
-    scene2.eye().disableTagging();
+    scene2.eye().tagging = false;
     scene2.setRadius(1000);
     scene2.fit(1);
 
@@ -64,7 +64,7 @@ public class AuxViewers extends PApplet {
     scene3.enableHint(Scene.BACKGROUND | Scene.AXES);
     //scene3.configHint(Scene.BACKGROUND, color(175, 200, 20, 170));
     scene3.configHint(Scene.BACKGROUND, color(175, 200, 20));
-    scene3.eye().disableTagging();
+    scene3.eye().tagging = false;
     scene3.setRadius(1000);
     scene3.fit(1);
   }

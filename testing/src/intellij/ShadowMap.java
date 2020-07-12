@@ -57,7 +57,7 @@ public class ShadowMap extends PApplet {
     shadowMapScene = new ShadowScene(shadowMap, scene.node("light"));
     shadowMapScene.resetHint();
     shadowMapScene.enableHint(Scene.BACKGROUND, color(140, 160, 125));
-    shadowMapScene.enablePicking(false);
+    shadowMapScene.picking = false;
     //shadowMapScene.setRadius(300);
     shadowMapScene.setType(shadowMapType);
     // */

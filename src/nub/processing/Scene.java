@@ -754,7 +754,7 @@ public class Scene extends Graph {
   protected boolean _tracks(Node node, int pixelX, int pixelY) {
     if (node == null || isEye(node))
       return false;
-    if (!node.isTaggingEnabled())
+    if (!node.tagging)
       return false;
     int index = pixelY * width() + pixelX;
     if (_backBuffer().pixels != null)
@@ -2302,7 +2302,7 @@ public class Scene extends Graph {
    * @see #_drawCircledBullsEye(Node)
    */
   protected void _drawBullsEye(Node node) {
-    if (node._bullsEyeShape == Node.BullsEyeShape.SQUARE)
+    if (_bullsEyeShape(node) == Node.BullsEyeShape.SQUARE)
       _drawSquaredBullsEye(node);
     else
       _drawCircledBullsEye(node);

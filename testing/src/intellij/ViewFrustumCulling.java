@@ -51,7 +51,7 @@ public class ViewFrustumCulling extends PApplet {
   public void draw() {
     focus = mainScene.hasMouseFocus() ? mainScene : secondaryScene;
     // culling condition should be retested every frame
-    root.cull(false);
+    root.cull = false;
     bypass = false;
     mainScene.display();
     bypass = true;
@@ -93,14 +93,14 @@ public class ViewFrustumCulling extends PApplet {
 
   class OctreeNode extends Node {
     OctreeNode() {
-      disableTagging();
+      tagging = false;
     }
 
     OctreeNode(OctreeNode node, Vector vector) {
       super(node);
       scale(0.5f);
       translate(Vector.multiply(vector, scaling() / 2));
-      disableTagging();
+      tagging = false;
     }
 
     float level() {
@@ -126,7 +126,7 @@ public class ViewFrustumCulling extends PApplet {
           worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
         case VISIBLE:
           for (Node node : children())
-            node.cull();
+            node.cull = true;
           break;
         case SEMIVISIBLE:
           if (!children().isEmpty()) {
@@ -134,11 +134,11 @@ public class ViewFrustumCulling extends PApplet {
             bypass();
             // ... but don't cull its children either
             for (Node node : children())
-              node.cull(false);
+              node.cull = false;
           }
           break;
         case INVISIBLE:
-          cull();
+          cull = true;
           break;
       }
     }

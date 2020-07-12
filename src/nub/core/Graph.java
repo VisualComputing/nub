@@ -194,7 +194,7 @@ public class Graph {
   protected int _width, _height;
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
   // _bb : picking buffer
-  protected boolean _picking;
+  public boolean picking;
   protected long _bbNeed, _bbCount;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected boolean _isProjectionViewInverseCached;
@@ -397,7 +397,7 @@ public class Graph {
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
     enableHint(HUD | SHAPE);
-    enablePicking(true);
+    picking = true;
     // middle grey encoded as a processing int rgb color
     _gridStroke = -8553091;
     _gridType = GridType.DOTS;
@@ -1867,7 +1867,7 @@ public class Graph {
       //_interpolator.addKeyFrame(node.detach(), duration);
       // doesn't work always since the node may be moving (see the Flock example)
       Node dummy = new Node(node);
-      dummy.disableTagging();
+      dummy.tagging = false;
       _interpolator.addKeyFrame(dummy, duration);
       _interpolator.run();
     }
@@ -2391,7 +2391,7 @@ public class Graph {
    * @see #tracks(Node, int, int)
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
-   * @see Node#enableTagging(boolean)
+   * @see Node#tagging
    * @see Node#bullsEyeSize()
    * @see Node#setBullsEyeSize(float)
    * @see #tag(String, int, int)
@@ -2462,7 +2462,7 @@ public class Graph {
    * @see #tracks(Node, int, int)
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
-   * @see Node#enableTagging(boolean)
+   * @see Node#tagging
    * @see Node#bullsEyeSize()
    * @see Node#setBullsEyeSize(float)
    * @see #tag(String, int, int)
@@ -2485,7 +2485,7 @@ public class Graph {
    * @see #tracks(Node, int, int)
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
-   * @see Node#enableTagging(boolean)
+   * @see Node#tagging
    * @see Node#bullsEyeSize()
    * @see Node#setBullsEyeSize(float)
    * @see #tag(String, int, int)
@@ -2505,23 +2505,23 @@ public class Graph {
    * Use internally by {@link #updateTag(String, int, int)}.
    */
   protected void _track(String tag, Node node, int pixelX, int pixelY) {
-    if (node(tag) == null && node.isTaggingEnabled() && (node._bypass != TimingHandler.frameCount))
+    if (node(tag) == null && node.tagging == true && (node._bypass != TimingHandler.frameCount))
       if (tracks(node, pixelX, pixelY)) {
         tag(tag, node);
         return;
       }
-    if (!node.isCulled() && node(tag) == null)
+    if (!node.cull && node(tag) == null)
       for (Node child : node.children())
         _track(tag, child, pixelX, pixelY);
   }
 
   protected boolean _precisePicking(Node node) {
-    return _picking && node.isTaggingEnabled() && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.PRECISE && _bb != null &&
+    return picking && node.tagging == true && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.PRECISE && _bb != null &&
             (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM) || node.isHintEnable(Node.BONE));
   }
 
   protected boolean _bullseyePicking(Node node) {
-    return _picking && node.isTaggingEnabled() && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.BULLSEYE
+    return picking && node.tagging == true && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.BULLSEYE
             /* && (node.isHintEnable(Node.BULLSEYE) || node.isHintEnable(Node.AXES) || node.isHintEnable(Node.CAMERA)) */;
   }
 
@@ -2533,7 +2533,7 @@ public class Graph {
    * @see #removeTag(String)
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
-   * @see Node#enableTagging(boolean)
+   * @see Node#tagging
    * @see Node#bullsEyeSize()
    * @see Node#setBullsEyeSize(float)
    */
@@ -2566,7 +2566,7 @@ public class Graph {
   protected boolean _tracks(Node node, int pixelX, int pixelY, Vector projection) {
     if (node == null || isEye(node) || projection == null)
       return false;
-    if (!node.isTaggingEnabled())
+    if (!node.tagging)
       return false;
     float threshold = node.bullsEyeSize() < 1 ?
         100 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) :
@@ -2603,7 +2603,7 @@ public class Graph {
    * @see #tracks(Node, int, int)
    * @see #tag(String, Node)
    * @see #hasTag(String, Node)
-   * @see Node#enableTagging(boolean)
+   * @see Node#tagging
    * @see Node#bullsEyeSize()
    * @see Node#setBullsEyeSize(float)
    * @see #tag(int, int)
@@ -2660,18 +2660,6 @@ public class Graph {
   protected void _initFrontBuffer() {}
 
   protected void _endFrontBuffer() {}
-
-  public void enablePicking(boolean enable) {
-    _picking = enable;
-  }
-
-  public void togglePicking() {
-    _picking = !_picking;
-  }
-
-  public boolean isPickingEnabled() {
-    return _picking;
-  }
 
   // caches
 
@@ -2908,8 +2896,7 @@ public class Graph {
    *
    * @see #render(Node)
    * @see Node#visit()
-   * @see Node#cull(boolean)
-   * @see Node#isCulled()
+   * @see Node#cull
    * @see Node#bypass()
    * @see Node#setShape(Consumer)
    * @see Node#setShape(processing.core.PShape)
@@ -2927,8 +2914,7 @@ public class Graph {
    * (refer to the {@link Node} documentation).
    *
    * @see Node#visit()
-   * @see Node#cull(boolean)
-   * @see Node#isCulled()
+   * @see Node#cull
    * @see Node#bypass()
    * @see Node#setShape(Consumer)
    * @see Node#setShape(processing.core.PShape)
@@ -2959,7 +2945,7 @@ public class Graph {
     _matrixHandler.pushMatrix();
     _matrixHandler.applyTransformation(node);
     node.visit();
-    if (!node.isCulled()) {
+    if (!node.cull) {
       if (node._bypass != TimingHandler.frameCount) {
         _trackFrontBuffer(node);
         if (isOffscreen())
@@ -2999,7 +2985,7 @@ public class Graph {
    * Use it as a {@code _postDraw()}.
    */
   protected void _renderBackBuffer() {
-    if (_picking && _bb != null && _bbCount < _bbNeed) {
+    if (picking && _bb != null && _bbCount < _bbNeed) {
       _initBackBuffer();
       _bbMatrixHandler.bind(projection(), view());
       if (_subtree == null) {
@@ -3028,7 +3014,7 @@ public class Graph {
   protected void _renderBackBuffer(Node node) {
     _bbMatrixHandler.pushMatrix();
     _bbMatrixHandler.applyTransformation(node);
-    if (!node.isCulled()) {
+    if (!node.cull) {
       if (node._bypass != TimingHandler.frameCount) {
         _drawBackBuffer(node);
         if (!isOffscreen())
@@ -3044,8 +3030,7 @@ public class Graph {
    * Renders the node onto the back-buffer.
    *
    * @see #render()
-   * @see Node#cull(boolean)
-   * @see Node#isCulled()
+   * @see Node#cull
    * @see Node#bypass()
    * @see Node#visit()
    * @see Node#setShape(Consumer)
@@ -3141,7 +3126,7 @@ public class Graph {
    * @see #updateTag(String, int, int)
    * @see #removeTag(String)
    * @see #hasTag(String, Node)
-   * @see Node#enableTagging(boolean)
+   * @see Node#tagging
    */
   public void tag(String tag, Node node) {
     if (node == null) {
@@ -3152,7 +3137,7 @@ public class Graph {
       System.out.println("Warning. Cannot tag the eye!");
       return;
     }
-    if (!node.isTaggingEnabled()) {
+    if (!node.tagging) {
       System.out.println("Warning. Node cannot be tagged! Enable tagging on the node first by call node.enableTagging(true)");
       return;
     }
@@ -3244,11 +3229,11 @@ public class Graph {
    * Disables tagging the node. Calls {@code unTag(node)} and then {@code node.disableTagging()}.
    *
    * @see #untag(Node)
-   * @see Node#disableTagging()
+   * @see Node#tagging
    */
   public void disableTagging(Node node) {
     untag(node);
-    node.disableTagging();
+    node.tagging = false;
   }
 
   /**
@@ -4938,6 +4923,10 @@ public class Graph {
 
   protected float _zFar(Node node) {
     return node._zFar;
+  }
+
+  protected Node.BullsEyeShape _bullsEyeShape(Node node) {
+    return node._bullsEyeShape;
   }
 
   // Interpolator

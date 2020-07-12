@@ -64,7 +64,7 @@ public class SMHL extends PApplet {
       }
     };
     // */
-    n1.disableTagging();
+    n1.tagging = false;
     n2 = new Node(this::landscape2);
     /*
     n2 = new Node() {
@@ -84,8 +84,8 @@ public class SMHL extends PApplet {
       }
     };
     // */
-    n2.disableTagging();
-    n2.cull();
+    n2.tagging = false;
+    n2.cull = true;
     n3 = new Node(this::landscape3);
     /*
     n3 = new Node() {
@@ -105,9 +105,10 @@ public class SMHL extends PApplet {
       }
     };
     // */
-    n3.disableTagging();
-    n3.cull();
-    new Node(this::floor).disableTagging();
+    n3.tagging = false;
+    n3.cull = true;
+    Node floor = new Node(this::floor);
+    floor.tagging = false;
     /*
     f = new Node() {
       @Override
@@ -168,7 +169,7 @@ public class SMHL extends PApplet {
     shadowMapScene = new ShadowScene(shadowMap, light);
     shadowMapScene.resetHint();
     shadowMapScene.enableHint(Scene.BACKGROUND, 0xffffffff);
-    shadowMapScene.enablePicking(false);
+    shadowMapScene.picking = false;
     //shadowMapScene.setRadius(300);
     shadowMapScene.setType(shadowMapType);
     // */
@@ -250,9 +251,9 @@ public class SMHL extends PApplet {
 
   public void keyPressed() {
     if (key == '1' || key == '2' || key == '3') {
-      n1.cull(key != '1');
-      n2.cull(key != '2');
-      n3.cull(key != '3');
+      n1.cull = key != '1';
+      n2.cull = key != '2';
+      n3.cull = key != '3';
     } else if (key == ' ') {
       shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
       light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 0.195f : tan(fov / 2));
