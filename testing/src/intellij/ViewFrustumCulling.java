@@ -1,5 +1,6 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -10,10 +11,9 @@ import processing.event.MouseEvent;
 public class ViewFrustumCulling extends PApplet {
   OctreeNode root;
   Scene mainScene, secondaryScene, focus;
-  boolean bypass;
 
-  int w = 1000;
-  int h = 800;
+  int w = 700;
+  int h = 700;
   //octree
   float a = 220, b = 100, c = 280;
   int levels = 4;
@@ -36,6 +36,9 @@ public class ViewFrustumCulling extends PApplet {
 
     // secondary scene
     secondaryScene = new Scene(createGraphics(w, h / 2, P3D));
+    // cull only against main scene
+    secondaryScene.visit = false;
+    secondaryScene.enableHint(Node.FRUSTUM, mainScene, color(255, 0, 0, 125));
     secondaryScene.enableHint(Scene.BACKGROUND, color(185));
     secondaryScene.togglePerspective();
     secondaryScene.setRadius(200);
@@ -52,9 +55,7 @@ public class ViewFrustumCulling extends PApplet {
     focus = mainScene.hasMouseFocus() ? mainScene : secondaryScene;
     // culling condition should be retested every frame
     root.cull = false;
-    bypass = false;
     mainScene.display();
-    bypass = true;
     secondaryScene.display(0, h / 2);
   }
 
@@ -117,13 +118,34 @@ public class ViewFrustumCulling extends PApplet {
     }
 
     // The visit() method is called just before the graphics(PGraphics) method
+    /*
+    @Override
+    public void visit(Graph graph) {
+      switch (graph.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
+          worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
+        case VISIBLE:
+          for (Node node : children())
+            node.cull = true;
+          break;
+        case SEMIVISIBLE:
+          if (!children().isEmpty()) {
+            // don't render the node...
+            bypass();
+            // ... but don't cull its children either
+            for (Node node : children())
+              node.cull = false;
+          }
+          break;
+        case INVISIBLE:
+          cull = true;
+          break;
+      }
+    }
+    // */
     @Override
     public void visit() {
-      // cull only against main scene
-      if (bypass)
-        return;
       switch (mainScene.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
-          worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
+              worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
         case VISIBLE:
           for (Node node : children())
             node.cull = true;

@@ -193,6 +193,7 @@ public class Graph {
   protected int _renderCount;
   protected int _width, _height;
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
+  public boolean visit;
   // _bb : picking buffer
   public boolean picking;
   protected long _bbNeed, _bbCount;
@@ -398,6 +399,7 @@ public class Graph {
     setZClippingCoefficient((float) Math.sqrt(3.0f));
     enableHint(HUD | SHAPE);
     picking = true;
+    visit = true;
     // middle grey encoded as a processing int rgb color
     _gridStroke = -8553091;
     _gridType = GridType.DOTS;
@@ -2891,11 +2893,11 @@ public class Graph {
 
   /**
    * Renders the node tree onto the {@link #context()} from the {@link #eye()} viewpoint.
-   * Calls {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
+   * Calls {@link Node#visit(Graph)} on each visited node (refer to the {@link Node} documentation).
    * Same as {@code render(null)}.
    *
    * @see #render(Node)
-   * @see Node#visit()
+   * @see Node#visit(Graph)
    * @see Node#cull
    * @see Node#bypass()
    * @see Node#setShape(Consumer)
@@ -2910,10 +2912,10 @@ public class Graph {
    * when {@code subtree} is {@code null}) onto the {@link #context()} from the {@link #eye()}
    * viewpoint, and calls {@link #closeContext()}.
    * <p>
-   * Note that the rendering algorithm calls {@link Node#visit()} on each visited node
+   * Note that the rendering algorithm calls {@link Node#visit(Graph)} on each visited node
    * (refer to the {@link Node} documentation).
    *
-   * @see Node#visit()
+   * @see Node#visit(Graph)
    * @see Node#cull
    * @see Node#bypass()
    * @see Node#setShape(Consumer)
@@ -2944,7 +2946,10 @@ public class Graph {
   protected void _render(Node node) {
     _matrixHandler.pushMatrix();
     _matrixHandler.applyTransformation(node);
-    node.visit();
+    if (visit) {
+      node.visit();
+      node.visit(this);
+    }
     if (!node.cull) {
       if (node._bypass != TimingHandler.frameCount) {
         _trackFrontBuffer(node);
@@ -3032,7 +3037,7 @@ public class Graph {
    * @see #render()
    * @see Node#cull
    * @see Node#bypass()
-   * @see Node#visit()
+   * @see Node#visit(Graph)
    * @see Node#setShape(Consumer)
    * @see Node#setShape(processing.core.PShape)
    */
