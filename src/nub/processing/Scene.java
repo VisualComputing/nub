@@ -777,7 +777,27 @@ public class Scene extends Graph {
 
   @Override
   protected void _endBackBuffer() {
-    super._endBackBuffer();
+    if (!_hudSet.isEmpty()) {
+      _bbMatrixHandler.beginHUD(width(), height());
+      for (Node node : _hudSet) {
+        if (node.isPickingModeEnable(Node.HUD)) {
+          _emitBackBufferUniforms(node);
+          _backBuffer().pushMatrix();
+          Vector location = screenLocation(node);
+          if (location != null) {
+            _backBuffer().translate(location.x(), location.y());
+            if (node._imrHUD != null) {
+              node._imrHUD.accept(_backBuffer());
+            }
+            if (node._rmrHUD != null) {
+              _backBuffer().shape(node._rmrHUD);
+            }
+          }
+          _backBuffer().popMatrix();
+        }
+      }
+      _bbMatrixHandler.endHUD();
+    }
     _backBuffer().popStyle();
     _backBuffer().endDraw();
     _backBuffer().loadPixels();
@@ -799,11 +819,14 @@ public class Scene extends Graph {
   }
 
   @Override
-  protected void _emitBackBufferUniforms(float r, float g, float b) {
+  protected void _emitBackBufferUniforms(Node node) {
     // TODO How to deal with these commands: breaks picking in Luxo when they're moved to the constructor
     // Seems related to: PassiveTransformations
     // funny, only safe way. Otherwise break things horribly when setting node shapes
     // and there are more than one node holding a shape
+    float r = (float) (node.id() & 255) / 255.f;
+    float g = (float) ((node.id() >> 8) & 255) / 255.f;
+    float b = (float) ((node.id() >> 16) & 255) / 255.f;
     _backBuffer().shader(_triangleShader);
     _backBuffer().shader(_lineShader, PApplet.LINES);
     _backBuffer().shader(_pointShader, PApplet.POINTS);
@@ -817,41 +840,32 @@ public class Scene extends Graph {
     if (!_hudSet.isEmpty() || (isHintEnable(HUD) && ((_imrHUD != null) || _rmrHUD != null))) {
       context().pushStyle();
       beginHUD();
-      if (!_hudSet.isEmpty()) _displayNodeHUD(context());
-      if (isHintEnable(HUD) && ((_imrHUD != null) || _rmrHUD != null)) _displayGraphHUD();
+      if (!_hudSet.isEmpty()) {
+        for (Node node : _hudSet) {
+          context().pushMatrix();
+          Vector location = screenLocation(node);
+          if (location != null) {
+            context().translate(location.x(), location.y());
+            if (node._imrHUD != null) {
+              node._imrHUD.accept(context());
+            }
+            if (node._rmrHUD != null) {
+              context().shape(node._rmrHUD);
+            }
+          }
+          context().popMatrix();
+        }
+      }
+      if (isHintEnable(HUD) && ((_imrHUD != null) || _rmrHUD != null)) {
+        if (_imrHUD != null) {
+          _imrHUD.accept(context());
+        }
+        if (_rmrHUD != null) {
+          context().shape(_rmrHUD);
+        }
+      }
       endHUD();
       context().popStyle();
-    }
-  }
-
-  @Override
-  protected void _displayNodeHUD(Object context) {
-    if (context instanceof PGraphics) {
-      PGraphics pg = (PGraphics) context;
-      for (Node node : _hudSet) {
-        pg.pushMatrix();
-        Vector location = screenLocation(node);
-        if (location != null) {
-          pg.translate(location.x(), location.y());
-          if (node._imrHUD != null) {
-            node._imrHUD.accept(pg);
-          }
-          if (node._rmrHUD != null) {
-            pg.shape(node._rmrHUD);
-          }
-        }
-        pg.popMatrix();
-      }
-    }
-  }
-
-  @Override
-  protected void _displayGraphHUD() {
-    if (_imrHUD != null) {
-      _imrHUD.accept(context());
-    }
-    if (_rmrHUD != null) {
-      context().shape(_rmrHUD);
     }
   }
 
@@ -962,6 +976,7 @@ public class Scene extends Graph {
 
   @Override
   protected void _displayBackHint(Node node) {
+    _emitBackBufferUniforms(node);
     PGraphics pg = _backBuffer();
     if (node.isHintEnable(Node.SHAPE) && node.isPickingModeEnable(Node.SHAPE)) {
       if (_rmrShape(node) != null) {

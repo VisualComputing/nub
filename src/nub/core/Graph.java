@@ -2662,9 +2662,7 @@ public class Graph {
 
   protected void _initBackBuffer() {}
 
-  protected void _endBackBuffer() {
-    if (!_hudSet.isEmpty()) _displayNodeHUD(_bb);
-  }
+  protected void _endBackBuffer() {}
 
   protected void _initFrontBuffer() {}
 
@@ -2962,33 +2960,26 @@ public class Graph {
         _trackFrontBuffer(node);
         if (isOffscreen())
           _trackBackBuffer(node);
-        _drawFrontBuffer(node);
+        if (_precisePicking(node))
+          _bbNeed = TimingHandler.frameCount;
+        if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
+          _matrixHandler.pushMatrix();
+          float scl = 1 + node._highlight;
+          // TODO 2d case needs testing
+          if (is2D())
+            _matrixHandler.scale(scl, scl);
+          else
+            _matrixHandler.scale(scl, scl, scl);
+          _displayFrontHint(node);
+          _matrixHandler.popMatrix();
+        } else {
+          _displayFrontHint(node);
+        }
       }
       for (Node child : node.children())
         _render(child);
     }
     _matrixHandler.popMatrix();
-  }
-
-  /**
-   * Renders the node onto the front buffer. Used by the rendering algorithms.
-   */
-  protected void _drawFrontBuffer(Node node) {
-    if (_precisePicking(node))
-      _bbNeed = TimingHandler.frameCount;
-    if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
-      _matrixHandler.pushMatrix();
-      float scl = 1 + node._highlight;
-      // TODO 2d case needs testing
-      if (is2D())
-        _matrixHandler.scale(scl, scl);
-      else
-        _matrixHandler.scale(scl, scl, scl);
-      _displayFrontHint(node);
-      _matrixHandler.popMatrix();
-    } else {
-      _displayFrontHint(node);
-    }
   }
 
   /**
@@ -3028,7 +3019,9 @@ public class Graph {
     _bbMatrixHandler.applyTransformation(node);
     if (!node.cull) {
       if (node._bypass != TimingHandler.frameCount) {
-        _drawBackBuffer(node);
+        if (_precisePicking(node)) {
+          _displayBackHint(node);
+        }
         if (!isOffscreen())
           _trackBackBuffer(node);
       }
@@ -3038,45 +3031,14 @@ public class Graph {
     _bbMatrixHandler.popMatrix();
   }
 
-  /**
-   * Renders the node onto the back-buffer.
-   *
-   * @see #render()
-   * @see Node#cull
-   * @see Node#bypass()
-   * @see Node#visit(Graph)
-   * @see Node#setShape(Consumer)
-   * @see Node#setShape(processing.core.PShape)
-   */
-  protected void _drawBackBuffer(Node node) {
-    if (_precisePicking(node)) {
-      float r = (float) (node.id() & 255) / 255.f;
-      float g = (float) ((node.id() >> 8) & 255) / 255.f;
-      float b = (float) ((node.id() >> 16) & 255) / 255.f;
-      _emitBackBufferUniforms(r, g, b);
-      _displayBackHint(node);
-    }
-  }
-
-  protected void _emitBackBufferUniforms(float r, float g, float b) {}
+  protected void _emitBackBufferUniforms(Node node) {}
 
   /**
-   * Displays all nodes' hud hint.
+   * Displays the graph and nodes hud hint.
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
-  protected void _displayNodeHUD(Object context) {
-  }
-
   protected void _displayHUD() {
-  }
-
-  /**
-   * Displays the graph hud hint.
-   * <p>
-   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
-   */
-  protected void _displayGraphHUD() {
   }
 
   /**
