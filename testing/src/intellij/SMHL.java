@@ -107,8 +107,7 @@ public class SMHL extends PApplet {
     // */
     n3.tagging = false;
     n3.cull = true;
-    Node floor = new Node(this::floor);
-    floor.tagging = false;
+    new Node(this::floor).tagging = false;
     /*
     f = new Node() {
       @Override
@@ -135,7 +134,7 @@ public class SMHL extends PApplet {
     //shadowMap.noSmooth();
 
     light = new Node();
-    light.setPickingPolicy(Node.PickingPolicy.BULLSEYE);
+    light.togglePickingMode(Node.AXES | Node.CAMERA);
     light.enableHint(Node.BULLSEYE | Node.AXES | Node.CAMERA);
     light.configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
     //light.resetHint();

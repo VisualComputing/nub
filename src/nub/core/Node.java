@@ -105,14 +105,13 @@ import java.util.function.Consumer;
  * <h2>Visual hints</h2>
  * The node space visual representation may be configured using the following hints:
  * {@link #CAMERA}, {@link #AXES}, {@link #HUD}, {@link #FRUSTUM}, {@link #SHAPE},
- * {@link #HIGHLIGHT}, {@link #BULLSEYE}, and {@link #TORUS}.
+ * {@link #BULLSEYE}, and {@link #TORUS}.
  * <p>
  * See {@link #hint()}, {@link #configHint(int, Object...)} {@link #enableHint(int)},
  * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
  * and {@link #resetHint()}.
  * <h2>Ray casting</h2>
- * The ray-casting node {@link #pickingPolicy()} may be set with
- * {@link #setPickingPolicy(PickingPolicy)}.
+ * The ray-casting node {@link #pickingMode()} may be set with {@link #enablePickingMode(int)}.
  * <h2>Custom behavior</h2>
  * Implementing a custom behavior for node is a two step process:
  * <ul>
@@ -149,10 +148,6 @@ public class Node {
     SQUARE, CIRCLE
   }
   protected BullsEyeShape _bullsEyeShape;
-  public enum PickingPolicy {
-    PRECISE, BULLSEYE, NONE
-  }
-  protected PickingPolicy _pickingPolicy;
 
   // ID
   protected static int _counter;
@@ -164,17 +159,17 @@ public class Node {
   public boolean tagging;
 
   // Visual hints
+  protected int _pickingMode;
   protected int _mask;
   public final static int CAMERA = 1 << 0;
   public final static int AXES = Graph.AXES;
   public final static int HUD = Graph.HUD;
   public final static int FRUSTUM = Graph.FRUSTUM;
   public final static int SHAPE = Graph.SHAPE;
-  public final static int HIGHLIGHT = 1 << 5;
-  public final static int BULLSEYE = 1 << 6;
-  public final static int TORUS = 1 << 7;
-  public final static int CONSTRAINT = 1 << 8;
-  public final static int BONE = 1 << 9;
+  public final static int BULLSEYE = 1 << 5;
+  public final static int TORUS = 1 << 6;
+  public final static int CONSTRAINT = 1 << 7;
+  public final static int BONE = 1 << 8;
   protected float _highlight;
   // Frustum
   protected int _frustumColor;
@@ -300,16 +295,14 @@ public class Node {
    * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
    * as {@link #constraint()}, having {@code translation}, {@code rotation} and {@code scaling} as
    * the {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
-   * The {@link #bullsEyeSize()} is set to {@code 0.2} and the {@link #HIGHLIGHT} hint
+   * The {@link #bullsEyeSize()} is set to {@code 0.2} and the {@link #highlight()} hint
    * magnitude to {@code 0.15}.
    */
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
-    // TODO these three are deprecated
+    // TODO deprecated
     setShape(this::graphics);
-    enableHint(SHAPE);
-    setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
@@ -321,8 +314,7 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    enableHint(HUD | HIGHLIGHT);
-    setPickingPolicy(PickingPolicy.NONE);
+    enablePickingMode(CAMERA | AXES | HUD | FRUSTUM | SHAPE | BULLSEYE | TORUS | CONSTRAINT | BONE);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -406,8 +398,6 @@ public class Node {
   public Node(Node reference, Constraint constraint, Consumer<processing.core.PGraphics> shape, Vector translation, Quaternion rotation, float scaling) {
     this(reference, constraint, translation, rotation, scaling);
     setShape(shape);
-    enableHint(SHAPE);
-    setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
@@ -415,13 +405,11 @@ public class Node {
    * as {@link #constraint()}, {@code shape}, having {@code translation},
    * {@code rotation} and {@code scaling} as the {@link #translation()}, {@link #rotation()}
    * and {@link #scaling()}, respectively. The {@link #bullsEyeSize()} is set to
-   * {@code 0} and the {@link #HIGHLIGHT} hint to {@code 0.15}.
+   * {@code 0} and the {@link #highlight()} hint to {@code 0.15}.
    */
   public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
     this(reference, constraint, translation, rotation, scaling);
     setShape(shape);
-    enableHint(SHAPE);
-    setPickingPolicy(PickingPolicy.PRECISE);
   }
 
   /**
@@ -921,22 +909,6 @@ public class Node {
   // PRECISION
 
   /**
-   * Sets the node ray-casting {@link #pickingPolicy()}. Either the {@link #BULLSEYE} or
-   * the {@link #SHAPE} {@link #hint()}.
-   */
-  public void setPickingPolicy(PickingPolicy policy) {
-    _pickingPolicy = policy;
-  }
-
-  /**
-   * Returns the node ray-casting {@link #pickingPolicy()}. Either the {@link #BULLSEYE} or
-   * {@link #SHAPE} {@link #hint()}.
-   */
-  public PickingPolicy pickingPolicy() {
-    return _pickingPolicy;
-  }
-
-  /**
    * Sets the {@link #bullsEyeSize()} of the {@link #BULLSEYE} {@link #hint()}.
    *
    * @see #bullsEyeSize()
@@ -945,6 +917,19 @@ public class Node {
     if (size <= 0)
       System.out.println("Warning: bulls eye size should be positive. Nothing done");
     _bullsEyeSize = size;
+  }
+
+  public void setHighlight(float highlight) {
+    float val = Math.abs(highlight);
+    while (val > 1)
+      val /= 10;
+    if (val != highlight)
+      System.out.println("Warning: highlight should be in [0..1]. Setting it as " + val);
+    _highlight = val;
+  }
+
+  public float highlight() {
+    return _highlight;
   }
 
   /**
@@ -2464,6 +2449,7 @@ public class Node {
   public void resetShape() {
     _rmrShape = null;
     _imrShape = null;
+    disableHint(SHAPE);
   }
 
   /**
@@ -2497,6 +2483,7 @@ public class Node {
    */
   public void setShape(processing.core.PShape shape) {
     _rmrShape = shape;
+    enableHint(SHAPE);
   }
 
   /**
@@ -2512,6 +2499,7 @@ public class Node {
    */
   public void setShape(Consumer<processing.core.PGraphics> callback) {
     _imrShape = callback;
+    enableHint(SHAPE);
   }
 
   /**
@@ -2539,6 +2527,7 @@ public class Node {
   public void resetHUD() {
     _rmrHUD = null;
     _imrHUD = null;
+    disableHint(HUD);
     _updateHUD();
   }
 
@@ -2577,6 +2566,7 @@ public class Node {
    */
   public void setHUD(processing.core.PShape shape) {
     _rmrHUD = shape;
+    enableHint(HUD);
     _updateHUD();
   }
 
@@ -2595,7 +2585,32 @@ public class Node {
    */
   public void setHUD(Consumer<processing.core.PGraphics> callback) {
     _imrHUD = callback;
+    enableHint(HUD);
     _updateHUD();
+  }
+
+  public boolean isPickingModeEnable(int pickingMode) {
+    return ~(_pickingMode | ~pickingMode) == 0;
+  }
+
+  public int pickingMode() {
+    return this._pickingMode;
+  }
+
+  public void resetPickingMode() {
+    _pickingMode = 0;
+  }
+
+  public void disablePickingMode(int pickingMode) {
+    _pickingMode &= ~pickingMode;
+  }
+
+  public void enablePickingMode(int pickingMode) {
+    _pickingMode |= pickingMode;
+  }
+
+  public void togglePickingMode(int pickingMode) {
+    _pickingMode ^= pickingMode;
   }
 
   /**
@@ -2630,8 +2645,6 @@ public class Node {
    * {@link Graph} or from low-level frustum plane params.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
    * {@link #setShape(processing.core.PShape)} or {@link #setShape(Consumer)}.</li>
-   * <li>{@link #HIGHLIGHT} which represents the scale factor to be applied to the node
-   * when it gets tagged (see {@link Graph#tag(String, Node)}).</li>
    * <li>{@link #BULLSEYE} which displays a bullseye centered at the node
    * {@link #position()} screen projection. Call {@link #setBullsEyeSize(float)}
    * to set the size of the hint</li>
@@ -2745,7 +2758,6 @@ public class Node {
    * {@code configHint(Node.FRUSTUM, frustumColor, graph)} or
    * {@code configHint(Node.FRUSTUM, eyeBuffer, frustumType, zNear, zFar)} or
    * {@code configHint(Node.FRUSTUM, frustumColor, eyeBuffer, frustumType, zNear, zFar)}.</li>
-   * <li>{@link #HIGHLIGHT} hint: {@code configHint(Node.HIGHLIGHT, highlight)}.</li>
    * <li>{@link #BULLSEYE} hint: {@code configHint(Node.BULLSEYE, bullseyeStroke)},
    * {@code configHint(Node.BULLSEYE, bullseyeShape)}, or
    * {@code configHint(Node.BULLSEYE, bullseyeStroke, bullseyeShape)}.</li>
@@ -2784,13 +2796,6 @@ public class Node {
         if (hint == AXES && Graph.isNumInstance(params[0])) {
           _axesLength = Graph.castToFloat(params[0]);
           return;
-        }
-        if (hint == HIGHLIGHT && Graph.isNumInstance(params[0])) {
-          float highlight = Graph.castToFloat(params[0]);
-          if (0 < highlight && highlight <= 1) {
-            _highlight = highlight;
-            return;
-          }
         }
         if (hint == CAMERA && Graph.isNumInstance(params[0])) {
           _cameraStroke = Graph.castToInt(params[0]);

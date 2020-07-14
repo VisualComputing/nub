@@ -1049,7 +1049,6 @@ public class Interpolator {
       // TODO readd condition when Node.graphics is removed
       //if (!node.isHintEnable(Node.SHAPE)) {
         node.enableHint(Node.BULLSEYE);
-        node.setPickingPolicy(Node.PickingPolicy.BULLSEYE);
         if (!node.tagging) {
           node.tagging = true;
         }

@@ -60,7 +60,6 @@ public class HolaMundo extends PApplet {
     //torus.setHUD(pshape);
     torus.setHUD(this::hud);
     torus.enableHint(Node.TORUS, color(255, 0, 0));
-    torus.setPickingPolicy(Node.PickingPolicy.PRECISE);
     torus.scale(10);
     torus.translate(-200, -200, 0);
     // 3. box

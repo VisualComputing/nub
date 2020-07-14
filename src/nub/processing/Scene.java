@@ -777,6 +777,7 @@ public class Scene extends Graph {
 
   @Override
   protected void _endBackBuffer() {
+    super._endBackBuffer();
     _backBuffer().popStyle();
     _backBuffer().endDraw();
     _backBuffer().loadPixels();
@@ -812,61 +813,45 @@ public class Scene extends Graph {
   }
 
   @Override
-  protected void _drawFrontBuffer(Node node) {
-    // TODO: should go in Graph, which requires making static
-    // (draw on an arbitrary context)
-    super._drawFrontBuffer(node);
-    PGraphics pGraphics = context();
-    if (node.isHintEnable(Node.AXES)) {
-      drawAxes(node._axesLength == 0 ? radius() / 5 : node._axesLength);
-    }
-    if (node.isHintEnable(Node.BULLSEYE)) {
-      pGraphics.pushStyle();
-      pGraphics.colorMode(PApplet.RGB, 255);
-      pGraphics.stroke(node._bullsEyeStroke);
-      // TODO above key tough line is the one below
-      // which requires making _screenLocation available on an arbitrary context
-      _drawBullsEye(node);
-      pGraphics.popStyle();
-    }
-    if (node.isHintEnable(Node.CAMERA)) {
-      pGraphics.pushStyle();
-      pGraphics.colorMode(PApplet.RGB, 255);
-      pGraphics.stroke(node._cameraStroke);
-      _drawEye(node._cameraLength == 0 ? radius() : node._cameraLength);
-      pGraphics.popStyle();
-    }
-  }
-
-  @Override
   protected void _displayHUD() {
     if (!_hudSet.isEmpty() || (isHintEnable(HUD) && ((_imrHUD != null) || _rmrHUD != null))) {
       context().pushStyle();
       beginHUD();
-      for (Node node : _hudSet) {
-        context().pushMatrix();
-        Vector location = screenLocation(node);
-        if (location != null) {
-          context().translate(location.x(), location.y());
-          if (node._imrHUD != null) {
-            node._imrHUD.accept(context());
-          }
-          if (node._rmrHUD != null) {
-            context().shape(node._rmrHUD);
-          }
-        }
-        context().popMatrix();
-      }
-      if (isHintEnable(HUD) && ((_imrHUD != null) || _rmrHUD != null)) {
-        if (_imrHUD != null) {
-          _imrHUD.accept(context());
-        }
-        if (_rmrHUD != null) {
-          context().shape(_rmrHUD);
-        }
-      }
+      if (!_hudSet.isEmpty()) _displayNodeHUD(context());
+      if (isHintEnable(HUD) && ((_imrHUD != null) || _rmrHUD != null)) _displayGraphHUD();
       endHUD();
       context().popStyle();
+    }
+  }
+
+  @Override
+  protected void _displayNodeHUD(Object context) {
+    if (context instanceof PGraphics) {
+      PGraphics pg = (PGraphics) context;
+      for (Node node : _hudSet) {
+        pg.pushMatrix();
+        Vector location = screenLocation(node);
+        if (location != null) {
+          pg.translate(location.x(), location.y());
+          if (node._imrHUD != null) {
+            node._imrHUD.accept(pg);
+          }
+          if (node._rmrHUD != null) {
+            pg.shape(node._rmrHUD);
+          }
+        }
+        pg.popMatrix();
+      }
+    }
+  }
+
+  @Override
+  protected void _displayGraphHUD() {
+    if (_imrHUD != null) {
+      _imrHUD.accept(context());
+    }
+    if (_rmrHUD != null) {
+      context().shape(_rmrHUD);
     }
   }
 
@@ -918,12 +903,10 @@ public class Scene extends Graph {
   }
 
   @Override
-  public void _displayHint(Object context, Node node) {
-    if (!(context instanceof PGraphics))
-      throw new RuntimeException("Displaying the node hints requires a PGraphics context");
-    PGraphics pg = (PGraphics) context;
-    pg.push();
+  public void _displayFrontHint(Node node) {
+    PGraphics pg = context();
     if (node.isHintEnable(Node.SHAPE)) {
+      pg.pushStyle();
       if (_rmrShape(node) != null) {
         pg.shapeMode(pg.shapeMode);
         pg.shape(_rmrShape(node));
@@ -931,13 +914,17 @@ public class Scene extends Graph {
       if (_imrShape(node) != null) {
         _imrShape(node).accept(pg);
       }
+      pg.popStyle();
     }
     if (node.isHintEnable(Node.TORUS)) {
+      pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.fill(_torusColor(node));
       drawTorusSolenoid(pg, _torusFaces(node), 5);
+      pg.popStyle();
     }
     if (node.isHintEnable(Node.FRUSTUM)) {
+      pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_frustumColor(node));
       pg.fill(_frustumColor(node));
@@ -947,8 +934,66 @@ public class Scene extends Graph {
       else if (_eyeBuffer(node) instanceof PGraphics) {
         drawFrustum(pg, (PGraphics) _eyeBuffer(node), node, _frustumType(node), _zNear(node), _zFar(node));
       }
+      pg.popStyle();
     }
-    pg.pop();
+    if (node.isHintEnable(Node.AXES)) {
+      pg.pushStyle();
+      // TODO debug
+      //pg.strokeWeight(5);
+      //pg.line(0, 0, 0, 0, 0, node._axesLength == 0 ? radius() / 5 : node._axesLength);
+      drawAxes(pg, node._axesLength == 0 ? radius() / 5 : node._axesLength);
+      pg.popStyle();
+    }
+    if (node.isHintEnable(Node.CAMERA)) {
+      pg.pushStyle();
+      pg.colorMode(PApplet.RGB, 255);
+      pg.stroke(node._cameraStroke);
+      _drawEye(node._cameraLength == 0 ? radius() : node._cameraLength);
+      pg.popStyle();
+    }
+    if (node.isHintEnable(Node.BULLSEYE) && node.isPickingModeEnable(Node.BULLSEYE)) {
+      pg.pushStyle();
+      pg.colorMode(PApplet.RGB, 255);
+      pg.stroke(node._bullsEyeStroke);
+      _drawBullsEye(node);
+      pg.popStyle();
+    }
+  }
+
+  @Override
+  protected void _displayBackHint(Node node) {
+    PGraphics pg = _backBuffer();
+    if (node.isHintEnable(Node.SHAPE) && node.isPickingModeEnable(Node.SHAPE)) {
+      if (_rmrShape(node) != null) {
+        pg.shapeMode(pg.shapeMode);
+        pg.shape(_rmrShape(node));
+      }
+      if (_imrShape(node) != null) {
+        _imrShape(node).accept(pg);
+      }
+    }
+    if (node.isHintEnable(Node.TORUS) && node.isPickingModeEnable(Node.TORUS)) {
+      drawTorusSolenoid(pg, _torusFaces(node), 5);
+    }
+    if (node.isHintEnable(Node.FRUSTUM) && node.isPickingModeEnable(Node.FRUSTUM)) {
+      if (_frustumGraph(node) instanceof Graph) {
+        drawFrustum(pg, _frustumGraph(node));
+      }
+      else if (_eyeBuffer(node) instanceof PGraphics) {
+        drawFrustum(pg, (PGraphics) _eyeBuffer(node), node, _frustumType(node), _zNear(node), _zFar(node));
+      }
+    }
+    pg.pushStyle();
+    pg.strokeWeight(5);
+    if (node.isHintEnable(Node.AXES) && node.isPickingModeEnable(Node.AXES)) {
+      //TODO debug
+      //pg.line(0, 0, 0, 0, 0, node._axesLength == 0 ? radius() / 5 : node._axesLength);
+      drawAxes(pg, node._axesLength == 0 ? radius() / 5 : node._axesLength);
+    }
+    if (node.isHintEnable(Node.CAMERA) && node.isPickingModeEnable(Node.CAMERA)) {
+      _drawEye(node._cameraLength == 0 ? radius() : node._cameraLength);
+    }
+    pg.popStyle();
   }
 
   /**

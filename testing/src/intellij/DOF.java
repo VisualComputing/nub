@@ -109,14 +109,6 @@ public class DOF extends PApplet {
       scene.fit(1);
     if (key == 'F')
       scene.fit();
-    if (key == 'p') {
-      exact = !exact;
-      for (int i = 0; i < models.length; i++)
-        if (models[i].pickingPolicy() == Node.PickingPolicy.PRECISE)
-          models[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
-        else
-          models[i].setPickingPolicy(Node.PickingPolicy.PRECISE);
-    }
   }
 
   @Override

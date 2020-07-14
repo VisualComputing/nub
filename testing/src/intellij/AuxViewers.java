@@ -34,8 +34,8 @@ public class AuxViewers extends PApplet {
     shapes = new Node[15];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(boxShape());
-      shapes[i].enableHint(Node.BULLSEYE);
-      shapes[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
+      //shapes[i].enableHint(Node.BULLSEYE);
+      //shapes[i].disablePickingMode(Node.SHAPE);
       scene1.randomize(shapes[i]);
     }
     toruses = new Node[15];
@@ -43,8 +43,8 @@ public class AuxViewers extends PApplet {
       toruses[i] = new Node();
       toruses[i].scale(8);
       toruses[i].enableHint(Node.TORUS);
-      toruses[i].enableHint(Node.BULLSEYE);
-      toruses[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
+      //toruses[i].enableHint(Node.BULLSEYE);
+      //toruses[i].disablePickingMode(Node.SHAPE);
       //toruses[i].setPickingPolicy(Node.SHAPE);
       scene1.randomize(toruses[i]);
     }

@@ -42,11 +42,9 @@ public class ShadowMap extends PApplet {
     shapes = new Node[20];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(this::cube);
-      shapes[i].setPickingPolicy(Node.PickingPolicy.BULLSEYE);
-      //shapes[i].enableHint(Node.BULLSEYE);
       shapes[i].configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
       scene.randomize(shapes[i]);
-      shapes[i].disableHint(Node.HIGHLIGHT);
+      shapes[i].setHighlight(0);
     }
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
     scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);

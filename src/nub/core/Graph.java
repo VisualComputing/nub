@@ -140,7 +140,6 @@ public class Graph {
   public final static int AXES = 1 << 1;
   public final static int HUD = 1 << 2;
   public final static int FRUSTUM = 1 << 3;
-  // TODO remove SHAPE hint?
   public final static int SHAPE = 1 << 4;
   public final static int BACKGROUND = 1 << 5;
   protected Consumer<processing.core.PGraphics> _imrHUD;
@@ -160,8 +159,7 @@ public class Graph {
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
-  // TODO make protected (debug)
-  public long _lastDisplayed;
+  protected long _lastDisplayed;
   protected boolean _offscreen;
 
   // 0. Contexts
@@ -2518,13 +2516,20 @@ public class Graph {
   }
 
   protected boolean _precisePicking(Node node) {
-    return picking && node.tagging == true && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.PRECISE && _bb != null &&
-            (node.isHintEnable(Node.SHAPE) || node.isHintEnable(Node.TORUS) || node.isHintEnable(Node.FRUSTUM) || node.isHintEnable(Node.BONE));
+    return picking && node.tagging == true && !isEye(node) && _bb != null && (
+            (node.isPickingModeEnable(Node.CAMERA) && node.isHintEnable(Node.CAMERA)) ||
+                    (node.isPickingModeEnable(Node.AXES) && node.isHintEnable(Node.AXES)) ||
+                    (node.isPickingModeEnable(Node.HUD) && node.isHintEnable(Node.HUD)) ||
+                    (node.isPickingModeEnable(Node.FRUSTUM) && node.isHintEnable(Node.FRUSTUM)) ||
+                    (node.isPickingModeEnable(Node.SHAPE) && node.isHintEnable(Node.SHAPE)) ||
+                    (node.isPickingModeEnable(Node.TORUS) && node.isHintEnable(Node.TORUS)) ||
+                    (node.isPickingModeEnable(Node.CONSTRAINT) && node.isHintEnable(Node.CONSTRAINT)) ||
+                    (node.isPickingModeEnable(Node.BONE) && node.isHintEnable(Node.BONE))
+    );
   }
 
   protected boolean _bullseyePicking(Node node) {
-    return picking && node.tagging == true && !isEye(node) && node.pickingPolicy() == Node.PickingPolicy.BULLSEYE
-            /* && (node.isHintEnable(Node.BULLSEYE) || node.isHintEnable(Node.AXES) || node.isHintEnable(Node.CAMERA)) */;
+    return picking && node.tagging == true && !isEye(node) && node.isPickingModeEnable(Node.BULLSEYE) && node.isHintEnable(Node.BULLSEYE);
   }
 
   /**
@@ -2657,7 +2662,9 @@ public class Graph {
 
   protected void _initBackBuffer() {}
 
-  protected void _endBackBuffer() {}
+  protected void _endBackBuffer() {
+    if (!_hudSet.isEmpty()) _displayNodeHUD(_bb);
+  }
 
   protected void _initFrontBuffer() {}
 
@@ -2969,7 +2976,7 @@ public class Graph {
   protected void _drawFrontBuffer(Node node) {
     if (_precisePicking(node))
       _bbNeed = TimingHandler.frameCount;
-    if (isTagged(node) && node.isHintEnable(Node.HIGHLIGHT)) {
+    if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
       _matrixHandler.pushMatrix();
       float scl = 1 + node._highlight;
       // TODO 2d case needs testing
@@ -2977,10 +2984,10 @@ public class Graph {
         _matrixHandler.scale(scl, scl);
       else
         _matrixHandler.scale(scl, scl, scl);
-      _displayHint(context(), node);
+      _displayFrontHint(node);
       _matrixHandler.popMatrix();
     } else {
-      _displayHint(context(), node);
+      _displayFrontHint(node);
     }
   }
 
@@ -3047,18 +3054,29 @@ public class Graph {
       float g = (float) ((node.id() >> 8) & 255) / 255.f;
       float b = (float) ((node.id() >> 16) & 255) / 255.f;
       _emitBackBufferUniforms(r, g, b);
-      _displayHint(_backBuffer(), node);
+      _displayBackHint(node);
     }
   }
 
   protected void _emitBackBufferUniforms(float r, float g, float b) {}
 
   /**
-   * Displays the graph and nodes hud hints.
+   * Displays all nodes' hud hint.
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
+  protected void _displayNodeHUD(Object context) {
+  }
+
   protected void _displayHUD() {
+  }
+
+  /**
+   * Displays the graph hud hint.
+   * <p>
+   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   */
+  protected void _displayGraphHUD() {
   }
 
   /**
@@ -3070,11 +3088,19 @@ public class Graph {
   }
 
   /**
-   * Draws the node {@link Node#hint()}.
+   * Draws the node {@link Node#hint()} onto the {@link #context()}.
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
-  protected void _displayHint(Object context, Node node) {
+  protected void _displayFrontHint(Node node) {
+  }
+
+  /**
+   * Draws the node {@link Node#hint()} into the picking buffer.
+   * <p>
+   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   */
+  protected void _displayBackHint(Node node) {
   }
 
   /**

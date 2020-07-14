@@ -30,6 +30,8 @@ public class SceneBuffers extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(caja());
       scene.randomize(shapes[i]);
+      //shapes[i].enableHint(Node.CAMERA);
+      shapes[i].enableHint(Node.AXES);
     }
     scene.fit(1);
     scene.enableHint(Scene.AXES);

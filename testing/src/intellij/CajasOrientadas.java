@@ -15,7 +15,7 @@ public class CajasOrientadas extends PApplet {
   boolean circle;
 
   public void settings() {
-    size(800, 800, P3D);
+    size(700, 700, P3D);
   }
 
   public void setup() {
@@ -68,11 +68,14 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void keyPressed() {
+    /*
     if (key == ' ')
       for (Box caja : cajas)
         caja.setPickingPolicy(caja.pickingPolicy() == Node.PickingPolicy.PRECISE ?
                 Node.PickingPolicy.BULLSEYE :
                 Node.PickingPolicy.PRECISE);
+
+     */
     if (key == 'c') {
       for (Box caja : cajas)
         if (caja.bullsEyeSize() < 1)
@@ -118,18 +121,23 @@ public class CajasOrientadas extends PApplet {
     int _color;
 
     public Box(int tint, float w, float h, float d) {
+      setShape(this::caja);
       _color = tint;
       _w = w;
       _h = h;
       _d = d;
       setBullsEyeSize(max(_w, _h, _d) / scene.radius());
       scene.randomize(this);
-      enableHint(Node.AXES | Node.BULLSEYE);
+      enableHint(Node.AXES);
+      if (isHintEnable(Node.AXES))
+        println("Node.AXES hint");
+      if (isPickingModeEnable(Node.AXES))
+        println("Node.AXES picking");
+      //enableHint(Node.AXES | Node.BULLSEYE);
     }
 
     // geometry is defined at the node local coordinate system
-    @Override
-    public void graphics(PGraphics pg) {
+    public void caja(PGraphics pg) {
       pg.pushStyle();
       pg.noStroke();
       pg.fill(_color);
@@ -150,7 +158,6 @@ public class CajasOrientadas extends PApplet {
     public Sphere(int tint, float radius) {
       _color = tint;
       _radius = radius;
-      setPickingPolicy(PickingPolicy.PRECISE);
     }
 
     @Override
