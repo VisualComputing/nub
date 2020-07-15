@@ -68,14 +68,11 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void keyPressed() {
-    /*
     if (key == ' ')
-      for (Box caja : cajas)
-        caja.setPickingPolicy(caja.pickingPolicy() == Node.PickingPolicy.PRECISE ?
-                Node.PickingPolicy.BULLSEYE :
-                Node.PickingPolicy.PRECISE);
-
-     */
+      for (Box caja : cajas) {
+        caja.toggleHint(Node.BULLSEYE);
+        caja.togglePickingMode(Node.SHAPE);
+      }
     if (key == 'c') {
       for (Box caja : cajas)
         if (caja.bullsEyeSize() < 1)
@@ -129,11 +126,6 @@ public class CajasOrientadas extends PApplet {
       setBullsEyeSize(max(_w, _h, _d) / scene.radius());
       scene.randomize(this);
       enableHint(Node.AXES);
-      if (isHintEnable(Node.AXES))
-        println("Node.AXES hint");
-      if (isPickingModeEnable(Node.AXES))
-        println("Node.AXES picking");
-      //enableHint(Node.AXES | Node.BULLSEYE);
     }
 
     // geometry is defined at the node local coordinate system

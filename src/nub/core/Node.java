@@ -111,7 +111,8 @@ import java.util.function.Consumer;
  * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
  * and {@link #resetHint()}.
  * <h2>Ray casting</h2>
- * The ray-casting node {@link #pickingMode()} may be set with {@link #enablePickingMode(int)}.
+ * Set the node picking ray-casting mode with {@link #enablePickingMode(int)} (see also
+ * {@link #pickingMode()}).
  * <h2>Custom behavior</h2>
  * Implementing a custom behavior for node is a two step process:
  * <ul>
@@ -302,7 +303,10 @@ public class Node {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
     // TODO deprecated
-    setShape(this::graphics);
+    // hack
+    _imrShape = this::graphics;
+    if (!getClass().equals(Node.class))
+      enableHint(SHAPE);
   }
 
   /**
@@ -543,7 +547,7 @@ public class Node {
 
   /**
    * Returns the unique sequential node id assigned at instantiation time.
-   * Used by {@link #colorID()} and {@link Graph#_drawBackBuffer(Node)}.
+   * Used by {@link #colorID()} and {@link Graph#_displayBackHint(Node)}.
    */
   public int id() {
     return _id;
@@ -2459,6 +2463,8 @@ public class Node {
    */
   public void resetRMRShape() {
     _rmrShape = null;
+    if (_imrShape == null)
+      disableHint(SHAPE);
   }
 
   /**
@@ -2468,6 +2474,8 @@ public class Node {
    */
   public void resetIMRShape() {
     _imrShape = null;
+    if (_rmrShape == null)
+      disableHint(SHAPE);
   }
 
   /**
@@ -2538,6 +2546,8 @@ public class Node {
    */
   public void resetRMRHUD() {
     _rmrHUD = null;
+    if (_imrHUD == null)
+      disableHint(HUD);
     _updateHUD();
   }
 
@@ -2548,6 +2558,8 @@ public class Node {
    */
   public void resetIMRHUD() {
     _imrHUD = null;
+    if (_rmrHUD == null)
+      disableHint(HUD);
     _updateHUD();
   }
 
@@ -2589,26 +2601,126 @@ public class Node {
     _updateHUD();
   }
 
+  /**
+   * Returns whether or not all single visual hints encoded in the bitwise-or
+   * {@code pickingMode} mask are enable for node picking with ray casting.
+   *
+   * @see #pickingMode()
+   * @see #resetPickingMode()
+   * @see #resetPickingMode()
+   * @see #disablePickingMode(int)
+   * @see #enablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #hint()
+   * @see #isHintEnable(int)
+   */
   public boolean isPickingModeEnable(int pickingMode) {
     return ~(_pickingMode | ~pickingMode) == 0;
   }
 
+  /**
+   * This mask is a bitwise-or of those node visual aspects which are enabled
+   * for picking with ray casting. It thus expects the same values as
+   * {@link #hint()}.
+   * <p>
+   * Note that picking a node from one of its visual aspects requires both
+   * the {@link #hint()} and this mask to have enabled the same aspects.
+   *
+   * @see #pickingMode()
+   * @see #resetPickingMode()
+   * @see #disablePickingMode(int)
+   * @see #enablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #hint()
+   * @see #isHintEnable(int)
+   * @see #resetHint()
+   * @see #disableHint(int)
+   * @see #enableHint(int)
+   * @see #toggleHint(int)
+   */
   public int pickingMode() {
     return this._pickingMode;
   }
 
+  /**
+   * Resets the current {@link #pickingMode()}, i.e., disables all single
+   * visual hints available for node picking with ray casting.
+   *
+   * @see #pickingMode()
+   * @see #resetPickingMode()
+   * @see #disablePickingMode(int)
+   * @see #enablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #hint()
+   * @see #isHintEnable(int)
+   * @see #resetHint()
+   * @see #disableHint(int)
+   * @see #enableHint(int)
+   * @see #toggleHint(int)
+   */
   public void resetPickingMode() {
     _pickingMode = 0;
   }
 
+  /**
+   * Disables all the single visual hints encoded in the bitwise-or {@code pickingMode} mask.
+   *
+   * @see #pickingMode()
+   * @see #resetPickingMode()
+   * @see #resetPickingMode()
+   * @see #disablePickingMode(int)
+   * @see #enablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #hint()
+   * @see #isHintEnable(int)
+   * @see #resetHint()
+   * @see #disableHint(int)
+   * @see #enableHint(int)
+   * @see #toggleHint(int)
+   */
   public void disablePickingMode(int pickingMode) {
     _pickingMode &= ~pickingMode;
   }
 
+  /**
+   * Enables all single visual hints encoded in the bitwise-or {@code pickingMode} mask.
+   *
+   * @see #pickingMode()
+   * @see #resetPickingMode()
+   * @see #disablePickingMode(int)
+   * @see #enablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #hint()
+   * @see #isHintEnable(int)
+   * @see #resetHint()
+   * @see #disableHint(int)
+   * @see #enableHint(int)
+   * @see #toggleHint(int)
+   */
   public void enablePickingMode(int pickingMode) {
     _pickingMode |= pickingMode;
   }
 
+  /**
+   * Toggles all single visual hints encoded in the bitwise-or {@code pickingMode} mask.
+   *
+   * @see #resetPickingMode()
+   * @see #resetPickingMode()
+   * @see #disablePickingMode(int)
+   * @see #enablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #hint()
+   * @see #isHintEnable(int)
+   * @see #resetHint()
+   * @see #disableHint(int)
+   * @see #enableHint(int)
+   * @see #toggleHint(int)
+   */
   public void togglePickingMode(int pickingMode) {
     _pickingMode ^= pickingMode;
   }
@@ -2624,6 +2736,12 @@ public class Node {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #resetHint()
+   * @see #pickingMode()
+   * @see #enablePickingMode(int)
+   * @see #disablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #resetPickingMode()
    */
   public boolean isHintEnable(int hint) {
     return ~(_mask | ~hint) == 0;
@@ -2660,6 +2778,12 @@ public class Node {
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
    * @see #resetHint()
+   * @see #pickingMode()
+   * @see #enablePickingMode(int)
+   * @see #disablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #resetPickingMode()
    */
   public int hint() {
     return this._mask;
@@ -2676,6 +2800,12 @@ public class Node {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #pickingMode()
+   * @see #enablePickingMode(int)
+   * @see #disablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #resetPickingMode()
    */
   public void resetHint() {
     _mask = 0;
@@ -2692,6 +2822,12 @@ public class Node {
    * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #pickingMode()
+   * @see #enablePickingMode(int)
+   * @see #disablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #resetPickingMode()
    */
   public void disableHint(int hint) {
     _mask &= ~hint;
@@ -2708,6 +2844,12 @@ public class Node {
    * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #pickingMode()
+   * @see #enablePickingMode(int)
+   * @see #disablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #resetPickingMode()
    */
   public void enableHint(int hint, Object... params) {
     enableHint(hint);
@@ -2724,6 +2866,12 @@ public class Node {
    * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
+   * @see #pickingMode()
+   * @see #enablePickingMode(int)
+   * @see #disablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #resetPickingMode()
    */
   public void enableHint(int hint) {
     _mask |= hint;
@@ -2740,6 +2888,12 @@ public class Node {
    * @see #resetHint()
    * @see #enableHint(int)
    * @see #isHintEnable(int)
+   * @see #pickingMode()
+   * @see #enablePickingMode(int)
+   * @see #disablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #resetPickingMode()
    */
   public void toggleHint(int hint) {
     _mask ^= hint;
@@ -2781,6 +2935,12 @@ public class Node {
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
    * @see #resetHint()
+   * @see #pickingMode()
+   * @see #enablePickingMode(int)
+   * @see #disablePickingMode(int)
+   * @see #togglePickingMode(int)
+   * @see #isPickingModeEnable(int)
+   * @see #resetPickingMode()
    */
   public void configHint(int hint, Object... params) {
     switch (params.length) {

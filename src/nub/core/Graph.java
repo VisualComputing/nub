@@ -2515,20 +2515,26 @@ public class Graph {
         _track(tag, child, pixelX, pixelY);
   }
 
-  protected boolean _precisePicking(Node node) {
+  /**
+   * Condition for the node back picking.
+   */
+  protected boolean _backPicking(Node node) {
     return picking && node.tagging == true && !isEye(node) && _bb != null && (
             (node.isPickingModeEnable(Node.CAMERA) && node.isHintEnable(Node.CAMERA)) ||
                     (node.isPickingModeEnable(Node.AXES) && node.isHintEnable(Node.AXES)) ||
-                    (node.isPickingModeEnable(Node.HUD) && node.isHintEnable(Node.HUD)) ||
+                    (node.isPickingModeEnable(Node.HUD) && node.isHintEnable(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
                     (node.isPickingModeEnable(Node.FRUSTUM) && node.isHintEnable(Node.FRUSTUM)) ||
-                    (node.isPickingModeEnable(Node.SHAPE) && node.isHintEnable(Node.SHAPE)) ||
+                    (node.isPickingModeEnable(Node.SHAPE) && node.isHintEnable(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
                     (node.isPickingModeEnable(Node.TORUS) && node.isHintEnable(Node.TORUS)) ||
                     (node.isPickingModeEnable(Node.CONSTRAINT) && node.isHintEnable(Node.CONSTRAINT)) ||
                     (node.isPickingModeEnable(Node.BONE) && node.isHintEnable(Node.BONE))
     );
   }
 
-  protected boolean _bullseyePicking(Node node) {
+  /**
+   * Condition for the node front picking.
+   */
+  protected boolean _frontPicking(Node node) {
     return picking && node.tagging == true && !isEye(node) && node.isPickingModeEnable(Node.BULLSEYE) && node.isHintEnable(Node.BULLSEYE);
   }
 
@@ -2545,9 +2551,9 @@ public class Graph {
    * @see Node#setBullsEyeSize(float)
    */
   public boolean tracks(Node node, int pixelX, int pixelY) {
-    if (_precisePicking(node))
+    if (_backPicking(node))
       return _tracks(node, pixelX, pixelY);
-    else if(_bullseyePicking(node))
+    else if(_frontPicking(node))
       return _tracks(node, pixelX, pixelY, screenLocation(node.position()));
     return false;
   }
@@ -2960,7 +2966,7 @@ public class Graph {
         _trackFrontBuffer(node);
         if (isOffscreen())
           _trackBackBuffer(node);
-        if (_precisePicking(node))
+        if (_backPicking(node))
           _bbNeed = TimingHandler.frameCount;
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
           _matrixHandler.pushMatrix();
@@ -3019,7 +3025,7 @@ public class Graph {
     _bbMatrixHandler.applyTransformation(node);
     if (!node.cull) {
       if (node._bypass != TimingHandler.frameCount) {
-        if (_precisePicking(node)) {
+        if (_backPicking(node)) {
           _displayBackHint(node);
         }
         if (!isOffscreen())
@@ -3069,7 +3075,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (_bullseyePicking(node) && !_rays.isEmpty()) {
+    if (_frontPicking(node) && !_rays.isEmpty()) {
       Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
@@ -3087,7 +3093,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
-    if (_precisePicking(node) && !_rays.isEmpty()) {
+    if (_backPicking(node) && !_rays.isEmpty()) {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
@@ -4776,6 +4782,7 @@ public class Graph {
    */
   public void setHUD(processing.core.PShape hud) {
     _rmrHUD = hud;
+    enableHint(HUD);
   }
 
   /**
@@ -4790,6 +4797,7 @@ public class Graph {
    */
   public void setHUD(Consumer<processing.core.PGraphics> hud) {
     _imrHUD = hud;
+    enableHint(HUD);
   }
 
   /**
@@ -4798,6 +4806,7 @@ public class Graph {
   public void resetHUD() {
     _imrHUD = null;
     _rmrHUD = null;
+    disableHint(HUD);
   }
 
   /**
@@ -4807,6 +4816,8 @@ public class Graph {
    */
   public void resetIMRHUD() {
     _imrHUD = null;
+    if (_rmrHUD == null)
+      disableHint(HUD);
   }
 
   /**
@@ -4816,6 +4827,8 @@ public class Graph {
    */
   public void resetRMRHUD() {
     _rmrHUD = null;
+    if (_imrHUD == null)
+      disableHint(HUD);
   }
 
   /**
@@ -4824,6 +4837,7 @@ public class Graph {
   public void resetShape() {
     _rmrShape = null;
     _imrShape = null;
+    disableHint(SHAPE);
   }
 
   /**
@@ -4833,6 +4847,8 @@ public class Graph {
    */
   public void resetRMRShape() {
     _rmrShape = null;
+    if (_imrShape == null)
+      disableHint(SHAPE);
   }
 
   /**
@@ -4842,6 +4858,8 @@ public class Graph {
    */
   public void resetIMRShape() {
     _imrShape = null;
+    if (_rmrShape == null)
+      disableHint(SHAPE);
   }
 
   /**
@@ -4857,6 +4875,7 @@ public class Graph {
    */
   public void setShape(processing.core.PShape shape) {
     _rmrShape = shape;
+    enableHint(SHAPE);
   }
 
   /**
@@ -4872,6 +4891,7 @@ public class Graph {
    */
   public void setShape(Consumer<processing.core.PGraphics> callback) {
     _imrShape = callback;
+    enableHint(SHAPE);
   }
 
   // Hack to hide node & interpolator hint properties
