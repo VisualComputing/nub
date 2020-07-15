@@ -65,7 +65,7 @@ import java.util.function.Consumer;
  * {@code Node node = new Node(new Vector(0.5,0,0), new Quaternion(new Vector(0,1,0),
  * new Vector(1,1,1)));} <br>
  * {@code pushMatrix();} <br>
- * {@code graph.applyTransformation(node);} <br>
+ * {@code applyMatrix(node.matrix());} <br>
  * {@code // Draw your object here, in the local node coordinate system.} <br>
  * {@code popMatrix();} <br>
  * <p>
