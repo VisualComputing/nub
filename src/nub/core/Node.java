@@ -21,6 +21,7 @@ import nub.timing.TimingHandler;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -2381,56 +2382,6 @@ public class Node {
    * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
    */
   public void interact(Object... gesture) {
-  }
-
-  /**
-   * This method is called on each node of the graph hierarchy by the {@link Graph#render()}
-   * algorithm to visit it. Default implementation is empty, i.e., it is meant to be implemented
-   * by derived classes.
-   * <p>
-   * Hierarchical culling, i.e., culling of the node and its children, should be decided here.
-   * Set the culling flag with {@link #cull} according to your culling condition:
-   *
-   * <pre>
-   * {@code
-   * node = new Node() {
-   *   public void visit() {
-   *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
-   *     // (which should be implemented by you) is true, scene.render() will prune the branch
-   *     // at the node
-   *     cull(cullingCondition);
-   *   }
-   * }
-   * }
-   * </pre>
-   * Bypassing rendering of the node may also be decided here, according to a bypassCondition
-   * (which should be implemented by you):
-   * <pre>
-   * {@code
-   * node = new Node() {
-   *   public void visit() {
-   *     if(bypassCondition)
-   *       // this will bypass node rendering without culling its children
-   *       bypass();
-   *   }
-   * }
-   * }
-   * </pre>
-   *
-   * @see Graph#render(Node)
-   * @see #bypass()
-   */
-  public void visit() {
-  }
-
-  /**
-   * View-point adaptive {@link #visit()}, which now takes a {@code graph} param
-   * matching the calling instance in {@link Graph#render()}.
-   *
-   * @see Graph#render(Node)
-   * @see #bypass()
-   */
-  public void visit(Graph graph) {
   }
 
   /**

@@ -19,6 +19,7 @@ import nub.timing.TimingHandler;
 import processing.core.PShape;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -191,7 +192,6 @@ public class Graph {
   protected int _renderCount;
   protected int _width, _height;
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
-  public boolean visit;
   // _bb : picking buffer
   public boolean picking;
   protected long _bbNeed, _bbCount;
@@ -397,7 +397,6 @@ public class Graph {
     setZClippingCoefficient((float) Math.sqrt(3.0f));
     enableHint(HUD | SHAPE);
     picking = true;
-    visit = true;
     // middle grey encoded as a processing int rgb color
     _gridStroke = -8553091;
     _gridType = GridType.DOTS;
@@ -2952,15 +2951,70 @@ public class Graph {
   }
 
   /**
+   * This method is called on each node of the graph hierarchy by the {@link Graph#render()}
+   * algorithm to visit it. Default implementation is empty, i.e., it is meant to be implemented
+   * by derived classes.
+   * <p>
+   * Hierarchical culling, i.e., culling of the node and its children, should be decided here.
+   * Set the culling flag with {@link #cull} according to your culling condition:
+   *
+   * <pre>
+   * {@code
+   * node = new Node() {
+   *   public void visit() {
+   *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
+   *     // (which should be implemented by you) is true, scene.render() will prune the branch
+   *     // at the node
+   *     cull(cullingCondition);
+   *   }
+   * }
+   * }
+   * </pre>
+   * Bypassing rendering of the node may also be decided here, according to a bypassCondition
+   * (which should be implemented by you):
+   * <pre>
+   * {@code
+   * node = new Node() {
+   *   public void visit() {
+   *     if(bypassCondition)
+   *       // this will bypass node rendering without culling its children
+   *       bypass();
+   *   }
+   * }
+   * }
+   * </pre>
+   *
+   * @see Graph#render(Node)
+   * @see #bypass()
+   */
+
+  /**
+   * View-point adaptive {@link #visit()}, which now takes a {@code graph} param
+   * matching the calling instance in {@link Graph#render()}.
+   *
+   * @see Graph#render(Node)
+   * @see #bypass()
+   */
+
+  protected HashMap<Integer, BiConsumer<Graph, Node>> _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
+
+  public void setVisit(Node node, BiConsumer<Graph, Node> functor) {
+    _functors.put(node.id(), functor);
+  }
+
+  public void resetVisit(Node node) {
+    _functors.remove(node.id());
+  }
+
+  /**
    * Used by the {@link #render(Node)} algorithm.
    */
   protected void _render(Node node) {
     _matrixHandler.pushMatrix();
     _matrixHandler.applyTransformation(node);
-    if (visit) {
-      node.visit();
-      node.visit(this);
-    }
+    BiConsumer<Graph, Node> functor = _functors.get(node.id());
+    if (functor != null)
+      functor.accept(this, node);
     if (!node.cull) {
       if (node._bypass != TimingHandler.frameCount) {
         _trackFrontBuffer(node);

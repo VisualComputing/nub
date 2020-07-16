@@ -34,10 +34,14 @@ public class ViewFrustumCulling extends PApplet {
     root = new OctreeNode();
     buildOctree(root);
 
+    for (Node node : mainScene.nodes()) {
+      if (!mainScene.isEye(node)) {
+        mainScene.setVisit(node, this::culling);
+      }
+    }
+
     // secondary scene
     secondaryScene = new Scene(createGraphics(w, h / 2, P3D));
-    // cull only against main scene
-    secondaryScene.visit = false;
     secondaryScene.enableHint(Node.FRUSTUM, mainScene, color(255, 0, 0, 125));
     secondaryScene.enableHint(Scene.BACKGROUND, color(185));
     secondaryScene.togglePerspective();
@@ -92,6 +96,28 @@ public class ViewFrustumCulling extends PApplet {
     }
   }
 
+  public void culling(Graph graph, Node node) {
+    switch (graph.boxVisibility(node.worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
+            node.worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
+      case VISIBLE:
+        for (Node child : node.children())
+          child.cull = true;
+        break;
+      case SEMIVISIBLE:
+        if (!node.children().isEmpty()) {
+          // don't render the node...
+          node.bypass();
+          // ... but don't cull its children either
+          for (Node child : node.children())
+            child.cull = false;
+        }
+        break;
+      case INVISIBLE:
+        node.cull = true;
+        break;
+    }
+  }
+
   class OctreeNode extends Node {
     OctreeNode() {
       tagging = false;
@@ -141,7 +167,7 @@ public class ViewFrustumCulling extends PApplet {
           break;
       }
     }
-    // */
+    /*
     @Override
     public void visit() {
       switch (mainScene.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
@@ -164,6 +190,7 @@ public class ViewFrustumCulling extends PApplet {
           break;
       }
     }
+    // */
   }
 
   public static void main(String args[]) {
