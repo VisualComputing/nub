@@ -92,13 +92,9 @@ void keyPressed() {
     if (edit) {
       shapeInterpolator.enableHint(Interpolator.SPLINE | Interpolator.AXES);
       eyeInterpolator.enableHint(Interpolator.SPLINE | Interpolator.CAMERA);
-      shapeInterpolator.edit();
-      eyeInterpolator.edit();
     } else {
       shapeInterpolator.disableHint(Interpolator.SPLINE | Interpolator.AXES);
       eyeInterpolator.disableHint(Interpolator.SPLINE | Interpolator.CAMERA);
-      shapeInterpolator.keep();
-      eyeInterpolator.keep();
     }
   }
 

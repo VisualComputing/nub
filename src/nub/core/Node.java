@@ -88,8 +88,8 @@ import java.util.function.Consumer;
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the node hierarchy which automatically apply the local
  * node transformations described above may be achieved with {@link Graph#render()} and
- * {@link Graph#render(Node)}. Customize the rendering traversal algorithm by
- * overriding {@link #visit(Graph)} (see also {@link #cull} and {@link #bypass()}).
+ * {@link Graph#render(Node)}. Customize the rendering traversal with
+ * {@link Graph#setVisit(Node, BiConsumer)} (see also {@link #cull} and {@link #bypass()}).
  * <h2>Constraints</h2>
  * One interesting feature of a node is that its displacements can be constrained.
  * When a {@link Constraint} is attached to a node, it filters the input of

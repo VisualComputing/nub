@@ -15,7 +15,6 @@ import processing.event.MouseEvent;
 public class Interpolators extends PApplet {
   Scene scene;
   Interpolator shapeInterpolator, eyeInterpolator;
-  boolean edit;
   Node shape;
 
   //Choose P3D or P2D
@@ -91,18 +90,10 @@ public class Interpolators extends PApplet {
 
   public void keyPressed() {
     if (key == ' ') {
-      edit = !edit;
-      if (edit) {
-        shapeInterpolator.enableHint(Interpolator.SPLINE | Interpolator.AXES);
-        eyeInterpolator.enableHint(Interpolator.SPLINE | Interpolator.CAMERA);
-        shapeInterpolator.edit();
-        eyeInterpolator.edit();
-      } else {
-        shapeInterpolator.disableHint(Interpolator.SPLINE | Interpolator.AXES);
-        eyeInterpolator.disableHint(Interpolator.SPLINE | Interpolator.CAMERA);
-        shapeInterpolator.keep();
-        eyeInterpolator.keep();
-      }
+      shapeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.AXES);
+      eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.CAMERA);
+      //shapeInterpolator.toggleHint(Interpolator.SPLINE);
+      //eyeInterpolator.toggleHint(Interpolator.SPLINE);
     }
 
     if (key == '-' || key == '+') {

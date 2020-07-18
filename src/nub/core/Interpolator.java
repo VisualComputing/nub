@@ -97,6 +97,7 @@ public class Interpolator {
     protected Vector _tangentVector;
     protected float _time;
     protected Node _node;
+    protected boolean _cache;
 
     KeyFrame(Node node, float time) {
       _time = time;
@@ -164,6 +165,7 @@ public class Interpolator {
   // Attention: We should go like this: protected Map<Float, Node> _list;
   // but Java doesn't allow to iterate backwards a map
   protected List<KeyFrame> _list;
+  public boolean cache;
   protected ListIterator<KeyFrame> _backwards;
   protected ListIterator<KeyFrame> _forwards;
   protected List<Node> _path;
@@ -231,6 +233,7 @@ public class Interpolator {
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
     _splineStroke = -65281;
     _steps = 3;
+    cache = true;
   }
 
   protected Interpolator(Interpolator other) {
@@ -260,6 +263,7 @@ public class Interpolator {
     this._splineCacheIsValid = false;
     this._backwards = _list.listIterator();
     this._forwards = _list.listIterator();
+    this.cache = other.cache;
     // TODO decide this and make consistent with Node.get()
     // hints
     this._cameraStroke = other._cameraStroke;
@@ -930,8 +934,7 @@ public class Interpolator {
    */
   public void disableHint(int hint) {
     _mask &= ~hint;
-    if (_mask == 0)
-      Graph._interpolators.remove(this);
+    if (_mask == 0) _disabled();
   }
 
   /**
@@ -963,8 +966,43 @@ public class Interpolator {
    */
   public void enableHint(int hint) {
     _mask |= hint;
-    if (_mask != 0)
-      Graph._interpolators.add(this);
+    if (_mask != 0) _enabled();
+  }
+
+  // TODO improve when line picking shader is fixed
+  protected void _enabled() {
+    if (cache) {
+      for (KeyFrame keyFrame : _list) {
+        if (keyFrame._node.hint() == 0) {
+          keyFrame._cache = true;
+          if (isHintEnable(CAMERA) || isHintEnable(AXES)) {
+            if (isHintEnable(CAMERA)) {
+              keyFrame._node.enableHint(CAMERA);
+            }
+            if (isHintEnable(AXES)) {
+              keyFrame._node.enableHint(AXES);
+            }
+          }
+          else {
+            keyFrame._node.enableHint(Node.BULLSEYE);
+          }
+        }
+      }
+    }
+    Graph._interpolators.add(this);
+  }
+
+  // TODO improve when line picking shader is fixed
+  protected void _disabled() {
+    if (cache) {
+      for (KeyFrame keyFrame : _list) {
+        if (keyFrame._cache) {
+          keyFrame._node.resetHint();
+          keyFrame._cache = false;
+        }
+      }
+    }
+    Graph._interpolators.remove(this);
   }
 
   /**
@@ -981,7 +1019,9 @@ public class Interpolator {
   public void toggleHint(int hint) {
     _mask ^= hint;
     if (_mask != 0)
-      Graph._interpolators.add(this);
+      _enabled();
+    else
+      _disabled();
   }
 
   /**
@@ -1034,57 +1074,6 @@ public class Interpolator {
         break;
     }
     System.out.println("Warning: some params in Interpolator.configHint(hint, params) couldn't be parsed!");
-  }
-
-  /**
-   * Allows edition of the interpolator by enabling the {@link Node#BULLSEYE},
-   * {@link Node#AXES} and {@link Node#CAMERA} hints for each ot its key-frames.
-   * Note that {@link #keep()} does the opposite.
-   *
-   * @see #keep()
-   * @see Node#hint()
-   */
-  public void edit() {
-    for (Node node : keyFrames().values()) {
-      // TODO readd condition when Node.graphics is removed
-      //if (!node.isHintEnable(Node.SHAPE)) {
-        node.enableHint(Node.BULLSEYE);
-        if (!node.tagging) {
-          node.tagging = true;
-        }
-      //}
-      if (isHintEnable(Interpolator.AXES)) {
-        node.enableHint(Node.AXES);
-      }
-      if (isHintEnable(Interpolator.CAMERA)) {
-        node.enableHint(Node.CAMERA);
-      }
-    }
-  }
-
-  /**
-   * Disallows edition of the interpolator by disabling the {@link Node#BULLSEYE},
-   * {@link Node#AXES} and {@link Node#CAMERA} hints for each ot its key-frames.
-   * Note that {@link #edit()} does the opposite.
-   *
-   * @see #edit()
-   * @see Node#hint()
-   */
-  public void keep() {
-    for (Node node : keyFrames().values()) {
-      //if (!node.isHintEnable(Node.SHAPE)) {
-        node.disableHint(Node.BULLSEYE);
-        //if (node.isTaggingEnabled()) {
-          node.tagging = false;
-        //}
-      //}
-      if (!isHintEnable(Interpolator.AXES)) {
-        node.disableHint(Node.AXES);
-      }
-      if (!isHintEnable(Interpolator.CAMERA)) {
-        node.disableHint(Node.CAMERA);
-      }
-    }
   }
 
   /**
