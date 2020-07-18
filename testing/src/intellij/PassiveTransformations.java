@@ -33,6 +33,8 @@ public class PassiveTransformations extends PApplet {
     nodes = new Node[50];
     for (int i = 0; i < nodes.length; i++) {
       nodes[i] = new Node() {
+        //TODO
+        /*
         @Override
         public void visit() {
           pushStyle();
@@ -40,6 +42,7 @@ public class PassiveTransformations extends PApplet {
           box(5);
           popStyle();
         }
+         */
       };
       graph.randomize(nodes[i]);
       nodes[i].setBullsEyeSize(20);

@@ -19,7 +19,7 @@ public class Interaction2D extends PApplet {
   PFont font36;
 
   public void settings() {
-    size(2600, 1400, P2D);
+    size(700, 700, P2D);
   }
 
   public void setup() {
@@ -66,8 +66,8 @@ public class Interaction2D extends PApplet {
 
   public void draw() {
     background(0);
-    scene.drawAxes();
     scene.render();
+    scene.drawAxes();
 
     scene.beginHUD();
     Vector position = scene.screenLocation(shape1.position());

@@ -158,6 +158,9 @@ public class Graph {
   protected static HashSet<Node> _hudSet = new HashSet<Node>();
   protected Node _frustumEye;
 
+  // Custom render
+  protected HashMap<Integer, BiConsumer<Graph, Node>> _functors;
+
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
   protected long _lastDisplayed;
@@ -367,6 +370,7 @@ public class Graph {
     setHeight(height);
     _tags = new HashMap<String, Node>();
     _rays = new ArrayList<Ray>();
+    _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
     cacheProjectionViewInverse(false);
     setFrustum(new Vector(), 100);
     setEye(eye == null ? new Node() : eye);
@@ -2903,11 +2907,11 @@ public class Graph {
 
   /**
    * Renders the node tree onto the {@link #context()} from the {@link #eye()} viewpoint.
-   * Calls {@link Node#visit(Graph)} on each visited node (refer to the {@link Node} documentation).
+   * Calls {@link #setVisit(Node, BiConsumer)} on each visited node (refer to the {@link Node} documentation).
    * Same as {@code render(null)}.
    *
    * @see #render(Node)
-   * @see Node#visit(Graph)
+   * @see #setVisit(Node, BiConsumer)
    * @see Node#cull
    * @see Node#bypass()
    * @see Node#setShape(Consumer)
@@ -2922,10 +2926,10 @@ public class Graph {
    * when {@code subtree} is {@code null}) onto the {@link #context()} from the {@link #eye()}
    * viewpoint, and calls {@link #closeContext()}.
    * <p>
-   * Note that the rendering algorithm calls {@link Node#visit(Graph)} on each visited node
+   * Note that the rendering algorithm calls {@link #setVisit(Node, BiConsumer)} on each visited node
    * (refer to the {@link Node} documentation).
    *
-   * @see Node#visit(Graph)
+   * @see #setVisit(Node, BiConsumer)
    * @see Node#cull
    * @see Node#bypass()
    * @see Node#setShape(Consumer)
@@ -2951,57 +2955,46 @@ public class Graph {
   }
 
   /**
-   * This method is called on each node of the graph hierarchy by the {@link Graph#render()}
-   * algorithm to visit it. Default implementation is empty, i.e., it is meant to be implemented
-   * by derived classes.
+   * Sets a custom node visit for the {@link #render()} algorithm.
    * <p>
-   * Hierarchical culling, i.e., culling of the node and its children, should be decided here.
-   * Set the culling flag with {@link #cull} according to your culling condition:
+   * Bypassing the node rendering and/or performing hierarchical culling, i.e.,
+   * culling of the node and its children, should be done here.
    *
    * <pre>
    * {@code
-   * node = new Node() {
-   *   public void visit() {
-   *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
-   *     // (which should be implemented by you) is true, scene.render() will prune the branch
-   *     // at the node
-   *     cull(cullingCondition);
+   * Graph scene = new Graph(context, width, height);
+   * Node space = new Node();
+   * public void visit(Graph graph, Node node) {
+   *   if (graph.cullingCondition) {
+   *     node.cull = true;
+   *   }
+   *   else if (bypassCondition) {
+   *     node.bypass();
    *   }
    * }
+   * scene.setVisit(space, visit);
    * }
    * </pre>
-   * Bypassing rendering of the node may also be decided here, according to a bypassCondition
-   * (which should be implemented by you):
-   * <pre>
-   * {@code
-   * node = new Node() {
-   *   public void visit() {
-   *     if(bypassCondition)
-   *       // this will bypass node rendering without culling its children
-   *       bypass();
-   *   }
-   * }
-   * }
-   * </pre>
+   * Note that the graph culling condition may be set from
+   * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}.
    *
-   * @see Graph#render(Node)
-   * @see #bypass()
+   * @see #resetVisit(Node)
+   * @see #render(Node)
+   * @see Node#bypass()
+   * @see Node#cull
    */
-
-  /**
-   * View-point adaptive {@link #visit()}, which now takes a {@code graph} param
-   * matching the calling instance in {@link Graph#render()}.
-   *
-   * @see Graph#render(Node)
-   * @see #bypass()
-   */
-
-  protected HashMap<Integer, BiConsumer<Graph, Node>> _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
-
   public void setVisit(Node node, BiConsumer<Graph, Node> functor) {
     _functors.put(node.id(), functor);
   }
 
+  /**
+   * Resets the node custom visit set with {@link #setVisit(Node, BiConsumer)}.
+   *
+   * @see #setVisit(Node, BiConsumer)
+   * @see #render(Node)
+   * @see Node#bypass()
+   * @see Node#cull
+   */
   public void resetVisit(Node node) {
     _functors.remove(node.id());
   }
@@ -3025,7 +3018,6 @@ public class Graph {
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
           _matrixHandler.pushMatrix();
           float scl = 1 + node._highlight;
-          // TODO 2d case needs testing
           if (is2D())
             _matrixHandler.scale(scl, scl);
           else

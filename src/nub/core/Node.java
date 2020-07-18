@@ -2385,6 +2385,15 @@ public class Node {
   }
 
   /**
+   * Same as {@code graph.setVisit(this, functor)}.
+   *
+   * @see Graph#setVisit(Node, BiConsumer)
+   */
+  public void setVisit(Graph graph, BiConsumer<Graph, Node> functor) {
+    graph.setVisit(this, functor);
+  }
+
+  /**
    * Bypass rendering the node for the current frame. Set it before calling {@link Graph#render()}
    * or any rendering algorithm. Note that the node nor its children get culled.
    */

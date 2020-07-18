@@ -29,17 +29,6 @@ public class ViewFrustumCulling extends PApplet {
     mainScene.togglePerspective();
     mainScene.enableBoundaryEquations();
     mainScene.fit(1);
-
-    // declare and build the octree hierarchy
-    root = new OctreeNode();
-    buildOctree(root);
-
-    for (Node node : mainScene.nodes()) {
-      if (!mainScene.isEye(node)) {
-        mainScene.setVisit(node, this::culling);
-      }
-    }
-
     // secondary scene
     secondaryScene = new Scene(createGraphics(w, h / 2, P3D));
     secondaryScene.enableHint(Node.FRUSTUM, mainScene, color(255, 0, 0, 125));
@@ -47,6 +36,9 @@ public class ViewFrustumCulling extends PApplet {
     secondaryScene.togglePerspective();
     secondaryScene.setRadius(200);
     secondaryScene.fit();
+    // declare and build the octree hierarchy
+    root = new OctreeNode();
+    buildOctree(root);
   }
 
   public void buildOctree(OctreeNode parent) {
@@ -96,31 +88,10 @@ public class ViewFrustumCulling extends PApplet {
     }
   }
 
-  public void culling(Graph graph, Node node) {
-    switch (graph.boxVisibility(node.worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
-            node.worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
-      case VISIBLE:
-        for (Node child : node.children())
-          child.cull = true;
-        break;
-      case SEMIVISIBLE:
-        if (!node.children().isEmpty()) {
-          // don't render the node...
-          node.bypass();
-          // ... but don't cull its children either
-          for (Node child : node.children())
-            child.cull = false;
-        }
-        break;
-      case INVISIBLE:
-        node.cull = true;
-        break;
-    }
-  }
-
   class OctreeNode extends Node {
     OctreeNode() {
       tagging = false;
+      setVisit(mainScene, this::culling);
     }
 
     OctreeNode(OctreeNode node, Vector vector) {
@@ -128,6 +99,7 @@ public class ViewFrustumCulling extends PApplet {
       scale(0.5f);
       translate(Vector.multiply(vector, scaling() / 2));
       tagging = false;
+      setVisit(mainScene, this::culling);
     }
 
     float level() {
@@ -143,54 +115,28 @@ public class ViewFrustumCulling extends PApplet {
       pg.box(a, b, c);
     }
 
-    // The visit() method is called just before the graphics(PGraphics) method
-    /*
-    @Override
-    public void visit(Graph graph) {
-      switch (graph.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
-          worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
+    // The culling method is called just before the graphics(PGraphics) method
+    public void culling(Graph graph, Node node) {
+      switch (graph.boxVisibility(node.worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
+              node.worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
         case VISIBLE:
-          for (Node node : children())
-            node.cull = true;
+          for (Node child : node.children())
+            child.cull = true;
           break;
         case SEMIVISIBLE:
-          if (!children().isEmpty()) {
+          if (!node.children().isEmpty()) {
             // don't render the node...
-            bypass();
+            node.bypass();
             // ... but don't cull its children either
-            for (Node node : children())
-              node.cull = false;
+            for (Node child : node.children())
+              child.cull = false;
           }
           break;
         case INVISIBLE:
-          cull = true;
+          node.cull = true;
           break;
       }
     }
-    /*
-    @Override
-    public void visit() {
-      switch (mainScene.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
-              worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
-        case VISIBLE:
-          for (Node node : children())
-            node.cull = true;
-          break;
-        case SEMIVISIBLE:
-          if (!children().isEmpty()) {
-            // don't render the node...
-            bypass();
-            // ... but don't cull its children either
-            for (Node node : children())
-              node.cull = false;
-          }
-          break;
-        case INVISIBLE:
-          cull = true;
-          break;
-      }
-    }
-    // */
   }
 
   public static void main(String args[]) {
