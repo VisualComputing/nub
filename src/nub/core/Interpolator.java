@@ -165,7 +165,7 @@ public class Interpolator {
   // Attention: We should go like this: protected Map<Float, Node> _list;
   // but Java doesn't allow to iterate backwards a map
   protected List<KeyFrame> _list;
-  public boolean cache;
+  public boolean edit;
   protected ListIterator<KeyFrame> _backwards;
   protected ListIterator<KeyFrame> _forwards;
   protected List<Node> _path;
@@ -233,7 +233,7 @@ public class Interpolator {
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
     _splineStroke = -65281;
     _steps = 3;
-    cache = true;
+    edit = true;
   }
 
   protected Interpolator(Interpolator other) {
@@ -263,7 +263,7 @@ public class Interpolator {
     this._splineCacheIsValid = false;
     this._backwards = _list.listIterator();
     this._forwards = _list.listIterator();
-    this.cache = other.cache;
+    this.edit = other.edit;
     // TODO decide this and make consistent with Node.get()
     // hints
     this._cameraStroke = other._cameraStroke;
@@ -971,7 +971,7 @@ public class Interpolator {
 
   // TODO improve when line picking shader is fixed
   protected void _enabled() {
-    if (cache) {
+    if (edit) {
       for (KeyFrame keyFrame : _list) {
         if (keyFrame._node.hint() == 0) {
           keyFrame._cache = true;
@@ -994,7 +994,7 @@ public class Interpolator {
 
   // TODO improve when line picking shader is fixed
   protected void _disabled() {
-    if (cache) {
+    if (edit) {
       for (KeyFrame keyFrame : _list) {
         if (keyFrame._cache) {
           keyFrame._node.resetHint();
