@@ -13,8 +13,8 @@ public class ViewingVolume extends PApplet {
 
   //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
-  int w = 1200;
-  int h = 1600;
+  int w = 700;
+  int h = 700;
 
   public void settings() {
     size(w, h, renderer);
@@ -34,6 +34,7 @@ public class ViewingVolume extends PApplet {
     // Note that we pass the upper left corner coordinates where the scene
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(createGraphics(w, h / 2, P3D));
+    scene2.enableHint(Scene.BACKGROUND, color(85));
     scene2.enableHint(Scene.FRUSTUM, scene1);
     scene2.enableHint(Scene.SHAPE);
     scene2.setShape(this::draw2);

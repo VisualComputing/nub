@@ -27,7 +27,8 @@ public class Flock extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.enableHint(Scene.BACKGROUND, color(10, 50, 25));
-    scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
+    // TODO pending
+    //scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.fit();
     // create and fill the list of boids
     flock = new ArrayList();

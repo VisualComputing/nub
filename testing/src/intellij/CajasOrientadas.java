@@ -137,7 +137,8 @@ public class CajasOrientadas extends PApplet {
       pg.popStyle();
     }
 
-    @Override
+    // TODO restore
+    //@Override
     public void visit() {
       updateCajaOrientation(this);
     }
@@ -161,7 +162,8 @@ public class CajasOrientadas extends PApplet {
       pg.popStyle();
     }
 
-    @Override
+    // TODO restore
+    //@Override
     public void visit() {
       for (Box caja : cajas)
         updateCajaOrientation(caja);

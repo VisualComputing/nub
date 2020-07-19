@@ -128,22 +128,8 @@ public class Scene extends Graph {
   // CONSTRUCTORS
 
   /**
-   * Constructor that defines an on-screen Processing scene. Same as
-   * {@code this(pApplet.g)}.
-   *
-   * @see #Scene(PGraphics)
-   * @see #Scene(PApplet, Node)
-   * @see #Scene(PGraphics, Node)
-   */
-  public Scene(PApplet pApplet) {
-    this(pApplet.g);
-  }
-
-  /**
    * Same as {@code this(pApplet.g, eye)}.
    *
-   * @see #Scene(PApplet)
-   * @see #Scene(PGraphics)
    * @see #Scene(PGraphics, Node)
    */
   public Scene(PApplet pApplet, Node eye) {
@@ -151,30 +137,177 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code this(pGraphics, null)}.
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, eye)},
+   * and then sets {@link #leftHanded} to {@code true}.
    *
-   * @see #Scene(PApplet)
-   * @see #Scene(PApplet, Node)
-   * @see #Scene(PGraphics, Node)
+   * @see Graph#Graph(Object, int, int, Node)
    */
-  public Scene(PGraphics pGraphics) {
-    this(pGraphics, null);
+  public Scene(PGraphics pGraphics, Node eye) {
+    super(pGraphics, pGraphics.width, pGraphics.height, eye);
+    _init(pGraphics);
   }
 
   /**
-   * Main constructor defining a left-handed Processing compatible scene.
-   * <p>
-   * An off-screen Processing scene is created if {@code pGraphics} is different
-   * than the main PApplet context, otherwise it creates an on-screen Processing
-   * scene. To display an off-screen scene call {@link #display(Node, int, int)}.
+   * Same as {@code this(pApplet.g, eye, type)}.
    *
-   * @see Graph#Graph(Object, nub.core.Graph.Type, int, int)
-   * @see #Scene(PApplet)
-   * @see #Scene(PGraphics)
-   * @see #Scene(PApplet, Node)
+   * @see #Scene(PGraphics, Node, Type)
    */
-  public Scene(PGraphics pGraphics, Node eye) {
-    super(pGraphics, eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
+  public Scene(PApplet pApplet, Node eye, Type type) {
+    this(pApplet.g, eye, type);
+  }
+
+  /**
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, eye, type)},
+   * and then sets {@link #leftHanded} to {@code true}.
+   *
+   * @see Graph#Graph(Object, int, int, Node, Type)
+   */
+  public Scene(PGraphics pGraphics, Node eye, Type type) {
+    super(pGraphics, pGraphics.width, pGraphics.height, eye, type);
+    _init(pGraphics);
+  }
+
+  /**
+   * Same as {@code this(pApplet.g)}.
+   *
+   * @see #Scene(PGraphics)
+   */
+  public Scene(PApplet pApplet) {
+    this(pApplet.g);
+  }
+
+  /**
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height)},
+   * and then sets {@link #leftHanded} to {@code true}.
+   *
+   * @see Graph#Graph(Object, int, int)
+   */
+  public Scene(PGraphics pGraphics) {
+    super(pGraphics, pGraphics.width, pGraphics.height);
+    _init(pGraphics);
+  }
+
+  /**
+   * Same as {@code this(pApplet.g, type)}.
+   *
+   * @see #Scene(PGraphics, Type)
+   */
+  public Scene(PApplet pApplet, Type type) {
+    this(pApplet.g, type);
+  }
+
+  /**
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, type)},
+   * and then sets {@link #leftHanded} to {@code true}.
+   *
+   * @see Graph#Graph(Object, int, int, Type)
+   */
+  public Scene(PGraphics pGraphics, Type type) {
+    super(pGraphics, pGraphics.width, pGraphics.height, type);
+    _init(pGraphics);
+  }
+
+  /**
+   * Same as {@code this(pApplet.g, type, zNear, zFar)}.
+   *
+   * @see #Scene(PGraphics, Type, float, float)
+   */
+  public Scene(PApplet pApplet, Type type, float zNear, float zFar) {
+    this(pApplet.g, type, zNear, zFar);
+  }
+
+  /**
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, type, zNear, zFar)},
+   * and then sets {@link #leftHanded} to {@code true}.
+   *
+   * @see Graph#Graph(Object, int, int, Type, float, float)
+   */
+  public Scene(PGraphics pGraphics, Type type, float zNear, float zFar) {
+    super(pGraphics, pGraphics.width, pGraphics.height, type, zNear, zFar);
+    _init(pGraphics);
+  }
+
+  /**
+   * Same as {@code this(pApplet.g, type, center, radius)}.
+   *
+   * @see #Scene(PGraphics, Type, Vector, float)
+   */
+  public Scene(PApplet pApplet, Type type, Vector center, float radius) {
+    this(pApplet.g, type, center, radius);
+  }
+
+  /**
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, type, center, radius)},
+   * and then sets {@link #leftHanded} to {@code true}.
+   *
+   * @see Graph#Graph(Object, int, int, Type, Vector, float)
+   */
+  public Scene(PGraphics pGraphics, Type type, Vector center, float radius) {
+    super(pGraphics, pGraphics.width, pGraphics.height, type, center, radius);
+    _init(pGraphics);
+  }
+
+  /**
+   * Same as {@code this(pApplet.g, eye, type, center, radius)}.
+   *
+   * @see #Scene(PGraphics, Node, Type, Vector, float)
+   */
+  public Scene(PApplet pApplet, Node eye, Type type, Vector center, float radius) {
+    this(pApplet.g, eye, type, center, radius);
+  }
+
+  /**
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, eye, type, center, radius)},
+   * and then sets {@link #leftHanded} to {@code true}.
+   *
+   * @see Graph#Graph(Object, int, int, Node, Type, Vector, float)
+   */
+  public Scene(PGraphics pGraphics, Node eye, Type type, Vector center, float radius) {
+    super(pGraphics, pGraphics.width, pGraphics.height, eye, type, center, radius);
+    _init(pGraphics);
+  }
+
+  /**
+   * Same as {@code this(pApplet.g, eye, zNear, zFar)}.
+   *
+   * @see #Scene(PGraphics, Node, float, float)
+   */
+  public Scene(PApplet pApplet, Node eye, float zNear, float zFar) {
+    this(pApplet.g, eye, zNear, zFar);
+  }
+
+  /**
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, eye, zNear, zFar)},
+   * and then sets {@link #leftHanded} to {@code true}.
+   *
+   * @see Graph#Graph(Object, int, int, Node, float, float)
+   */
+  public Scene(PGraphics pGraphics, Node eye, float zNear, float zFar) {
+    super(pGraphics, pGraphics.width, pGraphics.height, eye, zNear, zFar);
+    _init(pGraphics);
+  }
+
+  /**
+   * Same as {@code this(pApplet.g, eye, type, zNear, zFar)}.
+   *
+   * @see #Scene(PGraphics, Node, Type, float, float)
+   */
+  public Scene(PApplet pApplet, Node eye, Type type, float zNear, float zFar) {
+    this(pApplet.g, eye, type, zNear, zFar);
+  }
+
+  /**
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, eye, type, zNear, zFar)},
+   * and then sets {@link #leftHanded} to {@code true}.
+   *
+   * @see Graph#Graph(Object, int, int, Node, Type, float, float)
+   */
+  public Scene(PGraphics pGraphics, Node eye, Type type, float zNear, float zFar) {
+    super(pGraphics, pGraphics.width, pGraphics.height, eye, type, zNear, zFar);
+    _init(pGraphics);
+  }
+
+  protected void _init(PGraphics pGraphics) {
     // 1. P5 objects
     if (pApplet == null) pApplet = pGraphics.parent;
     _offscreen = pGraphics != pApplet.g;

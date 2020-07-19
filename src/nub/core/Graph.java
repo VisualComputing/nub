@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  * A 2D or 3D scene-graph providing eye, input and timing handling to a raster or ray-tracing
  * renderer.
  * <h1>1. Types and dimensions</h1>
- * To set the viewing volume use {@link #setFrustum(Vector, float)} or {@link #setFrustum(Vector, Vector)}.
+ * To set the viewing volume use {@link #setFrustum(Vector, float)} or {@link #setFrustum(float, float)}.
  * Both call {@link #setCenter(Vector)} and {@link #setRadius(float)} which defined a viewing ball
  * with {@link #center()} and {@link #radius()} parameters. See also {@link #setZClippingCoefficient(float)}
  * and {@link #setZNearCoefficient(float)} for a 3d graph.
@@ -174,6 +174,9 @@ public class Graph {
   protected Vector _center;
   protected float _radius;
   protected Vector _anchor;
+  // TODO implement fixed mode
+  boolean _fixed;
+  protected float _zNear, _zFar;
   // Inertial stuff
   public static float inertia = 0.8f;
   protected InertialTask _translationTask;
@@ -306,50 +309,140 @@ public class Graph {
   private float _zClippingCoefficient;
 
   /**
-   * Same as {@code this(Type.PERSPECTIVE, null, w, h)}.
+   * Same as {@code this(context, width, height, eye, Type.PERSPECTIVE)}.
    *
-   * @see #Graph(Object, Node, Type, int, int)
+   * @see #Graph(Object, int, int, Node, Type)
+   */
+  public Graph(Object context, int width, int height, Node eye) {
+    this(context, width, height, eye, Type.PERSPECTIVE);
+  }
+
+  /**
+   * Semas as {@code this(context, width, height, eye, type, new Vector(), 100)}.
+   *
+   * @see #Graph(Object, int, int, Node, Type, Vector, float)
+   */
+  public Graph(Object context, int width, int height, Node eye, Type type) {
+    this(context, width, height, eye, type, new Vector(), 100);
+  }
+
+  /**
+   * Semas as {@code this(context, width, height, Type.PERSPECTIVE)}.
+   *
+   * @see #Graph(Object, int, int, Type)
    */
   public Graph(Object context, int width, int height) {
-    this(context, null, Type.PERSPECTIVE, width, height);
+    this(context, width, height, Type.PERSPECTIVE);
   }
 
   /**
-   * Same as {@code this(context, null, Type.PERSPECTIVE, eye, width, height)}.
+   * Same as {@code this(context, width, height, type, new Vector(), 100)}.
    *
-   * @see #Graph(Object, Node, Type, int, int)
+   * @see #Graph(Object, int, int, Type, Vector, float)
    */
-  public Graph(Object context, Node eye, int width, int height) {
-    this(context, eye, Type.PERSPECTIVE, width, height);
+  public Graph(Object context, int width, int height, Type type) {
+    this(context, width, height, type, new Vector(), 100);
   }
 
   /**
-   * Same as {@code this(context, null, type, width, height)}.
+   * Defines a right-handed graph with the specified {@code width} and {@code height}
+   * screen window dimensions. Creates and {@link #eye()} node, sets its {@link #fov()} to
+   * {@code PI/3}. Calls {@link #setFrustum(float, float)} on {@code zNear} and
+   * {@code zFar} to set up the scene frustum and {@link #fit()} to display the
+   * whole scene.
+   * <p>
+   * The constructor also instantiates the graph main {@link #context()} and
+   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
+   * {@link #TimingHandler}.
    *
-   * @see #Graph(Object, Node, Type, int, int)
-   */
-  public Graph(Object context, Type type, int width, int height) {
-    this(context, null, type, width, height);
-  }
-
-  /**
-   * Default constructor defines a right-handed graph with the specified {@code width} and
-   * {@code height} screen window dimensions. The graph {@link #center()} and
-   * {@link #anchor()} are set to {@code (0,0,0)} and its {@link #radius()} to {@code 100}.
-   * <p>
-   * The constructor sets a {@link Node} instance as the graph {@link #eye()} and then
-   * calls {@link #fit()}, so that the entire scene fits the screen dimensions.
-   * <p>
-   * The constructor also instantiates the graph main {@link #context()} and {@code back-buffer}
-   * matrix-handlers (see {@link MatrixHandler}) and {@link #TimingHandler}.
-   * <p>
-   * Same as {@code this(context, null, type, eye, width, height)}.
-   *
+   * @see #setFrustum(float, float)
+   * @see #Graph(Object, int, int, Type, Vector, float)
    * @see #TimingHandler
-   * @see #setEye(Node)
-   * @see #Graph(Object, Type, int, int)
+   * @see MatrixHandler
    */
-  public Graph(Object context, Node eye, Type type, int width, int height) {
+  public Graph(Object context, int width, int height, Type type, float zNear, float zFar) {
+    _init(context, width, height, new Node(), type);
+    if (is3D())
+      setFOV((float) Math.PI / 3);
+    setFrustum(zNear, zFar);
+    fit();
+  }
+
+  /**
+   * Defines a right-handed graph with the specified {@code width} and {@code height}
+   * screen window dimensions. Creates and {@link #eye()} node, sets its {@link #fov()} to
+   * {@code PI/3}. Calls {@link #setFrustum(Vector, float)} on {@code center} and
+   * {@code radius} to set up the scene frustum and {@link #fit()} to display the
+   * whole scene.
+   * <p>
+   * The constructor also instantiates the graph main {@link #context()} and
+   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
+   * {@link #TimingHandler}.
+   *
+   * @see #setFrustum(float, float)
+   * @see #Graph(Object, int, int, Type, float, float)
+   * @see #TimingHandler
+   * @see MatrixHandler
+   */
+  public Graph(Object context, int width, int height, Type type, Vector center, float radius) {
+    _init(context, width, height, new Node(), type);
+    if (is3D())
+      setFOV((float) Math.PI / 3);
+    setFrustum(center, radius);
+    fit();
+  }
+
+  /**
+   * Defines a right-handed graph with the specified {@code width} and {@code height}
+   * screen window dimensions. Calls {@link #setFrustum(Vector, float)}
+   * on {@code center} and {@code radius} to set up the scene frustum.
+   * <p>
+   * The constructor also instantiates the graph main {@link #context()} and
+   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
+   * {@link #TimingHandler}.
+   *
+   * @see #setFrustum(Vector, float)
+   * @see #Graph(Object, int, int, Node, Type, float, float)
+   * @see #TimingHandler
+   * @see MatrixHandler
+   */
+  public Graph(Object context, int width, int height, Node eye, Type type, Vector center, float radius) {
+    _init(context, width, height, eye, type);
+    setFrustum(center, radius);
+  }
+
+  /**
+   * Same as {@code this(context, width, height, eye, Type.PERSPECTIVE, zNear, zFar)}.
+   *
+   * @see #Graph(Object, int, int, Node, Type, float, float)
+   */
+  public Graph(Object context, int width, int height, Node eye, float zNear, float zFar) {
+    this(context, width, height, eye, Type.PERSPECTIVE, zNear, zFar);
+  }
+
+  /**
+   * Defines a right-handed graph with the specified {@code width} and {@code height}
+   * screen window dimensions. Calls {@link #setFrustum(float, float)}
+   * on {@code zNear} and {@code zFar} to set up the scene frustum.
+   * <p>
+   * The constructor also instantiates the graph main {@link #context()} and
+   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
+   * {@link #TimingHandler}.
+   *
+   * @see #setFrustum(Vector, float)
+   * @see #Graph(Object, int, int, Node, Type, Vector, float)
+   * @see #TimingHandler
+   * @see MatrixHandler
+   */
+  public Graph(Object context, int width, int height, Node eye, Type type, float zNear, float zFar) {
+    _init(context, width, height, eye, type);
+    setFrustum(zNear, zFar);
+  }
+
+  /**
+   * Used internally by several constructors.
+   */
+  protected void _init(Object context, int width, int height, Node eye, Type type) {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
@@ -372,8 +465,7 @@ public class Graph {
     _rays = new ArrayList<Ray>();
     _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
     cacheProjectionViewInverse(false);
-    setFrustum(new Vector(), 100);
-    setEye(eye == null ? new Node() : eye);
+    setEye(eye);
     _translationTask = new InertialTask() {
       @Override
       public void action() {
@@ -393,9 +485,6 @@ public class Graph {
       }
     };
     setType(type);
-    if (is3D())
-      setFOV((float) Math.PI / 3);
-    fit();
     enableBoundaryEquations(false);
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
@@ -1578,7 +1667,8 @@ public class Graph {
    * Note that {@link Graph#radius()} (resp. {@link Graph#setRadius(float)} simply call this
    * method on its associated eye.
    *
-   * @see #setFrustum(Vector, Vector)
+   * @see #setFrustum(Vector, float)
+   * @see #setFrustum(float, float)
    */
   public float radius() {
     return _radius;
@@ -1594,7 +1684,8 @@ public class Graph {
    *
    * @see #setCenter(Vector)
    * @see #setRadius(float)
-   * @see #setFrustum(Vector, Vector)
+   * @see #setFrustum(Vector, float)
+   * @see #setFrustum(float, float)
    * @see #zNear()
    * @see #zFar()
    */
@@ -1645,9 +1736,10 @@ public class Graph {
    *
    * @see #setCenter(Vector)
    * @see #setRadius(float)
-   * @see #setFrustum(Vector, Vector)
+   * @see #setFrustum(float, float)
    */
   public void setFrustum(Vector center, float radius) {
+    _fixed = false;
     setCenter(center);
     setAnchor(center);
     setRadius(radius);
@@ -1659,8 +1751,21 @@ public class Graph {
    *
    * @see #setFrustum(Vector, float)
    */
+  /*
   public void setFrustum(Vector corner1, Vector corner2) {
     setFrustum(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f), 0.5f * (Vector.subtract(corner2, corner1)).magnitude());
+  }
+   */
+
+  //TODO implement me
+  public void setFrustum(float zNear, float zFar) {
+    _fixed = true;
+    _zNear = zNear;
+    _zFar = zFar;
+    Vector corner1 = new Vector(-width() / 2, -height() / 2, zNear);
+    Vector corner2 = new Vector(width() / 2, height() / 2, zFar);
+    setCenter(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f));
+    setRadius(0.5f * (Vector.subtract(corner2, corner1)).magnitude());
   }
 
   /**
