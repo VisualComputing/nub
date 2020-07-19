@@ -174,7 +174,6 @@ public class Graph {
   protected Vector _center;
   protected float _radius;
   protected Vector _anchor;
-  // TODO implement fixed mode
   boolean _fixed;
   protected float _zNear, _zFar;
   // Inertial stuff
@@ -204,7 +203,7 @@ public class Graph {
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected boolean _isProjectionViewInverseCached;
 
-  // TODO these three to are not only related to Quaternion.from but mainly to hint stuff
+  // TODO these three are not only related to Quaternion.from but mainly to hint stuff
 
   /**
    * Returns {@code true} if {@code o} is instance of {@link Integer}, {@link Float} or {@link Double},
@@ -465,6 +464,8 @@ public class Graph {
     _rays = new ArrayList<Ray>();
     _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
     cacheProjectionViewInverse(false);
+    if (eye == null)
+      throw new RuntimeException("Error eye shouldn't be null");
     setEye(eye);
     _translationTask = new InertialTask() {
       @Override
@@ -1762,8 +1763,10 @@ public class Graph {
     _fixed = true;
     _zNear = zNear;
     _zFar = zFar;
-    Vector corner1 = new Vector(-width() / 2, -height() / 2, zNear);
-    Vector corner2 = new Vector(width() / 2, height() / 2, zFar);
+    Vector eyeCorner1 = new Vector(-width() / 2, -height() / 2, zNear);
+    Vector eyeCorner2 = new Vector(width() / 2, height() / 2, zFar);
+    Vector corner1 = eye().worldLocation(eyeCorner1);
+    Vector corner2 = eye().worldLocation(eyeCorner2);
     setCenter(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f));
     setRadius(0.5f * (Vector.subtract(corner2, corner1)).magnitude());
   }

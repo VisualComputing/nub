@@ -22,10 +22,7 @@ import nub.timing.TimingHandler;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
-import processing.opengl.PGL;
-import processing.opengl.PGraphics3D;
-import processing.opengl.PGraphicsOpenGL;
-import processing.opengl.PShader;
+import processing.opengl.*;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -137,14 +134,12 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, eye)},
-   * and then sets {@link #leftHanded} to {@code true}.
+   * Same as {@code this(pGraphics, Node eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D)}.
    *
-   * @see Graph#Graph(Object, int, int, Node)
+   * @see #Scene(PGraphics, Node, Type)
    */
   public Scene(PGraphics pGraphics, Node eye) {
-    super(pGraphics, pGraphics.width, pGraphics.height, eye);
-    _init(pGraphics);
+    this(pGraphics, eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D);
   }
 
   /**
@@ -163,7 +158,7 @@ public class Scene extends Graph {
    * @see Graph#Graph(Object, int, int, Node, Type)
    */
   public Scene(PGraphics pGraphics, Node eye, Type type) {
-    super(pGraphics, pGraphics.width, pGraphics.height, eye, type);
+    super(pGraphics, pGraphics.width, pGraphics.height, eye, pGraphics instanceof PGraphics2D ? Type.TWO_D : type != Type.TWO_D ? type : Type.PERSPECTIVE);
     _init(pGraphics);
   }
 
@@ -177,14 +172,12 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height)},
-   * and then sets {@link #leftHanded} to {@code true}.
+   * Same as {@code this(pGraphics, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D)}.
    *
-   * @see Graph#Graph(Object, int, int)
+   * @see #Scene(PGraphics, Type)
    */
   public Scene(PGraphics pGraphics) {
-    super(pGraphics, pGraphics.width, pGraphics.height);
-    _init(pGraphics);
+    this(pGraphics, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D);
   }
 
   /**
@@ -203,7 +196,7 @@ public class Scene extends Graph {
    * @see Graph#Graph(Object, int, int, Type)
    */
   public Scene(PGraphics pGraphics, Type type) {
-    super(pGraphics, pGraphics.width, pGraphics.height, type);
+    super(pGraphics, pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics2D ? Type.TWO_D : type != Type.TWO_D ? type : Type.PERSPECTIVE);
     _init(pGraphics);
   }
 
@@ -223,7 +216,7 @@ public class Scene extends Graph {
    * @see Graph#Graph(Object, int, int, Type, float, float)
    */
   public Scene(PGraphics pGraphics, Type type, float zNear, float zFar) {
-    super(pGraphics, pGraphics.width, pGraphics.height, type, zNear, zFar);
+    super(pGraphics, pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics2D ? Type.TWO_D : type != Type.TWO_D ? type : Type.PERSPECTIVE, zNear, zFar);
     _init(pGraphics);
   }
 
@@ -243,7 +236,7 @@ public class Scene extends Graph {
    * @see Graph#Graph(Object, int, int, Type, Vector, float)
    */
   public Scene(PGraphics pGraphics, Type type, Vector center, float radius) {
-    super(pGraphics, pGraphics.width, pGraphics.height, type, center, radius);
+    super(pGraphics, pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics2D ? Type.TWO_D : type != Type.TWO_D ? type : Type.PERSPECTIVE, center, radius);
     _init(pGraphics);
   }
 
@@ -263,7 +256,7 @@ public class Scene extends Graph {
    * @see Graph#Graph(Object, int, int, Node, Type, Vector, float)
    */
   public Scene(PGraphics pGraphics, Node eye, Type type, Vector center, float radius) {
-    super(pGraphics, pGraphics.width, pGraphics.height, eye, type, center, radius);
+    super(pGraphics, pGraphics.width, pGraphics.height, eye, pGraphics instanceof PGraphics2D ? Type.TWO_D : type != Type.TWO_D ? type : Type.PERSPECTIVE, center, radius);
     _init(pGraphics);
   }
 
@@ -277,14 +270,12 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, eye, zNear, zFar)},
-   * and then sets {@link #leftHanded} to {@code true}.
+   * Same as {@code this(pGraphics, eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, zNear, zFar)}.
    *
-   * @see Graph#Graph(Object, int, int, Node, float, float)
+   * @see #Scene(PGraphics, Node, Type, float, float)
    */
   public Scene(PGraphics pGraphics, Node eye, float zNear, float zFar) {
-    super(pGraphics, pGraphics.width, pGraphics.height, eye, zNear, zFar);
-    _init(pGraphics);
+    this(pGraphics, eye, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, zNear, zFar);
   }
 
   /**
@@ -303,7 +294,7 @@ public class Scene extends Graph {
    * @see Graph#Graph(Object, int, int, Node, Type, float, float)
    */
   public Scene(PGraphics pGraphics, Node eye, Type type, float zNear, float zFar) {
-    super(pGraphics, pGraphics.width, pGraphics.height, eye, type, zNear, zFar);
+    super(pGraphics, pGraphics.width, pGraphics.height, eye, pGraphics instanceof PGraphics2D ? Type.TWO_D : type != Type.TWO_D ? type : Type.PERSPECTIVE, zNear, zFar);
     _init(pGraphics);
   }
 
