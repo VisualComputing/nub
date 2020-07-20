@@ -116,9 +116,7 @@ import java.util.function.Consumer;
  * and {@link #resetHint()}.
  * <h1>6. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
- * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}. Make sure
- * to set {@link #cacheBoundaryEquations} to true first, since update of the viewing volume
- * boundary equations are disabled by default.
+ * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}.
  * <h1>7. Matrix handling</h1>
  * The graph performs matrix handling through a matrix-handler. Refer to the {@link MatrixHandler}
  * documentation for details.
@@ -186,8 +184,6 @@ public class Graph {
   protected Interpolator _interpolator;
   //boundary eqns
   protected float[][] _coefficients;
-  // TODO match api naming conventions with setFrustum
-  public boolean cacheBoundaryEquations;
   protected Vector[] _normal;
   protected float[] _distance;
   // handed
@@ -1097,21 +1093,16 @@ public class Graph {
    * Returns {@code true} if {@code point} is visible (i.e, lies within the eye boundary)
    * and {@code false} otherwise.
    *
-   * <b>Attention:</b> The eye boundary plane equations should be updated before calling
-   * this method. You may compute them explicitly (by calling {@link #updateBoundaryEquations()})
-   * or enable them to be automatic updated in your graph setup (with
-   * {@link #cacheBoundaryEquations}).
-   *
    * @see #distanceToBoundary(int, Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #cacheBoundaryEquations
    * @see #boundaryEquations()
    */
   public boolean isPointVisible(Vector point) {
-    if (!cacheBoundaryEquations)
-      throw new RuntimeException("The frustum plane equations (needed by isPointVisible) may be outdated. Please "
-          + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+    if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
+      _updateBoundaryEquations();
+      _lastEqUpdate = TimingHandler.frameCount;
+    }
     for (int i = 0; i < (is3D() ? 6 : 4); ++i)
       if (distanceToBoundary(i, point) > 0)
         return false;
@@ -1123,22 +1114,17 @@ public class Graph {
    * {@link Visibility#SEMIVISIBLE}, depending whether the ball (of radius {@code radius}
    * and center {@code center}) is visible, invisible, or semi-visible, respectively.
    *
-   * <b>Attention:</b> The eye boundary plane equations should be updated before calling
-   * this method. You may compute them explicitly (by calling
-   * {@link #updateBoundaryEquations()} ) or enable them to be automatic updated in your
-   * graph setup (with {@link #cacheBoundaryEquations}).
-   *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #boxVisibility(Vector, Vector)
-   * @see #cacheBoundaryEquations
    * @see #boundaryEquations()
-   * @see #updateBoundaryEquations()
+   * @see #_updateBoundaryEquations()
    */
   public Visibility ballVisibility(Vector center, float radius) {
-    if (!cacheBoundaryEquations)
-      throw new RuntimeException("The frustum plane equations (needed by ballVisibility) may be outdated. Please "
-          + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+    if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
+      _updateBoundaryEquations();
+      _lastEqUpdate = TimingHandler.frameCount;
+    }
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
       float d = distanceToBoundary(i, center);
@@ -1158,22 +1144,17 @@ public class Graph {
    * (defined by corners {@code p1} and {@code p2}) is visible, invisible,
    * or semi-visible, respectively.
    *
-   * <b>Attention:</b> The eye boundary plane equations should be updated before calling
-   * this method. You may compute them explicitly (by calling
-   * {@link #updateBoundaryEquations()} ) or enable them to be automatic updated in your
-   * graph setup (with {@link #cacheBoundaryEquations}).
-   *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
-   * @see #cacheBoundaryEquations
    * @see #boundaryEquations()
-   * @see #updateBoundaryEquations()
+   * @see #_updateBoundaryEquations()
    */
   public Visibility boxVisibility(Vector corner1, Vector corner2) {
-    if (!cacheBoundaryEquations)
-      throw new RuntimeException("The frustum plane equations (needed by boxVisibility) may be outdated. Please "
-          + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+    if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
+      _updateBoundaryEquations();
+      _lastEqUpdate = TimingHandler.frameCount;
+    }
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
       boolean allOut = true;
@@ -1196,7 +1177,7 @@ public class Graph {
   }
 
   /**
-   * Returns the 4 or 6 plane equations of the eye boundary.
+   * Updates the 4 or 6 plane equations of the eye boundary.
    * <p>
    * In 2D the four 4-component vectors, respectively correspond to the
    * left, right, top and bottom eye boundary lines. Each vector holds a plane equation
@@ -1213,15 +1194,13 @@ public class Graph {
    * <p>
    * where {@code a}, {@code b}, {@code c} and {@code d} are the 4 components of each
    * vector, in that order.
-   *
-   * <b>Attention:</b> You should not call this method explicitly, unless you need the
-   * frustum equations to be updated only occasionally (rare). Set
-   * {@link #cacheBoundaryEquations} to true to automatically update the frustum equations
-   * every frame instead.
    */
-  public float[][] updateBoundaryEquations() {
+  protected void _updateBoundaryEquations() {
     _initCoefficients();
-    return is3D() ? _updateBoundaryEquations3() : _updateBoundaryEquations2();
+    if (is3D())
+      _updateBoundaryEquations3();
+    else
+      _updateBoundaryEquations2();
   }
 
   protected void _initCoefficients() {
@@ -1245,7 +1224,7 @@ public class Graph {
       _distance = new float[rows];
   }
 
-  protected float[][] _updateBoundaryEquations3() {
+  protected void _updateBoundaryEquations3() {
     // Computed once and for all
     Vector pos = eye().position();
     Vector viewDir = viewDirection();
@@ -1313,10 +1292,9 @@ public class Graph {
       _coefficients[i][2] = _normal[i]._vector[2];
       _coefficients[i][3] = _distance[i];
     }
-    return _coefficients;
   }
 
-  protected float[][] _updateBoundaryEquations2() {
+  protected void _updateBoundaryEquations2() {
     // Computed once and for all
     Vector pos = eye().position();
     Vector up = upVector();
@@ -1337,7 +1315,6 @@ public class Graph {
       // Change respect to Camera occurs here:
       _coefficients[i][2] = -_distance[i];
     }
-    return _coefficients;
   }
 
   /**
@@ -1359,22 +1336,18 @@ public class Graph {
    * where {@code a}, {@code b}, {@code c} and {@code d} are the 4 components of each
    * vector, in that order.
    *
-   * <b>Attention:</b> The eye boundary plane equations should be updated before calling
-   * this method. You may compute them explicitly (by calling
-   * {@link #updateBoundaryEquations()}) or enable them to be automatic updated in your
-   * graph setup (with {@link #cacheBoundaryEquations}).
-   *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #updateBoundaryEquations()
-   * @see #cacheBoundaryEquations
+   * @see #_updateBoundaryEquations()
    */
+  // TODO make naming convention match setFrustum
   public float[][] boundaryEquations() {
-    if (!cacheBoundaryEquations)
-      throw new RuntimeException("The graph boundary equations may be outdated. Please "
-          + "enable automatic updates of the equations in your setup with enableBoundaryEquations()");
+    if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
+      _updateBoundaryEquations();
+      _lastEqUpdate = TimingHandler.frameCount;
+    }
     return _coefficients;
   }
 
@@ -1389,22 +1362,16 @@ public class Graph {
    * In 3D {@code index} is a value between {@code 0} and {@code 5} which respectively
    * correspond to the left, right, near, far, top and bottom eye boundary planes.
    *
-   * <b>Attention:</b> The eye boundary plane equations should be updated before calling
-   * this method. You may compute them explicitly (by calling
-   * {@link #updateBoundaryEquations()}) or enable them to be automatic updated in your
-   * graph setup (with {@link #cacheBoundaryEquations}).
-   *
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #cacheBoundaryEquations
    * @see #boundaryEquations()
-   * @see #cacheBoundaryEquations
    */
   public float distanceToBoundary(int index, Vector position) {
-    if (!cacheBoundaryEquations)
-      throw new RuntimeException("The viewpoint boundary equations (needed by distanceToBoundary) may be outdated. Please "
-          + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+    if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
+      _updateBoundaryEquations();
+      _lastEqUpdate = TimingHandler.frameCount;
+    }
     Vector myVector = new Vector(_coefficients[index][0], _coefficients[index][1], _coefficients[index][2]);
     if (is3D())
       return Vector.dot(position, myVector) - _coefficients[index][3];
@@ -2793,8 +2760,8 @@ public class Graph {
 
   /**
    * Begins the rendering process (see {@link #render(Node)}). Use it always before
-   * {@link #closeContext()}. Binds the matrices to the renderer, updates the boundary equations
-   * (see {@link #updateBoundaryEquations()}) and displays the scene {@link #hint()}.
+   * {@link #closeContext()}. Binds the matrices to the renderer and displays the scene
+   * {@link #hint()}.
    * <p>
    * This method is automatically called by {@link #render(Node)}. Call it explicitly only
    * when the scene {@link #hint()} is reset (see also {@link #resetHint()}) and you need
@@ -2828,10 +2795,6 @@ public class Graph {
       if (isOffscreen())
         _initFrontBuffer();
       _bind();
-      if (cacheBoundaryEquations && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
-        updateBoundaryEquations();
-        _lastEqUpdate = TimingHandler.frameCount;
-      }
       _matrixHandler.pushMatrix();
       _displayHint();
     }
