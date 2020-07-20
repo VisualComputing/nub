@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  * and {@link #setZNearCoefficient(float)} for a 3d graph.
  * <p>
  * The way the projection matrix is computed (see
- * {@link #projection(Node, Type, float, float, float, float)}), defines the type of the
+ * {@link #projection()}), defines the type of the
  * graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC} for 3d graphs and {@link Type#TWO_D}
  * for a 2d graph.
  * <h1>2. Scene-graph handling</h1>
@@ -201,7 +201,7 @@ public class Graph {
   public boolean picking;
   protected long _bbNeed, _bbCount;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
-  protected boolean _isProjectionViewInverseCached;
+  public boolean cacheProjectionViewInverse;
 
   // TODO these three are not only related to Quaternion.from but mainly to hint stuff
 
@@ -300,7 +300,7 @@ public class Graph {
    * <p>
    * The type mainly defines the way the projection matrix is computed.
    */
-  protected enum Type {
+  public enum Type {
     PERSPECTIVE, ORTHOGRAPHIC, TWO_D, CUSTOM
   }
 
@@ -463,7 +463,6 @@ public class Graph {
     _tags = new HashMap<String, Node>();
     _rays = new ArrayList<Ray>();
     _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
-    cacheProjectionViewInverse(false);
     if (eye == null)
       throw new RuntimeException("Error eye shouldn't be null");
     setEye(eye);
@@ -572,7 +571,7 @@ public class Graph {
   }
 
   /**
-   * Defines the graph {@link #type()} according to the projection of the scene.
+   * Defines the graph {@link #_type} according to the projection of the scene.
    * Either {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}, {@link Type#TWO_D}
    * or {@link Type#CUSTOM}.
    * <p>
@@ -585,18 +584,17 @@ public class Graph {
    * nodes will be constrained so that they will remain at the x-y plane. See
    * {@link nub.core.constraint.Constraint}.
    *
-   * @see #projection(Node, Type, float, float, float, float)
    * @see Node#magnitude()
    */
   protected void _setType(Type type) {
-    if (type != type()) {
+    if (type != _type) {
       _modified();
       this._type = type;
     }
   }
 
   /**
-   * Shifts the graph {@link #type()} between {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} while trying
+   * Shifts the graph {@link #_type} between {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} while trying
    * to keep the {@link #fov()}. Only meaningful if graph {@link #is3D()}.
    *
    * @see #_setType(Type)
@@ -608,22 +606,21 @@ public class Graph {
   public void togglePerspective() {
     if (is3D()) {
       float fov = fov();
-      _setType(type() == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
+      _setType(_type == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
       setFOV(fov);
     }
   }
 
   /**
-   * Sets the {@link #eye()} {@link Node#magnitude()} (which is used to compute the
-   * {@link #projection(Node, Type, float, float, float, float)} matrix),
-   * according to {@code fov} (field-of-view) which is expressed in radians. Meaningless
-   * if the graph {@link #is2D()}. If the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}
-   * it will match the perspective projection obtained using {@code fov} of an image
-   * centered at the world XY plane from the eye current position.
+   * Sets the {@link #eye()} {@link Node#magnitude()}, according to {@code fov} (field-of-view)
+   * which is expressed in radians. Meaningless if the graph {@link #is2D()}.
+   * If the graph {@link #_type} is {@link Type#ORTHOGRAPHIC} it will match the perspective
+   * projection obtained using {@code fov} of an image centered at the world XY plane from
+   * the eye current position.
    * <p>
    * Computed as as {@code Math.tan(fov/2)} if the graph type is {@link Type#PERSPECTIVE} and as
    * {@code Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / width()}
-   * if the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}.
+   * if the graph {@link #_type} is {@link Type#ORTHOGRAPHIC}.
    *
    * @see #fov()
    * @see #hfov()
@@ -635,7 +632,7 @@ public class Graph {
       System.out.println("Warning: setFOV() is meaningless in 2D. Use eye().setMagnitude() instead");
       return;
     }
-    float magnitude = type() == Type.PERSPECTIVE ?
+    float magnitude = _type == Type.PERSPECTIVE ?
         (float) Math.tan(fov / 2) :
         (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / width();
     if (magnitude > 0)
@@ -645,19 +642,17 @@ public class Graph {
   /**
    * Retrieves the graph field-of-view in radians. Meaningless if the graph {@link #is2D()}.
    * See {@link #setFOV(float)} for details. The value is related to the {@link #eye()}
-   * {@link Node#magnitude()} (which in turn is used to compute the
-   * {@link #projection(Node, Type, float, float, float, float)} matrix) as follows:
+   * {@link Node#magnitude()} as follows:
    * <p>
    * <ol>
    * <li>It returns {@code 2 * Math.atan(eye().magnitude())}, when the
-   * graph {@link #type()} is {@link Type#PERSPECTIVE}.</li>
+   * graph {@link #_type} is {@link Type#PERSPECTIVE}.</li>
    * <li>It returns {@code 2 * Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))))},
-   * if the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}.</li>
+   * if the graph {@link #_type} is {@link Type#ORTHOGRAPHIC}.</li>
    * </ol>
    * Set this value with {@link #setFOV(float)} or {@link #setHFOV(float)}.
    *
    * @see Node#magnitude()
-   * @see #perspective(Node, float, float, float)
    * @see #_setType(Type)
    * @see #setHFOV(float)
    * @see #hfov()
@@ -668,7 +663,7 @@ public class Graph {
       System.out.println("Warning: fov() is meaningless in 2D. Use eye().magnitude() instead");
       return 1;
     }
-    return type() == Type.PERSPECTIVE ?
+    return _type == Type.PERSPECTIVE ?
         2 * (float) Math.atan(eye().magnitude()) :
         2 * (float) Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
   }
@@ -690,9 +685,9 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return type() == Type.PERSPECTIVE ? radians(eye().magnitude() * aspectRatio()) : eye().magnitude()}.
+   * Same as {@code return _type == Type.PERSPECTIVE ? radians(eye().magnitude() * aspectRatio()) : eye().magnitude()}.
    * <p>
-   * Returns the {@link #eye()} horizontal field-of-view in radians if the graph {@link #type()} is
+   * Returns the {@link #eye()} horizontal field-of-view in radians if the graph {@link #_type} is
    * {@link Type#PERSPECTIVE}, or the {@link #eye()} {@link Node#magnitude()} otherwise.
    *
    * @see #fov()
@@ -704,15 +699,13 @@ public class Graph {
       System.out.println("Warning: hfov() is meaningless in 2D. Use eye().magnitude() instead");
       return 1;
     }
-    return type() == Type.PERSPECTIVE ?
+    return _type == Type.PERSPECTIVE ?
         2 * (float) Math.atan(eye().magnitude() * aspectRatio()) :
         2 * (float) Math.atan(eye().magnitude() * aspectRatio() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
   }
 
   /**
-   * Returns the near clipping plane distance used by the eye node
-   * {@link #projection(Node, Type, float, float, float, float)} matrix in
-   * world units.
+   * Returns the near clipping plane distance used to compute the {@link #projection()} matrix.
    * <p>
    * The clipping planes' positions depend on the {@link #radius()} and {@link #center()}
    * rather than being fixed small-enough and large-enough values. A good approximation will
@@ -747,7 +740,7 @@ public class Graph {
     // Prevents negative or null zNear values.
     float zMin = zNearCoefficient() * zClippingCoefficient() * radius();
     if (z < zMin)
-      switch (type()) {
+      switch (_type) {
         case PERSPECTIVE:
           z = zMin;
           break;
@@ -760,8 +753,8 @@ public class Graph {
   }
 
   /**
-   * Returns the far clipping plane distance used by the
-   * {@link #projection(Node, Type, float, float, float, float) matrix in world units.
+   * Returns the far clipping plane distance used to compute the
+   * {@link #projection()} matrix in world units.
    * <p>
    * The far clipping plane is positioned at a distance equal to
    * {@code zClippingCoefficient() * radius()} behind the {@link #center()}:
@@ -1261,7 +1254,7 @@ public class Graph {
     Vector up = upVector();
     Vector right = rightVector();
     float posViewDir = Vector.dot(pos, viewDir);
-    switch (type()) {
+    switch (_type) {
       case PERSPECTIVE: {
         // horizontal fov: radians(eye().magnitude() * aspectRatio())
         float hhfov = 2 * (float) Math.atan(eye().magnitude() * aspectRatio()) / 2.0f;
@@ -1501,7 +1494,7 @@ public class Graph {
    * {@code endShape();}<br>
    */
   public float sceneToPixelRatio(Vector position) {
-    switch (type()) {
+    switch (_type) {
       case PERSPECTIVE:
         return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math.tan(fov() / 2.0f) / height();
       case TWO_D:
@@ -1641,7 +1634,7 @@ public class Graph {
     // more or less inspired by this:
     // http://en.wikipedia.org/wiki/Back-face_culling (perspective case :P)
     Vector camAxis;
-    if (type() == Type.ORTHOGRAPHIC)
+    if (_type == Type.ORTHOGRAPHIC)
       camAxis = viewDirection();
     else {
       camAxis = Vector.subtract(vertex, eye().position());
@@ -2080,7 +2073,7 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector center, float radius) {
-    switch (type()) {
+    switch (_type) {
       case TWO_D:
         lookAt(center);
         fitFOV();
@@ -2164,7 +2157,7 @@ public class Graph {
   public void fitFOV() {
     float distance = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
     float magnitude = distance < (float) Math.sqrt(2) * radius() ? ((float) Math.PI / 2) : 2 * (float) Math.asin(radius() / distance);
-    switch (type()) {
+    switch (_type) {
       case PERSPECTIVE:
         setFOV(magnitude);
         break;
@@ -2329,7 +2322,7 @@ public class Graph {
     Vector pointY = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
     float distance = 0.0f;
     float distX, distY;
-    switch (type()) {
+    switch (_type) {
       case PERSPECTIVE:
         //horizontal fov: radians(eye().magnitude() * aspectRatio())
         distX = Vector.distance(pointX, newCenter) / (float) Math.sin(2 * (float) Math.atan(eye().magnitude() * aspectRatio()) / 2.0f);
@@ -2357,7 +2350,7 @@ public class Graph {
    * This method is useful for analytical intersection in a selection method.
    */
   public void pixelToLine(int pixelX, int pixelY, Vector origin, Vector direction) {
-    switch (type()) {
+    switch (_type) {
       case PERSPECTIVE:
         // left-handed coordinate system correction
         if (leftHanded)
@@ -2446,7 +2439,7 @@ public class Graph {
    * @return true if the graph is 2D.
    */
   public boolean is2D() {
-    return type() == Type.TWO_D;
+    return _type == Type.TWO_D;
   }
 
   /**
@@ -2812,7 +2805,7 @@ public class Graph {
    * Returns the cached projection times view inverse matrix computed at {@link #openContext()}}.
    */
   public Matrix projectionViewInverse() {
-    if (isProjectionViewInverseCached())
+    if (cacheProjectionViewInverse)
       return _projectionViewInverse;
     else {
       Matrix projectionViewInverse = projectionView().get();
@@ -2824,32 +2817,6 @@ public class Graph {
   // cache setters for projection times view and its inverse
 
   /**
-   * Returns {@code true} if the projection * view matrix and its inverse are being cached, and
-   * {@code false} otherwise.
-   * <p>
-   * Use it only when continuously calling {@link #location(Vector)}.
-   *
-   * @see #projectionView()
-   * @see #cacheProjectionViewInverse(boolean)
-   */
-  public boolean isProjectionViewInverseCached() {
-    return _isProjectionViewInverseCached;
-  }
-
-  /**
-   * Cache projection * view inverse matrix (and also projection * view) so that
-   * {@link Graph#location(Vector)} is optimized.
-   * <p>
-   * Use it only when continuously calling {@link #location(Vector)}.
-   *
-   * @see #isProjectionViewInverseCached()
-   * @see #projectionView()
-   */
-  public void cacheProjectionViewInverse(boolean optimise) {
-    _isProjectionViewInverseCached = optimise;
-  }
-
-  /**
    * Called by {@link #render(Node)} and performs the following:
    * <ol>
    * <li>Updates the projection matrix using
@@ -2858,7 +2825,7 @@ public class Graph {
    * <li>Updates the view matrix by calling {@code eye().view()}.</li>
    * <li>Updates the {@link #projectionView()} matrix.</li>
    * <li>Updates the {@link #projectionViewInverse()} matrix if
-   * {@link #isProjectionViewInverseCached()}.</li>
+   * {@link #cacheProjectionViewInverse}.</li>
    * </ol>
    *
    * @see #fov()
@@ -2869,7 +2836,7 @@ public class Graph {
             : Matrix.orthographic(width() * eye().magnitude(), (leftHanded ? -height() : height()) * eye().magnitude(), zNear(), zFar());
     _view = eye().view();
     _projectionView = Matrix.multiply(_projection, _view);
-    if (isProjectionViewInverseCached())
+    if (cacheProjectionViewInverse)
       _projectionViewInverse = Matrix.inverse(_projectionView);
     _matrixHandler.bind(_projection, _view);
   }
@@ -3505,7 +3472,7 @@ public class Graph {
    * <p>
    * This method is not computationally optimized by default. If you call it several times with no
    * change in the matrices, you should buffer the inverse of the projection times view matrix
-   * to speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
+   * to speed-up the queries. See {@link #cacheProjectionViewInverse}.
    *
    * @see #screenLocation(Vector, Node)
    * @see #screenDisplacement(Vector, Node)
@@ -3610,7 +3577,7 @@ public class Graph {
     float dx = vector.x();
     float dy = leftHanded ? vector.y() : -vector.y();
     // Scale to fit the screen relative vector displacement
-    if (type() == Type.PERSPECTIVE) {
+    if (_type == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.position();
       float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
       dx *= 2.0 * k / (height() * eye().magnitude());
@@ -3649,7 +3616,7 @@ public class Graph {
     Vector eyeVector = eye().displacement(vector, node);
     float dx = eyeVector.x();
     float dy = leftHanded ? eyeVector.y() : -eyeVector.y();
-    if (type() == Type.PERSPECTIVE) {
+    if (_type == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.position();
       float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
       dx /= 2.0 * k / (height() * eye().magnitude());
@@ -4142,10 +4109,10 @@ public class Graph {
    */
   protected void _translate(float x, float y, float z) {
     float d1 = 1, d2;
-    if (type() == Type.ORTHOGRAPHIC)
+    if (_type == Type.ORTHOGRAPHIC)
       d1 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
     eye().translate(x, y, z);
-    if (type() == Type.ORTHOGRAPHIC) {
+    if (_type == Type.ORTHOGRAPHIC) {
       d2 = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
       if (d1 != 0)
         if (d2 / d1 > 0)

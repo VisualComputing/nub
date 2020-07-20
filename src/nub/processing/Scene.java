@@ -641,7 +641,7 @@ public class Scene extends Graph {
   }
 
   /**
-   * Saves the {@link #eye()}, the {@link #radius()} and the {@link #type()} into {@code fileName}.
+   * Saves the {@link #eye()}, the {@link #radius()} and the {@link #_type} into {@code fileName}.
    *
    * @see #saveConfig()
    * @see #loadConfig()
@@ -650,7 +650,7 @@ public class Scene extends Graph {
   public void saveConfig(String fileName) {
     JSONObject json = new JSONObject();
     json.setFloat("radius", radius());
-    json.setString("type", type().name());
+    json.setString("type", _type.name());
     json.setJSONObject("eye", _toJSONObject(eye()));
 
     //TODO restore
@@ -686,7 +686,7 @@ public class Scene extends Graph {
   }
 
   /**
-   * Loads the {@link #eye()}, the {@link #radius()} and the {@link #type()} from {@code fileName}.
+   * Loads the {@link #eye()}, the {@link #radius()} and the {@link #_type} from {@code fileName}.
    *
    * @see #saveConfig()
    * @see #saveConfig(String)
@@ -2031,7 +2031,7 @@ public class Scene extends Graph {
 
   /**
    * Draws a representation of the viewing frustum onto {@code pGraphics} according to
-   * {@code graph.eye()} and {@code graph.type()}.
+   * {@code graph.eye()} and {@code graph._type}.
    * <p>
    * Note that if {@code pGraphics == graph.context()} this method has not effect at all.
    *
