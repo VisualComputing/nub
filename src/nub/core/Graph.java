@@ -2849,50 +2849,12 @@ public class Graph {
     _isProjectionViewInverseCached = optimise;
   }
 
-  // get matrices
-
-  /**
-   * Returns either {@code Matrix.perspective(leftHanded ? -eye.magnitude() : eye.magnitude(), width / height, zNear, zFar)}
-   * if the {@code type} is {@link Graph.Type#PERSPECTIVE} or
-   * {@code Matrix.orthographic(width * eye.magnitude(), (leftHanded ? -height : height) * eye.magnitude(), zNear, zFar)}, if the
-   * the {@code type} is {@link Graph.Type#ORTHOGRAPHIC} or {@link Graph.Type#TWO_D}.
-   * In both cases it uses the node {@link Node#magnitude()}.
-   * <p>
-   * Override this method to set a {@link Graph.Type#CUSTOM} projection.
-   *
-   * @see #perspective(Node, float, float, float)
-   * @see #orthographic(Node, float, float, float, float)
-   */
-  public static Matrix projection(Node eye, Graph.Type type, float width, float height, float zNear, float zFar) {
-    if (type == Graph.Type.PERSPECTIVE)
-      return Matrix.perspective(leftHanded ? -eye.magnitude() : eye.magnitude(), width / height, zNear, zFar);
-    else
-      return Matrix.orthographic(width * eye.magnitude(), (leftHanded ? -height : height) * eye.magnitude(), zNear, zFar);
-  }
-
-  /**
-   * Same as {@code return Matrix.perspective(leftHanded ? -eye.magnitude() : eye.magnitude(), aspectRatio, zNear, zFar)}.
-   *
-   * @see Matrix#perspective(float, float, float, float)
-   */
-  public static Matrix perspective(Node eye, float aspectRatio, float zNear, float zFar) {
-    return Matrix.perspective(leftHanded ? -eye.magnitude() : eye.magnitude(), aspectRatio, zNear, zFar);
-  }
-
-  /**
-   * Same as {@code return Matrix.orthographic(width * eye.magnitude(), (leftHanded ? -height : height) * eye.magnitude(), zNear, zFar)}.
-   *
-   * @see Matrix#orthographic(float, float, float, float)
-   */
-  public static Matrix orthographic(Node eye, float width, float height, float zNear, float zFar) {
-    return Matrix.orthographic(width * eye.magnitude(), (leftHanded ? -height : height) * eye.magnitude(), zNear, zFar);
-  }
-
   /**
    * Called by {@link #render(Node)} and performs the following:
    * <ol>
-   * <li>Updates the projection matrix by calling
-   * {@code eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded())}.</li>
+   * <li>Updates the projection matrix using
+   * {@link Matrix#perspective(float, float, float, float)} or
+   * {@link Matrix#orthographic(float, float, float, float)}.</li>
    * <li>Updates the view matrix by calling {@code eye().view()}.</li>
    * <li>Updates the {@link #projectionView()} matrix.</li>
    * <li>Updates the {@link #projectionViewInverse()} matrix if
@@ -2900,11 +2862,11 @@ public class Graph {
    * </ol>
    *
    * @see #fov()
-   * @see #projection(Node, Type, float, float, float, float)
    * @see Node#view()
    */
   protected void _bind() {
-    _projection = projection(eye(), type(), width(), height(), zNear(), zFar());
+    _projection = _type == Graph.Type.PERSPECTIVE ? Matrix.perspective(leftHanded ? -eye().magnitude() : eye().magnitude(), width() / height(), zNear(), zFar())
+            : Matrix.orthographic(width() * eye().magnitude(), (leftHanded ? -height() : height()) * eye().magnitude(), zNear(), zFar());
     _view = eye().view();
     _projectionView = Matrix.multiply(_projection, _view);
     if (isProjectionViewInverseCached())
@@ -3462,14 +3424,14 @@ public class Graph {
    * @see #location(Vector)
    */
   public Vector screenLocation(Vector vector, Node node) {
-    return screenLocation(vector, node, projectionView(), width(), height());
+    return _screenLocation(vector, node, projectionView(), width(), height());
   }
 
   /**
    * Static cached version of {@link #screenLocation(Vector, Node)}. Requires the programmer
    * to suply the cached {@code projectionView} matrix.
    */
-  public static Vector screenLocation(Vector vector, Node node, Matrix projectionView, int width, int height) {
+  protected static Vector _screenLocation(Vector vector, Node node, Matrix projectionView, int width, int height) {
     return _screenLocation(node != null ? node.worldLocation(vector) : vector, projectionView, width, height);
   }
 
@@ -3551,14 +3513,14 @@ public class Graph {
    * @see #setHeight(int)
    */
   public Vector location(Vector pixel, Node node) {
-    return location(pixel, node, projectionViewInverse(), width(), height());
+    return _location(pixel, node, projectionViewInverse(), width(), height());
   }
 
   /**
    * Static cached version of {@link #_location(Vector, Matrix, int, int)}. Requires the programmer
    * to suply the cached {@code projectionViewInverseMatrix} matrix.
    */
-  public static Vector location(Vector pixel, Node node, Matrix projectionViewInverseMatrix, int width, int height) {
+  protected static Vector _location(Vector pixel, Node node, Matrix projectionViewInverseMatrix, int width, int height) {
     Vector worldLocation = _location(pixel, projectionViewInverseMatrix, width, height);
     return node != null ? node.location(worldLocation) : worldLocation;
   }
