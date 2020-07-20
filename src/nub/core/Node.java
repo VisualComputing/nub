@@ -70,9 +70,8 @@ import java.util.function.Consumer;
  * {@code // Draw your object here, in the local node coordinate system.} <br>
  * {@code popMatrix();} <br>
  * <p>
- * Use {@link #view()} and {@link Graph#projection(Node, Graph.Type, float, float, float, float)}
- * when rendering the scene from the node point-of-view. Note that these methods are used by
- * the graph when a node is set as its eye, see {@link Graph#render(Node)}.
+ * Use {@link #view()} when rendering the scene from the node point-of-view. Note that
+ * this method is automatically called by the graph, see {@link Graph#render(Node)}.
  * <p>
  * To transform a point from one node to another use {@link #location(Vector, Node)} and
  * {@link #worldLocation(Vector)}. To transform a vector (such as a normal) use
@@ -166,8 +165,9 @@ public class Node {
   public final static int CAMERA = 1 << 0;
   public final static int AXES = Graph.AXES;
   public final static int HUD = Graph.HUD;
-  public final static int FRUSTUM = Graph.FRUSTUM;
   public final static int SHAPE = Graph.SHAPE;
+  // TODO make protected?
+  public final static int FRUSTUM = Graph.FRUSTUM;
   public final static int BULLSEYE = 1 << 5;
   public final static int TORUS = 1 << 6;
   public final static int CONSTRAINT = 1 << 7;
@@ -1470,15 +1470,14 @@ public class Node {
   /**
    * Returns the magnitude of the node, defined in the world coordinate system.
    * <p>
-   * Note that the magnitude is used to compute the node
-   * {@link Graph#projection(Node, Graph.Type, float, float, float, float)} which is useful to render a
-   * scene from the node point-of-view.
+   * Note that the magnitude is used to compute the node {@link Graph#projection()}
+   * matrix to render a scene from the node point-of-view.
    *
    * @see #orientation()
    * @see #position()
    * @see #setPosition(Vector)
    * @see #translation()
-   * @see Graph#projection(Node, Graph.Type, float, float, float, float)
+   * @see Graph#projection()
    */
   public float magnitude() {
     return reference() != null ? reference().magnitude() * scaling() : scaling();

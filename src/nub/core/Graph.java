@@ -137,8 +137,8 @@ public class Graph {
   public final static int GRID = 1 << 0;
   public final static int AXES = 1 << 1;
   public final static int HUD = 1 << 2;
-  public final static int FRUSTUM = 1 << 3;
-  public final static int SHAPE = 1 << 4;
+  public final static int SHAPE = 1 << 3;
+  public final static int FRUSTUM = 1 << 4;
   public final static int BACKGROUND = 1 << 5;
   protected Consumer<processing.core.PGraphics> _imrHUD;
   protected processing.core.PShape _rmrHUD;
