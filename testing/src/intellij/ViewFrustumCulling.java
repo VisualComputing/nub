@@ -27,7 +27,7 @@ public class ViewFrustumCulling extends PApplet {
     mainScene = new Scene(createGraphics(w, h / 2, P3D));
     mainScene.enableHint(Scene.BACKGROUND, color(255));
     mainScene.togglePerspective();
-    mainScene.enableBoundaryEquations();
+    mainScene.cacheBoundaryEquations = true;
     mainScene.fit(1);
     // secondary scene
     secondaryScene = new Scene(createGraphics(w, h / 2, P3D));
