@@ -56,7 +56,7 @@ public class MiniMap extends PApplet {
       minimap.togglePerspective();
     minimap.fit(1);
     minimap.enableHint(Scene.BACKGROUND, color(125, 80, 90));
-    minimap.enableHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
+    minimap.enableHint(Scene.FRUSTUM, scene, color(255, 0, 0, 125));
   }
 
   PShape shape() {

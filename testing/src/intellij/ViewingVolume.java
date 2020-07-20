@@ -38,7 +38,7 @@ public class ViewingVolume extends PApplet {
     scene2.enableHint(Scene.FRUSTUM, scene1);
     scene2.enableHint(Scene.SHAPE);
     scene2.setShape(this::draw2);
-    scene2.setType(Graph.Type.ORTHOGRAPHIC);
+    scene2.togglePerspective();
     scene2.setRadius(600);
     scene2.fit();
 
@@ -101,10 +101,7 @@ public class ViewingVolume extends PApplet {
 
   public void keyPressed() {
     if (key == ' ')
-      if (focus.type() == Graph.Type.PERSPECTIVE)
-        focus.setType(Graph.Type.ORTHOGRAPHIC);
-      else
-        focus.setType(Graph.Type.PERSPECTIVE);
+      focus.togglePerspective();
     if (key == 'f') {
       Scene.leftHanded = !Scene.leftHanded;
     }

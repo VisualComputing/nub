@@ -94,11 +94,7 @@ public class AuxViewers extends PApplet {
     if (key == 't') {
       if (focus == null)
         return;
-      if (focus.type() == Graph.Type.PERSPECTIVE) {
-        focus.setType(Graph.Type.ORTHOGRAPHIC);
-      } else {
-        focus.setType(Graph.Type.PERSPECTIVE);
-      }
+      focus.togglePerspective();
     }
   }
 

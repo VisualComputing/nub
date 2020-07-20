@@ -12,7 +12,7 @@ import processing.opengl.PShader;
 
 import java.nio.file.Paths;
 
-public class ShadowMap extends PApplet {
+public class ShadowMapSimpler extends PApplet {
   Scene scene;
   //Scene shadowMapScene;
   ShadowScene shadowMapScene;
@@ -56,6 +56,8 @@ public class ShadowMap extends PApplet {
     shadowMapScene.enableHint(Scene.BACKGROUND, color(140, 160, 125));
     shadowMapScene.picking = false;
     //shadowMapScene.setRadius(300);
+
+    scene.enableHint(Scene.FRUSTUM, shadowMapScene, color(255, 0, 0, 125));
     // */
     frameRate(1000);
   }
@@ -142,6 +144,6 @@ public class ShadowMap extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.ShadowMap"});
+    PApplet.main(new String[]{"intellij.ShadowMapSimpler"});
   }
 }

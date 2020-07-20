@@ -29,7 +29,6 @@ public class SMHL extends PApplet {
           0, 0, 0.5f, 0,
           0.5f, 0.5f, 0.5f, 1
   );
-  Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   float zNear = 10;
   float zFar = 600;
   int w = 700;
@@ -136,7 +135,8 @@ public class SMHL extends PApplet {
     light = new Node();
     light.togglePickingMode(Node.AXES | Node.CAMERA);
     light.enableHint(Node.BULLSEYE | Node.AXES | Node.CAMERA);
-    light.configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
+    // TODO
+    //light.configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
     //light.resetHint();
     //light.setMagnitude(0.195);
 
@@ -170,7 +170,6 @@ public class SMHL extends PApplet {
     shadowMapScene.enableHint(Scene.BACKGROUND, 0xffffffff);
     shadowMapScene.picking = false;
     //shadowMapScene.setRadius(300);
-    shadowMapScene.setType(shadowMapType);
     // */
 
     frameRate(1000);
@@ -235,8 +234,9 @@ public class SMHL extends PApplet {
 
     // 2. Render the scene from the scene.eye() node
     //scene.openContext();
-    Matrix projectionView = Scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
-    Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
+    // TODO experimental
+    //Matrix projectionView = Scene.projectionView(light, shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+    Matrix lightMatrix = Matrix.multiply(biasMatrix, shadowMapScene.projectionView());
     Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, scene.eye().viewInverse()));
     Vector lightDirection = scene.eye().displacement(light.zAxis(false));
     Scene.setUniform(shadowShader, "lightDirection", lightDirection);
@@ -254,8 +254,9 @@ public class SMHL extends PApplet {
       n2.cull = key != '2';
       n3.cull = key != '3';
     } else if (key == ' ') {
-      shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
-      light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 0.195f : tan(fov / 2));
+      // TODO
+      //shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
+      //light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 0.195f : tan(fov / 2));
     }
   }
 

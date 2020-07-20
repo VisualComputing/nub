@@ -293,14 +293,14 @@ public class Graph {
 
   // 8. Projection stuff
 
-  Type _type;
+  protected Type _type;
 
   /**
    * Enumerates the graph types.
    * <p>
    * The type mainly defines the way the projection matrix is computed.
    */
-  public enum Type {
+  protected enum Type {
     PERSPECTIVE, ORTHOGRAPHIC, TWO_D, CUSTOM
   }
 
@@ -485,7 +485,7 @@ public class Graph {
         _rotateCAD();
       }
     };
-    setType(type);
+    _setType(type);
     enableBoundaryEquations(false);
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
@@ -563,9 +563,9 @@ public class Graph {
   // Type handling stuff
 
   /**
-   * Returns the graph type. Set by {@link #setType(Type)}.
+   * Returns the graph type. Set by {@link #_setType(Type)}.
    *
-   * @see #setType(Type)
+   * @see #_setType(Type)
    */
   public Type type() {
     return _type;
@@ -588,7 +588,7 @@ public class Graph {
    * @see #projection(Node, Type, float, float, float, float)
    * @see Node#magnitude()
    */
-  public void setType(Type type) {
+  protected void _setType(Type type) {
     if (type != type()) {
       _modified();
       this._type = type;
@@ -599,7 +599,7 @@ public class Graph {
    * Shifts the graph {@link #type()} between {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} while trying
    * to keep the {@link #fov()}. Only meaningful if graph {@link #is3D()}.
    *
-   * @see #setType(Type)
+   * @see #_setType(Type)
    * @see #setFOV(float)
    * @see #fov()
    * @see #hfov()
@@ -608,7 +608,7 @@ public class Graph {
   public void togglePerspective() {
     if (is3D()) {
       float fov = fov();
-      setType(type() == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
+      _setType(type() == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
       setFOV(fov);
     }
   }
@@ -628,7 +628,7 @@ public class Graph {
    * @see #fov()
    * @see #hfov()
    * @see #setHFOV(float)
-   * @see #setType(Type)
+   * @see #_setType(Type)
    */
   public void setFOV(float fov) {
     if (is2D()) {
@@ -658,7 +658,7 @@ public class Graph {
    *
    * @see Node#magnitude()
    * @see #perspective(Node, float, float, float)
-   * @see #setType(Type)
+   * @see #_setType(Type)
    * @see #setHFOV(float)
    * @see #hfov()
    * @see #setFOV(float)
@@ -2889,36 +2889,6 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return Matrix.multiply(projection(eye, type, width, height, zNear, zFar), eye.view())}.
-   *
-   * @see #projection(Node, Type, float, float, float, float)
-   * @see Node#view()
-   */
-  public static Matrix projectionView(Node eye, Graph.Type type, float width, float height, float zNear, float zFar) {
-    return Matrix.multiply(projection(eye, type, width, height, zNear, zFar), eye.view());
-  }
-
-  /**
-   * Same as {@code return Matrix.multiply(perspective(eye, aspectRatio, zNear, zFar), eye.view())}.
-   *
-   * @see #perspective(Node, float, float, float)
-   * @see Node#view()
-   */
-  public static Matrix perspectiveView(Node eye, float aspectRatio, float zNear, float zFar) {
-    return Matrix.multiply(perspective(eye, aspectRatio, zNear, zFar), eye.view());
-  }
-
-  /**
-   * Same as {@code return Matrix.multiply(orthographic(eye, width, height, zNear, zFar), eye.view())}.
-   *
-   * @see #orthographic(Node, float, float, float, float)
-   * @see Node#view()
-   */
-  public static Matrix orthographicView(Node eye, float width, float height, float zNear, float zFar) {
-    return Matrix.multiply(orthographic(eye, width, height, zNear, zFar), eye.view());
-  }
-
-  /**
    * Called by {@link #render(Node)} and performs the following:
    * <ol>
    * <li>Updates the projection matrix by calling
@@ -5074,22 +5044,6 @@ public class Graph {
 
   protected Graph _frustumGraph(Node node) {
     return node._frustumGraph;
-  }
-
-  protected Object _eyeBuffer(Node node) {
-    return node._eyeBuffer;
-  }
-
-  protected Type _frustumType(Node node) {
-    return node._frustumtype;
-  }
-
-  protected float _zNear(Node node) {
-    return node._zNear;
-  }
-
-  protected float _zFar(Node node) {
-    return node._zFar;
   }
 
   protected Node.BullsEyeShape _bullsEyeShape(Node node) {

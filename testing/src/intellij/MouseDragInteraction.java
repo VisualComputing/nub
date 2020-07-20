@@ -119,10 +119,7 @@ public class MouseDragInteraction extends PApplet {
     if (key == 'r')
       Scene.leftHanded = !Scene.leftHanded;
     if (key == 'p')
-      if (scene.type() == Graph.Type.PERSPECTIVE)
-        scene.setType(Graph.Type.ORTHOGRAPHIC);
-      else
-        scene.setType(Graph.Type.PERSPECTIVE);
+      scene.togglePerspective();
   }
 
   @Override

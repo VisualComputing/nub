@@ -101,10 +101,7 @@ public class DOF extends PApplet {
     if (key == '1') mode = 1;
     if (key == '2') mode = 2;
     if (key == 't')
-      if (scene.type() == Graph.Type.ORTHOGRAPHIC)
-        scene.setType(Graph.Type.PERSPECTIVE);
-      else
-        scene.setType(Graph.Type.ORTHOGRAPHIC);
+      scene.togglePerspective();
     if (key == 'f')
       scene.fit(1);
     if (key == 'F')
