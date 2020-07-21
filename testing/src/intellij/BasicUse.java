@@ -85,7 +85,7 @@ public class BasicUse extends PApplet {
     if (key == '4')
       node.toggleHint(Node.SHAPE);
     if (key == '5')
-      node.toggleHint(Node.FRUSTUM);
+      node.toggleHint(Node._FRUSTUM);
     if (key == '6')
       node.toggleHint(Node.TORUS);
     if (key == '7')
@@ -115,7 +115,7 @@ public class BasicUse extends PApplet {
         println("Node.BULLS_EYE");
       if (node.isHintEnable(Node.SHAPE))
         println("Node.SHAPE");
-      if (node.isHintEnable(Node.FRUSTUM))
+      if (node.isHintEnable(Node._FRUSTUM))
         println("Node.FRUSTUM");
       if (node.isHintEnable(Node.TORUS))
         println("Node.TORUS");

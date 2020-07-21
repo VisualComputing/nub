@@ -30,7 +30,7 @@ public class ViewFrustumCulling extends PApplet {
     mainScene.fit(1);
     // secondary scene
     secondaryScene = new Scene(createGraphics(w, h / 2, P3D));
-    secondaryScene.enableHint(Node.FRUSTUM, mainScene, color(255, 0, 0, 125));
+    secondaryScene.enableHint(Node._FRUSTUM, mainScene, color(255, 0, 0, 125));
     secondaryScene.enableHint(Scene.BACKGROUND, color(185));
     secondaryScene.togglePerspective();
     secondaryScene.setRadius(200);
@@ -91,7 +91,7 @@ public class ViewFrustumCulling extends PApplet {
     OctreeNode() {
       tagging = false;
       setShape(this::draw);
-      setVisit(mainScene, this::culling);
+      toggleVisit(mainScene, this::culling);
     }
 
     OctreeNode(OctreeNode node, Vector vector) {
@@ -100,7 +100,7 @@ public class ViewFrustumCulling extends PApplet {
       translate(Vector.multiply(vector, scaling() / 2));
       tagging = false;
       setShape(this::draw);
-      setVisit(mainScene, this::culling);
+      toggleVisit(mainScene, this::culling);
     }
 
     float level() {

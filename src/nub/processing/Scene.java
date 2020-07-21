@@ -1006,7 +1006,7 @@ public class Scene extends Graph {
       drawTorusSolenoid(pg, _torusFaces(node), 5);
       pg.popStyle();
     }
-    if (node.isHintEnable(Node.FRUSTUM)) {
+    if (node.isHintEnable(Node._FRUSTUM)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_frustumColor(node));
@@ -1042,7 +1042,7 @@ public class Scene extends Graph {
 
   @Override
   protected void _displayBackHint(Node node) {
-    _emitBackBufferUniforms(node);
+    super._displayBackHint(node);
     PGraphics pg = _backBuffer();
     if (node.isHintEnable(Node.SHAPE) && node.isPickingModeEnable(Node.SHAPE)) {
       if (_rmrShape(node) != null) {
@@ -1056,7 +1056,7 @@ public class Scene extends Graph {
     if (node.isHintEnable(Node.TORUS) && node.isPickingModeEnable(Node.TORUS)) {
       drawTorusSolenoid(pg, _torusFaces(node), 5);
     }
-    if (node.isHintEnable(Node.FRUSTUM) && node.isPickingModeEnable(Node.FRUSTUM)) {
+    if (node.isHintEnable(Node._FRUSTUM) && node.isPickingModeEnable(Node._FRUSTUM)) {
       if (_frustumGraph(node) instanceof Graph) {
         drawFrustum(pg, _frustumGraph(node));
       }

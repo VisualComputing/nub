@@ -157,6 +157,7 @@ public class Graph {
 
   // Custom render
   protected HashMap<Integer, BiConsumer<Graph, Node>> _functors;
+  protected HashMap<Integer, BiConsumer<Object, Node>> _backFunctors;
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
@@ -459,6 +460,7 @@ public class Graph {
     _tags = new HashMap<String, Node>();
     _rays = new ArrayList<Ray>();
     _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
+    _backFunctors = new HashMap<Integer, BiConsumer<Object, Node>>();
     if (eye == null)
       throw new RuntimeException("Error eye shouldn't be null");
     setEye(eye);
@@ -2541,10 +2543,11 @@ public class Graph {
    */
   protected boolean _backPicking(Node node) {
     return picking && node.tagging == true && !isEye(node) && _bb != null && (
+            !_backFunctors.isEmpty() ||
             (node.isPickingModeEnable(Node.CAMERA) && node.isHintEnable(Node.CAMERA)) ||
                     (node.isPickingModeEnable(Node.AXES) && node.isHintEnable(Node.AXES)) ||
                     (node.isPickingModeEnable(Node.HUD) && node.isHintEnable(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
-                    (node.isPickingModeEnable(Node.FRUSTUM) && node.isHintEnable(Node.FRUSTUM)) ||
+                    (node.isPickingModeEnable(Node._FRUSTUM) && node.isHintEnable(Node._FRUSTUM)) ||
                     (node.isPickingModeEnable(Node.SHAPE) && node.isHintEnable(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
                     (node.isPickingModeEnable(Node.TORUS) && node.isHintEnable(Node.TORUS)) ||
                     (node.isPickingModeEnable(Node.CONSTRAINT) && node.isHintEnable(Node.CONSTRAINT)) ||
@@ -2827,11 +2830,11 @@ public class Graph {
 
   /**
    * Renders the node tree onto the {@link #context()} from the {@link #eye()} viewpoint.
-   * Calls {@link #setVisit(Node, BiConsumer)} on each visited node (refer to the {@link Node} documentation).
+   * Calls {@link #toggleVisit(Node, BiConsumer)} on each visited node (refer to the {@link Node} documentation).
    * Same as {@code render(null)}.
    *
    * @see #render(Node)
-   * @see #setVisit(Node, BiConsumer)
+   * @see #toggleVisit(Node, BiConsumer)
    * @see Node#cull
    * @see Node#bypass()
    * @see Node#setShape(Consumer)
@@ -2846,10 +2849,10 @@ public class Graph {
    * when {@code subtree} is {@code null}) onto the {@link #context()} from the {@link #eye()}
    * viewpoint, and calls {@link #closeContext()}.
    * <p>
-   * Note that the rendering algorithm calls {@link #setVisit(Node, BiConsumer)} on each visited node
+   * Note that the rendering algorithm calls {@link #toggleVisit(Node, BiConsumer)} on each visited node
    * (refer to the {@link Node} documentation).
    *
-   * @see #setVisit(Node, BiConsumer)
+   * @see #toggleVisit(Node, BiConsumer)
    * @see Node#cull
    * @see Node#bypass()
    * @see Node#setShape(Consumer)
@@ -2898,25 +2901,23 @@ public class Graph {
    * Note that the graph culling condition may be set from
    * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}.
    *
-   * @see #resetVisit(Node)
+   * @see #toggleBackVisit(Node, BiConsumer)
    * @see #render(Node)
    * @see Node#bypass()
    * @see Node#cull
    */
-  public void setVisit(Node node, BiConsumer<Graph, Node> functor) {
-    _functors.put(node.id(), functor);
+  public void toggleVisit(Node node, BiConsumer<Graph, Node> functor) {
+    if (_functors.containsKey(node.id()))
+      _functors.remove(node.id());
+    else
+      _functors.put(node.id(), functor);
   }
 
-  /**
-   * Resets the node custom visit set with {@link #setVisit(Node, BiConsumer)}.
-   *
-   * @see #setVisit(Node, BiConsumer)
-   * @see #render(Node)
-   * @see Node#bypass()
-   * @see Node#cull
-   */
-  public void resetVisit(Node node) {
-    _functors.remove(node.id());
+  public void toggleBackVisit(Node node, BiConsumer<Object, Node> functor) {
+    if (_backFunctors.containsKey(node.id()))
+      _backFunctors.remove(node.id());
+    else
+      _backFunctors.put(node.id(), functor);
   }
 
   /**
@@ -3035,6 +3036,10 @@ public class Graph {
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
   protected void _displayBackHint(Node node) {
+    _emitBackBufferUniforms(node);
+    BiConsumer<Object, Node> functor = _backFunctors.get(node.id());
+    if (functor != null)
+      functor.accept(this, node);
   }
 
   /**
@@ -4507,7 +4512,7 @@ public class Graph {
    * <li>{@link #AXES} which displays a grid hint centered at the world origin.</li>
    * <li>{@link #HUD} which displays the graph Heads-Up-Display set with
    * {@link #setHUD(PShape)} or {@link #setHUD(Consumer)}.</li>
-   * <li>{@link #FRUSTUM} which is an interface to set up the {@link Node#FRUSTUM}
+   * <li>{@link #FRUSTUM} which is an interface to set up the {@link Node#_FRUSTUM}
    * for a given graph {@link #eye()}.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
    * {@link #setShape(PShape)} or {@link #setShape(Consumer)}.</li>
@@ -4543,7 +4548,7 @@ public class Graph {
   public void resetHint() {
     _mask = 0;
     if (isHintEnable(FRUSTUM) && _frustumEye != null) {
-      _frustumEye.disableHint(Node.FRUSTUM);
+      _frustumEye.disableHint(Node._FRUSTUM);
     }
   }
 
@@ -4561,7 +4566,7 @@ public class Graph {
   public void disableHint(int hint) {
     _mask &= ~hint;
     if (!isHintEnable(FRUSTUM) && _frustumEye != null) {
-      _frustumEye.disableHint(Node.FRUSTUM);
+      _frustumEye.disableHint(Node._FRUSTUM);
     }
   }
 
@@ -4580,7 +4585,7 @@ public class Graph {
     enableHint(hint);
     configHint(hint, params);
     if (isHintEnable(FRUSTUM) && _frustumEye != null) {
-      _frustumEye.enableHint(Node.FRUSTUM);
+      _frustumEye.enableHint(Node._FRUSTUM);
     }
   }
 
@@ -4598,7 +4603,7 @@ public class Graph {
   public void enableHint(int hint) {
     _mask |= hint;
     if (isHintEnable(FRUSTUM) && _frustumEye != null) {
-      _frustumEye.enableHint(Node.FRUSTUM);
+      _frustumEye.enableHint(Node._FRUSTUM);
     }
   }
 
@@ -4616,7 +4621,7 @@ public class Graph {
   public void toggleHint(int hint) {
     _mask ^= hint;
     if (isHintEnable(FRUSTUM) && _frustumEye != null) {
-      _frustumEye.enableHint(Node.FRUSTUM);
+      _frustumEye.enableHint(Node._FRUSTUM);
     }
   }
 
@@ -4665,12 +4670,12 @@ public class Graph {
         }
         if (hint == FRUSTUM) {
           if (isNumInstance(params[0]) && _frustumEye != null) {
-            _frustumEye.configHint(Node.FRUSTUM, params[0]);
+            _frustumEye.configHint(Node._FRUSTUM, params[0]);
             return;
           }
           if (params[0] instanceof Graph && params[0] != this) {
             _frustumEye = ((Graph) params[0]).eye();
-            _frustumEye.configHint(Node.FRUSTUM, params[0]);
+            _frustumEye.configHint(Node._FRUSTUM, params[0]);
             return;
           }
         }
@@ -4689,12 +4694,12 @@ public class Graph {
         if (hint == FRUSTUM) {
           if (Graph.isNumInstance(params[0]) && params[1] instanceof Graph) {
             _frustumEye = ((Graph) params[1]).eye();
-            _frustumEye.configHint(Node.FRUSTUM, params[0], params[1]);
+            _frustumEye.configHint(Node._FRUSTUM, params[0], params[1]);
             return;
           }
           if (params[0] instanceof Graph && Graph.isNumInstance(params[1])) {
             _frustumEye = ((Graph) params[0]).eye();
-            _frustumEye.configHint(Node.FRUSTUM, params[0], params[1]);
+            _frustumEye.configHint(Node._FRUSTUM, params[0], params[1]);
             return;
           }
         }
