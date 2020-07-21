@@ -42,12 +42,12 @@ public class ShadowMap extends PApplet {
     shapes = new Node[20];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(this::cube);
-      shapes[i].configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
+      //shapes[i].configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
       scene.randomize(shapes[i]);
       shapes[i].setHighlight(0);
     }
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
-    scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+    //scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
     scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
     // scene.enablePicking(false);
     ///*
@@ -89,11 +89,11 @@ public class ShadowMap extends PApplet {
   public void mouseMoved(MouseEvent event) {
     if (event.isShiftDown()) {
       if (scene.isTagValid("light"))
-        scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+        //scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
       // no calling mouseTag since we need to immediately update the tagged node
       scene.updateMouseTag("light");
       if (scene.isTagValid("light")) {
-        scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+        //scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
         shadowMapScene.setEye(scene.node("light"));
       }
     } else
@@ -112,7 +112,7 @@ public class ShadowMap extends PApplet {
   public void mouseWheel(MouseEvent event) {
     if (event.isShiftDown() && scene.isTagValid("light")) {
       depthShader.set("far", zFar += event.getCount() * 20);
-      scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
+      //scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
     }
     else
       scene.scale(event.getCount() * 20);
@@ -121,7 +121,7 @@ public class ShadowMap extends PApplet {
   public void keyPressed() {
     if (key == ' ' && scene.isTagValid("light")) {
       shadowMapType = shadowMapType == Scene.Type.ORTHOGRAPHIC ? Scene.Type.PERSPECTIVE : Scene.Type.ORTHOGRAPHIC;
-      scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
+      //scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
     }
     if (key == 'p')
       scene.togglePerspective();

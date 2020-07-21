@@ -108,8 +108,7 @@ import java.util.function.Consumer;
  * Refer to the {@link Interpolator} documentation for details.
  * <h1>5. Visual hints</h2>
  * The world space visual representation may be configured using the following hints:
- * {@link #AXES}, {@link #HUD}, {@link #FRUSTUM}, {@link #GRID}, {@link #BACKGROUND},
- * {@link #SHAPE}.
+ * {@link #AXES}, {@link #HUD}, {@link #GRID}, {@link #BACKGROUND} and {@link #SHAPE}.
  * <p>
  * See {@link #hint()}, {@link #configHint(int, Object...)} {@link #enableHint(int)},
  * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
@@ -138,8 +137,7 @@ public class Graph {
   public final static int AXES = 1 << 1;
   public final static int HUD = 1 << 2;
   public final static int SHAPE = 1 << 3;
-  public final static int FRUSTUM = 1 << 4;
-  public final static int BACKGROUND = 1 << 5;
+  public final static int BACKGROUND = 1 << 4;
   protected Consumer<processing.core.PGraphics> _imrHUD;
   protected processing.core.PShape _rmrHUD;
   protected Consumer<processing.core.PGraphics> _imrShape;
@@ -153,7 +151,7 @@ public class Graph {
   protected Object _background;
   protected static HashSet<Interpolator> _interpolators = new HashSet<Interpolator>();
   protected static HashSet<Node> _hudSet = new HashSet<Node>();
-  protected Node _frustumEye;
+  protected HashMap<Integer, Graph> _frustumGraphs;
 
   // Custom render
   protected HashMap<Integer, BiConsumer<Graph, Node>> _functors;
@@ -485,6 +483,7 @@ public class Graph {
     setZClippingCoefficient((float) Math.sqrt(3.0f));
     enableHint(HUD | SHAPE);
     picking = true;
+    _frustumGraphs = new HashMap<Integer, Graph>();
     // middle grey encoded as a processing int rgb color
     _gridStroke = -8553091;
     _gridType = GridType.DOTS;
@@ -583,7 +582,10 @@ public class Graph {
    */
   // TODO make protected?
   public void setType(Type type) {
-    if (is3D() && type != _type && type != Type.TWO_D) {
+    if (_type == Type.TWO_D) {
+      return;
+    }
+    if (type != _type && type != null) {
       _modified();
       this._type = type;
     }
@@ -2545,7 +2547,8 @@ public class Graph {
             (node.isPickingModeEnable(Node.CAMERA) && node.isHintEnable(Node.CAMERA)) ||
                     (node.isPickingModeEnable(Node.AXES) && node.isHintEnable(Node.AXES)) ||
                     (node.isPickingModeEnable(Node.HUD) && node.isHintEnable(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
-                    (node.isPickingModeEnable(Node.FRUSTUM) && node.isHintEnable(Node.FRUSTUM)) ||
+                    /*(node.isPickingModeEnable(Node.FRUSTUM) && node.isHintEnable(Node.FRUSTUM)) ||*/
+                    (_frustumGraphs.containsKey(node.id()) && node.isPickingModeEnable(Node.FRUSTUM) && node.isHintEnable(Node.FRUSTUM)) ||
                     (node.isPickingModeEnable(Node.SHAPE) && node.isHintEnable(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
                     (node.isPickingModeEnable(Node.TORUS) && node.isHintEnable(Node.TORUS)) ||
                     (node.isPickingModeEnable(Node.CONSTRAINT) && node.isHintEnable(Node.CONSTRAINT)) ||
@@ -4508,8 +4511,6 @@ public class Graph {
    * <li>{@link #AXES} which displays a grid hint centered at the world origin.</li>
    * <li>{@link #HUD} which displays the graph Heads-Up-Display set with
    * {@link #setHUD(PShape)} or {@link #setHUD(Consumer)}.</li>
-   * <li>{@link #FRUSTUM} which is an interface to set up the {@link Node#FRUSTUM}
-   * for a given graph {@link #eye()}.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
    * {@link #setShape(PShape)} or {@link #setShape(Consumer)}.</li>
    * <li>{@link #BACKGROUND} which sets up the graph background to be displayed.</li>
@@ -4543,9 +4544,6 @@ public class Graph {
    */
   public void resetHint() {
     _mask = 0;
-    if (isHintEnable(FRUSTUM) && _frustumEye != null) {
-      _frustumEye.disableHint(Node.FRUSTUM);
-    }
   }
 
   /**
@@ -4561,9 +4559,6 @@ public class Graph {
    */
   public void disableHint(int hint) {
     _mask &= ~hint;
-    if (!isHintEnable(FRUSTUM) && _frustumEye != null) {
-      _frustumEye.disableHint(Node.FRUSTUM);
-    }
   }
 
   /**
@@ -4580,9 +4575,6 @@ public class Graph {
   public void enableHint(int hint, Object... params) {
     enableHint(hint);
     configHint(hint, params);
-    if (isHintEnable(FRUSTUM) && _frustumEye != null) {
-      _frustumEye.enableHint(Node.FRUSTUM);
-    }
   }
 
   /**
@@ -4598,9 +4590,6 @@ public class Graph {
    */
   public void enableHint(int hint) {
     _mask |= hint;
-    if (isHintEnable(FRUSTUM) && _frustumEye != null) {
-      _frustumEye.enableHint(Node.FRUSTUM);
-    }
   }
 
   /**
@@ -4616,9 +4605,6 @@ public class Graph {
    */
   public void toggleHint(int hint) {
     _mask ^= hint;
-    if (isHintEnable(FRUSTUM) && _frustumEye != null) {
-      _frustumEye.enableHint(Node.FRUSTUM);
-    }
   }
 
   /**
@@ -4630,10 +4616,6 @@ public class Graph {
    * {@code configHint(Graph.GRID, gridStroke, gridType)},
    * {@code configHint(Graph.GRID, gridStroke, gridSubdivs)}
    * {@code configHint(Graph.GRID, gridStroke, gridSubdivs, gridType)}.</li>
-   * <li>{@link #FRUSTUM} hint: {@code configHint(Graph.FRUSTUM, otherGraph)} or
-   * {@code configHint(Graph.FRUSTUM, frustumColor)} or
-   * {@code configHint(Graph.FRUSTUM, otherGraph, frustumColor)}, or
-   * {@code configHint(Graph.FRUSTUM, frustumColor, otherGraph)}.</li>
    * <li>{@link #BACKGROUND} hint: {@code configHint(Graph.BACKGROUND, background)}.</li>
    * </ol>
    * Note that the {@code gridStroke}, {@code cameraStroke} and {@code frustumColor}
@@ -4664,17 +4646,6 @@ public class Graph {
             return;
           }
         }
-        if (hint == FRUSTUM) {
-          if (isNumInstance(params[0]) && _frustumEye != null) {
-            _frustumEye.configHint(Node.FRUSTUM, params[0]);
-            return;
-          }
-          if (params[0] instanceof Graph && params[0] != this) {
-            _frustumEye = ((Graph) params[0]).eye();
-            _frustumEye.configHint(Node.FRUSTUM, params[0]);
-            return;
-          }
-        }
         if (hint == BACKGROUND) {
           if (isNumInstance(params[0])) {
             _background = castToInt(params[0]);
@@ -4687,18 +4658,6 @@ public class Graph {
         }
         break;
       case 2:
-        if (hint == FRUSTUM) {
-          if (Graph.isNumInstance(params[0]) && params[1] instanceof Graph) {
-            _frustumEye = ((Graph) params[1]).eye();
-            _frustumEye.configHint(Node.FRUSTUM, params[0], params[1]);
-            return;
-          }
-          if (params[0] instanceof Graph && Graph.isNumInstance(params[1])) {
-            _frustumEye = ((Graph) params[0]).eye();
-            _frustumEye.configHint(Node.FRUSTUM, params[0], params[1]);
-            return;
-          }
-        }
         if (hint == GRID) {
           if (isNumInstance(params[0]) && isNumInstance(params[1])) {
             _gridStroke = castToInt(params[0]);
@@ -4735,6 +4694,24 @@ public class Graph {
         break;
     }
     System.out.println("Warning: some params in Scene.configHint(hint, params) couldn't be parsed!");
+  }
+
+  public void toggleFrustum(Graph otherGraph) {
+    if (_frustumGraphs.containsKey(otherGraph.eye().id()))
+      disableFrustum(otherGraph);
+    else
+      enableFrustum(otherGraph);
+  }
+
+  public void enableFrustum(Graph otherGraph) {
+    if (this != otherGraph) {
+      Node _frustumEye = otherGraph.eye();
+      _frustumGraphs.put(_frustumEye.id(), otherGraph);
+    }
+  }
+
+  public void disableFrustum(Graph otherGraph) {
+    _frustumGraphs.remove(otherGraph.eye().id());
   }
 
   /**
@@ -4883,10 +4860,6 @@ public class Graph {
 
   protected int _frustumColor(Node node) {
     return node._frustumColor;
-  }
-
-  protected Graph _frustumGraph(Node node) {
-    return node._frustumGraph;
   }
 
   protected Node.BullsEyeShape _bullsEyeShape(Node node) {

@@ -35,7 +35,7 @@ public class ViewingVolume extends PApplet {
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(createGraphics(w, h / 2, P3D));
     scene2.enableHint(Scene.BACKGROUND, color(85));
-    scene2.enableHint(Scene.FRUSTUM, scene1);
+    scene2.enableFrustum(scene1);
     scene2.enableHint(Scene.SHAPE);
     scene2.setShape(this::draw2);
     scene2.togglePerspective();

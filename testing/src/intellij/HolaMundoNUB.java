@@ -128,8 +128,6 @@ public class HolaMundoNUB extends PApplet {
       mainScene.toggleHint(Scene.AXES | Scene.HUD);
       if (mainScene.isHintEnable(Scene.BACKGROUND)) println("Scene.BACKGROUND");
       if (mainScene.isHintEnable(Scene.BACKGROUND | Scene.AXES)) println("Scene.BACKGROUND | Scene.AXES)");
-      if (mainScene.isHintEnable(Scene.BACKGROUND | Scene.FRUSTUM)) println("Scene.BACKGROUND | Scene.FRUSTUM)");
-      if (mainScene.isHintEnable(Scene.FRUSTUM)) println("Scene.FRUSTUM)");
     }
   }
 

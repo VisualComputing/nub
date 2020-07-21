@@ -1,6 +1,5 @@
 package intellij;
 
-import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -46,18 +45,21 @@ public class ShadowMapSimpler extends PApplet {
       shapes[i].setHighlight(0);
     }
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
-    scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+    scene.node("light").toggleHint(Node.SHAPE | Node.AXES);
     scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
     // scene.enablePicking(false);
     ///*
     //shadowMapScene = new Scene(this, shadowMap, light);
     shadowMapScene = new ShadowScene(shadowMap, scene.node("light"));
+    shadowMapScene.togglePerspective();
     shadowMapScene.resetHint();
     shadowMapScene.enableHint(Scene.BACKGROUND, color(140, 160, 125));
     shadowMapScene.picking = false;
     //shadowMapScene.setRadius(300);
 
-    scene.enableHint(Scene.FRUSTUM, shadowMapScene, color(255, 0, 0, 125));
+    //scene.enableFrustum(shadowMapScene, color(255, 0, 0, 125));
+    shadowMapScene.eye().configHint(Node.FRUSTUM, color(255, 0, 0, 125));
+    scene.enableFrustum(shadowMapScene);
     // */
     frameRate(1000);
   }
@@ -88,13 +90,16 @@ public class ShadowMapSimpler extends PApplet {
 
   public void mouseMoved(MouseEvent event) {
     if (event.isShiftDown()) {
-      if (scene.isTagValid("light"))
-        scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+      if (scene.isTagValid("light")) {
+        scene.node("light").toggleHint(Node.SHAPE | Node.AXES);
+        scene.toggleFrustum(shadowMapScene);
+      }
       // no calling mouseTag since we need to immediately update the tagged node
       scene.updateMouseTag("light");
       if (scene.isTagValid("light")) {
-        scene.node("light").toggleHint(Node.SHAPE | Node.FRUSTUM | Node.AXES);
+        scene.node("light").toggleHint(Node.SHAPE | Node.AXES);
         shadowMapScene.setEye(scene.node("light"));
+        scene.toggleFrustum(shadowMapScene);
       }
     } else
       scene.mouseTag();

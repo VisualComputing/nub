@@ -104,7 +104,7 @@ import java.util.function.Consumer;
  * easily be implemented.
  * <h2>Visual hints</h2>
  * The node space visual representation may be configured using the following hints:
- * {@link #CAMERA}, {@link #AXES}, {@link #HUD}, {@link #FRUSTUM}, {@link #SHAPE},
+ * {@link #CAMERA}, {@link #AXES}, {@link #HUD}, {@link #FRUSTUM},, {@link #SHAPE},
  * {@link #BULLSEYE}, and {@link #TORUS}.
  * <p>
  * See {@link #hint()}, {@link #configHint(int, Object...)} {@link #enableHint(int)},
@@ -166,8 +166,7 @@ public class Node {
   public final static int AXES = Graph.AXES;
   public final static int HUD = Graph.HUD;
   public final static int SHAPE = Graph.SHAPE;
-  // TODO make protected?
-  public final static int FRUSTUM = Graph.FRUSTUM;
+  public final static int FRUSTUM = 1 << 4;
   public final static int BULLSEYE = 1 << 5;
   public final static int TORUS = 1 << 6;
   public final static int CONSTRAINT = 1 << 7;
@@ -175,7 +174,6 @@ public class Node {
   protected float _highlight;
   // Frustum
   protected int _frustumColor;
-  protected Graph _frustumGraph;
   // torus
   protected int _torusColor;
   protected int _torusFaces;
@@ -314,7 +312,8 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    enablePickingMode(CAMERA | AXES | HUD | FRUSTUM | SHAPE | BULLSEYE | TORUS | CONSTRAINT | BONE);
+    enablePickingMode(CAMERA | AXES | HUD | SHAPE | FRUSTUM | BULLSEYE | TORUS | CONSTRAINT | BONE);
+    enableHint(FRUSTUM);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -2712,9 +2711,8 @@ public class Node {
    * {@link #position()} an oriented according to the node {@link #orientation()}.</li>
    * <li>{@link #HUD} which displays the node Heads-Up-Display set with
    * {@link #setHUD(processing.core.PShape)} or {@link #setHUD(Consumer)}.</li>
-   * <li>{@link #FRUSTUM} which displays a frustum visual representation which origin is
-   * located at the node {@link #position()}. The frustum may be set up from a given
-   * {@link Graph} or from low-level frustum plane params.</li>
+   * <li>{@link #FRUSTUM} which displays a graph frustum visual representation
+   * see {@link Graph#enableFrustum(Graph)}.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
    * {@link #setShape(processing.core.PShape)} or {@link #setShape(Consumer)}.</li>
    * <li>{@link #BULLSEYE} which displays a bullseye centered at the node
@@ -2861,9 +2859,7 @@ public class Node {
    * <li>{@link #CAMERA} hint: {@code configHint(Node.CAMERA, cameraStroke)} or
    * {@code configHint(Node.CAMERA, cameraStroke, cameraLength)}.</li>
    * <li>{@link #AXES} hint: {@code configHint(Node.AXES, axesLength)}.</li>
-   * <li>{@link #FRUSTUM} hint: {@code configHint(Node.FRUSTUM, frustumColor)}
-   * or {@code configHint(Node.FRUSTUM, graph)} or
-   * {@code configHint(Node.FRUSTUM, frustumColor, graph)}.</li>
+   * <li>{@link #FRUSTUM} hint: {@code configHint(Node.FRUSTUM, frustumColor)}.</li>
    * <li>{@link #BULLSEYE} hint: {@code configHint(Node.BULLSEYE, bullseyeStroke)},
    * {@code configHint(Node.BULLSEYE, bullseyeShape)}, or
    * {@code configHint(Node.BULLSEYE, bullseyeStroke, bullseyeShape)}.</li>
@@ -2917,10 +2913,6 @@ public class Node {
           _frustumColor = Graph.castToInt(params[0]);
           return;
         }
-        if (hint == FRUSTUM && params[0] instanceof Graph) {
-          _frustumGraph = (Graph) params[0];
-          return;
-        }
         if (hint == TORUS && Graph.isNumInstance(params[0])) {
           _torusColor = Graph.castToInt(params[0]);
           return;
@@ -2941,18 +2933,6 @@ public class Node {
           if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
             _cameraStroke = Graph.castToInt(params[0]);
             _cameraLength = Graph.castToFloat(params[1]);
-            return;
-          }
-        }
-        if (hint == FRUSTUM) {
-          if (Graph.isNumInstance(params[0]) && params[1] instanceof Graph) {
-            _frustumColor = Graph.castToInt(params[0]);
-            _frustumGraph = (Graph) params[1];
-            return;
-          }
-          if (params[0] instanceof Graph && Graph.isNumInstance(params[1])) {
-            _frustumGraph = (Graph) params[0];
-            _frustumColor = Graph.castToInt(params[1]);
             return;
           }
         }
