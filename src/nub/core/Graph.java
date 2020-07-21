@@ -480,7 +480,7 @@ public class Graph {
         _rotateCAD();
       }
     };
-    _setType(type);
+    setType(type);
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
     enableHint(HUD | SHAPE);
@@ -557,9 +557,9 @@ public class Graph {
   // Type handling stuff
 
   /**
-   * Returns the graph type. Set by {@link #_setType(Type)}.
+   * Returns the graph type. Set by {@link #setType(Type)}.
    *
-   * @see #_setType(Type)
+   * @see #setType(Type)
    */
   public Type type() {
     return _type;
@@ -581,8 +581,9 @@ public class Graph {
    *
    * @see Node#magnitude()
    */
-  protected void _setType(Type type) {
-    if (type != _type) {
+  // TODO make protected?
+  public void setType(Type type) {
+    if (is3D() && type != _type && type != Type.TWO_D) {
       _modified();
       this._type = type;
     }
@@ -592,7 +593,7 @@ public class Graph {
    * Shifts the graph {@link #_type} between {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} while trying
    * to keep the {@link #fov()}. Only meaningful if graph {@link #is3D()}.
    *
-   * @see #_setType(Type)
+   * @see #setType(Type)
    * @see #setFOV(float)
    * @see #fov()
    * @see #hfov()
@@ -601,7 +602,7 @@ public class Graph {
   public void togglePerspective() {
     if (is3D()) {
       float fov = fov();
-      _setType(_type == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
+      setType(_type == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
       setFOV(fov);
     }
   }
@@ -620,7 +621,7 @@ public class Graph {
    * @see #fov()
    * @see #hfov()
    * @see #setHFOV(float)
-   * @see #_setType(Type)
+   * @see #setType(Type)
    */
   public void setFOV(float fov) {
     if (is2D()) {
@@ -648,7 +649,7 @@ public class Graph {
    * Set this value with {@link #setFOV(float)} or {@link #setHFOV(float)}.
    *
    * @see Node#magnitude()
-   * @see #_setType(Type)
+   * @see #setType(Type)
    * @see #setHFOV(float)
    * @see #hfov()
    * @see #setFOV(float)
