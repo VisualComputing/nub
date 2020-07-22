@@ -311,16 +311,16 @@ public class Graph {
   }
 
   /**
-   * Semas as {@code this(context, width, height, eye, type, new Vector(), 100)}.
+   * Same as {@code this(context, width, height, eye, type, new Vector(), 100)}.
    *
    * @see #Graph(Object, int, int, Node, Type, Vector, float)
    */
-  public Graph(Object context, int width, int height, Node eye, Type type) {
+  protected Graph(Object context, int width, int height, Node eye, Type type) {
     this(context, width, height, eye, type, new Vector(), 100);
   }
 
   /**
-   * Semas as {@code this(context, width, height, Type.PERSPECTIVE)}.
+   * Same as {@code this(context, width, height, Type.PERSPECTIVE)}.
    *
    * @see #Graph(Object, int, int, Type)
    */
@@ -333,7 +333,7 @@ public class Graph {
    *
    * @see #Graph(Object, int, int, Type, Vector, float)
    */
-  public Graph(Object context, int width, int height, Type type) {
+  protected Graph(Object context, int width, int height, Type type) {
     this(context, width, height, type, new Vector(), 100);
   }
 
@@ -353,7 +353,7 @@ public class Graph {
    * @see #TimingHandler
    * @see MatrixHandler
    */
-  public Graph(Object context, int width, int height, Type type, float zNear, float zFar) {
+  protected Graph(Object context, int width, int height, Type type, float zNear, float zFar) {
     _init(context, width, height, new Node(), type);
     if (is3D())
       setFOV((float) Math.PI / 3);
@@ -377,7 +377,7 @@ public class Graph {
    * @see #TimingHandler
    * @see MatrixHandler
    */
-  public Graph(Object context, int width, int height, Type type, Vector center, float radius) {
+  protected Graph(Object context, int width, int height, Type type, Vector center, float radius) {
     _init(context, width, height, new Node(), type);
     if (is3D())
       setFOV((float) Math.PI / 3);
@@ -399,7 +399,7 @@ public class Graph {
    * @see #TimingHandler
    * @see MatrixHandler
    */
-  public Graph(Object context, int width, int height, Node eye, Type type, Vector center, float radius) {
+  protected Graph(Object context, int width, int height, Node eye, Type type, Vector center, float radius) {
     _init(context, width, height, eye, type);
     setFrustum(center, radius);
   }
@@ -427,7 +427,7 @@ public class Graph {
    * @see #TimingHandler
    * @see MatrixHandler
    */
-  public Graph(Object context, int width, int height, Node eye, Type type, float zNear, float zFar) {
+  protected Graph(Object context, int width, int height, Node eye, Type type, float zNear, float zFar) {
     _init(context, width, height, eye, type);
     setFrustum(zNear, zFar);
   }
@@ -479,7 +479,7 @@ public class Graph {
         _rotateCAD();
       }
     };
-    setType(type);
+    _setType(type);
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
     enableHint(HUD | SHAPE);
@@ -556,9 +556,9 @@ public class Graph {
   // Type handling stuff
 
   /**
-   * Returns the graph type. Set by {@link #setType(Type)}.
+   * Returns the graph type. Set by {@link #_setType(Type)}.
    *
-   * @see #setType(Type)
+   * @see #_setType(Type)
    */
   public Type type() {
     return _type;
@@ -580,8 +580,7 @@ public class Graph {
    *
    * @see Node#magnitude()
    */
-  // TODO make protected?
-  public void setType(Type type) {
+  protected void _setType(Type type) {
     if (_type == Type.TWO_D) {
       return;
     }
@@ -595,7 +594,7 @@ public class Graph {
    * Shifts the graph {@link #_type} between {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} while trying
    * to keep the {@link #fov()}. Only meaningful if graph {@link #is3D()}.
    *
-   * @see #setType(Type)
+   * @see #_setType(Type)
    * @see #setFOV(float)
    * @see #fov()
    * @see #hfov()
@@ -604,7 +603,7 @@ public class Graph {
   public void togglePerspective() {
     if (is3D()) {
       float fov = fov();
-      setType(_type == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
+      _setType(_type == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
       setFOV(fov);
     }
   }
@@ -623,7 +622,7 @@ public class Graph {
    * @see #fov()
    * @see #hfov()
    * @see #setHFOV(float)
-   * @see #setType(Type)
+   * @see #_setType(Type)
    */
   public void setFOV(float fov) {
     if (is2D()) {
@@ -651,7 +650,7 @@ public class Graph {
    * Set this value with {@link #setFOV(float)} or {@link #setHFOV(float)}.
    *
    * @see Node#magnitude()
-   * @see #setType(Type)
+   * @see #_setType(Type)
    * @see #setHFOV(float)
    * @see #hfov()
    * @see #setFOV(float)

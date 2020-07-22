@@ -13,7 +13,7 @@ import processing.opengl.PShader;
 import java.nio.file.Paths;
 
 public class ShadowMap extends PApplet {
-  Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
+  //Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
   //Scene shadowMapScene;
   ShadowScene shadowMapScene;
@@ -57,7 +57,7 @@ public class ShadowMap extends PApplet {
     shadowMapScene.enableHint(Scene.BACKGROUND, color(140, 160, 125));
     shadowMapScene.picking = false;
     //shadowMapScene.setRadius(300);
-    shadowMapScene.setType(shadowMapType);
+    //shadowMapScene.setType(shadowMapType);
     // */
     frameRate(1000);
   }
@@ -120,7 +120,7 @@ public class ShadowMap extends PApplet {
 
   public void keyPressed() {
     if (key == ' ' && scene.isTagValid("light")) {
-      shadowMapType = shadowMapType == Scene.Type.ORTHOGRAPHIC ? Scene.Type.PERSPECTIVE : Scene.Type.ORTHOGRAPHIC;
+     // shadowMapType = shadowMapType == Scene.Type.ORTHOGRAPHIC ? Scene.Type.PERSPECTIVE : Scene.Type.ORTHOGRAPHIC;
       //scene.node("light").configHint(Node.FRUSTUM, shadowMap, shadowMapType, zNear, zFar);
     }
     if (key == 'p')
