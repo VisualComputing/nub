@@ -138,6 +138,7 @@ public class Graph {
   public final static int HUD = 1 << 2;
   public final static int SHAPE = 1 << 3;
   public final static int BACKGROUND = 1 << 4;
+  public final static int CENTER = 1 << 5;
   protected Consumer<processing.core.PGraphics> _imrHUD;
   protected processing.core.PShape _rmrHUD;
   protected Consumer<processing.core.PGraphics> _imrShape;
@@ -147,6 +148,7 @@ public class Graph {
   }
   protected GridType _gridType;
   protected int _gridStroke;
+  protected int _centerStroke;
   protected int _gridSubDiv;
   protected Object _background;
   protected static HashSet<Interpolator> _interpolators = new HashSet<Interpolator>();
@@ -167,7 +169,6 @@ public class Graph {
   protected long _lastEqUpdate;
   protected Vector _center;
   protected float _radius;
-  protected Vector _anchor;
   boolean _fixed;
   protected float _zNear, _zFar;
   // Inertial stuff
@@ -484,6 +485,8 @@ public class Graph {
     picking = true;
     // middle grey encoded as a processing int rgb color
     _gridStroke = -8553091;
+    // green encoded as a processing int rgb color
+    _centerStroke = -16711936;
     _gridType = GridType.DOTS;
     _gridSubDiv = 10;
     _background = -16777216;
@@ -505,7 +508,7 @@ public class Graph {
    * @see Node#randomize(Vector, float, boolean)
    */
   public void randomize(Node node) {
-    node.randomize(center(), radius(), is3D());
+    node.randomize(center(), _radius, is3D());
   }
 
   // Dimensions stuff
@@ -731,9 +734,11 @@ public class Graph {
    * @see #zFar()
    */
   public float zNear() {
-    float z = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) - zClippingCoefficient() * radius();
+    if (_fixed)
+      return _zNear;
+    float z = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) - zClippingCoefficient() * _radius;
     // Prevents negative or null zNear values.
-    float zMin = zNearCoefficient() * zClippingCoefficient() * radius();
+    float zMin = zNearCoefficient() * zClippingCoefficient() * _radius;
     if (z < zMin)
       switch (_type) {
         case PERSPECTIVE:
@@ -760,7 +765,7 @@ public class Graph {
    * @see #zNear()
    */
   public float zFar() {
-    return Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) + zClippingCoefficient() * radius();
+    return _fixed ? _zFar: Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) + zClippingCoefficient() * _radius;
   }
 
   /**
@@ -1605,27 +1610,7 @@ public class Graph {
    * @see #zFar()
    */
   public Vector center() {
-    return _center;
-  }
-
-  /**
-   * The point the eye revolves around with a ROTATE gesture. Defined in world
-   * coordinate system.
-   * <p>
-   * Default value is the {@link #center()}. Use {@link #setAnchor(Vector)} to change it.
-   * <p>
-   *
-   * @see #setAnchor(Vector)
-   */
-  public Vector anchor() {
-    return _anchor;
-  }
-
-  /**
-   * Sets the {@link #anchor()}, defined in the world coordinate system.
-   */
-  public void setAnchor(Vector anchor) {
-    _anchor = anchor;
+    return _fixed ? eye().worldLocation(new Vector(0, 0, -zNear() - radius() / 2)) : _center;
   }
 
   /**
@@ -1635,6 +1620,8 @@ public class Graph {
    */
   public void setRadius(float radius) {
     _radius = radius;
+    // TODO new
+    _modified();
   }
 
   /**
@@ -1644,6 +1631,8 @@ public class Graph {
    */
   public void setCenter(Vector center) {
     _center = center;
+    // TODO new
+    _modified();
   }
 
   /**
@@ -1656,7 +1645,6 @@ public class Graph {
   public void setFrustum(Vector center, float radius) {
     _fixed = false;
     setCenter(center);
-    setAnchor(center);
     setRadius(radius);
   }
 
@@ -1674,6 +1662,8 @@ public class Graph {
 
   //TODO implement me
   public void setFrustum(float zNear, float zFar) {
+    if (zFar <= zNear)
+      return;
     _fixed = true;
     _zNear = zNear;
     _zFar = zFar;
@@ -1681,7 +1671,7 @@ public class Graph {
     Vector eyeCorner2 = new Vector(width() / 2, height() / 2, zFar);
     Vector corner1 = eye().worldLocation(eyeCorner1);
     Vector corner2 = eye().worldLocation(eyeCorner2);
-    setCenter(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f));
+    //setCenter(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f));
     setRadius(0.5f * (Vector.subtract(corner2, corner1)).magnitude());
   }
 
@@ -1744,7 +1734,7 @@ public class Graph {
    * Use this method in order to define the eye horizontal plane.
    * <p>
    * When {@code noMove} is set to {@code false}, the orientation modification is
-   * compensated by a translation, so that the {@link #anchor()} stays projected at the
+   * compensated by a translation, so that the {@link #center()} stays projected at the
    * same position on screen. This is especially useful when the eye is an observer of the
    * graph.
    * <p>
@@ -1756,7 +1746,7 @@ public class Graph {
   public void setUpVector(Vector up, boolean noMove) {
     Quaternion q = new Quaternion(new Vector(0.0f, 1.0f, 0.0f), eye().displacement(up));
     if (!noMove)
-      eye().setPosition(Vector.subtract(anchor(), (Quaternion.multiply(eye().orientation(), q)).rotate(eye().location(anchor()))));
+      eye().setPosition(Vector.subtract(center(), (Quaternion.multiply(eye().orientation(), q)).rotate(eye().location(center()))));
     eye().rotate(q);
   }
 
@@ -1773,15 +1763,6 @@ public class Graph {
     return eye().yAxis();
   }
 
-  /**
-   * Same as {@code lookAt(anchor())}.
-   *
-   * @see #lookAt(Vector)
-   * @see #anchor()
-   */
-  public void lookAtAnchor() {
-    lookAt(anchor());
-  }
 
   /**
    * @see #lookAt(Vector)
@@ -1916,7 +1897,7 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit() {
-    fit(center(), radius());
+    fit(center(), _radius);
   }
 
   /**
@@ -1937,7 +1918,7 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(float duration) {
-    fit(center(), radius(), duration);
+    fit(center(), _radius, duration);
   }
 
   /**
@@ -2000,7 +1981,7 @@ public class Graph {
         fitFOV();
         break;
       case ORTHOGRAPHIC:
-        float distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / eye().magnitude());
+        float distance = Vector.dot(Vector.subtract(center, center()), viewDirection()) + (radius / eye().magnitude());
         eye().setPosition(Vector.subtract(center, Vector.multiply(viewDirection(), distance)));
         fitFOV();
         break;
@@ -2077,15 +2058,15 @@ public class Graph {
    */
   public void fitFOV() {
     float distance = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
-    float magnitude = distance < (float) Math.sqrt(2) * radius() ? ((float) Math.PI / 2) : 2 * (float) Math.asin(radius() / distance);
+    float magnitude = distance < (float) Math.sqrt(2) * _radius ? ((float) Math.PI / 2) : 2 * (float) Math.asin(_radius / distance);
     switch (_type) {
       case PERSPECTIVE:
         setFOV(magnitude);
         break;
       case ORTHOGRAPHIC:
-        eye().setMagnitude(distance < (float) Math.sqrt(2) * radius() ? 2 * radius() / Math.min(width(), height()) : 2 * (float) Math.sin(magnitude) * distance / width());
+        eye().setMagnitude(distance < (float) Math.sqrt(2) * _radius ? 2 * _radius / Math.min(width(), height()) : 2 * (float) Math.sin(magnitude) * distance / width());
       case TWO_D:
-        eye().setMagnitude(2 * radius() / Math.min(width(), height()));
+        eye().setMagnitude(2 * _radius / Math.min(width(), height()));
         break;
     }
   }
@@ -2251,7 +2232,7 @@ public class Graph {
         distance = Math.max(distX, distY);
         break;
       case ORTHOGRAPHIC:
-        float dist = Vector.dot(Vector.subtract(newCenter, anchor()), vd);
+        float dist = Vector.dot(Vector.subtract(newCenter, center()), vd);
         distX = Vector.distance(pointX, newCenter) / eye().magnitude() / aspectRatio();
         distY = Vector.distance(pointY, newCenter) / eye().magnitude() / 1.0f;
         distance = dist + Math.max(distX, distY);
@@ -4004,7 +3985,7 @@ public class Graph {
    */
   public void translateEye(float dx, float dy, float dz, float inertia) {
     Node node = eye().detach();
-    node.setPosition(anchor().get());
+    node.setPosition(center().get());
     Vector vector = displacement(new Vector(dx, dy, dz), node);
     vector.multiply(-1);
     // Option 1: don't compensate orthographic, i.e., use Node.translate(vector, inertia)
@@ -4160,7 +4141,7 @@ public class Graph {
   }
 
   /**
-   * Rotate the {@link #eye()} around the world x-y-z axes passing through {@link #anchor()},
+   * Rotate the {@link #eye()} around the world x-y-z axes passing through {@link #center()},
    * according to {@code roll}, {@code pitch} and {@code yaw} radians, resp., and {@code inertia}
    * which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
@@ -4173,7 +4154,7 @@ public class Graph {
       pitch = 0;
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
-    eye().orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), anchor(), inertia);
+    eye().orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), center(), inertia);
   }
 
   // 6. Spin
@@ -4318,7 +4299,7 @@ public class Graph {
    * Rotates the {@link #eye()} using an arcball interface, from points {@code (pixel1X, pixel1Y)} to
    * {@code (pixel2X, pixel2Y)} pixel positions. The {@code inertia} controls the gesture strength
    * and it should be in {@code [0..1]}, 0 no inertia & 1 no friction.
-   * The center of the rotation is the screen projected graph {@link #anchor()}.
+   * The center of the rotation is the screen projected graph {@link #center()}.
    * <p>
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
    * three-dimensional orientation using a mouse.
@@ -4327,7 +4308,7 @@ public class Graph {
    */
   public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
     float sensitivity = 1;
-    Vector center = screenLocation(anchor());
+    Vector center = screenLocation(center());
     if (center == null)
       return;
     int centerX = (int) center.x();
@@ -4342,7 +4323,7 @@ public class Graph {
     Vector axis = p2.cross(p1);
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
-    eye().orbit(new Quaternion(axis, angle), anchor(), inertia);
+    eye().orbit(new Quaternion(axis, angle), center(), inertia);
   }
 
   /**
@@ -4481,7 +4462,7 @@ public class Graph {
    */
   protected void _rotateCAD() {
     Vector _up = eye().displacement(_eyeUp);
-    eye().orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _cadRotateTask._y : -_cadRotateTask._y)), anchor());
+    eye().orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _cadRotateTask._y : -_cadRotateTask._y)), center());
   }
 
   // visual hints
@@ -4653,6 +4634,12 @@ public class Graph {
           }
           if (params[0] instanceof processing.core.PImage) {
             _background = params[0];
+            return;
+          }
+        }
+        if (hint == CENTER) {
+          if (isNumInstance(params[0])) {
+            _centerStroke = castToInt(params[0]);
             return;
           }
         }

@@ -428,15 +428,15 @@ public class Scene extends Graph {
   // 3. Drawing methods
 
   /**
-   * The {@link #anchor()} is set to the point located under {@code pixel} on screen.
+   * The {@link #center()} is set to the point located under {@code pixel} on screen.
    * <p>
    * Returns {@code true} if a point was found under {@code pixel} and
-   * {@code false} if none was found (in this case no {@link #anchor()} is set).
+   * {@code false} if none was found (in this case no {@link #center()} is set).
    */
-  public boolean setAnchorFromPixel(int pixelX, int pixelY) {
+  public boolean setCenterFromPixel(int pixelX, int pixelY) {
     Vector pup = location(pixelX, pixelY);
     if (pup != null) {
-      setAnchor(pup);
+      setCenter(pup);
       // new animation
       //TODO restore
       //anchorFlag = true;
@@ -649,7 +649,7 @@ public class Scene extends Graph {
    */
   public void saveConfig(String fileName) {
     JSONObject json = new JSONObject();
-    json.setFloat("radius", radius());
+    json.setFloat("radius", _radius);
     json.setString("type", _type.name());
     json.setJSONObject("eye", _toJSONObject(eye()));
 
@@ -959,11 +959,26 @@ public class Scene extends Graph {
       context().stroke(_gridStroke);
       if (_gridType == GridType.DOTS) {
         context().strokeWeight(5);
-        drawDottedGrid(radius(), _gridSubDiv);
+        drawDottedGrid(_radius, _gridSubDiv);
       } else {
         context().strokeWeight(1);
-        drawGrid(radius(), _gridSubDiv);
+        drawGrid(_radius, _gridSubDiv);
       }
+      context().popStyle();
+    }
+    if (isHintEnable(CENTER)) {
+      context().pushStyle();
+      context().colorMode(PApplet.RGB, 255);
+      //context().stroke(_centerStroke);
+      //context().noStroke();
+      context().stroke(_centerStroke);
+      context().strokeWeight(20);
+      context().strokeCap(PApplet.ROUND);
+      Vector center = center();
+      if (is2D())
+        context().point(center.x(), center.y());
+      else
+        context().point(center.x(), center.y(), center.z());
       context().popStyle();
     }
     for (Interpolator interpolator : _interpolators) {
@@ -1023,15 +1038,15 @@ public class Scene extends Graph {
       pg.pushStyle();
       // TODO debug
       //pg.strokeWeight(5);
-      //pg.line(0, 0, 0, 0, 0, node._axesLength == 0 ? radius() / 5 : node._axesLength);
-      drawAxes(pg, _axesLength(node) == 0 ? radius() / 5 : _axesLength(node));
+      //pg.line(0, 0, 0, 0, 0, node._axesLength == 0 ? _radius / 5 : node._axesLength);
+      drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
       pg.popStyle();
     }
     if (node.isHintEnable(Node.CAMERA)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_cameraStroke(node));
-      _drawEye(_cameraLength(node) == 0 ? radius() : _cameraLength(node));
+      _drawEye(_cameraLength(node) == 0 ? _radius : _cameraLength(node));
       pg.popStyle();
     }
     if (node.isHintEnable(Node.BULLSEYE) && node.isPickingModeEnable(Node.BULLSEYE)) {
@@ -1069,10 +1084,10 @@ public class Scene extends Graph {
     pg.pushStyle();
     pg.strokeWeight(5);
     if (node.isHintEnable(Node.AXES) && node.isPickingModeEnable(Node.AXES)) {
-      drawAxes(pg, _axesLength(node) == 0 ? radius() / 5 : _axesLength(node));
+      drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
     }
     if (node.isHintEnable(Node.CAMERA) && node.isPickingModeEnable(Node.CAMERA)) {
-      _drawEye(_cameraLength(node) == 0 ? radius() : _cameraLength(node));
+      _drawEye(_cameraLength(node) == 0 ? _radius : _cameraLength(node));
     }
     pg.popStyle();
   }
@@ -1308,14 +1323,14 @@ public class Scene extends Graph {
             _matrixHandler.applyTransformation(node);
             if (interpolator.isHintEnable(Interpolator.AXES)) {
               // TODO test
-              drawAxes(_axesLength(interpolator) == 0 ? radius() / 5 : _axesLength(interpolator));
+              drawAxes(_axesLength(interpolator) == 0 ? _radius / 5 : _axesLength(interpolator));
             }
             if (interpolator.isHintEnable(Interpolator.CAMERA)) {
               // TODO test
               context().pushStyle();
               context().colorMode(PApplet.RGB, 255);
               context().stroke(_cameraStroke(interpolator));
-              _drawEye(_cameraLength(interpolator) == 0 ? radius() : _cameraLength(interpolator));
+              _drawEye(_cameraLength(interpolator) == 0 ? _radius : _cameraLength(interpolator));
               context().popStyle();
             }
             _matrixHandler.popMatrix();
@@ -1472,7 +1487,7 @@ public class Scene extends Graph {
    * @see #drawCylinder(PGraphics, float, float)
    */
   public void drawCylinder(PGraphics pGraphics) {
-    drawCylinder(pGraphics, radius() / 6, radius() / 3);
+    drawCylinder(pGraphics, _radius / 6, _radius / 3);
   }
 
   /**
@@ -1650,7 +1665,7 @@ public class Scene extends Graph {
    * @see #drawCone(PGraphics, int, float, float, float, float)
    */
   public void drawCone(PGraphics pGraphics) {
-    float radius = radius() / 4;
+    float radius = _radius / 4;
     drawCone(pGraphics, 12, 0, 0, radius, (float) Math.sqrt((float) 3) * radius);
   }
 
@@ -1771,7 +1786,7 @@ public class Scene extends Graph {
    * @see #drawAxes(float)
    */
   public void drawAxes() {
-    drawAxes(radius());
+    drawAxes(_radius);
   }
 
   /**
@@ -1789,7 +1804,7 @@ public class Scene extends Graph {
    * @see #drawAxes(PGraphics, float)
    */
   public void drawAxes(PGraphics pGraphics) {
-    drawAxes(pGraphics, radius());
+    drawAxes(pGraphics, _radius);
   }
 
   /**
@@ -1876,7 +1891,7 @@ public class Scene extends Graph {
    * @see #drawGrid(float, int)
    */
   public void drawGrid() {
-    drawGrid(radius(), 10);
+    drawGrid(_radius, 10);
   }
 
   /**
@@ -1894,7 +1909,7 @@ public class Scene extends Graph {
    * @see #drawGrid(float, int)
    */
   public void drawGrid(int subdivisions) {
-    drawGrid(radius(), subdivisions);
+    drawGrid(_radius, subdivisions);
   }
 
   /**
@@ -1914,7 +1929,7 @@ public class Scene extends Graph {
    * @see #drawAxes(float)
    */
   public void drawGrid(PGraphics pGraphics) {
-    drawGrid(pGraphics, radius(), 10);
+    drawGrid(pGraphics, _radius, 10);
   }
 
   /**
@@ -1941,7 +1956,7 @@ public class Scene extends Graph {
    * @see #drawDottedGrid(float, int)
    */
   public void drawDottedGrid() {
-    drawDottedGrid(radius(), 10);
+    drawDottedGrid(_radius, 10);
   }
 
   /**
@@ -1959,7 +1974,7 @@ public class Scene extends Graph {
    * @see #drawDottedGrid(float, int)
    */
   public void drawDottedGrid(int subdivisions) {
-    drawDottedGrid(radius(), subdivisions);
+    drawDottedGrid(_radius, subdivisions);
   }
 
   /**
@@ -1977,7 +1992,7 @@ public class Scene extends Graph {
    * @see #drawDottedGrid(PGraphics, float, int)
    */
   public void drawDottedGrid(PGraphics pGraphics) {
-    drawDottedGrid(pGraphics, radius(), 10);
+    drawDottedGrid(pGraphics, _radius, 10);
   }
 
   /**
@@ -2385,7 +2400,7 @@ public class Scene extends Graph {
    * @see #drawCross(float, float, float)
    */
   public void drawCross(float x, float y) {
-    drawCross(x, y, radius() / 5);
+    drawCross(x, y, _radius / 5);
   }
 
   /**
@@ -2454,7 +2469,7 @@ public class Scene extends Graph {
    * @see #drawCircledBullsEye(float, float, float)
    */
   public void drawSquaredBullsEye(float x, float y) {
-    drawSquaredBullsEye(x, y, radius() / 5);
+    drawSquaredBullsEye(x, y, _radius / 5);
   }
 
   /**
@@ -2528,7 +2543,7 @@ public class Scene extends Graph {
    * @see #drawSquaredBullsEye(float, float, float)
    */
   public void drawCircledBullsEye(float x, float y) {
-    drawCircledBullsEye(x, y, radius() / 5);
+    drawCircledBullsEye(x, y, _radius / 5);
   }
 
   /**
@@ -2563,7 +2578,7 @@ public class Scene extends Graph {
    * @see #drawTorusSolenoid(int, float)
    */
   public void drawTorusSolenoid(int faces) {
-    drawTorusSolenoid(faces, 0.07f * radius());
+    drawTorusSolenoid(faces, 0.07f * _radius);
   }
 
   /**
