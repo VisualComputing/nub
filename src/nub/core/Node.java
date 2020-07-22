@@ -2712,7 +2712,7 @@ public class Node {
    * <li>{@link #HUD} which displays the node Heads-Up-Display set with
    * {@link #setHUD(processing.core.PShape)} or {@link #setHUD(Consumer)}.</li>
    * <li>{@link #FRUSTUM} which displays a graph frustum visual representation
-   * see {@link Graph#enableFrustum(Graph)}.</li>
+   * see {@link Graph#enableFrustumDisplay(Graph)}.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
    * {@link #setShape(processing.core.PShape)} or {@link #setShape(Consumer)}.</li>
    * <li>{@link #BULLSEYE} which displays a bullseye centered at the node

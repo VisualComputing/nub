@@ -59,7 +59,7 @@ public class ShadowMapSimpler extends PApplet {
 
     //scene.enableFrustum(shadowMapScene, color(255, 0, 0, 125));
     shadowMapScene.eye().configHint(Node.FRUSTUM, color(255, 0, 0, 125));
-    scene.enableFrustum(shadowMapScene);
+    scene.enableFrustumDisplay(shadowMapScene);
     // */
     frameRate(1000);
   }
@@ -92,14 +92,14 @@ public class ShadowMapSimpler extends PApplet {
     if (event.isShiftDown()) {
       if (scene.isTagValid("light")) {
         scene.node("light").toggleHint(Node.SHAPE | Node.AXES);
-        scene.toggleFrustum(shadowMapScene);
+        scene.toggleFrustumDisplay(shadowMapScene);
       }
       // no calling mouseTag since we need to immediately update the tagged node
       scene.updateMouseTag("light");
       if (scene.isTagValid("light")) {
-        scene.node("light").toggleHint(Node.SHAPE | Node.AXES);
         shadowMapScene.setEye(scene.node("light"));
-        scene.toggleFrustum(shadowMapScene);
+        scene.node("light").toggleHint(Node.SHAPE | Node.AXES);
+        scene.toggleFrustumDisplay(shadowMapScene);
       }
     } else
       scene.mouseTag();

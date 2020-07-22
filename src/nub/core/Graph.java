@@ -457,6 +457,7 @@ public class Graph {
     _tags = new HashMap<String, Node>();
     _rays = new ArrayList<Ray>();
     _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
+    _frustumGraphs = new HashMap<Integer, Graph>();
     if (eye == null)
       throw new RuntimeException("Error eye shouldn't be null");
     setEye(eye);
@@ -483,7 +484,6 @@ public class Graph {
     setZClippingCoefficient((float) Math.sqrt(3.0f));
     enableHint(HUD | SHAPE);
     picking = true;
-    _frustumGraphs = new HashMap<Integer, Graph>();
     // middle grey encoded as a processing int rgb color
     _gridStroke = -8553091;
     _gridType = GridType.DOTS;
@@ -1075,6 +1075,7 @@ public class Graph {
       untag(eye);
       System.out.println("Warning: node was untagged since it was set as the eye");
     }
+    _frustumGraphs.remove(eye.id());
     _eye = eye;
     if (_interpolator == null)
       _interpolator = new Interpolator(_eye);
@@ -4696,21 +4697,21 @@ public class Graph {
     System.out.println("Warning: some params in Scene.configHint(hint, params) couldn't be parsed!");
   }
 
-  public void toggleFrustum(Graph otherGraph) {
+  public void toggleFrustumDisplay(Graph otherGraph) {
     if (_frustumGraphs.containsKey(otherGraph.eye().id()))
-      disableFrustum(otherGraph);
+      disableFrustumDisplay(otherGraph);
     else
-      enableFrustum(otherGraph);
+      enableFrustumDisplay(otherGraph);
   }
 
-  public void enableFrustum(Graph otherGraph) {
+  public void enableFrustumDisplay(Graph otherGraph) {
     if (this != otherGraph) {
       Node _frustumEye = otherGraph.eye();
       _frustumGraphs.put(_frustumEye.id(), otherGraph);
     }
   }
 
-  public void disableFrustum(Graph otherGraph) {
+  public void disableFrustumDisplay(Graph otherGraph) {
     _frustumGraphs.remove(otherGraph.eye().id());
   }
 

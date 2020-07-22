@@ -1010,7 +1010,7 @@ public class Scene extends Graph {
     if (graph != null) {
       if (graph.eye() != node) {
         _frustumGraphs.remove(node);
-        if (graph.eye().isHintEnable(Node.FRUSTUM))
+        if (graph.eye().isHintEnable(Node.FRUSTUM) && graph.eye() != eye())
           _frustumGraphs.put(graph.eye().id(), graph);
       } else {
         if (node.isHintEnable(Node.FRUSTUM)) {
