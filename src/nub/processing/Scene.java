@@ -1006,14 +1006,9 @@ public class Scene extends Graph {
       drawTorusSolenoid(pg, _torusFaces(node), 5);
       pg.popStyle();
     }
-    Graph graph = _frustumGraphs.get(node.id());
-    if (graph != null) {
-      if (graph.eye() != node) {
-        _frustumGraphs.remove(node);
-        if (graph.eye().isHintEnable(Node.FRUSTUM) && graph.eye() != eye())
-          _frustumGraphs.put(graph.eye().id(), graph);
-      } else {
-        if (node.isHintEnable(Node.FRUSTUM)) {
+    if (node.isHintEnable(Node.FRUSTUM)) {
+      for (Graph graph : _graphs(node)) {
+        if (graph != this) {
           pg.pushStyle();
           pg.colorMode(PApplet.RGB, 255);
           pg.stroke(_frustumColor(node));
@@ -1064,9 +1059,10 @@ public class Scene extends Graph {
       drawTorusSolenoid(pg, _torusFaces(node), 5);
     }
     if (node.isHintEnable(Node.FRUSTUM) && node.isPickingModeEnable(Node.FRUSTUM)) {
-      Graph graph = _frustumGraphs.get(node.id());
-      if (graph != null) {
-        drawFrustum(pg, graph);
+      for (Graph graph : _graphs(node)) {
+        if (graph != this) {
+          drawFrustum(pg, graph);
+        }
       }
     }
     pg.pushStyle();

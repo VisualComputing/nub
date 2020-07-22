@@ -45,7 +45,7 @@ public class ShadowMapSimpler extends PApplet {
       shapes[i].setHighlight(0);
     }
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
-    scene.node("light").toggleHint(Node.SHAPE | Node.AXES);
+    scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.FRUSTUM);
     scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
     // scene.enablePicking(false);
     ///*
@@ -58,8 +58,7 @@ public class ShadowMapSimpler extends PApplet {
     //shadowMapScene.setRadius(300);
 
     //scene.enableFrustum(shadowMapScene, color(255, 0, 0, 125));
-    shadowMapScene.eye().configHint(Node.FRUSTUM, color(255, 0, 0, 125));
-    scene.enableFrustumDisplay(shadowMapScene);
+    //shadowMapScene.eye().enableHint(Node.FRUSTUM, color(255, 0, 0, 125));
     // */
     frameRate(1000);
   }
@@ -91,15 +90,13 @@ public class ShadowMapSimpler extends PApplet {
   public void mouseMoved(MouseEvent event) {
     if (event.isShiftDown()) {
       if (scene.isTagValid("light")) {
-        scene.node("light").toggleHint(Node.SHAPE | Node.AXES);
-        scene.toggleFrustumDisplay(shadowMapScene);
+        scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.FRUSTUM);
       }
       // no calling mouseTag since we need to immediately update the tagged node
       scene.updateMouseTag("light");
       if (scene.isTagValid("light")) {
         shadowMapScene.setEye(scene.node("light"));
-        scene.node("light").toggleHint(Node.SHAPE | Node.AXES);
-        scene.toggleFrustumDisplay(shadowMapScene);
+        scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.FRUSTUM);
       }
     } else
       scene.mouseTag();

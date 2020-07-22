@@ -151,7 +151,6 @@ public class Graph {
   protected Object _background;
   protected static HashSet<Interpolator> _interpolators = new HashSet<Interpolator>();
   protected static HashSet<Node> _hudSet = new HashSet<Node>();
-  protected HashMap<Integer, Graph> _frustumGraphs;
 
   // Custom render
   protected HashMap<Integer, BiConsumer<Graph, Node>> _functors;
@@ -457,7 +456,6 @@ public class Graph {
     _tags = new HashMap<String, Node>();
     _rays = new ArrayList<Ray>();
     _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
-    _frustumGraphs = new HashMap<Integer, Graph>();
     if (eye == null)
       throw new RuntimeException("Error eye shouldn't be null");
     setEye(eye);
@@ -1074,8 +1072,11 @@ public class Graph {
       untag(eye);
       System.out.println("Warning: node was untagged since it was set as the eye");
     }
-    _frustumGraphs.remove(eye.id());
+    if (_eye != null) {
+      _eye._graphs.remove(this);
+    }
     _eye = eye;
+    _eye._graphs.add(this);
     if (_interpolator == null)
       _interpolator = new Interpolator(_eye);
     else
@@ -2547,8 +2548,7 @@ public class Graph {
             (node.isPickingModeEnable(Node.CAMERA) && node.isHintEnable(Node.CAMERA)) ||
                     (node.isPickingModeEnable(Node.AXES) && node.isHintEnable(Node.AXES)) ||
                     (node.isPickingModeEnable(Node.HUD) && node.isHintEnable(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
-                    /*(node.isPickingModeEnable(Node.FRUSTUM) && node.isHintEnable(Node.FRUSTUM)) ||*/
-                    (_frustumGraphs.containsKey(node.id()) && node.isPickingModeEnable(Node.FRUSTUM) && node.isHintEnable(Node.FRUSTUM)) ||
+                    (node._graphs != null && node.isPickingModeEnable(Node.FRUSTUM) && node.isHintEnable(Node.FRUSTUM)) ||
                     (node.isPickingModeEnable(Node.SHAPE) && node.isHintEnable(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
                     (node.isPickingModeEnable(Node.TORUS) && node.isHintEnable(Node.TORUS)) ||
                     (node.isPickingModeEnable(Node.CONSTRAINT) && node.isHintEnable(Node.CONSTRAINT)) ||
@@ -4697,42 +4697,6 @@ public class Graph {
   }
 
   /**
-   * Toggles the display of the {@code otherGraph} frustum when rendering this scene.
-   *
-   * @see #disableFrustumDisplay(Graph)
-   * @see #enableFrustumDisplay(Graph)
-   */
-  public void toggleFrustumDisplay(Graph otherGraph) {
-    if (_frustumGraphs.containsKey(otherGraph.eye().id()))
-      disableFrustumDisplay(otherGraph);
-    else
-      enableFrustumDisplay(otherGraph);
-  }
-
-  /**
-   * Enables the display of the {@code otherGraph} frustum when rendering this scene.
-   *
-   * @see #disableFrustumDisplay(Graph)
-   * @see #toggleFrustumDisplay(Graph)
-   */
-  public void enableFrustumDisplay(Graph otherGraph) {
-    if (this != otherGraph) {
-      Node _frustumEye = otherGraph.eye();
-      _frustumGraphs.put(_frustumEye.id(), otherGraph);
-    }
-  }
-
-  /**
-   * Disables the display of the {@code otherGraph} frustum when rendering this scene.
-   *
-   * @see #enableFrustumDisplay(Graph)
-   * @see #toggleFrustumDisplay(Graph)
-   */
-  public void disableFrustumDisplay(Graph otherGraph) {
-    _frustumGraphs.remove(otherGraph.eye().id());
-  }
-
-  /**
    * Sets the graph retained mode rendering (rmr) shape {@link #HUD} hint
    * (see {@link #hint()}). Use {@code enableHint(Node.HUD)},
    * {@code disableHint(Node.HUD)} and {@code toggleHint(Node.HUD)} to (dis)enable the hint.
@@ -4878,6 +4842,10 @@ public class Graph {
 
   protected int _frustumColor(Node node) {
     return node._frustumColor;
+  }
+
+  protected HashSet<Graph> _graphs(Node node) {
+    return node._graphs;
   }
 
   protected Node.BullsEyeShape _bullsEyeShape(Node node) {

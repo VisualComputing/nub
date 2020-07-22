@@ -19,6 +19,7 @@ import nub.timing.Task;
 import nub.timing.TimingHandler;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -196,6 +197,8 @@ public class Node {
   protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
   protected final float _scalingFactor = 800;
 
+  protected HashSet<Graph> _graphs;
+
   /**
    * Same as {@code this(null, null, null, new Vector(), new Quaternion(), 1)}.
    *
@@ -313,7 +316,6 @@ public class Node {
     setRotation(rotation);
     setScaling(scaling);
     enablePickingMode(CAMERA | AXES | HUD | SHAPE | FRUSTUM | BULLSEYE | TORUS | CONSTRAINT | BONE);
-    enableHint(FRUSTUM);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -338,6 +340,7 @@ public class Node {
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
     _cameraStroke = -65281;
     _children = new ArrayList<Node>();
+    _graphs = new HashSet<Graph>();
   }
 
   // From here only Java constructors
@@ -2946,5 +2949,19 @@ public class Node {
         break;
     }
     System.out.println("Warning: some params in Node.configHint(hint, params) couldn't be parsed!");
+  }
+
+  /**
+   * Returns whether or not this node is some scene {@link Graph#eye()}.
+   */
+  public boolean isEye() {
+    return !_graphs.isEmpty();
+  }
+
+  /**
+   * Returns whether or not this node is the {@code graph} {@link Graph#eye()}.
+   */
+  public boolean isEye(Graph graph) {
+    return _graphs.contains(graph);
   }
 }

@@ -26,12 +26,11 @@ public class ViewFrustumCulling extends PApplet {
     // main scene
     mainScene = new Scene(createGraphics(w, h / 2, P3D));
     mainScene.enableHint(Scene.BACKGROUND, color(255));
+    mainScene.eye().enableHint(Node.FRUSTUM);
     mainScene.togglePerspective();
     mainScene.fit(1);
     // secondary scene
     secondaryScene = new Scene(createGraphics(w, h / 2, P3D));
-    //secondaryScene.enableFrustum(mainScene, color(255, 0, 0, 125));
-    secondaryScene.enableFrustumDisplay(mainScene);
     secondaryScene.enableHint(Scene.BACKGROUND, color(185));
     secondaryScene.togglePerspective();
     secondaryScene.setRadius(200);
