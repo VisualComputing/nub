@@ -4697,6 +4697,12 @@ public class Graph {
     System.out.println("Warning: some params in Scene.configHint(hint, params) couldn't be parsed!");
   }
 
+  /**
+   * Toggles the display of the {@code otherGraph} frustum when rendering this scene.
+   *
+   * @see #disableFrustumDisplay(Graph)
+   * @see #enableFrustumDisplay(Graph)
+   */
   public void toggleFrustumDisplay(Graph otherGraph) {
     if (_frustumGraphs.containsKey(otherGraph.eye().id()))
       disableFrustumDisplay(otherGraph);
@@ -4704,6 +4710,12 @@ public class Graph {
       enableFrustumDisplay(otherGraph);
   }
 
+  /**
+   * Enables the display of the {@code otherGraph} frustum when rendering this scene.
+   *
+   * @see #disableFrustumDisplay(Graph)
+   * @see #toggleFrustumDisplay(Graph)
+   */
   public void enableFrustumDisplay(Graph otherGraph) {
     if (this != otherGraph) {
       Node _frustumEye = otherGraph.eye();
@@ -4711,6 +4723,12 @@ public class Graph {
     }
   }
 
+  /**
+   * Disables the display of the {@code otherGraph} frustum when rendering this scene.
+   *
+   * @see #enableFrustumDisplay(Graph)
+   * @see #toggleFrustumDisplay(Graph)
+   */
   public void disableFrustumDisplay(Graph otherGraph) {
     _frustumGraphs.remove(otherGraph.eye().id());
   }
