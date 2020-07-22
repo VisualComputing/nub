@@ -1011,8 +1011,9 @@ public class Scene extends Graph {
         if (graph != this) {
           pg.pushStyle();
           pg.colorMode(PApplet.RGB, 255);
-          pg.stroke(_frustumColor(node));
-          pg.fill(_frustumColor(node));
+          // 2113928960: yellow (with alpha: color(255, 255, 0, 125)) encoded as a processing int rgb color
+          pg.stroke(isNumInstance(_background(graph)) ? castToInt(_background(graph)) : 2113928960);
+          pg.fill(isNumInstance(_background(graph)) ? castToInt(_background(graph)) : 2113928960);
           drawFrustum(pg, graph);
           pg.popStyle();
         }

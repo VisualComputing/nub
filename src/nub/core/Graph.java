@@ -4822,6 +4822,12 @@ public class Graph {
 
   // Hack to hide node & interpolator hint properties
 
+  // Graph
+
+  protected Object _background(Graph graph) {
+    return graph._background;
+  }
+
   // Node
 
   protected Consumer<processing.core.PGraphics> _imrShape(Node node) {
@@ -4838,10 +4844,6 @@ public class Graph {
 
   protected int _torusFaces(Node node) {
     return node._torusFaces;
-  }
-
-  protected int _frustumColor(Node node) {
-    return node._frustumColor;
   }
 
   protected HashSet<Graph> _frustumGraphs(Node node) {

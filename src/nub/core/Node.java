@@ -174,7 +174,6 @@ public class Node {
   public final static int BONE = 1 << 8;
   protected float _highlight;
   // Frustum
-  protected int _frustumColor;
   protected HashSet<Graph> _frustumGraphs;
   // torus
   protected int _torusColor;
@@ -333,8 +332,6 @@ public class Node {
     _torusColor = Graph._color(r, g, b);
     // cyan (color(0, 255, 255)) encoded as a processing int rgb color
     _bullsEyeStroke = -16711681;
-    // yellow (with alpha: color(255, 255, 0, 125)) encoded as a processing int rgb color
-    _frustumColor = 2113928960;
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
     _cameraStroke = -65281;
     _children = new ArrayList<Node>();
@@ -2859,7 +2856,6 @@ public class Node {
    * <li>{@link #CAMERA} hint: {@code configHint(Node.CAMERA, cameraStroke)} or
    * {@code configHint(Node.CAMERA, cameraStroke, cameraLength)}.</li>
    * <li>{@link #AXES} hint: {@code configHint(Node.AXES, axesLength)}.</li>
-   * <li>{@link #FRUSTUM} hint: {@code configHint(Node.FRUSTUM, frustumColor)}.</li>
    * <li>{@link #BULLSEYE} hint: {@code configHint(Node.BULLSEYE, bullseyeStroke)},
    * {@code configHint(Node.BULLSEYE, bullseyeShape)}, or
    * {@code configHint(Node.BULLSEYE, bullseyeStroke, bullseyeShape)}.</li>
@@ -2907,10 +2903,6 @@ public class Node {
         }
         if (hint == CAMERA && Graph.isNumInstance(params[0])) {
           _cameraStroke = Graph.castToInt(params[0]);
-          return;
-        }
-        if (hint == FRUSTUM && Graph.isNumInstance(params[0])) {
-          _frustumColor = Graph.castToInt(params[0]);
           return;
         }
         if (hint == TORUS && Graph.isNumInstance(params[0])) {
