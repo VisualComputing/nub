@@ -855,11 +855,11 @@ public class Scene extends Graph {
           Vector location = screenLocation(node);
           if (location != null) {
             _backBuffer().translate(location.x(), location.y());
-            if (node._imrHUD != null) {
-              node._imrHUD.accept(_backBuffer());
+            if (_imrHUD(node) != null) {
+              _imrHUD(node).accept(_backBuffer());
             }
-            if (node._rmrHUD != null) {
-              _backBuffer().shape(node._rmrHUD);
+            if (_rmrHUD(node) != null) {
+              _backBuffer().shape(_rmrHUD(node));
             }
           }
           _backBuffer().popMatrix();
@@ -915,11 +915,11 @@ public class Scene extends Graph {
           Vector location = screenLocation(node);
           if (location != null) {
             context().translate(location.x(), location.y());
-            if (node._imrHUD != null) {
-              node._imrHUD.accept(context());
+            if (_imrHUD(node) != null) {
+              _imrHUD(node).accept(context());
             }
-            if (node._rmrHUD != null) {
-              context().shape(node._rmrHUD);
+            if (_rmrHUD(node) != null) {
+              context().shape(_rmrHUD(node));
             }
           }
           context().popMatrix();
@@ -1007,7 +1007,7 @@ public class Scene extends Graph {
       pg.popStyle();
     }
     if (node.isHintEnable(Node.FRUSTUM)) {
-      for (Graph graph : _graphs(node)) {
+      for (Graph graph : _frustumGraphs(node)) {
         if (graph != this) {
           pg.pushStyle();
           pg.colorMode(PApplet.RGB, 255);
@@ -1023,20 +1023,20 @@ public class Scene extends Graph {
       // TODO debug
       //pg.strokeWeight(5);
       //pg.line(0, 0, 0, 0, 0, node._axesLength == 0 ? radius() / 5 : node._axesLength);
-      drawAxes(pg, node._axesLength == 0 ? radius() / 5 : node._axesLength);
+      drawAxes(pg, _axesLength(node) == 0 ? radius() / 5 : _axesLength(node));
       pg.popStyle();
     }
     if (node.isHintEnable(Node.CAMERA)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
-      pg.stroke(node._cameraStroke);
-      _drawEye(node._cameraLength == 0 ? radius() : node._cameraLength);
+      pg.stroke(_cameraStroke(node));
+      _drawEye(_cameraLength(node) == 0 ? radius() : _cameraLength(node));
       pg.popStyle();
     }
     if (node.isHintEnable(Node.BULLSEYE) && node.isPickingModeEnable(Node.BULLSEYE)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
-      pg.stroke(node._bullsEyeStroke);
+      pg.stroke(_bullsEyeStroke(node));
       _drawBullsEye(node);
       pg.popStyle();
     }
@@ -1059,7 +1059,7 @@ public class Scene extends Graph {
       drawTorusSolenoid(pg, _torusFaces(node), 5);
     }
     if (node.isHintEnable(Node.FRUSTUM) && node.isPickingModeEnable(Node.FRUSTUM)) {
-      for (Graph graph : _graphs(node)) {
+      for (Graph graph : _frustumGraphs(node)) {
         if (graph != this) {
           drawFrustum(pg, graph);
         }
@@ -1068,12 +1068,10 @@ public class Scene extends Graph {
     pg.pushStyle();
     pg.strokeWeight(5);
     if (node.isHintEnable(Node.AXES) && node.isPickingModeEnable(Node.AXES)) {
-      //TODO debug
-      //pg.line(0, 0, 0, 0, 0, node._axesLength == 0 ? radius() / 5 : node._axesLength);
-      drawAxes(pg, node._axesLength == 0 ? radius() / 5 : node._axesLength);
+      drawAxes(pg, _axesLength(node) == 0 ? radius() / 5 : _axesLength(node));
     }
     if (node.isHintEnable(Node.CAMERA) && node.isPickingModeEnable(Node.CAMERA)) {
-      _drawEye(node._cameraLength == 0 ? radius() : node._cameraLength);
+      _drawEye(_cameraLength(node) == 0 ? radius() : _cameraLength(node));
     }
     pg.popStyle();
   }

@@ -175,16 +175,16 @@ public class Node {
   protected float _highlight;
   // Frustum
   protected int _frustumColor;
+  protected HashSet<Graph> _frustumGraphs;
   // torus
   protected int _torusColor;
   protected int _torusFaces;
-  // TODO public because Scene._drawFrontBuffer
-  public int _bullsEyeStroke;
-  public float _axesLength;
-  public int _cameraStroke;
-  public float _cameraLength;
-  public Consumer<processing.core.PGraphics> _imrHUD;
-  public processing.core.PShape _rmrHUD;
+  protected int _bullsEyeStroke;
+  protected float _axesLength;
+  protected int _cameraStroke;
+  protected float _cameraLength;
+  protected Consumer<processing.core.PGraphics> _imrHUD;
+  protected processing.core.PShape _rmrHUD;
   // Rendering
   // Immediate mode rendering
   protected Consumer<processing.core.PGraphics> _imrShape;
@@ -196,8 +196,6 @@ public class Node {
   // Tasks
   protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
   protected final float _scalingFactor = 800;
-
-  protected HashSet<Graph> _graphs;
 
   /**
    * Same as {@code this(null, null, null, new Vector(), new Quaternion(), 1)}.
@@ -340,7 +338,7 @@ public class Node {
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
     _cameraStroke = -65281;
     _children = new ArrayList<Node>();
-    _graphs = new HashSet<Graph>();
+    _frustumGraphs = new HashSet<Graph>();
   }
 
   // From here only Java constructors
@@ -2714,8 +2712,7 @@ public class Node {
    * {@link #position()} an oriented according to the node {@link #orientation()}.</li>
    * <li>{@link #HUD} which displays the node Heads-Up-Display set with
    * {@link #setHUD(processing.core.PShape)} or {@link #setHUD(Consumer)}.</li>
-   * <li>{@link #FRUSTUM} which displays a graph frustum visual representation
-   * see {@link Graph#enableFrustumDisplay(Graph)}.</li>
+   * <li>{@link #FRUSTUM} which displays a graph frustum visual representation.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
    * {@link #setShape(processing.core.PShape)} or {@link #setShape(Consumer)}.</li>
    * <li>{@link #BULLSEYE} which displays a bullseye centered at the node
@@ -2949,19 +2946,5 @@ public class Node {
         break;
     }
     System.out.println("Warning: some params in Node.configHint(hint, params) couldn't be parsed!");
-  }
-
-  /**
-   * Returns whether or not this node is some scene {@link Graph#eye()}.
-   */
-  public boolean isEye() {
-    return !_graphs.isEmpty();
-  }
-
-  /**
-   * Returns whether or not this node is the {@code graph} {@link Graph#eye()}.
-   */
-  public boolean isEye(Graph graph) {
-    return _graphs.contains(graph);
   }
 }
