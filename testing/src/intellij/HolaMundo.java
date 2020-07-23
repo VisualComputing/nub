@@ -34,10 +34,12 @@ public class HolaMundo extends PApplet {
   public void setup() {
     // A. Scenes
     // 1. Main (onscreen) Scene
-    mainScene = new Scene(this);
+    mainScene = new Scene(this, 500);
+    //mainScene.setFrustum(500);
+    //mainScene.fit(1);
+    //mainScene = new Scene(this, 500);
     //mainScene.togglePicking();
-    mainScene.setRadius(500);
-    mainScene.fit(1);
+    //mainScene.fit(1);
     mainScene.enableHint(Scene.AXES | Scene.GRID);
     mainScene.configHint(Scene.GRID, color(0, 255, 0));
     mainScene.enableHint(Graph.BACKGROUND);
@@ -51,9 +53,8 @@ public class HolaMundo extends PApplet {
     //mainScene.setHUD(this::hud);
     //mainScene.configHint(Scene.GRID, Graph.GridType.LINE);
     // 2. Hint (offscreen) Scene
-    hintScene = new Scene(createGraphics(hintSceneWidth, hintSceneHeight, P3D));
+    hintScene = new Scene(createGraphics(hintSceneWidth, hintSceneHeight, P3D), 300);
     hintScene.enableHint(Graph.BACKGROUND, color(0, 123, 240));
-    hintScene.setRadius(300);
     // B. Nodes
     // 1. torus
     torus = new Node();
@@ -102,7 +103,7 @@ public class HolaMundo extends PApplet {
       pup = mainScene.mouseLocation();
       // position the auxiliar viewer
       if (pup != null) {
-        hintScene.setCenter(pup);
+        hintScene.setFrustum(pup, 300);
         hintScene.eye().setPosition(pup);
         hintScene.setViewDirection(mainScene.displacement(Vector.plusJ));
         hintScene.setUpVector(mainScene.displacement(Vector.minusK));

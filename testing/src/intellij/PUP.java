@@ -24,16 +24,14 @@ public class PUP extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this);
-    scene.setRadius(1000);
+    scene = new Scene(this, 1000);
     scene.fit(1);
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
       models[i] = new Node(boxShape());
       scene.randomize(models[i]);
     }
-    visualHint = new Scene(createGraphics(w, h, P3D));
-    visualHint.setRadius(300);
+    visualHint = new Scene(createGraphics(w, h, P3D), 300);
   }
 
   public void draw() {
@@ -81,7 +79,7 @@ public class PUP extends PApplet {
     if (event.isControlDown()) {
       pup = scene.mouseLocation();
       if (pup != null) {
-        visualHint.setCenter(pup);
+        visualHint.setFrustum(pup, 300);
         visualHint.eye().setPosition(pup);
         //hint.setViewDirection(scene.displacement(Vector.plusJ));
         visualHint.setViewDirection(scene.displacement(new Vector(0, 1, 0)));

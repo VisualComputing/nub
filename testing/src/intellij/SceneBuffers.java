@@ -21,10 +21,9 @@ public class SceneBuffers extends PApplet {
 
   public void setup() {
     rectMode(CENTER);
-    scene = new Scene(createGraphics(w, h / 2, renderer));
+    scene = new Scene(createGraphics(w, h / 2, renderer), max(w, h));
     //scene = new Scene(this);
     scene.enableHint(Scene.BACKGROUND, color(125));
-    scene.setRadius(max(w, h));
 
     shapes = new Node[100];
     for (int i = 0; i < shapes.length; i++) {

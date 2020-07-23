@@ -35,8 +35,7 @@ public class CustomEyeInteraction extends PApplet {
   public void setup() {
     texmap = loadImage("/home/pierre/IdeaProjects/nub/testing/data/globe/world32k.jpg");
     initializeSphere(sDetail);
-    scene = new Scene(this);
-    scene.setRadius(globeRadius * 1.2f);
+    scene = new Scene(this, globeRadius * 1.2f);
     scene.fit(1);
   }
 

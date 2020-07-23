@@ -22,8 +22,7 @@ public class BasicUse extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this);
-    scene.setRadius(150);
+    scene = new Scene(this, 150);
     scene.fit(1);
     //node = new Node();
     node = new Node((pg) -> {

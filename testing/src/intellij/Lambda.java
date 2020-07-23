@@ -30,8 +30,7 @@ public class Lambda extends PApplet {
 
   public void setup() {
     rectMode(CENTER);
-    scene = new Scene(this);
-    scene.setRadius(150);
+    scene = new Scene(this, 150);
 
     // interpolation 1. Default eye interpolations
     scene.fit(1);

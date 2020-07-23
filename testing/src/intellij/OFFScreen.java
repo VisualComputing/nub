@@ -22,11 +22,10 @@ public class OFFScreen extends PApplet {
   public void setup() {
     // TODO render at 400, 200
     //scene = new Scene(this, createGraphics(1300, 900, renderer));
-    scene = new Scene(createGraphics(800, 600, P3D));
+    scene = new Scene(createGraphics(800, 600, P3D), 300);
     scene.enableHint(Scene.BACKGROUND | Scene.AXES);
     scene.configHint(Scene.BACKGROUND, color(0));
     scene.setFOV(PI / 3);
-    scene.setRadius(300);
     scene.fit(1);
 
     shape1 = new Node() {

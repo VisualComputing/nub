@@ -30,10 +30,9 @@ public class ViewFrustumCulling extends PApplet {
     mainScene.togglePerspective();
     mainScene.fit(1);
     // secondary scene
-    secondaryScene = new Scene(createGraphics(w, h / 2, P3D));
+    secondaryScene = new Scene(createGraphics(w, h / 2, P3D), 200);
     secondaryScene.enableHint(Scene.BACKGROUND, color(185));
     secondaryScene.togglePerspective();
-    secondaryScene.setRadius(200);
     secondaryScene.fit();
     // declare and build the octree hierarchy
     root = new OctreeNode();

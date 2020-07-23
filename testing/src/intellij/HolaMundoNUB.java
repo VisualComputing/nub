@@ -31,8 +31,7 @@ public class HolaMundoNUB extends PApplet {
   public void setup() {
     // A. Scenes
     // 1. Main (Scene
-    mainScene = new Scene(createGraphics(width, height, P3D));
-    mainScene.setRadius(500);
+    mainScene = new Scene(createGraphics(width, height, P3D), 500);
     mainScene.fit(1);
     mainScene.enableHint(Scene.AXES | Scene.GRID);
     mainScene.configHint(Scene.GRID, color(0, 255, 0));
@@ -40,9 +39,8 @@ public class HolaMundoNUB extends PApplet {
     mainScene.enableHint(Scene.BACKGROUND, color(125));
     mainScene.setHUD(this::hud);
     // 2. Can (offscreen) Scene
-    canScene = new Scene(createGraphics(canSceneWidth, canSceneHeight, P3D));
+    canScene = new Scene(createGraphics(canSceneWidth, canSceneHeight, P3D), 300);
     canScene.enableHint(Scene.BACKGROUND, color(25, 170, 150));
-    canScene.setRadius(300);
     canScene.fit();
     //texShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/texture/texfrag.glsl");
     //canScene.context().shader(texShader);

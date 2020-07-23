@@ -24,8 +24,7 @@ public class Luxo extends PApplet {
   Lamp lamp;
 
   public void setup() {
-    scene = new Scene(this);
-    scene.setRadius(100);
+    scene = new Scene(this, 150);
     scene.fit(1);
     lamp = new Lamp(scene);
   }

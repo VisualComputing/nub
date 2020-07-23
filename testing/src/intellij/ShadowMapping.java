@@ -38,10 +38,9 @@ public class ShadowMapping extends PApplet {
 
   public void setup() {
     //scene = new Scene(createGraphics(w, h, P3D));
-    scene = new Scene(this);
+    scene = new Scene(this, max(w, h) / 3);
     scene.enableHint(Scene.BACKGROUND, color(0));
     scene.togglePerspective();
-    scene.setRadius(max(w, h) / 3);
     scene.fit(1);
     // initDefaultPass
     String shadowVertPath = Paths.get("testing/data/shadow/shadow_vert.glsl").toAbsolutePath().toString();

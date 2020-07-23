@@ -164,12 +164,30 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {this(pApplet.g, new Vector(), radius)}.
+   *
+   * @see Scene#Scene(PGraphics, Vector, float)
+   */
+  public Scene(PApplet pApplet, float radius) {
+    this(pApplet.g, new Vector(), radius);
+  }
+
+  /**
    * Same as {@code this(pApplet.g, center, radius)}.
    *
    * @see #Scene(PGraphics, Vector, float)
    */
   public Scene(PApplet pApplet, Vector center, float radius) {
     this(pApplet.g, center, radius);
+  }
+
+  /**
+   * Same as {@code this(pGraphics, new Vector(), radius)}.
+   *
+   * @see #Scene(PGraphics, Vector, float)
+   */
+  public Scene(PGraphics pGraphics, float radius) {
+    this(pGraphics, new Vector(), radius);
   }
 
   /**
@@ -184,12 +202,30 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code this(pApplet, eye, new Vector(), radius)}.
+   *
+   * @see Scene#Scene(PApplet, Node, Vector, float)
+   */
+  public Scene(PApplet pApplet, Node eye, float radius) {
+    this(pApplet, eye, new Vector(), radius);
+  }
+
+  /**
    * Same as {@code this(pApplet.g, eye, center, rdius)}.
    *
    * @see #Scene(PGraphics, Node, Vector, float)
    */
   public Scene(PApplet pApplet, Node eye, Vector center, float radius) {
     this(pApplet.g, eye, center, radius);
+  }
+
+  /**
+   * Same as {@code this(pGraphics, eye, new Vector(), radius)}.
+   *
+   * @see #Scene(PGraphics, Node, Vector, float)
+   */
+  public Scene(PGraphics pGraphics, Node eye, float radius) {
+    this(pGraphics, eye, new Vector(), radius);
   }
 
   /**
@@ -333,9 +369,11 @@ public class Scene extends Graph {
    * {@code false} if none was found (in this case no {@link #center()} is set).
    */
   public boolean setCenter(int pixelX, int pixelY) {
+    if (_fixed)
+      return false;
     Vector pup = location(pixelX, pixelY);
     if (pup != null) {
-      setCenter(pup);
+      _center = pup;
       return true;
     }
     return false;
@@ -434,9 +472,11 @@ public class Scene extends Graph {
    * {@code false} if none was found (in this case no {@link #center()} is set).
    */
   public boolean setCenterFromPixel(int pixelX, int pixelY) {
+    if (_fixed)
+      return false;
     Vector pup = location(pixelX, pixelY);
     if (pup != null) {
-      setCenter(pup);
+      _center = pup;
       // new animation
       //TODO restore
       //anchorFlag = true;
@@ -700,7 +740,8 @@ public class Scene extends Graph {
       System.out.println("No such " + fileName + " found!");
     }
     if (json != null) {
-      setRadius(json.getFloat("radius"));
+      // TODO pending
+      _radius = json.getFloat("radius");
       String type = json.getString("type");
       _setType(type.equals("PERSPECTIVE") ? Type.PERSPECTIVE :
           type.equals("ORTHOGRAPHIC") ? Type.ORTHOGRAPHIC : type.equals("TWO_D") ? Type.TWO_D : Type.CUSTOM);

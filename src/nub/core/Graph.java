@@ -27,9 +27,6 @@ import java.util.function.Consumer;
  * renderer.
  * <h1>1. Types and dimensions</h1>
  * To set the viewing volume use {@link #setFrustum(Vector, float)} or {@link #setFrustum(float, float)}.
- * Both call {@link #setCenter(Vector)} and {@link #setRadius(float)} which defined a viewing ball
- * with {@link #center()} and {@link #radius()} parameters. See also {@link #setZClippingCoefficient(float)}
- * and {@link #setZNearCoefficient(float)} for a 3d graph.
  * <p>
  * The way the projection matrix is computed (see
  * {@link #projection()}), defines the type of the
@@ -169,7 +166,7 @@ public class Graph {
   protected long _lastEqUpdate;
   protected Vector _center;
   protected float _radius;
-  boolean _fixed;
+  protected boolean _fixed;
   protected float _zNear, _zFar;
   // Inertial stuff
   public static float inertia = 0.8f;
@@ -479,8 +476,6 @@ public class Graph {
       }
     };
     _setType(type);
-    setZNearCoefficient(0.005f);
-    setZClippingCoefficient((float) Math.sqrt(3.0f));
     enableHint(HUD | SHAPE);
     picking = true;
     // middle grey encoded as a processing int rgb color
@@ -710,23 +705,19 @@ public class Graph {
    * hence result in an optimal precision of the z-buffer.
    * <p>
    * The near clipping plane is positioned at a distance equal to
-   * {@link #zClippingCoefficient()} * {@link #radius()} in front of the
+   * {@code zClippingCoefficient} * {@link #radius()} in front of the
    * {@link #center()}: {@code Vector.scalarProjection(
    * Vector.subtract(eye().position(), center()), eye().zAxis()) - zClippingCoefficient() * radius()}
    * <p>
    * In order to prevent negative or too small {@link #zNear()} values (which would
-   * degrade the z precision), {@link #zNearCoefficient()} is used when the eye is
+   * degrade the z precision), {@code zNearCoefficient} is used when the eye is
    * inside the {@link #radius()} ball:
    * <p>
    * {@code zMin = zNearCoefficient() * zClippingCoefficient() * radius();} <br>
    * {@code zNear = zMin;}<br>
    * {@code With an ORTHOGRAPHIC and TWO_D types, the value is simply clamped to 0}<br>
    * <p>
-   * See also the {@link #zFar()}, {@link #zClippingCoefficient()} and
-   * {@link #zNearCoefficient()} documentations.
-   * <p>
-   * If you need a completely different zNear computation, overload the {@link #zNear()}
-   * and {@link #zFar()} methods.
+   * See also the {@link #zFar()} documentation.
    *
    * <b>Attention:</b> The value is always positive, although the clipping plane is
    * positioned at a negative z value in the eye coordinate system.
@@ -736,9 +727,9 @@ public class Graph {
   public float zNear() {
     if (_fixed)
       return _zNear;
-    float z = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) - zClippingCoefficient() * _radius;
+    float z = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) - _zClippingCoefficient * _radius;
     // Prevents negative or null zNear values.
-    float zMin = zNearCoefficient() * zClippingCoefficient() * _radius;
+    float zMin = _zNearCoefficient * _zClippingCoefficient * _radius;
     if (z < zMin)
       switch (_type) {
         case PERSPECTIVE:
@@ -765,60 +756,7 @@ public class Graph {
    * @see #zNear()
    */
   public float zFar() {
-    return _fixed ? _zFar: Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) + zClippingCoefficient() * _radius;
-  }
-
-  /**
-   * Returns the coefficient used to set {@link #zNear()} when the {@link #eye()} is
-   * inside the ball defined by {@link #center()} and {@link #zClippingCoefficient()} * {@link #radius()}.
-   * <p>
-   * In that case, the {@link #zNear()} value is set to
-   * {@code zNearCoefficient() * zClippingCoefficient() * radius()}. See the
-   * {@code zNear()} documentation for details.
-   * <p>
-   * Default value is 0.005, which is appropriate for most applications. In case you need
-   * a high dynamic ZBuffer precision, you can increase this value (~0.1). A lower value
-   * will prevent clipping of very close objects at the expense of a worst Z precision.
-   * <p>
-   * Only meaningful when the graph type is PERSPECTIVE.
-   */
-  public float zNearCoefficient() {
-    return _zNearCoefficient;
-  }
-
-  /**
-   * Sets the {@link #zNearCoefficient()} value.
-   */
-  public void setZNearCoefficient(float coefficient) {
-    if (coefficient != _zNearCoefficient)
-      _modified();
-    _zNearCoefficient = coefficient;
-  }
-
-  /**
-   * Returns the coefficient used to position the near and far clipping planes.
-   * <p>
-   * The near (resp. far) clipping plane is positioned at a distance equal to
-   * {@code zClippingCoefficient() * radius()} in front of (resp. behind) the
-   * {@link #center()}. This guarantees an optimal use of the z-buffer range and
-   * minimizes aliasing. See the {@link #zNear()} and {@link #zFar()} documentations.
-   * <p>
-   * Default value is square root of 3 (so that a cube of edge size 2*{@link #radius()}
-   * is not clipped).
-   *
-   * @see #zNearCoefficient()
-   */
-  public float zClippingCoefficient() {
-    return _zClippingCoefficient;
-  }
-
-  /**
-   * Sets the {@link #zClippingCoefficient()} value.
-   */
-  public void setZClippingCoefficient(float coefficient) {
-    if (coefficient != _zClippingCoefficient)
-      _modified();
-    _zClippingCoefficient = coefficient;
+    return _fixed ? _zFar: Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) + _zClippingCoefficient * _radius;
   }
 
   // Graph and nodes stuff
@@ -1578,17 +1516,12 @@ public class Graph {
   }
 
   /**
-   * Returns the radius of the graph observed by the eye in world units.
-   * <p>
-   * In 3D you need to provide such an approximation of the graph dimensions so
-   * that the it can adapt its {@link #zNear()} and {@link #zFar()} values. See the {@link #center()}
-   * documentation.
-   * <p>
-   * Note that {@link Graph#radius()} (resp. {@link Graph#setRadius(float)} simply call this
-   * method on its associated eye.
+   * Returns the radius of the graph observed by the eye in world units. Set it with
+   * {@link #setFrustum(Vector, float)} or {@link #setFrustum(float, float)}.
    *
    * @see #setFrustum(Vector, float)
    * @see #setFrustum(float, float)
+   * @see #center()
    */
   public float radius() {
     return _radius;
@@ -1596,83 +1529,106 @@ public class Graph {
 
   /**
    * Returns the position of the graph center, defined in the world coordinate system.
-   * <p>
-   * The graph observed by the eye should be roughly centered on this position, and
-   * included in a {@link #radius()} ball.
-   * <p>
-   * Default value is the world origin. Use {@link #setCenter(Vector)} to change it.
+   * Set it with {@link #setFrustum(Vector, float)} or {@link #setFrustum(float, float)}.
    *
-   * @see #setCenter(Vector)
-   * @see #setRadius(float)
    * @see #setFrustum(Vector, float)
    * @see #setFrustum(float, float)
    * @see #zNear()
    * @see #zFar()
    */
   public Vector center() {
-    return _fixed ? eye().worldLocation(new Vector(0, 0, -zNear() - radius() / 2)) : _center;
+    return _fixed ? eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / 2 )) : _center;
   }
 
   /**
-   * Sets the {@link #radius()} value in world units.
+   * Same as {@code setFrustum(new Vector(), radius)}.
    *
-   * @see #setCenter(Vector)
+   * @see #setFrustum(float, float)
+   * @see #setFrustum(Vector, float, float, float)
+   * @see #setFrustum(float, float)
    */
-  public void setRadius(float radius) {
-    _radius = radius;
-    // TODO new
-    _modified();
-  }
-
-  /**
-   * Sets the {@link #center()} of the graph.
-   *
-   * @see #setRadius(float)
-   */
-  public void setCenter(Vector center) {
-    _center = center;
-    // TODO new
-    _modified();
+  public void setFrustum(float radius) {
+    setFrustum(new Vector(), radius);
   }
 
   /**
    * Same as {@code setCenter(center); setRadius(radius)}.
    *
-   * @see #setCenter(Vector)
-   * @see #setRadius(float)
    * @see #setFrustum(float, float)
+   * @see #setFrustum(Vector, float, float, float)
+   * @see #setFrustum(float)
    */
   public void setFrustum(Vector center, float radius) {
-    _fixed = false;
-    setCenter(center);
-    setRadius(radius);
+    setFrustum(center, radius, 0.005f, (float) Math.sqrt(3.0f));
   }
 
   /**
-   * Similar to {@link #setRadius(float)} and {@link #setCenter(Vector)}, but the
-   * graph limits are defined by a world axis aligned bounding box.
+   * Sets the scene bounding sphere, defined by {@code center} and {@code radius}) in the
+   * world coordinate system. The {@link #zNear()} and {@link #zFar()} computation is performed
+   * so that it adapts to best fit this bounding sphere. To set fixed {@link #zNear()} and
+   * {@link #zFar()} values use {@link #setFrustum(float, float)} instead.
+   * <p>
+   * The {@code zNearCoefficient} (only meaningful for perspective projections) is used to set
+   * the {@link #zNear()} when the {@link #eye()} is
+   * inside the ball defined by {@code #center} and zClippingCoefficient * {@code #radius}.
+   * In that case, the {@link #zNear()} value is set to
+   * {@code zNearCoefficient * zClippingCoefficient * radius}. Default value is 0.005, which
+   * is appropriate for most applications. In case you need a high dynamic ZBuffer precision,
+   * you can increase this value (~0.1). A lower value will prevent clipping of very close
+   * objects at the expense of a worst Z precision.
+   * <p>
+   * The {@code zClippingCoefficient} is used to position the near and far clipping planes.
+   * The near (resp. far) clipping plane is positioned at a distance equal to
+   * {@code zClippingCoefficient * radius()} in front of (resp. behind) the {@code center}.
+   * This guarantees an optimal use of the z-buffer range and minimizes aliasing. Default
+   * value is square root of 3 (so that a cube of edge size 2*{@link #radius()} is not clipped).
+   * <p>
+   * See the {@link #zNear()} and {@link #zFar()} documentations.
    *
+   * @see #setFrustum(float)
    * @see #setFrustum(Vector, float)
+   * @see #setFrustum(float, float)
+   * @see #zNear()
+   * @see #zFar()
    */
-  /*
-  public void setFrustum(Vector corner1, Vector corner2) {
-    setFrustum(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f), 0.5f * (Vector.subtract(corner2, corner1)).magnitude());
+  public void setFrustum(Vector center, float radius, float zNearCoefficient, float zClippingCoefficient) {
+    _fixed = false;
+    _center = center;
+    _radius = Math.abs(radius);
+    _zNearCoefficient = zNearCoefficient;
+    _zClippingCoefficient = zClippingCoefficient;
+    _modified();
   }
-   */
 
-  //TODO implement me
+  /**
+   * Sets fixed {@link #zNear()} and {@link #zFar()} values. Use
+   * {@link #setFrustum(Vector, float, float, float)} to make them fit a
+   * bounding sphere defined in the world coordinate system instead.
+   * <p>
+   * Note that the {@link #center()} is computed as
+   * {@code eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / 2 ))}.
+   *
+   * @see #setFrustum(Vector, float, float, float)
+   * @see #setFrustum(Vector, float)
+   * @see #zNear()
+   * @see #zFar()
+   */
   public void setFrustum(float zNear, float zFar) {
-    if (zFar <= zNear)
+    //public void setFrustum(Vector corner1, Vector corner2) {
+      //setFrustum(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f), 0.5f * (Vector.subtract(corner2, corner1)).magnitude());
+    //}
+    if (Math.abs(zFar) <= Math.abs(zNear) || zNear == 0)
       return;
     _fixed = true;
-    _zNear = zNear;
-    _zFar = zFar;
+    _zNear = Math.abs(zNear);
+    _zFar = Math.abs(zFar);
     Vector eyeCorner1 = new Vector(-width() / 2, -height() / 2, zNear);
     Vector eyeCorner2 = new Vector(width() / 2, height() / 2, zFar);
     Vector corner1 = eye().worldLocation(eyeCorner1);
     Vector corner2 = eye().worldLocation(eyeCorner2);
     //setCenter(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f));
-    setRadius(0.5f * (Vector.subtract(corner2, corner1)).magnitude());
+    _radius = 0.5f * (Vector.subtract(corner2, corner1)).magnitude();
+    _modified();
   }
 
   /**

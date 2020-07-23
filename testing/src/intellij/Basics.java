@@ -20,8 +20,7 @@ public class Basics extends PApplet {
 
   public void setup() {
     rectMode(CENTER);
-    scene = new Scene(this);
-    scene.setRadius(1000);
+    scene = new Scene(this, 1000);
     scene.fit(1);
 
     node = new Node() {

@@ -25,8 +25,7 @@ public class Interpolators extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this);
-    scene.setRadius(150);
+    scene = new Scene(this, 150);
     scene.fit(1);
     PShape pshape;
     if (scene.is2D()) {

@@ -2709,7 +2709,9 @@ public class Node {
    * {@link #position()} an oriented according to the node {@link #orientation()}.</li>
    * <li>{@link #HUD} which displays the node Heads-Up-Display set with
    * {@link #setHUD(processing.core.PShape)} or {@link #setHUD(Consumer)}.</li>
-   * <li>{@link #FRUSTUM} which displays a graph frustum visual representation.</li>
+   * <li>{@link #FRUSTUM} which displays a graph frustum visual representation.
+   * Only meaningful if this node is some scene's eye and there's and there's
+   * a second scene point-of-view perspective to look at it.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
    * {@link #setShape(processing.core.PShape)} or {@link #setShape(Consumer)}.</li>
    * <li>{@link #BULLSEYE} which displays a bullseye centered at the node

@@ -27,8 +27,7 @@ public class ConstrainedEye extends PApplet {
     size(800, 800, P3D);
     myFont = loadFont("FreeSans-16.vlw");
     textFont(myFont);
-    scene = new Scene(this);
-    scene.setRadius(400);
+    scene = new Scene(this, 400);
     scene.fit(1);
 
     constraints[0] = new WorldConstraint();

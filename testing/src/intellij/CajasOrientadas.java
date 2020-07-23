@@ -20,8 +20,7 @@ public class CajasOrientadas extends PApplet {
 
   public void setup() {
     // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
-    scene = new Scene(this);
-    scene.setRadius(200);
+    scene = new Scene(this, 200);
     scene.togglePerspective();
     scene.fit();
     esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);

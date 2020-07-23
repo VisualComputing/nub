@@ -25,8 +25,7 @@ public class Interaction2D extends PApplet {
   public void setup() {
     font36 = loadFont("FreeSans-36.vlw");
     rectMode(CENTER);
-    scene = new Scene(this);
-    scene.setRadius(1000);
+    scene = new Scene(this, 1000);
     //scene.eye().setScaling(1);
     scene.fit(1);
 

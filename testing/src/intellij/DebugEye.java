@@ -19,7 +19,7 @@ public class DebugEye extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this);
+    scene = new Scene(this, 50);
     //scene.togglePerspective();
     Node box1 = new Node() {
       @Override
@@ -57,8 +57,6 @@ public class DebugEye extends PApplet {
       }
     };
     box2.translate(0, 0, 20);
-    scene.setRadius(50);
-    scene.fit(1);
     axis = Vector.random();
     axis.multiply(scene.radius() / 3);
   }

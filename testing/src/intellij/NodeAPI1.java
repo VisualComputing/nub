@@ -59,10 +59,9 @@ public class NodeAPI1 extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this);
+    scene = new Scene(this, 200);
     mode = Mode.m1;
 
-    scene.setRadius(200);
     scene.fit(1);
 
     f1 = new InteractiveNode(scene, f1Color);

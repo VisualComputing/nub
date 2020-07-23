@@ -28,8 +28,7 @@ public class MiniMap extends PApplet {
 
   @Override
   public void setup() {
-    scene = onScreen ? new Scene(this) : new Scene(createGraphics(w, h, renderer));
-    scene.setRadius(1000);
+    scene = onScreen ? new Scene(this, 1000) : new Scene(createGraphics(w, h, renderer), 1000);
     rectMode(CENTER);
     scene.fit(1);
     scene.eye().setBullsEyeSize(50);
@@ -50,8 +49,7 @@ public class MiniMap extends PApplet {
     }
     // Note that we pass the upper left corner coordinates where the minimap
     // is to be drawn (see drawing code below) to its constructor.
-    minimap = new Scene(createGraphics(w / 2, h / 2, renderer));
-    minimap.setRadius(2000);
+    minimap = new Scene(createGraphics(w / 2, h / 2, renderer), 2000);
     if (renderer == P3D)
       minimap.togglePerspective();
     minimap.fit(1);
