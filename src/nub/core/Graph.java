@@ -1614,20 +1614,19 @@ public class Graph {
    * @see #zFar()
    */
   public void setFrustum(float zNear, float zFar) {
-    //public void setFrustum(Vector corner1, Vector corner2) {
-      //setFrustum(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f), 0.5f * (Vector.subtract(corner2, corner1)).magnitude());
-    //}
-    if (Math.abs(zFar) <= Math.abs(zNear) || zNear == 0)
+    float near = Math.abs(zNear);
+    float far = Math.abs(zFar);
+    if (far <= near || near == 0)
       return;
+    if (is2D()) {
+      System.out.println("Warning: setFrustum(zNear, zFar) only available in 3D. Calling setFrustum((zFar - zNear) / 2) instead!");
+      setFrustum((far - near) / 2);
+      return;
+    }
     _fixed = true;
-    _zNear = Math.abs(zNear);
-    _zFar = Math.abs(zFar);
-    Vector eyeCorner1 = new Vector(-width() / 2, -height() / 2, zNear);
-    Vector eyeCorner2 = new Vector(width() / 2, height() / 2, zFar);
-    Vector corner1 = eye().worldLocation(eyeCorner1);
-    Vector corner2 = eye().worldLocation(eyeCorner2);
-    //setCenter(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f));
-    _radius = 0.5f * (Vector.subtract(corner2, corner1)).magnitude();
+    _zNear = near;
+    _zFar = far;
+    _radius = (far - near) / 2;
     _modified();
   }
 
