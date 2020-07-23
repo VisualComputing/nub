@@ -106,7 +106,7 @@ public class CustomEyeInteraction extends PApplet {
         // */
       } else {
         scene.fit(1);
-        scene.lookAtCenter();
+        scene.lookAt(scene.center());
       }
     }
     if (keyMode) {

@@ -1537,7 +1537,7 @@ public class Graph {
    * @see #zFar()
    */
   public Vector center() {
-    return _fixed ? eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / 2 )) : _center;
+    return _fixed ? eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / (eye().magnitude() * 2) )) : _center;
   }
 
   /**
@@ -1606,7 +1606,7 @@ public class Graph {
    * bounding sphere defined in the world coordinate system instead.
    * <p>
    * Note that the {@link #center()} is computed as
-   * {@code eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / 2 ))}.
+   * {@code eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / (eye().magnitude() * 2) ))}.
    *
    * @see #setFrustum(Vector, float, float, float)
    * @see #setFrustum(Vector, float)
@@ -1717,15 +1717,6 @@ public class Graph {
    */
   public Vector upVector() {
     return eye().yAxis();
-  }
-
-
-  /**
-   * @see #lookAt(Vector)
-   * @see #center()
-   */
-  public void lookAtCenter() {
-    lookAt(center());
   }
 
   /**
