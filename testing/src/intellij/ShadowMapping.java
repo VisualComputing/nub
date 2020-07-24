@@ -159,7 +159,7 @@ public class ShadowMapping extends PApplet {
       else
         light.setMagnitude(1);
     } else if (key == 'd') {
-      light.toggleHint(Node.BULLSEYE | Node.AXES /* | Node.CAMERA */ | Node.FRUSTUM);
+      light.toggleHint(Node.BULLSEYE | Node.AXES /* | Node.CAMERA */ | Node.BOUNDS);
       debug = !debug;
       if (debug)
         resetShader();
@@ -186,7 +186,7 @@ public class ShadowMapping extends PApplet {
       int shift = event.getCount() * 20;
       float zNear = shadowMapScene.zNear();
       float zFar = shadowMapScene.zFar();
-      shadowMapScene.setFrustum(zNear, zFar + shift);
+      shadowMapScene.setBounds(zNear, zFar + shift);
     } else
       scene.scale(event.getCount() * 20);
   }

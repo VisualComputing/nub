@@ -105,7 +105,7 @@ import java.util.function.Consumer;
  * easily be implemented.
  * <h2>Visual hints</h2>
  * The node space visual representation may be configured using the following hints:
- * {@link #CAMERA}, {@link #AXES}, {@link #HUD}, {@link #FRUSTUM},, {@link #SHAPE},
+ * {@link #CAMERA}, {@link #AXES}, {@link #HUD}, {@link #BOUNDS},, {@link #SHAPE},
  * {@link #BULLSEYE}, and {@link #TORUS}.
  * <p>
  * See {@link #hint()}, {@link #configHint(int, Object...)} {@link #enableHint(int)},
@@ -167,13 +167,13 @@ public class Node {
   public final static int AXES = Graph.AXES;
   public final static int HUD = Graph.HUD;
   public final static int SHAPE = Graph.SHAPE;
-  public final static int FRUSTUM = 1 << 4;
+  public final static int BOUNDS = 1 << 4;
   public final static int BULLSEYE = 1 << 5;
   public final static int TORUS = 1 << 6;
   public final static int CONSTRAINT = 1 << 7;
   public final static int BONE = 1 << 8;
   protected float _highlight;
-  // Frustum
+  // Bounds
   protected HashSet<Graph> _frustumGraphs;
   // torus
   protected int _torusColor;
@@ -312,7 +312,7 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    enablePickingMode(CAMERA | AXES | HUD | SHAPE | FRUSTUM | BULLSEYE | TORUS | CONSTRAINT | BONE);
+    enablePickingMode(CAMERA | AXES | HUD | SHAPE | BOUNDS | BULLSEYE | TORUS | CONSTRAINT | BONE);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -2709,9 +2709,9 @@ public class Node {
    * {@link #position()} an oriented according to the node {@link #orientation()}.</li>
    * <li>{@link #HUD} which displays the node Heads-Up-Display set with
    * {@link #setHUD(processing.core.PShape)} or {@link #setHUD(Consumer)}.</li>
-   * <li>{@link #FRUSTUM} which displays a graph frustum visual representation.
-   * Only meaningful if this node is some scene's eye and there's and there's
-   * a second scene point-of-view perspective to look at it.</li>
+   * <li>{@link #BOUNDS} which displays the bounding volume of each graph for which
+   * this node is the eye. Only meaningful if there's a second scene perspective
+   * to look at this eye node from.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
    * {@link #setShape(processing.core.PShape)} or {@link #setShape(Consumer)}.</li>
    * <li>{@link #BULLSEYE} which displays a bullseye centered at the node
@@ -2864,15 +2864,14 @@ public class Node {
    * <li>{@link #TORUS} hint: configHint(Node.TORUS, torusStroke)}, or
    * configHint(Node.TORUS, torusStroke, torusFaces)}.</li>
    * </ol>
-   * Note that the {@code cameraStroke}, {@code splineStroke}, {@code bullseyeStroke},
-   * {@code torusStroke} and {@code frustumColor}, are color {@code int} vars;
-   * {@code cameraLength} and {@code exesLength}
-   * are world magnitude numerical values; {@code highlight} is a numerical value in
-   * {@code [0..1]} which represents the scale factor to be applied to the node when
-   * it gets tagged (see {@link Graph#tag(String, Node)}); {@code bullseyeShape}
-   * is either of type {@link BullsEyeShape#SQUARE} or {@link BullsEyeShape#CIRCLE};
-   * {@code graph} is of type {@link Graph}; and, {@code graph} may be of type
-   * {@link processing.core.PGraphics}.
+   * Note that the {@code cameraStroke}, {@code splineStroke}, {@code bullseyeStroke}
+   * and {@code torusStroke} are color {@code int} vars; {@code cameraLength} and
+   * {@code exesLength} are world magnitude numerical values; {@code highlight} is a
+   * numerical value in {@code [0..1]} which represents the scale factor to be
+   * applied to the node when it gets tagged (see {@link Graph#tag(String, Node)});
+   * {@code bullseyeShape} is either of type {@link BullsEyeShape#SQUARE} or
+   * {@link BullsEyeShape#CIRCLE}; {@code graph} is of type {@link Graph}; and,
+   * {@code graph} may be of type {@link processing.core.PGraphics}.
    *
    * @see #hint()
    * @see #enableHint(int)

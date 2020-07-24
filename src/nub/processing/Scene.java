@@ -1062,7 +1062,7 @@ public class Scene extends Graph {
       drawTorusSolenoid(pg, _torusFaces(node), 5);
       pg.popStyle();
     }
-    if (node.isHintEnable(Node.FRUSTUM)) {
+    if (node.isHintEnable(Node.BOUNDS)) {
       for (Graph graph : _frustumGraphs(node)) {
         if (graph != this) {
           pg.pushStyle();
@@ -1115,7 +1115,7 @@ public class Scene extends Graph {
     if (node.isHintEnable(Node.TORUS) && node.isPickingModeEnable(Node.TORUS)) {
       drawTorusSolenoid(pg, _torusFaces(node), 5);
     }
-    if (node.isHintEnable(Node.FRUSTUM) && node.isPickingModeEnable(Node.FRUSTUM)) {
+    if (node.isHintEnable(Node.BOUNDS) && node.isPickingModeEnable(Node.BOUNDS)) {
       for (Graph graph : _frustumGraphs(node)) {
         if (graph != this) {
           drawFrustum(pg, graph);

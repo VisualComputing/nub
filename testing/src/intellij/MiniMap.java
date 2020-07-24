@@ -55,7 +55,7 @@ public class MiniMap extends PApplet {
     minimap.fit(1);
     minimap.enableHint(Scene.BACKGROUND, color(125, 80, 90));
     //minimap.enableFrustum(scene, color(255, 0, 0, 125));
-    scene.eye().enableHint(Node.FRUSTUM);
+    scene.eye().enableHint(Node.BOUNDS);
   }
 
   PShape shape() {

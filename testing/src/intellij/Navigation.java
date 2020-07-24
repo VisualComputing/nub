@@ -6,7 +6,6 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
-import processing.opengl.PShader;
 
 public class Navigation extends PApplet {
   // 1. Nodes
@@ -35,7 +34,7 @@ public class Navigation extends PApplet {
     mainScene.configHint(Scene.GRID, color(0, 255, 0));
     mainScene.enableHint(Scene.HUD);
     mainScene.enableHint(Scene.BACKGROUND, color(125));
-    mainScene.eye().enableHint(Node.FRUSTUM);
+    mainScene.eye().enableHint(Node.BOUNDS);
     mainScene.setHUD(this::hud);
     // 2. Can (offscreen) Scene
     auxScene = new Scene(createGraphics(auxSceneWidth, auxSceneHeight, P3D), 300);

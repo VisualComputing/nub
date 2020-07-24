@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  * A 2D or 3D scene-graph providing eye, input and timing handling to a raster or ray-tracing
  * renderer.
  * <h1>1. Types and dimensions</h1>
- * To set the viewing volume use {@link #setFrustum(Vector, float)} or {@link #setFrustum(float, float)}.
+ * To set the viewing volume use {@link #setBounds(Vector, float)} or {@link #setBounds(float, float)}.
  * <p>
  * The way the projection matrix is computed (see
  * {@link #projection()}), defines the type of the
@@ -177,7 +177,7 @@ public class Graph {
 
   //Interpolator
   protected Interpolator _interpolator;
-  //boundary eqns
+  //bounds eqns
   protected float[][] _coefficients;
   protected Vector[] _normal;
   protected float[] _distance;
@@ -275,8 +275,7 @@ public class Graph {
   // 7. Visibility
 
   /**
-   * Enumerates the different visibility states an object may have respect to the eye
-   * boundary.
+   * Enumerates the different visibility states an object may have respect to the bounding volume.
    */
   public enum Visibility {
     VISIBLE, SEMIVISIBLE, INVISIBLE
@@ -337,7 +336,7 @@ public class Graph {
   /**
    * Defines a right-handed graph with the specified {@code width} and {@code height}
    * screen window dimensions. Creates and {@link #eye()} node, sets its {@link #fov()} to
-   * {@code PI/3}. Calls {@link #setFrustum(float, float)} on {@code zNear} and
+   * {@code PI/3}. Calls {@link #setBounds(float, float)} on {@code zNear} and
    * {@code zFar} to set up the scene frustum and {@link #fit()} to display the
    * whole scene.
    * <p>
@@ -345,7 +344,7 @@ public class Graph {
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
    * {@link #TimingHandler}.
    *
-   * @see #setFrustum(float, float)
+   * @see #setBounds(float, float)
    * @see #Graph(Object, int, int, Type, Vector, float)
    * @see #TimingHandler
    * @see MatrixHandler
@@ -354,7 +353,7 @@ public class Graph {
     _init(context, width, height, new Node(), type);
     if (is3D())
       setFOV((float) Math.PI / 3);
-    setFrustum(zNear, zFar);
+    setBounds(zNear, zFar);
     fit();
   }
 
@@ -370,7 +369,7 @@ public class Graph {
   /**
    * Defines a right-handed graph with the specified {@code width} and {@code height}
    * screen window dimensions. Creates and {@link #eye()} node, sets its {@link #fov()} to
-   * {@code PI/3}. Calls {@link #setFrustum(Vector, float)} on {@code center} and
+   * {@code PI/3}. Calls {@link #setBounds(Vector, float)} on {@code center} and
    * {@code radius} to set up the scene frustum and {@link #fit()} to display the
    * whole scene.
    * <p>
@@ -378,7 +377,7 @@ public class Graph {
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
    * {@link #TimingHandler}.
    *
-   * @see #setFrustum(float, float)
+   * @see #setBounds(float, float)
    * @see #Graph(Object, int, int, Type, float, float)
    * @see #TimingHandler
    * @see MatrixHandler
@@ -387,7 +386,7 @@ public class Graph {
     _init(context, width, height, new Node(), type);
     if (is3D())
       setFOV((float) Math.PI / 3);
-    setFrustum(center, radius);
+    setBounds(center, radius);
     fit();
   }
 
@@ -402,21 +401,21 @@ public class Graph {
 
   /**
    * Defines a right-handed graph with the specified {@code width} and {@code height}
-   * screen window dimensions. Calls {@link #setFrustum(Vector, float)}
+   * screen window dimensions. Calls {@link #setBounds(Vector, float)}
    * on {@code center} and {@code radius} to set up the scene frustum.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
    * {@link #TimingHandler}.
    *
-   * @see #setFrustum(Vector, float)
+   * @see #setBounds(Vector, float)
    * @see #Graph(Object, int, int, Node, Type, float, float)
    * @see #TimingHandler
    * @see MatrixHandler
    */
   protected Graph(Object context, int width, int height, Node eye, Type type, Vector center, float radius) {
     _init(context, width, height, eye, type);
-    setFrustum(center, radius);
+    setBounds(center, radius);
   }
 
   /**
@@ -430,21 +429,21 @@ public class Graph {
 
   /**
    * Defines a right-handed graph with the specified {@code width} and {@code height}
-   * screen window dimensions. Calls {@link #setFrustum(float, float)}
+   * screen window dimensions. Calls {@link #setBounds(float, float)}
    * on {@code zNear} and {@code zFar} to set up the scene frustum.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
    * {@link #TimingHandler}.
    *
-   * @see #setFrustum(Vector, float)
+   * @see #setBounds(Vector, float)
    * @see #Graph(Object, int, int, Node, Type, Vector, float)
    * @see #TimingHandler
    * @see MatrixHandler
    */
   protected Graph(Object context, int width, int height, Node eye, Type type, float zNear, float zFar) {
     _init(context, width, height, eye, type);
-    setFrustum(zNear, zFar);
+    setBounds(zNear, zFar);
   }
 
   /**
@@ -1055,21 +1054,21 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if {@code point} is visible (i.e, lies within the eye boundary)
+   * Returns {@code true} if {@code point} is visible (i.e, lies within the eye bounds)
    * and {@code false} otherwise.
    *
-   * @see #distanceToBoundary(int, Vector)
+   * @see #distanceToBound(int, Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #boundaryEquations()
+   * @see #bounds()
    */
   public boolean isPointVisible(Vector point) {
     if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
-      _updateBoundaryEquations();
+      _updateBounds();
       _lastEqUpdate = TimingHandler.frameCount;
     }
     for (int i = 0; i < (is3D() ? 6 : 4); ++i)
-      if (distanceToBoundary(i, point) > 0)
+      if (distanceToBound(i, point) > 0)
         return false;
     return true;
   }
@@ -1079,20 +1078,20 @@ public class Graph {
    * {@link Visibility#SEMIVISIBLE}, depending whether the ball (of radius {@code radius}
    * and center {@code center}) is visible, invisible, or semi-visible, respectively.
    *
-   * @see #distanceToBoundary(int, Vector)
+   * @see #distanceToBound(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #boxVisibility(Vector, Vector)
-   * @see #boundaryEquations()
-   * @see #_updateBoundaryEquations()
+   * @see #bounds()
+   * @see #_updateBounds()
    */
   public Visibility ballVisibility(Vector center, float radius) {
     if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
-      _updateBoundaryEquations();
+      _updateBounds();
       _lastEqUpdate = TimingHandler.frameCount;
     }
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
-      float d = distanceToBoundary(i, center);
+      float d = distanceToBound(i, center);
       if (d > radius)
         return Visibility.INVISIBLE;
       if ((d > 0) || (-d < radius))
@@ -1109,15 +1108,15 @@ public class Graph {
    * (defined by corners {@code p1} and {@code p2}) is visible, invisible,
    * or semi-visible, respectively.
    *
-   * @see #distanceToBoundary(int, Vector)
+   * @see #distanceToBound(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
-   * @see #boundaryEquations()
-   * @see #_updateBoundaryEquations()
+   * @see #bounds()
+   * @see #_updateBounds()
    */
   public Visibility boxVisibility(Vector corner1, Vector corner2) {
     if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
-      _updateBoundaryEquations();
+      _updateBounds();
       _lastEqUpdate = TimingHandler.frameCount;
     }
     boolean allInForAllPlanes = true;
@@ -1126,7 +1125,7 @@ public class Graph {
       for (int c = 0; c < 8; ++c) {
         Vector pos = new Vector(((c & 4) != 0) ? corner1._vector[0] : corner2._vector[0], ((c & 2) != 0) ? corner1._vector[1] : corner2._vector[1],
             ((c & 1) != 0) ? corner1._vector[2] : corner2._vector[2]);
-        if (distanceToBoundary(i, pos) > 0.0)
+        if (distanceToBound(i, pos) > 0.0)
           allInForAllPlanes = false;
         else
           allOut = false;
@@ -1142,10 +1141,10 @@ public class Graph {
   }
 
   /**
-   * Updates the 4 or 6 plane equations of the eye boundary.
+   * Updates the 4 or 6 plane equations of the eye bounds.
    * <p>
    * In 2D the four 4-component vectors, respectively correspond to the
-   * left, right, top and bottom eye boundary lines. Each vector holds a plane equation
+   * left, right, top and bottom eye bounds lines. Each vector holds a plane equation
    * of the form:
    * <p>
    * {@code a*x + b*y + c = 0} where {@code a}, {@code b} and {@code c} are the 3
@@ -1160,7 +1159,7 @@ public class Graph {
    * where {@code a}, {@code b}, {@code c} and {@code d} are the 4 components of each
    * vector, in that order.
    */
-  protected void _updateBoundaryEquations() {
+  protected void _updateBounds() {
     _initCoefficients();
     if (is3D())
       _updateBoundaryEquations3();
@@ -1283,17 +1282,17 @@ public class Graph {
   }
 
   /**
-   * Returns the boundary plane equations.
+   * Returns the bounds plane equations.
    * <p>
    * In 2D the four 4-component vectors, respectively correspond to the
-   * left, right, top and bottom eye boundary lines. Each vector holds a plane equation
+   * left, right, top and bottom eye bounds lines. Each vector holds a plane equation
    * of the form:
    * <p>
    * {@code a*x + b*y + c = 0} where {@code a}, {@code b} and {@code c} are the 3
    * components of each vector, in that order.
    * <p>
    * In 3D the six 4-component vectors returned by this method, respectively correspond to the
-   * left, right, near, far, top and bottom eye boundary planes. Each vector holds a plane
+   * left, right, near, far, top and bottom eye bounding planes. Each vector holds a plane
    * equation of the form:
    * <p>
    * {@code a*x + b*y + c*z + d = 0}
@@ -1301,16 +1300,16 @@ public class Graph {
    * where {@code a}, {@code b}, {@code c} and {@code d} are the 4 components of each
    * vector, in that order.
    *
-   * @see #distanceToBoundary(int, Vector)
+   * @see #distanceToBound(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #_updateBoundaryEquations()
+   * @see #_updateBounds()
    */
   // TODO make naming convention match setFrustum
-  public float[][] boundaryEquations() {
+  public float[][] bounds() {
     if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
-      _updateBoundaryEquations();
+      _updateBounds();
       _lastEqUpdate = TimingHandler.frameCount;
     }
     return _coefficients;
@@ -1318,23 +1317,23 @@ public class Graph {
 
   /**
    * Returns the signed distance between point {@code position} and plane {@code index}
-   * in world units. The distance is negative if the point lies in the planes's boundary
+   * in world units. The distance is negative if the point lies in the planes's bounding
    * halfspace, and positive otherwise.
    * <p>
    * In 2D {@code index} is a value between {@code 0} and {@code 3} which respectively
-   * correspond to the left, right, top and bottom eye boundary planes.
+   * correspond to the left, right, top and bottom eye bounding planes.
    * <p>
    * In 3D {@code index} is a value between {@code 0} and {@code 5} which respectively
-   * correspond to the left, right, near, far, top and bottom eye boundary planes.
+   * correspond to the left, right, near, far, top and bottom eye bounding planes.
    *
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #boundaryEquations()
+   * @see #bounds()
    */
-  public float distanceToBoundary(int index, Vector position) {
+  public float distanceToBound(int index, Vector position) {
     if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
-      _updateBoundaryEquations();
+      _updateBounds();
       _lastEqUpdate = TimingHandler.frameCount;
     }
     Vector myVector = new Vector(_coefficients[index][0], _coefficients[index][1], _coefficients[index][2]);
@@ -1535,10 +1534,10 @@ public class Graph {
 
   /**
    * Returns the radius of the graph observed by the eye in world units. Set it with
-   * {@link #setFrustum(Vector, float)} or {@link #setFrustum(float, float)}.
+   * {@link #setBounds(Vector, float)} or {@link #setBounds(float, float)}.
    *
-   * @see #setFrustum(Vector, float)
-   * @see #setFrustum(float, float)
+   * @see #setBounds(Vector, float)
+   * @see #setBounds(float, float)
    * @see #center()
    */
   public float radius() {
@@ -1547,10 +1546,10 @@ public class Graph {
 
   /**
    * Returns the position of the graph center, defined in the world coordinate system.
-   * Set it with {@link #setFrustum(Vector, float)} or {@link #setFrustum(float, float)}.
+   * Set it with {@link #setBounds(Vector, float)} or {@link #setBounds(float, float)}.
    *
-   * @see #setFrustum(Vector, float)
-   * @see #setFrustum(float, float)
+   * @see #setBounds(Vector, float)
+   * @see #setBounds(float, float)
    * @see #zNear()
    * @see #zFar()
    */
@@ -1561,30 +1560,30 @@ public class Graph {
   /**
    * Same as {@code setFrustum(new Vector(), radius)}.
    *
-   * @see #setFrustum(float, float)
-   * @see #setFrustum(Vector, float, float, float)
-   * @see #setFrustum(float, float)
+   * @see #setBounds(float, float)
+   * @see #setBounds(Vector, float, float, float)
+   * @see #setBounds(float, float)
    */
-  public void setFrustum(float radius) {
-    setFrustum(new Vector(), radius);
+  public void setBounds(float radius) {
+    setBounds(new Vector(), radius);
   }
 
   /**
    * Same as {@code setCenter(center); setRadius(radius)}.
    *
-   * @see #setFrustum(float, float)
-   * @see #setFrustum(Vector, float, float, float)
-   * @see #setFrustum(float)
+   * @see #setBounds(float, float)
+   * @see #setBounds(Vector, float, float, float)
+   * @see #setBounds(float)
    */
-  public void setFrustum(Vector center, float radius) {
-    setFrustum(center, radius, 0.005f, (float) Math.sqrt(3.0f));
+  public void setBounds(Vector center, float radius) {
+    setBounds(center, radius, 0.005f, (float) Math.sqrt(3.0f));
   }
 
   /**
    * Sets the scene bounding sphere, defined by {@code center} and {@code radius}) in the
    * world coordinate system. The {@link #zNear()} and {@link #zFar()} computation is performed
    * so that it adapts to best fit this bounding sphere. To set fixed {@link #zNear()} and
-   * {@link #zFar()} values use {@link #setFrustum(float, float)} instead.
+   * {@link #zFar()} values use {@link #setBounds(float, float)} instead.
    * <p>
    * The {@code zNearCoefficient} (only meaningful for perspective projections) is used to set
    * the {@link #zNear()} when the {@link #eye()} is
@@ -1603,13 +1602,13 @@ public class Graph {
    * <p>
    * See the {@link #zNear()} and {@link #zFar()} documentations.
    *
-   * @see #setFrustum(float)
-   * @see #setFrustum(Vector, float)
-   * @see #setFrustum(float, float)
+   * @see #setBounds(float)
+   * @see #setBounds(Vector, float)
+   * @see #setBounds(float, float)
    * @see #zNear()
    * @see #zFar()
    */
-  public void setFrustum(Vector center, float radius, float zNearCoefficient, float zClippingCoefficient) {
+  public void setBounds(Vector center, float radius, float zNearCoefficient, float zClippingCoefficient) {
     _fixed = false;
     _center = center;
     _radius = Math.abs(radius);
@@ -1620,25 +1619,25 @@ public class Graph {
 
   /**
    * Sets fixed {@link #zNear()} and {@link #zFar()} values. Use
-   * {@link #setFrustum(Vector, float, float, float)} to make them fit a
+   * {@link #setBounds(Vector, float, float, float)} to make them fit a
    * bounding sphere defined in the world coordinate system instead.
    * <p>
    * Note that the {@link #center()} is computed as
    * {@code eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / (eye().magnitude() * 2) ))}.
    *
-   * @see #setFrustum(Vector, float, float, float)
-   * @see #setFrustum(Vector, float)
+   * @see #setBounds(Vector, float, float, float)
+   * @see #setBounds(Vector, float)
    * @see #zNear()
    * @see #zFar()
    */
-  public void setFrustum(float zNear, float zFar) {
+  public void setBounds(float zNear, float zFar) {
     float near = Math.abs(zNear);
     float far = Math.abs(zFar);
     if (far <= near || near == 0)
       return;
     if (is2D()) {
       System.out.println("Warning: setFrustum(zNear, zFar) only available in 3D. Calling setFrustum((zFar - zNear) / 2) instead!");
-      setFrustum((far - near) / 2);
+      setBounds((far - near) / 2);
       return;
     }
     _fixed = true;
@@ -2095,8 +2094,8 @@ public class Graph {
    * upper left corner) fits the screen.
    * <p>
    * The eye is translated (its {@link Node#orientation()} is unchanged) so that
-   * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
-   * <i>boundary</i> in 3D, it's the intersection of this boundary with a plane
+   * {@code rectangle} is entirely visible. Since the pixel coordinates only define
+   * <i>bounds</i> in 3D, it's the intersection of this bounds with a plane
    * (orthogonal to the {@link #viewDirection()} and passing through the
    * {@link #center()}) that is used to define the 3D rectangle that is eventually
    * fitted.
@@ -2493,7 +2492,7 @@ public class Graph {
             (node.isPickingModeEnable(Node.CAMERA) && node.isHintEnable(Node.CAMERA)) ||
                     (node.isPickingModeEnable(Node.AXES) && node.isHintEnable(Node.AXES)) ||
                     (node.isPickingModeEnable(Node.HUD) && node.isHintEnable(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
-                    (node._frustumGraphs != null && node.isPickingModeEnable(Node.FRUSTUM) && node.isHintEnable(Node.FRUSTUM)) ||
+                    (node._frustumGraphs != null && node.isPickingModeEnable(Node.BOUNDS) && node.isHintEnable(Node.BOUNDS)) ||
                     (node.isPickingModeEnable(Node.SHAPE) && node.isHintEnable(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
                     (node.isPickingModeEnable(Node.TORUS) && node.isHintEnable(Node.TORUS)) ||
                     (node.isPickingModeEnable(Node.CONSTRAINT) && node.isHintEnable(Node.CONSTRAINT)) ||

@@ -43,7 +43,7 @@ public class ShadowMap extends PApplet {
       shapes[i].setHighlight(0);
     }
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
-    scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.FRUSTUM);
+    scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
     scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
     // scene.enablePicking(false);
     shadowMapScene = new Scene(shadowMap, scene.node("light"), zNear, zFar);
@@ -79,13 +79,13 @@ public class ShadowMap extends PApplet {
   public void mouseMoved(MouseEvent event) {
     if (event.isShiftDown()) {
       if (scene.isTagValid("light")) {
-        scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.FRUSTUM);
+        scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
       }
       // no calling mouseTag since we need to immediately update the tagged node
       scene.updateMouseTag("light");
       if (scene.isTagValid("light")) {
         shadowMapScene.setEye(scene.node("light"));
-        scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.FRUSTUM);
+        scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
       }
     } else
       scene.mouseTag();
@@ -103,7 +103,7 @@ public class ShadowMap extends PApplet {
   public void mouseWheel(MouseEvent event) {
     if (event.isShiftDown() && scene.isTagValid("light")) {
       depthShader.set("far", zFar += event.getCount() * 20);
-      shadowMapScene.setFrustum(zNear, zFar);
+      shadowMapScene.setBounds(zNear, zFar);
     }
     else
       scene.scale(event.getCount() * 20);
