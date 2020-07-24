@@ -239,6 +239,46 @@ public class Scene extends Graph {
     _init(pGraphics);
   }
 
+  /**
+   * Same as {@code this(pApplet.g, zNear, zFar)}.
+   *
+   * @see #Scene(PGraphics, float, float)
+   */
+  public Scene(PApplet pApplet, float zNear, float zFar) {
+    this(pApplet.g, zNear, zFar);
+  }
+
+  /**
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics2D ? Type.TWO_D : Type.PERSPECTIVE, zNear, zFar)},
+   * and then sets {@link #leftHanded} to {@code true}.
+   *
+   * @see Graph#Graph(Object, int, int, Type, float, float)
+   */
+  public Scene(PGraphics pGraphics, float zNear, float zFar) {
+    super(pGraphics, pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics2D ? Type.TWO_D : Type.PERSPECTIVE, zNear, zFar);
+    _init(pGraphics);
+  }
+
+  /**
+   * Same as {@code this(pApplet.g, eye, zNear, zFar)}.
+   *
+   * @see #Scene(PGraphics, Node, float, float)
+   */
+  public Scene(PApplet pApplet, Node eye, float zNear, float zFar) {
+    this(pApplet.g, eye, zNear, zFar);
+  }
+
+  /**
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, eye, type, zNear, zFar)},
+   * and then sets {@link #leftHanded} to {@code true}.
+   *
+   * @see Graph#Graph(Object, int, int, Node, Type, float, float)
+   */
+  public Scene(PGraphics pGraphics, Node eye, float zNear, float zFar) {
+    super(pGraphics, pGraphics.width, pGraphics.height, eye, pGraphics instanceof PGraphics2D ? Type.TWO_D : Type.PERSPECTIVE, zNear, zFar);
+    _init(pGraphics);
+  }
+
   protected void _init(PGraphics pGraphics) {
     // 1. P5 objects
     if (pApplet == null) pApplet = pGraphics.parent;
@@ -329,6 +369,8 @@ public class Scene extends Graph {
    * {@code false} if none was found (in this case no {@link #center()} is set).
    */
   public boolean setCenter(int pixelX, int pixelY) {
+    if (_fixed)
+      return false;
     Vector pup = location(pixelX, pixelY);
     if (pup != null) {
       _center = pup;
@@ -430,6 +472,8 @@ public class Scene extends Graph {
    * {@code false} if none was found (in this case no {@link #center()} is set).
    */
   public boolean setCenterFromPixel(int pixelX, int pixelY) {
+    if (_fixed)
+      return false;
     Vector pup = location(pixelX, pixelY);
     if (pup != null) {
       _center = pup;
