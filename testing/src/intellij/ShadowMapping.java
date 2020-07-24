@@ -70,17 +70,14 @@ public class ShadowMapping extends PApplet {
     shadowMapScene.togglePerspective();
     shadowMapScene.enableHint(Scene.BACKGROUND, 0xffffffff);
     shadowMapScene.picking = false;
-    animation = new TimingTask() {
-      @Override
-      public void execute() {
-        if (!scene.isTagged(light)) {
-          float lightAngle = frameCount * 0.002f;
-          light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
-        }
-        light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
-        light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
+    animation = new TimingTask(() -> {
+      if (!scene.isTagged(light)) {
+        float lightAngle = frameCount * 0.002f;
+        light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
       }
-    };
+      light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
+      light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
+    });
     animation.run(60);
     frameRate(1000);
   }
