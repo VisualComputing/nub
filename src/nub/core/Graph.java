@@ -168,7 +168,7 @@ public class Graph {
   protected float _radius;
   // custum bounds
   protected float _zNear, _zFar;
-  protected long _customBounds = 0;
+  protected long _customBounds;
   // Inertial stuff
   public static float inertia = 0.8f;
   protected InertialTask _translationTask;
@@ -262,7 +262,7 @@ public class Graph {
 
   // 4. Graph
   protected static List<Node> _seeds = new ArrayList<Node>();
-  protected long _lastNonEyeUpdate = 0;
+  protected long _lastNonEyeUpdate;
 
   // 5. Interaction methods
   Vector _upVector;
