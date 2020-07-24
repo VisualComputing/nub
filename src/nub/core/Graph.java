@@ -359,6 +359,15 @@ public class Graph {
   }
 
   /**
+   * Same as {@code this(context, width, height, type, new Vector(), radius)}.
+   *
+   * @see #Graph(Object, int, int, Type, Vector, float)
+   */
+  protected Graph(Object context, int width, int height, Type type, float radius) {
+    this(context, width, height, type, new Vector(), radius);
+  }
+
+  /**
    * Defines a right-handed graph with the specified {@code width} and {@code height}
    * screen window dimensions. Creates and {@link #eye()} node, sets its {@link #fov()} to
    * {@code PI/3}. Calls {@link #setFrustum(Vector, float)} on {@code center} and
@@ -380,6 +389,15 @@ public class Graph {
       setFOV((float) Math.PI / 3);
     setFrustum(center, radius);
     fit();
+  }
+
+  /**
+   * Same as {@code this(context, width, height, eye, type, new Vector(), radius)}.
+   *
+   * @see #Graph(Object, int, int, Node, Type, Vector, float)
+   */
+  protected Graph(Object context, int width, int height, Node eye, Type type, float radius) {
+    this(context, width, height, eye, type, new Vector(), radius);
   }
 
   /**
