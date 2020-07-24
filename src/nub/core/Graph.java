@@ -135,7 +135,6 @@ public class Graph {
   public final static int HUD = 1 << 2;
   public final static int SHAPE = 1 << 3;
   public final static int BACKGROUND = 1 << 4;
-  public final static int CENTER = 1 << 5;
   protected Consumer<processing.core.PGraphics> _imrHUD;
   protected processing.core.PShape _rmrHUD;
   protected Consumer<processing.core.PGraphics> _imrShape;
@@ -4597,12 +4596,6 @@ public class Graph {
           }
           if (params[0] instanceof processing.core.PImage) {
             _background = params[0];
-            return;
-          }
-        }
-        if (hint == CENTER) {
-          if (isNumInstance(params[0])) {
-            _centerStroke = castToInt(params[0]);
             return;
           }
         }

@@ -1007,21 +1007,6 @@ public class Scene extends Graph {
       }
       context().popStyle();
     }
-    if (isHintEnable(CENTER)) {
-      context().pushStyle();
-      context().colorMode(PApplet.RGB, 255);
-      //context().stroke(_centerStroke);
-      //context().noStroke();
-      context().stroke(_centerStroke);
-      context().strokeWeight(20);
-      context().strokeCap(PApplet.ROUND);
-      Vector center = center();
-      if (is2D())
-        context().point(center.x(), center.y());
-      else
-        context().point(center.x(), center.y(), center.z());
-      context().popStyle();
-    }
     for (Interpolator interpolator : _interpolators) {
       context().pushStyle();
       _drawSpline(interpolator);
