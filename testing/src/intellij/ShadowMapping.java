@@ -21,6 +21,8 @@ public class ShadowMapping extends PApplet {
   PShader depthShader;
   PShader shadowShader;
   PGraphics shadowMap;
+  float zNear = 10;
+  float zFar = 600;
   float fov = THIRD_PI;
   Matrix biasMatrix = new Matrix(
           0.5f, 0, 0, 0,
@@ -66,7 +68,7 @@ public class ShadowMapping extends PApplet {
     shadowMap.shader(depthShader);
     // Testing the appearance of artifacts first
     //shadowMap.noSmooth();
-    shadowMapScene = new Scene(shadowMap, light, 10, 600);
+    shadowMapScene = new Scene(shadowMap, light);
     shadowMapScene.togglePerspective();
     shadowMapScene.enableHint(Scene.BACKGROUND, 0xffffffff);
     shadowMapScene.picking = false;
@@ -135,7 +137,7 @@ public class ShadowMapping extends PApplet {
 
   public void draw() {
     // 1. Render the shadowmap
-    shadowMapScene.render();
+    shadowMapScene.render(zNear, zFar);
     // 2. Display the scene
     if (!debug) {
       Matrix lightMatrix = Matrix.multiply(biasMatrix, shadowMapScene.projectionView());
@@ -183,10 +185,7 @@ public class ShadowMapping extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     if (event.isShiftDown()) {
-      int shift = event.getCount() * 20;
-      float zNear = shadowMapScene.zNear();
-      float zFar = shadowMapScene.zFar();
-      shadowMapScene.setFrustum(zNear, zFar + shift);
+      zFar += event.getCount() * 20;
     } else
       scene.scale(event.getCount() * 20);
   }

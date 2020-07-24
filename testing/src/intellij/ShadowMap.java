@@ -46,7 +46,7 @@ public class ShadowMap extends PApplet {
     scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.FRUSTUM);
     scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
     // scene.enablePicking(false);
-    shadowMapScene = new Scene(shadowMap, scene.node("light"), zNear, zFar);
+    shadowMapScene = new Scene(shadowMap, scene.node("light"));
     shadowMapScene.togglePerspective();
     shadowMapScene.enableHint(Scene.AXES | Scene.CENTER);
     shadowMapScene.enableHint(Scene.BACKGROUND, color(140, 160, 125));
@@ -72,7 +72,8 @@ public class ShadowMap extends PApplet {
     scene.render();
     // 2. Fill in shadow map using the light point of view
     if (scene.isTagValid("light")) {
-      shadowMapScene.display(w / 2, h / 2);
+      shadowMapScene.render(zNear, zFar);
+      shadowMapScene.image(w / 2, h / 2);
     }
   }
 
@@ -103,7 +104,6 @@ public class ShadowMap extends PApplet {
   public void mouseWheel(MouseEvent event) {
     if (event.isShiftDown() && scene.isTagValid("light")) {
       depthShader.set("far", zFar += event.getCount() * 20);
-      shadowMapScene.setFrustum(zNear, zFar);
     }
     else
       scene.scale(event.getCount() * 20);

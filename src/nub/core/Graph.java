@@ -26,10 +26,10 @@ import java.util.function.Consumer;
  * A 2D or 3D scene-graph providing eye, input and timing handling to a raster or ray-tracing
  * renderer.
  * <h1>1. Types and dimensions</h1>
- * To set the viewing volume use {@link #setFrustum(Vector, float)} or {@link #setFrustum(float, float)}.
+ * To set the viewing volume use {@link #setFrustum(Vector, float)} or {@link #setFrustum(Vector, Vector)}.
+ * which defines a bounding viewing ball with {@link #center()} and {@link #radius()} parameters.
  * <p>
- * The way the projection matrix is computed (see
- * {@link #projection()}), defines the type of the
+ * The way the projection matrix is computed (see {@link #projection()}), defines the type of the
  * graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC} for 3d graphs and {@link Type#TWO_D}
  * for a 2d graph.
  * <h1>2. Scene-graph handling</h1>
@@ -166,8 +166,9 @@ public class Graph {
   protected long _lastEqUpdate;
   protected Vector _center;
   protected float _radius;
-  protected boolean _fixed;
+  // custum bounds
   protected float _zNear, _zFar;
+  protected long _customBounds = 0;
   // Inertial stuff
   public static float inertia = 0.8f;
   protected InertialTask _translationTask;
@@ -335,30 +336,6 @@ public class Graph {
   }
 
   /**
-   * Defines a right-handed graph with the specified {@code width} and {@code height}
-   * screen window dimensions. Creates and {@link #eye()} node, sets its {@link #fov()} to
-   * {@code PI/3}. Calls {@link #setFrustum(float, float)} on {@code zNear} and
-   * {@code zFar} to set up the scene frustum and {@link #fit()} to display the
-   * whole scene.
-   * <p>
-   * The constructor also instantiates the graph main {@link #context()} and
-   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
-   * {@link #TimingHandler}.
-   *
-   * @see #setFrustum(float, float)
-   * @see #Graph(Object, int, int, Type, Vector, float)
-   * @see #TimingHandler
-   * @see MatrixHandler
-   */
-  protected Graph(Object context, int width, int height, Type type, float zNear, float zFar) {
-    _init(context, width, height, new Node(), type);
-    if (is3D())
-      setFOV((float) Math.PI / 3);
-    setFrustum(zNear, zFar);
-    fit();
-  }
-
-  /**
    * Same as {@code this(context, width, height, type, new Vector(), radius)}.
    *
    * @see #Graph(Object, int, int, Type, Vector, float)
@@ -378,8 +355,6 @@ public class Graph {
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
    * {@link #TimingHandler}.
    *
-   * @see #setFrustum(float, float)
-   * @see #Graph(Object, int, int, Type, float, float)
    * @see #TimingHandler
    * @see MatrixHandler
    */
@@ -410,41 +385,12 @@ public class Graph {
    * {@link #TimingHandler}.
    *
    * @see #setFrustum(Vector, float)
-   * @see #Graph(Object, int, int, Node, Type, float, float)
    * @see #TimingHandler
    * @see MatrixHandler
    */
   protected Graph(Object context, int width, int height, Node eye, Type type, Vector center, float radius) {
     _init(context, width, height, eye, type);
     setFrustum(center, radius);
-  }
-
-  /**
-   * Same as {@code this(context, width, height, eye, Type.PERSPECTIVE, zNear, zFar)}.
-   *
-   * @see #Graph(Object, int, int, Node, Type, float, float)
-   */
-  public Graph(Object context, int width, int height, Node eye, float zNear, float zFar) {
-    this(context, width, height, eye, Type.PERSPECTIVE, zNear, zFar);
-  }
-
-  /**
-   * Defines a right-handed graph with the specified {@code width} and {@code height}
-   * screen window dimensions. Calls {@link #setFrustum(float, float)}
-   * on {@code zNear} and {@code zFar} to set up the scene frustum.
-   * <p>
-   * The constructor also instantiates the graph main {@link #context()} and
-   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
-   * {@link #TimingHandler}.
-   *
-   * @see #setFrustum(Vector, float)
-   * @see #Graph(Object, int, int, Node, Type, Vector, float)
-   * @see #TimingHandler
-   * @see MatrixHandler
-   */
-  protected Graph(Object context, int width, int height, Node eye, Type type, float zNear, float zFar) {
-    _init(context, width, height, eye, type);
-    setFrustum(zNear, zFar);
   }
 
   /**
@@ -743,7 +689,7 @@ public class Graph {
    * @see #zFar()
    */
   public float zNear() {
-    if (_fixed)
+    if (_customBounds + 1 >= TimingHandler.frameCount && _zNear > 0 && _zFar > _zNear)
       return _zNear;
     float z = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) - _zClippingCoefficient * _radius;
     // Prevents negative or null zNear values.
@@ -774,7 +720,9 @@ public class Graph {
    * @see #zNear()
    */
   public float zFar() {
-    return _fixed ? _zFar: Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) + _zClippingCoefficient * _radius;
+    if (_customBounds + 1 >= TimingHandler.frameCount && _zNear > 0 && _zFar > _zNear)
+      return _zFar;
+    return Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) + _zClippingCoefficient * _radius;
   }
 
   // Graph and nodes stuff
@@ -1534,11 +1482,20 @@ public class Graph {
   }
 
   /**
+   * Sets the {@link #radius()} value in world units.
+   *
+   * @see #setCenter(Vector)
+   */
+  public void setRadius(float radius) {
+    _radius = radius;
+    _modified();
+  }
+
+  /**
    * Returns the radius of the graph observed by the eye in world units. Set it with
-   * {@link #setFrustum(Vector, float)} or {@link #setFrustum(float, float)}.
+   * {@link #setFrustum(Vector, float)}.
    *
    * @see #setFrustum(Vector, float)
-   * @see #setFrustum(float, float)
    * @see #center()
    */
   public float radius() {
@@ -1546,24 +1503,43 @@ public class Graph {
   }
 
   /**
+   * Sets the {@link #center()} of the graph.
+   *
+   * @see #setRadius(float)
+   */
+  public void setCenter(Vector center) {
+    _center = center;
+    _modified();
+  }
+
+  /**
    * Returns the position of the graph center, defined in the world coordinate system.
-   * Set it with {@link #setFrustum(Vector, float)} or {@link #setFrustum(float, float)}.
    *
    * @see #setFrustum(Vector, float)
-   * @see #setFrustum(float, float)
+   * @see #setFrustum(Vector, Vector)
    * @see #zNear()
    * @see #zFar()
    */
   public Vector center() {
-    return _fixed ? eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / (eye().magnitude() * 2) )) : _center;
+    return _center;
+  }
+
+  /**
+   * Similar to {@link #setRadius(float)} and {@link #setCenter(Vector)}, but the
+   * graph bounds are defined by a world axis aligned bounding box.
+   *
+   * @see #setFrustum(Vector, float)
+   */
+  public void setFrustum(Vector corner1, Vector corner2) {
+    setFrustum(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f), 0.5f * (Vector.subtract(corner2, corner1)).magnitude());
   }
 
   /**
    * Same as {@code setFrustum(new Vector(), radius)}.
    *
-   * @see #setFrustum(float, float)
    * @see #setFrustum(Vector, float, float, float)
-   * @see #setFrustum(float, float)
+   * @see #setFrustum(Vector, float)
+   * @see #setFrustum(Vector, Vector)
    */
   public void setFrustum(float radius) {
     setFrustum(new Vector(), radius);
@@ -1572,7 +1548,7 @@ public class Graph {
   /**
    * Same as {@code setCenter(center); setRadius(radius)}.
    *
-   * @see #setFrustum(float, float)
+   * @see #setFrustum(Vector, Vector)
    * @see #setFrustum(Vector, float, float, float)
    * @see #setFrustum(float)
    */
@@ -1583,8 +1559,7 @@ public class Graph {
   /**
    * Sets the scene bounding sphere, defined by {@code center} and {@code radius}) in the
    * world coordinate system. The {@link #zNear()} and {@link #zFar()} computation is performed
-   * so that it adapts to best fit this bounding sphere. To set fixed {@link #zNear()} and
-   * {@link #zFar()} values use {@link #setFrustum(float, float)} instead.
+   * so that it adapts to best fit this bounding sphere.
    * <p>
    * The {@code zNearCoefficient} (only meaningful for perspective projections) is used to set
    * the {@link #zNear()} when the {@link #eye()} is
@@ -1605,46 +1580,15 @@ public class Graph {
    *
    * @see #setFrustum(float)
    * @see #setFrustum(Vector, float)
-   * @see #setFrustum(float, float)
+   * @see #setFrustum(Vector, Vector)
    * @see #zNear()
    * @see #zFar()
    */
   public void setFrustum(Vector center, float radius, float zNearCoefficient, float zClippingCoefficient) {
-    _fixed = false;
     _center = center;
     _radius = Math.abs(radius);
     _zNearCoefficient = zNearCoefficient;
     _zClippingCoefficient = zClippingCoefficient;
-    _modified();
-  }
-
-  /**
-   * Sets fixed {@link #zNear()} and {@link #zFar()} values. Use
-   * {@link #setFrustum(Vector, float, float, float)} to make them fit a
-   * bounding sphere defined in the world coordinate system instead.
-   * <p>
-   * Note that the {@link #center()} is computed as
-   * {@code eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / (eye().magnitude() * 2) ))}.
-   *
-   * @see #setFrustum(Vector, float, float, float)
-   * @see #setFrustum(Vector, float)
-   * @see #zNear()
-   * @see #zFar()
-   */
-  public void setFrustum(float zNear, float zFar) {
-    float near = Math.abs(zNear);
-    float far = Math.abs(zFar);
-    if (far <= near || near == 0)
-      return;
-    if (is2D()) {
-      System.out.println("Warning: setFrustum(zNear, zFar) only available in 3D. Calling setFrustum((zFar - zNear) / 2) instead!");
-      setFrustum((far - near) / 2);
-      return;
-    }
-    _fixed = true;
-    _zNear = near;
-    _zFar = far;
-    _radius = (far - near) / 2;
     _modified();
   }
 
@@ -2775,11 +2719,24 @@ public class Graph {
   }
 
   /**
+   * Same as {@code render(null, zNear, zFar)} but with custom {@code zNear} and {@zFar} bounds.
+   *
+   * @see #render()
+   * @see #render(Node)
+   * @see #render(Node, float, float)
+   */
+  public void render(float zNear, float zFar) {
+    render(null, zNear, zFar);
+  }
+
+  /**
    * Renders the node tree onto the {@link #context()} from the {@link #eye()} viewpoint.
    * Calls {@link #setVisit(Node, BiConsumer)} on each visited node (refer to the {@link Node} documentation).
    * Same as {@code render(null)}.
    *
+   * @see #render(float, float)
    * @see #render(Node)
+   * @see #render(Node, float, float)
    * @see #setVisit(Node, BiConsumer)
    * @see Node#cull
    * @see Node#bypass()
@@ -2791,6 +2748,20 @@ public class Graph {
   }
 
   /**
+   * Same as {@code render(subtree)} but with custom {@code zNear} and {@zFar} bounds.
+   *
+   * @see #render()
+   * @see #render(float, float)
+   * @see #render(Node)
+   */
+  public void render(Node subtree, float zNear, float zFar) {
+    _customBounds = TimingHandler.frameCount;
+    _zNear = zNear;
+    _zFar = zFar;
+    render(subtree);
+  }
+
+  /**
    * Calls {@link #openContext()}, then renders the node {@code subtree} (or the whole tree
    * when {@code subtree} is {@code null}) onto the {@link #context()} from the {@link #eye()}
    * viewpoint, and calls {@link #closeContext()}.
@@ -2798,6 +2769,9 @@ public class Graph {
    * Note that the rendering algorithm calls {@link #setVisit(Node, BiConsumer)} on each visited node
    * (refer to the {@link Node} documentation).
    *
+   * @see #render()
+   * @see #render(float, float)
+   * @see #render(Node, float, float)
    * @see #setVisit(Node, BiConsumer)
    * @see Node#cull
    * @see Node#bypass()
@@ -3967,7 +3941,7 @@ public class Graph {
   }
 
   /**
-   * Internally by the _translationTask to compensate orthographic projection eye translation.
+   * Internally used by the _translationTask to compensate orthographic projection eye translation.
    */
   protected void _translate(float x, float y, float z) {
     float d1 = 1, d2;
