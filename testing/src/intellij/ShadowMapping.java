@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 public class ShadowMapping extends PApplet {
   Scene scene;
   Scene shadowMapScene;
-  Node n1, n2, n3, f, light;
+  Node n1, n2, n3, light;
   TimingTask animation;
   PShader depthShader;
   PShader shadowShader;
@@ -29,8 +29,8 @@ public class ShadowMapping extends PApplet {
           0.5f, 0.5f, 0.5f, 1
   );
   boolean debug;
-  int w = 700;
-  int h = 700;
+  int w = 1200;
+  int h = 1200;
 
   public void settings() {
     size(w, h, P3D);
@@ -38,7 +38,7 @@ public class ShadowMapping extends PApplet {
 
   public void setup() {
     //scene = new Scene(createGraphics(w, h, P3D));
-    scene = new Scene(this, max(w, h) / 3);
+    scene = new Scene(this, max(w, h) / 3f);
     scene.enableHint(Scene.BACKGROUND, color(0));
     scene.togglePerspective();
     scene.fit(1);
@@ -57,7 +57,7 @@ public class ShadowMapping extends PApplet {
     n3.cull = true;
     new Node(this::floor).tagging = false;
     light = new Node();
-    light.enableHint(Node.BULLSEYE | Node.AXES /* | Node.CAMERA */);
+    light.enableHint(Node.BULLSEYE | Node.AXES | Node.CAMERA);
     // initShadowPass
     //String depthPath = Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString();
     String depthPath = Paths.get("testing/data/depth/depth_frag.glsl").toAbsolutePath().toString();
@@ -156,7 +156,7 @@ public class ShadowMapping extends PApplet {
       else
         light.setMagnitude(1);
     } else if (key == 'd') {
-      light.toggleHint(Node.BULLSEYE | Node.AXES /* | Node.CAMERA */ | Node.BOUNDS);
+      light.toggleHint(Node.BULLSEYE | Node.AXES | Node.CAMERA | Node.BOUNDS);
       debug = !debug;
       if (debug)
         resetShader();

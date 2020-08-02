@@ -1072,7 +1072,8 @@ public class Scene extends Graph {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_cameraStroke(node));
-      _drawEye(_cameraLength(node) == 0 ? _radius : _cameraLength(node));
+      pg.fill(_cameraStroke(node));
+      _drawEye(pg, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
       pg.popStyle();
     }
     if (node.isHintEnable(Node.BULLSEYE) && node.isPickingModeEnable(Node.BULLSEYE)) {
@@ -1113,7 +1114,7 @@ public class Scene extends Graph {
       drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
     }
     if (node.isHintEnable(Node.CAMERA) && node.isPickingModeEnable(Node.CAMERA)) {
-      _drawEye(_cameraLength(node) == 0 ? _radius : _cameraLength(node));
+      _drawEye(pg, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
     }
     pg.popStyle();
   }
@@ -1356,7 +1357,8 @@ public class Scene extends Graph {
               context().pushStyle();
               context().colorMode(PApplet.RGB, 255);
               context().stroke(_cameraStroke(interpolator));
-              _drawEye(_cameraLength(interpolator) == 0 ? _radius : _cameraLength(interpolator));
+              context().fill(_cameraStroke(interpolator));
+              _drawEye(context(), _cameraLength(interpolator) == 0 ? _radius : _cameraLength(interpolator));
               context().popStyle();
             }
             _matrixHandler.popMatrix();
@@ -1370,8 +1372,8 @@ public class Scene extends Graph {
   /**
    * Internal use.
    */
-  protected void _drawEye(float scale) {
-    context().pushStyle();
+  protected void _drawEye(PGraphics pg, float scale) {
+    pg.pushStyle();
     float halfHeight = scale * (is2D() ? 1.2f : 0.07f);
     float halfWidth = halfHeight * 1.3f;
     float dist = halfHeight / (float) Math.tan(PApplet.PI / 8.0f);
@@ -1382,56 +1384,57 @@ public class Scene extends Graph {
     float baseHalfWidth = 0.3f * halfWidth;
 
     // Frustum outline
-    context().noFill();
-    context().beginShape();
-    vertex(-halfWidth, halfHeight, -dist);
-    vertex(-halfWidth, -halfHeight, -dist);
-    vertex(0.0f, 0.0f, 0.0f);
-    vertex(halfWidth, -halfHeight, -dist);
-    vertex(-halfWidth, -halfHeight, -dist);
-    context().endShape();
-    context().noFill();
-    context().beginShape();
-    vertex(halfWidth, -halfHeight, -dist);
-    vertex(halfWidth, halfHeight, -dist);
-    vertex(0.0f, 0.0f, 0.0f);
-    vertex(-halfWidth, halfHeight, -dist);
-    vertex(halfWidth, halfHeight, -dist);
-    context().endShape();
+    if (pg == context()) {
+      pg.pushStyle();
+      pg.noFill();
+    }
+    //pg.pushStyle();
+    // TODO from here study picking with fill
+    //pg.noFill();
+    pg.beginShape(PApplet.TRIANGLE_FAN);
+    vertex(pg, 0.0f, 0.0f, 0.0f);
+    vertex(pg, -halfWidth, -halfHeight, -dist);
+    vertex(pg, halfWidth, -halfHeight, -dist);
+    vertex(pg, halfWidth, halfHeight, -dist);
+    vertex(pg, -halfWidth, halfHeight, -dist);
+    vertex(pg, -halfWidth, -halfHeight, -dist);
+    pg.endShape(PApplet.CLOSE);
+    if (pg == context()) {
+      pg.popStyle();
+    }
+    //pg.popStyle();
 
     // Up arrow
-    context().noStroke();
-    context().fill(context().strokeColor);
+    pg.noStroke();
     // Base
-    context().beginShape(PApplet.QUADS);
+    pg.beginShape(PApplet.QUADS);
 
     if (leftHanded) {
-      vertex(baseHalfWidth, -halfHeight, -dist);
-      vertex(-baseHalfWidth, -halfHeight, -dist);
-      vertex(-baseHalfWidth, -baseHeight, -dist);
-      vertex(baseHalfWidth, -baseHeight, -dist);
+      vertex(pg, baseHalfWidth, -halfHeight, -dist);
+      vertex(pg, -baseHalfWidth, -halfHeight, -dist);
+      vertex(pg, -baseHalfWidth, -baseHeight, -dist);
+      vertex(pg, baseHalfWidth, -baseHeight, -dist);
     } else {
-      vertex(-baseHalfWidth, halfHeight, -dist);
-      vertex(baseHalfWidth, halfHeight, -dist);
-      vertex(baseHalfWidth, baseHeight, -dist);
-      vertex(-baseHalfWidth, baseHeight, -dist);
+      vertex(pg, -baseHalfWidth, halfHeight, -dist);
+      vertex(pg, baseHalfWidth, halfHeight, -dist);
+      vertex(pg, baseHalfWidth, baseHeight, -dist);
+      vertex(pg, -baseHalfWidth, baseHeight, -dist);
     }
 
-    context().endShape();
+    pg.endShape();
     // Arrow
-    context().beginShape(PApplet.TRIANGLES);
-
+    pg.beginShape(PApplet.TRIANGLES);
     if (leftHanded) {
-      vertex(0.0f, -arrowHeight, -dist);
-      vertex(arrowHalfWidth, -baseHeight, -dist);
-      vertex(-arrowHalfWidth, -baseHeight, -dist);
+      vertex(pg, 0.0f, -arrowHeight, -dist);
+      vertex(pg, arrowHalfWidth, -baseHeight, -dist);
+      vertex(pg, -arrowHalfWidth, -baseHeight, -dist);
     } else {
-      vertex(0.0f, arrowHeight, -dist);
-      vertex(-arrowHalfWidth, baseHeight, -dist);
-      vertex(arrowHalfWidth, baseHeight, -dist);
+      vertex(pg, 0.0f, arrowHeight, -dist);
+      vertex(pg, -arrowHalfWidth, baseHeight, -dist);
+      vertex(pg, arrowHalfWidth, baseHeight, -dist);
     }
-    context().endShape();
-    context().popStyle();
+    pg.endShape();
+    pg.popStyle();
   }
 
   /**
