@@ -191,7 +191,7 @@ public class Graph {
   public boolean picking;
   protected long _bbNeed, _bbCount;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
-  public boolean cacheProjectionViewInverse;
+  protected long _cacheProjectionViewInverse;
 
   // TODO these three are not only related to Quaternion.from but mainly to hint stuff
 
@@ -2665,16 +2665,14 @@ public class Graph {
   }
 
   /**
-   * Returns the cached projection times view inverse matrix computed at {@link #openContext()}}.
+   * Returns the projection times view inverse matrix.
    */
   public Matrix projectionViewInverse() {
-    if (cacheProjectionViewInverse)
-      return _projectionViewInverse;
-    else {
-      Matrix projectionViewInverse = projectionView().get();
-      projectionViewInverse.invert();
-      return projectionViewInverse;
+    if (_cacheProjectionViewInverse < TimingHandler.frameCount) {
+      _projectionViewInverse = Matrix.inverse(_projectionView);
+      _cacheProjectionViewInverse = TimingHandler.frameCount;
     }
+    return _projectionViewInverse;
   }
 
   // cache setters for projection times view and its inverse
@@ -2687,8 +2685,6 @@ public class Graph {
    * {@link Matrix#orthographic(float, float, float, float)}.</li>
    * <li>Updates the view matrix by calling {@code eye().view()}.</li>
    * <li>Updates the {@link #projectionView()} matrix.</li>
-   * <li>Updates the {@link #projectionViewInverse()} matrix if
-   * {@link #cacheProjectionViewInverse}.</li>
    * </ol>
    *
    * @see #fov()
@@ -2699,8 +2695,6 @@ public class Graph {
             : Matrix.orthographic(width() * eye().magnitude(), (leftHanded ? -height() : height()) * eye().magnitude(), zNear(), zFar());
     _view = eye().view();
     _projectionView = Matrix.multiply(_projection, _view);
-    if (cacheProjectionViewInverse)
-      _projectionViewInverse = Matrix.inverse(_projectionView);
     _matrixHandler.bind(_projection, _view);
   }
 
@@ -3328,10 +3322,6 @@ public class Graph {
    * This method only uses the intrinsic eye parameters (view and projection matrices),
    * {@link #width()} and {@link #height()}). You can hence define a virtual eye and use
    * this method to compute un-projections out of a classical rendering context.
-   * <p>
-   * This method is not computationally optimized by default. If you call it several times with no
-   * change in the matrices, you should buffer the inverse of the projection times view matrix
-   * to speed-up the queries. See {@link #cacheProjectionViewInverse}.
    *
    * @see #screenLocation(Vector, Node)
    * @see #screenDisplacement(Vector, Node)
