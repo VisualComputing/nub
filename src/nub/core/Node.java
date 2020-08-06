@@ -2385,6 +2385,24 @@ public class Node {
   }
 
   /**
+   * This together with {@link #visit(Graph, Node)} is a workaround for
+   * {@link #setVisit(Graph, BiConsumer)} which is not available in Processing 3.x.
+   */
+  @Deprecated
+  public void setVisit(Graph graph) {
+    graph.setVisit(this, this::visit);
+  }
+
+  /**
+   * This together with {@link #setVisit(Graph)} is a workaround for
+   * {@link #setVisit(Graph, BiConsumer)} which is not available in Processing 3.x.
+   */
+  @Deprecated
+  public void visit(Graph graph, Node node) {
+
+  }
+
+  /**
    * Bypass rendering the node for the current frame. Set it before calling {@link Graph#render()}
    * or any rendering algorithm. Note that the node nor its children get culled.
    */

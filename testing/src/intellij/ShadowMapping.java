@@ -68,6 +68,7 @@ public class ShadowMapping extends PApplet {
     //shadowMap.noSmooth();
     shadowMapScene = new Scene(shadowMap, light, 10, 600);
     shadowMapScene.togglePerspective();
+    light.setMagnitude(1);
     shadowMapScene.enableHint(Scene.BACKGROUND, 0xffffffff);
     shadowMapScene.picking = false;
     animation = new TimingTask(() -> {
