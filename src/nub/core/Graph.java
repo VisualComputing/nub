@@ -643,7 +643,7 @@ public class Graph {
     }
     float magnitude = _type == Type.PERSPECTIVE ?
         (float) Math.tan(fov / 2) :
-        (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / width();
+        (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / (float) width();
     if (magnitude > 0)
       eye().setMagnitude(magnitude);
   }
@@ -674,7 +674,7 @@ public class Graph {
     }
     return _type == Type.PERSPECTIVE ?
         2 * (float) Math.atan(eye().magnitude()) :
-        2 * (float) Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
+        2 * (float) Math.atan(eye().magnitude() * (float) width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
   }
 
   /**
@@ -710,7 +710,7 @@ public class Graph {
     }
     return _type == Type.PERSPECTIVE ?
         2 * (float) Math.atan(eye().magnitude() * aspectRatio()) :
-        2 * (float) Math.atan(eye().magnitude() * aspectRatio() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
+        2 * (float) Math.atan(eye().magnitude() * aspectRatio() * (float) width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
   }
 
   /**
@@ -1236,8 +1236,8 @@ public class Graph {
         _normal[1] = right;
         _normal[4] = up;
         _normal[5] = Vector.multiply(up, -1);
-        float wh0 = eye().magnitude() * width() / 2;
-        float wh1 = eye().magnitude() * height() / 2;
+        float wh0 = eye().magnitude() * (float) width() / 2;
+        float wh1 = eye().magnitude() * (float) height() / 2;
         _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
         _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
         _distance[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[4]);
@@ -1266,8 +1266,8 @@ public class Graph {
     _normal[1] = right;
     _normal[2] = up;
     _normal[3] = Vector.multiply(up, -1);
-    float wh0 = eye().magnitude() * width() / 2;
-    float wh1 = eye().magnitude() * height() / 2;
+    float wh0 = eye().magnitude() * (float) width() / 2;
+    float wh1 = eye().magnitude() * (float) height() / 2;
     _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
     _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
     _distance[2] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[2]);
@@ -1375,7 +1375,7 @@ public class Graph {
   public float sceneToPixelRatio(Vector position) {
     switch (_type) {
       case PERSPECTIVE:
-        return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math.tan(fov() / 2.0f) / height();
+        return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math.tan(fov() / 2.0f) / (float) height();
       case TWO_D:
       case ORTHOGRAPHIC:
         return eye().magnitude();
@@ -2025,9 +2025,9 @@ public class Graph {
         setFOV(magnitude);
         break;
       case ORTHOGRAPHIC:
-        eye().setMagnitude(distance < (float) Math.sqrt(2) * _radius ? 2 * _radius / Math.min(width(), height()) : 2 * (float) Math.sin(magnitude) * distance / width());
+        eye().setMagnitude(distance < (float) Math.sqrt(2) * _radius ? 2 * _radius / (float) Math.min(width(), height()) : 2 * (float) Math.sin(magnitude) * distance / width());
       case TWO_D:
-        eye().setMagnitude(2 * _radius / Math.min(width(), height()));
+        eye().setMagnitude(2 * _radius / (float) Math.min(width(), height()));
         break;
     }
   }
@@ -2219,8 +2219,8 @@ public class Graph {
         if (leftHanded)
           pixelY = height() - pixelY;
         origin.set(eye().position());
-        direction.set(new Vector(((2.0f * pixelX / width()) - 1.0f) * eye().magnitude() * aspectRatio(),
-            ((2.0f * (height() - pixelY) / height()) - 1.0f) * eye().magnitude(),
+        direction.set(new Vector(((2.0f * pixelX / (float) width()) - 1.0f) * eye().magnitude() * aspectRatio(),
+            ((2.0f * (height() - pixelY) / (float) height()) - 1.0f) * eye().magnitude(),
             -1.0f));
         direction.set(Vector.subtract(eye().worldLocation(direction), origin));
         direction.normalize();
@@ -2691,7 +2691,7 @@ public class Graph {
    * @see Node#view()
    */
   protected void _bind() {
-    _projection = _type == Graph.Type.PERSPECTIVE ? Matrix.perspective(leftHanded ? -eye().magnitude() : eye().magnitude(), width() / height(), zNear(), zFar())
+    _projection = _type == Graph.Type.PERSPECTIVE ? Matrix.perspective(leftHanded ? -eye().magnitude() : eye().magnitude(), aspectRatio(), zNear(), zFar())
             : Matrix.orthographic(width() * eye().magnitude(), (leftHanded ? -height() : height()) * eye().magnitude(), zNear(), zFar());
     _view = eye().view();
     _projectionView = Matrix.multiply(_projection, _view);
@@ -3395,7 +3395,7 @@ public class Graph {
    * @see #screenToNDCLocation(Vector)
    */
   public Vector screenToNDCDisplacement(Vector vector) {
-    return new Vector(2 * vector.x() / width(), 2 * vector.y() / height(), 2 * vector.z());
+    return new Vector(2 * vector.x() / (float) width(), 2 * vector.y() / (float) height(), 2 * vector.z());
   }
 
   /**
@@ -3429,8 +3429,8 @@ public class Graph {
     if (_type == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.position();
       float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
-      dx *= 2.0 * k / (height() * eye().magnitude());
-      dy *= 2.0 * k / (height() * eye().magnitude());
+      dx *= 2.0 * k / ((float) height() * eye().magnitude());
+      dy *= 2.0 * k / ((float) height() * eye().magnitude());
     }
     float dz = vector.z();
     if (is2D() && dz != 0) {
@@ -3468,8 +3468,8 @@ public class Graph {
     if (_type == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.position();
       float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().magnitude());
-      dx /= 2.0 * k / (height() * eye().magnitude());
-      dy /= 2.0 * k / (height() * eye().magnitude());
+      dx /= 2.0 * k / ((float) height() * eye().magnitude());
+      dy /= 2.0 * k / ((float) height() * eye().magnitude());
     }
     float dz = eyeVector.z();
     if (is2D() && dz != 0) {
@@ -3781,7 +3781,7 @@ public class Graph {
       System.out.println("Warning: scaleNode requires a non-null node different than the eye. Nothing done");
       return;
     }
-    float factor = 1 + Math.abs(delta) / height();
+    float factor = 1 + Math.abs(delta) / (float) height();
     node.scale(delta >= 0 ? factor : 1 / factor, inertia);
   }
 
@@ -4223,10 +4223,10 @@ public class Graph {
       return;
     int centerX = (int) center.x();
     int centerY = (int) center.y();
-    float px = sensitivity * (pixel1X - centerX) / width();
-    float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / height();
-    float dx = sensitivity * (pixel2X - centerX) / width();
-    float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / height();
+    float px = sensitivity * (pixel1X - centerX) / (float) width();
+    float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / (float) height();
+    float dx = sensitivity * (pixel2X - centerX) / (float) width();
+    float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / (float) height();
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
@@ -4264,10 +4264,10 @@ public class Graph {
       return;
     int centerX = (int) center.x();
     int centerY = (int) center.y();
-    float px = sensitivity * (pixel1X - centerX) / width();
-    float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / height();
-    float dx = sensitivity * (pixel2X - centerX) / width();
-    float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / height();
+    float px = sensitivity * (pixel1X - centerX) / (float) width();
+    float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / (float) height();
+    float dx = sensitivity * (pixel2X - centerX) / (float) width();
+    float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / (float) height();
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0

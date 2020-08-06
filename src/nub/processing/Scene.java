@@ -2814,7 +2814,7 @@ public class Scene extends Graph {
    * @see #mouseRADX(float)
    */
   public float mouseRADX() {
-    return mouseRADX(PApplet.HALF_PI / width());
+    return mouseRADX(PApplet.HALF_PI / (float) width());
   }
 
   /**
@@ -2838,7 +2838,7 @@ public class Scene extends Graph {
    * @see #mouseRADY(float)
    */
   public float mouseRADY() {
-    return mouseRADY(PApplet.HALF_PI / height());
+    return mouseRADY(PApplet.HALF_PI / (float) height());
   }
 
   /**
