@@ -1305,7 +1305,6 @@ public class Graph {
    * @see #boxVisibility(Vector, Vector)
    * @see #_updateBounds()
    */
-  // TODO make naming convention match setFrustum
   public float[][] bounds() {
     if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
       _updateBounds();
@@ -1557,7 +1556,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code setFrustum(new Vector(), radius)}.
+   * Same as {@code setBounds(new Vector(), radius)}.
    *
    * @see #setBounds(float, float)
    * @see #setBounds(Vector, float, float, float)
@@ -1568,7 +1567,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code setCenter(center); setRadius(radius)}.
+   * Same as {@code setBounds(center, radius, 0.005f, (float) Math.sqrt(3.0f))}.
    *
    * @see #setBounds(float, float)
    * @see #setBounds(Vector, float, float, float)
@@ -1635,7 +1634,7 @@ public class Graph {
     if (far <= near || near == 0)
       return;
     if (is2D()) {
-      System.out.println("Warning: setFrustum(zNear, zFar) only available in 3D. Calling setFrustum((zFar - zNear) / 2) instead!");
+      System.out.println("Warning: setBounds(zNear, zFar) only available in 3D. Calling setBounds((zFar - zNear) / 2) instead!");
       setBounds((far - near) / 2);
       return;
     }
