@@ -43,8 +43,7 @@ Node avatar;
 
 void setup() {
   size(1000, 700, P3D);
-  scene = new Scene(this);
-  scene.setFrustum(Vector.zero, new Vector(flockWidth, flockHeight, flockDepth));
+  scene = new Scene(this, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), 600);
   scene.fit();
   // create and fill the list of boids
   flock = new ArrayList();
@@ -53,10 +52,12 @@ void setup() {
 }
 
 void draw() {
+  scene.openContext();
   background(10, 50, 25);
   ambientLight(128, 128, 128);
   directionalLight(255, 255, 255, 0, 1, -100);
   walls();
+  scene.closeContext();
   scene.render();
   // uncomment to asynchronously update boid avatar. See mouseClicked()
   // updateAvatar(scene.node("mouseClicked"));

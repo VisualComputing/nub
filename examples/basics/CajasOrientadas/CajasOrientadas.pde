@@ -26,17 +26,17 @@ boolean circle;
 void setup() {
   size(800, 600, P3D);
   // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
-  scene = new Scene(this);
+  scene = new Scene(this, 200);
   scene.enableHint(Scene.BACKGROUND, color(0));
-  scene.setRadius(200);
   scene.togglePerspective();
   scene.fit();
   esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);
   esfera.setPosition(new Vector(0, 1.4, 0));
   cajas = new Box[15];
-  for (int i = 0; i < cajas.length; i++)
-    cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)), 
-      random(10, 40), random(10, 40), random(10, 40));
+  for (int i = 0; i < cajas.length; i++) {
+    cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)), random(10, 40), random(10, 40), random(10, 40));
+    cajas[i].togglePickingMode(Node.SHAPE);
+  }
   scene.fit();
   scene.tag("keyboard", esfera);
 }
@@ -71,7 +71,7 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   if (key == ' ') {
     for (Box caja : cajas)
-      caja.setPickingPolicy(caja.pickingPolicy() == Node.SHAPE ? Node.BULLSEYE : Node.SHAPE);
+      caja.togglePickingMode(Node.BULLSEYE | Node.SHAPE);
   }
   if (key == 'c') {
     for (Box caja : cajas)

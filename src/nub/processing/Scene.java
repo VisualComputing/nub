@@ -1076,7 +1076,7 @@ public class Scene extends Graph {
       _drawEye(pg, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
       pg.popStyle();
     }
-    if (node.isHintEnable(Node.BULLSEYE) && node.isPickingModeEnable(Node.BULLSEYE)) {
+    if (node.isHintEnable(Node.BULLSEYE)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_bullsEyeStroke(node));

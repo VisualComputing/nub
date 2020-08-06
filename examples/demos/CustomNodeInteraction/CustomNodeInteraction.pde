@@ -46,12 +46,12 @@ void setup() {
         pg.pushStyle();
         pg.fill(_color);
         Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
-        Scene.beginHUD(pg);
+        scene.beginHUD();
         Vector position = scene.screenLocation(position());
         pg.fill(isTagged(scene) ? 0 : 255, isTagged(scene) ? 255 : 0, isTagged(scene) ? 0 : 255);
         pg.textFont(font36);
         pg.text(_id, position.x(), position.y());
-        Scene.endHUD(pg);
+        scene.endHUD();
         pg.popStyle();
       }
 

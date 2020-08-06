@@ -19,8 +19,8 @@ public class ShadowMap extends PApplet {
   PShader depthShader;
   float zNear = 50;
   float zFar = 700;
-  int w = 700;
-  int h = 700;
+  int w = 1400;
+  int h = 1400;
 
   public void settings() {
     size(w, h, P3D);

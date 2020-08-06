@@ -5,8 +5,6 @@ class Sphere extends Node {
   public Sphere(int tint, float radius) {
     _color = tint;
     _radius = radius;
-    setPickingPolicy(Node.SHAPE);
-    enableHint(Node.SHAPE | Node.HIGHLIGHT);
   }
 
   @Override

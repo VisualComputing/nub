@@ -27,8 +27,7 @@ String renderer = P3D;
 
 void setup() {
   size(1000, 700, renderer);
-  scene = new Scene(this);
-  scene.setRadius(150);
+  scene = new Scene(this, 150);
   scene.fit(1);
   PShape pshape;
   if (scene.is2D()) {
@@ -97,7 +96,6 @@ void keyPressed() {
       eyeInterpolator.disableHint(Interpolator.SPLINE | Interpolator.CAMERA);
     }
   }
-
   if (key == '-' || key == '+') {
     shapeInterpolator.increaseSpeed(key == '+' ? 0.25 : -0.25);
   }

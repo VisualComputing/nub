@@ -32,8 +32,7 @@ boolean snPicking;
 void setup() {
   size(1600, 800, P3D);
   openSpaceNavigator();
-  scene = new Scene(this);
-  scene.setRadius(1500);
+  scene = new Scene(this, 1500);
   scene.fit(1);
   Node[] shapes = new Node[50];
   for (int i = 0; i < shapes.length; i++) {

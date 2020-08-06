@@ -26,10 +26,8 @@ void settings() {
 
 void setup() {
   rectMode(CENTER);
-  // same as: scene = new Scene(this, createGraphics(w, h / 2, renderer));
-  scene = new Scene(this, renderer, w, h /2);
+  scene = new Scene(createGraphics(w, h /2, renderer), max(w, h));
   scene.enableHint(Scene.BACKGROUND, color(10, 50, 25));
-  scene.setRadius(max(w, h));
 
   shapes = new Node[100];
   for (int i = 0; i < shapes.length; i++) {

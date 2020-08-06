@@ -29,14 +29,13 @@ boolean interactiveEye;
 String renderer = P2D;
 
 void setup() {
-  size(800, 600, renderer);
-  scene = onScreen ? new Scene(this) : new Scene(this, renderer);
-  scene.setRadius(1000);
   rectMode(CENTER);
-  scene.fit(1);
+  size(1920, 1080, renderer);
+  scene = onScreen ? new Scene(this, 1000) : new Scene(createGraphics(width, height, renderer), 1000);
+  scene.eye().enableHint(Node.BOUNDS | Node.BULLSEYE);
+  scene.eye().disablePickingMode(Node.BULLSEYE);
   scene.eye().setBullsEyeSize(50);
-  scene.eye().disableHint(Node.HIGHLIGHT);
-  scene.eye().enableHint(Node.BULLSEYE);
+  scene.eye().setHighlight(0);
   scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
   models = new Node[30];
   for (int i = 0; i < models.length; i++) {
@@ -47,19 +46,14 @@ void setup() {
       models[i].enableHint(Node.TORUS);
       models[i].scale(3);
     }
-    // set picking precision to the pixels of the node projection
-    models[i].setPickingPolicy(Node.SHAPE);
     scene.randomize(models[i]);
   }
   // Note that we pass the upper left corner coordinates where the minimap
   // is to be drawn (see drawing code below) to its constructor.
-  minimap = new Scene(this, renderer, width / 2, height / 2);
-  minimap.setRadius(2000);
+  minimap = new Scene(createGraphics(width / 2, height / 2, renderer), 2000);
   if (renderer == P3D)
     minimap.togglePerspective();
-  minimap.fit(1);
   minimap.enableHint(Scene.BACKGROUND, color(125, 80, 90));
-  minimap.enableHint(Scene.FRUSTUM, scene, color(255, 0, 0, 125));
 }
 
 PShape shape() {
@@ -82,6 +76,8 @@ void keyPressed() {
     focus.fit(1);
   if (key == 't')
     focus.togglePerspective();
+  if (key == 'p')
+    scene.eye().togglePickingMode(Node.BULLSEYE | Node.BOUNDS);
 }
 
 void mouseMoved() {
@@ -115,11 +111,7 @@ void mouseClicked(MouseEvent event) {
 
 void draw() {
   focus = minimap.hasMouseFocus() ? minimap : scene;
-  if (scene.isOffscreen()) {
-    scene.display();
-  } else {
-    scene.render();
-  }
+  scene.display();
   if (displayMinimap) {
     minimap.display(width / 2, height / 2);
   }

@@ -48,13 +48,14 @@ void settings() {
 void setup() {
   texmap = loadImage("world32k.jpg");
   initializeSphere(sDetail);
-  scene = new Scene(this);
-  scene.setRadius(globeRadius * 1.2f);
-  scene.fit(1);
+  scene = new Scene(this, globeRadius * 1.2f);
 }
 
 void draw() {
+  scene.openContext();
   background(0);
+  scene.closeContext();
+  scene.render();
   fill(200);
   noStroke();
   textureMode(IMAGE);
@@ -85,12 +86,12 @@ void keyPressed(KeyEvent event) {
       float a = TWO_PI - 2;
       scene.eye().setPosition(t);
       // We need to line up the eye up vector along the anchor and the camera position:
-      scene.setUpVector(Vector.subtract(scene.eye().position(), scene.anchor()));
+      scene.setUpVector(Vector.subtract(scene.eye().position(), scene.center()));
       // The rest is just to make the scene appear in front of us.
       scene.eye().rotate(Quaternion.from(a, 0, 0));
     } else {
+      scene.lookAt(Vector.zero);
       scene.fit(1);
-      scene.lookAtCenter();
     }
   }
   if (keyMode) {

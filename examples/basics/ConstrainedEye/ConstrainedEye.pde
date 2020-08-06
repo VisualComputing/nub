@@ -28,8 +28,7 @@ void setup() {
   size(700, 700, renderer);
   font = loadFont("FreeSans-16.vlw");
   textFont(font);
-  scene = new Scene(this);
-  scene.setRadius(400);
+  scene = new Scene(this, 400);
   scene.fit(1);
   constraints[0] = new WorldConstraint();
   // Note that an EyeConstraint(eye) would produce the same results:
@@ -39,17 +38,21 @@ void setup() {
   rotDir = 0;
   activeConstraint = 0;
   scene.eye().setConstraint(constraints[activeConstraint]);
-  scene.enableHint(Scene.GRID | Scene.AXES | Scene.BACKGROUND);
-  scene.configHint(Scene.GRID, color(0, 255, 0));
+  scene.enableHint(Scene.AXES);
+  scene.enableHint(Scene.GRID, color(0, 255, 0));
 }
 
 void draw() {
-  fill(204, 102, 0, 150);
+  background(204, 102, 0);
+  scene.openContext();
+  fill(255, 255, 0);
   scene.drawTorusSolenoid();
   fill(0, 255, 255);
   scene.beginHUD();
   displayText();
   scene.endHUD();
+  scene.closeContext();
+  scene.render();
 }
 
 void mouseDragged() {

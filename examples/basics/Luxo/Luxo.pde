@@ -21,7 +21,6 @@ Lamp lamp;
 void setup() {
   size(1000, 700, P3D);
   scene = new Scene(this);
-  scene.setRadius(100);
   scene.fit(1);
   lamp = new Lamp();
 }

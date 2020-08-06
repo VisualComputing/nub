@@ -15,7 +15,6 @@ class Lamp {
 
     for (int i = 0; i < 4; ++i) {
       pieces[i] = new Piece();
-      pieces[i].setPickingPolicy(Node.SHAPE);
       node(i).setReference(i > 0 ? pieces[i - 1] : null);
     }
 
