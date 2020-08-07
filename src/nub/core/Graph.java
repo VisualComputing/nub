@@ -491,7 +491,7 @@ public class Graph {
         _rotateCAD();
       }
     };
-    _setType(type);
+    setType(type);
     enableHint(HUD | SHAPE);
     picking = true;
     // middle grey encoded as a processing int rgb color
@@ -568,9 +568,9 @@ public class Graph {
   // Type handling stuff
 
   /**
-   * Returns the graph type. Set by {@link #_setType(Type)}.
+   * Returns the graph type. Set by {@link #setType(Type)}.
    *
-   * @see #_setType(Type)
+   * @see #setType(Type)
    */
   public Type type() {
     return _type;
@@ -592,7 +592,7 @@ public class Graph {
    *
    * @see Node#magnitude()
    */
-  protected void _setType(Type type) {
+  public void setType(Type type) {
     if (_type == Type.TWO_D) {
       return;
     }
@@ -606,7 +606,7 @@ public class Graph {
    * Shifts the graph {@link #_type} between {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} while trying
    * to keep the {@link #fov()}. Only meaningful if graph {@link #is3D()}.
    *
-   * @see #_setType(Type)
+   * @see #setType(Type)
    * @see #setFOV(float)
    * @see #fov()
    * @see #hfov()
@@ -615,7 +615,7 @@ public class Graph {
   public void togglePerspective() {
     if (is3D()) {
       float fov = fov();
-      _setType(_type == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
+      setType(_type == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
       setFOV(fov);
     }
   }
@@ -634,7 +634,7 @@ public class Graph {
    * @see #fov()
    * @see #hfov()
    * @see #setHFOV(float)
-   * @see #_setType(Type)
+   * @see #setType(Type)
    */
   public void setFOV(float fov) {
     if (is2D()) {
@@ -662,7 +662,7 @@ public class Graph {
    * Set this value with {@link #setFOV(float)} or {@link #setHFOV(float)}.
    *
    * @see Node#magnitude()
-   * @see #_setType(Type)
+   * @see #setType(Type)
    * @see #setHFOV(float)
    * @see #hfov()
    * @see #setFOV(float)

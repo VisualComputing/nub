@@ -67,8 +67,7 @@ public class ShadowMapping extends PApplet {
     // Testing the appearance of artifacts first
     //shadowMap.noSmooth();
     shadowMapScene = new Scene(shadowMap, light, 10, 600);
-    shadowMapScene.togglePerspective();
-    light.setMagnitude(1);
+    shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
     shadowMapScene.enableHint(Scene.BACKGROUND, 0xffffffff);
     shadowMapScene.picking = false;
     animation = new TimingTask(() -> {
@@ -151,11 +150,14 @@ public class ShadowMapping extends PApplet {
       n2.cull = key != '2';
       n3.cull = key != '3';
     } else if (key == ' ') {
-      shadowMapScene.togglePerspective();
-      if (shadowMapScene.type() == Graph.Type.PERSPECTIVE)
-        light.setMagnitude(tan(fov / 2));
-      else
+      if (shadowMapScene.type() == Graph.Type.PERSPECTIVE) {
+        shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
         light.setMagnitude(1);
+      }
+      else {
+        shadowMapScene.setType(Graph.Type.PERSPECTIVE);
+        light.setMagnitude(tan(fov / 2));
+      }
     } else if (key == 'd') {
       light.toggleHint(Node.BULLSEYE | Node.AXES | Node.CAMERA | Node.BOUNDS);
       debug = !debug;
