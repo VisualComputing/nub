@@ -19,10 +19,9 @@ import nub.processing.*;
 
 OctreeNode root;
 Scene mainScene, secondaryScene, focus;
-boolean bypass;
 
-int w = 900;
-int h = 700;
+int w = 1400;
+int h = 1400;
 //octree
 float a = 220, b = 100, c = 280;
 int levels = 4;
@@ -33,21 +32,19 @@ void settings() {
 
 void setup() {
   // main scene
-  mainScene = new Scene(this, P3D, w, h /2);
+  mainScene = new Scene(createGraphics(w, h / 2, P3D));
   mainScene.enableHint(Scene.BACKGROUND, color(255));
+  mainScene.eye().enableHint(Node.BOUNDS);
   mainScene.togglePerspective();
-  mainScene.enableBoundaryEquations();
   mainScene.fit(1);
+  // secondary scene
+  secondaryScene = new Scene(createGraphics(w, h / 2, P3D), 200);
+  secondaryScene.enableHint(Scene.BACKGROUND, color(185));
+  secondaryScene.togglePerspective();
+  secondaryScene.fit();
   // declare and build the octree hierarchy
   root = new OctreeNode();
   buildOctree(root);
-  // secondary scene
-  secondaryScene = new Scene(this, P3D, w, h / 2);
-  secondaryScene.enableHint(Scene.BACKGROUND, color(185));
-  secondaryScene.enableHint(Node.FRUSTUM, mainScene, color(255, 0, 255, 160));
-  secondaryScene.togglePerspective();
-  secondaryScene.setRadius(200);
-  secondaryScene.fit();
 }
 
 void buildOctree(OctreeNode parent) {
@@ -59,10 +56,8 @@ void buildOctree(OctreeNode parent) {
 void draw() {
   focus = mainScene.hasMouseFocus() ? mainScene : secondaryScene;
   // culling condition should be retested every frame
-  root.cull(false);
-  bypass = false;
+  root.cull = false;
   mainScene.display();
-  bypass = true;
   secondaryScene.display(0, h / 2);
 }
 

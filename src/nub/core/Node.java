@@ -2378,23 +2378,32 @@ public class Node {
   /**
    * Same as {@code graph.setVisit(this, functor)}.
    *
+   * @see #setVisit(Graph, Consumer)
    * @see Graph#setVisit(Node, BiConsumer)
+   * @see Graph#setVisit(Node, Consumer)
    */
   public void setVisit(Graph graph, BiConsumer<Graph, Node> functor) {
     graph.setVisit(this, functor);
   }
 
+  /**
+   * Same as {@code graph.setVisit(this, (g, n) -> functor.accept(g))}.
+   *
+   * @see #setVisit(Graph, BiConsumer)
+   * @see Graph#setVisit(Node, BiConsumer)
+   * @see Graph#setVisit(Node, Consumer)
+   */
   public void setVisit(Graph graph, Consumer<Graph> functor) {
     graph.setVisit(this, (g, n) -> functor.accept(g));
   }
 
   /**
-   * This together with {@link #visit(Graph, Node)} is a workaround for
+   * This together with {@link #visit(Graph)} is a workaround for
    * {@link #setVisit(Graph, BiConsumer)} which is not available in Processing 3.x.
    */
   @Deprecated
   public void setVisit(Graph graph) {
-    graph.setVisit(this, this::visit);
+    setVisit(graph, this::visit);
   }
 
   /**
@@ -2402,9 +2411,7 @@ public class Node {
    * {@link #setVisit(Graph, BiConsumer)} which is not available in Processing 3.x.
    */
   @Deprecated
-  public void visit(Graph graph, Node node) {
-
-  }
+  public void visit(Graph graph) {}
 
   /**
    * Bypass rendering the node for the current frame. Set it before calling {@link Graph#render()}

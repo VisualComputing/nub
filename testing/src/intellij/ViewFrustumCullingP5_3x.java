@@ -53,10 +53,6 @@ public class ViewFrustumCullingP5_3x extends PApplet {
     secondaryScene.display(0, h / 2);
   }
 
-  void handleMouse() {
-    focus = mouseY < h / 2 ? mainScene : secondaryScene;
-  }
-
   public void mouseDragged() {
     if (mouseButton == LEFT)
       focus.mouseSpinEye();
@@ -90,7 +86,6 @@ public class ViewFrustumCullingP5_3x extends PApplet {
     OctreeNode() {
       tagging = false;
       setShape(this::draw);
-      //setVisit(mainScene, this::culling);
       setVisit(mainScene);
     }
 
@@ -100,7 +95,7 @@ public class ViewFrustumCullingP5_3x extends PApplet {
       translate(Vector.multiply(vector, scaling() / 2));
       tagging = false;
       setShape(this::draw);
-      setVisit(mainScene, this::culling);
+      setVisit(mainScene);
     }
 
     float level() {
@@ -115,30 +110,26 @@ public class ViewFrustumCullingP5_3x extends PApplet {
       pg.box(a, b, c);
     }
 
-    @Override
-    public void visit(Graph graph, Node node) {
-      culling(graph, node);
-    }
-
     // The culling method is called just before the graphics(PGraphics) method
-    public void culling(Graph graph, Node node) {
-      switch (graph.boxVisibility(node.worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
-              node.worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
+    @Override
+    public void visit(Graph graph) {
+      switch (graph.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
+              worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
         case VISIBLE:
-          for (Node child : node.children())
+          for (Node child : children())
             child.cull = true;
           break;
         case SEMIVISIBLE:
-          if (!node.children().isEmpty()) {
+          if (!children().isEmpty()) {
             // don't render the node...
-            node.bypass();
+            bypass();
             // ... but don't cull its children either
-            for (Node child : node.children())
+            for (Node child : children())
               child.cull = false;
           }
           break;
         case INVISIBLE:
-          node.cull = true;
+          cull = true;
           break;
       }
     }

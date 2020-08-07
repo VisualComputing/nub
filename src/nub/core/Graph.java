@@ -2838,13 +2838,31 @@ public class Graph {
    * Note that the graph culling condition may be set from
    * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}.
    *
+   * @see #setVisit(Node, Consumer)
    * @see #resetVisit(Node)
    * @see #render(Node)
+   * @see Node#setVisit(Graph, BiConsumer)
+   * @see Node#setVisit(Graph, Consumer)
    * @see Node#bypass()
    * @see Node#cull
    */
   public void setVisit(Node node, BiConsumer<Graph, Node> functor) {
     _functors.put(node.id(), functor);
+  }
+
+  /**
+   * Same as {@code setVisit(node, (g, n) -> functor.accept(n))}.
+   *
+   * @see #setVisit(Node, BiConsumer)
+   * @see #resetVisit(Node)
+   * @see #render(Node)
+   * @see Node#setVisit(Graph, BiConsumer)
+   * @see Node#setVisit(Graph, Consumer)
+   * @see Node#bypass()
+   * @see Node#cull
+   */
+  public void setVisit(Node node, Consumer<Node> functor) {
+    setVisit(node, (g, n) -> functor.accept(n));
   }
 
   /**

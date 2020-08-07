@@ -1,13 +1,17 @@
 class OctreeNode extends Node {
   OctreeNode() {
-    disableTagging();
+    tagging = false;
+    // register the visit method only at the main scene
+    setVisit(mainScene);
   }
 
   OctreeNode(OctreeNode node, Vector vector) {
     super(node);
     scale(0.5);
     translate(Vector.multiply(vector, scaling() / 2));
-    disableTagging();
+    tagging = false;
+    // register the visit method only at the main scene
+    setVisit(mainScene);
   }
 
   float level() {
@@ -23,29 +27,26 @@ class OctreeNode extends Node {
     pg.box(a, b, c);
   }
 
-  // The visit() method is called just before the graphics(PGraphics) method
+  // The culling method is called just before the graphics(PGraphics) method
   @Override
-  public void visit() {
-    // cull only against main scene
-    if (bypass)
-      return;
-    switch (mainScene.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
-                                    worldLocation(new Vector( a / 2,  b / 2,  c / 2)))) {
+  public void visit(Graph graph) {
+    switch (graph.boxVisibility(worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
+      worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
     case VISIBLE:
-      for (Node node : children())
-        node.cull();
+      for (Node child : children())
+        child.cull = true;
       break;
     case SEMIVISIBLE:
       if (!children().isEmpty()) {
         // don't render the node...
         bypass();
         // ... but don't cull its children either
-        for (Node node : children())
-          node.cull(false);
+        for (Node child : children())
+          child.cull = false;
       }
       break;
     case INVISIBLE:
-      cull();
+      cull = true;
       break;
     }
   }
