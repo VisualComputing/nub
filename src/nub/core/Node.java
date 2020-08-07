@@ -2384,6 +2384,10 @@ public class Node {
     graph.setVisit(this, functor);
   }
 
+  public void setVisit(Graph graph, Consumer<Graph> functor) {
+    graph.setVisit(this, (g, n) -> functor.accept(g));
+  }
+
   /**
    * This together with {@link #visit(Graph, Node)} is a workaround for
    * {@link #setVisit(Graph, BiConsumer)} which is not available in Processing 3.x.
