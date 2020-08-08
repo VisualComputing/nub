@@ -293,9 +293,11 @@ public class Scene extends Graph {
       _onscreenGraph = this;
     // 2. Back buffer
     if (_backBuffer() != null) _backBuffer().noSmooth();
-    _triangleShader = pApplet.loadShader("PickingBuffer.frag");
-    _lineShader = pApplet.loadShader("PickingBuffer.frag");
-    _pointShader = pApplet.loadShader("PickingBuffer.frag");
+    _triangleShader = pApplet.loadShader("Picking.frag");
+    // _lineShader = pApplet.loadShader("Picking.frag");
+    _lineShader = pApplet.loadShader("Picking.frag", "LinePicking.vert");
+    //_pointShader = pApplet.loadShader("PointPicking.frag");
+    _pointShader = pApplet.loadShader("Picking.frag", "PointPicking.vert");
     // 3. Register P5 methods
     pApplet.registerMethod("pre", this);
     pApplet.registerMethod("draw", this);
@@ -1109,7 +1111,7 @@ public class Scene extends Graph {
       }
     }
     pg.pushStyle();
-    pg.strokeWeight(5);
+    pg.strokeWeight(10);
     if (node.isHintEnable(Node.AXES) && node.isPickingModeEnable(Node.AXES)) {
       drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
     }

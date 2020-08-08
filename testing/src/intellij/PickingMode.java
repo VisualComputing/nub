@@ -3,6 +3,7 @@ package intellij;
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
@@ -27,13 +28,13 @@ public class PickingMode extends PApplet {
 
     shapes = new Node[100];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Node();
+      shapes[i] = new Node(this::point);
       //shapes[i] = new Node(caja());
       scene.randomize(shapes[i]);
-      shapes[i].enableHint(Node.CAMERA);
+      //shapes[i].enableHint(Node.CAMERA);
       //shapes[i].enableHint(Node.AXES);
     }
-    scene.fit(1);
+    //scene.fit(1);
     scene.enableHint(Scene.AXES);
   }
 
@@ -42,6 +43,10 @@ public class PickingMode extends PApplet {
     scene.display();
     // 2. Display back buffer
     scene.displayBackBuffer(0, h / 2);
+  }
+
+  public void keyPressed() {
+    scene.togglePerspective();
   }
 
   public void mouseMoved() {
@@ -62,6 +67,14 @@ public class PickingMode extends PApplet {
       scene.moveForward(event.getCount() * 20);
     else
       scene.scaleEye(event.getCount() * 20);
+  }
+
+  void point(PGraphics pg) {
+    pg.pushStyle();
+    pg.stroke(0, 255, 0);
+    pg.strokeWeight(10);
+    pg.point(0, 0, 0);
+    pg.popStyle();
   }
 
   PShape caja() {
