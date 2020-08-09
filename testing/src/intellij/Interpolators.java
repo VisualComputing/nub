@@ -21,7 +21,7 @@ public class Interpolators extends PApplet {
   String renderer = P3D;
 
   public void settings() {
-    size(700, 700, renderer);
+    size(1920, 1080, renderer);
   }
 
   public void setup() {

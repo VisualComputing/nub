@@ -28,11 +28,11 @@ public class PickingMode extends PApplet {
 
     shapes = new Node[100];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Node(this::point);
+      shapes[i] = new Node();
+      //shapes[i] = new Node(this::point);
       //shapes[i] = new Node(caja());
       scene.randomize(shapes[i]);
-      //shapes[i].enableHint(Node.CAMERA);
-      //shapes[i].enableHint(Node.AXES);
+      shapes[i].enableHint(Node.AXES);
     }
     //scene.fit(1);
     scene.enableHint(Scene.AXES);

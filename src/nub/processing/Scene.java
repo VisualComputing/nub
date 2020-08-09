@@ -294,9 +294,7 @@ public class Scene extends Graph {
     // 2. Back buffer
     if (_backBuffer() != null) _backBuffer().noSmooth();
     _triangleShader = pApplet.loadShader("Picking.frag");
-    // _lineShader = pApplet.loadShader("Picking.frag");
     _lineShader = pApplet.loadShader("Picking.frag", "LinePicking.vert");
-    //_pointShader = pApplet.loadShader("PointPicking.frag");
     _pointShader = pApplet.loadShader("Picking.frag", "PointPicking.vert");
     // 3. Register P5 methods
     pApplet.registerMethod("pre", this);
@@ -1064,9 +1062,6 @@ public class Scene extends Graph {
     }
     if (node.isHintEnable(Node.AXES)) {
       pg.pushStyle();
-      // TODO debug
-      //pg.strokeWeight(5);
-      //pg.line(0, 0, 0, 0, 0, node._axesLength == 0 ? _radius / 5 : node._axesLength);
       drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
       pg.popStyle();
     }
@@ -1110,15 +1105,15 @@ public class Scene extends Graph {
         }
       }
     }
-    pg.pushStyle();
-    pg.strokeWeight(10);
     if (node.isHintEnable(Node.AXES) && node.isPickingModeEnable(Node.AXES)) {
+      pg.pushStyle();
+      pg.strokeWeight(6);
       drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
+      pg.popStyle();
     }
     if (node.isHintEnable(Node.CAMERA) && node.isPickingModeEnable(Node.CAMERA)) {
       _drawEye(pg, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
     }
-    pg.popStyle();
   }
 
   // drawing
