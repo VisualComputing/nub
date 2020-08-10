@@ -56,7 +56,6 @@ public class MatrixHandler {
    * implementing them in terms of that renderer.
    *
    * @see Graph#render()
-   * @see Graph#projection(Node, Graph.Type, float, float, float, float)
    * @see Node#view()
    */
   public void bind(Matrix projection, Matrix view) {

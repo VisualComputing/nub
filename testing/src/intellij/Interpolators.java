@@ -49,11 +49,14 @@ public class Interpolators extends PApplet {
     for (int i = 0; i < random(4, 10); i++) {
       shapeInterpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
     }
+    shapeInterpolator.edit = true;
+    //shapeInterpolator.setSteps(10);
+    shapeInterpolator.setSteps(1);
     shapeInterpolator.run();
 
     eyeInterpolator = new Interpolator(scene.eye());
     eyeInterpolator.configHint(Interpolator.SPLINE, color(255, 255, 0));
-    eyeInterpolator.configHint(Interpolator.CAMERA, color(0, 255, 0));
+    // eyeInterpolator.configHint(Interpolator.CAMERA, color(0, 255, 0));
 
     scene.enableHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(0, 255, 0));
@@ -64,7 +67,7 @@ public class Interpolators extends PApplet {
 
   public void draw() {
     scene.render();
-    println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");
+    // println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");
   }
 
   public void mouseMoved() {
@@ -89,10 +92,14 @@ public class Interpolators extends PApplet {
 
   public void keyPressed() {
     if (key == ' ') {
-      shapeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.AXES);
-      eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.CAMERA);
-      //shapeInterpolator.toggleHint(Interpolator.SPLINE);
-      //eyeInterpolator.toggleHint(Interpolator.SPLINE);
+      //shapeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.AXES);
+      //eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.CAMERA);
+      shapeInterpolator.toggleHint(Interpolator.SPLINE);
+      eyeInterpolator.toggleHint(Interpolator.SPLINE);
+    }
+
+    if (key == 'i') {
+      println(shapeInterpolator.keyFrames().size());
     }
 
     if (key == '-' || key == '+') {

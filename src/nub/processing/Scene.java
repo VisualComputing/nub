@@ -1336,31 +1336,39 @@ public class Scene extends Graph {
         context().endShape();
         context().popStyle();
       }
-      if (interpolator.isHintEnable(Interpolator.AXES) || interpolator.isHintEnable(Interpolator.CAMERA)) {
-        int nbSteps = 30;
-        int count = 0;
-        float goal = 0.0f;
-        for (Node node : path) {
-          if ((count++) >= goal) {
-            goal += nbSteps / (float) interpolator.steps();
+      int count = 0;
+      float goal = 0.0f;
+      for (Node node : path) {
+        if (count >= goal) {
+          goal += Interpolator.maxSteps / (float) interpolator.steps();
+          if (count % Interpolator.maxSteps != 0) {
             _matrixHandler.pushMatrix();
             _matrixHandler.applyTransformation(node);
-            if (interpolator.isHintEnable(Interpolator.AXES)) {
-              // TODO test
-              drawAxes(_axesLength(interpolator) == 0 ? _radius / 5 : _axesLength(interpolator));
-            }
-            if (interpolator.isHintEnable(Interpolator.CAMERA)) {
+            if (interpolator.node().isEye()) {
               // TODO test
               context().pushStyle();
               context().colorMode(PApplet.RGB, 255);
+              /*
               context().stroke(_cameraStroke(interpolator));
               context().fill(_cameraStroke(interpolator));
               _drawEye(context(), _cameraLength(interpolator) == 0 ? _radius : _cameraLength(interpolator));
+              */
+              context().stroke(_cameraStroke(interpolator.node()));
+              context().fill(_cameraStroke(interpolator.node()));
+              _drawEye(context(), _cameraLength(interpolator.node()) == 0 ? _radius : _cameraLength(interpolator.node()));
               context().popStyle();
+            }
+            //if (interpolator.isHintEnable(Interpolator.CAMERA)) {
+            else {
+              //if (interpolator.isHintEnable(Interpolator.AXES)) {
+              drawAxes(_radius / 5);
+              // TODO test
+              // drawAxes(_axesLength(interpolator) == 0 ? _radius / 5 : _axesLength(interpolator));
             }
             _matrixHandler.popMatrix();
           }
         }
+        count++;
       }
       context().popStyle();
     }
@@ -1381,13 +1389,12 @@ public class Scene extends Graph {
     float baseHalfWidth = 0.3f * halfWidth;
 
     // Frustum outline
+    /*
     if (pg == context()) {
       pg.pushStyle();
       pg.noFill();
     }
-    //pg.pushStyle();
-    // TODO from here study picking with fill
-    //pg.noFill();
+    */
     pg.beginShape(PApplet.TRIANGLE_FAN);
     vertex(pg, 0.0f, 0.0f, 0.0f);
     vertex(pg, -halfWidth, -halfHeight, -dist);
@@ -1396,10 +1403,11 @@ public class Scene extends Graph {
     vertex(pg, -halfWidth, halfHeight, -dist);
     vertex(pg, -halfWidth, -halfHeight, -dist);
     pg.endShape(PApplet.CLOSE);
+    /*
     if (pg == context()) {
       pg.popStyle();
     }
-    //pg.popStyle();
+    */
 
     // Up arrow
     pg.noStroke();

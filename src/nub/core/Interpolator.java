@@ -165,6 +165,7 @@ public class Interpolator {
   // Attention: We should go like this: protected Map<Float, Node> _list;
   // but Java doesn't allow to iterate backwards a map
   protected List<KeyFrame> _list;
+  public static int maxSteps = 30;
   public boolean edit;
   protected ListIterator<KeyFrame> _backwards;
   protected ListIterator<KeyFrame> _forwards;
@@ -190,12 +191,7 @@ public class Interpolator {
 
   // Visual hint
   protected int _mask;
-  public final static int CAMERA = Node.CAMERA;
-  public final static int AXES = Node.AXES;
   public final static int SPLINE = 1 << 2;
-  protected float _axesLength;
-  protected int _cameraStroke;
-  protected float _cameraLength;
   protected int _splineStroke;
   protected int _steps;
 
@@ -228,8 +224,6 @@ public class Interpolator {
     _backwards = _list.listIterator();
     _forwards = _list.listIterator();
     // hints
-    // green (color(0, 255, 0)) encoded as a processing int rgb color
-    _cameraStroke = -16711936;
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
     _splineStroke = -65281;
     _steps = 3;
@@ -266,11 +260,8 @@ public class Interpolator {
     this.edit = other.edit;
     // TODO decide this and make consistent with Node.get()
     // hints
-    this._cameraStroke = other._cameraStroke;
-    this._cameraLength = other._cameraLength;
     this._splineStroke = other._splineStroke;
     this._steps = other._steps;
-    this._axesLength = other._axesLength;
   }
 
   /**
@@ -768,7 +759,6 @@ public class Interpolator {
     _checkValidity();
     if (!_pathIsValid) {
       _path.clear();
-      int nbSteps = 30;
       if (_list.isEmpty())
         return;
       if (!_valuesAreValid)
@@ -789,8 +779,8 @@ public class Interpolator {
           pvec1 = Vector.subtract(pvec1, keyFrames[2]._tangentVector());
           Vector pvec2 = Vector.add(Vector.multiply(pdiff, (-2.0f)), keyFrames[1]._tangentVector());
           pvec2 = Vector.add(pvec2, keyFrames[2]._tangentVector());
-          for (int step = 0; step < nbSteps; ++step) {
-            float alpha = step / (float) nbSteps;
+          for (int step = 0; step < maxSteps; ++step) {
+            float alpha = step / (float) maxSteps;
             _path.add(Node.detach(
                 Vector.add(keyFrames[1]._node.position(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
                 Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.orientation(), alpha),
@@ -881,10 +871,6 @@ public class Interpolator {
    * single visual hints available the interpolator:
    * <p>
    * <ol>
-   * <li>{@link #CAMERA} which displays a camera hint for each interpolator key-frame
-   * centered at the screen projection of its {@link Node#position()}.</li>
-   * <li>{@link #AXES} which displays an axes hint for each key-frame centered at
-   * the screen projection of its {@link Node#position()}.</li>
    * <li>{@link #SPLINE} which displays a Catmull-Rom spline having the key-frames
    * as its control points.</li>
    * </ol>
@@ -969,22 +955,16 @@ public class Interpolator {
     if (_mask != 0) _enabled();
   }
 
-  // TODO improve when line picking shader is fixed
   protected void _enabled() {
     if (edit) {
       for (KeyFrame keyFrame : _list) {
         if (keyFrame._node.hint() == 0) {
           keyFrame._cache = true;
-          if (isHintEnable(CAMERA) || isHintEnable(AXES)) {
-            if (isHintEnable(CAMERA)) {
-              keyFrame._node.enableHint(CAMERA);
-            }
-            if (isHintEnable(AXES)) {
-              keyFrame._node.enableHint(AXES);
-            }
+          if (node().isEye()) {
+            keyFrame._node.enableHint(Node.CAMERA);
           }
           else {
-            keyFrame._node.enableHint(Node.BULLSEYE);
+            keyFrame._node.enableHint(Node.AXES);
           }
         }
       }
@@ -992,7 +972,6 @@ public class Interpolator {
     Graph._interpolators.add(this);
   }
 
-  // TODO improve when line picking shader is fixed
   protected void _disabled() {
     if (edit) {
       for (KeyFrame keyFrame : _list) {
@@ -1028,9 +1007,6 @@ public class Interpolator {
    * Configures the hint using varargs as follows:
    * <p>
    * <ol>
-   * <li>{@link #CAMERA} hint: {@code configHint(Interpolator.CAMERA, cameraStroke)}
-   * or {@code configHint(Interpolator.CAMERA, cameraStroke, cameraLength)}.</li>
-   * <li>{@link #AXES} hint: {@code configHint(Interpolator.AXES, axesLength)}.</li>
    * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke)}.</li>
    * </ol>
    * Note that the {@code cameraStroke} and {@code splineStroke} are color {@code int}
@@ -1051,23 +1027,6 @@ public class Interpolator {
         if (Graph.isNumInstance(params[0])) {
           if (hint == SPLINE) {
             _splineStroke = Graph.castToInt(params[0]);
-            return;
-          }
-          if (hint == AXES) {
-            _axesLength = Graph.castToFloat(params[0]);
-            return;
-          }
-          if (hint == CAMERA) {
-            _cameraStroke = Graph.castToInt(params[0]);
-            return;
-          }
-        }
-        break;
-      case 2:
-        if (hint == CAMERA) {
-          if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
-            _cameraStroke = Graph.castToInt(params[0]);
-            _cameraLength = Graph.castToFloat(params[1]);
             return;
           }
         }
@@ -1094,7 +1053,7 @@ public class Interpolator {
    * @see #hint()
    */
   public void setSteps(int steps) {
-    if (1 <= steps && steps <= 30)
+    if (1 <= steps && steps <= maxSteps)
       _steps = steps;
     else
       System.out.println("Warning: spline steps should be in [1..30]. Nothing done!");

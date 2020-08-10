@@ -2969,4 +2969,18 @@ public class Node {
     }
     System.out.println("Warning: some params in Node.configHint(hint, params) couldn't be parsed!");
   }
+
+  /**
+   * Returns whether or not this node is some graph {@link Graph#eye()}.
+   */
+  public boolean isEye() {
+    return !_frustumGraphs.isEmpty();
+  }
+
+  /**
+   * Returns whether or not this node is the given {@code graph} {@link Graph#eye()}.
+   */
+  public boolean isEye(Graph graph) {
+    return _frustumGraphs.contains(graph);
+  }
 }

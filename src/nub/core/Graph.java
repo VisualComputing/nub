@@ -1003,7 +1003,7 @@ public class Graph {
   // Eye stuff
 
   /**
-   * Checks wheter or not the given node is the {@link #eye()}.
+   * Checks whether or not the given node is the {@link #eye()}.
    */
   public boolean isEye(Node node) {
     return _eye == node;
@@ -4829,27 +4829,6 @@ public class Graph {
   }
 
   // Interpolator
-
-  /**
-   * Used to display the interpolator in {@link #_displayHint()}.
-   */
-  protected float _axesLength(Interpolator interpolator) {
-    return interpolator._axesLength;
-  }
-
-  /**
-   * Used to display the interpolator in {@link #_displayHint()}.
-   */
-  protected float _cameraLength(Interpolator interpolator) {
-    return interpolator._cameraLength;
-  }
-
-  /**
-   * Used to display the interpolator in {@link #_displayHint()}.
-   */
-  protected int _cameraStroke(Interpolator interpolator) {
-    return interpolator._cameraStroke;
-  }
 
   /**
    * Used to display the interpolator in {@link #_displayHint()}.
