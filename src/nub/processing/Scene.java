@@ -1360,8 +1360,9 @@ public class Scene extends Graph {
             }
             //if (interpolator.isHintEnable(Interpolator.CAMERA)) {
             else {
+              _displayFrontHint(interpolator.node());
               //if (interpolator.isHintEnable(Interpolator.AXES)) {
-              drawAxes(_radius / 5);
+              //drawAxes(_radius / 5);
               // TODO test
               // drawAxes(_axesLength(interpolator) == 0 ? _radius / 5 : _axesLength(interpolator));
             }
