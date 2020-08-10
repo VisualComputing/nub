@@ -317,7 +317,7 @@ public class Node {
     // unlikely but theoretically possible
     if (_id == 16777216)
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
-    setBullsEyeSize(30);
+    _bullsEyeSize = 30;
     _bullsEyeShape = BullsEyeShape.SQUARE;
     tagging = true;
     // hints
@@ -491,19 +491,16 @@ public class Node {
    *
    * @see #detach()
    */
-  // TODO should hint be copied ?
   public Node get() {
-    // Copying the shape (node.setShape(this.shape())) is incompatible with js
-    // and it also would affect Interpolator addKeyFrame(eye)
     Node node = new Node();
     node.set(this);
-    // TODO decide this and make consistent with Interpolator.get()
     return node;
   }
 
   /**
-   * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
-   * those of the {@code node}. The node {@link #reference()} and {@link #constraint()}
+   * Sets {@link #position()}, {@link #orientation()}, {@link #magnitude()},
+   * {@link #hint()} and {@link #pickingMode()} values from those of the {@code node}.
+   * The node {@link #reference()} and {@link #constraint()}
    * are not affected by this call.
    * <p>
    * After calling {@code set(node)} a call to {@code this.matches(node)} should
@@ -519,6 +516,20 @@ public class Node {
     setPosition(node);
     setOrientation(node);
     setMagnitude(node);
+    _mask = node.hint();
+    _pickingMode = node.pickingMode();
+    _rmrShape = node._rmrShape;
+    _imrShape = node._imrShape;
+    _rmrHUD = node._rmrHUD;
+    _imrHUD = node._imrHUD;
+    _bullsEyeSize = node._bullsEyeSize;
+    _bullsEyeShape = node._bullsEyeShape;
+    tagging = node.tagging;
+    _highlight = node._highlight;
+    _torusFaces = node._torusFaces;
+    _torusColor = node._torusColor;
+    _bullsEyeStroke = node._bullsEyeStroke;
+    _cameraStroke = node._cameraStroke;
   }
 
   /**
@@ -907,6 +918,14 @@ public class Node {
 
   /**
    * Sets the {@link #bullsEyeSize()} of the {@link #BULLSEYE} {@link #hint()}.
+   * <p>
+   * Picking a node is done with ray casting against a screen-space bullseye shape
+   * (see {@link #configHint(int, Object...)}) whose length is defined as follows:
+   * <ul>
+   * <li>A percentage of the graph diameter (see {@link Graph#radius()}). Set it
+   * with {@code size in [0..1]}.</li>
+   * <li>A fixed numbers of pixels. Set it with {@code size > 1}.</li>
+   * </ul>
    *
    * @see #bullsEyeSize()
    */
@@ -916,6 +935,12 @@ public class Node {
     _bullsEyeSize = size;
   }
 
+  /**
+   * Sets the node {@link #highlight()} which should be a value in  {@code [0..1]}.
+   * Default value is {@code 0.15}.
+   *
+   * @see #highlight()
+   */
   public void setHighlight(float highlight) {
     float val = Math.abs(highlight);
     while (val > 1)
@@ -925,6 +950,11 @@ public class Node {
     _highlight = val;
   }
 
+  /**
+   * Returns the highlighting magnitude use to scale the node when it's tagged.
+   *
+   * @see #setHighlight(float)
+   */
   public float highlight() {
     return _highlight;
   }
@@ -932,18 +962,6 @@ public class Node {
   /**
    * Returns the node {@link #BULLSEYE} {@link #hint()} size. Set it with
    * {@link #setBullsEyeSize(float)}.
-   * <p>
-   * Picking a node is done with ray casting against a screen-space shape defined according
-   * to a {@link #bullsEyeSize()} as follows:
-   * <ul>
-   * <li>A node bounding box whose length is defined as percentage of the graph diameter
-   * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
-   * <li>A squared 'bullseye' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
-   * <li>A node bounding sphere whose length is defined as percentage of the graph diameter
-   * (see {@link Graph#radius()}). Set it with {@code threshold in [-1..0]}.</li>
-   * <li>A circled 'bullseye' of a fixed pixels length. Set it with {@code threshold < -1}.</li>
-   * </ul>
-   * Default picking precision is defined with {@code threshold = 0}.
    *
    * @see #setBullsEyeSize(float)
    */
