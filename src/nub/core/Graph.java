@@ -4848,4 +4848,8 @@ public class Graph {
   protected int _splineWeight(Interpolator interpolator) {
     return interpolator._splineWeight;
   }
+
+  protected List<Node> _path(Interpolator interpolator) {
+    return interpolator._path();
+  }
 }

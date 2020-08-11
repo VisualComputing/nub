@@ -1310,7 +1310,7 @@ public class Scene extends Graph {
     if (interpolator.hint() != 0) {
       context().pushStyle();
       context().noFill();
-      List<Node> path = interpolator.path();
+      List<Node> path = _path(interpolator);
       if (interpolator.isHintEnable(Interpolator.SPLINE) && path.size() > 1) {
         context().pushStyle();
         context().colorMode(PApplet.RGB, 255);

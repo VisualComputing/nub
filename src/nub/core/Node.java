@@ -298,7 +298,7 @@ public class Node {
     setReference(reference);
     // /*
     // TODO deprecated
-    // hack
+    // hack (refer to Node.get())
     _imrShape = this::graphics;
     if (!getClass().equals(Node.class))
       enableHint(SHAPE);

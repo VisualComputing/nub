@@ -757,7 +757,7 @@ public class Interpolator {
    * <p>
    * Use it in your interpolator path drawing routine.
    */
-  public List<Node> path() {
+  protected List<Node> _path() {
     _updatePath();
     return _path;
   }
@@ -797,7 +797,10 @@ public class Interpolator {
                     Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.orientation(), alpha),
                     Vector.lerp(keyFrames[1]._node.magnitude(), keyFrames[2]._node.magnitude(), alpha));
             if (step % Interpolator.maxSteps != 0) {
-              if (node()._imrShape != null || node()._rmrShape != null) {
+              // TODO deprecated
+              // hack (refer to Node.get())
+              if (node().isHintEnable(Node.SHAPE) && node()._imrShape != null || node()._rmrShape != null) {
+              //if (node()._imrShape != null || node()._rmrShape != null) {
                 node.setShape(node());
               }
               else {
