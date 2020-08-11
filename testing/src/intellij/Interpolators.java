@@ -50,7 +50,8 @@ public class Interpolators extends PApplet {
     for (int i = 0; i < random(4, 10); i++) {
       shapeInterpolator.addKeyFrame(scene.randomNode(), (Node.BULLSEYE | Node.AXES), i % 2 == 1 ? 1 : 4);
     }
-    shapeInterpolator.configHint(Interpolator.STEPS, Node.AXES);
+    // decide what to reproduce along path
+    //shapeInterpolator.configHint(Interpolator.STEPS, Node.AXES);
     shapeInterpolator.setSteps(1);
     shapeInterpolator.run();
 
