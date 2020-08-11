@@ -915,6 +915,7 @@ public class Interpolator {
    * <ol>
    * <li>{@link #SPLINE} which displays a Catmull-Rom spline having the key-frames
    * as its control points.</li>
+   * <li>{@link #STEPS} which defines what to draw between consecutive key-frames.</li>
    * </ol>
    * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
    * calling either {@link Graph#render(Node)} or {@link Graph#render()}.
@@ -1038,9 +1039,11 @@ public class Interpolator {
    * <ol>
    * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke)}.</li>
    * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke, splineWeight)}.</li>
+   * <li>{@link #STEPS} hint: {@code configHint(Interpolator.STEPS, hint)}.</li>
    * </ol>
-   * Note that the {@code splineStroke} is a color {@code int} var; and, {@code splineWeight}
-   * is a stroke weight int var.
+   * Note that the {@code splineStroke} is a color {@code int} var;{@code splineWeight}
+   * is a stroke weight int var; and, {@code hint} is a node {@link Node#hint()} defining
+   * what to draw between two consecutives key-frames. See also {@link #setSteps(int)}.
    *
    * @see #hint()
    * @see #enableHint(int)
