@@ -1308,11 +1308,10 @@ public class Scene extends Graph {
    */
   protected void _drawSpline(Interpolator interpolator) {
     if (interpolator.hint() != 0) {
-      context().pushStyle();
-      context().noFill();
       List<Node> path = _path(interpolator);
       if (interpolator.isHintEnable(Interpolator.SPLINE) && path.size() > 1) {
         context().pushStyle();
+        context().noFill();
         context().colorMode(PApplet.RGB, 255);
         context().strokeWeight(_splineWeight(interpolator));
         context().stroke(_splineStroke(interpolator));
@@ -1324,21 +1323,24 @@ public class Scene extends Graph {
         context().endShape();
         context().popStyle();
       }
-      int count = 0;
-      float goal = 0.0f;
-      for (Node node : path) {
-        if (count >= goal) {
-          goal += Interpolator.maxSteps / ((float) interpolator.steps() + 1);
-          if (count % Interpolator.maxSteps != 0) {
-            _matrixHandler.pushMatrix();
-            _matrixHandler.applyTransformation(node);
-            _displayFrontHint(node);
-            _matrixHandler.popMatrix();
+      if (interpolator.isHintEnable(Interpolator.STEPS)) {
+        context().pushStyle();
+        int count = 0;
+        float goal = 0.0f;
+        for (Node node : path) {
+          if (count >= goal) {
+            goal += Interpolator.maxSteps / ((float) interpolator.steps() + 1);
+            if (count % Interpolator.maxSteps != 0) {
+              _matrixHandler.pushMatrix();
+              _matrixHandler.applyTransformation(node);
+              _displayFrontHint(node);
+              _matrixHandler.popMatrix();
+            }
           }
+          count++;
         }
-        count++;
+        context().popStyle();
       }
-      context().popStyle();
     }
   }
 

@@ -50,6 +50,7 @@ public class Interpolators extends PApplet {
     for (int i = 0; i < random(4, 10); i++) {
       shapeInterpolator.addKeyFrame(scene.randomNode(), (Node.BULLSEYE | Node.AXES), i % 2 == 1 ? 1 : 4);
     }
+    shapeInterpolator.configHint(Interpolator.STEPS, Node.AXES);
     shapeInterpolator.setSteps(1);
     shapeInterpolator.run();
 
@@ -90,8 +91,8 @@ public class Interpolators extends PApplet {
 
   public void keyPressed() {
     if (key == ' ') {
-      shapeInterpolator.toggleHint(Interpolator.SPLINE);
-      eyeInterpolator.toggleHint(Interpolator.SPLINE);
+      shapeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
+      eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
     }
     if (key == 'i') {
       println(shapeInterpolator.keyFrames().size());

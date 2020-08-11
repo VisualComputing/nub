@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.stream.Collectors;
 
 /**
  * A keyframe Catmull-Rom interpolator.
@@ -203,9 +202,11 @@ public class Interpolator {
   // Visual hint
   protected int _mask;
   public final static int SPLINE = 1 << 0;
+  public final static int STEPS = 1 << 1;
   protected int _splineStroke;
   protected int _splineWeight;
   protected int _steps;
+  protected int _stepsHint;
 
   /**
    * Creates an interpolator, with {@code node} as associated {@link #node()}.
@@ -240,6 +241,20 @@ public class Interpolator {
     _splineStroke = -65281;
     _splineWeight = 3;
     _steps = 3;
+
+    // TODO deprecated
+    // hack (refer to Node.get())
+    if (node().isHintEnable(Node.SHAPE) && node()._imrShape != null || node()._rmrShape != null) {
+      //if (node()._imrShape != null || node()._rmrShape != null) {
+      _stepsHint = Node.SHAPE;
+    }
+    else {
+      if (node().isEye()) {
+        _stepsHint = Node.CAMERA;
+      } else {
+        _stepsHint = Node.AXES;
+      }
+    }
   }
 
   protected Interpolator(Interpolator other) {
@@ -273,6 +288,7 @@ public class Interpolator {
     this._splineStroke = other._splineStroke;
     this._splineWeight = other._splineWeight;
     this._steps = other._steps;
+    this._stepsHint = other._stepsHint;
   }
 
   /**
@@ -806,18 +822,9 @@ public class Interpolator {
                     Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.orientation(), alpha),
                     Vector.lerp(keyFrames[1]._node.magnitude(), keyFrames[2]._node.magnitude(), alpha));
             if (step % Interpolator.maxSteps != 0) {
-              // TODO deprecated
-              // hack (refer to Node.get())
-              if (node().isHintEnable(Node.SHAPE) && node()._imrShape != null || node()._rmrShape != null) {
-              //if (node()._imrShape != null || node()._rmrShape != null) {
+              node._mask = _stepsHint;
+              if (node.isHintEnable(Node.SHAPE) && (node()._imrShape != null || node()._rmrShape != null)) {
                 node.setShape(node());
-              }
-              else {
-                if (node().isEye()) {
-                  node.enableHint(Node.CAMERA);
-                } else {
-                  node.enableHint(Node.AXES);
-                }
               }
             }
             _path.add(node);
@@ -1051,6 +1058,10 @@ public class Interpolator {
             _splineStroke = Graph.castToInt(params[0]);
             return;
           }
+          if (hint == STEPS) {
+             _stepsHint = Graph.castToInt(params[0]);
+            return;
+          }
         }
         break;
       case 2:
@@ -1090,7 +1101,10 @@ public class Interpolator {
       System.out.println("Warning: spline steps should be in [0..maxSteps-1]. Nothing done!");
   }
 
-  public void clearCache() {
+  /**
+   * Clear every key-frame cache hint.
+   */
+  public void clearKeyFrameCacheHint() {
     for (KeyFrame keyFrame : _list) {
       keyFrame._hint = keyFrame._cacheHint;
     }
