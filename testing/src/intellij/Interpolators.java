@@ -8,6 +8,8 @@ import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
+import java.util.stream.Collectors;
+
 /**
  * This example introduces the three different interpolations offered
  * by the Graph.
@@ -26,7 +28,6 @@ public class Interpolators extends PApplet {
 
   public void setup() {
     scene = new Scene(this, 150);
-    scene.fit(1);
     PShape pshape;
     if (scene.is2D()) {
       rectMode(CENTER);
@@ -47,19 +48,14 @@ public class Interpolators extends PApplet {
     shapeInterpolator.enableRecurrence();
     // Create an initial shape interpolator path
     for (int i = 0; i < random(4, 10); i++) {
-      //shapeInterpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
-      Node node = shape.get();
-      scene.randomize(node);
-      //node.randomize();
-      shapeInterpolator.addKeyFrame(node, i % 2 == 1 ? 1 : 4);
+      shapeInterpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
     }
-    //shapeInterpolator.setSteps(10);
+    // shapeInterpolator.edit = false;
     shapeInterpolator.setSteps(1);
     shapeInterpolator.run();
 
     eyeInterpolator = new Interpolator(scene.eye());
     eyeInterpolator.configHint(Interpolator.SPLINE, color(255, 255, 0));
-    // eyeInterpolator.configHint(Interpolator.CAMERA, color(0, 255, 0));
 
     scene.enableHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(0, 255, 0));
@@ -95,20 +91,15 @@ public class Interpolators extends PApplet {
 
   public void keyPressed() {
     if (key == ' ') {
-      //shapeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.AXES);
-      //eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.CAMERA);
       shapeInterpolator.toggleHint(Interpolator.SPLINE);
       eyeInterpolator.toggleHint(Interpolator.SPLINE);
     }
-
     if (key == 'i') {
       println(shapeInterpolator.keyFrames().size());
     }
-
     if (key == '-' || key == '+') {
       shapeInterpolator.increaseSpeed(key == '+' ? 0.25f : -0.25f);
     }
-
     if (key == '1') {
       eyeInterpolator.addKeyFrame(scene.eye().get());
     }
@@ -116,12 +107,10 @@ public class Interpolators extends PApplet {
       eyeInterpolator.toggle();
     if (key == 'b')
       eyeInterpolator.clear();
-
     if (key == 's')
       scene.fit(1);
     if (key == 'f')
       scene.fit();
-
     if (key == 'x')
       for (Task task : Scene.TimingHandler.tasks())
         task.enableConcurrence();

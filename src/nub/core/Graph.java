@@ -4841,4 +4841,11 @@ public class Graph {
   protected int _splineStroke(Interpolator interpolator) {
     return interpolator._splineStroke;
   }
+
+  /**
+   * Used to display the interpolator in {@link #_displayHint()}.
+   */
+  protected int _splineWeight(Interpolator interpolator) {
+    return interpolator._splineWeight;
+  }
 }

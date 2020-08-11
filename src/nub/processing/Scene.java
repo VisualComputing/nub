@@ -78,18 +78,6 @@ import java.util.function.Consumer;
  * Another scene's eye (different than the graph {@link Graph#eye()}) can be drawn with
  * {@link #drawFrustum(Graph)}. Typical usage include interactive minimaps and
  * visibility culling visualization and debugging.
- * <p>
- * An {@link Interpolator} path may be drawn with code like this:
- * <pre>
- * {@code
- * void draw() {
- *   scene.render();
- *   scene._drawSpline(interpolator, 5);
- * }
- * }
- * </pre>
- * while {@link #render()} will draw the animated node(s), {@link #_drawSpline(Interpolator)}
- * will draw the interpolated path too.
  * <h1>Picking and interaction</h1>
  * Refer to the {@link Graph} documentation for details about how picking and interaction works
  * in nub.
@@ -1326,7 +1314,7 @@ public class Scene extends Graph {
       if (interpolator.isHintEnable(Interpolator.SPLINE) && path.size() > 1) {
         context().pushStyle();
         context().colorMode(PApplet.RGB, 255);
-        context().strokeWeight(3);
+        context().strokeWeight(_splineWeight(interpolator));
         context().stroke(_splineStroke(interpolator));
         context().beginShape();
         for (Node node : path) {
@@ -1340,32 +1328,11 @@ public class Scene extends Graph {
       float goal = 0.0f;
       for (Node node : path) {
         if (count >= goal) {
-          goal += Interpolator.maxSteps / (float) interpolator.steps();
+          goal += Interpolator.maxSteps / ((float) interpolator.steps() + 1);
           if (count % Interpolator.maxSteps != 0) {
             _matrixHandler.pushMatrix();
             _matrixHandler.applyTransformation(node);
-            if (interpolator.node().isEye()) {
-              // TODO test
-              context().pushStyle();
-              context().colorMode(PApplet.RGB, 255);
-              /*
-              context().stroke(_cameraStroke(interpolator));
-              context().fill(_cameraStroke(interpolator));
-              _drawEye(context(), _cameraLength(interpolator) == 0 ? _radius : _cameraLength(interpolator));
-              */
-              context().stroke(_cameraStroke(interpolator.node()));
-              context().fill(_cameraStroke(interpolator.node()));
-              _drawEye(context(), _cameraLength(interpolator.node()) == 0 ? _radius : _cameraLength(interpolator.node()));
-              context().popStyle();
-            }
-            //if (interpolator.isHintEnable(Interpolator.CAMERA)) {
-            else {
-              _displayFrontHint(interpolator.node());
-              //if (interpolator.isHintEnable(Interpolator.AXES)) {
-              //drawAxes(_radius / 5);
-              // TODO test
-              // drawAxes(_axesLength(interpolator) == 0 ? _radius / 5 : _axesLength(interpolator));
-            }
+            _displayFrontHint(node);
             _matrixHandler.popMatrix();
           }
         }
@@ -1396,6 +1363,9 @@ public class Scene extends Graph {
       pg.noFill();
     }
     */
+    pg.pushStyle();
+    pg.noFill();
+
     pg.beginShape(PApplet.TRIANGLE_FAN);
     vertex(pg, 0.0f, 0.0f, 0.0f);
     vertex(pg, -halfWidth, -halfHeight, -dist);
@@ -1409,6 +1379,7 @@ public class Scene extends Graph {
       pg.popStyle();
     }
     */
+    pg.popStyle();
 
     // Up arrow
     pg.noStroke();

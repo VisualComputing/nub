@@ -296,11 +296,13 @@ public class Node {
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
+    // /*
     // TODO deprecated
     // hack
     _imrShape = this::graphics;
     if (!getClass().equals(Node.class))
       enableHint(SHAPE);
+    // */
   }
 
   /**
@@ -494,6 +496,13 @@ public class Node {
   public Node get() {
     Node node = new Node();
     node.set(this);
+    // /*
+    // TODO deprecated
+    // hack
+    //if (getClass().equals(Node.class))
+    if (!isHintEnable(Node.SHAPE))
+      node.disableHint(SHAPE);
+    // */
     return node;
   }
 
@@ -518,10 +527,8 @@ public class Node {
     setMagnitude(node);
     _mask = node.hint();
     _pickingMode = node.pickingMode();
-    _rmrShape = node._rmrShape;
-    _imrShape = node._imrShape;
-    _rmrHUD = node._rmrHUD;
-    _imrHUD = node._imrHUD;
+    setShape(node);
+    setHUD(node);
     _bullsEyeSize = node._bullsEyeSize;
     _bullsEyeShape = node._bullsEyeShape;
     tagging = node.tagging;
@@ -2477,6 +2484,14 @@ public class Node {
   }
 
   /**
+   * Sets this shape from the {@code node} shape.
+   */
+  public void setShape(Node node) {
+    setShape(node._rmrShape);
+    setShape(node._imrShape);
+  }
+
+  /**
    * Sets the node retained mode rendering (rmr) {@link #SHAPE} hint
    * (see {@link #hint()}). Use {@code enableHint(Node.SHAPE)},
    * {@code disableHint(Node.SHAPE)} and {@code toggleHint(Node.SHAPE)}
@@ -2488,8 +2503,13 @@ public class Node {
    * @see #resetRMRShape()
    */
   public void setShape(processing.core.PShape shape) {
-    _rmrShape = shape;
-    enableHint(SHAPE);
+    if (shape == null) {
+      resetRMRShape();
+    }
+    else {
+      _rmrShape = shape;
+      enableHint(SHAPE);
+    }
   }
 
   /**
@@ -2504,8 +2524,13 @@ public class Node {
    * @see #resetRMRShape()
    */
   public void setShape(Consumer<processing.core.PGraphics> callback) {
-    _imrShape = callback;
-    enableHint(SHAPE);
+    if (callback == null) {
+      resetIMRShape();
+    }
+    else {
+      _imrShape = callback;
+      enableHint(SHAPE);
+    }
   }
 
   /**
@@ -2562,6 +2587,14 @@ public class Node {
   }
 
   /**
+   * Sets this (H)eads (U)p (D)isplay from the {@code node} hud.
+   */
+  public void setHUD(Node node) {
+    setHUD(node._rmrHUD);
+    setHUD(node._imrHUD);
+  }
+
+  /**
    * Sets the node retained mode rendering (rmr) shape {@link #HUD} hint
    * (see {@link #hint()}). The 2D {@code shape} screen coordinates are
    * interpreted relative to the node {@link #position()} screen projection
@@ -2575,9 +2608,14 @@ public class Node {
    * @see #resetRMRHUD()
    */
   public void setHUD(processing.core.PShape shape) {
-    _rmrHUD = shape;
-    enableHint(HUD);
-    _updateHUD();
+    if (shape == null) {
+      resetRMRHUD();
+    }
+    else {
+      _rmrHUD = shape;
+      enableHint(HUD);
+      _updateHUD();
+    }
   }
 
   /**
@@ -2594,9 +2632,14 @@ public class Node {
    * @see #resetRMRHUD()
    */
   public void setHUD(Consumer<processing.core.PGraphics> callback) {
-    _imrHUD = callback;
-    enableHint(HUD);
-    _updateHUD();
+    if (callback == null) {
+      resetIMRHUD();
+    }
+    else {
+      _imrHUD = callback;
+      enableHint(HUD);
+      _updateHUD();
+    }
   }
 
   /**

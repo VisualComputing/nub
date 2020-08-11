@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
 
 /**
  * A keyframe Catmull-Rom interpolator.
@@ -191,8 +192,9 @@ public class Interpolator {
 
   // Visual hint
   protected int _mask;
-  public final static int SPLINE = 1 << 2;
+  public final static int SPLINE = 1 << 0;
   protected int _splineStroke;
+  protected int _splineWeight;
   protected int _steps;
 
   /**
@@ -226,6 +228,7 @@ public class Interpolator {
     // hints
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
     _splineStroke = -65281;
+    _splineWeight = 3;
     _steps = 3;
     edit = true;
   }
@@ -258,9 +261,9 @@ public class Interpolator {
     this._backwards = _list.listIterator();
     this._forwards = _list.listIterator();
     this.edit = other.edit;
-    // TODO decide this and make consistent with Node.get()
     // hints
     this._splineStroke = other._splineStroke;
+    this._splineWeight = other._splineWeight;
     this._steps = other._steps;
   }
 
@@ -285,7 +288,10 @@ public class Interpolator {
     if (node == null) {
       throw new RuntimeException("Interpolator node should be non-null!");
     }
-    _node = node;
+    if (_node != node) {
+      _node = node;
+      _pathIsValid = false;
+    }
   }
 
   /**
@@ -608,7 +614,10 @@ public class Interpolator {
       return;
     if (node == null)
       return;
-    _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time));
+    KeyFrame keyFrame = new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time);
+    if (isHintEnable(Interpolator.SPLINE))
+      _enabled(keyFrame);
+    _list.add(keyFrame);
     _valuesAreValid = false;
     _pathIsValid = false;
     _currentKeyFrameValid = false;
@@ -627,6 +636,7 @@ public class Interpolator {
     while (listIterator.hasNext()) {
       KeyFrame keyFrame = listIterator.next();
       if (keyFrame._time == time) {
+        _disabled(keyFrame);
         _valuesAreValid = false;
         _pathIsValid = false;
         _currentKeyFrameValid = false;
@@ -763,8 +773,9 @@ public class Interpolator {
         return;
       if (!_valuesAreValid)
         _updateModifiedKeyFrames();
-      if (_list.get(0) == _list.get(_list.size() - 1))
+      if (_list.get(0) == _list.get(_list.size() - 1)) {
         _path.add(Node.detach(_list.get(0)._node.position(), _list.get(0)._node.orientation(), _list.get(0)._node.magnitude()));
+      }
       else {
         KeyFrame[] keyFrames = new KeyFrame[4];
         keyFrames[0] = _list.get(0);
@@ -781,11 +792,23 @@ public class Interpolator {
           pvec2 = Vector.add(pvec2, keyFrames[2]._tangentVector());
           for (int step = 0; step < maxSteps; ++step) {
             float alpha = step / (float) maxSteps;
-            _path.add(Node.detach(
-                Vector.add(keyFrames[1]._node.position(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
-                Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.orientation(), alpha),
-                Vector.lerp(keyFrames[1]._node.magnitude(), keyFrames[2]._node.magnitude(), alpha))
-            );
+            Node node = Node.detach(
+                    Vector.add(keyFrames[1]._node.position(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
+                    Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.orientation(), alpha),
+                    Vector.lerp(keyFrames[1]._node.magnitude(), keyFrames[2]._node.magnitude(), alpha));
+            if (step % Interpolator.maxSteps != 0) {
+              if (node()._imrShape != null || node()._rmrShape != null) {
+                node.setShape(node());
+              }
+              else {
+                if (node().isEye()) {
+                  node.enableHint(Node.CAMERA);
+                } else {
+                  node.enableHint(Node.AXES);
+                }
+              }
+            }
+            _path.add(node);
           }
           // Shift
           keyFrames[0] = keyFrames[1];
@@ -956,32 +979,48 @@ public class Interpolator {
   }
 
   protected void _enabled() {
-    if (edit) {
-      for (KeyFrame keyFrame : _list) {
-        if (keyFrame._node.hint() == 0) {
-          keyFrame._cache = true;
-          if (node().isEye()) {
-            keyFrame._node.enableHint(Node.CAMERA);
-          }
-          else {
-            keyFrame._node.enableHint(Node.AXES);
-          }
-        }
-      }
+    for (KeyFrame keyFrame : _list) {
+      _enabled(keyFrame);
     }
     Graph._interpolators.add(this);
   }
 
-  protected void _disabled() {
+  protected void _enabled(KeyFrame keyFrame) {
     if (edit) {
-      for (KeyFrame keyFrame : _list) {
-        if (keyFrame._cache) {
-          keyFrame._node.resetHint();
-          keyFrame._cache = false;
+      if (node().isEye()) {
+        if (keyFrame._node.hint() == 0 || keyFrame._node.hint() == Node.BOUNDS) {
+          keyFrame._cache = true;
+          keyFrame._node.enableHint(Node.CAMERA | Node.BULLSEYE);
+        }
+      } else {
+        if (keyFrame._node.hint() == 0) {
+          keyFrame._cache = true;
+          keyFrame._node.setBullsEyeSize(100);
+          keyFrame._node.enableHint(Node.AXES | Node.BULLSEYE);
+          keyFrame._node.enablePickingMode(Node.AXES | Node.BULLSEYE);
         }
       }
     }
+  }
+
+  protected void _disabled() {
+    for (KeyFrame keyFrame : _list) {
+      _disabled(keyFrame);
+    }
     Graph._interpolators.remove(this);
+  }
+
+  protected void _disabled(KeyFrame keyFrame) {
+    if (keyFrame._cache) {
+      if (node().isEye()) {
+        keyFrame._node.disableHint(Node.CAMERA | Node.BULLSEYE);
+      }
+      else {
+        keyFrame._node.disableHint(Node.AXES | Node.BULLSEYE);
+        //keyFrame._node.resetHint();
+      }
+      keyFrame._cache = false;
+    }
   }
 
   /**
@@ -1008,10 +1047,10 @@ public class Interpolator {
    * <p>
    * <ol>
    * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke)}.</li>
+   * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke, splineWeight)}.</li>
    * </ol>
-   * Note that the {@code cameraStroke} and {@code splineStroke} are color {@code int}
-   * vars; and, {@code cameraLength} and {@code exesLength} are world magnitude
-   * numerical values.
+   * Note that the {@code splineStroke} is a color {@code int} var; and, {@code splineWeight}
+   * is a stroke weight int var.
    *
    * @see #hint()
    * @see #enableHint(int)
@@ -1027,6 +1066,15 @@ public class Interpolator {
         if (Graph.isNumInstance(params[0])) {
           if (hint == SPLINE) {
             _splineStroke = Graph.castToInt(params[0]);
+            return;
+          }
+        }
+        break;
+      case 2:
+        if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
+          if (hint == SPLINE) {
+            _splineStroke = Graph.castToInt(params[0]);
+            _splineWeight = Graph.castToInt(params[1]);
             return;
           }
         }
@@ -1053,9 +1101,9 @@ public class Interpolator {
    * @see #hint()
    */
   public void setSteps(int steps) {
-    if (1 <= steps && steps <= maxSteps)
+    if (0 <= steps && steps < maxSteps)
       _steps = steps;
     else
-      System.out.println("Warning: spline steps should be in [1..30]. Nothing done!");
+      System.out.println("Warning: spline steps should be in [0..maxSteps-1]. Nothing done!");
   }
 }
