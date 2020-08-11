@@ -2518,11 +2518,16 @@ public class Graph {
    * @see Node#setBullsEyeSize(float)
    */
   public boolean tracks(Node node, int pixelX, int pixelY) {
-    if (_backPicking(node))
-      return _tracks(node, pixelX, pixelY);
-    else if(_frontPicking(node))
-      return _tracks(node, pixelX, pixelY, screenLocation(node.position()));
-    return false;
+    boolean result = false;
+    if (_backPicking(node)) {
+      result = _tracks(node, pixelX, pixelY);
+    }
+    if (!result) {
+      if(_frontPicking(node)) {
+        result = _tracks(node, pixelX, pixelY, screenLocation(node.position()));
+      }
+    }
+    return result;
   }
 
   /**
