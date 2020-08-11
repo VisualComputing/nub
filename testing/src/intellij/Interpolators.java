@@ -48,9 +48,8 @@ public class Interpolators extends PApplet {
     shapeInterpolator.enableRecurrence();
     // Create an initial shape interpolator path
     for (int i = 0; i < random(4, 10); i++) {
-      shapeInterpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+      shapeInterpolator.addKeyFrame(scene.randomNode(), (Node.BULLSEYE | Node.AXES), i % 2 == 1 ? 1 : 4);
     }
-    // shapeInterpolator.edit = false;
     shapeInterpolator.setSteps(1);
     shapeInterpolator.run();
 
@@ -101,7 +100,7 @@ public class Interpolators extends PApplet {
       shapeInterpolator.increaseSpeed(key == '+' ? 0.25f : -0.25f);
     }
     if (key == '1') {
-      eyeInterpolator.addKeyFrame(scene.eye().get());
+      eyeInterpolator.addKeyFrame(scene.eye().get(), Node.CAMERA, 1);
     }
     if (key == 'a')
       eyeInterpolator.toggle();
