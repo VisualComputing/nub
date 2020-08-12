@@ -891,15 +891,19 @@ public class Interpolator {
           for (int step = 0; step < maxSteps; ++step) {
             float alpha = step / (float) maxSteps;
             Node node = Node.detach(
-                    Vector.add(keyFrames[1]._node.position(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
-                    Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.orientation(), alpha),
-                    Vector.lerp(keyFrames[1]._node.magnitude(), keyFrames[2]._node.magnitude(), alpha));
+                Vector.add(keyFrames[1]._node.position(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
+                Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.orientation(), alpha),
+                Vector.lerp(keyFrames[1]._node.magnitude(), keyFrames[2]._node.magnitude(), alpha));
             if (step % Interpolator.maxSteps != 0) {
               node._mask = _stepsHint;
               if (node.isHintEnable(Node.SHAPE) && (node()._imrShape != null || node()._rmrShape != null)) {
                 node.setShape(node());
               }
             }
+            node._torusFaces = node()._torusFaces;
+            node._torusColor = node()._torusColor;
+            node._bullsEyeStroke = node()._bullsEyeStroke;
+            node._cameraStroke = node()._cameraStroke;
             _path.add(node);
           }
           // Shift

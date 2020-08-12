@@ -63,6 +63,8 @@ public class Interpolators extends PApplet {
     scene.configHint(Scene.GRID, color(0, 255, 0));
     scene.enableHint(Scene.BACKGROUND, color(125));
 
+    scene.eye().configHint(Node.CAMERA, color(0, 255, 0));
+
     frameRate(1000);
   }
 

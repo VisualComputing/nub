@@ -575,7 +575,8 @@ public class Node {
   // MODIFIED
 
   /**
-   * @return the last frame this node was updated.
+   * @return the last frame this node affine transformation ({@link #position()},
+   * {@link #orientation()} or {@link #magnitude()}) or {@link #reference()} was updated.
    */
   public long lastUpdate() {
     return _lastUpdate;
