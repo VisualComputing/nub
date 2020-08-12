@@ -418,7 +418,13 @@ public class Node {
    * @see #get()
    */
   public Node detach() {
-    return detach(this);
+    Node node = detach(this);
+    node._torusFaces = this._torusFaces;
+    node._torusColor = this._torusColor;
+    node._bullsEyeStroke = this._bullsEyeStroke;
+    node._cameraStroke = this._cameraStroke;
+    node._axesLength = this._axesLength;
+    return node;
   }
 
   /**
@@ -2527,11 +2533,18 @@ public class Node {
   public void setShape(Consumer<processing.core.PGraphics> callback) {
     if (callback == null) {
       resetIMRShape();
-    }
-    else {
+    } else {
       _imrShape = callback;
       enableHint(SHAPE);
     }
+  }
+
+  /**
+   * Sets this shape from the {@code graph} shape.
+   */
+  public void setShape(Graph graph) {
+    setShape(graph._rmrShape);
+    setShape(graph._imrShape);
   }
 
   /**

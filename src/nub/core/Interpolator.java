@@ -904,6 +904,7 @@ public class Interpolator {
             node._torusColor = node()._torusColor;
             node._bullsEyeStroke = node()._bullsEyeStroke;
             node._cameraStroke = node()._cameraStroke;
+            node._axesLength = node()._axesLength;
             _path.add(node);
           }
           // Shift

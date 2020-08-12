@@ -4652,6 +4652,14 @@ public class Graph {
   }
 
   /**
+   * Sets this (H)eads (U)p (D)isplay from the {@code graph} hud.
+   */
+  public void setHUD(Graph graph) {
+    setHUD(graph._rmrHUD);
+    setHUD(graph._imrHUD);
+  }
+
+  /**
    * Sets the graph retained mode rendering (rmr) shape {@link #HUD} hint
    * (see {@link #hint()}). Use {@code enableHint(Node.HUD)},
    * {@code disableHint(Node.HUD)} and {@code toggleHint(Node.HUD)} to (dis)enable the hint.
