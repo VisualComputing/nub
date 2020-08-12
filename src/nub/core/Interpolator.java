@@ -611,16 +611,75 @@ public class Interpolator {
   }
 
   /**
-   * Appends a new keyframe one second after the previously added one.
+   * Same as {@code addKeyFrame(1)}.
    *
+   * @see #addKeyFrame(Node, int, float)
    * @see #addKeyFrame(Node, float)
+   * @see #addKeyFrame(int, float)
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame(Node)
+   */
+  public void addKeyFrame() {
+    addKeyFrame(1);
+  }
+
+  /**
+   * Same as
+   * {@code addKeyFrame(node().isEye() ? (Node.CAMERA | Node.BULLSEYE) : node().hint() == 0 ? (Node.AXES | Node.BULLSEYE) : node().hint(), time)}.
+   *
+   * @see #addKeyFrame(Node, int, float)
+   * @see #addKeyFrame(Node, float)
+   * @see #addKeyFrame(int, float)
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame(Node)
+   */
+  public void addKeyFrame(float time) {
+    addKeyFrame(node().isEye() ? (Node.CAMERA | Node.BULLSEYE) : node().hint() == 0 ? (Node.AXES | Node.BULLSEYE) : node().hint(), time);
+  }
+
+  /**
+   * Same as {@code addKeyFrame(node().get(), hint, time)}.
+   *
+   * @see #addKeyFrame(Node, int, float)
+   * @see #addKeyFrame(Node)
+   * @see #addKeyFrame(int, float)
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame()
+   */
+  public void addKeyFrame(int hint, float time) {
+    addKeyFrame(node().get(), hint, time);
+  }
+
+  /**
+   * Same as {@code addKeyFrame(node, _list.isEmpty() ? 0.0f : 1.0f)}.
+   *
+   * @see #addKeyFrame(Node, int, float)
+   * @see #addKeyFrame(Node, float)
+   * @see #addKeyFrame(int, float)
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame()
    */
   public void addKeyFrame(Node node) {
     addKeyFrame(node, _list.isEmpty() ? 0.0f : 1.0f);
   }
 
   /**
-   * Appends a new keyframe {@code time} seconds after the previously added one.
+   * Same as
+   * {@code addKeyFrame(node, node.isEye() ? (Node.CAMERA | Node.BULLSEYE) : node.hint() == 0 ? (Node.AXES | Node.BULLSEYE) : node().hint(), time)}.
+   *
+   * @see #addKeyFrame(Node, int, float)
+   * @see #addKeyFrame(Node)
+   * @see #addKeyFrame(int, float)
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame()
+   */
+  public void addKeyFrame(Node node, float time) {
+    addKeyFrame(node, node.isEye() ? (Node.CAMERA | Node.BULLSEYE) : node.hint() == 0 ? (Node.AXES | Node.BULLSEYE) : node().hint(), time);
+  }
+
+  /**
+   * Appends a new keyframe which will display the node {@code hint} when the interpolator
+   * {@link #SPLINE} hint is enabled, {@code time} seconds after the previously added one.
    * <p>
    * Note that when {@code node} is modified, the interpolator path is updated accordingly.
    * This allows for dynamic paths, where keyframes can be edited, even during the
@@ -628,12 +687,12 @@ public class Interpolator {
    * <p>
    * {@code null} node references are silently ignored.
    *
+   * @see #addKeyFrame(Node, float)
    * @see #addKeyFrame(Node)
+   * @see #addKeyFrame(int, float)
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame()
    */
-  public void addKeyFrame(Node node, float time) {
-    addKeyFrame(node, node.hint(), time);
-  }
-
   public void addKeyFrame(Node node, int hint, float time) {
     if (_list.size() == 0) {
       if (time < 0)
@@ -650,30 +709,44 @@ public class Interpolator {
   }
 
   /**
-   * Remove keyframe according to {@code time}. Calls {@link Task#stop()}
-   * and returns {@code true} if the deletion was successful and returns
-   * {@code false} otherwise.
+   * Remove the closest keyframe to {@code time} and returns it.
+   * May return {@code null} is the interpolator is empty.
    */
-  // TODO needs testing
-  public boolean removeKeyFrame(float time) {
-    boolean result = false;
-    ListIterator<KeyFrame> listIterator = _list.listIterator();
-    while (listIterator.hasNext()) {
-      KeyFrame keyFrame = listIterator.next();
-      if (keyFrame._time == time) {
-        keyFrame._node._mask = keyFrame._cacheHint;
-        _valuesAreValid = false;
-        _pathIsValid = false;
-        _currentKeyFrameValid = false;
-        if (_task.isActive())
-          _task.stop();
-        Graph.prune(keyFrame._node);
-        setTime(firstTime());
-        listIterator.remove();
-        result = true;
+  public Node removeKeyFrame(float time) {
+    if (_list.isEmpty())
+      return null;
+    int index = 0;
+    if (_list.size() > 1 && time >= 0) {
+      float previousTime = firstTime();
+      float currentTime;
+      while (index < _list.size()) {
+        currentTime = _list.get(index)._time;
+        if (currentTime < time) {
+          previousTime = currentTime;
+        } else {
+          if (time - previousTime < currentTime - time & index > 0)
+            index--;
+          break;
+        }
+        index++;
       }
     }
-    return result;
+    if (index == _list.size())
+      index--;
+    KeyFrame keyFrame = _list.get(index);
+    keyFrame._node._mask = keyFrame._cacheHint;
+    _valuesAreValid = false;
+    _pathIsValid = false;
+    _currentKeyFrameValid = false;
+    boolean rerun = _task.isActive();
+    if (rerun) {
+      _task.stop();
+    }
+    _list.remove(index);
+    setTime(firstTime());
+    if (rerun /* && _list.size() > 1 */)
+      _task.run();
+    return keyFrame._node;
   }
 
   /**

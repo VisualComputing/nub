@@ -8,8 +8,6 @@ import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
-import java.util.stream.Collectors;
-
 /**
  * This example introduces the three different interpolations offered
  * by the Graph.
@@ -47,8 +45,11 @@ public class Interpolators extends PApplet {
     shapeInterpolator.configHint(Interpolator.SPLINE, color(255));
     shapeInterpolator.enableRecurrence();
     // Create an initial shape interpolator path
-    for (int i = 0; i < random(4, 10); i++) {
-      shapeInterpolator.addKeyFrame(scene.randomNode(), (Node.BULLSEYE | Node.AXES), i % 2 == 1 ? 1 : 4);
+    int count = (int) random(4, 10);
+    count = 5;
+    for (int i = 0; i < count; i++) {
+      //shapeInterpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+      shapeInterpolator.addKeyFrame(scene.randomNode());
     }
     // decide what to reproduce along path
     //shapeInterpolator.configHint(Interpolator.STEPS, Node.AXES);
@@ -92,8 +93,14 @@ public class Interpolators extends PApplet {
 
   public void keyPressed() {
     if (key == ' ') {
-      shapeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
+      shapeInterpolator.toggleHint(Interpolator.SPLINE /* | Interpolator.STEPS */);
       eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
+    }
+    if (key == 'r') {
+      shapeInterpolator.removeKeyFrame(3);
+    }
+    if (key == 'p') {
+      shapeInterpolator.toggle();
     }
     if (key == 'i') {
       println(shapeInterpolator.keyFrames().size());
@@ -102,7 +109,7 @@ public class Interpolators extends PApplet {
       shapeInterpolator.increaseSpeed(key == '+' ? 0.25f : -0.25f);
     }
     if (key == '1') {
-      eyeInterpolator.addKeyFrame(scene.eye().get(), Node.CAMERA, 1);
+      eyeInterpolator.addKeyFrame();
     }
     if (key == 'a')
       eyeInterpolator.toggle();
