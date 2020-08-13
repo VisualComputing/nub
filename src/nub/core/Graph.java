@@ -1840,6 +1840,8 @@ public class Graph {
 
   /**
    * Same as {@code fitBall(center(), radius())}.
+   * <p>
+   * Note that this is not available when bounds are fixed. Use {@link #setBounds(Vector, float)} instead.
    *
    * @see #center()
    * @see #radius()
@@ -1865,6 +1867,8 @@ public class Graph {
 
   /**
    * Same as {@code fitBall(center(), radius(), duration)}.
+   * <p>
+   * Note that this method is not available when bounds are fixed. Use {@link #setBounds(Vector, float)} instead.
    *
    * @see #center()
    * @see #radius()
@@ -1896,6 +1900,8 @@ public class Graph {
    * ball fits the screen. Its {@link Node#orientation()} and its
    * {@link #fov()} are unchanged. You should therefore orientate the eye
    * before you call this method.
+   * <p>
+   * Note that this is not available when bounds are fixed. Use {@link #setBounds(Vector, float)} instead.
    *
    * @see #fit(float)
    * @see #fit(Vector, float)
@@ -1932,6 +1938,8 @@ public class Graph {
   /**
    * Moves the eye so that the ball defined by {@code center} and {@code radius} is
    * visible and fits the window.
+   * <p>
+   * Note that this is not available when bounds are fixed. Use {@link #setBounds(Vector, float)} instead.
    *
    * @see #fit(float)
    * @see #fit(Vector, float, float)
@@ -1976,7 +1984,9 @@ public class Graph {
    * The eye position and orientation are not modified and you first have to orientate
    * the eye in order to actually see the scene (see {@link #lookAt(Vector)},
    * {@link #fit()} or {@link #fit(Vector, float)}).
-   *
+   * <p>
+   * Note that this is not available when bounds are fixed. Use {@link #setBounds(Vector, float)} instead.
+   * <p>
    * <b>Attention:</b> The {@link #fov()} is clamped to PI/2. This happens
    * when the eye is at a distance lower than sqrt(2) * radius() from the center().
    *
@@ -2019,7 +2029,9 @@ public class Graph {
    * The eye position and orientation are not modified and you first have to orientate
    * the eye in order to actually see the scene (see {@link #lookAt(Vector)},
    * {@link #fit()} or {@link #fit(Vector, float)}).
-   *
+   * <p>
+   * Note that this is not available when bounds are fixed. Use {@link #setBounds(Vector, float)} instead.
+   * <p>
    * <b>Attention:</b> The {@link #fov()} is clamped to PI/2. This happens
    * when the eye is at a distance lower than sqrt(2) * radius() from the center().
    *
@@ -2057,6 +2069,8 @@ public class Graph {
   /**
    * Smoothly moves the eye during {@code duration} seconds so that the world axis aligned
    * box defined by {@code corner1} and {@code corner2} is entirely visible.
+   * <p>
+   * Note that this is not available when bounds are fixed. Use {@link #setBounds(Vector, float)} instead.
    *
    * @see #fit(Vector, Vector)
    * @see #fit(float)
@@ -2093,6 +2107,8 @@ public class Graph {
   /**
    * Moves the eye so that the world axis aligned box defined by {@code corner1}
    * and {@code corner2} is entirely visible.
+   * <p>
+   * Note that this is not available when bounds are fixed. Use {@link #setBounds(Vector, float)} instead.
    *
    * @see #fit(Vector, Vector, float)
    * @see #fit(float)
