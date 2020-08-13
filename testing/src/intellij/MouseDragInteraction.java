@@ -15,7 +15,7 @@ import processing.event.MouseEvent;
 public class MouseDragInteraction extends PApplet {
   Scene scene;
   Vector randomVector;
-  boolean cad, lookAround;
+  boolean cad, lookAround = true;
   Node node, shape1, shape2;
 
   public void settings() {
@@ -25,6 +25,8 @@ public class MouseDragInteraction extends PApplet {
   public void setup() {
     rectMode(CENTER);
     //scene = new Scene(this, 100, 1600);
+    //scene.eye().setPosition(new Vector(0, 0, 850));
+
     scene = new Scene(this, 1500);
     scene.enableHint(Scene.AXES);
     scene.enableHint(Scene.BACKGROUND, color(0));
@@ -129,7 +131,8 @@ public class MouseDragInteraction extends PApplet {
   public void mouseDragged() {
     if (mouseButton == LEFT)
       if (cad) {
-        scene.mouseRotateCAD(randomVector);
+        //scene.mouseRotateCAD(randomVector);
+        scene.mouseRotateCAD();
       } else if (lookAround) {
         scene.mouseLookAround();
       } else {
