@@ -50,11 +50,11 @@ void setup() {
   for (int i = 0; i < random(4, 10); i++) {
     shapeInterpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
   }
+  shapeInterpolator.setSteps(1);
   shapeInterpolator.run();
 
   eyeInterpolator = new Interpolator(scene.eye());
   eyeInterpolator.configHint(Interpolator.SPLINE, color(255, 255, 0));
-  eyeInterpolator.configHint(Interpolator.CAMERA, color(0, 255, 0));
 
   scene.enableHint(Scene.AXES | Scene.GRID);
   scene.configHint(Scene.GRID, color(0, 255, 0));
@@ -87,14 +87,8 @@ void mouseWheel(MouseEvent event) {
 
 void keyPressed() {
   if (key == ' ') {
-    edit = !edit;
-    if (edit) {
-      shapeInterpolator.enableHint(Interpolator.SPLINE | Interpolator.AXES);
-      eyeInterpolator.enableHint(Interpolator.SPLINE | Interpolator.CAMERA);
-    } else {
-      shapeInterpolator.disableHint(Interpolator.SPLINE | Interpolator.AXES);
-      eyeInterpolator.disableHint(Interpolator.SPLINE | Interpolator.CAMERA);
-    }
+    shapeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
+    eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS  );
   }
   if (key == '-' || key == '+') {
     shapeInterpolator.increaseSpeed(key == '+' ? 0.25 : -0.25);

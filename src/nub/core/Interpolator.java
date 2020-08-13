@@ -33,34 +33,25 @@ import java.util.ListIterator;
  * Here is a typical usage example:
  * <pre>
  * {@code
- * void init() {
+ * void setup() {
  *   Graph graph = new Graph(1200, 800);
  *   Interpolator interpolator = new Interpolator();
  *   for (int i = 0; i < 10; i++)
- *     interpolator.addKeyFrame(Node.random(graph));
- *   interpolator.start();
+ *     interpolator.addKeyFrame(scene.randomNode());
+ *   interpolator.run();
  * }
  * }
  * </pre>
  * which will create a random (see {@link Node#random(Graph)}) interpolator path
  * containing 10 keyframes (see {@link #addKeyFrame(Node)}). The interpolation is
- * also started (see {@link #run()}).
+ * also run (see {@link #run()}). The interpolation is stopped when {@link #time()} is
+ * greater than the {@link #lastTime()} (unless {@link #enableRecurrence()} is called).
  * <p>
- * The graph main drawing loop should look like:
- * <pre>
- * {@code
- * void mainLoop() {
- *   pushMatrix();
- *   graph.applyTransformation(interpolator.node());
- *   // draw your object here. Its position, orientation and magnitude are interpolated.
- *   popMatrix();
- * }
- * }
- * </pre>
- * The interpolation is stopped when {@link #time()} is greater than the
- * {@link #lastTime()} (unless loop() is {@code true}).
- * <p>
- * The
+ * The interpolator visual representation may be configured using the following hints:
+ * {@link #SPLINE} and {@link #STEPS}. See {@link #hint()},
+ * {@link #configHint(int, Object...)} {@link #enableHint(int)},
+ * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
+ * and {@link #resetHint()}.
  * <b>Attention:</b> If a {@link nub.core.constraint.Constraint} is attached to
  * the {@link #node()} (see {@link Node#constraint()}), it should be reset before
  * {@link #run()} is called, otherwise the interpolated motion (computed as if
