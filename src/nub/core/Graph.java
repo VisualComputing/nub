@@ -336,8 +336,7 @@ public class Graph {
    * Defines a right-handed graph with the specified {@code width} and {@code height}
    * screen window dimensions. Creates and {@link #eye()} node, sets its {@link #fov()} to
    * {@code PI/3}. Calls {@link #setBounds(float, float)} on {@code zNear} and
-   * {@code zFar} to set up the scene frustum and {@link #fit()} to display the
-   * whole scene.
+   * {@code zFar} to set up the scene frustum.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
@@ -353,7 +352,6 @@ public class Graph {
     if (is3D())
       setFOV((float) Math.PI / 3);
     setBounds(zNear, zFar);
-    fit();
   }
 
   /**
@@ -1858,6 +1856,10 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit() {
+    if (_fixed) {
+      System.out.println("Warning: fit() is not available when bounds are fixed. Call setBounds(center, radius) first.");
+      return;
+    }
     fit(center(), _radius);
   }
 
@@ -1879,6 +1881,10 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(float duration) {
+    if (_fixed) {
+      System.out.println("Warning: fit(duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
+      return;
+    }
     fit(center(), _radius, duration);
   }
 
@@ -1904,6 +1910,10 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector center, float radius, float duration) {
+    if (_fixed) {
+      System.out.println("Warning: fit(center, radius, duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
+      return;
+    }
     if (duration <= 0)
       fit(center, radius);
     else {
@@ -1936,6 +1946,10 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector center, float radius) {
+    if (_fixed) {
+      System.out.println("Warning: fit(center, radius) is not available when bounds are fixed. Call setBounds(center, radius) first.");
+      return;
+    }
     switch (_type) {
       case TWO_D:
         lookAt(center);
@@ -1979,6 +1993,10 @@ public class Graph {
    * @see #fit(Vector, Vector, float)
    */
   public void fitFOV(float duration) {
+    if (_fixed) {
+      System.out.println("Warning: fitFOV(duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
+      return;
+    }
     if (duration <= 0)
       fitFOV();
     else {
@@ -2018,6 +2036,10 @@ public class Graph {
    * @see #fit(Vector, Vector, float)
    */
   public void fitFOV() {
+    if (_fixed) {
+      System.out.println("Warning: fitFOV() is not available when bounds are fixed. Call setBounds(center, radius) first.");
+      return;
+    }
     float distance = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
     float magnitude = distance < (float) Math.sqrt(2) * _radius ? ((float) Math.PI / 2) : 2 * (float) Math.asin(_radius / distance);
     switch (_type) {
@@ -2049,6 +2071,10 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector corner1, Vector corner2, float duration) {
+    if (_fixed) {
+      System.out.println("Warning: fit(corner1, corner2, duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
+      return;
+    }
     if (duration <= 0)
       fit(corner1, corner2);
     else {
@@ -2081,6 +2107,10 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector corner1, Vector corner2) {
+    if (_fixed) {
+      System.out.println("Warning: fit(corner1, corner2) is not available when bounds are fixed. Call setBounds(center, radius) first.");
+      return;
+    }
     float diameter = Math.max(Math.abs(corner2._vector[1] - corner1._vector[1]), Math.abs(corner2._vector[0] - corner1._vector[0]));
     diameter = Math.max(Math.abs(corner2._vector[2] - corner1._vector[2]), diameter);
     fit(Vector.multiply(Vector.add(corner1, corner2), 0.5f), 0.5f * diameter);
@@ -2235,68 +2265,6 @@ public class Graph {
   }
 
   // Other stuff
-
-  /**
-   * If {@link #isLeftHanded()} calls {@link #setRightHanded()}, otherwise calls
-   * {@link #setLeftHanded()}.
-   */
-  /*
-  public static void flip() {
-    if (isLeftHanded())
-      setRightHanded();
-    else
-      setLeftHanded();
-  }
-
-   */
-
-  /**
-   * Returns true if graph is left handed. Note that the graph is right handed by default.
-   *
-   * @see #setLeftHanded()
-   */
-  /*
-  public static boolean isLeftHanded() {
-    return leftHanded;
-  }
-
-
-   */
-  /**
-   * Returns true if graph is right handed. Note that the graph is right handed by default.
-   *
-   * @see #setRightHanded()
-   */
-  /*
-  public static boolean isRightHanded() {
-    return rightHanded;
-  }
-
-
-   */
-  /**
-   * Set the graph as right handed.
-   *
-   * @see #isRightHanded()
-   */
-  /*
-  public static void setRightHanded() {
-    rightHanded = true;
-  }
-
-   */
-
-  /**
-   * Set the graph as left handed.
-   *
-   * @see #isLeftHanded()
-   */
-  /*
-  public static void setLeftHanded() {
-    rightHanded = false;
-  }
-
-   */
 
   /**
    * @return true if the graph is 2D.

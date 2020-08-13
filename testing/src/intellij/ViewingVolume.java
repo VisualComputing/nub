@@ -13,8 +13,8 @@ public class ViewingVolume extends PApplet {
 
   //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
-  int w = 700;
-  int h = 700;
+  int w = 1200;
+  int h = 1200;
 
   public void settings() {
     size(w, h, renderer);
@@ -22,12 +22,13 @@ public class ViewingVolume extends PApplet {
 
   @Override
   public void setup() {
-    scene1 = new Scene(createGraphics(w, h / 2, P3D), 150);
+    //scene1 = new Scene(createGraphics(w, h / 2, P3D), 150);
+    scene1 = new Scene(createGraphics(w, h / 2, P3D), 50, 4000);
     scene1.enableHint(Scene.BACKGROUND, color(125));
     scene1.enableHint(Scene.AXES | Scene.SHAPE);
     scene1.setShape(this::draw1);
     //scene1.togglePerspective();
-    scene1.fit();
+    //scene1.fit();
     //scene1.eye().setMagnitude(1);
 
     // Note that we pass the upper left corner coordinates where the scene
@@ -86,7 +87,7 @@ public class ViewingVolume extends PApplet {
     //focus.scale(event.getCount() * 20);
     //println(event.getCount());
     //focus.moveForward(((float)event.getCount()) / 0.1f);
-    focus.moveForward(event.getCount() / 50);
+    focus.moveForward(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
@@ -106,7 +107,7 @@ public class ViewingVolume extends PApplet {
     if (key == 's')
       scene1.fit(1);
     if (key == '1')
-      scene1.fitFOV();
+      scene1.fitFOV(1);
     if (key == '2')
       scene2.fitFOV();
     if (key == 'p') {
