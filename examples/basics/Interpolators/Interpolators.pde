@@ -88,14 +88,14 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   if (key == ' ') {
     shapeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
-    eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS  );
+    eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
   }
   if (key == '-' || key == '+') {
     shapeInterpolator.increaseSpeed(key == '+' ? 0.25 : -0.25);
   }
 
   if (key == '1') {
-    eyeInterpolator.addKeyFrame(scene.eye().get());
+    eyeInterpolator.addKeyFrame();
   }
   if (key == 'a')
     eyeInterpolator.toggle();

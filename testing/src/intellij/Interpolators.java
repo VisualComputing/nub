@@ -48,8 +48,8 @@ public class Interpolators extends PApplet {
     int count = (int) random(4, 10);
     count = 5;
     for (int i = 0; i < count; i++) {
-      //shapeInterpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
-      shapeInterpolator.addKeyFrame(scene.randomNode());
+      shapeInterpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+      //shapeInterpolator.addKeyFrame(scene.randomNode());
     }
     // decide what to reproduce along path
     //shapeInterpolator.configHint(Interpolator.STEPS, Node.AXES);
