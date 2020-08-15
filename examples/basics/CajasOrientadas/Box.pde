@@ -24,8 +24,8 @@ public class Box extends Node {
   }
 
   @Override
-  public void visit(Graph grahp, Node node) {
-    Vector to = Vector.subtract(esfera.position(), node.position());
-    node.setOrientation(Quaternion.from(Vector.plusJ, to));
+  public void visit(Graph graph) {
+    Vector to = Vector.subtract(esfera.position(), position());
+    setOrientation(Quaternion.from(Vector.plusJ, to));
   }
 }

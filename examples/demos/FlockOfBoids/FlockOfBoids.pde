@@ -43,7 +43,7 @@ Node avatar;
 
 void setup() {
   size(1000, 700, P3D);
-  scene = new Scene(this, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), 600);
+  scene = new Scene(this, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), 800);
   scene.fit();
   // create and fill the list of boids
   flock = new ArrayList();
