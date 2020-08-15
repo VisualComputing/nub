@@ -184,11 +184,10 @@ Note that the `display` and `render` commands are equivalent when the scene is o
    ```processing
    PGraphics pg;
    void draw() {
-     // save space and setup projection matrix for 2D drawing
-     // https://manmohanbishnoi.wordpress.com/2014/12/02/2d-hud-graphics-over-3d-objects-in-modern-opengl/
+     // begin screen space
      scene.beginHUD();
-     // Use 2D screen space coordinates from here:
-     image(pg, width / 2, height / 2);
+     // use 2D screen space coordinates from here:
+     ...
      // restore space
      scene.endHUD();
    }
