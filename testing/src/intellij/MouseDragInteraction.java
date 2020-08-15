@@ -15,7 +15,7 @@ import processing.event.MouseEvent;
 public class MouseDragInteraction extends PApplet {
   Scene scene;
   Vector randomVector;
-  boolean cad, lookAround = true;
+  boolean cad, lookAround;
   Node node, shape1, shape2;
 
   public void settings() {
@@ -24,10 +24,20 @@ public class MouseDragInteraction extends PApplet {
 
   public void setup() {
     rectMode(CENTER);
+
     //scene = new Scene(this, 100, 1600);
     //scene.eye().setPosition(new Vector(0, 0, 850));
-
     scene = new Scene(this, 1500);
+    scene.setHUD((PGraphics pg) -> {
+      pg.pushStyle();
+      pg.stroke(255, 255, 0);
+      pg.strokeWeight(5);
+      pg.fill(255, 255, 0, 125);
+      pg.rect(pixelX, pixelY, 2 * h, h);
+      //pg.point(pixelX, pixelY);
+      pg.popStyle();
+    });
+    //scene.togglePerspective();
     scene.enableHint(Scene.AXES);
     scene.enableHint(Scene.BACKGROUND, color(0));
     //scene.fit(1);
@@ -118,10 +128,11 @@ public class MouseDragInteraction extends PApplet {
       scene.togglePerspective();
 
     if (key == 'g') {
-      scene.fit(200, 100, 800, 400);
-      //scene.fit(width / 2,height/2, 800, 400);
+      scene.fit(pixelX, pixelY, 2 * h, h, 1);
     }
   }
+
+  int pixelX = 300, pixelY = 400, h = 100;
 
   @Override
   public void mouseMoved() {

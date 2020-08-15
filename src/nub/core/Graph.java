@@ -647,13 +647,13 @@ public class Graph {
   }
 
   /**
-   * Retrieves the graph field-of-view in radians. Meaningless if the graph {@link #is2D()}.
+   * Retrieves the scene field-of-view in radians. Meaningless if the scene {@link #is2D()}.
    * See {@link #setFOV(float)} for details. The value is related to the {@link #eye()}
    * {@link Node#magnitude()} as follows:
    * <p>
    * <ol>
    * <li>It returns {@code 2 * Math.atan(eye().magnitude())}, when the
-   * graph {@link #_type} is {@link Type#PERSPECTIVE}.</li>
+   * graph {@link #type()} is {@link Type#PERSPECTIVE}.</li>
    * <li>It returns {@code 2 * Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))))},
    * if the graph {@link #_type} is {@link Type#ORTHOGRAPHIC}.</li>
    * </ol>
@@ -692,10 +692,9 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return _type == Type.PERSPECTIVE ? radians(eye().magnitude() * aspectRatio()) : eye().magnitude()}.
+   * Same as {@code return type() == Type.PERSPECTIVE ? radians(eye().magnitude() * aspectRatio()) : eye().magnitude()}.
    * <p>
-   * Returns the {@link #eye()} horizontal field-of-view in radians if the graph {@link #_type} is
-   * {@link Type#PERSPECTIVE}, or the {@link #eye()} {@link Node#magnitude()} otherwise.
+   * Returns the {@link #eye()} horizontal field-of-view in radians.
    *
    * @see #fov()
    * @see #setHFOV(float)
@@ -2239,10 +2238,14 @@ public class Graph {
         distance = Math.max(distX, distY);
         break;
       case ORTHOGRAPHIC:
-        float dist = Vector.dot(Vector.subtract(newCenter, center()), vd);
-        distX = Vector.distance(pointX, newCenter) / eye().magnitude() / aspectRatio();
-        distY = Vector.distance(pointY, newCenter) / eye().magnitude() / 1.0f;
-        distance = dist + Math.max(distX, distY);
+        if (!_fixed) {
+          float dist = Vector.dot(Vector.subtract(newCenter, center()), vd);
+          distX = Vector.distance(pointX, newCenter) / eye().magnitude() / aspectRatio();
+          distY = Vector.distance(pointY, newCenter) / eye().magnitude() / 1.0f;
+          distance = dist + Math.max(distX, distY);
+        } else {
+          System.out.println("Warning: fit(x, y, width, height) is not available when bounds are fixed. Call setBounds(center, radius) first.");
+        }
         break;
     }
     eye().setPosition(Vector.subtract(newCenter, Vector.multiply(vd, distance)));

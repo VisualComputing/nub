@@ -1,6 +1,6 @@
 // The fragment eye depth is obtained by solving z_e in terms z_n from here:
-// http://visualcomputing.github.io/Transformations/#/7/14 and:
-// http://visualcomputing.github.io/Transformations/#/7/15
+// http://visualcomputing.github.io/Transformations/#/6/14 and:
+// http://visualcomputing.github.io/Transformations/#/6/15
 // yielding to: z_e = (2 * near * far) / (z_n * (far - near) - far - near) (eq1)
 
 uniform float near;
