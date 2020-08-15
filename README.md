@@ -60,9 +60,7 @@ import nub.processing.*;
 Scene offScreenScene;
 
 void setup() {
-  offScreenScene = new Scene(this, createGraphics(500, 500, P3D));
-  // or use the equivalent but simpler version:
-  // offScreenScene = new Scene(this, P3D, 500, 500);
+  offScreenScene = new Scene(createGraphics(w, h / 2, P3D));
 }
 ```
 
@@ -161,144 +159,66 @@ Note that `point` is a [Vector](https://visualcomputing.github.io/nub-javadocs/n
 
 ## Rendering
 
-Render (and display) the scene node hierarchy from its [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) point-of-view with:
+Display the scene node hierarchy from its [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) point-of-view with:
 
 ```processing
 void draw() {
+  scene.display();
+}
+```
+
+Render the scene node hierarchy from its [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) point-of-view with:
+
+```processing
+void draw() {
+  // the subtree param is optional
   scene.render();
 }
 ```
 
-see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo) example, among several others. Render (and display) a scene branch, like n1-n2, from the scene `eye` point-of-view with:
+Note that the `display` and `render` commands are equivalent when the scene is onscreen. Observations:
 
-```processing
-// renders n1-n2, discarding n3
-void draw() {
-  // save space
-  pushMatrix();
-  // enter n1 space
-  scene.applyTransformation(n1);
-  scene.draw(n1);
-  // save state
-  pushMatrix();
-  // enter n2 space
-  scene.applyTransformation(n2);
-  scene.draw(n2);
-  // restore space
-  popMatrix();
-  popMatrix();
-}
-```
-
-this technique may also be useful when projecting the same branch among several scenes, but it requires the node hierarchy to be known in advanced. Render the scene node hierarchy from its `eye` point-of-view, onto an arbitrary `PGraphics` with:
-
-```processing
-PGraphics pg;
-
-void draw() {
-  scene.render(pg);
-}
-```
-
-see the [PostEffects](https://github.com/VisualComputing/nub/tree/master/examples/demos/PostEffects) example. Render the scene node hierarchy onto an arbitrary `PGraphics`, from an arbitrary node `viewPoint` with:
-
-```processing
-PGraphics pg;
-Node viewPoint;
-// frustum data
-Scene.Type frustumType = Scene.Type.PERSPECTIVE;
-float zNear, zFar;
-
-void draw() {
-  Scene.render(pg, frustumType, viewPoint, zNear, zFar);
-}
-```
-
-see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) and [ShadowMapping](https://github.com/VisualComputing/nub/tree/master/examples/demos/ShadowMapping) examples.  Render the scene node hierarchy onto an arbitrary `PGraphics`, from given `projection` and `view` matrices with:
-
-```processing
-PGraphics pg;
-Matrix projection, view;
-
-void draw() {
-  Scene.render(pg, projection, view);
-}
-```
-
-Render (and display) the off-screen scene node hierarchy from its `eye` point-of-view with:
-
-```processing
-void draw() {
-  offScreenScene.beginDraw();
-  offScreenScene.render();
-  offScreenScene.endDraw();
-  // display the rendered offScreenScene
-  offScreenScene.display();
-}
-```
-
-see the [SceneBuffers](https://github.com/VisualComputing/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde) example. Render (and display) the same node hierarchy among the scene and several off-screen scenes, each one from its own `eye` point-of-view, with:
-
-```processing
-void draw() {
-  // 1. render onto the scene
-  scene.render();
-  // 2. render onto the off-screen scene
-  offScreenScene.beginDraw();
-  offScreenScene.render();
-  offScreenScene.endDraw();
-  // display the rendered offScreenScene
-  offScreenScene.display();
-}
-```
-
-see the [MiniMap](https://github.com/VisualComputing/nub/blob/master/examples/demos/MiniMap/MiniMap.pde) and the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) examples. Render 2D screen space stuff (such as gui elements and text) on top of a 3D scene with:
-
-```processing
-PGraphics pg;
-
-void draw() {
- // save space and setup projection matrix for 2D drawing
- // https://manmohanbishnoi.wordpress.com/2014/12/02/2d-hud-graphics-over-3d-objects-in-modern-opengl/
- scene.beginHUD();
- // Use 2D screen space coordinates from here:
- image(pg, width / 2, height / 2);
- // restore space
- scene.endHUD();
-}
-```
-
-see the [DepthMap](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap) example, among several others. Customize the rendering traversal algorithm by overriding the node `visit()` method, which will then be just called before its drawing routine, for example:
-
-```processing
-Scene.Visibility visibility;
-
-@Override
-public void visit() {
-  switch (visibility) {
-  case VISIBLE:
-    for (Node node : children())
-      node.cull();
-    break;
-  case SEMIVISIBLE:
-    if (!children().isEmpty()) {
-      // don't render the node...
-      bypass();
-      // ... but don't cull its children either
-      for (Node node : children())
-        node.cull(false);
-    }
-    break;
-  case INVISIBLE:
-    cull();
-    break;
-  }
-}
-```
-
-see the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
-
-Note that the above rendering algorithms take an optional node param that enables them to render a subtree: `scene.render(subtree)`, `scene.render(pg, subtree)`, `Scene.render(pg, frustumType, subtree, viewPoint, zNear, zFar)` and `Scene.render(pg, subtree, projection, view)`.
+1. Call `scene.display(subtree)` and `scene.render(subtree)` to just `display` / `render` the scene subtree.
+2. Call `scene.display(pixelX, pixelY)` (or `scene.display(subtree, pixelX, pixelY)`) to display the offscreen scene at `(pixelX, pixelY)` left corner.
+3. Render 2D screen space stuff (such as gui elements and text) on top of a 3D scene with:
+   ```processing
+   PGraphics pg;
+   void draw() {
+     // save space and setup projection matrix for 2D drawing
+     // https://manmohanbishnoi.wordpress.com/2014/12/02/2d-hud-graphics-over-3d-objects-in-modern-opengl/
+     scene.beginHUD();
+     // Use 2D screen space coordinates from here:
+     image(pg, width / 2, height / 2);
+     // restore space
+     scene.endHUD();
+   }
+   ```
+4. Customize the rendering traversal algorithm by overriding the node `visit(graph)` method, which will then be just called before its drawing routine, for example:
+   ```processing
+   Scene.Visibility visibility;
+   @Override
+   public void visit(Graph graph) {
+     switch (visibility) {
+     case VISIBLE:
+       for (Node node : children())
+         node.cull();
+       break;
+     case SEMIVISIBLE:
+       if (!children().isEmpty()) {
+         // don't render the node...
+         bypass();
+         // ... but don't cull its children either
+         for (Node node : children())
+           node.cull(false);
+       }
+       break;
+     case INVISIBLE:
+       cull();
+       break;
+     }
+   }
+   ```
+   see the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
 
 #### Drawing functionality
 
@@ -539,7 +459,7 @@ void setup() {
   TimingTask spinningTask = new TimingTask() {
     @Override
     public void execute() {
-      scene.eye().orbit(new Vector(0, 1, 0), PI / 100);
+      scene.eye().orbit(new Vector.plusJ, PI / 100);
     }
   };
   spinningTask.run();
@@ -569,17 +489,7 @@ void setup() {
 }
 ```
 
-which will create a `shape` interpolator containing [4..10] random key-frames. The interpolation is also run. The interpolator trajectory may be drawn with code like this:
-
-```processing
-...
-void draw() {
-  scene.render();
-  scene.drawCatmullRom(interpolator);
-}
-```
-
-while [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) will draw the animated shape(s) [drawCatmullRom(Interpolator)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawCatmullRom-nub.core.Interpolator-) will draw the interpolated path too. See the [Interpolators](https://github.com/VisualComputing/nub/tree/master/examples/basics/Interpolators) example.
+which will create a `shape` interpolator containing [4..10] random key-frames. See the [Interpolators](https://github.com/VisualComputing/nub/tree/master/examples/basics/Interpolators) example.
 
 ## Installation
 
