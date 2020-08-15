@@ -180,44 +180,8 @@ Note that the `display` and `render` commands are equivalent when the scene is o
 
 1. Call `scene.display(subtree)` and `scene.render(subtree)` to just `display` / `render` the scene subtree.
 2. Call `scene.display(pixelX, pixelY)` (or `scene.display(subtree, pixelX, pixelY)`) to display the offscreen scene at `(pixelX, pixelY)` left corner.
-3. Render 2D screen space stuff (such as gui elements and text) on top of a 3D scene with:
-   ```processing
-   PGraphics pg;
-   void draw() {
-     // begin screen space
-     scene.beginHUD();
-     // use 2D screen space coordinates from here:
-     ...
-     // restore space
-     scene.endHUD();
-   }
-   ```
-4. Customize the rendering traversal algorithm by overriding the node `visit(graph)` method, which will then be just called before its drawing routine, for example:
-   ```processing
-   Scene.Visibility visibility;
-   @Override
-   public void visit(Graph graph) {
-     switch (visibility) {
-     case VISIBLE:
-       for (Node node : children())
-         node.cull();
-       break;
-     case SEMIVISIBLE:
-       if (!children().isEmpty()) {
-         // don't render the node...
-         bypass();
-         // ... but don't cull its children either
-         for (Node node : children())
-           node.cull(false);
-       }
-       break;
-     case INVISIBLE:
-       cull();
-       break;
-     }
-   }
-   ```
-   see the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
+3. Enclose 2D screen space with `scene.beginHUD()` and `scene.endHUD()` stuff (such as gui elements and text) with to render it on top of a 3D scene.
+4. Customize the rendering traversal algorithm by overriding the node `visit(graph)` method, see the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
 
 #### Drawing functionality
 
