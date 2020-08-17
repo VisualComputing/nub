@@ -3522,9 +3522,9 @@ public class Graph {
   }
 
   /**
-   * If {@code node} is non-null and different than the {@link #eye()} call
-   * {@code node.interact(gesture)} which should be overridden to customize the node behavior
-   * from the gesture data.
+   * If {@code node} is non-null call the interact {@code node} gesture
+   * parser function set either with {@link Node#setInteraction(Consumer)}
+   * or {@link Node#setInteraction(BiConsumer)}.
    *
    * @see Node#setInteraction(BiConsumer)
    * @see Node#setInteraction(Consumer)
@@ -3535,6 +3535,15 @@ public class Graph {
         node._interact.accept(node, gesture);
       }
     }
+  }
+
+  /**
+   * Same as {@code interact(eye(), gesture)}.
+   *
+   * @see #interact(Node, Object...)
+   */
+  public void interact(Object... gesture) {
+    interact(eye(), gesture);
   }
 
   // 1. Align
