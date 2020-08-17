@@ -117,8 +117,9 @@ import java.util.function.Consumer;
  * <h2>Custom behavior</h2>
  * Implementing a custom behavior for node is a two step process:
  * <ul>
- * <li>Parse user gesture data by overriding {@link #interact(Object...)}.</li>
- * <li>Send gesture data to the node by calling {@link Graph#interactNode(Node, Object...)},
+ * <li>Register a user gesture data parser, see {@link #setInteraction(BiConsumer)}
+ * and {@link #setInteraction(Consumer)}.</li>
+ * <li>Send gesture data to the node by calling {@link Graph#interact(Node, Object...)},
  * {@link Graph#interactTag(String, Object...)} or {@link Graph#interactTag(Object...)}.</li>
  * </ul>
  */
@@ -191,6 +192,9 @@ public class Node {
   // PShape is only available in Java
   protected processing.core.PShape _rmrShape;
   protected long _bypass = -1;
+
+  //Object... gesture
+  protected BiConsumer<Node, Object[]> _interact;
 
   // Tasks
   protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
@@ -338,6 +342,8 @@ public class Node {
     _cameraStroke = -65281;
     _children = new ArrayList<Node>();
     _frustumGraphs = new HashSet<Graph>();
+    // TODO deprecated
+    setInteraction(this::interact);
   }
 
   // From here only Java constructors
@@ -2401,13 +2407,6 @@ public class Node {
   }
 
   /**
-   * Parse {@code gesture} params. Useful to customize the node behavior.
-   * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
-   */
-  public void interact(Object... gesture) {
-  }
-
-  /**
    * Same as {@code graph.setVisit(this, functor)}.
    *
    * @see #setVisit(Graph, Consumer)
@@ -2545,6 +2544,50 @@ public class Node {
   public void setShape(Graph graph) {
     setShape(graph._rmrShape);
     setShape(graph._imrShape);
+  }
+
+  /**
+   * Sets the node interaction procedure {@code callback} which is a function
+   * implemented by a {@link Node} derived class and which takes
+   * no params, or a gesture encoded as an array of on Object params.
+   * <p>
+   * The interaction is performed either after calling the
+   * {@link Graph#interactTag(String, Object...)}, {@link Graph#interactTag(Object...)}
+   * or {@link Graph#interact(Node, Object...)} scene procedures.
+   * <p>
+   * Same as {@code setInteraction((n, o) -> callback.accept(o))}.
+   *
+   * @see #setInteraction(BiConsumer)
+   */
+  public void setInteraction(Consumer<Object[]> callback) {
+    setInteraction((n, o) -> callback.accept(o));
+  }
+
+  /**
+   * Sets the node interaction procedure {@code callback} which is a function that takes
+   * a node param (holding this node instance) and, optionally, a gesture encoded as
+   * an array of on Object params.
+   * <p>
+   * The interaction is performed either after calling the
+   * {@link Graph#interactTag(String, Object...)}, {@link Graph#interactTag(Object...)}
+   * or {@link Graph#interact(Node, Object...)} scene procedures.
+   *
+   * @see #setInteraction(Consumer)
+   */
+  public void setInteraction(BiConsumer<Node, Object[]> callback) {
+    _interact = callback;
+  }
+
+  /**
+   * Parse {@code gesture} params. Useful to customize the node behavior.
+   * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
+   *
+   * @deprecated use either {@link #setInteraction(BiConsumer)} or
+   * {@link #setInteraction(Consumer)} instead.
+   */
+  @Deprecated
+  public void interact(Object[] gesture) {
+    System.out.println("Warning: Node.interact() missed implementation");
   }
 
   /**

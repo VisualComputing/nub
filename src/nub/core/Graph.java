@@ -92,7 +92,7 @@ import java.util.function.Consumer;
  * value globally, instead of setting it on a per method call basis. Note that it is initially set to 0.8.</li>
  * <li>Customize node behaviors by overridden {@link Node#interact(Object...)}
  * and then invoke them by either calling: {@link #interactTag(Object...)},
- * {@link #interactTag(String, Object...)} or {@link #interactNode(Node, Object...)}.
+ * {@link #interactTag(String, Object...)} or {@link #interact(Node, Object...)}.
  * </li>
  * </ol>
  * <h1>4. Timing handling</h1>
@@ -3497,17 +3497,6 @@ public class Graph {
 
   // 0. Patterns
 
-  /*
-  public void interact(Object... gesture) {
-    interact(null, gesture);
-  }
-
-  public void interact(String tag, Object... gesture) {
-    if (!interactTag(tag, gesture))
-      interactEye(gesture);
-  }
-   */
-
   /**
    * Same as {@code return interactTag(null, gesture)}.
    *
@@ -3522,11 +3511,11 @@ public class Graph {
    * {@code interactNode(node(tag), gesture)} and returns {@code true}, otherwise
    * {@code false}.
    *
-   * @see #interactNode(Node, Object...)
+   * @see #interact(Node, Object...)
    */
   public boolean interactTag(String tag, Object... gesture) {
     if (node(tag) != null) {
-      interactNode(node(tag), gesture);
+      interact(node(tag), gesture);
       return true;
     }
     return false;
@@ -3537,21 +3526,16 @@ public class Graph {
    * {@code node.interact(gesture)} which should be overridden to customize the node behavior
    * from the gesture data.
    *
-   * @see Node#interact(Object...)
+   * @see Node#setInteraction(BiConsumer)
+   * @see Node#setInteraction(Consumer)
    */
-  public void interactNode(Node node, Object... gesture) {
-    if (node == null || node == eye()) {
-      System.out.println("Warning: interactNode requires a non-null node different than the eye. Nothing done");
-      return;
+  public void interact(Node node, Object... gesture) {
+    if (node != null) {
+      if (node._interact != null) {
+        node._interact.accept(node, gesture);
+      }
     }
-    node.interact(gesture);
   }
-
-  /*
-  public void interactEye(Object... gesture) {
-
-  }
-   */
 
   // 1. Align
 

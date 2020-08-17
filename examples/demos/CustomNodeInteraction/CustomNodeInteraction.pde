@@ -56,7 +56,7 @@ void setup() {
       }
 
       @Override
-      public void interact(Object... gesture) {
+      public void interact(Object[] gesture) {
         if (gesture.length == 0)
           _color = randomColor();
         if (gesture.length == 1)
