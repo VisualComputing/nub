@@ -2474,14 +2474,14 @@ public class Graph {
    */
   protected boolean _backPicking(Node node) {
     return picking && node.tagging == true && !isEye(node) && _bb != null && (
-            (node.isPickingModeEnable(Node.CAMERA) && node.isHintEnable(Node.CAMERA)) ||
-                    (node.isPickingModeEnable(Node.AXES) && node.isHintEnable(Node.AXES)) ||
-                    (node.isPickingModeEnable(Node.HUD) && node.isHintEnable(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
-                    (node._frustumGraphs != null && node.isPickingModeEnable(Node.BOUNDS) && node.isHintEnable(Node.BOUNDS)) ||
-                    (node.isPickingModeEnable(Node.SHAPE) && node.isHintEnable(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
-                    (node.isPickingModeEnable(Node.TORUS) && node.isHintEnable(Node.TORUS)) ||
-                    (node.isPickingModeEnable(Node.CONSTRAINT) && node.isHintEnable(Node.CONSTRAINT)) ||
-                    (node.isPickingModeEnable(Node.BONE) && node.isHintEnable(Node.BONE))
+        (node.isPickingEnable(Node.CAMERA) && node.isHintEnable(Node.CAMERA)) ||
+            (node.isPickingEnable(Node.AXES) && node.isHintEnable(Node.AXES)) ||
+            (node.isPickingEnable(Node.HUD) && node.isHintEnable(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
+            (node._frustumGraphs != null && node.isPickingEnable(Node.BOUNDS) && node.isHintEnable(Node.BOUNDS)) ||
+            (node.isPickingEnable(Node.SHAPE) && node.isHintEnable(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
+            (node.isPickingEnable(Node.TORUS) && node.isHintEnable(Node.TORUS)) ||
+            (node.isPickingEnable(Node.CONSTRAINT) && node.isHintEnable(Node.CONSTRAINT)) ||
+            (node.isPickingEnable(Node.BONE) && node.isHintEnable(Node.BONE))
     );
   }
 
@@ -2489,7 +2489,7 @@ public class Graph {
    * Condition for the node front picking.
    */
   protected boolean _frontPicking(Node node) {
-    return picking && node.tagging == true && !isEye(node) && node.isPickingModeEnable(Node.BULLSEYE) && node.isHintEnable(Node.BULLSEYE);
+    return picking && node.tagging == true && !isEye(node) && node.isPickingEnable(Node.BULLSEYE) && node.isHintEnable(Node.BULLSEYE);
   }
 
   /**

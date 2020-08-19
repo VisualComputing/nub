@@ -112,8 +112,8 @@ import java.util.function.Consumer;
  * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
  * and {@link #resetHint()}.
  * <h2>Ray casting</h2>
- * Set the node picking ray-casting mode with {@link #enablePickingMode(int)} (see also
- * {@link #pickingMode()}).
+ * Set the node picking ray-casting mode with {@link #enablePicking(int)} (see also
+ * {@link #picking()}).
  * <h2>Custom behavior</h2>
  * Implementing a custom behavior for node is a two step process:
  * <ul>
@@ -162,7 +162,7 @@ public class Node {
   public boolean tagging;
 
   // Visual hints
-  protected int _pickingMode;
+  protected int _picking;
   protected int _mask;
   public final static int CAMERA = 1 << 0;
   public final static int AXES = Graph.AXES;
@@ -318,7 +318,7 @@ public class Node {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    enablePickingMode(CAMERA | AXES | HUD | SHAPE | BOUNDS | BULLSEYE | TORUS | CONSTRAINT | BONE);
+    enablePicking(CAMERA | AXES | HUD | SHAPE | BOUNDS | BULLSEYE | TORUS | CONSTRAINT | BONE);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -520,7 +520,7 @@ public class Node {
 
   /**
    * Sets {@link #position()}, {@link #orientation()}, {@link #magnitude()},
-   * {@link #hint()} and {@link #pickingMode()} values from those of the {@code node}.
+   * {@link #hint()} and {@link #picking()} values from those of the {@code node}.
    * The node {@link #reference()} and {@link #constraint()}
    * are not affected by this call.
    * <p>
@@ -538,7 +538,7 @@ public class Node {
     setOrientation(node);
     setMagnitude(node);
     _mask = node.hint();
-    _pickingMode = node.pickingMode();
+    _picking = node.picking();
     setShape(node);
     setHUD(node);
     _bullsEyeSize = node._bullsEyeSize;
@@ -2700,36 +2700,37 @@ public class Node {
   }
 
   /**
-   * Returns whether or not all single visual hints encoded in the bitwise-or
-   * {@code pickingMode} mask are enable for node picking with ray casting.
+   * Returns whether or not all hints encoded in the bitwise-or
+   * {@code hint} mask are enable for node picking with ray casting.
    *
-   * @see #pickingMode()
-   * @see #resetPickingMode()
-   * @see #resetPickingMode()
-   * @see #disablePickingMode(int)
-   * @see #enablePickingMode(int)
-   * @see #togglePickingMode(int)
+   * @see #picking()
+   * @see #resetPicking()
+   * @see #resetPicking()
+   * @see #disablePicking(int)
+   * @see #enablePicking(int)
+   * @see #togglePicking(int)
    * @see #hint()
    * @see #isHintEnable(int)
    */
-  public boolean isPickingModeEnable(int pickingMode) {
-    return ~(_pickingMode | ~pickingMode) == 0;
+  public boolean isPickingEnable(int hint) {
+    return ~(_picking | ~hint) == 0;
   }
 
   /**
-   * This mask is a bitwise-or of those node visual aspects which are enabled
-   * for picking with ray casting. It thus expects the same values as
-   * {@link #hint()}.
+   * Returns the current visual picking hint mask encoding the
+   * visual aspects that are to be taken into account for picking
+   * the node with ray casting. Refer to {@link #hint()} to learn
+   * how to configure the mask.
    * <p>
    * Note that picking a node from one of its visual aspects requires both
    * the {@link #hint()} and this mask to have enabled the same aspects.
    *
-   * @see #pickingMode()
-   * @see #resetPickingMode()
-   * @see #disablePickingMode(int)
-   * @see #enablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
+   * @see #picking()
+   * @see #resetPicking()
+   * @see #disablePicking(int)
+   * @see #enablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
    * @see #hint()
    * @see #isHintEnable(int)
    * @see #resetHint()
@@ -2737,20 +2738,20 @@ public class Node {
    * @see #enableHint(int)
    * @see #toggleHint(int)
    */
-  public int pickingMode() {
-    return this._pickingMode;
+  public int picking() {
+    return this._picking;
   }
 
   /**
-   * Resets the current {@link #pickingMode()}, i.e., disables all single
+   * Resets {@link #picking()}, i.e., disables all single
    * visual hints available for node picking with ray casting.
    *
-   * @see #pickingMode()
-   * @see #resetPickingMode()
-   * @see #disablePickingMode(int)
-   * @see #enablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
+   * @see #picking()
+   * @see #resetPicking()
+   * @see #disablePicking(int)
+   * @see #enablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
    * @see #hint()
    * @see #isHintEnable(int)
    * @see #resetHint()
@@ -2758,20 +2759,20 @@ public class Node {
    * @see #enableHint(int)
    * @see #toggleHint(int)
    */
-  public void resetPickingMode() {
-    _pickingMode = 0;
+  public void resetPicking() {
+    _picking = 0;
   }
 
   /**
-   * Disables all the single visual hints encoded in the bitwise-or {@code pickingMode} mask.
+   * Disables all the single visual hints encoded in the bitwise-or {@code hint} mask.
    *
-   * @see #pickingMode()
-   * @see #resetPickingMode()
-   * @see #resetPickingMode()
-   * @see #disablePickingMode(int)
-   * @see #enablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
+   * @see #picking()
+   * @see #resetPicking()
+   * @see #resetPicking()
+   * @see #disablePicking(int)
+   * @see #enablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
    * @see #hint()
    * @see #isHintEnable(int)
    * @see #resetHint()
@@ -2779,19 +2780,19 @@ public class Node {
    * @see #enableHint(int)
    * @see #toggleHint(int)
    */
-  public void disablePickingMode(int pickingMode) {
-    _pickingMode &= ~pickingMode;
+  public void disablePicking(int hint) {
+    _picking &= ~hint;
   }
 
   /**
    * Enables all single visual hints encoded in the bitwise-or {@code pickingMode} mask.
    *
-   * @see #pickingMode()
-   * @see #resetPickingMode()
-   * @see #disablePickingMode(int)
-   * @see #enablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
+   * @see #picking()
+   * @see #resetPicking()
+   * @see #disablePicking(int)
+   * @see #enablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
    * @see #hint()
    * @see #isHintEnable(int)
    * @see #resetHint()
@@ -2799,19 +2800,19 @@ public class Node {
    * @see #enableHint(int)
    * @see #toggleHint(int)
    */
-  public void enablePickingMode(int pickingMode) {
-    _pickingMode |= pickingMode;
+  public void enablePicking(int picking) {
+    _picking |= picking;
   }
 
   /**
-   * Toggles all single visual hints encoded in the bitwise-or {@code pickingMode} mask.
+   * Toggles all single visual hints encoded in the bitwise-or {@code hint} mask.
    *
-   * @see #resetPickingMode()
-   * @see #resetPickingMode()
-   * @see #disablePickingMode(int)
-   * @see #enablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
+   * @see #resetPicking()
+   * @see #resetPicking()
+   * @see #disablePicking(int)
+   * @see #enablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
    * @see #hint()
    * @see #isHintEnable(int)
    * @see #resetHint()
@@ -2819,8 +2820,8 @@ public class Node {
    * @see #enableHint(int)
    * @see #toggleHint(int)
    */
-  public void togglePickingMode(int pickingMode) {
-    _pickingMode ^= pickingMode;
+  public void togglePicking(int hint) {
+    _picking ^= hint;
   }
 
   /**
@@ -2834,12 +2835,12 @@ public class Node {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #resetHint()
-   * @see #pickingMode()
-   * @see #enablePickingMode(int)
-   * @see #disablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
-   * @see #resetPickingMode()
+   * @see #picking()
+   * @see #enablePicking(int)
+   * @see #disablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
+   * @see #resetPicking()
    */
   public boolean isHintEnable(int hint) {
     return ~(_mask | ~hint) == 0;
@@ -2876,12 +2877,12 @@ public class Node {
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
    * @see #resetHint()
-   * @see #pickingMode()
-   * @see #enablePickingMode(int)
-   * @see #disablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
-   * @see #resetPickingMode()
+   * @see #picking()
+   * @see #enablePicking(int)
+   * @see #disablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
+   * @see #resetPicking()
    */
   public int hint() {
     return this._mask;
@@ -2898,12 +2899,12 @@ public class Node {
    * @see #disableHint(int)
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #pickingMode()
-   * @see #enablePickingMode(int)
-   * @see #disablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
-   * @see #resetPickingMode()
+   * @see #picking()
+   * @see #enablePicking(int)
+   * @see #disablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
+   * @see #resetPicking()
    */
   public void resetHint() {
     _mask = 0;
@@ -2920,12 +2921,12 @@ public class Node {
    * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #pickingMode()
-   * @see #enablePickingMode(int)
-   * @see #disablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
-   * @see #resetPickingMode()
+   * @see #picking()
+   * @see #enablePicking(int)
+   * @see #disablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
+   * @see #resetPicking()
    */
   public void disableHint(int hint) {
     _mask &= ~hint;
@@ -2942,12 +2943,12 @@ public class Node {
    * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #pickingMode()
-   * @see #enablePickingMode(int)
-   * @see #disablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
-   * @see #resetPickingMode()
+   * @see #picking()
+   * @see #enablePicking(int)
+   * @see #disablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
+   * @see #resetPicking()
    */
   public void enableHint(int hint, Object... params) {
     enableHint(hint);
@@ -2964,12 +2965,12 @@ public class Node {
    * @see #resetHint()
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
-   * @see #pickingMode()
-   * @see #enablePickingMode(int)
-   * @see #disablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
-   * @see #resetPickingMode()
+   * @see #picking()
+   * @see #enablePicking(int)
+   * @see #disablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
+   * @see #resetPicking()
    */
   public void enableHint(int hint) {
     _mask |= hint;
@@ -2986,12 +2987,12 @@ public class Node {
    * @see #resetHint()
    * @see #enableHint(int)
    * @see #isHintEnable(int)
-   * @see #pickingMode()
-   * @see #enablePickingMode(int)
-   * @see #disablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
-   * @see #resetPickingMode()
+   * @see #picking()
+   * @see #enablePicking(int)
+   * @see #disablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
+   * @see #resetPicking()
    */
   public void toggleHint(int hint) {
     _mask ^= hint;
@@ -3027,12 +3028,12 @@ public class Node {
    * @see #toggleHint(int)
    * @see #isHintEnable(int)
    * @see #resetHint()
-   * @see #pickingMode()
-   * @see #enablePickingMode(int)
-   * @see #disablePickingMode(int)
-   * @see #togglePickingMode(int)
-   * @see #isPickingModeEnable(int)
-   * @see #resetPickingMode()
+   * @see #picking()
+   * @see #enablePicking(int)
+   * @see #disablePicking(int)
+   * @see #togglePicking(int)
+   * @see #isPickingEnable(int)
+   * @see #resetPicking()
    */
   public void configHint(int hint, Object... params) {
     switch (params.length) {

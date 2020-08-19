@@ -35,7 +35,7 @@ public class AuxViewers extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(boxShape());
       shapes[i].setHUD(this::hud);
-      shapes[i].disablePickingMode(Node.SHAPE);
+      shapes[i].disablePicking(Node.SHAPE);
       //shapes[i].enableHint(Node.BULLSEYE);
       //shapes[i].disablePickingMode(Node.SHAPE);
       scene1.randomize(shapes[i]);

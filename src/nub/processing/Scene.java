@@ -14,7 +14,9 @@
 
 package nub.processing;
 
-import nub.core.*;
+import nub.core.Graph;
+import nub.core.Interpolator;
+import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -878,7 +880,7 @@ public class Scene extends Graph {
     if (!_hudSet.isEmpty()) {
       _bbMatrixHandler.beginHUD(width(), height());
       for (Node node : _hudSet) {
-        if (node.isPickingModeEnable(Node.HUD)) {
+        if (node.isPickingEnable(Node.HUD)) {
           _emitBackBufferUniforms(node);
           _backBuffer().pushMatrix();
           Vector location = screenLocation(node);
@@ -1074,7 +1076,7 @@ public class Scene extends Graph {
   protected void _displayBackHint(Node node) {
     _emitBackBufferUniforms(node);
     PGraphics pg = _backBuffer();
-    if (node.isHintEnable(Node.SHAPE) && node.isPickingModeEnable(Node.SHAPE)) {
+    if (node.isHintEnable(Node.SHAPE) && node.isPickingEnable(Node.SHAPE)) {
       if (_rmrShape(node) != null) {
         pg.shapeMode(pg.shapeMode);
         pg.shape(_rmrShape(node));
@@ -1083,23 +1085,23 @@ public class Scene extends Graph {
         _imrShape(node).accept(pg);
       }
     }
-    if (node.isHintEnable(Node.TORUS) && node.isPickingModeEnable(Node.TORUS)) {
+    if (node.isHintEnable(Node.TORUS) && node.isPickingEnable(Node.TORUS)) {
       drawTorusSolenoid(pg, _torusFaces(node), 5);
     }
-    if (node.isHintEnable(Node.BOUNDS) && node.isPickingModeEnable(Node.BOUNDS)) {
+    if (node.isHintEnable(Node.BOUNDS) && node.isPickingEnable(Node.BOUNDS)) {
       for (Graph graph : _frustumGraphs(node)) {
         if (graph != this) {
           drawFrustum(pg, graph);
         }
       }
     }
-    if (node.isHintEnable(Node.AXES) && node.isPickingModeEnable(Node.AXES)) {
+    if (node.isHintEnable(Node.AXES) && node.isPickingEnable(Node.AXES)) {
       pg.pushStyle();
       pg.strokeWeight(6);
       drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
       pg.popStyle();
     }
-    if (node.isHintEnable(Node.CAMERA) && node.isPickingModeEnable(Node.CAMERA)) {
+    if (node.isHintEnable(Node.CAMERA) && node.isPickingEnable(Node.CAMERA)) {
       _drawEye(pg, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
     }
   }
