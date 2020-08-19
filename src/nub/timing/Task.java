@@ -33,7 +33,6 @@ public class Task {
     void execute();
   }
 
-  protected TimingHandler _timingHandler;
   protected Callback _callback;
   protected boolean _active;
   protected boolean _recurrence;
@@ -47,8 +46,10 @@ public class Task {
    * (see {@link #setCallback(Callback)}) with a {@link #period()} of 40ms
    * (i.e., a {@link #frequency()} of 25 Hz).
    */
-  public Task(TimingHandler timingHandler, Callback callback) {
-    _init(timingHandler);
+  public Task(Callback callback) {
+    TimingHandler.registerTask(this);
+    _recurrence = true;
+    _period = 40;
     setCallback(callback);
   }
 
@@ -57,19 +58,12 @@ public class Task {
    * (i.e., a {@link #frequency()} of 25 Hz). The task {@link #execute()} is
    * set as its {@link #callback()} method.
    */
-  public Task(TimingHandler timingHandler) {
-    _init(timingHandler);
-    setCallback(this::execute);
-  }
-
-  /**
-   * Internally used by constructors.
-   */
-  protected void _init(TimingHandler timingHandler) {
-    _timingHandler = timingHandler;
-    _timingHandler.registerTask(this);
+  public Task() {
+    TimingHandler.registerTask(this);
     _recurrence = true;
     _period = 40;
+    // TODO deprecated
+    setCallback(this::execute);
   }
 
   /**
@@ -298,7 +292,7 @@ public class Task {
    * (see {@link #period()} and {@link #setPeriod(long)}). A non-recurrent task
    * will only be executed once just after a delay of {@link #period()} ms.
    * <p>
-   * Tasks are recurrent by default, see {@link #Task(TimingHandler)}.
+   * Tasks are recurrent by default, see {@link #Task()}.
    *
    * @see #enableRecurrence(boolean)
    * @see #isConcurrent()

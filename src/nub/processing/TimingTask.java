@@ -40,7 +40,7 @@ public class TimingTask extends Task {
    * (i.e., a {@link #frequency()} of 25 Hz).
    */
   public TimingTask(Callback callback) {
-    super(Graph.TimingHandler, callback);
+    super(callback);
     if (!Graph._seeded)
       enableConcurrence();
   }
@@ -51,7 +51,7 @@ public class TimingTask extends Task {
    * set as its {@link #callback()} method.
    */
   public TimingTask() {
-    super(Graph.TimingHandler);
+    super();
     if (!Graph._seeded)
       enableConcurrence();
   }
