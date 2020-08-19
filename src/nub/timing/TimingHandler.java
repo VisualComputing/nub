@@ -34,14 +34,7 @@ public class TimingHandler {
   protected static long _frameRateLastNanos;
 
   // T i m e r P o o l
-  protected static HashSet<Task> _tasks;
-
-  /**
-   * Main constructor.
-   */
-  public TimingHandler() {
-    _tasks = new HashSet<Task>();
-  }
+  protected static HashSet<Task> _tasks = new HashSet<Task>();
 
   /**
    * Handler's main method. It should be called from within your main event loop.

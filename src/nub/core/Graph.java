@@ -252,7 +252,7 @@ public class Graph {
     }
   }
 
-  public static TimingHandler TimingHandler = new TimingHandler();
+  public static TimingHandler TimingHandler;
   public static boolean _seeded;
   protected boolean _seededGraph;
   protected HashMap<String, Node> _tags;
