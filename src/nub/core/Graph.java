@@ -2474,14 +2474,14 @@ public class Graph {
    */
   protected boolean _backPicking(Node node) {
     return picking && node.tagging == true && !isEye(node) && _bb != null && (
-        (node.isPickingEnable(Node.CAMERA) && node.isHintEnable(Node.CAMERA)) ||
-            (node.isPickingEnable(Node.AXES) && node.isHintEnable(Node.AXES)) ||
-            (node.isPickingEnable(Node.HUD) && node.isHintEnable(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
-            (node._frustumGraphs != null && node.isPickingEnable(Node.BOUNDS) && node.isHintEnable(Node.BOUNDS)) ||
-            (node.isPickingEnable(Node.SHAPE) && node.isHintEnable(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
-            (node.isPickingEnable(Node.TORUS) && node.isHintEnable(Node.TORUS)) ||
-            (node.isPickingEnable(Node.CONSTRAINT) && node.isHintEnable(Node.CONSTRAINT)) ||
-            (node.isPickingEnable(Node.BONE) && node.isHintEnable(Node.BONE))
+        (node.isPickingEnabled(Node.CAMERA) && node.isHintEnabled(Node.CAMERA)) ||
+            (node.isPickingEnabled(Node.AXES) && node.isHintEnabled(Node.AXES)) ||
+            (node.isPickingEnabled(Node.HUD) && node.isHintEnabled(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
+            (node._frustumGraphs != null && node.isPickingEnabled(Node.BOUNDS) && node.isHintEnabled(Node.BOUNDS)) ||
+            (node.isPickingEnabled(Node.SHAPE) && node.isHintEnabled(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
+            (node.isPickingEnabled(Node.TORUS) && node.isHintEnabled(Node.TORUS)) ||
+            (node.isPickingEnabled(Node.CONSTRAINT) && node.isHintEnabled(Node.CONSTRAINT)) ||
+            (node.isPickingEnabled(Node.BONE) && node.isHintEnabled(Node.BONE))
     );
   }
 
@@ -2489,7 +2489,7 @@ public class Graph {
    * Condition for the node front picking.
    */
   protected boolean _frontPicking(Node node) {
-    return picking && node.tagging == true && !isEye(node) && node.isPickingEnable(Node.BULLSEYE) && node.isHintEnable(Node.BULLSEYE);
+    return picking && node.tagging == true && !isEye(node) && node.isPickingEnabled(Node.BULLSEYE) && node.isHintEnabled(Node.BULLSEYE);
   }
 
   /**
@@ -4433,7 +4433,7 @@ public class Graph {
    * @see #toggleHint(int)
    * @see #resetHint()
    */
-  public boolean isHintEnable(int hint) {
+  public boolean isHintEnabled(int hint) {
     return ~(_mask | ~hint) == 0;
   }
 
@@ -4458,7 +4458,7 @@ public class Graph {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #resetHint()
    */
   public int hint() {
@@ -4475,7 +4475,7 @@ public class Graph {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    */
   public void resetHint() {
     _mask = 0;
@@ -4490,7 +4490,7 @@ public class Graph {
    * @see #enableHint(int, Object...)
    * @see #resetHint()
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    */
   public void disableHint(int hint) {
     _mask &= ~hint;
@@ -4505,7 +4505,7 @@ public class Graph {
    * @see #disableHint(int)
    * @see #resetHint()
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    */
   public void enableHint(int hint, Object... params) {
     enableHint(hint);
@@ -4521,7 +4521,7 @@ public class Graph {
    * @see #enableHint(int, Object...)
    * @see #resetHint()
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    */
   public void enableHint(int hint) {
     _mask |= hint;
@@ -4536,7 +4536,7 @@ public class Graph {
    * @see #enableHint(int, Object...)
    * @see #resetHint()
    * @see #enableHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    */
   public void toggleHint(int hint) {
     _mask ^= hint;
@@ -4565,7 +4565,7 @@ public class Graph {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #resetHint()
    */
   public void configHint(int hint, Object... params) {

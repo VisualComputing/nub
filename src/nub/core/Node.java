@@ -512,7 +512,7 @@ public class Node {
     // TODO deprecated
     // hack
     //if (getClass().equals(Node.class))
-    if (!isHintEnable(Node.SHAPE))
+    if (!isHintEnabled(Node.SHAPE))
       node.disableHint(SHAPE);
     // */
     return node;
@@ -2601,10 +2601,9 @@ public class Node {
   }
 
   protected void _updateHUD() {
-    if ((_rmrHUD == null && _imrHUD == null) || !isHintEnable(HUD)) {
+    if ((_rmrHUD == null && _imrHUD == null) || !isHintEnabled(HUD)) {
       Graph._hudSet.remove(this);
-    }
-    else {
+    } else {
       Graph._hudSet.add(this);
     }
   }
@@ -2710,9 +2709,9 @@ public class Node {
    * @see #enablePicking(int)
    * @see #togglePicking(int)
    * @see #hint()
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    */
-  public boolean isPickingEnable(int hint) {
+  public boolean isPickingEnabled(int hint) {
     return ~(_picking | ~hint) == 0;
   }
 
@@ -2730,9 +2729,9 @@ public class Node {
    * @see #disablePicking(int)
    * @see #enablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #hint()
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #resetHint()
    * @see #disableHint(int)
    * @see #enableHint(int)
@@ -2751,9 +2750,9 @@ public class Node {
    * @see #disablePicking(int)
    * @see #enablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #hint()
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #resetHint()
    * @see #disableHint(int)
    * @see #enableHint(int)
@@ -2772,9 +2771,9 @@ public class Node {
    * @see #disablePicking(int)
    * @see #enablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #hint()
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #resetHint()
    * @see #disableHint(int)
    * @see #enableHint(int)
@@ -2792,9 +2791,9 @@ public class Node {
    * @see #disablePicking(int)
    * @see #enablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #hint()
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #resetHint()
    * @see #disableHint(int)
    * @see #enableHint(int)
@@ -2812,9 +2811,9 @@ public class Node {
    * @see #disablePicking(int)
    * @see #enablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #hint()
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #resetHint()
    * @see #disableHint(int)
    * @see #enableHint(int)
@@ -2839,10 +2838,10 @@ public class Node {
    * @see #enablePicking(int)
    * @see #disablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #resetPicking()
    */
-  public boolean isHintEnable(int hint) {
+  public boolean isHintEnabled(int hint) {
     return ~(_mask | ~hint) == 0;
   }
 
@@ -2875,13 +2874,13 @@ public class Node {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #resetHint()
    * @see #picking()
    * @see #enablePicking(int)
    * @see #disablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #resetPicking()
    */
   public int hint() {
@@ -2898,12 +2897,12 @@ public class Node {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #picking()
    * @see #enablePicking(int)
    * @see #disablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #resetPicking()
    */
   public void resetHint() {
@@ -2920,12 +2919,12 @@ public class Node {
    * @see #enableHint(int, Object...)
    * @see #resetHint()
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #picking()
    * @see #enablePicking(int)
    * @see #disablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #resetPicking()
    */
   public void disableHint(int hint) {
@@ -2942,12 +2941,12 @@ public class Node {
    * @see #disableHint(int)
    * @see #resetHint()
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #picking()
    * @see #enablePicking(int)
    * @see #disablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #resetPicking()
    */
   public void enableHint(int hint, Object... params) {
@@ -2964,12 +2963,12 @@ public class Node {
    * @see #enableHint(int, Object...)
    * @see #resetHint()
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #picking()
    * @see #enablePicking(int)
    * @see #disablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #resetPicking()
    */
   public void enableHint(int hint) {
@@ -2986,12 +2985,12 @@ public class Node {
    * @see #enableHint(int, Object...)
    * @see #resetHint()
    * @see #enableHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #picking()
    * @see #enablePicking(int)
    * @see #disablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #resetPicking()
    */
   public void toggleHint(int hint) {
@@ -3026,13 +3025,13 @@ public class Node {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #resetHint()
    * @see #picking()
    * @see #enablePicking(int)
    * @see #disablePicking(int)
    * @see #togglePicking(int)
-   * @see #isPickingEnable(int)
+   * @see #isPickingEnabled(int)
    * @see #resetPicking()
    */
   public void configHint(int hint, Object... params) {

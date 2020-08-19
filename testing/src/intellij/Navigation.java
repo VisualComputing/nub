@@ -105,8 +105,8 @@ public class Navigation extends PApplet {
     }
     if (key == ' ') {
       mainScene.toggleHint(Scene.AXES | Scene.HUD);
-      if (mainScene.isHintEnable(Scene.BACKGROUND)) println("Scene.BACKGROUND");
-      if (mainScene.isHintEnable(Scene.BACKGROUND | Scene.AXES)) println("Scene.BACKGROUND | Scene.AXES)");
+      if (mainScene.isHintEnabled(Scene.BACKGROUND)) println("Scene.BACKGROUND");
+      if (mainScene.isHintEnabled(Scene.BACKGROUND | Scene.AXES)) println("Scene.BACKGROUND | Scene.AXES)");
     }
   }
 

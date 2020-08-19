@@ -880,7 +880,7 @@ public class Scene extends Graph {
     if (!_hudSet.isEmpty()) {
       _bbMatrixHandler.beginHUD(width(), height());
       for (Node node : _hudSet) {
-        if (node.isPickingEnable(Node.HUD)) {
+        if (node.isPickingEnabled(Node.HUD)) {
           _emitBackBufferUniforms(node);
           _backBuffer().pushMatrix();
           Vector location = screenLocation(node);
@@ -937,7 +937,7 @@ public class Scene extends Graph {
 
   @Override
   protected void _displayHUD() {
-    if (!_hudSet.isEmpty() || (isHintEnable(HUD) && ((_imrHUD != null) || _rmrHUD != null))) {
+    if (!_hudSet.isEmpty() || (isHintEnabled(HUD) && ((_imrHUD != null) || _rmrHUD != null))) {
       context().pushStyle();
       beginHUD();
       if (!_hudSet.isEmpty()) {
@@ -956,7 +956,7 @@ public class Scene extends Graph {
           context().popMatrix();
         }
       }
-      if (isHintEnable(HUD) && ((_imrHUD != null) || _rmrHUD != null)) {
+      if (isHintEnabled(HUD) && ((_imrHUD != null) || _rmrHUD != null)) {
         if (_imrHUD != null) {
           _imrHUD.accept(context());
         }
@@ -972,19 +972,19 @@ public class Scene extends Graph {
   @Override
   protected void _displayHint() {
     context().pushStyle();
-    if (isHintEnable(BACKGROUND)) {
+    if (isHintEnabled(BACKGROUND)) {
       if (isNumInstance(_background)) {
         context().background(castToInt(_background));
       } else if (_background instanceof PImage) {
         context().background((PImage) _background);
       }
     }
-    if (isHintEnable(AXES)) {
+    if (isHintEnabled(AXES)) {
       context().pushStyle();
       drawAxes();
       context().popStyle();
     }
-    if (isHintEnable(GRID)) {
+    if (isHintEnabled(GRID)) {
       context().pushStyle();
       context().colorMode(PApplet.RGB, 255);
       context().stroke(_gridStroke);
@@ -1002,7 +1002,7 @@ public class Scene extends Graph {
       _drawSpline(interpolator);
       context().popStyle();
     }
-    if (isHintEnable(Graph.SHAPE) && (_rmrShape != null || _imrShape != null)) {
+    if (isHintEnabled(Graph.SHAPE) && (_rmrShape != null || _imrShape != null)) {
       context().push();
       if (_rmrShape != null) {
         context().shapeMode(context().shapeMode);
@@ -1019,7 +1019,7 @@ public class Scene extends Graph {
   @Override
   public void _displayFrontHint(Node node) {
     PGraphics pg = context();
-    if (node.isHintEnable(Node.SHAPE)) {
+    if (node.isHintEnabled(Node.SHAPE)) {
       pg.pushStyle();
       if (_rmrShape(node) != null) {
         pg.shapeMode(pg.shapeMode);
@@ -1030,14 +1030,14 @@ public class Scene extends Graph {
       }
       pg.popStyle();
     }
-    if (node.isHintEnable(Node.TORUS)) {
+    if (node.isHintEnabled(Node.TORUS)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.fill(_torusColor(node));
       drawTorusSolenoid(pg, _torusFaces(node), 5);
       pg.popStyle();
     }
-    if (node.isHintEnable(Node.BOUNDS)) {
+    if (node.isHintEnabled(Node.BOUNDS)) {
       for (Graph graph : _frustumGraphs(node)) {
         if (graph != this) {
           pg.pushStyle();
@@ -1050,12 +1050,12 @@ public class Scene extends Graph {
         }
       }
     }
-    if (node.isHintEnable(Node.AXES)) {
+    if (node.isHintEnabled(Node.AXES)) {
       pg.pushStyle();
       drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
       pg.popStyle();
     }
-    if (node.isHintEnable(Node.CAMERA)) {
+    if (node.isHintEnabled(Node.CAMERA)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_cameraStroke(node));
@@ -1063,7 +1063,7 @@ public class Scene extends Graph {
       _drawEye(pg, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
       pg.popStyle();
     }
-    if (node.isHintEnable(Node.BULLSEYE)) {
+    if (node.isHintEnabled(Node.BULLSEYE)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_bullsEyeStroke(node));
@@ -1076,7 +1076,7 @@ public class Scene extends Graph {
   protected void _displayBackHint(Node node) {
     _emitBackBufferUniforms(node);
     PGraphics pg = _backBuffer();
-    if (node.isHintEnable(Node.SHAPE) && node.isPickingEnable(Node.SHAPE)) {
+    if (node.isHintEnabled(Node.SHAPE) && node.isPickingEnabled(Node.SHAPE)) {
       if (_rmrShape(node) != null) {
         pg.shapeMode(pg.shapeMode);
         pg.shape(_rmrShape(node));
@@ -1085,23 +1085,23 @@ public class Scene extends Graph {
         _imrShape(node).accept(pg);
       }
     }
-    if (node.isHintEnable(Node.TORUS) && node.isPickingEnable(Node.TORUS)) {
+    if (node.isHintEnabled(Node.TORUS) && node.isPickingEnabled(Node.TORUS)) {
       drawTorusSolenoid(pg, _torusFaces(node), 5);
     }
-    if (node.isHintEnable(Node.BOUNDS) && node.isPickingEnable(Node.BOUNDS)) {
+    if (node.isHintEnabled(Node.BOUNDS) && node.isPickingEnabled(Node.BOUNDS)) {
       for (Graph graph : _frustumGraphs(node)) {
         if (graph != this) {
           drawFrustum(pg, graph);
         }
       }
     }
-    if (node.isHintEnable(Node.AXES) && node.isPickingEnable(Node.AXES)) {
+    if (node.isHintEnabled(Node.AXES) && node.isPickingEnabled(Node.AXES)) {
       pg.pushStyle();
       pg.strokeWeight(6);
       drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
       pg.popStyle();
     }
-    if (node.isHintEnable(Node.CAMERA) && node.isPickingEnable(Node.CAMERA)) {
+    if (node.isHintEnabled(Node.CAMERA) && node.isPickingEnabled(Node.CAMERA)) {
       _drawEye(pg, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
     }
   }
@@ -1311,7 +1311,7 @@ public class Scene extends Graph {
   protected void _drawSpline(Interpolator interpolator) {
     if (interpolator.hint() != 0) {
       List<Node> path = _path(interpolator);
-      if (interpolator.isHintEnable(Interpolator.SPLINE) && path.size() > 1) {
+      if (interpolator.isHintEnabled(Interpolator.SPLINE) && path.size() > 1) {
         context().pushStyle();
         context().noFill();
         context().colorMode(PApplet.RGB, 255);
@@ -1325,7 +1325,7 @@ public class Scene extends Graph {
         context().endShape();
         context().popStyle();
       }
-      if (interpolator.isHintEnable(Interpolator.STEPS)) {
+      if (interpolator.isHintEnabled(Interpolator.STEPS)) {
         context().pushStyle();
         int count = 0;
         float goal = 0.0f;

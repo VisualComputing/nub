@@ -100,7 +100,7 @@ public class Interpolator {
       _cacheHint = node.hint();
       _hint = hint;
       _time = time;
-      if (isHintEnable(SPLINE) && _hint != _cacheHint)
+      if (isHintEnabled(SPLINE) && _hint != _cacheHint)
         _node._mask = _hint;
     }
 
@@ -235,11 +235,10 @@ public class Interpolator {
 
     // TODO deprecated
     // hack (refer to Node.get())
-    if (node().isHintEnable(Node.SHAPE) && node()._imrShape != null || node()._rmrShape != null) {
+    if (node().isHintEnabled(Node.SHAPE) && node()._imrShape != null || node()._rmrShape != null) {
       //if (node()._imrShape != null || node()._rmrShape != null) {
       _stepsHint = Node.SHAPE;
-    }
-    else {
+    } else {
       if (node().isEye()) {
         _stepsHint = Node.CAMERA;
       } else {
@@ -887,7 +886,7 @@ public class Interpolator {
                 Vector.lerp(keyFrames[1]._node.magnitude(), keyFrames[2]._node.magnitude(), alpha));
             if (step % Interpolator.maxSteps != 0) {
               node._mask = _stepsHint;
-              if (node.isHintEnable(Node.SHAPE) && (node()._imrShape != null || node()._rmrShape != null)) {
+              if (node.isHintEnabled(Node.SHAPE) && (node()._imrShape != null || node()._rmrShape != null)) {
                 node.setShape(node());
               }
             }
@@ -973,7 +972,7 @@ public class Interpolator {
    * @see #toggleHint(int)
    * @see #resetHint()
    */
-  public boolean isHintEnable(int hint) {
+  public boolean isHintEnabled(int hint) {
     return ~(_mask | ~hint) == 0;
   }
 
@@ -995,7 +994,7 @@ public class Interpolator {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #resetHint()
    */
   public int hint() {
@@ -1012,7 +1011,7 @@ public class Interpolator {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    */
   public void resetHint() {
     _mask = 0;
@@ -1028,7 +1027,7 @@ public class Interpolator {
    * @see #enableHint(int, Object...)
    * @see #resetHint()
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    */
   public void disableHint(int hint) {
     _mask &= ~hint;
@@ -1044,7 +1043,7 @@ public class Interpolator {
    * @see #disableHint(int)
    * @see #resetHint()
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    */
   public void enableHint(int hint, Object... params) {
     enableHint(hint);
@@ -1060,7 +1059,7 @@ public class Interpolator {
    * @see #enableHint(int, Object...)
    * @see #resetHint()
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    */
   public void enableHint(int hint) {
     _mask |= hint;
@@ -1092,7 +1091,7 @@ public class Interpolator {
    * @see #enableHint(int, Object...)
    * @see #resetHint()
    * @see #enableHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    */
   public void toggleHint(int hint) {
     _mask ^= hint;
@@ -1119,7 +1118,7 @@ public class Interpolator {
    * @see #enableHint(int, Object...)
    * @see #disableHint(int)
    * @see #toggleHint(int)
-   * @see #isHintEnable(int)
+   * @see #isHintEnabled(int)
    * @see #resetHint()
    */
   public void configHint(int hint, Object... params) {

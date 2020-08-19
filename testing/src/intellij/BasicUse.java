@@ -106,21 +106,21 @@ public class BasicUse extends PApplet {
     if (key == 'p') {
       println(Scene.nodes().size());
       println("node hint: " + node.hint());
-      if (node.isHintEnable(Node.AXES))
+      if (node.isHintEnabled(Node.AXES))
         println("Node.AXES");
-      if (node.isHintEnable(Node.CAMERA))
+      if (node.isHintEnabled(Node.CAMERA))
         println("Node.CAMERA");
-      if (node.isHintEnable(Node.BULLSEYE))
+      if (node.isHintEnabled(Node.BULLSEYE))
         println("Node.BULLS_EYE");
-      if (node.isHintEnable(Node.SHAPE))
+      if (node.isHintEnabled(Node.SHAPE))
         println("Node.SHAPE");
       //if (node.isHintEnable(Node.FRUSTUM))
         //println("Node.FRUSTUM");
-      if (node.isHintEnable(Node.TORUS))
+      if (node.isHintEnabled(Node.TORUS))
         println("Node.TORUS");
-      if (node.isHintEnable(Node.CONSTRAINT))
+      if (node.isHintEnabled(Node.CONSTRAINT))
         println("Node.CONSTRAINT");
-      if (node.isHintEnable(Node.BONE))
+      if (node.isHintEnabled(Node.BONE))
         println("Node.BONE");
     }
   }
