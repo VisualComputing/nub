@@ -35,7 +35,7 @@ void setup() {
   cajas = new Box[15];
   for (int i = 0; i < cajas.length; i++) {
     cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)), random(10, 40), random(10, 40), random(10, 40));
-    cajas[i].togglePickingMode(Node.SHAPE);
+    cajas[i].togglePicking(Node.SHAPE);
   }
   scene.fit();
   scene.tag("keyboard", esfera);
@@ -71,7 +71,7 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   if (key == ' ') {
     for (Box caja : cajas)
-      caja.togglePickingMode(Node.BULLSEYE | Node.SHAPE);
+      caja.togglePicking(Node.BULLSEYE | Node.SHAPE);
   }
   if (key == 'c') {
     for (Box caja : cajas)

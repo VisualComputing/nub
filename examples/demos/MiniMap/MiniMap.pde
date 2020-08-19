@@ -33,7 +33,7 @@ void setup() {
   size(1920, 1080, renderer);
   scene = onScreen ? new Scene(this, 1000) : new Scene(createGraphics(width, height, renderer), 1000);
   scene.eye().enableHint(Node.BOUNDS | Node.BULLSEYE);
-  scene.eye().disablePickingMode(Node.BULLSEYE);
+  scene.eye().disablePicking(Node.BULLSEYE);
   scene.eye().setBullsEyeSize(50);
   scene.eye().setHighlight(0);
   scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
@@ -77,7 +77,7 @@ void keyPressed() {
   if (key == 't')
     focus.togglePerspective();
   if (key == 'p')
-    scene.eye().togglePickingMode(Node.BULLSEYE | Node.BOUNDS);
+    scene.eye().togglePicking(Node.BULLSEYE | Node.BOUNDS);
 }
 
 void mouseMoved() {
