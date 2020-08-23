@@ -26,6 +26,7 @@ boolean circle;
 void setup() {
   size(800, 600, P3D);
   // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
+  Scene.inertia = 0.85;
   scene = new Scene(this, 200);
   scene.enableHint(Scene.BACKGROUND, color(0));
   scene.togglePerspective();
