@@ -16,8 +16,8 @@ public class AuxViewers extends PApplet {
   // test both cases here
   boolean onScreen = false;
 
-  int w = 700;
-  int h = 700;
+  int w = 1920;
+  int h = 1080;
 
   public void settings() {
     size(w, h, P3D);

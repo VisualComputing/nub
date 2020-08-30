@@ -212,14 +212,7 @@ public class Interpolator {
     setNode(node);
     _t = 0.0f;
     _speed = 1.0f;
-    //JS should just go:
-    //_task = new Task(Graph.timingHandler()) {
-    _task = new nub.processing.TimingTask() {
-      @Override
-      public void execute() {
-        Interpolator.this._execute();
-      }
-    };
+    _task = new nub.processing.TimingTask(() -> Interpolator.this._execute());
     _recurrent = false;
     _pathIsValid = false;
     _valuesAreValid = false;
@@ -257,14 +250,7 @@ public class Interpolator {
     this.setNode(other.node());
     this._t = other._t;
     this._speed = other._speed;
-    //JS should just go:
-    //this._task = new Task(Graph.timingHandler()) {
-    this._task = new nub.processing.TimingTask() {
-      @Override
-      public void execute() {
-        Interpolator.this._execute();
-      }
-    };
+    this._task = new nub.processing.TimingTask(() -> Interpolator.this._execute());
     this._task.setPeriod(other.task().period());
     this._task.enableConcurrence(other._task.isConcurrent());
     this._recurrent = other._recurrent;

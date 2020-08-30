@@ -10,24 +10,25 @@ import processing.event.MouseEvent;
 
 public class VisitExample extends PApplet {
   /**
-   * This example modifies the visual representation on a Node depending on the scene it is drawn.
-   * */
+   * This example modifies the visual representation on a Node
+   * depending on the scene it is drawn.
+   */
 
   boolean relativeToGraph = true;
   int rows = 2, cols = 2;
   int n = rows * cols;
   Scene[] scenes = new Scene[n];
   Scene focus;
-  int w = 700, h = 700;
+  int w = 1400, h = 1400;
   int[] strokeColors = new int[n];
   int[] fillColors = new int[n];
 
-  public void settings(){
+  public void settings() {
     size(w, h, P3D);
   }
 
   @Override
-  public void setup(){
+  public void setup() {
     //create the scenes
     for(int i = 0; i < n; i++){
       final int idx = i;
@@ -53,11 +54,11 @@ public class VisitExample extends PApplet {
     }
   }
 
-  public void sceneHUD(int i, PGraphics pg){
+  public void sceneHUD(int i, PGraphics pg) {
     pg.pushStyle();
     pg.stroke(255);
     pg.fill(255);
-    pg.text("On scene " + i + " radius : " + (int)(scenes[i].radius()), 10, pg.height / 10);
+    pg.text("On scene " + i + " radius : " + (int) (scenes[i].radius()), 10, pg.height / 10);
     pg.popStyle();
   }
 
@@ -69,17 +70,18 @@ public class VisitExample extends PApplet {
     }
   }
 
-  class CustomNode extends Node{
+  class CustomNode extends Node {
     //Add some attributes
-    float radiusInPixels = 10f, radius;
+    float radiusInPixels = 50, radius;
     int strokeCol, fillCol;
-    public CustomNode(){
+
+    public CustomNode() {
       super();
       //without modifying Node class
       //for(Scene scene : scenes) setVisit(scene, (g , n) -> setupAttributesByGraph(g));
       //modifying the node class
-      for(Scene scene : scenes) setVisit(scene, this::setupAttributesByGraph);
-      setShape(pg ->{
+      for (Scene scene : scenes) setVisit(scene, this::setupAttributesByGraph);
+      setShape(pg -> {
         pg.pushStyle();
         pg.stroke(strokeCol);
         pg.fill(fillCol);
@@ -88,8 +90,8 @@ public class VisitExample extends PApplet {
       });
     }
 
-    public void setupAttributesByGraph(Graph g){
-      if(relativeToGraph) {
+    public void setupAttributesByGraph(Graph g) {
+      if (relativeToGraph) {
         //keep the size of the node relative to the graph such that it always occupies 10 pixels
         this.radius = this.radiusInPixels * g.sceneToPixelRatio(position());
         //change color based on Graph
@@ -138,14 +140,12 @@ public class VisitExample extends PApplet {
 
   @Override
   public void keyPressed(){
-    if(key == ' '){
+    if (key == ' ') {
       relativeToGraph = !relativeToGraph;
     }
   }
 
-
   public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.VisitExample"});
   }
-
 }

@@ -26,13 +26,6 @@ abstract class InertialTask extends nub.processing.TimingTask {
   protected float _inertia;
   protected float _x, _y, _z;
 
-  // JS should go:
-  /*
-  InertialTask() {
-    super(Graph.timingHandler());
-  }
-  */
-
   /**
    * Sets inertia in [0..1].
    */

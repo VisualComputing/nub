@@ -1,6 +1,5 @@
 package intellij;
 
-import nub.core.Graph;
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
@@ -22,7 +21,7 @@ public class DOF extends PApplet {
 
   @Override
   public void settings() {
-    size(700, 700, P3D);
+    size(1400, 1400, P3D);
   }
 
   @Override
@@ -84,7 +83,7 @@ public class DOF extends PApplet {
       //image(depthScene.context(), 0, 0);
     else
       image(dofPGraphics, 0, 0);
-    println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");
+    // println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");
   }
 
   PShape boxShape() {
