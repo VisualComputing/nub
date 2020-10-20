@@ -11,6 +11,8 @@ import processing.event.MouseEvent;
 
 public class HelloWorld extends PApplet {
   Scene scene, auxScene;
+  Node n1, n2;
+  boolean displayAux;
   Vector v;
   Task task;
 
@@ -21,13 +23,29 @@ public class HelloWorld extends PApplet {
 
   @Override
   public void setup() {
+    n1 = new Node();
+    n2 = new Node(n1);
+    n1.enableHint(Node.AXES);
+    n2.enableHint(Node.TORUS);
+    n1.translate(new Vector(75, -75, 80));
+    n1.scale(5);
+    n2.translate(new Vector(50, 65, 0));
+    n2.setHUD((PGraphics pg) -> {
+      pg.pushStyle();
+      pg.fill(255, 0, 255, 125);
+      pg.rect(0, 0, 200, 300);
+      pg.pushStyle();
+    });
+
     scene = new Scene(this, 500);
     // pendiente
     scene.eye().enableHint(Node.BOUNDS);
     scene.enableHint(Scene.BACKGROUND | Scene.AXES | Scene.GRID);
     scene.configHint(Scene.BACKGROUND, color(125));
-    scene.enableHint(Scene.HUD);
+    scene.disableHint(Scene.HUD);
+    // modo inmediato: mediante un procedimiento
     scene.setHUD(this::rect);
+    // modo retenido: PShape
     scene.setShape(createShape(SPHERE, 50));
     task = new Task(this::functor);
     task.run();
@@ -47,6 +65,9 @@ public class HelloWorld extends PApplet {
       scene.fit(1);
     if (key == 't') {
       scene.toggleHint(Scene.HUD);
+    }
+    if (key == 'd') {
+      displayAux = !displayAux;
     }
   }
 
@@ -74,15 +95,17 @@ public class HelloWorld extends PApplet {
       point(v.x(), v.y(), v.z());
       popStyle();
     }
-    //auxScene.render();
-    //auxScene.image(width/2, height/2);
-    auxScene.display(width - auxScene.width(), height - auxScene.height());
+    if (displayAux)
+      auxScene.display(width - auxScene.width(), height - auxScene.height());
   }
 
   @Override
   public void mouseMoved(MouseEvent event) {
     if (event.isControlDown()) {
       v = scene.mouseLocation();
+    }
+    else {
+      scene.mouseTag();
     }
   }
 
