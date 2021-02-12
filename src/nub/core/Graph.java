@@ -4443,7 +4443,7 @@ public class Graph {
    * <p>
    * <ol>
    * <li>{@link #GRID} which displays a grid hint centered at the world origin.</li>
-   * <li>{@link #AXES} which displays a grid hint centered at the world origin.</li>
+   * <li>{@link #AXES} which displays an axes hint centered at the world origin.</li>
    * <li>{@link #HUD} which displays the graph Heads-Up-Display set with
    * {@link #setHUD(PShape)} or {@link #setHUD(Consumer)}.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
