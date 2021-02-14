@@ -226,7 +226,6 @@ public class Interpolator {
     _splineWeight = 3;
     _steps = 3;
 
-    // TODO deprecated
     // hack (refer to Node.get())
     if (node().isHintEnabled(Node.SHAPE) && node()._imrShape != null || node()._rmrShape != null) {
       //if (node()._imrShape != null || node()._rmrShape != null) {

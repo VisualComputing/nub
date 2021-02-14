@@ -62,7 +62,6 @@ public class Task {
     TimingHandler.registerTask(this);
     _recurrence = true;
     _period = 40;
-    // TODO deprecated
     setCallback(this::execute);
   }
 
@@ -96,6 +95,7 @@ public class Task {
    * {@link #period()}. Do not implement this method for drawing
    * since it will not necessarily be executed every frame.
    */
+  @Deprecated
   public void execute() {
   }
 

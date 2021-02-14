@@ -18,6 +18,7 @@ import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -300,13 +301,16 @@ public class Node {
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
     setReference(reference);
-    // /*
-    // TODO deprecated
-    // hack (refer to Node.get())
-    _imrShape = this::graphics;
-    if (!getClass().equals(Node.class))
-      enableHint(SHAPE);
-    // */
+    // hack
+    Method method = null;
+    try {
+      method = this.getClass().getMethod("graphics", processing.core.PGraphics.class);
+    } catch(NoSuchMethodException e) {
+      System.out.println(e.toString()); //print exception object
+    }
+    if (!method.getDeclaringClass().equals(Node.class)) {
+      setShape(this::graphics);
+    }
   }
 
   /**
