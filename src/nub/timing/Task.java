@@ -66,14 +66,14 @@ public class Task {
   }
 
   /**
-   * Sets the callback method which should be provided by third parties
-   * using this task.
+   * Sets the task callback method.
    * <p>
    * The callback will be executed (see {@link #run(long)}) at a certain
    * {@link #period()}. Do not implement drawing in your callback since
    * it will not necessarily be executed every frame.
    *
    * @see #callback()
+   * @see #execute()
    */
   public void setCallback(Callback callback) {
     _callback = callback;
@@ -90,12 +90,15 @@ public class Task {
 
   /**
    * Callback method which should be implemented by derived classes.
+   * Otherwise simply use {@link #setCallback(Callback)}.
    * <p>
    * The task will be executed (see {@link #run(long)}) at a certain
    * {@link #period()}. Do not implement this method for drawing
    * since it will not necessarily be executed every frame.
+   *
+   * @see #setCallback(Callback)
+   * @see #callback()
    */
-  @Deprecated
   public void execute() {
   }
 

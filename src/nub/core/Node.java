@@ -145,8 +145,6 @@ public class Node {
   protected long _lastUpdate;
 
   // Tagging & Precision
-  // TODO I think this should be modeled as an enum with bullseye SPACE
-  // think bout hud_space
   protected float _bullsEyeSize;
   public enum BullsEyeShape {
     SQUARE, CIRCLE
@@ -346,7 +344,6 @@ public class Node {
     _cameraStroke = -65281;
     _children = new ArrayList<Node>();
     _frustumGraphs = new HashSet<Graph>();
-    // TODO deprecated
     setInteraction(this::interact);
   }
 
@@ -512,13 +509,8 @@ public class Node {
   public Node get() {
     Node node = new Node();
     node.set(this);
-    // /*
-    // TODO deprecated
-    // hack
-    //if (getClass().equals(Node.class))
     if (!isHintEnabled(Node.SHAPE))
       node.disableHint(SHAPE);
-    // */
     return node;
   }
 
@@ -2436,7 +2428,6 @@ public class Node {
    * This together with {@link #visit(Graph)} is a workaround for
    * {@link #setVisit(Graph, BiConsumer)} which is not available in Processing 3.x.
    */
-  @Deprecated
   public void setVisit(Graph graph) {
     setVisit(graph, this::visit);
   }
@@ -2445,7 +2436,6 @@ public class Node {
    * This together with {@link #setVisit(Graph)} is a workaround for
    * {@link #setVisit(Graph, BiConsumer)} which is not available in Processing 3.x.
    */
-  @Deprecated
   public void visit(Graph graph) {}
 
   /**
@@ -2586,10 +2576,9 @@ public class Node {
    * Parse {@code gesture} params. Useful to customize the node behavior.
    * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
    *
-   * @deprecated use either {@link #setInteraction(BiConsumer)} or
-   * {@link #setInteraction(Consumer)} instead.
+   * @see #setInteraction(BiConsumer)
+   * @see #setInteraction(Consumer)
    */
-  @Deprecated
   public void interact(Object[] gesture) {
     System.out.println("Warning: Node.interact() missed implementation");
   }
@@ -2598,9 +2587,8 @@ public class Node {
    * Override this method to set an immediate mode graphics procedure on the Processing
    * {@code PGraphics} or use {@link #setShape(Consumer)} instead.
    *
-   * @deprecated use {@link #setShape(Consumer)} instead.
+   * @see #setShape(Consumer)
    */
-  @Deprecated
   public void graphics(processing.core.PGraphics pGraphics) {
   }
 
