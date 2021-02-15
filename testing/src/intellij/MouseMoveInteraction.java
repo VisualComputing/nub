@@ -24,19 +24,16 @@ public class MouseMoveInteraction extends PApplet {
     scene = new Scene(this, 1000);
     scene.fit(1);
 
-    Node shape1 = new Node() {
-      @Override
-      public void graphics(PGraphics pGraphics) {
-        pGraphics.pushStyle();
-        pGraphics.rectMode(CENTER);
-        pGraphics.fill(255, 0, 255);
-        if (scene.is3D())
-          Scene.drawTorusSolenoid(pGraphics, 80);
-        else
-          pGraphics.rect(10, 10, 200, 200);
-        pGraphics.popStyle();
-      }
-    };
+    Node shape1 = new Node((PGraphics pGraphics) -> {
+      pGraphics.pushStyle();
+      pGraphics.rectMode(CENTER);
+      pGraphics.fill(255, 0, 255);
+      if (scene.is3D())
+        Scene.drawTorusSolenoid(pGraphics, 80);
+      else
+        pGraphics.rect(10, 10, 200, 200);
+      pGraphics.popStyle();
+    });
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, -275);
 

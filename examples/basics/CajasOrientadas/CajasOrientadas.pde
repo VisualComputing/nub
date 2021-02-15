@@ -19,8 +19,8 @@ import nub.core.*;
 import nub.processing.*;
 
 Scene scene;
-Box[] cajas;
-Sphere esfera;
+Node[] cajas;
+Node esfera;
 boolean circle;
 
 void setup() {
@@ -31,15 +31,35 @@ void setup() {
   scene.enableHint(Scene.BACKGROUND, color(0));
   scene.togglePerspective();
   scene.fit();
-  esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);
+  esfera = new Node(esfera(10));
   esfera.setPosition(new Vector(0, 1.4, 0));
-  cajas = new Box[15];
+  cajas = new Node[15];
   for (int i = 0; i < cajas.length; i++) {
-    cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)), random(10, 40), random(10, 40), random(10, 40));
+    cajas[i] = new Node(caja(random(10, 40), random(10, 40), random(10, 40)));
     cajas[i].togglePicking(Node.SHAPE);
+    cajas[i].enableHint(Node.AXES | Node.BULLSEYE);
+    scene.setVisit(cajas[i], (Node node) -> {
+      Vector to = Vector.subtract(esfera.position(), node.position());
+      node.setOrientation(Quaternion.from(Vector.plusJ, to));
+    });
+    scene.randomize(cajas[i]);
   }
   scene.fit();
   scene.tag("keyboard", esfera);
+}
+
+PShape caja(float w, float h, float d) {
+  PShape caja = createShape(BOX, w, h, d);
+  caja.setFill(color(random(0, 255), random(0, 255), random(0, 255)));
+  caja.setStroke(false);
+  return caja;
+}
+
+PShape esfera(float r) {
+  PShape esfera = createShape(SPHERE, r);
+  esfera.setStroke(false);
+  esfera.setFill(color(random(0, 255), random(0, 255), random(0, 255)));
+  return esfera;
 }
 
 void draw() {
@@ -71,11 +91,11 @@ void mouseWheel(MouseEvent event) {
 
 void keyPressed() {
   if (key == ' ') {
-    for (Box caja : cajas)
+    for (Node caja : cajas)
       caja.togglePicking(Node.BULLSEYE | Node.SHAPE);
   }
   if (key == 'c') {
-    for (Box caja : cajas)
+    for (Node caja : cajas)
       if (caja.bullsEyeSize() < 1)
         caja.setBullsEyeSize(caja.bullsEyeSize() * 200);
       else
@@ -83,17 +103,17 @@ void keyPressed() {
   }
   if (key == 'd') {
     circle = !circle;
-    for (Box caja : cajas)
+    for (Node caja : cajas)
       caja.configHint(Node.BULLSEYE, circle ?
         Node.BullsEyeShape.CIRCLE :
         Node.BullsEyeShape.SQUARE);
   }
   if (key == 'a') {
-    for (Box caja : cajas)
+    for (Node caja : cajas)
       caja.toggleHint(Node.AXES);
   }
   if (key == 'p') {
-    for (Box caja : cajas)
+    for (Node caja : cajas)
       caja.toggleHint(Node.BULLSEYE);
   }
   if (key == 'e') {

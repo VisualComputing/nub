@@ -39,21 +39,18 @@ void setup() {
   // shapes
   shapes = new Node[20];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Node() {
-      @Override
-      public void graphics(PGraphics pg) {
-        pg.pushStyle();
-        if (pg == shadowMap)
-          pg.noStroke();
-        else {
-          pg.strokeWeight(3);
-          pg.stroke(0, 255, 255);
-        }
-        pg.fill(255, 0, 0);
-        pg.box(80);
-        pg.popStyle();
+    shapes[i] = new Node((PGraphics pg) -> {
+      pg.pushStyle();
+      if (pg == shadowMap)
+      pg.noStroke();
+      else {
+        pg.strokeWeight(3);
+        pg.stroke(0, 255, 255);
       }
-    };
+      pg.fill(255, 0, 0);
+      pg.box(80);
+      pg.popStyle();
+    });
     scene.randomize(shapes[i]);
   }
   // light

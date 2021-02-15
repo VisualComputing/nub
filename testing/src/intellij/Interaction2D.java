@@ -29,27 +29,15 @@ public class Interaction2D extends PApplet {
     //scene.eye().setScaling(1);
     scene.fit(1);
 
-    shape1 = new Node() {
-      @Override
-      public void graphics(PGraphics pGraphics) {
-        Scene.drawAxes(pGraphics, scene.radius() / 3);
-        pGraphics.pushStyle();
-        pGraphics.rectMode(CENTER);
-        pGraphics.fill(0, 255, 255);
-        pGraphics.rect(10, 10, 200, 200);
-        pGraphics.stroke(255, 0, 0);
-        /*
-        scene._drawSquaredBullsEye(this);
-        scene.beginHUD(pGraphics);
-        Vector position = scene.screenLocation(position());
-        pGraphics.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
-        pGraphics.textFont(font36);
-        pGraphics.text("center", position.x(), position.y());
-        scene.endHUD(pGraphics);
-        */
-        pGraphics.popStyle();
-      }
-    };
+    shape1 = new Node((PGraphics pGraphics) -> {
+      Scene.drawAxes(pGraphics, scene.radius() / 3);
+      pGraphics.pushStyle();
+      pGraphics.rectMode(CENTER);
+      pGraphics.fill(0, 255, 255);
+      pGraphics.rect(10, 10, 200, 200);
+      pGraphics.stroke(255, 0, 0);
+      pGraphics.popStyle();
+    });
     shape1.enableHint(Node.BULLSEYE);
     //shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, 0);

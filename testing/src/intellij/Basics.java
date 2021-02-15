@@ -23,6 +23,7 @@ public class Basics extends PApplet {
     scene = new Scene(this, 1000);
     scene.fit(1);
 
+    // /*
     node = new Node() {
       @Override
       public void graphics(PGraphics pg) {
@@ -38,8 +39,11 @@ public class Basics extends PApplet {
         pg.popStyle();
       }
     };
+    // */
+    //node = new Node();
     node.enableHint(Node.BULLSEYE);
     node.setRotation(Quaternion.random());
+    println(node.isHintEnabled(Node.SHAPE));
     //shape = new Node(scene, shape());
     shape = new Node();
     shape.setShape(shape());

@@ -21,41 +21,35 @@ public class DebugCam extends PApplet {
   public void setup() {
     scene = new Scene(this, 50);
     //scene.togglePerspective();
-    Node box1 = new Node() {
-      @Override
-      public void graphics(PGraphics pg) {
-        pg.pushStyle();
-        pg.strokeWeight(1 / 10f);
-        pg.fill(255, 0, 0);
-        pg.box(30);
-        pg.popStyle();
-      }
-
-      @Override
-      public void interact(Object... gesture) {
-        if (gesture.length == 1) {
-          if (gesture[0] instanceof Float) {
-            if (orbit) {
-              Quaternion q = new Quaternion(displacement(axis), (float) gesture[0]);
-              orbit(q, scene.center(), inertia);
-            } else {
-              Quaternion q = new Quaternion((float) gesture[0], 0, 0);
-              rotate(q, inertia);
-            }
+    Node box1 = new Node();
+    box1.setShape((PGraphics pg) -> {
+      pg.pushStyle();
+      pg.strokeWeight(1 / 10f);
+      pg.fill(255, 0, 0);
+      pg.box(30);
+      pg.popStyle();
+    });
+    box1.setInteraction((Object... gesture) -> {
+      if (gesture.length == 1) {
+        if (gesture[0] instanceof Float) {
+          if (orbit) {
+            Quaternion q = new Quaternion(box1.displacement(axis), (float) gesture[0]);
+            box1.orbit(q, scene.center(), inertia);
+          } else {
+            Quaternion q = new Quaternion((float) gesture[0], 0, 0);
+            box1.rotate(q, inertia);
           }
         }
       }
-    };
-    Node box2 = new Node(box1) {
-      @Override
-      public void graphics(PGraphics pg) {
-        pg.pushStyle();
-        pg.strokeWeight(1 / 10f);
-        pg.fill(0, 0, 255);
-        pg.box(5);
-        pg.popStyle();
-      }
-    };
+    });
+    Node box2 = new Node(box1);
+    box2.setShape((PGraphics pg) -> {
+      pg.pushStyle();
+      pg.strokeWeight(1 / 10f);
+      pg.fill(0, 0, 255);
+      pg.box(5);
+      pg.popStyle();
+    });
     box2.translate(0, 0, 20);
     axis = Vector.random();
     axis.multiply(scene.radius() / 3);

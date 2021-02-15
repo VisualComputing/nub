@@ -1,4 +1,5 @@
-class Particle extends TimingTask {
+class Particle {
+  TimingTask task;
   PVector speed;
   PVector pos;
   int age;
@@ -8,19 +9,17 @@ class Particle extends TimingTask {
     speed = new PVector();
     pos = new PVector();
     init();
-    run();
-  }
-
-  @Override
-  public void execute() {
-    speed.z -= 0.05;
-    pos = PVector.add(pos, PVector.mult(speed, 10));
-    if (pos.z < 0.0) {
-      speed.z = -0.8 * speed.z;
-      pos.z = 0;
-    }
-    if (++age == ageMax)
+    task = new TimingTask(() -> {
+      speed.z -= 0.05;
+      pos = PVector.add(pos, PVector.mult(speed, 10));
+      if (pos.z < 0.0) {
+        speed.z = -0.8 * speed.z;
+        pos.z = 0;
+      }
+      if (++age == ageMax)
       init();
+    });
+    task.run();
   }
 
   void init() {

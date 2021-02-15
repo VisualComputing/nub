@@ -60,15 +60,15 @@ void keyPressed() {
   for (Particle particle : particles) {
     if (key == '+')
       // less period is faster
-      particle.increasePeriod(-2);
+      particle.task.increasePeriod(-2);
     if (key == '-')
-      particle.increasePeriod(2);
+      particle.task.increasePeriod(2);
     if (key == ' ')
-      particle.toggle();
+      particle.task.toggle();
     if (key == 'e')
-      particle.enableConcurrence(true);
+      particle.task.enableConcurrence(true);
     if (key == 'd')
-      particle.enableConcurrence(false);
+      particle.task.enableConcurrence(false);
   }
-  println((!particles[0].isConcurrent() ? "Non-concurrent " : "Concurrent ") + "system. Particle period: " + particles[0].period());
+  println((!particles[0].task.isConcurrent() ? "Non-concurrent " : "Concurrent ") + "system. Particle period: " + particles[0].task.period());
 }

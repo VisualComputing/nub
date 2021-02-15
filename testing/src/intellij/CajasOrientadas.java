@@ -1,5 +1,6 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -55,11 +56,6 @@ public class CajasOrientadas extends PApplet {
       else
         scene.scaleEye(mouseX - pmouseX);
     }
-  }
-
-  public void updateCajaOrientation(Node node) {
-    Vector to = Vector.subtract(esfera.position(), node.position());
-    node.setOrientation(Quaternion.from(Vector.plusJ, to));
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -118,6 +114,7 @@ public class CajasOrientadas extends PApplet {
 
     public Box(int tint, float w, float h, float d) {
       setShape(this::caja);
+      setVisit(scene, this::visit);
       _color = tint;
       _w = w;
       _h = h;
@@ -136,10 +133,9 @@ public class CajasOrientadas extends PApplet {
       pg.popStyle();
     }
 
-    // TODO restore
-    //@Override
-    public void visit() {
-      updateCajaOrientation(this);
+    public void visit(Graph graph) {
+      Vector to = Vector.subtract(esfera.position(), position());
+      setOrientation(Quaternion.from(Vector.plusJ, to));
     }
   }
 
@@ -150,22 +146,13 @@ public class CajasOrientadas extends PApplet {
     public Sphere(int tint, float radius) {
       _color = tint;
       _radius = radius;
-    }
-
-    @Override
-    public void graphics(PGraphics pg) {
-      pg.pushStyle();
-      pg.noStroke();
-      pg.fill(_color);
-      pg.sphere(_radius);
-      pg.popStyle();
-    }
-
-    // TODO restore
-    //@Override
-    public void visit() {
-      for (Box caja : cajas)
-        updateCajaOrientation(caja);
+      setShape((PGraphics pg) -> {
+        pg.pushStyle();
+        pg.noStroke();
+        pg.fill(_color);
+        pg.sphere(_radius);
+        pg.popStyle();
+      });
     }
   }
 

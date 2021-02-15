@@ -25,39 +25,7 @@ public class CustomNodeInteraction extends PApplet {
     scene.fit(1);
     shapes = new Node[10];
     for (int i = 0; i < shapes.length; i++) {
-      // shapes[i] = new CustomNode();
-      // /*
-      shapes[i] = new Node() {
-        int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
-
-        @Override
-        public void graphics(PGraphics pg) {
-          pg.pushStyle();
-          pg.fill(_color);
-          Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
-          pg.popStyle();
-        }
-
-        @Override
-        public void interact(Object... gesture) {
-          if (gesture.length == 0)
-            _color = randomColor();
-          if (gesture.length == 1)
-            if (gesture[0] instanceof String) {
-              if (((String) gesture[0]).matches("mas"))
-                _faces++;
-              else if (((String) gesture[0]).matches("menos"))
-                if (_faces > 2)
-                  _faces--;
-            } else if (gesture[0] instanceof Integer) {
-              int delta = (Integer) gesture[0];
-              if (_faces + delta > 1)
-                _faces = _faces + delta;
-            }
-        }
-      };
-      // */
-      //shapes[i].setInteraction(this::customInteraction2);
+      shapes[i] = new CustomNode();
       scene.randomize(shapes[i]);
     }
     font36 = loadFont("FreeSans-36.vlw");
@@ -76,24 +44,6 @@ public class CustomNodeInteraction extends PApplet {
 
   int randomFaces() {
     return (int) random(3, 15);
-  }
-
-  public void customInteraction2(Node node, Object[] gesture) {
-    CustomNode customNode = (CustomNode) node;
-    if (gesture.length == 0)
-      customNode._color = randomColor();
-    if (gesture.length == 1)
-      if (gesture[0] instanceof String) {
-        if (((String) gesture[0]).matches("mas"))
-          customNode._faces++;
-        else if (((String) gesture[0]).matches("menos"))
-          if (customNode._faces > 2)
-            customNode._faces--;
-      } else if (gesture[0] instanceof Integer) {
-        int delta = (Integer) gesture[0];
-        if (customNode._faces + delta > 1)
-          customNode._faces = customNode._faces + delta;
-      }
   }
 
   public void draw() {
@@ -143,10 +93,31 @@ public class CustomNodeInteraction extends PApplet {
     int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
 
     public CustomNode() {
-      //setInteraction(this::customInteraction);
+      setShape((PGraphics pg) -> {
+        pg.pushStyle();
+        pg.fill(_color);
+        Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
+        pg.popStyle();
+      });
+      setInteraction((Object... gesture) -> {
+        if (gesture.length == 0)
+          _color = randomColor();
+        if (gesture.length == 1)
+          if (gesture[0] instanceof String) {
+            if (((String) gesture[0]).matches("mas"))
+              _faces++;
+            else if (((String) gesture[0]).matches("menos"))
+              if (_faces > 2)
+                _faces--;
+          } else if (gesture[0] instanceof Integer) {
+            int delta = (Integer) gesture[0];
+            if (_faces + delta > 1)
+              _faces = _faces + delta;
+          }
+      });
     }
 
-    @Override
+    /*
     public void graphics(PGraphics pg) {
       pg.pushStyle();
       pg.fill(_color);
@@ -154,7 +125,7 @@ public class CustomNodeInteraction extends PApplet {
       pg.popStyle();
     }
 
-    public void customInteraction(Object[] gesture) {
+    public void interaction(Object... gesture) {
       if (gesture.length == 0)
         _color = randomColor();
       if (gesture.length == 1)
@@ -170,6 +141,7 @@ public class CustomNodeInteraction extends PApplet {
             _faces = _faces + delta;
         }
     }
+    // */
   }
 
   public static void main(String[] args) {

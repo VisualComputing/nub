@@ -46,71 +46,18 @@ void setup() {
   scene.enableHint(Scene.BACKGROUND, color(0));
   scene.togglePerspective();
   scene.fit(1);
-  Node floor = new Node() {
-    @Override
-      public void graphics(PGraphics pg) {
-      pg.pushStyle();
-      pg.noStroke();
-      pg.fill(0xff222222);
-      pg.box(360, 5, 360);
-      pg.popStyle();
-    }
-  };
+  Node floor = new Node((PGraphics pg) -> {
+    pg.pushStyle();
+    pg.noStroke();
+    pg.fill(0xff222222);
+    pg.box(360, 5, 360);
+    pg.popStyle();
+  });
   floor.tagging = false;
-  landscape1 = new Node() {
-    @Override
-    public void graphics(PGraphics pg) {
-      pg.pushStyle();
-      pg.noStroke();
-      float offset = -frameCount * 0.01;
-      pg.fill(0xffff5500);
-      for (int z = -5; z < 6; ++z)
-        for (int x = -5; x < 6; ++x) {
-          pg.pushMatrix();
-          pg.translate(x * 12, sin(offset + x) * 20 + cos(offset + z) * 20, z * 12);
-          pg.box(10, 100, 10);
-          pg.popMatrix();
-        }
-      pg.popStyle();
-    }
-  };
-  landscape2 = new Node() {
-    @Override
-    public void graphics(PGraphics pg) {
-      pg.pushStyle();
-      pg.noStroke();
-      float angle = -frameCount * 0.0015, rotation = TWO_PI / 20;
-      pg.fill(0xffff5500);
-      for (int n = 0; n < 20; ++n, angle += rotation) {
-        pg.pushMatrix();
-        pg.translate(sin(angle) * 70, cos(angle * 4) * 10, cos(angle) * 70);
-        pg.box(10, 100, 10);
-        pg.popMatrix();
-      }
-      pg.fill(0xff0055ff);
-      pg.sphere(50);
-      pg.popStyle();
-    }
-  };
+  landscape1 = new Node(this::landscape1);
+  landscape2 = new Node(this::landscape2);
   landscape2.cull = true;
-  landscape3 = new Node() {
-    @Override
-    public void graphics(PGraphics pg) {
-      pg.pushStyle();
-      pg.noStroke();
-      float angle = -frameCount * 0.0015, rotation = TWO_PI / 20;
-      pg.fill(0xffff5500);
-      for (int n = 0; n < 20; ++n, angle += rotation) {
-        pg.pushMatrix();
-        pg.translate(sin(angle) * 70, cos(angle) * 70, 0);
-        pg.box(10, 10, 100);
-        pg.popMatrix();
-      }
-      pg.fill(0xff00ff55);
-      pg.sphere(50);
-      pg.popStyle();
-    }
-  };
+  landscape3 = new Node(this::landscape3);
   landscape3.cull = true;
   // initShadowPass
   depthShader = loadShader("depth_frag.glsl");
@@ -125,23 +72,68 @@ void setup() {
   light = new Node();
   light.enableHint(Node.BULLSEYE | Node.AXES | Node.CAMERA);
   light.configHint(Node.BOUNDS, shadowMap, shadowMapType, zNear, zFar);
-  animation = new TimingTask() {
-    @Override
-    public void execute() {
-      if (!scene.isTagged(light)) {
-        float lightAngle = frameCount * 0.002;
-        light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
-      }
-      light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), Vector.plusJ));
-      light.setZAxis(light.position());
+  animation = new TimingTask(() -> {
+    if (!scene.isTagged(light)) {
+      float lightAngle = frameCount * 0.002;
+      light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
     }
-  };
+    light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), Vector.plusJ));
+    light.setZAxis(light.position());
+  }
+  );
   animation.run(60);
   // shadow map scene
   shadowMapScene = new Scene(shadowMap, light, 10, 600);
   shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
   shadowMapScene.enableHint(Scene.BACKGROUND, 0xffffffff);
   shadowMapScene.picking = false;
+}
+
+void landscape1(PGraphics pg) {
+  pg.pushStyle();
+  pg.noStroke();
+  float offset = -frameCount * 0.01;
+  pg.fill(0xffff5500);
+  for (int z = -5; z < 6; ++z)
+    for (int x = -5; x < 6; ++x) {
+      pg.pushMatrix();
+      pg.translate(x * 12, sin(offset + x) * 20 + cos(offset + z) * 20, z * 12);
+      pg.box(10, 100, 10);
+      pg.popMatrix();
+    }
+  pg.popStyle();
+}
+
+void landscape2(PGraphics pg) {
+  pg.pushStyle();
+  pg.noStroke();
+  float angle = -frameCount * 0.0015, rotation = TWO_PI / 20;
+  pg.fill(0xffff5500);
+  for (int n = 0; n < 20; ++n, angle += rotation) {
+    pg.pushMatrix();
+    pg.translate(sin(angle) * 70, cos(angle * 4) * 10, cos(angle) * 70);
+    pg.box(10, 100, 10);
+    pg.popMatrix();
+  }
+  pg.fill(0xff0055ff);
+  pg.sphere(50);
+  pg.popStyle();
+}
+
+void landscape3(PGraphics pg) {
+  pg.pushStyle();
+  pg.noStroke();
+  float angle = -frameCount * 0.0015, rotation = TWO_PI / 20;
+  pg.fill(0xffff5500);
+  for (int n = 0; n < 20; ++n, angle += rotation) {
+    pg.pushMatrix();
+    pg.translate(sin(angle) * 70, cos(angle) * 70, 0);
+    pg.box(10, 10, 100);
+    pg.popMatrix();
+  }
+  pg.fill(0xff00ff55);
+  pg.sphere(50);
+  pg.popStyle();
 }
 
 void draw() {
@@ -163,7 +155,8 @@ void keyPressed() {
     landscape1.cull = key != '1';
     landscape2.cull = key != '2';
     landscape3.cull = key != '3';
-  } else if (key == ' ') {
+  }
+  if (key == ' ') {
     if (shadowMapScene.type() == Graph.Type.PERSPECTIVE) {
       shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
       light.setMagnitude(1);
@@ -171,13 +164,17 @@ void keyPressed() {
       shadowMapScene.setType(Graph.Type.PERSPECTIVE);
       light.setMagnitude(tan(fov / 2));
     }
-  } else if (key == 'd') {
+  }
+  if (key == 'd') {
     light.toggleHint(Node.BULLSEYE | Node.AXES | Node.CAMERA | Node.BOUNDS);
     debug = !debug;
     if (debug)
       resetShader();
     else
       shader(shadowShader);
+  }
+  if (key == 'c') {
+    light.toggleHint(Node.CAMERA);
   }
 }
 

@@ -87,35 +87,8 @@ public class ParticleSystem extends PApplet {
       pos = new PVector();
       init();
       task = new TimingTask(this::run);
-      /*
-      task = new TimingTask(() -> {
-        speed.z -= 0.05f;
-        pos = PVector.add(pos, PVector.mult(speed, 10f));
-        if (pos.z < 0.0) {
-          speed.z = -0.8f * speed.z;
-          pos.z = 0.0f;
-        }
-        if (++age == ageMax)
-          init();
-      });
-      // */
-      /*
-      task = new TimingTask() {
-        @Override
-        public void execute() {
-          speed.z -= 0.05f;
-          pos = PVector.add(pos, PVector.mult(speed, 10f));
-          if (pos.z < 0.0) {
-            speed.z = -0.8f * speed.z;
-            pos.z = 0.0f;
-          }
-          if (++age == ageMax)
-            init();
-        }
-      };
-      // */
-      //task.enableConcurrence();
       task.run();
+      setShape(this::graphics);
     }
 
     long period() {
@@ -142,7 +115,6 @@ public class ParticleSystem extends PApplet {
       return task.isConcurrent();
     }
 
-    @Override
     public void graphics(PGraphics pg) {
       pg.pushStyle();
       pg.strokeWeight(3); // Default

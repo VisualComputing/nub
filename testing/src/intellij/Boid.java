@@ -27,55 +27,54 @@ class Boid extends TimingTask {
 
   Boid(Scene scn, ArrayList<Boid> f, Vector inPos) {
     super();
+    setCallback(this::execute);
     scene = scn;
     flock = f;
     // the boid node just holds the boid appearance for rendering
-    node = new Node() {
-      @Override
-      public void graphics(PGraphics pg) {
-        pg.pushStyle();
+    node = new Node();
+    node.setShape((PGraphics pg) -> {
+      pg.pushStyle();
 
-        // uncomment to draw boid axes
-        //Scene.drawAxes(pg, 10);
+      // uncomment to draw boid axes
+      //Scene.drawAxes(pg, 10);
 
-        pg.strokeWeight(2);
-        pg.stroke(scene.pApplet.color(40, 255, 40));
-        pg.fill(scene.pApplet.color(0, 255, 0, 125));
+      pg.strokeWeight(2);
+      pg.stroke(scene.pApplet.color(40, 255, 40));
+      pg.fill(scene.pApplet.color(0, 255, 0, 125));
 
-        // highlight boids under the mouse
-        if (scene.node("mouseMoved") == this) {
-          pg.stroke(scene.pApplet.color(0, 0, 255));
-          pg.fill(scene.pApplet.color(0, 0, 255));
-        }
-
-        // highlight avatar
-        if (this == Flock.avatar) {
-          pg.stroke(scene.pApplet.color(255, 0, 0));
-          pg.fill(scene.pApplet.color(255, 0, 0));
-        }
-
-        //draw boid
-        pg.beginShape(PApplet.TRIANGLES);
-        pg.vertex(3 * sc, 0, 0);
-        pg.vertex(-3 * sc, 2 * sc, 0);
-        pg.vertex(-3 * sc, -2 * sc, 0);
-
-        pg.vertex(3 * sc, 0, 0);
-        pg.vertex(-3 * sc, 2 * sc, 0);
-        pg.vertex(-3 * sc, 0, 2 * sc);
-
-        pg.vertex(3 * sc, 0, 0);
-        pg.vertex(-3 * sc, 0, 2 * sc);
-        pg.vertex(-3 * sc, -2 * sc, 0);
-
-        pg.vertex(-3 * sc, 0, 2 * sc);
-        pg.vertex(-3 * sc, 2 * sc, 0);
-        pg.vertex(-3 * sc, -2 * sc, 0);
-        pg.endShape();
-
-        pg.popStyle();
+      // highlight boids under the mouse
+      if (scene.node("mouseMoved") == node) {
+        pg.stroke(scene.pApplet.color(0, 0, 255));
+        pg.fill(scene.pApplet.color(0, 0, 255));
       }
-    };
+
+      // highlight avatar
+      if (node == Flock.avatar) {
+        pg.stroke(scene.pApplet.color(255, 0, 0));
+        pg.fill(scene.pApplet.color(255, 0, 0));
+      }
+
+      //draw boid
+      pg.beginShape(PApplet.TRIANGLES);
+      pg.vertex(3 * sc, 0, 0);
+      pg.vertex(-3 * sc, 2 * sc, 0);
+      pg.vertex(-3 * sc, -2 * sc, 0);
+
+      pg.vertex(3 * sc, 0, 0);
+      pg.vertex(-3 * sc, 2 * sc, 0);
+      pg.vertex(-3 * sc, 0, 2 * sc);
+
+      pg.vertex(3 * sc, 0, 0);
+      pg.vertex(-3 * sc, 0, 2 * sc);
+      pg.vertex(-3 * sc, -2 * sc, 0);
+
+      pg.vertex(-3 * sc, 0, 2 * sc);
+      pg.vertex(-3 * sc, 2 * sc, 0);
+      pg.vertex(-3 * sc, -2 * sc, 0);
+      pg.endShape();
+
+      pg.popStyle();
+    });
     position = new Vector();
     position.set(inPos);
     node.setPosition(new Vector(position.x(), position.y(), position.z()));
@@ -85,7 +84,6 @@ class Boid extends TimingTask {
     run();
   }
 
-  @Override
   public void execute() {
     t += 0.1;
     flap = 10 * scene.pApplet.sin(t);

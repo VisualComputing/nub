@@ -41,22 +41,17 @@ public class Lambda extends PApplet {
 
     // interpolation 3. Custom (arbitrary) node interpolations
 
-    shape = new Node() {
-      // Note that within render() geometry is defined at the
-      // node local coordinate system.
-      @Override
-      public void graphics(PGraphics pg) {
-        pg.pushStyle();
-        pg.fill(0, 255, 255, 125);
-        pg.stroke(0, 0, 255);
-        pg.strokeWeight(2);
-        if (pg.is2D())
-          pg.rect(0, 0, 100, 100);
-        else
-          pg.box(30);
-        pg.popStyle();
-      }
-    };
+    shape = new Node((PGraphics pg) -> {
+      pg.pushStyle();
+      pg.fill(0, 255, 255, 125);
+      pg.stroke(0, 0, 255);
+      pg.strokeWeight(2);
+      if (pg.is2D())
+        pg.rect(0, 0, 100, 100);
+      else
+        pg.box(30);
+      pg.popStyle();
+    });
     interpolator = new Interpolator(shape);
     interpolator.enableRecurrence();
     // Create an initial path

@@ -1,4 +1,6 @@
-class Boid extends Node {
+class Boid {
+  // Node
+  Node node;
   // timing task
   TimingTask task;
   // fields
@@ -12,80 +14,18 @@ class Boid extends Node {
   float t = 0;
 
   Boid(Vector inPos) {
+    node = new Node(this::display);
     position = new Vector();
     position.set(inPos);
-    setPosition(new Vector(position.x(), position.y(), position.z()));
+    node.setPosition(new Vector(position.x(), position.y(), position.z()));
     velocity = Vector.random();
     acceleration = new Vector();
     neighborhoodRadius = 100;
-    task = new TimingTask() {
-      @Override
-      public void execute() {
-        t += 0.1;
-        flap = 10 * sin(t);
-        // acceleration.add(steer(new Vector(mouseX,mouseY,300),true));
-        // acceleration.add(new Vector(0,.05,0));
-        if (avoidWalls) {
-          acceleration.add(Vector.multiply(avoid(new Vector(position.x(), flockHeight, position.z())), 5));
-          acceleration.add(Vector.multiply(avoid(new Vector(position.x(), 0, position.z())), 5));
-          acceleration.add(Vector.multiply(avoid(new Vector(flockWidth, position.y(), position.z())), 5));
-          acceleration.add(Vector.multiply(avoid(new Vector(0, position.y(), position.z())), 5));
-          acceleration.add(Vector.multiply(avoid(new Vector(position.x(), position.y(), 0)), 5));
-          acceleration.add(Vector.multiply(avoid(new Vector(position.x(), position.y(), flockDepth)), 5));
-        }
-        //alignment
-        alignment = new Vector();
-        int alignmentCount = 0;
-        //cohesion
-        Vector posSum = new Vector();
-        int cohesionCount = 0;
-        //separation
-        separation = new Vector();
-        Vector repulse;
-        for (int i = 0; i < flock.size(); i++) {
-          Boid boid = flock.get(i);
-          //alignment
-          float distance = Vector.distance(position, boid.position);
-          if (distance > 0 && distance <= neighborhoodRadius) {
-            alignment.add(boid.velocity);
-            alignmentCount++;
-          }
-          //cohesion
-          float dist = dist(position.x(), position.y(), boid.position.x(), boid.position.y());
-          if (dist > 0 && dist <= neighborhoodRadius) {
-            posSum.add(boid.position);
-            cohesionCount++;
-          }
-          //separation
-          if (distance > 0 && distance <= neighborhoodRadius) {
-            repulse = Vector.subtract(position, boid.position);
-            repulse.normalize();
-            repulse.divide(distance);
-            separation.add(repulse);
-          }
-        }
-        //alignment
-        if (alignmentCount > 0) {
-          alignment.divide((float) alignmentCount);
-          alignment.limit(maxSteerForce);
-        }
-        //cohesion
-        if (cohesionCount > 0)
-          posSum.divide((float) cohesionCount);
-        cohesion = Vector.subtract(posSum, position);
-        cohesion.limit(maxSteerForce);
-        acceleration.add(Vector.multiply(alignment, 1));
-        acceleration.add(Vector.multiply(cohesion, 3));
-        acceleration.add(Vector.multiply(separation, 1));
-        move();
-        checkBounds();
-      }
-    };
+    task = new TimingTask(this::behavior);
     task.run();
   }
 
-  @Override
-  public void graphics(PGraphics pg) {
+  public void display(PGraphics pg) {
     pg.pushStyle();
     // uncomment to draw boid axes
     //Scene.drawAxes(pg, 10);
@@ -93,12 +33,12 @@ class Boid extends Node {
     pg.stroke(color(40, 255, 40));
     pg.fill(color(0, 255, 0, 125));
     // highlight boids under the mouse
-    if (scene.node("mouseMoved") == this) {
+    if (scene.node("mouseMoved") == node) {
       pg.stroke(color(0, 0, 255));
       pg.fill(color(0, 0, 255));
     }
     // highlight avatar
-    if (this ==  avatar) {
+    if (node ==  avatar) {
       pg.stroke(color(255, 0, 0));
       pg.fill(color(255, 0, 0));
     }
@@ -129,14 +69,75 @@ class Boid extends Node {
 
   //-----------behaviors---------------
 
+  void behavior() {
+    t += 0.1;
+    flap = 10 * sin(t);
+    // acceleration.add(steer(new Vector(mouseX,mouseY,300),true));
+    // acceleration.add(new Vector(0,.05,0));
+    if (avoidWalls) {
+      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), flockHeight, position.z())), 5));
+      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), 0, position.z())), 5));
+      acceleration.add(Vector.multiply(avoid(new Vector(flockWidth, position.y(), position.z())), 5));
+      acceleration.add(Vector.multiply(avoid(new Vector(0, position.y(), position.z())), 5));
+      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), position.y(), 0)), 5));
+      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), position.y(), flockDepth)), 5));
+    }
+    //alignment
+    alignment = new Vector();
+    int alignmentCount = 0;
+    //cohesion
+    Vector posSum = new Vector();
+    int cohesionCount = 0;
+    //separation
+    separation = new Vector();
+    Vector repulse;
+    for (int i = 0; i < flock.size(); i++) {
+      Boid boid = flock.get(i);
+      //alignment
+      float distance = Vector.distance(position, boid.position);
+      if (distance > 0 && distance <= neighborhoodRadius) {
+        alignment.add(boid.velocity);
+        alignmentCount++;
+      }
+      //cohesion
+      float dist = dist(position.x(), position.y(), boid.position.x(), boid.position.y());
+      if (dist > 0 && dist <= neighborhoodRadius) {
+        posSum.add(boid.position);
+        cohesionCount++;
+      }
+      //separation
+      if (distance > 0 && distance <= neighborhoodRadius) {
+        repulse = Vector.subtract(position, boid.position);
+        repulse.normalize();
+        repulse.divide(distance);
+        separation.add(repulse);
+      }
+    }
+    //alignment
+    if (alignmentCount > 0) {
+      alignment.divide((float) alignmentCount);
+      alignment.limit(maxSteerForce);
+    }
+    //cohesion
+    if (cohesionCount > 0)
+      posSum.divide((float) cohesionCount);
+    cohesion = Vector.subtract(posSum, position);
+    cohesion.limit(maxSteerForce);
+    acceleration.add(Vector.multiply(alignment, 1));
+    acceleration.add(Vector.multiply(cohesion, 3));
+    acceleration.add(Vector.multiply(separation, 1));
+    move();
+    checkBounds();
+  }
+
   void move() {
     velocity.add(acceleration); // add acceleration to velocity
     velocity.limit(maxSpeed); // make sure the velocity vector magnitude does not
     // exceed maxSpeed
     position.add(velocity); // add velocity to position
-    setPosition(position);
-    setRotation(Quaternion.multiply(Quaternion.from(Vector.plusJ, atan2(-velocity.z(), velocity.x())),
-                                    Quaternion.from(Vector.plusK, asin(velocity.y() / velocity.magnitude()))));
+    node.setPosition(position);
+    node.setRotation(Quaternion.multiply(Quaternion.from(Vector.plusJ, atan2(-velocity.z(), velocity.x())),
+      Quaternion.from(Vector.plusK, asin(velocity.y() / velocity.magnitude()))));
     acceleration.multiply(0); // reset acceleration
   }
 
