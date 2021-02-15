@@ -1,6 +1,6 @@
 /***************************************************************************************
  * nub
- * Copyright (c) 2019-2020 Universidad Nacional de Colombia
+ * Copyright (c) 2019-2021 Universidad Nacional de Colombia
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
  * All rights reserved. A simple, expressive, language-agnostic, and extensible visual

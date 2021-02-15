@@ -1,6 +1,6 @@
 /***************************************************************************************
  * nub
- * Copyright (c) 2019-2020 Universidad Nacional de Colombia
+ * Copyright (c) 2019-2021 Universidad Nacional de Colombia
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
  * All rights reserved. A simple, expressive, language-agnostic, and extensible visual
@@ -100,8 +100,8 @@ import java.util.function.Consumer;
  * @see TimingTask
  */
 public class Scene extends Graph {
-  public static String prettyVersion = "0.7.0";
-  public static String version = "7";
+  public static String prettyVersion = "0.8.0";
+  public static String version = "8";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   public static PApplet pApplet;
