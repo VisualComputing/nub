@@ -69,15 +69,15 @@ Node node(Node parent, Vector vector) {
     pg.noFill();
     pg.box(a, b, c);
   });
-  // register the visit method only at the main scene
-  node.setVisit(mainScene, this::cull);
+  // register the culling method only at the main scene
+  mainScene.setVisit(node, this::cull);
   return node;
 }
 
 
-// The culling method is called just before the graphics(PGraphics) method
-public void cull(Graph graph, Node node) {
-  switch (graph.boxVisibility(node.worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
+// The culling method is called before the node is rendered
+public void cull(Node node) {
+  switch (mainScene.boxVisibility(node.worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
     node.worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
   case VISIBLE:
     for (Node child : node.children())
