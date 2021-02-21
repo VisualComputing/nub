@@ -20,7 +20,7 @@ import nub.core.*;
 import nub.processing.*;
 
 Scene scene;
-Node[] shapes;
+Torus[] shapes;
 PFont font36;
 int totalShapes;
 
@@ -32,58 +32,15 @@ void settings() {
 }
 
 void setup() {
+  font36 = loadFont("FreeSans-36.vlw");
   scene = new Scene(this);
   scene.enableHint(Scene.AXES | Scene.BACKGROUND);
   scene.configHint(Scene.BACKGROUND, color(0));
   scene.fit(1);
-  shapes = new Node[10];
+  shapes = new Torus[10];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Node() {
-      int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
-
-      @Override
-      public void graphics(PGraphics pg) {
-        pg.pushStyle();
-        pg.fill(_color);
-        Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
-        scene.beginHUD();
-        Vector position = scene.screenLocation(position());
-        pg.fill(isTagged(scene) ? 0 : 255, isTagged(scene) ? 255 : 0, isTagged(scene) ? 0 : 255);
-        pg.textFont(font36);
-        pg.text(_id, position.x(), position.y());
-        scene.endHUD();
-        pg.popStyle();
-      }
-
-      @Override
-      public void interact(Object[] gesture) {
-        if (gesture.length == 0)
-          _color = randomColor();
-        if (gesture.length == 1)
-          if (gesture[0] instanceof String) {
-            if (((String) gesture[0]).matches("mas"))
-              _faces++;
-            else if (((String) gesture[0]).matches("menos"))
-              if (_faces > 2)
-                _faces--;
-          } else if (gesture[0] instanceof Integer) {
-            int delta = (Integer) gesture[0];
-            if (_faces +  delta > 1)
-              _faces = _faces + delta;
-          }
-      }
-    };
-    scene.randomize(shapes[i]);
+    shapes[i] = new Torus();
   }
-  font36 = loadFont("FreeSans-36.vlw");
-}
-
-int randomColor() {
-  return color(random(255), random(255), random(255), random(125, 255));
-}
-
-int randomFaces() {
-  return (int) random(3, 15);
 }
 
 void draw() {
@@ -93,7 +50,7 @@ void draw() {
 void keyPressed() {
   int value = Character.getNumericValue(key);
   if (value >= 0 && value < 10)
-    scene.tag("key", shapes[value]);
+    scene.tag("key", shapes[value].node);
   if (key == ' ')
     scene.removeTag("key");
   if (key == CODED)
