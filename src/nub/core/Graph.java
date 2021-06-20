@@ -1803,8 +1803,8 @@ public class Graph {
   }
 
   /**
-   * Smoothly interpolates the eye on a interpolator path so that it goes to {@code node}
-   * which is defined in world coordinates. The {@code duration} defines the interpolation speed.
+   * Smoothly interpolates the eye on a interpolator path so that it goes to {@code node}.
+   * The {@code duration} defines the interpolation speed.
    *
    * @see #fit(Node)
    * @see #fit(Vector, float)
@@ -2252,12 +2252,12 @@ public class Graph {
   }
 
   /**
-   * Gives the coefficients of a 3D half-line passing through the eye and pixel
+   * Gives the coefficients of a 3D half-line passing through the eye position and pixel
    * (pixelX,pixelY). Origin in the upper left corner. Use {@link #height()} - pixelY to locate the
    * origin at the lower left corner.
    * <p>
-   * The origin of the half line (eye position) is stored in {@code orig}, while
-   * {@code dir} contains the properly oriented and normalized direction of the half line.
+   * The origin of the half line (eye position) is stored in {@code origin}, while
+   * {@code direction} contains the properly oriented and normalized direction of the half line.
    * <p>
    * This method is useful for analytical intersection in a selection method.
    */
@@ -3259,7 +3259,7 @@ public class Graph {
 
   /**
    * Static cached version of {@link #screenLocation(Vector, Node)}. Requires the programmer
-   * to suply the cached {@code projectionView} matrix.
+   * to supply the cached {@code projectionView} matrix.
    */
   protected static Vector _screenLocation(Vector vector, Node node, Matrix projectionView, int width, int height) {
     return _screenLocation(node != null ? node.worldLocation(vector) : vector, projectionView, width, height);
@@ -3675,7 +3675,7 @@ public class Graph {
   }
 
   /**
-   * Focuses the {@link #eye()} to the world.
+   * Focuses the {@link #eye()} to the world origin.
    *
    * @see #focusNode(Node)
    */
@@ -4066,7 +4066,7 @@ public class Graph {
 
   /**
    * Rotate the {@code node} (which should be different than the {@link #eye()}) around the
-   * world x-y-z axes according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.,
+   * screen x-y-z axes according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.,
    * and according to {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
    * @see #rotateEye(float, float, float, float)
@@ -4095,7 +4095,7 @@ public class Graph {
   }
 
   /**
-   * Rotate the {@link #eye()} around the world x-y-z axes passing through {@link #center()},
+   * Rotate the {@link #eye()} around the eye x-y-z axes passing through {@link #center()},
    * according to {@code roll}, {@code pitch} and {@code yaw} radians, resp., and {@code inertia}
    * which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
