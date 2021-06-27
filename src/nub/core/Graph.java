@@ -4066,7 +4066,7 @@ public class Graph {
 
   /**
    * Rotate the {@code node} (which should be different than the {@link #eye()}) around the
-   * screen x-y-z axes according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.,
+   * eye x-y-z axes according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.,
    * and according to {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
    * @see #rotateEye(float, float, float, float)
@@ -4095,7 +4095,7 @@ public class Graph {
   }
 
   /**
-   * Rotate the {@link #eye()} around the eye x-y-z axes passing through {@link #center()},
+   * Rotate the {@link #eye()} around its x-y-z axes passing through {@link #center()},
    * according to {@code roll}, {@code pitch} and {@code yaw} radians, resp., and {@code inertia}
    * which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    *
@@ -4108,7 +4108,18 @@ public class Graph {
       pitch = 0;
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
-    eye().orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), center(), inertia);
+    eye()._orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), center(), inertia);
+    // same as:
+    //Quaternion q = new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw);
+    //eye().orbit(eye().worldDisplacement(q.axis()), q.angle(), center(), inertia);
+    //System.out.println("tested");
+    /*
+    // whereas the following doesn't work
+    /*
+    Quaternion q = new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw);
+    q = eye().worldDisplacement(q);
+    eye().orbit(q.axis(), q.angle(), center(), inertia);
+    // */
   }
 
   // 6. Spin
@@ -4277,7 +4288,9 @@ public class Graph {
     Vector axis = p2.cross(p1);
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
-    eye().orbit(new Quaternion(axis, angle), center(), inertia);
+    eye()._orbit(new Quaternion(axis, angle), center(), inertia);
+    // same as:
+    //eye().orbit(eye().worldDisplacement(axis), angle, center(), inertia);
   }
 
   /**
@@ -4416,7 +4429,7 @@ public class Graph {
    */
   protected void _rotateCAD() {
     Vector _up = eye().displacement(_eyeUp);
-    eye().orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _cadRotateTask._y : -_cadRotateTask._y)), center());
+    eye()._orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _cadRotateTask._y : -_cadRotateTask._y)), center());
   }
 
   // visual hints

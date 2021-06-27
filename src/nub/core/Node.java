@@ -83,7 +83,7 @@ import java.util.function.Consumer;
  * {@link #displacement(float, Node)} and {@link #worldDisplacement(float)}.
  * <p>
  * The methods {@link #translate(Vector, float)}, {@link #rotate(Quaternion, float)},
- * {@link #orbit(Quaternion, Vector, float)} and {@link #scale(float, float)}, locally apply
+ * {@link #orbit(Vector, float, Vector, float)} and {@link #scale(float, float)}, locally apply
  * differential geometry transformations damped with a given {@code inertia}. Note that
  * when the inertial parameter is omitted its value is defaulted to 0.
  * <h2>Hierarchical traversals</h2>
@@ -94,10 +94,10 @@ import java.util.function.Consumer;
  * <h2>Constraints</h2>
  * One interesting feature of a node is that its displacements can be constrained.
  * When a {@link Constraint} is attached to a node, it filters the input of
- * {@link #translate(Vector)}, {@link #rotate(Quaternion)}, and {@link #orbit(Quaternion, Vector)}
- * and only the resulting filtered motion is applied to the node. The default
- * {@link #constraint()} is {@code null} resulting in no filtering. Use
- * {@link #setConstraint(Constraint)} to attach a constraint to a node.
+ * {@link #translate(Vector)}, {@link #rotate(Quaternion)}, and
+ * {@link #orbit(Vector, float, Vector, float)} and only the resulting filtered motion
+ * is applied to the node. The default {@link #constraint()} is {@code null} resulting in
+ * no filtering. Use {@link #setConstraint(Constraint)} to attach a constraint to a node.
  * <p>
  * Classical constraints are provided for convenience (see
  * {@link nub.core.constraint.LocalConstraint},
@@ -788,7 +788,7 @@ public class Node {
       _orbitTask = new InertialTask() {
         @Override
         public void action() {
-          orbit(new Quaternion(_x, _y, _z), _center);
+          _orbit(new Quaternion(_x, _y, _z), _center);
         }
       };
     }
@@ -1092,7 +1092,7 @@ public class Node {
    *
    * @see #rotate(Quaternion, float)
    * @see #scale(float, float)
-   * @see #orbit(Quaternion, Vector, float)
+   * @see #orbit(Vector, float, Vector, float)
    * @see #setConstraint(Constraint)
    */
   public void translate(Vector vector, float inertia) {
@@ -1228,7 +1228,7 @@ public class Node {
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
    * @see #translate(Vector, float)
-   * @see #orbit(Quaternion, Vector, float)
+   * @see #orbit(Vector, float, Vector, float)
    * @see #scale(float, float)
    * @see #setConstraint(Constraint)
    */
@@ -1307,8 +1307,8 @@ public class Node {
    * @see #scale(float, float)
    * @see #setConstraint(Constraint)
    */
-  public void orbit(Quaternion quaternion, Vector center, float inertia) {
-    orbit(quaternion, center);
+  protected void _orbit(Quaternion quaternion, Vector center, float inertia) {
+    _orbit(quaternion, center);
     if (!Graph.TimingHandler.isTaskRegistered(_orbitTask)) {
       System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use orbit(quaternion, center) instead");
       return;
@@ -1326,9 +1326,10 @@ public class Node {
   /**
    * Same as {@code orbit(quaternion, center, 0)}.
    *
-   * @see #orbit(Quaternion, Vector, float)
+   * @see #_orbit(Quaternion, Vector, float)
    */
-  public void orbit(Quaternion quaternion, Vector center) {
+  // TODO should not be constrained!
+  protected void _orbit(Quaternion quaternion, Vector center) {
     if (constraint() != null)
       quaternion = constraint().constrainRotation(quaternion, this);
     rotation().compose(quaternion);
@@ -1354,7 +1355,7 @@ public class Node {
 
   /**
    * Same as {@code orbit(axis, angle, new Vector(), inertia)}.
-   *
+   * @see #orbit(Vector, float)
    * @see #orbit(Vector, float, Vector, float)
    */
   public void orbit(Vector axis, float angle, float inertia) {
@@ -1366,7 +1367,7 @@ public class Node {
    * coordinate system. Same as {@code orbit(axis, angle, new Vector())}.
    *
    * @see #orbit(Vector, float, Vector)
-   * @see #orbit(Quaternion, Vector)
+   * @see #orbit(Vector, float, Vector, float)
    */
   public void orbit(Vector axis, float angle) {
     orbit(axis, angle, new Vector());
@@ -1375,21 +1376,22 @@ public class Node {
   /**
    * Same as {@code orbit(new Quaternion(displacement(axis), angle), center, inertia)}.
    *
-   * @see #orbit(Quaternion, Vector, float)
+   * @see #orbit(Vector, float)
+   * @see #orbit(Vector, float, float)
    */
   public void orbit(Vector axis, float angle, Vector center, float inertia) {
-    orbit(new Quaternion(displacement(axis), angle), center, inertia);
+    _orbit(new Quaternion(displacement(axis), angle), center, inertia);
   }
 
   /**
    * Rotates the node around {@code axis} passing through {@code center}, both defined in the world
    * coordinate system. Same as {@code orbit(new Quaternion(displacement(axis), angle), center)}.
    *
-   * @see #orbit(Quaternion, Vector)
+   * @see #_orbit(Quaternion, Vector)
    * @see #orbit(Vector, float)
    */
   public void orbit(Vector axis, float angle, Vector center) {
-    orbit(new Quaternion(displacement(axis), angle), center);
+    _orbit(new Quaternion(displacement(axis), angle), center);
   }
 
   // ORIENTATION
@@ -1471,7 +1473,7 @@ public class Node {
    *
    * @see #translate(Vector, float)
    * @see #rotate(Quaternion, float)
-   * @see #orbit(Quaternion, Vector, float)
+   * @see #_orbit(Quaternion, Vector, float)
    * @see #setConstraint(Constraint)
    */
   public void scale(float scaling, float inertia) {

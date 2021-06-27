@@ -1,6 +1,8 @@
 package intellij;
 
 import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.timing.Task;
 import processing.core.PApplet;
@@ -12,7 +14,8 @@ import processing.event.MouseEvent;
  */
 public class BasicUse extends PApplet {
   Scene scene;
-  Node node;
+  Node node, child, sibling;
+  Vector axis;
 
   //Choose P3D for a 3D scene, or P2D for a 2D one
   String renderer = P3D;
@@ -37,6 +40,16 @@ public class BasicUse extends PApplet {
     // node.disableHint(Node.IMR);
     node.enableHint(Node.AXES);
     node.enableHint(Node.BULLSEYE);
+    child = new Node(node);
+    child.enableHint(Node.AXES | Node.TORUS);
+    child.translate(-25, -75, 50);
+    child.rotate(Quaternion.random());
+    //sibling = child.get();
+    //sibling.setReference(node);
+    sibling = new Node();
+    sibling.setReference(node);
+    sibling.set(child);
+    //child
     //node.setPickingPolicy(Node.PickingPolicy.BULLS_EYE);
     //node.setBullsEyeSize(50);
     node.configHint(Node.BULLSEYE, Node.BullsEyeShape.CIRCLE);
@@ -45,11 +58,15 @@ public class BasicUse extends PApplet {
     scene.enableHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(255, 0, 0));
     //scene.enableHint(Graph.BACKGROUND, color(100, 155, 255));
+    randomize();
   }
 
   public void draw() {
     background(125);
     scene.render();
+    noStroke();
+    fill(0, 255, 255);
+    scene.drawArrow(axis);
   }
 
   public void mouseMoved() {
@@ -59,10 +76,32 @@ public class BasicUse extends PApplet {
   public void mouseDragged() {
     if (mouseButton == LEFT)
       scene.mouseSpin();
-    else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+    else if (mouseButton == RIGHT) {
+      //Vector v = new Vector(scene.mouseDX(), 0, 0);
+      //child.translate(v);
+
+      //child.rotate(Quaternion.from(child.displacement(axis), scene.mouseRADX()));
+      // works
+      //sibling.rotate(Quaternion.from(sibling.displacement(axis), scene.mouseRADX()));
+      // fails
+      //sibling.rotate(sibling.displacement(Quaternion.from(axis, scene.mouseRADX())));
+
+      scene.rotate(0, scene.mouseRADX(), 0);
+      /*
+      //scene.mouseTranslate();
+      //scene.rotate(0, scene.mouseRADX(), 0);
+      Node node = scene.node();
+      if (node == child || node == sibling) {
+        //Vector v = node.reference().displacement(axis);
+        //node.rotate(Quaternion.from(v, scene.mouseRADX()));
+        Quaternion q = Quaternion.from(axis, 0.5f * scene.mouseRADX());//node.reference().displacement(axis);
+        node.rotate(node.reference().displacement(q));
+      }
+      // */
+    }
     else
-      scene.scale(mouseX - pmouseX);
+      scene.mouseTranslate();
+      //scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -72,7 +111,14 @@ public class BasicUse extends PApplet {
       scene.scaleEye(event.getCount() * 20);
   }
 
+  public void randomize() {
+    axis = Vector.random();
+    axis.multiply(scene.radius() / 3);
+  }
+
   public void keyPressed() {
+    if (key == 'a')
+      randomize();
     if (key == ' ')
       node.resetHint();
     if (key == '1')
@@ -122,6 +168,16 @@ public class BasicUse extends PApplet {
         println("Node.CONSTRAINT");
       if (node.isHintEnabled(Node.BONE))
         println("Node.BONE");
+    }
+    if (key == 'r') {
+      Quaternion q = Quaternion.random();
+      child.setOrientation(q);
+      /*
+      sibling.resetReference();
+      sibling.setRotation(q);
+      sibling.setReference(node);
+      // */
+      sibling.setRotation(node.displacement(q));
     }
   }
 

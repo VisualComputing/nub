@@ -20,6 +20,7 @@ public class DebugEye extends PApplet {
 
   public void setup() {
     scene = new Scene(this, 50);
+    scene.enableHint(Scene.BACKGROUND | Scene.AXES | Scene.GRID);
     //scene.togglePerspective();
     Node box1 = new Node();
     box1.setShape((PGraphics pg) -> {
@@ -33,8 +34,13 @@ public class DebugEye extends PApplet {
       if (gesture.length == 1) {
         if (gesture[0] instanceof Float) {
           if (orbit) {
-            Quaternion q = new Quaternion(box1.displacement(axis), (float) gesture[0]);
-            box1.orbit(q, scene.center(), inertia);
+            // op1
+            //Quaternion q = new Quaternion(box1.displacement(axis), (float) gesture[0]);
+            //box1.orbit(q, scene.center(), inertia);
+            // op2
+            box1.orbit(axis, (float) gesture[0], scene.center(), inertia);
+            // op3
+            //box1.orbit(axis, (float) gesture[0], inertia);
           } else {
             Quaternion q = new Quaternion((float) gesture[0], 0, 0);
             box1.rotate(q, inertia);
@@ -56,13 +62,11 @@ public class DebugEye extends PApplet {
   }
 
   public void draw() {
-    background(0);
-    scene.drawAxes();
-    scene.drawArrow(axis);
-    stroke(125);
-    scene.drawGrid();
     lights();
     scene.render();
+    noStroke();
+    fill(255, 255, 0);
+    scene.drawArrow(axis);
   }
 
   public void mouseMoved() {
@@ -97,6 +101,10 @@ public class DebugEye extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == 'r') {
+      axis = Vector.random();
+      axis.multiply(scene.radius() / 3);
+    }
     if (key == 'f')
       Scene.leftHanded = !Scene.leftHanded;
     if (key == 'p')

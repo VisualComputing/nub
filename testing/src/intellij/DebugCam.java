@@ -33,8 +33,9 @@ public class DebugCam extends PApplet {
       if (gesture.length == 1) {
         if (gesture[0] instanceof Float) {
           if (orbit) {
-            Quaternion q = new Quaternion(box1.displacement(axis), (float) gesture[0]);
-            box1.orbit(q, scene.center(), inertia);
+            //Quaternion q = new Quaternion(box1.displacement(axis), (float) gesture[0]);
+            //box1.orbit(q, scene.center(), inertia);
+            box1.orbit(axis, (float) gesture[0], scene.center(), inertia);
           } else {
             Quaternion q = new Quaternion((float) gesture[0], 0, 0);
             box1.rotate(q, inertia);
