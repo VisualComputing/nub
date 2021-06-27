@@ -723,6 +723,11 @@ public class Node {
       System.out.println("A node descendant cannot be set as its reference.");
       return;
     }
+    // -1. this is detached
+    Vector position = this.position();
+    Quaternion orientation = this.orientation();
+    float magnitude = this.magnitude();
+    boolean detached = !Graph.isReachable(this) && node != null;
     // 0. reference is detached
     if (node != null && !Graph.isReachable(node)) {
       if (Graph.isReachable(this))
@@ -752,6 +757,11 @@ public class Node {
     // 2b. after assigning new reference node
     _restorePath(reference(), this);
     _restoredTasks(this);
+    if (detached) {
+      this.setPosition(position);
+      this.setOrientation(orientation);
+      this.setMagnitude(magnitude);
+    }
     _modified();
   }
 

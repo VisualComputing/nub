@@ -33,6 +33,8 @@ public class GraphAPI extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
+    scene.configHint(Scene.BACKGROUND, color(125));
+    scene.enableHint(Scene.BACKGROUND | Scene.AXES);
 
     // red
     n1 = new Node(shape(color(255, 0, 0)));
@@ -55,9 +57,12 @@ public class GraphAPI extends PApplet {
     scene.randomize(n5);
 
     // cyan
-    detached = Node.detach(n1);
+    detached = Node.detach(n3);
     detached.setShape(shape(color(0, 255, 255)));
-    scene.randomize(detached);
+    println(detached.position().toString());
+    println(detached.orientation().toString());
+    println(detached.magnitude());
+    //scene.randomize(detached);
   }
 
   PShape shape(int c) {
@@ -67,8 +72,6 @@ public class GraphAPI extends PApplet {
   }
 
   public void draw() {
-    background(125);
-    scene.drawAxes();
     scene.render();
   }
 
@@ -78,7 +81,7 @@ public class GraphAPI extends PApplet {
     if (key == 'y')
       n4.setReference(detached);
     if (key == 'z')
-      detached.setReference(n1);
+      detached.setReference(n4);
     if (key == 'p')
       scene.prune(n4);
     if (key == 'a')
