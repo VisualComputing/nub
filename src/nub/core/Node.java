@@ -723,12 +723,11 @@ public class Node {
       System.out.println("A node descendant cannot be set as its reference.");
       return;
     }
-    // -1. this is detached
+    // 0. Cache global geom attributes
     Vector position = this.position();
     Quaternion orientation = this.orientation();
     float magnitude = this.magnitude();
-    boolean detached = !Graph.isReachable(this) && node != null;
-    // 0. reference is detached
+    // 1. reference is detached
     if (node != null && !Graph.isReachable(node)) {
       if (Graph.isReachable(this))
         Graph.prune(this);
@@ -737,31 +736,34 @@ public class Node {
           reference()._removeChild(this);
         _reference = node;// reference() returns now the new value
         reference()._addChild(this);
+        // restore global geom attributes
+        this.setPosition(position);
+        this.setOrientation(orientation);
+        this.setMagnitude(magnitude);
       }
       return;
     }
-    // 1. no need to re-parent, just check this needs to be added as a leading node
+    // 2. no need to re-parent, just check this needs to be added as a leading node
     if (reference() == node) {
       _restorePath(reference(), this);
       _restoredTasks(this);
       return;
     }
-    // 2. else re-parenting
-    // 2a. before assigning new reference node
+    // 3. else re-parenting
+    // 3a. before assigning new reference node
     if (reference() != null) // old
       reference()._removeChild(this);
     else
       Graph._removeLeadingNode(this);
     // finally assign the reference node
     _reference = node;// reference() returns now the new value
-    // 2b. after assigning new reference node
+    // 3b. after assigning new reference node
     _restorePath(reference(), this);
     _restoredTasks(this);
-    if (detached) {
-      this.setPosition(position);
-      this.setOrientation(orientation);
-      this.setMagnitude(magnitude);
-    }
+    // restore global geom attributes
+    this.setPosition(position);
+    this.setOrientation(orientation);
+    this.setMagnitude(magnitude);
     _modified();
   }
 

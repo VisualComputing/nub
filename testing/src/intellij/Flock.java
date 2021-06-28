@@ -18,8 +18,9 @@ public class Flock extends PApplet {
   int flockHeight = 720;
   int flockDepth = 600;
   boolean avoidWalls = true;
+  boolean refNeeded;
 
-  int initBoidNum = 900; // amount of boids to start the program with
+  int initBoidNum = 400; // amount of boids to start the program with
   ArrayList<Boid> flock;
   Node avatar;
 
@@ -28,7 +29,6 @@ public class Flock extends PApplet {
   }
 
   public void setup() {
-    size(1000, 700, P3D);
     scene = new Scene(this, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), 800);
     scene.fit();
     // create and fill the list of boids
@@ -45,6 +45,10 @@ public class Flock extends PApplet {
     walls();
     scene.closeContext();
     scene.render();
+    if(!scene.interpolator().task().isActive() && scene.eye().reference() == null) {
+      scene.eye().setReference(avatar);
+      refNeeded = false;
+    }
     // uncomment to asynchronously update boid avatar. See mouseClicked()
     // updateAvatar(scene.node("mouseClicked"));
   }
@@ -80,8 +84,8 @@ public class Flock extends PApplet {
 
   // Sets current avatar as the eye reference and interpolate the eye to it
   void thirdPerson() {
-    scene.eye().setReference(avatar);
     scene.fit(avatar, 1);
+    refNeeded = true;
   }
 
   // Resets the eye
@@ -123,10 +127,11 @@ public class Flock extends PApplet {
     // 1. highlighting
     scene.mouseTag("mouseMoved");
     // 2. third-person interaction
-    if (scene.eye().reference() != null)
+    if (scene.eye().reference() != null) {
       // press shift to move the mouse without looking around
       if (!event.isShiftDown())
         scene.mouseLookAround();
+    }
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -162,6 +167,8 @@ public class Flock extends PApplet {
         break;
       case 'p':
         println("Frame rate: " + frameRate);
+        println(avatar.toString());
+        println(scene.eye().toString());
         break;
       case 'v':
         avoidWalls = !avoidWalls;

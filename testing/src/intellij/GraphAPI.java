@@ -80,8 +80,12 @@ public class GraphAPI extends PApplet {
       detached.resetReference();
     if (key == 'y')
       n4.setReference(detached);
-    if (key == 'z')
+    if (key == 'z') {
       detached.setReference(n4);
+      println(detached.position().toString());
+      println(detached.orientation().toString());
+      println(detached.magnitude());
+    }
     if (key == 'p')
       scene.prune(n4);
     if (key == 'a')
