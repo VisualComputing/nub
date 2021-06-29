@@ -92,7 +92,6 @@ void keyPressed() {
   if (key == '-' || key == '+') {
     shapeInterpolator.increaseSpeed(key == '+' ? 0.25 : -0.25);
   }
-
   if (key == '1') {
     eyeInterpolator.addKeyFrame();
   }
@@ -100,7 +99,6 @@ void keyPressed() {
     eyeInterpolator.toggle();
   if (key == 'b')
     eyeInterpolator.clear();
-
   if (key == 's')
     scene.fit(1);
   if (key == 'f')

@@ -37,7 +37,7 @@ int flockHeight = 720;
 int flockDepth = 600;
 boolean avoidWalls = true;
 
-int initBoidNum = 900; // amount of boids to start the program with
+int initBoidNum = 400; // amount of boids to start the program with
 ArrayList<Boid> flock;
 Node avatar;
 
@@ -95,6 +95,7 @@ void updateAvatar(Node node) {
 // Sets current avatar as the eye reference and interpolate the eye to it
 void thirdPerson() {
   scene.eye().setReference(avatar);
+  avatar.setMagnitude(scene.eye());
   scene.fit(avatar, 1);
 }
 
@@ -103,6 +104,7 @@ void resetEye() {
   // same as: scene.eye().setReference(null);
   scene.eye().resetReference();
   scene.lookAt(scene.center());
+  avatar.setMagnitude(1);
   scene.fit(1);
 }
 

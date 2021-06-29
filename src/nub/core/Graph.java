@@ -1827,7 +1827,7 @@ public class Graph {
       _interpolator.reset();
       _interpolator.clear();
       _interpolator.addKeyFrame(eye().detach());
-      _interpolator.addKeyFrame(node.detach(), duration);
+      _interpolator.addKeyFrame(node, duration);
       _interpolator.run();
     }
   }

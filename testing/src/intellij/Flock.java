@@ -18,7 +18,6 @@ public class Flock extends PApplet {
   int flockHeight = 720;
   int flockDepth = 600;
   boolean avoidWalls = true;
-  boolean refNeeded;
 
   int initBoidNum = 400; // amount of boids to start the program with
   ArrayList<Boid> flock;
@@ -30,7 +29,11 @@ public class Flock extends PApplet {
 
   public void setup() {
     scene = new Scene(this, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), 800);
+    println(scene.fov());
+    println(scene.eye().magnitude());
     scene.fit();
+    println(scene.fov());
+    println(scene.eye().magnitude());
     // create and fill the list of boids
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
@@ -45,10 +48,6 @@ public class Flock extends PApplet {
     walls();
     scene.closeContext();
     scene.render();
-    if(!scene.interpolator().task().isActive() && scene.eye().reference() == null) {
-      scene.eye().setReference(avatar);
-      refNeeded = false;
-    }
     // uncomment to asynchronously update boid avatar. See mouseClicked()
     // updateAvatar(scene.node("mouseClicked"));
   }
@@ -84,8 +83,9 @@ public class Flock extends PApplet {
 
   // Sets current avatar as the eye reference and interpolate the eye to it
   void thirdPerson() {
+    scene.eye().setReference(avatar);
+    avatar.setMagnitude(scene.eye());
     scene.fit(avatar, 1);
-    refNeeded = true;
   }
 
   // Resets the eye
@@ -93,6 +93,7 @@ public class Flock extends PApplet {
     // same as: scene.eye().setReference(null);
     scene.eye().resetReference();
     scene.lookAt(scene.center());
+    avatar.setMagnitude(1);
     scene.fit(1);
   }
 
@@ -141,6 +142,10 @@ public class Flock extends PApplet {
 
   public void keyPressed() {
     switch (key) {
+      case 'f':
+          println(scene.fov());
+          println(scene.eye().magnitude());
+        break;
       case 'a':
         for (Boid boid : flock)
           boid.task.toggle();

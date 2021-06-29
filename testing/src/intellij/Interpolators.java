@@ -26,6 +26,8 @@ public class Interpolators extends PApplet {
 
   public void setup() {
     scene = new Scene(this, 150);
+    println(scene.fov());
+    println(scene.eye().magnitude());
     PShape pshape;
     if (scene.is2D()) {
       rectMode(CENTER);
@@ -94,6 +96,10 @@ public class Interpolators extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == 'z') {
+      println(scene.fov());
+      println(scene.eye().magnitude());
+    }
     if (key == ' ') {
       shapeInterpolator.toggleHint(Interpolator.SPLINE /* | Interpolator.STEPS */);
       eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
