@@ -724,22 +724,31 @@ public class Node {
       return;
     }
     // 0. Cache global geom attributes
-    Vector position = this.position();
-    Quaternion orientation = this.orientation();
-    float magnitude = this.magnitude();
+    Vector position = new Vector();
+    Quaternion orientation = new Quaternion();
+    float magnitude = 0;
+    boolean needscache = reference() != null && reference() != node;
+    if(needscache) {
+      position = this.position().get();
+      orientation = this.orientation().get();
+      magnitude = this.magnitude();
+    }
     // 1. reference is detached
     if (node != null && !Graph.isReachable(node)) {
       if (Graph.isReachable(this))
         Graph.prune(this);
       if (reference() != node) {
-        if (reference() != null)
+        if (reference() != null) {
           reference()._removeChild(this);
+        }
         _reference = node;// reference() returns now the new value
         reference()._addChild(this);
         // restore global geom attributes
-        this.setPosition(position);
-        this.setOrientation(orientation);
-        this.setMagnitude(magnitude);
+        if (needscache) {
+          this.setPosition(position);
+          this.setOrientation(orientation);
+          this.setMagnitude(magnitude);
+        }
       }
       return;
     }
@@ -761,9 +770,11 @@ public class Node {
     _restorePath(reference(), this);
     _restoredTasks(this);
     // restore global geom attributes
-    this.setPosition(position);
-    this.setOrientation(orientation);
-    this.setMagnitude(magnitude);
+    if (needscache) {
+      this.setPosition(position);
+      this.setOrientation(orientation);
+      this.setMagnitude(magnitude);
+    }
     _modified();
   }
 
