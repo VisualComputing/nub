@@ -889,7 +889,8 @@ public class Graph {
   public static boolean isReachable(Node node) {
     if (node == null)
       return false;
-    for (Node n : nodes())
+    List<Node> nodes = nodes();
+    for (Node n : nodes)
       if (n == node)
         return true;
     return false;
