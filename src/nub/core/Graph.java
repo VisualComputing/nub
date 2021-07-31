@@ -64,7 +64,7 @@ import java.util.function.Consumer;
  * tagged node synchronously (i.e., they return the tagged node immediately),
  * {@link #tag(String, int, int)} updates it asynchronously (i.e., it optimally updates the tagged
  * node during the next call to the {@link #render()} or {@link #render(Node)} algorithms); and, </li>
- * <li>Interact with your tagged nodes by calling any of the following methods: {@link #alignTag(String)},
+ * <li>Interact with your tagged nodes by calling any of the following methods: {@link #alignEye(String)},
  * {@link #focusTag(String)}, {@link #translateTag(String, float, float, float, float)},
  * {@link #rotateTag(String, float, float, float, float)}, {@link #scaleTag(String, float, float)},
  * or {@link #spinTag(String, int, int, int, int, float)}).
@@ -77,15 +77,15 @@ import java.util.function.Consumer;
  * <li>To check if a given node would be picked with a ray casted at a given screen position,
  * call {@link #tracks(Node, int, int)}.</li>
  * <li>To interact with the node that is referred with the {@code null} tag, call any of the following methods:
- * {@link #alignTag()}, {@link #focusTag()}, {@link #translateTag(float, float, float, float)},
+ * {@link #alignEye()}, {@link #focusTag()}, {@link #translateTag(float, float, float, float)},
  * {@link #rotateTag(float, float, float, float)}, {@link #scaleTag(float, float)} and
  * {@link #spinTag(int, int, int, int, float)}).</li>
- * <li>To directly interact with a given node, call any of the following methods: {@link #alignNode(Node)},
+ * <li>To directly interact with a given node, call any of the following methods: {@link #alignEye(Node)},
  * {@link #focusNode(Node)}, {@link #translateNode(Node, float, float, float, float)},
  * {@link #rotateNode(Node, float, float, float, float)},
  * {@link #scaleNode(Node, float, float)} and {@link #spinNode(Node, int, int, int, int, float)}).</li>
  * <li>To either interact with the node referred with a given tag or the eye, when that tag is not in use,
- * call any of the following methods: {@link #align(String)}, {@link #focus(String)},
+ * call any of the following methods: {@link #alignEye(Node)}, {@link #focus(String)},
  * {@link #translate(String, float, float, float, float)}, {@link #rotate(String, float, float, float, float)},
  * {@link #scale(String, float, float)} and {@link #spin(String, int, int, int, int, float)}.</li>
  * <li>Set {@code Graph.inertia} in  [0..1] (0 no inertia & 1 no friction) to change the default inertia
@@ -3545,46 +3545,22 @@ public class Graph {
   // 1. Align
 
   /**
-   * Same as {@code align(null)}.
-   *
-   * @see #align(String)
-   */
-  public void align() {
-    align(null);
-  }
-
-  /**
-   * Calls {@code alignTag(tag)} if {@code node(tag)} is non-null and {@code alignEye()} otherwise.
-   *
-   * @see #alignTag(String)
-   * @see #alignEye()
-   */
-  public void align(String tag) {
-    if (!alignTag(tag))
-      alignEye();
-  }
-
-  /**
    * Same as {@code return alignTag(null)}.
    *
-   * @see #alignTag(String)
+   * @see #alignEye(String)
    */
-  public boolean alignTag() {
-    return alignTag(null);
+  public void alignEye() {
+    alignEye((String)null);
   }
 
   /**
    * Same as {@code alignNode(node(tag))}. Returns {@code true} if succeeded and {@code false} otherwise.
    *
-   * @see #alignNode(Node)
+   * @see #alignEye(Node)
    * @see #node(String)
    */
-  public boolean alignTag(String tag) {
-    if (node(tag) != null) {
-      alignNode(node(tag));
-      return true;
-    }
-    return false;
+  public void alignEye(String tag) {
+    alignEye(node(tag));
   }
 
   /**
@@ -3592,21 +3568,13 @@ public class Graph {
    *
    * @see #alignEye()
    */
-  public void alignNode(Node node) {
+  public void alignEye(Node node) {
     if (node == null || node == eye()) {
-      System.out.println("Warning: alignNode requires a non-null node different than the eye. Nothing done");
-      return;
+      eye().align(true);
     }
-    node.align(eye());
-  }
-
-  /**
-   * Aligns the {@link #eye()} with the world.
-   *
-   * @see #alignNode(Node)
-   */
-  public void alignEye() {
-    eye().align(true);
+    else {
+      node.align(eye());
+    }
   }
 
   // 2. Focus

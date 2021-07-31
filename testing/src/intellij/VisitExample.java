@@ -135,7 +135,7 @@ public class VisitExample extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.align();
+        focus.alignEye();
   }
 
   @Override

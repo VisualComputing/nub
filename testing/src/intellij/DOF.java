@@ -131,7 +131,7 @@ public class DOF extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.alignTag();
+        scene.alignEye();
   }
 
   public static void main(String[] args) {

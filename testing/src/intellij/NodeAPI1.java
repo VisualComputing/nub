@@ -347,7 +347,7 @@ public class NodeAPI1 extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.alignTag();
+        scene.alignEye();
   }
 
   public class InteractiveNode extends Node {

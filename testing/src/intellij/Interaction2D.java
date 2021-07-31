@@ -131,7 +131,7 @@ public class Interaction2D extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.alignTag();
+        scene.alignEye();
   }
 
   PShape shape() {

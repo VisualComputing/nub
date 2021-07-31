@@ -106,7 +106,7 @@ void mouseClicked(MouseEvent event) {
     if (event.getButton() == LEFT)
       focus.focus();
     else
-      focus.align();
+      focus.alignEye();
 }
 
 void draw() {

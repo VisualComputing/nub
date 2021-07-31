@@ -184,7 +184,7 @@ public class Superliminal extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.alignTag();
+        focus.alignEye();
   }
 
   public void draw() {

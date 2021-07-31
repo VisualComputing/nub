@@ -78,7 +78,7 @@ public class OFFScreen extends PApplet {
       if (event.getButton() == LEFT)
         scene.focus();
       else
-        scene.alignTag();
+        scene.alignEye();
   }
 
   public void keyPressed() {

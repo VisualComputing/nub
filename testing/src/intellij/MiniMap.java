@@ -112,7 +112,7 @@ public class MiniMap extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.align();
+        focus.alignEye();
   }
 
   @Override

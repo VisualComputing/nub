@@ -131,7 +131,7 @@ public class AuxViewers extends PApplet {
       if (event.getButton() == LEFT)
         focus.focus();
       else
-        focus.alignTag();
+        focus.alignEye();
   }
 
   public void draw() {
