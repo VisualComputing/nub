@@ -127,7 +127,7 @@ public class GraphAPI extends PApplet {
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focus();
+        scene.focusEye();
       else
         scene.alignEye();
   }

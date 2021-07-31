@@ -80,7 +80,7 @@ public class MouseMoveInteraction extends PApplet {
       scene.mouseTag();
     else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focus();
+        scene.focusEye();
       else
         scene.alignEye();
   }

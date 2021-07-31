@@ -353,7 +353,7 @@ public class NodeAPI2 extends PApplet {
       scene.updateMouseTag();
     else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focus();
+        scene.focusEye();
       else
         scene.alignEye();
   }

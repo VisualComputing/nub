@@ -65,7 +65,7 @@ import java.util.function.Consumer;
  * {@link #tag(String, int, int)} updates it asynchronously (i.e., it optimally updates the tagged
  * node during the next call to the {@link #render()} or {@link #render(Node)} algorithms); and, </li>
  * <li>Interact with your tagged nodes by calling any of the following methods: {@link #alignEye(String)},
- * {@link #focusTag(String)}, {@link #translateTag(String, float, float, float, float)},
+ * {@link #focusEye(String)}, {@link #translateTag(String, float, float, float, float)},
  * {@link #rotateTag(String, float, float, float, float)}, {@link #scaleTag(String, float, float)},
  * or {@link #spinTag(String, int, int, int, int, float)}).
  * </li>
@@ -77,7 +77,7 @@ import java.util.function.Consumer;
  * <li>To check if a given node would be picked with a ray casted at a given screen position,
  * call {@link #tracks(Node, int, int)}.</li>
  * <li>To interact with the node that is referred with the {@code null} tag, call any of the following methods:
- * {@link #alignEye()}, {@link #focusTag()}, {@link #translateTag(float, float, float, float)},
+ * {@link #alignEye()}, {@link #focusEye()}, {@link #translateTag(float, float, float, float)},
  * {@link #rotateTag(float, float, float, float)}, {@link #scaleTag(float, float)} and
  * {@link #spinTag(int, int, int, int, float)}).</li>
  * <li>To directly interact with a given node, call any of the following methods: {@link #alignEye(Node)},
@@ -3583,71 +3583,39 @@ public class Graph {
   // 2. Focus
 
   /**
-   * Same as {@code focus(null)}.
+   * Same as {@code focusEye((String)null)}.
    *
-   * @see #focus(String)
-   * @see #focusTag(String)
-   * @see #focusEye()
-   * @see #focusTag()
-   */
-  public void focus() {
-    focus(null);
-  }
-
-  /**
-   * Calls {@code focusTag(tag)} if {@code node(tag)} is non-null and {@code focusEye()} otherwise.
-   *
-   * @see #focusEye()
-   * @see #focusTag(String)
-   */
-  public void focus(String tag) {
-    if (!focusTag(tag))
-      focusEye();
-  }
-
-  /**
-   * Same as {@code focusTag(null)}.
-   *
-   * @see #focusTag(String)
-   */
-  public boolean focusTag() {
-    return focusTag(null);
-  }
-
-  /**
-   * Same as {@code return focusNode(node(tag))}. Returns {@code true} if succeeded and {@code false} otherwise.
-   *
-   * @see #focusNode(Node)
-   * @see #node(String)
-   */
-  public boolean focusTag(String tag) {
-    if (node(tag) != null) {
-      focusNode(node(tag));
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Focuses the node (which should be different than the {@link #eye()}) with the {@link #eye()}.
-   *
-   * @see #focusEye()
-   */
-  public void focusNode(Node node) {
-    if (node == null || node == eye()) {
-      System.out.println("Warning: focusNode requires a non-null node different than the eye. Nothing done");
-      return;
-    }
-    node.projectOnLine(eye().position(), eye().zAxis(false));
-  }
-
-  /**
-   * Focuses the {@link #eye()} to the world origin.
-   *
-   * @see #focusNode(Node)
+   * @see #focusEye(String)
+   * @see #focusEye(Node)
    */
   public void focusEye() {
-    eye().projectOnLine(center(), viewDirection());
+    focusEye((String)null);
+  }
+
+  /**
+   * Same as {@code focusEye(node(tag))}.
+   *
+   * @see #focusEye()
+   * @see #focusEye(Node)
+   * @see #node(String)
+   */
+  public void focusEye(String tag) {
+    focusEye(node(tag));
+  }
+
+  /**
+   * Focuses the node (use null for the world) with the {@link #eye()}.
+   *
+   * @see #focusEye()
+   * @see #focusEye(String tag)
+   */
+  public void focusEye(Node node) {
+    if (node == null || node == eye()) {
+      eye().projectOnLine(center(), viewDirection());
+    }
+    else {
+      node.projectOnLine(eye().position(), eye().zAxis(false));
+    }
   }
 
   // 3. Scale

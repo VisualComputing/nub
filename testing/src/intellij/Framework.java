@@ -152,7 +152,7 @@ public class Framework extends PApplet {
       return;
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        focus.focus();
+        focus.focusEye();
       else
         focus.alignEye();
   }

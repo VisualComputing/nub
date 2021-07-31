@@ -70,7 +70,7 @@ public class PointUnderPixel extends PApplet {
       }
     } else {
       if (event.getCount() == 1)
-        scene.focus();
+        scene.focusEye();
       else
         scene.alignEye();
     }

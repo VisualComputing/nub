@@ -87,7 +87,7 @@ public class Orbit extends PApplet {
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
-      scene.focus();
+      scene.focusEye();
   }
 
   PShape shape() {

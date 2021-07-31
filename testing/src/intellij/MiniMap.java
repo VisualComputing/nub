@@ -110,7 +110,7 @@ public class MiniMap extends PApplet {
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        focus.focus();
+        focus.focusEye();
       else
         focus.alignEye();
   }
