@@ -3545,17 +3545,19 @@ public class Graph {
   // 1. Align
 
   /**
-   * Same as {@code return alignTag(null)}.
+   * Same as {@code alignEye((String)null)}.
    *
    * @see #alignEye(String)
+   * @see #alignEye(Node)
    */
   public void alignEye() {
     alignEye((String)null);
   }
 
   /**
-   * Same as {@code alignNode(node(tag))}. Returns {@code true} if succeeded and {@code false} otherwise.
+   * Same as {@code alignEye(node(tag))}.
    *
+   * @see #alignEye()
    * @see #alignEye(Node)
    * @see #node(String)
    */
@@ -3564,9 +3566,10 @@ public class Graph {
   }
 
   /**
-   * Aligns the node (which should be different than the {@link #eye()}) with the {@link #eye()}.
+   * Aligns the node (use null for the world) with the {@link #eye()}.
    *
    * @see #alignEye()
+   * @see #alignEye(String tag)
    */
   public void alignEye(Node node) {
     if (node == null || node == eye()) {
