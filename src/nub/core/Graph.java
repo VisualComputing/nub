@@ -47,7 +47,7 @@ import java.util.function.Consumer;
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFOV()},
  * {@link #fov()}, {@link #fit()}, {@link #lookAround(float, float)}, {@link #rotateCAD(float, float)},
  * {@link #moveForward(float)}, {@link #translateEyeOld(float, float, float)},
- * {@link #rotateEye(float, float, float)} and {@link #scaleEye(float)}.
+ * {@link #rotateEye(float, float, float)} and {@link #scaleNode(float)}.
  * <h2>2.1. Transformations</h2>
  * The graph acts as interface between screen space (a box of {@link #width()} * {@link #height()} * 1
  * dimensions), from where user gesture data is gathered, and the {@code nodes}. To transform points
@@ -64,8 +64,8 @@ import java.util.function.Consumer;
  * tagged node synchronously (i.e., they return the tagged node immediately),
  * {@link #tag(String, int, int)} updates it asynchronously (i.e., it optimally updates the tagged
  * node during the next call to the {@link #render()} or {@link #render(Node)} algorithms); and, </li>
- * <li>Interact with your tagged nodes by calling any of the following methods: {@link #alignEye(String)},
- * {@link #focusEye(String)}, {@link #translateTag(String, float, float, float, float)},
+ * <li>Interact with your tagged nodes by calling any of the following methods: {@link #alignNode(String)},
+ * {@link #focusNode(String)}, {@link #translateTag(String, float, float, float, float)},
  * {@link #rotateTag(String, float, float, float, float)}, {@link #scaleTag(String, float, float)},
  * or {@link #spinTag(String, int, int, int, int, float)}).
  * </li>
@@ -77,16 +77,16 @@ import java.util.function.Consumer;
  * <li>To check if a given node would be picked with a ray casted at a given screen position,
  * call {@link #tracks(Node, int, int)}.</li>
  * <li>To interact with the node that is referred with the {@code null} tag, call any of the following methods:
- * {@link #alignEye()}, {@link #focusEye()}, {@link #translateTag(float, float, float, float)},
+ * {@link #alignNode()}, {@link #focusNode()}, {@link #translateTag(float, float, float, float)},
  * {@link #rotateTag(float, float, float, float)}, {@link #scaleTag(float, float)} and
  * {@link #spinTag(int, int, int, int, float)}).</li>
- * <li>To directly interact with a given node, call any of the following methods: {@link #alignEye(Node)},
+ * <li>To directly interact with a given node, call any of the following methods: {@link #alignNode(Node)},
  * {@link #focusNode(Node)}, {@link #translateNode(Node, float, float, float, float)},
  * {@link #rotateNode(Node, float, float, float, float)},
  * {@link #scaleNode(Node, float, float)} and {@link #spinNode(Node, int, int, int, int, float)}).</li>
  * <li>To either interact with the node referred with a given tag or the eye, when that tag is not in use,
- * call any of the following methods: {@link #alignEye(Node)}, {@link #focus(String)},
- * {@link #translateEye(String, float, float, float, float)}, {@link #rotate(String, float, float, float, float)},
+ * call any of the following methods: {@link #alignNode(Node)}, {@link #focus(String)},
+ * {@link #translateNode(String, float, float, float, float)}, {@link #rotate(String, float, float, float, float)},
  * {@link #scale(String, float, float)} and {@link #spin(String, int, int, int, int, float)}.</li>
  * <li>Set {@code Graph.inertia} in  [0..1] (0 no inertia & 1 no friction) to change the default inertia
  * value globally, instead of setting it on a per method call basis. Note that it is initially set to 0.8.</li>
@@ -3426,7 +3426,7 @@ public class Graph {
    * @see #displacement(Vector, Node)
    * @see #screenLocation(Vector, Node)
    * @see #translateNode(Node, float, float, float)
-   * @see #translateEyeOld(float, float, float)
+   * @see #translateNode(float, float, float)
    */
   public Vector displacement(Vector vector, Node node) {
     float dx = vector.x();
@@ -3545,33 +3545,33 @@ public class Graph {
   // 1. Align
 
   /**
-   * Same as {@code alignEye((String)null)}.
+   * Same as {@code alignNode((String)null)}.
    *
-   * @see #alignEye(String)
-   * @see #alignEye(Node)
+   * @see #alignNode(String)
+   * @see #alignNode(Node)
    */
-  public void alignEye() {
-    alignEye((String)null);
+  public void alignNode() {
+    alignNode((String)null);
   }
 
   /**
-   * Same as {@code alignEye(node(tag))}.
+   * Same as {@code alignNode(node(tag))}.
    *
-   * @see #alignEye()
-   * @see #alignEye(Node)
+   * @see #alignNode()
+   * @see #alignNode(Node)
    * @see #node(String)
    */
-  public void alignEye(String tag) {
-    alignEye(node(tag));
+  public void alignNode(String tag) {
+    alignNode(node(tag));
   }
 
   /**
    * Aligns the node (use null for the world) with the {@link #eye()}.
    *
-   * @see #alignEye()
-   * @see #alignEye(String tag)
+   * @see #alignNode()
+   * @see #alignNode(String tag)
    */
-  public void alignEye(Node node) {
+  public void alignNode(Node node) {
     if (node == null || node == eye()) {
       eye().align(true);
     }
@@ -3583,33 +3583,33 @@ public class Graph {
   // 2. Focus
 
   /**
-   * Same as {@code focusEye((String)null)}.
+   * Same as {@code focusNode((String)null)}.
    *
-   * @see #focusEye(String)
-   * @see #focusEye(Node)
+   * @see #focusNode(String)
+   * @see #focusNode(Node)
    */
-  public void focusEye() {
-    focusEye((String)null);
+  public void focusNode() {
+    focusNode((String)null);
   }
 
   /**
-   * Same as {@code focusEye(node(tag))}.
+   * Same as {@code focusNode(node(tag))}.
    *
-   * @see #focusEye()
-   * @see #focusEye(Node)
+   * @see #focusNode()
+   * @see #focusNode(Node)
    * @see #node(String)
    */
-  public void focusEye(String tag) {
-    focusEye(node(tag));
+  public void focusNode(String tag) {
+    focusNode(node(tag));
   }
 
   /**
    * Focuses the node (use null for the world) with the {@link #eye()}.
    *
-   * @see #focusEye()
-   * @see #focusEye(String tag)
+   * @see #focusNode()
+   * @see #focusNode(String tag)
    */
-  public void focusEye(Node node) {
+  public void focusNode(Node node) {
     if (node == null || node == eye()) {
       eye().projectOnLine(center(), viewDirection());
     }
@@ -3621,55 +3621,55 @@ public class Graph {
   // 3. Scale
 
   /**
-   * Same as {@code scaleEye(delta, Graph.inertia)}.
+   * Same as {@code scaleNode(delta, Graph.inertia)}.
    *
-   * @see #scaleEye(float, float)
+   * @see #scaleNode(float, float)
    */
-  public void scaleEye(float delta) {
-    scaleEye(delta, Graph.inertia);
+  public void scaleNode(float delta) {
+    scaleNode(delta, Graph.inertia);
   }
 
   /**
-   * Same as {@code scaleEye((String)null, delta, inertia)}.
+   * Same as {@code scaleNode((String)null, delta, inertia)}.
    *
-   * @see #scaleEye(String, float, float)
+   * @see #scaleNode(String, float, float)
    */
-  public void scaleEye(float delta, float inertia) {
-    scaleEye((String)null, delta, inertia);
+  public void scaleNode(float delta, float inertia) {
+    scaleNode((String)null, delta, inertia);
   }
 
   /**
-   * Same as {@code scaleEye(tag, delta, Graph.inertia)}.
+   * Same as {@code scaleNode(tag, delta, Graph.inertia)}.
    *
-   * @see #scaleEye(String, float, float)
+   * @see #scaleNode(String, float, float)
    */
-  public void scaleEye(String tag, float delta) {
-    scaleEye(tag, delta, Graph.inertia);
+  public void scaleNode(String tag, float delta) {
+    scaleNode(tag, delta, Graph.inertia);
   }
 
   /**
-   * Same as {@code scaleEye(node(tag), delta, inertia)}.
+   * Same as {@code scaleNode(node(tag), delta, inertia)}.
    *
-   * @see #scaleEye(Node, float, float)
+   * @see #scaleNode(Node, float, float)
    */
-  public void scaleEye(String tag, float delta, float inertia) {
-    scaleEye(node(tag), delta, inertia);
+  public void scaleNode(String tag, float delta, float inertia) {
+    scaleNode(node(tag), delta, inertia);
   }
 
   /**
-   * Same as {@code scaleEye(node, delta, Graph.inertia)}.
+   * Same as {@code scaleNode(node, delta, Graph.inertia)}.
    *
-   * @see #scaleEye(Node, float, float)
+   * @see #scaleNode(Node, float, float)
    */
-  public void scaleEye(Node node, float delta) {
-    scaleEye(node, delta, Graph.inertia);
+  public void scaleNode(Node node, float delta) {
+    scaleNode(node, delta, Graph.inertia);
   }
 
   /**
    * Scales the {@code node} (use null for the world) according to {@code delta} and
    * {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    */
-  public void scaleEye(Node node, float delta, float inertia) {
+  public void scaleNode(Node node, float delta, float inertia) {
     if (node == null || node == eye()) {
       float factor = 1 + Math.abs(delta) / (float) -height();
       eye().scale(delta >= 0 ? factor : 1 / factor, inertia);
@@ -3682,27 +3682,52 @@ public class Graph {
 
   // 4. Translate
 
-  public void translateEye(float dx, float dy, float dz) {
-    translateEye(dx, dy, dz, Graph.inertia);
+  /**
+   * Same as {@code translateNode(dx, dy, dz, Graph.inertia)}.
+   *
+   * @see #translateNode(float, float, float, float)
+   */
+  public void translateNode(float dx, float dy, float dz) {
+    translateNode(dx, dy, dz, Graph.inertia);
   }
 
-  public void translateEye(float dx, float dy, float dz, float inertia) {
-    translateEye((String)null, dx, dy, dz, inertia);
+  /**
+   * Same as {@code translateNode((String)null, dx, dy, dz, inertia)}.
+   *
+   * @see #translateNode(String, float, float, float, float)
+   */
+  public void translateNode(float dx, float dy, float dz, float inertia) {
+    translateNode((String)null, dx, dy, dz, inertia);
   }
 
-  public void translateEye(String tag, float dx, float dy, float dz) {
-    translateEye(tag, dx, dy, dz, Graph.inertia);
+  /**
+   * Same as {@code translateNode(tag, dx, dy, dz, Graph.inertia)}.
+   *
+   * @see #translateNode(String, float, float, float, float)
+   */
+  public void translateNode(String tag, float dx, float dy, float dz) {
+    translateNode(tag, dx, dy, dz, Graph.inertia);
   }
 
-  public void translateEye(String tag, float dx, float dy, float dz, float inertia) {
-    translateEye(node(tag), dx, dy, dz, inertia);
+  public void translateNode(String tag, float dx, float dy, float dz, float inertia) {
+    translateNode(node(tag), dx, dy, dz, inertia);
   }
 
-  public void translateEye(Node node, float dx, float dy, float dz) {
-    translateEye(node, dx, dy, dz, Graph.inertia);
+  /**
+   * Same as {@code translateNode(node, dx, dy, dz, Graph.inertia)}.
+   *
+   * @see #translateNode(Node, float, float, float, float)
+   */
+  public void translateNode(Node node, float dx, float dy, float dz) {
+    translateNode(node, dx, dy, dz, Graph.inertia);
   }
 
-  public void translateEye(Node node, float dx, float dy, float dz, float inertia) {
+  /**
+   * Translates the {@code node} (use null for the world) according to {@code (dx, dy, dz)}
+   * defined in screen-space ((a box of {@link #width()} * {@link #height()} * 1 dimensions),
+   * and {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
+   */
+  public void translateNode(Node node, float dx, float dy, float dz, float inertia) {
     if (node == null || node == eye()) {
       node = eye().detach();
       node.setPosition(center().get());
@@ -4100,11 +4125,11 @@ public class Graph {
    * the {@link #eye()} if the graph type is {@link Type#ORTHOGRAPHIC} so that nearby objects
    * appear bigger when moving towards them.
    *
-   * @see #translateEye(float, float, float)
+   * @see #translateNode(float, float, float)
    */
   public void moveForward(float delta, float inertia) {
     // we negate z which targets the Processing mouse wheel
-    translateEye(0, 0, delta / (zNear() - zFar()), inertia);
+    translateNode(0, 0, delta / (zNear() - zFar()), inertia);
   }
 
   // 8. lookAround

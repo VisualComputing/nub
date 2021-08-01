@@ -3099,7 +3099,7 @@ public class Scene extends Graph {
     if (l != lag)
       System.out.println("Warning: lag should be in [0..1]. Setting it as " + l);
     // hack: idea is to have node always under the cursor
-    super.translateEye(node, mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
+    super.translateNode(node, mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
   }
 
   /**
@@ -3127,7 +3127,7 @@ public class Scene extends Graph {
     if (l != lag)
       System.out.println("Warning: lag should be in [0..1]. Setting it as " + l);
     // hack: idea is to have the world axes under the cursor
-    super.translateEye(mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
+    super.translateNode(mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
   }
 
   /**

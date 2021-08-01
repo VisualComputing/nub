@@ -71,7 +71,7 @@ public class MouseMoveInteraction extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     //scene.zoom(event.getCount() * 20);
-    scene.scaleEye(event.getCount() * 20);
+    scene.scaleNode(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
@@ -80,9 +80,9 @@ public class MouseMoveInteraction extends PApplet {
       scene.mouseTag();
     else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focusEye();
+        scene.focusNode();
       else
-        scene.alignEye();
+        scene.alignNode();
   }
 
   PShape shape() {

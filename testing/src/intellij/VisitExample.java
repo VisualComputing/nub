@@ -121,7 +121,7 @@ public class VisitExample extends PApplet {
     else if(mouseButton == RIGHT)
       focus.mouseTranslate();
     else
-      focus.scaleEye(focus.mouseDX());
+      focus.scaleNode(focus.mouseDX());
   }
 
   @Override
@@ -133,9 +133,9 @@ public class VisitExample extends PApplet {
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        focus.focusEye();
+        focus.focusNode();
       else
-        focus.alignEye();
+        focus.alignNode();
   }
 
   @Override

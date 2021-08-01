@@ -108,7 +108,7 @@ public class BasicUse extends PApplet {
     if (scene.is3D())
       scene.moveForward(event.getCount() * 20);
     else
-      scene.scaleEye(event.getCount() * 20);
+      scene.scaleNode(event.getCount() * 20);
   }
 
   public void randomize() {

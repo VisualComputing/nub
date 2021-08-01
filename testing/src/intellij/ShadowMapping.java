@@ -188,7 +188,7 @@ public class ShadowMapping extends PApplet {
       float zFar = shadowMapScene.zFar();
       shadowMapScene.setBounds(zNear, zFar + shift);
     } else
-      scene.scaleEye(event.getCount() * 20);
+      scene.scaleNode(event.getCount() * 20);
   }
 
   public static void main(String[] args) {

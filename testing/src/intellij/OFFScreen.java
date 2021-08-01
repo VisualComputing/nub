@@ -70,15 +70,15 @@ public class OFFScreen extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scaleEye(event.getCount() * 20);
+    scene.scaleNode(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focusEye();
+        scene.focusNode();
       else
-        scene.alignEye();
+        scene.alignNode();
   }
 
   public void keyPressed() {

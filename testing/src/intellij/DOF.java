@@ -122,16 +122,16 @@ public class DOF extends PApplet {
 
   @Override
   public void mouseWheel(MouseEvent event) {
-    scene.scaleEye(event.getCount() * 20);
+    scene.scaleNode(event.getCount() * 20);
   }
 
   @Override
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focusEye();
+        scene.focusNode();
       else
-        scene.alignEye();
+        scene.alignNode();
   }
 
   public static void main(String[] args) {

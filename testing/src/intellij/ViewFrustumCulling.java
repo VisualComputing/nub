@@ -63,7 +63,7 @@ public class ViewFrustumCulling extends PApplet {
     else if (mouseButton == RIGHT)
       focus.mouseTranslateEye();
     else
-      focus.scaleEye(mouseX - pmouseX);
+      focus.scaleNode(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -73,9 +73,9 @@ public class ViewFrustumCulling extends PApplet {
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        focus.focusEye();
+        focus.focusNode();
       else
-        focus.alignEye();
+        focus.alignNode();
   }
 
   public void keyPressed() {

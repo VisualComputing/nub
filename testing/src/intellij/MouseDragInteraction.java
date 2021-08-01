@@ -154,7 +154,7 @@ public class MouseDragInteraction extends PApplet {
     else if (mouseButton == RIGHT) {
       scene.mouseTranslate();
     } else {
-      scene.scaleEye(scene.mouseDX());
+      scene.scaleNode(scene.mouseDX());
     }
   }
 
@@ -165,9 +165,9 @@ public class MouseDragInteraction extends PApplet {
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focusEye();
+        scene.focusNode();
       else
-        scene.alignEye();
+        scene.alignNode();
   }
 
   PShape shape() {

@@ -117,21 +117,21 @@ public class Interaction2D extends PApplet {
       //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);
-      scene.scaleEye(mouseX - pmouseX);
+      scene.scaleNode(mouseX - pmouseX);
     //scene.rotate(0, 0, mouseX - pmouseX, PI/width);
   }
 
   public void mouseWheel(MouseEvent event) {
     //scene.zoom(event.getCount() * 20);
-    scene.scaleEye(event.getCount() * 20);
+    scene.scaleNode(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focusEye();
+        scene.focusNode();
       else
-        scene.alignEye();
+        scene.alignNode();
   }
 
   PShape shape() {

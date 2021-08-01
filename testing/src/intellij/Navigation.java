@@ -80,7 +80,7 @@ public class Navigation extends PApplet {
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
-      scene.scaleEye(mouseX - pmouseX);
+      scene.scaleNode(mouseX - pmouseX);
   }
 
   @Override

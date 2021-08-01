@@ -85,14 +85,14 @@ public class Interpolators extends PApplet {
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
-      scene.scaleEye(mouseX - pmouseX);
+      scene.scaleNode(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
     if (scene.is3D())
       scene.moveForward(event.getCount() * 20);
     else
-      scene.scaleEye(event.getCount() * 20);
+      scene.scaleNode(event.getCount() * 20);
   }
 
   public void keyPressed() {

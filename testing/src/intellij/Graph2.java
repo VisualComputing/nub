@@ -66,13 +66,13 @@ public class Graph2 extends PApplet {
     if (mouseButton == LEFT)
       graph.spin(pmouseX, pmouseY, mouseX, mouseY);
     else if (mouseButton == RIGHT)
-      graph.translateEye(mouseX - pmouseX, mouseY - pmouseY, 0, 0);
+      graph.translateNode(mouseX - pmouseX, mouseY - pmouseY, 0, 0);
     else
-      graph.scaleEye(mouseX - pmouseX);
+      graph.scaleNode(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    graph.scaleEye(event.getCount() * 20);
+    graph.scaleNode(event.getCount() * 20);
   }
 
   public static void main(String args[]) {

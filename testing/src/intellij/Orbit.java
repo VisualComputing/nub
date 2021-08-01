@@ -82,12 +82,12 @@ public class Orbit extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scaleEye(event.getCount() * 20);
+    scene.scaleNode(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
-      scene.focusEye();
+      scene.focusNode();
   }
 
   PShape shape() {

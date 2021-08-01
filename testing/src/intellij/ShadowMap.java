@@ -105,7 +105,7 @@ public class ShadowMap extends PApplet {
       shadowMapScene.setBounds(zNear, zFar);
     }
     else
-      scene.scaleEye(event.getCount() * 20);
+      scene.scaleNode(event.getCount() * 20);
   }
 
   public void keyPressed() {
