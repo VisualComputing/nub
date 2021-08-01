@@ -108,7 +108,7 @@ public class Interaction2D extends PApplet {
     // Mouse methods that don't take a node parameter (such as mouseCAD)
     // are only available to the scene.eye().
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.mouseSpinNode();
       //scene.mouseCAD();
       //scene.lookAround(upVector);
       //scene.mouseCAD();

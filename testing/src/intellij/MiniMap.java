@@ -91,7 +91,7 @@ public class MiniMap extends PApplet {
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.mouseSpin();
+      focus.mouseSpinNode();
     else if (mouseButton == RIGHT)
       focus.mouseTranslateNode();
     else

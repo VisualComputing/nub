@@ -71,7 +71,7 @@ public class CustomNodeInteraction extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin("key");
+      scene.mouseSpinNode("key");
     else if (mouseButton == CENTER)
       scene.scaleNode("key", scene.mouseDX());
     else

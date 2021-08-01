@@ -66,7 +66,7 @@ public class MouseMoveInteraction extends PApplet {
     else if (lookAround && scene.node() == null)
       scene.mouseLookAround();
     else
-      scene.mouseSpin();
+      scene.mouseSpinNode();
   }
 
   public void mouseWheel(MouseEvent event) {

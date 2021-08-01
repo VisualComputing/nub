@@ -76,7 +76,7 @@ public class DebugEye extends PApplet {
   public void mouseDragged(MouseEvent event) {
     switch (mouseButton) {
       case LEFT:
-        scene.mouseSpin();
+        scene.mouseSpinNode();
         break;
       case RIGHT:
         scene.mouseTranslateNode();

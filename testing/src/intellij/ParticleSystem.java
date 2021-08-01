@@ -40,7 +40,7 @@ public class ParticleSystem extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.mouseSpinNode();
     else if (mouseButton == RIGHT)
       scene.mouseTranslateNode();
     else

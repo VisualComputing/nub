@@ -115,7 +115,7 @@ public class Flock extends PApplet {
     if (scene.eye().reference() == null)
       if (mouseButton == LEFT)
         // same as: scene.spin(scene.eye());
-        scene.mouseSpin();
+        scene.mouseSpinNode();
       else if (mouseButton == RIGHT)
         // same as: scene.translate(scene.eye());
         scene.mouseTranslateNode();

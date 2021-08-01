@@ -90,7 +90,7 @@ import java.util.function.Consumer;
  * beginning with {@code mouse*}, such as: {@link #mouseTag(String)} and {@link #mouseTag()} for
  * node tagging; {@link #mouseTranslateNode(float)}, {@link #mouseTranslateNode(String, float)},
  * {@link #mouseTranslateTag(String, float)} and {@link #mouseTranslateEye(float)} for translation;
- * {@link #mouseSpin(float)}, {@link #mouseSpin(String, float)}, {@link #mouseSpinTag(String, float)}
+ * {@link #mouseSpinNode(float)}, {@link #mouseSpinNode(String, float)}, {@link #mouseSpinTag(String, float)}
  * and {@link #mouseSpinEye(float)} for spinning; {@link #mouseLookAround(float)} and
  * {@link #mouseRotateCAD(float)} for eye look-around and rotate-cad, to name a few.
  *
@@ -3051,122 +3051,45 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code mouseSpin(null)}.
+   * Same as {@code mouseSpinNode((String)null)}.
    *
-   * @see #mouseSpin(String)
+   * @see #mouseSpinNode(String)
    */
-  public void mouseSpin() {
-    mouseSpin(null);
+  public void mouseSpinNode() {
+    mouseSpinNode((String)null);
   }
 
   /**
-   * Same as {@code mouseSpin(tag, Graph.inertia)}.
+   * Same as {@code mouseSpinNode(tag, Graph.inertia)}.
    *
-   * @see #mouseSpin(String, float)
+   * @see #mouseSpinNode(String, float)
    */
-  public void mouseSpin(String tag) {
-    mouseSpin(tag, Graph.inertia);
+  public void mouseSpinNode(String tag) {
+    mouseSpinNode(tag, Graph.inertia);
   }
 
   /**
-   * Same as {@code mouseSpin(null, inertia)}.
+   * Same as {@code mouseSpinNode((String)null, inertia)}.
    *
-   * @see #mouseSpin(String, float)
+   * @see #mouseSpinNode(String, float)
    */
-  public void mouseSpin(float inertia) {
-    mouseSpin(null, inertia);
+  public void mouseSpinNode(float inertia) {
+    mouseSpinNode((String)null, inertia);
   }
 
   /**
-   * Calls {@code mouseSpinTag(tag, inertia)} if {@code node(tag)}
-   * is non-null and {@code mouseSpinEye(inertia)} otherwise.
-   *
-   * @see #mouseSpinTag(String)
-   * @see #mouseSpinEye()
-   */
-  public void mouseSpin(String tag, float inertia) {
-    if (!mouseSpinTag(tag, inertia))
-      mouseSpinEye(inertia);
-  }
-
-  /**
-   * Same as {@code return mouseSpinTag(null, Graph.inertia)}.
-   *
-   * @see #mouseSpinTag(String, float)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
-   */
-  public boolean mouseSpinTag() {
-    return mouseSpinTag(null, Graph.inertia);
-  }
-
-  /**
-   * Same as {@code return mouseSpinTag(null, inertia)}.
-   *
-   * @see #mouseSpinTag(String, float)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
-   */
-  public boolean mouseSpinTag(float inertia) {
-    return mouseSpinTag(null, inertia);
-  }
-
-  /**
-   * Same as {@code return mouseSpinTag(tag, Graph.inertia)}.
-   *
-   * @see #mouseSpinTag(String, float)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
-   */
-  public boolean mouseSpinTag(String tag) {
-    return mouseSpinTag(tag, Graph.inertia);
-  }
-
-  /**
-   * Same as {@code mouseSpinNode(node(tag), inertia)}. Returns
-   * {@code true} if succeeded and {@code false} otherwise.
+   * Same as {@code mouseSpinNode(node(tag), inertia)}.
    *
    * @see #mouseSpinNode(Node, float)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
    */
-  public boolean mouseSpinTag(String tag, float inertia) {
-    if (node(tag) != null) {
-      mouseSpinNode(node(tag), inertia);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Same as {@code mouseSpinNode(node, Graph.inertia)}.
-   *
-   * @see #mouseSpinNode(Node, float)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
-   */
-  public void mouseSpinNode(Node node) {
-    mouseSpinNode(node, Graph.inertia);
+  public void mouseSpinNode(String tag, float inertia) {
+    mouseSpinNode(node(tag), inertia);
   }
 
   /**
    * Same as {@code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
    *
-   * @see #spinNodeOld(Node, int, int, int, int, float)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
+   * @see #spinNode(Node, int, int, int, int, float)
    */
   public void mouseSpinNode(Node node, float inertia) {
     if (inertia == 1) {
@@ -3175,37 +3098,6 @@ public class Scene extends Graph {
       super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.9f);
     } else
       super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
-  }
-
-  /**
-   * Same as {@code mouseSpinEye(Graph.inertia)}.
-   *
-   * @see #mouseSpinEye(float)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
-   */
-  public void mouseSpinEye() {
-    mouseSpinEye(Graph.inertia);
-  }
-
-  /**
-   * Same as {@code super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
-   *
-   * @see #spinEye(int, int, int, int, float)
-   * @see #pmouseX()
-   * @see #pmouseY()
-   * @see #mouseX()
-   * @see #mouseY()
-   */
-  public void mouseSpinEye(float inertia) {
-    if (inertia == 1) {
-      // Sensitivity is expressed in pixels per milliseconds. Default value is 30 (300 pixels per second).
-      float sensitivity = 30;
-      super.spinNode(pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.9f);
-    } else
-      super.spinNode(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   // only eye

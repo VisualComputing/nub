@@ -59,7 +59,7 @@ public class ViewFrustumCulling extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.mouseSpinEye();
+      focus.mouseSpinNode();
     else if (mouseButton == RIGHT)
       focus.mouseTranslateNode();
     else

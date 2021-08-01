@@ -329,13 +329,13 @@ public class NodeAPI2 extends PApplet {
     else if (scene.node() == null)
       scene.mouseLookAround();
     else
-      scene.mouseSpin();
+      scene.mouseSpinNode();
   }
 
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.mouseSpinNode();
     else if (mouseButton == RIGHT)
       scene.mouseTranslateNode();
     else

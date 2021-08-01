@@ -144,7 +144,7 @@ public class Superliminal extends PApplet {
     if (focus == null)
       return;
     if (mouseButton == LEFT)
-      focus.mouseSpin();
+      focus.mouseSpinNode();
     else if (mouseButton == RIGHT)
       focus.mouseTranslateNode();
     else {

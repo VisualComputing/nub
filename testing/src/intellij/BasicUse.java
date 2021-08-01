@@ -75,7 +75,7 @@ public class BasicUse extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.mouseSpinNode();
     else if (mouseButton == RIGHT) {
       //Vector v = new Vector(scene.mouseDX(), 0, 0);
       //child.translate(v);
