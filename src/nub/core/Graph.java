@@ -45,9 +45,8 @@ import java.util.function.Consumer;
  * (see {@link #setEye(Node)}). Several functions handle the eye, such as
  * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFOV()},
- * {@link #fov()}, {@link #fit()}, {@link #lookAround(float, float)}, {@link #rotateCAD(float, float)},
- * {@link #moveForward(float)}, {@link #translateEyeOld(float, float, float)},
- * {@link #rotateEye(float, float, float)} and {@link #scaleNode(float)}.
+ * {@link #fov()}, {@link #fit()}, {@link #lookAround(float, float)},
+ * {@link #rotateCAD(float, float)}, and {@link #moveForward(float)}.
  * <h2>2.1. Transformations</h2>
  * The graph acts as interface between screen space (a box of {@link #width()} * {@link #height()} * 1
  * dimensions), from where user gesture data is gathered, and the {@code nodes}. To transform points
@@ -65,9 +64,9 @@ import java.util.function.Consumer;
  * {@link #tag(String, int, int)} updates it asynchronously (i.e., it optimally updates the tagged
  * node during the next call to the {@link #render()} or {@link #render(Node)} algorithms); and, </li>
  * <li>Interact with your tagged nodes by calling any of the following methods: {@link #alignNode(String)},
- * {@link #focusNode(String)}, {@link #translateTag(String, float, float, float, float)},
- * {@link #rotateTag(String, float, float, float, float)}, {@link #scaleTag(String, float, float)},
- * or {@link #spinTag(String, int, int, int, int, float)}).
+ * {@link #focusNode(String)}, {@link #translateNode(String, float, float, float, float)},
+ * {@link #rotateNode(String, float, float, float, float)}, {@link #scaleNode(String, float, float)},
+ * or {@link #spinNode(String, int, int, int, int, float)}).
  * </li>
  * </ol>
  * Observations:
@@ -77,17 +76,17 @@ import java.util.function.Consumer;
  * <li>To check if a given node would be picked with a ray casted at a given screen position,
  * call {@link #tracks(Node, int, int)}.</li>
  * <li>To interact with the node that is referred with the {@code null} tag, call any of the following methods:
- * {@link #alignNode()}, {@link #focusNode()}, {@link #translateTag(float, float, float, float)},
- * {@link #rotateTag(float, float, float, float)}, {@link #scaleTag(float, float)} and
- * {@link #spinTag(int, int, int, int, float)}).</li>
+ * {@link #alignNode()}, {@link #focusNode()}, {@link #translateNode(float, float, float, float)},
+ * {@link #rotateNode(float, float, float, float)}, {@link #scaleNode(float, float)} and
+ * {@link #spinNode(int, int, int, int, float)}).</li>
  * <li>To directly interact with a given node, call any of the following methods: {@link #alignNode(Node)},
  * {@link #focusNode(Node)}, {@link #translateNode(Node, float, float, float, float)},
- * {@link #rotateNodeOld(Node, float, float, float, float)},
+ * {@link #rotateNode(Node, float, float, float, float)},
  * {@link #scaleNode(Node, float, float)} and {@link #spinNode(Node, int, int, int, int, float)}).</li>
  * <li>To either interact with the node referred with a given tag or the eye, when that tag is not in use,
- * call any of the following methods: {@link #alignNode(Node)}, {@link #focus(String)},
+ * call any of the following methods: {@link #alignNode(Node)}, {@link #focusNode(String)},
  * {@link #translateNode(String, float, float, float, float)}, {@link #rotateNode(String, float, float, float, float)},
- * {@link #scale(String, float, float)} and {@link #spin(String, int, int, int, int, float)}.</li>
+ * {@link #scaleNode(String, float, float)} and {@link #spinNode(String, int, int, int, int, float)}.</li>
  * <li>Set {@code Graph.inertia} in  [0..1] (0 no inertia & 1 no friction) to change the default inertia
  * value globally, instead of setting it on a per method call basis. Note that it is initially set to 0.8.</li>
  * <li>Customize node behaviors by overridden {@link Node#interact(Object...)}
@@ -3793,6 +3792,11 @@ public class Graph {
     rotateNode((String)null, roll, pitch, yaw, inertia);
   }
 
+  /**
+   * Same as {@code rotateNode(tag, roll, pitch, yaw, Graph.inertia)}.
+   *
+   * @see #rotateNode(String, float, float, float, float)
+   */
   public void rotateNode(String tag, float roll, float pitch, float yaw) {
     rotateNode(tag, roll, pitch, yaw, Graph.inertia);
   }
@@ -3806,6 +3810,11 @@ public class Graph {
     rotateNode(node(tag), roll, pitch, yaw, inertia);
   }
 
+  /**
+   * Same as {@code rotateNode(node, roll, pitch, yaw, Graph.inertia)}.
+   *
+   * @see #rotateNode(Node, float, float, float, float)
+   */
   public void rotateNode(Node node, float roll, float pitch, float yaw) {
     rotateNode(node, roll, pitch, yaw, Graph.inertia);
   }
@@ -3847,84 +3856,39 @@ public class Graph {
   // 6. Spin
 
   /**
-   * Same as {@code spin(pixel1X, pixel1Y, pixel2X, pixel2Y)}.
+   * Same as {@code spinNode(pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
    *
-   * @see #spin(String, int, int, int, int)
+   * @see #spinNode(int, int, int, int, float)
    */
-  public void spin(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spin(null, pixel1X, pixel1Y, pixel2X, pixel2Y);
+  public void spinNode(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    spinNode(pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
   }
 
   /**
-   * Same as {@code spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
+   * Same as {@code spinNode((String)null, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}.
    *
-   * @see #spin(String, int, int, int, int, float)
+   * @see #spinNode(String, int, int, int, int, float)
    */
-  public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
+  public void spinNode(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
+    spinNode((String)null, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
   }
 
   /**
-   * Same as {@code spin(null, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}.
+   * Same as {@code spinNode(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
    *
-   * @see #spin(String, int, int, int, int, float)
+   * @see #spinNode(String, int, int, int, int, float)
    */
-  public void spin(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
-    spin(null, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
+  public void spinNode(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
+    spinNode(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
   }
 
   /**
-   * Calls {@code (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia))} if {@code node(tag)}
-   * is non-null and spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)} otherwise.
+   * Same as {@code spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}.
    *
-   * @see #spinTag(String, int, int, int, int, float)
-   * @see #spinEye(int, int, int, int, float)
-   */
-  public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
-    if (!spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia))
-      spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
-  }
-
-  /**
-   * Same as {@code return spinTag(null, pixel1X, pixel1Y, pixel2X, pixel2Y)}.
-   *
-   * @see #spinTag(String, int, int, int, int)
-   */
-  public boolean spinTag(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    return spinTag(null, pixel1X, pixel1Y, pixel2X, pixel2Y);
-  }
-
-  /**
-   * Same as {@code return spinTag(null, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}.
-   *
-   * @see #spinTag(String, int, int, int, int, float)
-   */
-  public boolean spinTag(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
-    return spinTag(null, pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
-  }
-
-  /**
-   * Same as {@code return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
-   *
-   * @see #spinTag(String, int, int, int, int, float)
-   */
-  public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    return spinTag(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
-  }
-
-  /**
-   * Same as {@code spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}. Returns
-   * {@code true} if succeeded and {@code false} otherwise.
-   *
-   * @see #node(String)
    * @see #spinNode(Node, int, int, int, int, float)
    */
-  public boolean spinTag(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
-    if (node(tag) != null) {
-      spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
-      return true;
-    }
-    return false;
+  public void spinNode(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
+    spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
   }
 
   /**
@@ -3937,82 +3901,56 @@ public class Graph {
   }
 
   /**
-   * Rotates the {@code node} (which should be different than the {@link #eye()}) using an arcball
-   * interface, from points {@code (pixel1X, pixel1Y)} to {@code (pixel2X, pixel2Y)} pixel positions.
-   * The {@code inertia} controls the gesture strength and it should be in {@code [0..1]},
-   * 0 no inertia & 1 no friction. The center of the rotation is the screen projected node origin
-   * (see {@link Node#position()}).
+   * Rotates the {@code node} (use null for the world) using an arcball interface, from points
+   * {@code (pixel1X, pixel1Y)} to {@code (pixel2X, pixel2Y)} pixel positions. The {@code inertia}
+   * controls the gesture strength and it should be in {@code [0..1]}, 0 no inertia & 1 no friction.
+   * The center of the rotation is the screen projected node origin (see {@link Node#position()}).
    * <p>
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
    * three-dimensional orientation using a mouse.
-   *
-   * @see #spinEye(int, int, int, int, float)
    */
   public void spinNode(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
-    float sensitivity = 1;
     if (node == null || node == eye()) {
-      System.out.println("Warning: spinNode requires a non-null node different than the eye. Nothing done");
-      return;
+      float sensitivity = 1;
+      Vector center = screenLocation(center());
+      if (center == null)
+        return;
+      int centerX = (int) center.x();
+      int centerY = (int) center.y();
+      float px = sensitivity * (pixel1X - centerX) / (float) width();
+      float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / (float) height();
+      float dx = sensitivity * (pixel2X - centerX) / (float) width();
+      float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / (float) height();
+      Vector p1 = new Vector(px, py, _projectOnBall(px, py));
+      Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
+      // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
+      Vector axis = p2.cross(p1);
+      // 2D is an ad-hoc
+      float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
+      eye()._orbit(new Quaternion(axis, angle), center(), inertia);
+      // same as:
+      //eye().orbit(eye().worldDisplacement(axis), angle, center(), inertia);
     }
-    Vector center = screenLocation(node.position());
-    if (center == null)
-      return;
-    int centerX = (int) center.x();
-    int centerY = (int) center.y();
-    float px = sensitivity * (pixel1X - centerX) / (float) width();
-    float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / (float) height();
-    float dx = sensitivity * (pixel2X - centerX) / (float) width();
-    float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / (float) height();
-    Vector p1 = new Vector(px, py, _projectOnBall(px, py));
-    Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
-    // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
-    Vector axis = p2.cross(p1);
-    // 2D is an ad-hoc
-    float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
-    Quaternion quaternion = new Quaternion(axis, -angle);
-    node.rotate(new Quaternion(node.displacement(quaternion.axis(), eye()), quaternion.angle()), inertia);
-  }
-
-  /**
-   * Same as {@code spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
-   *
-   * @see #spinEye(int, int, int, int, float)
-   */
-  public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spinEye(pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
-  }
-
-  /**
-   * Rotates the {@link #eye()} using an arcball interface, from points {@code (pixel1X, pixel1Y)} to
-   * {@code (pixel2X, pixel2Y)} pixel positions. The {@code inertia} controls the gesture strength
-   * and it should be in {@code [0..1]}, 0 no inertia & 1 no friction.
-   * The center of the rotation is the screen projected graph {@link #center()}.
-   * <p>
-   * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
-   * three-dimensional orientation using a mouse.
-   *
-   * @see #spinNode(Node, int, int, int, int, float)
-   */
-  public void spinEye(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
-    float sensitivity = 1;
-    Vector center = screenLocation(center());
-    if (center == null)
-      return;
-    int centerX = (int) center.x();
-    int centerY = (int) center.y();
-    float px = sensitivity * (pixel1X - centerX) / (float) width();
-    float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / (float) height();
-    float dx = sensitivity * (pixel2X - centerX) / (float) width();
-    float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / (float) height();
-    Vector p1 = new Vector(px, py, _projectOnBall(px, py));
-    Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
-    // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
-    Vector axis = p2.cross(p1);
-    // 2D is an ad-hoc
-    float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
-    eye()._orbit(new Quaternion(axis, angle), center(), inertia);
-    // same as:
-    //eye().orbit(eye().worldDisplacement(axis), angle, center(), inertia);
+    else {
+      float sensitivity = 1;
+      Vector center = screenLocation(node.position());
+      if (center == null)
+        return;
+      int centerX = (int) center.x();
+      int centerY = (int) center.y();
+      float px = sensitivity * (pixel1X - centerX) / (float) width();
+      float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / (float) height();
+      float dx = sensitivity * (pixel2X - centerX) / (float) width();
+      float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / (float) height();
+      Vector p1 = new Vector(px, py, _projectOnBall(px, py));
+      Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
+      // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
+      Vector axis = p2.cross(p1);
+      // 2D is an ad-hoc
+      float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
+      Quaternion quaternion = new Quaternion(axis, -angle);
+      node.rotate(new Quaternion(node.displacement(quaternion.axis(), eye()), quaternion.angle()), inertia);
+    }
   }
 
   /**

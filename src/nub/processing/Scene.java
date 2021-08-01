@@ -3242,7 +3242,7 @@ public class Scene extends Graph {
   /**
    * Same as {@code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
    *
-   * @see #spinNode(Node, int, int, int, int, float)
+   * @see #spinNodeOld(Node, int, int, int, int, float)
    * @see #pmouseX()
    * @see #pmouseY()
    * @see #mouseX()
@@ -3283,9 +3283,9 @@ public class Scene extends Graph {
     if (inertia == 1) {
       // Sensitivity is expressed in pixels per milliseconds. Default value is 30 (300 pixels per second).
       float sensitivity = 30;
-      super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.9f);
+      super.spinNode(pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.9f);
     } else
-      super.spinEye(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
+      super.spinNode(pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   // only eye

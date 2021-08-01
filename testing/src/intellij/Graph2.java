@@ -64,7 +64,7 @@ public class Graph2 extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      graph.spin(pmouseX, pmouseY, mouseX, mouseY);
+      graph.spinNode(pmouseX, pmouseY, mouseX, mouseY);
     else if (mouseButton == RIGHT)
       graph.translateNode(mouseX - pmouseX, mouseY - pmouseY, 0, 0);
     else
