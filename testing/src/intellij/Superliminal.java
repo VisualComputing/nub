@@ -167,7 +167,7 @@ public class Superliminal extends PApplet {
         node.translate(v, Scene.inertia);
       }
       else {
-        scene.translateNode(node, 0, 0, amount / 50, Scene.inertia);
+        scene.translateEye(node, 0, 0, amount / 50, Scene.inertia);
       }
       // */
     }

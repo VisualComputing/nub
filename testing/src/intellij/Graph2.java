@@ -66,7 +66,7 @@ public class Graph2 extends PApplet {
     if (mouseButton == LEFT)
       graph.spin(pmouseX, pmouseY, mouseX, mouseY);
     else if (mouseButton == RIGHT)
-      graph.translate(mouseX - pmouseX, mouseY - pmouseY, 0, 0);
+      graph.translateEye(mouseX - pmouseX, mouseY - pmouseY, 0, 0);
     else
       graph.scaleEye(mouseX - pmouseX);
   }

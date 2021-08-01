@@ -3090,7 +3090,7 @@ public class Scene extends Graph {
    * It tries to keep the node under the mouse cursor independently of {@code lag} which should
    * be in [0..1], 0 responds immediately and 1 no response at all.
    *
-   * @see #translateEye(float, float, float, float)
+   * @see #translateEyeOld(float, float, float, float)
    */
   public void mouseTranslateNode(Node node, float lag) {
     float l = Math.abs(lag);
@@ -3099,7 +3099,7 @@ public class Scene extends Graph {
     if (l != lag)
       System.out.println("Warning: lag should be in [0..1]. Setting it as " + l);
     // hack: idea is to have node always under the cursor
-    super.translateNode(node, mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
+    super.translateEye(node, mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
   }
 
   /**
@@ -3118,7 +3118,7 @@ public class Scene extends Graph {
    * It tries to keep the world axes under the mouse cursor independently of {@code lag} which
    * should be in [0..1], 0 responds immediately and 1 no response at all.
    *
-   * @see #translateEye(float, float, float, float)
+   * @see #translateEyeOld(float, float, float, float)
    */
   public void mouseTranslateEye(float lag) {
     float l = Math.abs(lag);

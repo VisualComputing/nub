@@ -46,7 +46,7 @@ import java.util.function.Consumer;
  * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFOV()},
  * {@link #fov()}, {@link #fit()}, {@link #lookAround(float, float)}, {@link #rotateCAD(float, float)},
- * {@link #moveForward(float)}, {@link #translateEye(float, float, float)},
+ * {@link #moveForward(float)}, {@link #translateEyeOld(float, float, float)},
  * {@link #rotateEye(float, float, float)} and {@link #scaleEye(float)}.
  * <h2>2.1. Transformations</h2>
  * The graph acts as interface between screen space (a box of {@link #width()} * {@link #height()} * 1
@@ -86,7 +86,7 @@ import java.util.function.Consumer;
  * {@link #scaleNode(Node, float, float)} and {@link #spinNode(Node, int, int, int, int, float)}).</li>
  * <li>To either interact with the node referred with a given tag or the eye, when that tag is not in use,
  * call any of the following methods: {@link #alignEye(Node)}, {@link #focus(String)},
- * {@link #translate(String, float, float, float, float)}, {@link #rotate(String, float, float, float, float)},
+ * {@link #translateEye(String, float, float, float, float)}, {@link #rotate(String, float, float, float, float)},
  * {@link #scale(String, float, float)} and {@link #spin(String, int, int, int, int, float)}.</li>
  * <li>Set {@code Graph.inertia} in  [0..1] (0 no inertia & 1 no friction) to change the default inertia
  * value globally, instead of setting it on a per method call basis. Note that it is initially set to 0.8.</li>
@@ -3426,7 +3426,7 @@ public class Graph {
    * @see #displacement(Vector, Node)
    * @see #screenLocation(Vector, Node)
    * @see #translateNode(Node, float, float, float)
-   * @see #translateEye(float, float, float)
+   * @see #translateEyeOld(float, float, float)
    */
   public Vector displacement(Vector vector, Node node) {
     float dx = vector.x();
@@ -3682,149 +3682,48 @@ public class Graph {
 
   // 4. Translate
 
-  /**
-   * Same as {@code translate(null, dx, dy, dz)}.
-   *
-   * @see #translate(String, float, float, float)
-   */
-  public void translate(float dx, float dy, float dz) {
-    translate(null, dx, dy, dz);
-  }
-
-  /**
-   * Same as {@code translate(tag, dx, dy, dz, Graph.inertia)}.
-   *
-   * @see #translate(String, float, float, float, float)
-   */
-  public void translate(String tag, float dx, float dy, float dz) {
-    translate(tag, dx, dy, dz, Graph.inertia);
-  }
-
-  /**
-   * Same as {@code translate(null, dx, dy, dz, inertia)}.
-   *
-   * @see #translate(String, float, float, float, float)
-   */
-  public void translate(float dx, float dy, float dz, float inertia) {
-    translate(null, dx, dy, dz, inertia);
-  }
-
-  /**
-   * Calls {@code translateTag(tag, dx, dy, dz, inertia)} if {@code node(tag)} is non-null
-   * and {@code translateEye(dx, dy, dz, inertia)} otherwise.
-   *
-   * @see #translateTag(String, float, float, float, float)
-   * @see #translateEye(float, float, float, float)
-   */
-  public void translate(String tag, float dx, float dy, float dz, float inertia) {
-    if (!translateTag(tag, dx, dy, dz, inertia))
-      translateEye(dx, dy, dz, inertia);
-  }
-
-  /**
-   * Same as {@code return translateTag(null, dx, dy, dz)}.
-   *
-   * @see #translateTag(String, float, float, float)
-   */
-  public boolean translateTag(float dx, float dy, float dz) {
-    return translateTag(null, dx, dy, dz);
-  }
-
-  /**
-   * Same as {@code return translateTag(null, dx, dy, dz, inertia)}.
-   *
-   * @see #translateTag(String, float, float, float, float)
-   */
-  public boolean translateTag(float dx, float dy, float dz, float inertia) {
-    return translateTag(null, dx, dy, dz, inertia);
-  }
-
-  /**
-   * Same as {@code return translateTag(tag, dx, dy, dz, Graph.inertia)}.
-   *
-   * @see #translateTag(String, float, float, float, float)
-   */
-  public boolean translateTag(String tag, float dx, float dy, float dz) {
-    return translateTag(tag, dx, dy, dz, Graph.inertia);
-  }
-
-  /**
-   * Same as {@code translateNode(node(tag), dx, dy, dz, inertia)}. Returns {@code true} if succeeded and {@code false} otherwise.
-   *
-   * @see #translateNode(Node, float, float, float, float)
-   */
-  public boolean translateTag(String tag, float dx, float dy, float dz, float inertia) {
-    if (node(tag) != null) {
-      translateNode(node(tag), dx, dy, dz, inertia);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Same as {@code translateNode(node, dx, dy, dz, Graph.inertia)}.
-   *
-   * @see #translateNode(Node, float, float, float, float)
-   */
-  public void translateNode(Node node, float dx, float dy, float dz) {
-    translateNode(node, dx, dy, dz, Graph.inertia);
-  }
-
-  /**
-   * Translates the node (which should be different than the {@link #eye()}) according to
-   * {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
-   *
-   * @param dx      screen space delta-x units in [0..width()]
-   * @param dy      screen space delta-y units in [0..height()]
-   * @param dz      screen space delta-z units in [0..1]
-   * @param inertia should be in {@code [0..1]
-   * @see #displacement(Vector, Node)
-   */
-  public void translateNode(Node node, float dx, float dy, float dz, float inertia) {
-    if (node == null || node == eye()) {
-      System.out.println("Warning: translateNode requires a non-null node different than the eye. Nothing done");
-      return;
-    }
-    Vector vector = displacement(new Vector(dx, dy, dz), node);
-    node.translate(node.reference() == null ? node.worldDisplacement(vector) : node.reference().displacement(vector, node), inertia);
-  }
-
-  /**
-   * Same as {@code translateEye(dx, dy, dz, Graph.inertia)}.
-   *
-   * @see #translateEye(float, float, float, float)
-   */
   public void translateEye(float dx, float dy, float dz) {
     translateEye(dx, dy, dz, Graph.inertia);
   }
 
-  /**
-   * Translates the {@link #eye()} according to {@code inertia} which should be in {@code [0..1],
-   * 0 no inertia & 1 no friction.
-   *
-   * @param dx      screen space delta-x units in [0..width()]
-   * @param dy      screen space delta-y units in [0..height()]
-   * @param dz      screen space delta-z units in [0..1]
-   * @param inertia should be in {@code [0..1]
-   * @see #translateEye(float, float, float)
-   * @see #displacement(Vector, Node)
-   */
   public void translateEye(float dx, float dy, float dz, float inertia) {
-    Node node = eye().detach();
-    node.setPosition(center().get());
-    Vector vector = displacement(new Vector(dx, dy, dz), node);
-    vector.multiply(-1);
-    // Option 1: don't compensate orthographic, i.e., use Node.translate(vector, inertia)
-    //eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()), inertia);
-    // Option 2: compensate orthographic, i.e., use Graph inertial translation task
-    Vector translation = eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye());
-    _translate(translation.x(), translation.y(), translation.z());
-    _translationTask.setInertia(inertia);
-    _translationTask._x += translation.x();
-    _translationTask._y += translation.y();
-    _translationTask._z += translation.z();
-    if (!_translationTask.isActive()) {
-      _translationTask.run();
+    translateEye((String)null, dx, dy, dz, inertia);
+  }
+
+  public void translateEye(String tag, float dx, float dy, float dz) {
+    translateEye(tag, dx, dy, dz, Graph.inertia);
+  }
+
+  public void translateEye(String tag, float dx, float dy, float dz, float inertia) {
+    translateEye(node(tag), dx, dy, dz, inertia);
+  }
+
+  public void translateEye(Node node, float dx, float dy, float dz) {
+    translateEye(node, dx, dy, dz, Graph.inertia);
+  }
+
+  public void translateEye(Node node, float dx, float dy, float dz, float inertia) {
+    if (node == null || node == eye()) {
+      node = eye().detach();
+      node.setPosition(center().get());
+      Vector vector = displacement(new Vector(dx, dy, dz), node);
+      vector.multiply(-1);
+      // Option 1: don't compensate orthographic, i.e., use Node.translate(vector, inertia)
+      //eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()), inertia);
+      // Option 2: compensate orthographic, i.e., use Graph inertial translation task
+      Vector translation = eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye());
+      _translate(translation.x(), translation.y(), translation.z());
+      _translationTask.setInertia(inertia);
+      _translationTask._x += translation.x();
+      _translationTask._y += translation.y();
+      _translationTask._z += translation.z();
+      if (!_translationTask.isActive()) {
+        _translationTask.run();
+      }
+    }
+    else {
+      Vector vector = displacement(new Vector(dx, dy, dz), node);
+      node.translate(node.reference() == null ? node.worldDisplacement(vector) : node.reference().displacement(vector, node), inertia);
     }
   }
 
