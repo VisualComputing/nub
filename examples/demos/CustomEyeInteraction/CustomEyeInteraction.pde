@@ -66,11 +66,11 @@ void mouseDragged() {
   if (keyMode)
     return;
   if (mouseButton == LEFT)
-    scene.mouseSpinEye();
+    scene.mouseSpinNode();
   else if (mouseButton == RIGHT)
-    scene.mouseTranslateEye();
+    scene.mouseTranslateNode();
   else
-    scene.scaleEye(scene.mouseDX());
+    scene.scaleNode(scene.mouseDX());
 }
 
 void mouseWheel(MouseEvent event) {

@@ -3493,52 +3493,39 @@ public class Graph {
   // 0. Patterns
 
   /**
-   * Same as {@code return interactTag(null, gesture)}.
+   * Same as {@code interact((String)null, gesture)}.
    *
-   * @see #interactTag(String, Object...)
+   * @see #interact(String, Object...)
    */
-  public boolean interactTag(Object... gesture) {
-    return interactTag(null, gesture);
+  public void interact(Object... gesture) {
+    interact((String)null, gesture);
   }
 
   /**
-   * If {@code node(tag)} is non-null (see {@link #node(String)}) calls
-   * {@code interactNode(node(tag), gesture)} and returns {@code true}, otherwise
-   * {@code false}.
+   * Same as {@code if (tag == null || node(tag) != null) interact(node(tag), gesture)}.
    *
    * @see #interact(Node, Object...)
    */
-  public boolean interactTag(String tag, Object... gesture) {
-    if (node(tag) != null) {
+  public void interact(String tag, Object... gesture) {
+    if (tag == null || node(tag) != null)
       interact(node(tag), gesture);
-      return true;
-    }
-    return false;
   }
 
   /**
-   * If {@code node} is non-null call the interact {@code node} gesture
-   * parser function set either with {@link Node#setInteraction(Consumer)}
-   * or {@link Node#setInteraction(BiConsumer)}.
+   * Call the {@code node} (or the {@link #eye()} if {@code node} is null) interact
+   * gesture parser function set either with {@link Node#setInteraction(Consumer)} or
+   * {@link Node#setInteraction(BiConsumer)}.
    *
    * @see Node#setInteraction(BiConsumer)
    * @see Node#setInteraction(Consumer)
    */
   public void interact(Node node, Object... gesture) {
-    if (node != null) {
-      if (node._interact != null) {
-        node._interact.accept(node, gesture);
-      }
+    if (node == null || node == eye()) {
+      node = eye();
     }
-  }
-
-  /**
-   * Same as {@code interact(eye(), gesture)}.
-   *
-   * @see #interact(Node, Object...)
-   */
-  public void interact(Object... gesture) {
-    interact(eye(), gesture);
+    if (node._interact != null) {
+      node._interact.accept(node, gesture);
+    }
   }
 
   // 1. Align

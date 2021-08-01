@@ -82,19 +82,26 @@ public class DebugCam extends PApplet {
         if (event.isShiftDown()) {
           scene.scaleNode((float) mouseX - pmouseX, inertia);
         } else {
-          if (!scene.interactTag(scene.mouseRADX()))
+          if (scene.node() != null) {
+            scene.interact(scene.mouseRADX());
+          } else {
             if (cad)
               scene.mouseRotateCAD(inertia);
             else
               scene.mouseLookAround(inertia);
+          }
         }
         break;
     }
   }
 
   public void mouseWheel(MouseEvent event) {
-    if (!scene.interactTag((float)event.getCount() * 10.f * PI / (float)width))
+    if (scene.node() != null) {
+      scene.interact((float)event.getCount() * 10.f * PI / (float)width);
+    }
+    else {
       scene.moveForward(event.getCount() * 10, inertia);
+    }
   }
 
   public void keyPressed() {
