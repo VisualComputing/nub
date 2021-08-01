@@ -152,7 +152,7 @@ public class MouseDragInteraction extends PApplet {
         //scene.mouseSpinEye(1);
       }
     else if (mouseButton == RIGHT) {
-      scene.mouseTranslate();
+      scene.mouseTranslateNode();
     } else {
       scene.scaleNode(scene.mouseDX());
     }

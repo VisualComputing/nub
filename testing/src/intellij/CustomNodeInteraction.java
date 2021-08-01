@@ -75,7 +75,7 @@ public class CustomNodeInteraction extends PApplet {
     else if (mouseButton == CENTER)
       scene.scaleNode("key", scene.mouseDX());
     else
-      scene.mouseTranslate("key");
+      scene.mouseTranslateNode("key");
   }
 
   public void mouseWheel(MouseEvent event) {

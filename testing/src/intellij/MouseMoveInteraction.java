@@ -62,7 +62,7 @@ public class MouseMoveInteraction extends PApplet {
 
   public void mouseMoved(MouseEvent event) {
     if (event.isShiftDown())
-      scene.mouseTranslate();
+      scene.mouseTranslateNode();
     else if (lookAround && scene.node() == null)
       scene.mouseLookAround();
     else

@@ -100,7 +100,7 @@ public class BasicUse extends PApplet {
       // */
     }
     else
-      scene.mouseTranslate();
+      scene.mouseTranslateNode();
       //scene.scale(mouseX - pmouseX);
   }
 

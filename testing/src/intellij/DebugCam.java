@@ -77,8 +77,7 @@ public class DebugCam extends PApplet {
           scene.mouseSpinEye(inertia);
         break;
       case RIGHT:
-        if (!scene.mouseTranslateTag(inertia))
-          scene.mouseTranslateEye(inertia);
+          scene.mouseTranslateNode(inertia);
         break;
       case CENTER:
         if (event.isShiftDown()) {

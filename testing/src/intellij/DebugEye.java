@@ -79,7 +79,7 @@ public class DebugEye extends PApplet {
         scene.mouseSpin();
         break;
       case RIGHT:
-        scene.mouseTranslate();
+        scene.mouseTranslateNode();
         break;
       case CENTER:
         if (event.isShiftDown()) {

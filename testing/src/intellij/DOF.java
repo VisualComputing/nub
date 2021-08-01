@@ -115,7 +115,7 @@ public class DOF extends PApplet {
     if (mouseButton == LEFT)
       scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.mouseTranslateNode();
     else
       scene.moveForward(scene.mouseDX());
   }

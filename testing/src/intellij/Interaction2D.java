@@ -113,7 +113,7 @@ public class Interaction2D extends PApplet {
       //scene.lookAround(upVector);
       //scene.mouseCAD();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.mouseTranslateNode();
       //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);

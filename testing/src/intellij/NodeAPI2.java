@@ -325,7 +325,7 @@ public class NodeAPI2 extends PApplet {
     if (event.isControlDown())
       return;
     if (event.isShiftDown())
-      scene.mouseTranslate();
+      scene.mouseTranslateNode();
     else if (scene.node() == null)
       scene.mouseLookAround();
     else
@@ -337,7 +337,7 @@ public class NodeAPI2 extends PApplet {
     if (mouseButton == LEFT)
       scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.mouseTranslateNode();
     else
       scene.moveForward(mouseX - pmouseX);
   }

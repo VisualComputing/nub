@@ -77,7 +77,7 @@ public class ViewingVolume extends PApplet {
     if (mouseButton == LEFT)
       focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.mouseTranslate();
+      focus.mouseTranslateNode();
     else
       //focus.zoom(mouseX - pmouseX);
       focus.scaleNode(mouseX - pmouseX);

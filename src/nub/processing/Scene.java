@@ -88,7 +88,7 @@ import java.util.function.Consumer;
  * {@link PApplet#pmouseX} and {@link PApplet#pmouseY} Processing variables and thus simplify
  * the method signatures provide by the {@link Graph} counterparts. Refer to the method signatures
  * beginning with {@code mouse*}, such as: {@link #mouseTag(String)} and {@link #mouseTag()} for
- * node tagging; {@link #mouseTranslate(float)}, {@link #mouseTranslate(String, float)},
+ * node tagging; {@link #mouseTranslateNode(float)}, {@link #mouseTranslateNode(String, float)},
  * {@link #mouseTranslateTag(String, float)} and {@link #mouseTranslateEye(float)} for translation;
  * {@link #mouseSpin(float)}, {@link #mouseSpin(String, float)}, {@link #mouseSpinTag(String, float)}
  * and {@link #mouseSpinEye(float)} for spinning; {@link #mouseLookAround(float)} and
@@ -2987,99 +2987,45 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code mouseTranslate(null)}.
+   * Same as {@code mouseTranslateNode(Graph.inertia)}.
    *
-   * @see #mouseTranslate(String)
+   * @see #mouseTranslateNode(float)
    */
-  public void mouseTranslate() {
-    mouseTranslate(null);
+  public void mouseTranslateNode() {
+    mouseTranslateNode(Graph.inertia);
   }
 
   /**
-   * Same as {@code mouseTranslate(tag, Graph.inertia)}.
+   * Same as {@code mouseTranslateNode((String)null, inertia)}.
    *
-   * @see #mouseTranslate(String, float)
+   * @see #mouseTranslateNode(String, float)
    */
-  public void mouseTranslate(String tag) {
-    mouseTranslate(tag, Graph.inertia);
+  public void mouseTranslateNode(float inertia) {
+    mouseTranslateNode((String)null, inertia);
   }
 
   /**
-   * Same as {@code mouseTranslate(null, lag)}.
+   * Same as {@code mouseTranslateNode(tag, Graph.inertia)}.
    *
-   * @see #mouseTranslate(String, float)
+   * @see #mouseTranslateNode(String, float)
    */
-  public void mouseTranslate(float lag) {
-    mouseTranslate(null, lag);
+  public void mouseTranslateNode(String tag) {
+    mouseTranslateNode(tag, Graph.inertia);
   }
 
   /**
-   * Calls {@code mouseTranslateTag(tag, lag)} if {@code node(tag)} is non-null and
-   * {@code mouseTranslateEye(lag)} otherwise.
-   *
-   * @see #mouseTranslateTag(String)
-   * @see #mouseTranslateEye()
-   * @see #mouseDX()
-   * @see #mouseDY()
-   */
-  public void mouseTranslate(String tag, float lag) {
-    if (!mouseTranslateTag(tag, lag))
-      mouseTranslateEye(lag);
-  }
-
-  /**
-   * Same as {@code return mouseTranslateTag(null)}.
-   *
-   * @see #mouseTranslateTag(String)
-   * @see #mouseDX()
-   * @see #mouseDY()
-   */
-  public boolean mouseTranslateTag() {
-    return mouseTranslateTag(null);
-  }
-
-  /**
-   * Same as {@code return mouseTranslateTag(null, lag)}.
-   *
-   * @see #mouseTranslateTag(String, float)
-   * @see #mouseDX()
-   * @see #mouseDY()
-   */
-  public boolean mouseTranslateTag(float lag) {
-    return mouseTranslateTag(null, lag);
-  }
-
-  /**
-   * Same as {@code return mouseTranslateTag(tag, Graph.inertia)}.
-   *
-   * @see #mouseTranslateTag(String, float)
-   * @see #mouseDX()
-   * @see #mouseDY()
-   */
-  public boolean mouseTranslateTag(String tag) {
-    return mouseTranslateTag(tag, Graph.inertia);
-  }
-
-  /**
-   * Same as {@code mouseTranslateNode(node(tag), lag)}. Returns {@code true} if succeeded
-   * and {@code false} otherwise.
+   * Same as {@code mouseTranslateNode(node(tag), inertia)}.
    *
    * @see #mouseTranslateNode(Node, float)
    */
-  public boolean mouseTranslateTag(String tag, float lag) {
-    if (node(tag) != null) {
-      mouseTranslateNode(node(tag), lag);
-      return true;
-    }
-    return false;
+  public void mouseTranslateNode(String tag, float inertia) {
+    mouseTranslateNode(node(tag), inertia);
   }
 
   /**
-   * Same as {@code mouseTranslateNode(node, Graph.inertia)}.
+   * Same as {@code }.
    *
    * @see #mouseTranslateNode(Node, float)
-   * @see #mouseDX()
-   * @see #mouseDY()
    */
   public void mouseTranslateNode(Node node) {
     mouseTranslateNode(node, Graph.inertia);
@@ -3090,7 +3036,9 @@ public class Scene extends Graph {
    * It tries to keep the node under the mouse cursor independently of {@code lag} which should
    * be in [0..1], 0 responds immediately and 1 no response at all.
    *
-   * @see #translateEyeOld(float, float, float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
+   * @see #translateNode(Node, float, float, float, float)
    */
   public void mouseTranslateNode(Node node, float lag) {
     float l = Math.abs(lag);
@@ -3100,34 +3048,6 @@ public class Scene extends Graph {
       System.out.println("Warning: lag should be in [0..1]. Setting it as " + l);
     // hack: idea is to have node always under the cursor
     super.translateNode(node, mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
-  }
-
-  /**
-   * Same as {@code mouseTranslateEye(Graph.inertia)}.
-   *
-   * @see #mouseTranslateEye()
-   * @see #mouseDX()
-   * @see #mouseDY()
-   */
-  public void mouseTranslateEye() {
-    mouseTranslateEye(Graph.inertia);
-  }
-
-  /**
-   * Same as {@code super.translateEye(mouseDX() * (1 - lag), mouseDY() * (1 - lag), 0, lag)}.
-   * It tries to keep the world axes under the mouse cursor independently of {@code lag} which
-   * should be in [0..1], 0 responds immediately and 1 no response at all.
-   *
-   * @see #translateEyeOld(float, float, float, float)
-   */
-  public void mouseTranslateEye(float lag) {
-    float l = Math.abs(lag);
-    while (l > 1)
-      l /= 10;
-    if (l != lag)
-      System.out.println("Warning: lag should be in [0..1]. Setting it as " + l);
-    // hack: idea is to have the world axes under the cursor
-    super.translateNode(mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
   }
 
   /**

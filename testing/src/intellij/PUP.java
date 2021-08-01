@@ -101,7 +101,7 @@ public class PUP extends PApplet {
     if (mouseButton == LEFT)
       focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.mouseTranslate();
+      focus.mouseTranslateNode();
     else
       focus.moveForward(focus.mouseDX());
   }

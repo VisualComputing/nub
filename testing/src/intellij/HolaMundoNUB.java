@@ -101,7 +101,7 @@ public class HolaMundoNUB extends PApplet {
     if (mouseButton == LEFT)
       scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.mouseTranslateNode();
     else
       scene.scaleNode(mouseX - pmouseX);
   }
