@@ -3013,12 +3013,13 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code mouseTranslateNode(node(tag), inertia)}.
+   * Same as {@code if (tag == null || node(tag) != null) mouseTranslateNode(node(tag), inertia)}.
    *
    * @see #mouseTranslateNode(Node, float)
    */
   public void mouseTranslateNode(String tag, float inertia) {
-    mouseTranslateNode(node(tag), inertia);
+    if (tag == null || node(tag) != null)
+      mouseTranslateNode(node(tag), inertia);
   }
 
   /**
@@ -3077,12 +3078,13 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code mouseSpinNode(node(tag), inertia)}.
+   * Same as {@code if (tag == null || node(tag) != null) mouseSpinNode(node(tag), inertia)}.
    *
    * @see #mouseSpinNode(Node, float)
    */
   public void mouseSpinNode(String tag, float inertia) {
-    mouseSpinNode(node(tag), inertia);
+    if (tag == null || node(tag) != null)
+      mouseSpinNode(node(tag), inertia);
   }
 
   /**

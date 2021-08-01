@@ -3554,14 +3554,15 @@ public class Graph {
   }
 
   /**
-   * Same as {@code alignNode(node(tag))}.
+   * Same as {@code if (tag == null || node(tag) != null) alignNode(node(tag))}.
    *
    * @see #alignNode()
    * @see #alignNode(Node)
    * @see #node(String)
    */
   public void alignNode(String tag) {
-    alignNode(node(tag));
+    if (tag == null || node(tag) != null)
+      alignNode(node(tag));
   }
 
   /**
@@ -3592,14 +3593,15 @@ public class Graph {
   }
 
   /**
-   * Same as {@code focusNode(node(tag))}.
+   * Same as {@code if (tag == null || node(tag) != null) focusNode(node(tag))}.
    *
    * @see #focusNode()
    * @see #focusNode(Node)
    * @see #node(String)
    */
   public void focusNode(String tag) {
-    focusNode(node(tag));
+    if (tag == null || node(tag) != null)
+      focusNode(node(tag));
   }
 
   /**
@@ -3647,12 +3649,13 @@ public class Graph {
   }
 
   /**
-   * Same as {@code scaleNode(node(tag), delta, inertia)}.
+   * Same as {@code if (tag == null || node(tag) != null) scaleNode(node(tag), delta, inertia)}.
    *
    * @see #scaleNode(Node, float, float)
    */
   public void scaleNode(String tag, float delta, float inertia) {
-    scaleNode(node(tag), delta, inertia);
+    if (tag == null || node(tag) != null)
+      scaleNode(node(tag), delta, inertia);
   }
 
   /**
@@ -3709,12 +3712,13 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translateNode(node(tag), dx, dy, dz, inertia)}.
+   * Same as {@code if (tag == null || node(tag) != null) translateNode(node(tag), dx, dy, dz, inertia)}.
    *
    * @see #translateNode(Node, float, float, float, float)
    */
   public void translateNode(String tag, float dx, float dy, float dz, float inertia) {
-    translateNode(node(tag), dx, dy, dz, inertia);
+    if (tag == null || node(tag) != null)
+      translateNode(node(tag), dx, dy, dz, inertia);
   }
 
   /**
@@ -3802,12 +3806,13 @@ public class Graph {
   }
 
   /**
-   * Same as {@code rotateNode(node(tag), roll, pitch, yaw, inertia)}.
+   * Same as {@code if (tag == null || node(tag) != null) rotateNode(node(tag), roll, pitch, yaw, inertia)}.
    *
    * @see #rotateNode(Node, float, float, float, float)
    */
   public void rotateNode(String tag, float roll, float pitch, float yaw, float inertia) {
-    rotateNode(node(tag), roll, pitch, yaw, inertia);
+    if (tag == null || node(tag) != null)
+      rotateNode(node(tag), roll, pitch, yaw, inertia);
   }
 
   /**
@@ -3883,12 +3888,13 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}.
+   * Same as {@code if (tag == null || node(tag) != null) spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, inertia)}.
    *
    * @see #spinNode(Node, int, int, int, int, float)
    */
   public void spinNode(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
-    spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
+    if (tag == null || node(tag) != null)
+      spinNode(node(tag), pixel1X, pixel1Y, pixel2X, pixel2Y, inertia);
   }
 
   /**
