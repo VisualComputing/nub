@@ -137,7 +137,7 @@ public class Flock extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     // same as: scene.scale(event.getCount() * 20, scene.eye());
-    scene.scale(event.getCount() * 20);
+    scene.scaleEye(event.getCount() * 20);
   }
 
   public void keyPressed() {

@@ -80,7 +80,7 @@ public class ViewingVolume extends PApplet {
       focus.mouseTranslate();
     else
       //focus.zoom(mouseX - pmouseX);
-      focus.scale(mouseX - pmouseX);
+      focus.scaleEye(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {

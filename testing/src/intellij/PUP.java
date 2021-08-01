@@ -108,7 +108,7 @@ public class PUP extends PApplet {
 
   @Override
   public void mouseWheel(MouseEvent event) {
-    focus.scale(event.getCount() * 20);
+    focus.scaleEye(event.getCount() * 20);
   }
 
   @Override

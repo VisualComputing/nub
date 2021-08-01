@@ -122,7 +122,7 @@ public class DOF extends PApplet {
 
   @Override
   public void mouseWheel(MouseEvent event) {
-    scene.scale(event.getCount() * 20);
+    scene.scaleEye(event.getCount() * 20);
   }
 
   @Override

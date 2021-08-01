@@ -69,11 +69,11 @@ public class PassiveTransformations extends PApplet {
     else if (mouseButton == RIGHT)
       graph.translate(mouseX - pmouseX, mouseY - pmouseY, 0);
     else
-      graph.scale(mouseX - pmouseX);
+      graph.scaleEye(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    graph.scale(event.getCount() * 20);
+    graph.scaleEye(event.getCount() * 20);
   }
 
   public static void main(String[] args) {

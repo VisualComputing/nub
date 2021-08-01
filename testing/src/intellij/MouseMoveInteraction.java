@@ -71,7 +71,7 @@ public class MouseMoveInteraction extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     //scene.zoom(event.getCount() * 20);
-    scene.scale(event.getCount() * 20);
+    scene.scaleEye(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {

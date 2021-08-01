@@ -82,8 +82,7 @@ public class DebugCam extends PApplet {
         break;
       case CENTER:
         if (event.isShiftDown()) {
-          if (!scene.scaleTag((float) mouseX - pmouseX, inertia))
-            scene.scaleEye((float) mouseX - pmouseX, inertia);
+          scene.scaleEye((float) mouseX - pmouseX, inertia);
         } else {
           if (!scene.interactTag(scene.mouseRADX()))
             if (cad)

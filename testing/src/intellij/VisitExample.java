@@ -121,7 +121,7 @@ public class VisitExample extends PApplet {
     else if(mouseButton == RIGHT)
       focus.mouseTranslate();
     else
-      focus.scale(focus.mouseDX());
+      focus.scaleEye(focus.mouseDX());
   }
 
   @Override

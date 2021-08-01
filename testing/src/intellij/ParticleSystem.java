@@ -44,7 +44,7 @@ public class ParticleSystem extends PApplet {
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
-      scene.scale(mouseX - pmouseX);
+      scene.scaleEye(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {

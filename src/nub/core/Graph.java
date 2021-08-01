@@ -3621,109 +3621,6 @@ public class Graph {
   // 3. Scale
 
   /**
-   * Same as {@code scale(null, delta)}.
-   *
-   * @see #scale(String, float)
-   */
-  public void scale(float delta) {
-    scale(null, delta);
-  }
-
-  /**
-   * Same as {@code scale(tag, delta, Graph.inertia)}.
-   *
-   * @see #scale(String, float, float)
-   */
-  public void scale(String tag, float delta) {
-    scale(tag, delta, Graph.inertia);
-  }
-
-  /**
-   * Same as {@code scale(null, delta, inertia)}.
-   *
-   * @see #scale(String, float, float)
-   */
-  public void scale(float delta, float inertia) {
-    scale(null, delta, inertia);
-  }
-
-  /**
-   * Calls {@code scaleTag(tag, delta, inertia)} if {@code node(tag)} is non-null and
-   * {@code scaleEye(delta, inertia)} otherwise.
-   *
-   * @see #scaleEye(float, float)
-   * @see #scaleTag(String, float, float)
-   */
-  public void scale(String tag, float delta, float inertia) {
-    if (!scaleTag(tag, delta, inertia))
-      scaleEye(delta, inertia);
-  }
-
-  /**
-   * Same as {@code scaleTag(null, delta)}.
-   *
-   * @see #scaleTag(String, float)
-   */
-  public boolean scaleTag(float delta) {
-    return scaleTag(null, delta);
-  }
-
-  /**
-   * Same as {@code return scaleTag(null, delta, inertia)}.
-   *
-   * @see #scaleTag(String, float, float)
-   */
-  public boolean scaleTag(float delta, float inertia) {
-    return scaleTag(null, delta, inertia);
-  }
-
-  /**
-   * Same as {@code return scaleTag(tag, delta, Graph.inertia)}.
-   *
-   * @see #scaleTag(String, float, float)
-   */
-  public boolean scaleTag(String tag, float delta) {
-    return scaleTag(tag, delta, Graph.inertia);
-  }
-
-  /**
-   * Same as {@code scaleNode(node(tag), delta, inertia)}. Returns {@code true} if succeeded and {@code false} otherwise.
-   *
-   * @see #scaleNode(Node, float, float)
-   */
-  public boolean scaleTag(String tag, float delta, float inertia) {
-    if (node(tag) != null) {
-      scaleNode(node(tag), delta, inertia);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Same as {@code scaleNode(node, delta, Graph.inertia)}.
-   *
-   * @see #scaleNode(Node, float, float)
-   */
-  public void scaleNode(Node node, float delta) {
-    scaleNode(node, delta, Graph.inertia);
-  }
-
-  /**
-   * Scales the {@code node} (which should be different than the {@link #eye()}) according to {@code delta} and
-   * {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
-   *
-   * @see #scaleEye(float, float)
-   */
-  public void scaleNode(Node node, float delta, float inertia) {
-    if (node == null || node == eye()) {
-      System.out.println("Warning: scaleNode requires a non-null node different than the eye. Nothing done");
-      return;
-    }
-    float factor = 1 + Math.abs(delta) / (float) height();
-    node.scale(delta >= 0 ? factor : 1 / factor, inertia);
-  }
-
-  /**
    * Same as {@code scaleEye(delta, Graph.inertia)}.
    *
    * @see #scaleEye(float, float)
@@ -3733,14 +3630,54 @@ public class Graph {
   }
 
   /**
-   * Scales the {@link #eye()}, i.e., modifies {@link #fov()} according to {@code delta} and {@code inertia}
-   * which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
+   * Same as {@code scaleEye((String)null, delta, inertia)}.
    *
-   * @see #scaleNode(Node, float)
+   * @see #scaleEye(String, float, float)
    */
   public void scaleEye(float delta, float inertia) {
-    float factor = 1 + Math.abs(delta) / (float) -height();
-    eye().scale(delta >= 0 ? factor : 1 / factor, inertia);
+    scaleEye((String)null, delta, inertia);
+  }
+
+  /**
+   * Same as {@code scaleEye(tag, delta, Graph.inertia)}.
+   *
+   * @see #scaleEye(String, float, float)
+   */
+  public void scaleEye(String tag, float delta) {
+    scaleEye(tag, delta, Graph.inertia);
+  }
+
+  /**
+   * Same as {@code scaleEye(node(tag), delta, inertia)}.
+   *
+   * @see #scaleEye(Node, float, float)
+   */
+  public void scaleEye(String tag, float delta, float inertia) {
+    scaleEye(node(tag), delta, inertia);
+  }
+
+  /**
+   * Same as {@code scaleEye(node, delta, Graph.inertia)}.
+   *
+   * @see #scaleEye(Node, float, float)
+   */
+  public void scaleEye(Node node, float delta) {
+    scaleEye(node, delta, Graph.inertia);
+  }
+
+  /**
+   * Scales the {@code node} (use null for the world) according to {@code delta} and
+   * {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
+   */
+  public void scaleEye(Node node, float delta, float inertia) {
+    if (node == null || node == eye()) {
+      float factor = 1 + Math.abs(delta) / (float) -height();
+      eye().scale(delta >= 0 ? factor : 1 / factor, inertia);
+    }
+    else {
+      float factor = 1 + Math.abs(delta) / (float) height();
+      node.scale(delta >= 0 ? factor : 1 / factor, inertia);
+    }
   }
 
   // 4. Translate

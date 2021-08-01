@@ -83,7 +83,7 @@ public class DebugEye extends PApplet {
         break;
       case CENTER:
         if (event.isShiftDown()) {
-          scene.scale((float) mouseX - pmouseX);
+          scene.scaleEye((float) mouseX - pmouseX);
         } else {
           if (!scene.interactTag(scene.mouseRADX()))
             if (cad)

@@ -126,7 +126,7 @@ public class HolaMundo extends PApplet {
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
-      scene.scale(mouseX - pmouseX);
+      scene.scaleEye(mouseX - pmouseX);
   }
 
   @Override

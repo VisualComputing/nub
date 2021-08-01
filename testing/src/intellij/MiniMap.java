@@ -95,7 +95,7 @@ public class MiniMap extends PApplet {
     else if (mouseButton == RIGHT)
       focus.mouseTranslate();
     else
-      focus.scale(focus.mouseDX());
+      focus.scaleEye(focus.mouseDX());
   }
 
   @Override
@@ -103,7 +103,7 @@ public class MiniMap extends PApplet {
     if (renderer == P3D)
       focus.moveForward(event.getCount() * 40);
     else
-      focus.scale(event.getCount() * 40);
+      focus.scaleEye(event.getCount() * 40);
   }
 
   @Override

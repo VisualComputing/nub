@@ -148,7 +148,7 @@ public class Superliminal extends PApplet {
     else if (mouseButton == RIGHT)
       focus.mouseTranslate();
     else {
-      focus.scale(mouseX - pmouseX);
+      focus.scaleEye(mouseX - pmouseX);
     }
   }
 
