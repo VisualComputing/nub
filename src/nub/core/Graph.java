@@ -90,8 +90,8 @@ import java.util.function.Consumer;
  * <li>Set {@code Graph.inertia} in  [0..1] (0 no inertia & 1 no friction) to change the default inertia
  * value globally, instead of setting it on a per method call basis. Note that it is initially set to 0.8.</li>
  * <li>Customize node behaviors by overridden {@link Node#interact(Object...)}
- * and then invoke them by either calling: {@link #interactTag(Object...)},
- * {@link #interactTag(String, Object...)} or {@link #interact(Node, Object...)}.
+ * and then invoke them by either calling: {@link #interact(Object...)},
+ * {@link #interact(String, Object...)} or {@link #interact(Node, Object...)}.
  * </li>
  * </ol>
  * <h1>4. Timing handling</h1>
@@ -3520,7 +3520,7 @@ public class Graph {
    * @see Node#setInteraction(Consumer)
    */
   public void interact(Node node, Object... gesture) {
-    if (node == null || node == eye()) {
+    if (node == null) {
       node = eye();
     }
     if (node._interact != null) {
