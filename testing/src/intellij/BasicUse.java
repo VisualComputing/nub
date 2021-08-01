@@ -86,7 +86,7 @@ public class BasicUse extends PApplet {
       // fails
       //sibling.rotate(sibling.displacement(Quaternion.from(axis, scene.mouseRADX())));
 
-      scene.rotate(0, scene.mouseRADX(), 0);
+      scene.rotateNode(0.0f, scene.mouseRADX(), 0.0f);
       /*
       //scene.mouseTranslate();
       //scene.rotate(0, scene.mouseRADX(), 0);

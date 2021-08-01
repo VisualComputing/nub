@@ -82,11 +82,11 @@ import java.util.function.Consumer;
  * {@link #spinTag(int, int, int, int, float)}).</li>
  * <li>To directly interact with a given node, call any of the following methods: {@link #alignNode(Node)},
  * {@link #focusNode(Node)}, {@link #translateNode(Node, float, float, float, float)},
- * {@link #rotateNode(Node, float, float, float, float)},
+ * {@link #rotateNodeOld(Node, float, float, float, float)},
  * {@link #scaleNode(Node, float, float)} and {@link #spinNode(Node, int, int, int, int, float)}).</li>
  * <li>To either interact with the node referred with a given tag or the eye, when that tag is not in use,
  * call any of the following methods: {@link #alignNode(Node)}, {@link #focus(String)},
- * {@link #translateNode(String, float, float, float, float)}, {@link #rotate(String, float, float, float, float)},
+ * {@link #translateNode(String, float, float, float, float)}, {@link #rotateNode(String, float, float, float, float)},
  * {@link #scale(String, float, float)} and {@link #spin(String, int, int, int, int, float)}.</li>
  * <li>Set {@code Graph.inertia} in  [0..1] (0 no inertia & 1 no friction) to change the default inertia
  * value globally, instead of setting it on a per method call basis. Note that it is initially set to 0.8.</li>
@@ -3709,6 +3709,11 @@ public class Graph {
     translateNode(tag, dx, dy, dz, Graph.inertia);
   }
 
+  /**
+   * Same as {@code translateNode(node(tag), dx, dy, dz, inertia)}.
+   *
+   * @see #translateNode(Node, float, float, float, float)
+   */
   public void translateNode(String tag, float dx, float dy, float dz, float inertia) {
     translateNode(node(tag), dx, dy, dz, inertia);
   }
@@ -3771,151 +3776,72 @@ public class Graph {
   // 5. Rotate
 
   /**
-   * Same as {@code rotate(null, roll, pitch, yaw)}.
+   * Same as {@code rotateNode(roll, pitch, yaw, Graph.inertia)}.
    *
-   * @see #rotate(float, float, float)
+   * @see #rotateNode(float, float, float, float)
    */
-  public void rotate(float roll, float pitch, float yaw) {
-    rotate(null, roll, pitch, yaw);
+  public void rotateNode(float roll, float pitch, float yaw) {
+    rotateNode(roll, pitch, yaw, Graph.inertia);
   }
 
   /**
-   * Same as {@code rotate(tag, roll, pitch, yaw, Graph.inertia)}.
+   * Same as {@code rotateNode((String)null, roll, pitch, yaw, inertia)}.
    *
-   * @see #rotate(String, float, float, float, float)
+   * @see #rotateNode(String, float, float, float, float)
    */
-  public void rotate(String tag, float roll, float pitch, float yaw) {
-    rotate(tag, roll, pitch, yaw, Graph.inertia);
+  public void rotateNode(float roll, float pitch, float yaw, float inertia) {
+    rotateNode((String)null, roll, pitch, yaw, inertia);
+  }
+
+  public void rotateNode(String tag, float roll, float pitch, float yaw) {
+    rotateNode(tag, roll, pitch, yaw, Graph.inertia);
   }
 
   /**
-   * Same as {@code rotate(null, roll, pitch, yaw, inertia)}.
-   *
-   * @see #rotate(String, float, float, float, float)
-   */
-  public void rotate(float roll, float pitch, float yaw, float inertia) {
-    rotate(null, roll, pitch, yaw, inertia);
-  }
-
-  /**
-   * Calls {@code rotateTag(tag, roll, pitch, yaw, inertia)} if {@code node(tag)} is non-null
-   * and {@code rotateEye(roll, pitch, yaw, inertia)} otherwise.
-   *
-   * @see #rotateTag(String, float, float, float, float)
-   * @see #rotateEye(float, float, float, float)
-   */
-  public void rotate(String tag, float roll, float pitch, float yaw, float inertia) {
-    if (!rotateTag(tag, roll, pitch, yaw, inertia))
-      rotateEye(roll, pitch, yaw, inertia);
-  }
-
-  /**
-   * Same as {@code return rotateTag(null, roll, pitch, yaw)}.
-   *
-   * @see #rotateTag(String, float, float, float)
-   */
-  public boolean rotateTag(float roll, float pitch, float yaw) {
-    return rotateTag(null, roll, pitch, yaw);
-  }
-
-  /**
-   * Same as {@code return rotateTag(tag, roll, pitch, yaw, Graph.inertia)}.
-   *
-   * @see #rotateTag(String, float, float, float, float)
-   */
-  public boolean rotateTag(String tag, float roll, float pitch, float yaw) {
-    return rotateTag(tag, roll, pitch, yaw, Graph.inertia);
-  }
-
-  /**
-   * Same as {@code return rotateTag(null, roll, pitch, yaw, inertia)}.
-   *
-   * @see #rotateTag(String, float, float, float, float)
-   */
-  public boolean rotateTag(float roll, float pitch, float yaw, float inertia) {
-    return rotateTag(null, roll, pitch, yaw, inertia);
-  }
-
-  /**
-   * Same as {@code rotateNode(node(tag), roll, pitch, yaw, inertia)}. Returns
-   * {@code true} if succeeded and {@code false} otherwise.
-   *
-   * @see #node(String)
-   * @see #rotateNode(Node, float, float, float, float)
-   */
-  public boolean rotateTag(String tag, float roll, float pitch, float yaw, float inertia) {
-    if (node(tag) != null) {
-      rotateNode(node(tag), roll, pitch, yaw, inertia);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Same as {@code rotateNode(node, roll, pitch, yaw, Graph.inertia)}.
+   * Same as {@code rotateNode(node(tag), roll, pitch, yaw, inertia)}.
    *
    * @see #rotateNode(Node, float, float, float, float)
    */
+  public void rotateNode(String tag, float roll, float pitch, float yaw, float inertia) {
+    rotateNode(node(tag), roll, pitch, yaw, inertia);
+  }
+
   public void rotateNode(Node node, float roll, float pitch, float yaw) {
     rotateNode(node, roll, pitch, yaw, Graph.inertia);
   }
 
   /**
-   * Rotate the {@code node} (which should be different than the {@link #eye()}) around the
-   * eye x-y-z axes according to {@code roll}, {@code pitch} and {@code yaw} radians, resp.,
-   * and according to {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
-   *
-   * @see #rotateEye(float, float, float, float)
+   * Rotates the {@code node} (use null for the world) around the x-y-z screen axes according to
+   * {@code roll}, {@code pitch} and {@code yaw} radians, resp., and according to {@code inertia}
+   * which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    */
   public void rotateNode(Node node, float roll, float pitch, float yaw, float inertia) {
     if (node == null || node == eye()) {
-      System.out.println("Warning: rotateNode requires a non-null node different than the eye. Nothing done");
-      return;
+      if (is2D() && (roll != 0 || pitch != 0)) {
+        roll = 0;
+        pitch = 0;
+        System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
+      }
+      eye()._orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), center(), inertia);
+      // same as:
+      //Quaternion q = new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw);
+      //eye().orbit(eye().worldDisplacement(q.axis()), q.angle(), center(), inertia);
+      // whereas the following doesn't work
+      /*
+      Quaternion q = new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw);
+      q = eye().worldDisplacement(q);
+      eye().orbit(q.axis(), q.angle(), center(), inertia);
+      // */
     }
-    if (is2D() && (roll != 0 || pitch != 0)) {
-      roll = 0;
-      pitch = 0;
-      System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
+    else {
+      if (is2D() && (roll != 0 || pitch != 0)) {
+        roll = 0;
+        pitch = 0;
+        System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
+      }
+      Quaternion quaternion = new Quaternion(leftHanded ? roll : -roll, -pitch, leftHanded ? yaw : -yaw);
+      node.rotate(new Quaternion(node.displacement(quaternion.axis(), eye()), quaternion.angle()), inertia);
     }
-    Quaternion quaternion = new Quaternion(leftHanded ? roll : -roll, -pitch, leftHanded ? yaw : -yaw);
-    node.rotate(new Quaternion(node.displacement(quaternion.axis(), eye()), quaternion.angle()), inertia);
-  }
-
-  /**
-   * Same as {@code rotateEye(roll, pitch, yaw, Graph.inertia)}.
-   *
-   * @see #rotateEye(float, float, float, float)
-   */
-  public void rotateEye(float roll, float pitch, float yaw) {
-    rotateEye(roll, pitch, yaw, Graph.inertia);
-  }
-
-  /**
-   * Rotate the {@link #eye()} around its x-y-z axes passing through {@link #center()},
-   * according to {@code roll}, {@code pitch} and {@code yaw} radians, resp., and {@code inertia}
-   * which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
-   *
-   * @see #rotateEye(float, float, float)
-   * @see #rotateNode(Node, float, float, float, float)
-   */
-  public void rotateEye(float roll, float pitch, float yaw, float inertia) {
-    if (is2D() && (roll != 0 || pitch != 0)) {
-      roll = 0;
-      pitch = 0;
-      System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
-    }
-    eye()._orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), center(), inertia);
-    // same as:
-    //Quaternion q = new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw);
-    //eye().orbit(eye().worldDisplacement(q.axis()), q.angle(), center(), inertia);
-    //System.out.println("tested");
-    /*
-    // whereas the following doesn't work
-    /*
-    Quaternion q = new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw);
-    q = eye().worldDisplacement(q);
-    eye().orbit(q.axis(), q.angle(), center(), inertia);
-    // */
   }
 
   // 6. Spin
