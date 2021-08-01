@@ -39,38 +39,38 @@ public class CustomNodeInteraction extends PApplet {
   public void keyPressed() {
     int value = Character.getNumericValue(key);
     if (value >= 0 && value < 10)
-      scene.tag("key", shapes[value].node);
+      scene.tag(shapes[value].node);
     if (key == ' ')
-      scene.removeTag("key");
+      scene.removeTag();
     if (key == CODED)
       if (keyCode == UP)
-        scene.translateNode("key", 0, -10, 0);
+        scene.translateNode(0, -10, 0);
       else if (keyCode == DOWN)
-        scene.translateNode("key", 0, 10, 0);
+        scene.translateNode(0, 10, 0);
       else if (keyCode == LEFT)
-        scene.interact("key", "menos");
+        scene.interact( "menos");
       else if (keyCode == RIGHT)
-        scene.interact("key", "mas");
+        scene.interact("mas");
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpinNode("key");
+      scene.mouseSpinNode();
     else if (mouseButton == CENTER)
-      scene.scaleNode("key", scene.mouseDX());
+      scene.scaleNode(scene.mouseDX());
     else
-      scene.mouseTranslateNode("key");
+      scene.mouseTranslateNode();
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.interact("key", event.getCount());
+    scene.interact(event.getCount());
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      scene.interact("key");
+      scene.interact();
     if (event.getCount() == 2)
-      scene.mouseTag("key");
+      scene.mouseTag();
   }
 
   public class Torus {
