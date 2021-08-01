@@ -88,11 +88,10 @@ import java.util.function.Consumer;
  * {@link PApplet#pmouseX} and {@link PApplet#pmouseY} Processing variables and thus simplify
  * the method signatures provide by the {@link Graph} counterparts. Refer to the method signatures
  * beginning with {@code mouse*}, such as: {@link #mouseTag(String)} and {@link #mouseTag()} for
- * node tagging; {@link #mouseTranslateNode(float)}, {@link #mouseTranslateNode(String, float)},
- * {@link #mouseTranslateTag(String, float)} and {@link #mouseTranslateEye(float)} for translation;
- * {@link #mouseSpinNode(float)}, {@link #mouseSpinNode(String, float)}, {@link #mouseSpinTag(String, float)}
- * and {@link #mouseSpinEye(float)} for spinning; {@link #mouseLookAround(float)} and
- * {@link #mouseRotateCAD(float)} for eye look-around and rotate-cad, to name a few.
+ * node tagging; {@link #mouseTranslateNode(Node, float)} and {@link #mouseTranslateNode(String, float)}
+ * for translation; {@link #mouseSpinNode(Node, float)} and {@link #mouseSpinNode(String, float)} for
+ * spinning; {@link #mouseLookAround(float)} and {@link #mouseRotateCAD(float)} for eye look-around
+ * and rotate-cad, to name a few.
  *
  * @see Graph
  * @see Node
