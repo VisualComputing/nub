@@ -61,20 +61,24 @@ void mouseMoved() {
 
 void mouseDragged() {
   if (mouseButton == LEFT) {
-    if (!scene.mouseSpinTag("key"))
+    if (scene.node("key") != null)
+      scene.mouseSpin("key");
+    else
       scene.mouseSpin();
   } else if (mouseButton == RIGHT) {
-    if (!scene.mouseTranslateTag("key"))
-      scene.mouseTranslate();
+    if (scene.node("key") != null)
+      scene.mouseShift("key");
+    else
+      scene.mouseShift();
   } else
-    scene.scale(mouseX - pmouseX);
+    scene.zoom(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
   if (scene.is3D())
     scene.moveForward(event.getCount() * 20);
   else
-    scene.scaleEye(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
 }
 
 void keyPressed() {

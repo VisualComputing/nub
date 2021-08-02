@@ -55,31 +55,31 @@ void keyPressed() {
     scene.removeTag("key");
   if (key == CODED)
     if (keyCode == UP)
-      scene.translate("key", 0, -10, 0);
+      scene.shift("key", 0, -10, 0);
     else if (keyCode == DOWN)
-      scene.translate("key", 0, 10, 0);
+      scene.shift("key", 0, 10, 0);
     else if (keyCode == LEFT)
-      scene.interactTag("key", "menos");
+      scene.interact("key", "menos");
     else if (keyCode == RIGHT)
-      scene.interactTag("key", "mas");
+      scene.interact("key", "mas");
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
     scene.mouseSpin("key");
   else if (mouseButton == CENTER)
-    scene.scale("key", scene.mouseDX());
+    scene.zoom("key", scene.mouseDX());
   else
-    scene.mouseTranslate("key");
+    scene.mouseShift("key");
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.interactTag("key", event.getCount());
+  scene.interact("key", event.getCount());
 }
 
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1)
-    scene.interactTag("key");
+    scene.interact("key");
   if (event.getCount() == 2)
     scene.mouseTag("key");
 }

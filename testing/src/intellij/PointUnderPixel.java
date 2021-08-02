@@ -70,9 +70,9 @@ public class PointUnderPixel extends PApplet {
       }
     } else {
       if (event.getCount() == 1)
-        scene.focusNode();
+        scene.focus();
       else
-        scene.alignNode();
+        scene.align();
     }
   }
 
@@ -90,16 +90,16 @@ public class PointUnderPixel extends PApplet {
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpinNode();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslateNode();
+      scene.mouseShift();
     else
       scene.moveForward(scene.mouseDX());
   }
 
   @Override
   public void mouseWheel(MouseEvent event) {
-    scene.scaleNode(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
   }
 
   @Override

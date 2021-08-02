@@ -44,9 +44,9 @@ public class CustomNodeInteraction extends PApplet {
       scene.removeTag();
     if (key == CODED)
       if (keyCode == UP)
-        scene.translateNode(0, -10, 0);
+        scene.shift(0, -10, 0);
       else if (keyCode == DOWN)
-        scene.translateNode(0, 10, 0);
+        scene.shift(0, 10, 0);
       else if (keyCode == LEFT)
         scene.interact( "menos");
       else if (keyCode == RIGHT)
@@ -55,11 +55,11 @@ public class CustomNodeInteraction extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpinNode();
+      scene.mouseSpin();
     else if (mouseButton == CENTER)
-      scene.scaleNode(scene.mouseDX());
+      scene.zoom(scene.mouseDX());
     else
-      scene.mouseTranslateNode();
+      scene.mouseShift();
   }
 
   public void mouseWheel(MouseEvent event) {

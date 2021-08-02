@@ -45,11 +45,11 @@ void draw() {
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.mouseSpinEye();
+    scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.mouseTranslateEye();
+    scene.mouseShift();
   else
-    scene.scaleEye(mouseX - pmouseX);
+    scene.zoom(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {

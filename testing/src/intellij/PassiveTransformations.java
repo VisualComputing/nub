@@ -65,15 +65,15 @@ public class PassiveTransformations extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      graph.spinNode(pmouseX, pmouseY, mouseX, mouseY);
+      graph.spin(pmouseX, pmouseY, mouseX, mouseY);
     else if (mouseButton == RIGHT)
-      graph.translateNode(mouseX - pmouseX, mouseY - pmouseY, 0);
+      graph.shift(mouseX - pmouseX, mouseY - pmouseY, 0);
     else
-      graph.scaleNode(mouseX - pmouseX);
+      graph.zoom(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    graph.scaleNode(event.getCount() * 20);
+    graph.zoom(event.getCount() * 20);
   }
 
   public static void main(String[] args) {

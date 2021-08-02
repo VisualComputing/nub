@@ -98,7 +98,7 @@ void mouseDragged() {
   if (mouseButton == LEFT)
     scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.mouseTranslate();
+    scene.mouseShift();
   else
     scene.moveForward(mouseX - pmouseX);
 }
@@ -108,7 +108,7 @@ void mouseWheel(MouseEvent event) {
     depthShader.set("far", zFar += event.getCount() * 20);
     shadowMapScene.setBounds(zNear, zFar);
   } else
-    scene.scale(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
 }
 
 void keyPressed() {

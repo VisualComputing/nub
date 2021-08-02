@@ -67,7 +67,7 @@ void draw() {
 }
 
 void mouseClicked() {
-  scene.focusEye();
+  scene.focus();
 }
 
 void mouseMoved() {
@@ -75,13 +75,16 @@ void mouseMoved() {
 }
 
 void mouseDragged() {
-  if (!scene.mouseTranslateTag()) {
-    if (mouseButton == LEFT)
-      scene.mouseSpinEye();
-    else if (mouseButton == RIGHT)
-      scene.mouseTranslateEye();
-    else
-      scene.scaleEye(mouseX - pmouseX);
+  if (scene.node("keyboard") != null) {
+    scene.mouseShift("keyboard");
+  }
+  else {
+  if (mouseButton == LEFT)
+    scene.mouseSpin();
+  else if (mouseButton == RIGHT)
+    scene.mouseShift();
+  else
+    scene.zoom(mouseX - pmouseX);
   }
 }
 
@@ -133,12 +136,12 @@ void keyPressed() {
   }
   if (key == CODED) {
     if (keyCode == UP)
-      scene.translate("keyboard", 0, -10, 0);
+      scene.shift("keyboard", 0, -10, 0);
     else if (keyCode == DOWN)
-      scene.translate("keyboard", 0, 10, 0);
+      scene.shift("keyboard", 0, 10, 0);
     else if (keyCode == LEFT)
-      scene.translate("keyboard", -10, 0, 0);
+      scene.shift("keyboard", -10, 0, 0);
     else if (keyCode == RIGHT)
-      scene.translate("keyboard", 10, 0, 0);
+      scene.shift("keyboard", 10, 0, 0);
   }
 }

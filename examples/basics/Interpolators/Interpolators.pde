@@ -72,16 +72,16 @@ void mouseDragged() {
   if (mouseButton == LEFT)
     scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.mouseTranslate();
+    scene.mouseShift();
   else
-    scene.scale(mouseX - pmouseX);
+    scene.zoom(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
   if (scene.is3D())
     scene.moveForward(event.getCount() * 20);
   else
-    scene.scaleEye(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
 }
 
 void keyPressed() {

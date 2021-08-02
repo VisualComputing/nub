@@ -75,7 +75,7 @@ public class BasicUse extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpinNode();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT) {
       //Vector v = new Vector(scene.mouseDX(), 0, 0);
       //child.translate(v);
@@ -86,7 +86,7 @@ public class BasicUse extends PApplet {
       // fails
       //sibling.rotate(sibling.displacement(Quaternion.from(axis, scene.mouseRADX())));
 
-      scene.rotateNode(0.0f, scene.mouseRADX(), 0.0f);
+      scene.turn(0.0f, scene.mouseRADX(), 0.0f);
       /*
       //scene.mouseTranslate();
       //scene.rotate(0, scene.mouseRADX(), 0);
@@ -100,7 +100,7 @@ public class BasicUse extends PApplet {
       // */
     }
     else
-      scene.mouseTranslateNode();
+      scene.mouseShift();
       //scene.scale(mouseX - pmouseX);
   }
 
@@ -108,7 +108,7 @@ public class BasicUse extends PApplet {
     if (scene.is3D())
       scene.moveForward(event.getCount() * 20);
     else
-      scene.scaleNode(event.getCount() * 20);
+      scene.zoom(event.getCount() * 20);
   }
 
   public void randomize() {

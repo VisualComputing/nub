@@ -91,11 +91,11 @@ public class MiniMap extends PApplet {
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.mouseSpinNode();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.mouseTranslateNode();
+      focus.mouseShift();
     else
-      focus.scaleNode(focus.mouseDX());
+      focus.zoom(focus.mouseDX());
   }
 
   @Override
@@ -103,16 +103,16 @@ public class MiniMap extends PApplet {
     if (renderer == P3D)
       focus.moveForward(event.getCount() * 40);
     else
-      focus.scaleNode(event.getCount() * 40);
+      focus.zoom(event.getCount() * 40);
   }
 
   @Override
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        focus.focusNode();
+        focus.focus();
       else
-        focus.alignNode();
+        focus.align();
   }
 
   @Override

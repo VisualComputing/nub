@@ -108,11 +108,11 @@ void draw() {
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    focus.mouseSpinEye();
+    focus.mouseSpin();
   else if (mouseButton == RIGHT)
-    focus.mouseTranslateEye();
+    focus.mouseShift();
   else
-    focus.scaleEye(mouseX - pmouseX);
+    focus.zoom(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
@@ -122,9 +122,9 @@ void mouseWheel(MouseEvent event) {
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 2)
     if (event.getButton() == LEFT)
-      focus.focusEye();
+      focus.focus();
     else
-      focus.alignEye();
+      focus.align();
 }
 
 void keyPressed() {

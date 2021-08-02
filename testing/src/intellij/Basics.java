@@ -58,7 +58,7 @@ public class Basics extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseSpinNode();
+    scene.mouseSpin();
   }
 
   PShape shape() {

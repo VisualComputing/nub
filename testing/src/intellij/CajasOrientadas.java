@@ -40,7 +40,7 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void mouseClicked() {
-    scene.focusNode();
+    scene.focus();
   }
 
   public void mouseMoved() {
@@ -49,11 +49,11 @@ public class CajasOrientadas extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpinNode();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslateNode();
+      scene.mouseShift();
     else
-      scene.scaleNode(mouseX - pmouseX);
+      scene.zoom(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -97,13 +97,13 @@ public class CajasOrientadas extends PApplet {
         scene.tag("keyboard", esfera);
     if (key == CODED)
       if (keyCode == UP)
-        scene.translateNode("keyboard", 0, -10, 0);
+        scene.shift("keyboard", 0, -10, 0);
       else if (keyCode == DOWN)
-        scene.translateNode("keyboard", 0, 10, 0);
+        scene.shift("keyboard", 0, 10, 0);
       else if (keyCode == LEFT)
-        scene.translateNode("keyboard", -10, 0, 0);
+        scene.shift("keyboard", -10, 0, 0);
       else if (keyCode == RIGHT)
-        scene.translateNode("keyboard", 10, 0, 0);
+        scene.shift("keyboard", 10, 0, 0);
   }
 
   public class Box extends Node {

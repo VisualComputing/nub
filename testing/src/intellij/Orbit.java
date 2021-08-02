@@ -74,20 +74,20 @@ public class Orbit extends PApplet {
         //shape2.orbit(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
         shape2.orbit(axis, (mouseX - pmouseX) * PI / width);
       else
-        scene.mouseSpinNode();
+        scene.mouseSpin();
     } else if (mouseButton == RIGHT)
-      scene.mouseSpinNode();
+      scene.mouseSpin();
     //scene.translate();
     //scene.mousePan();
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scaleNode(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
-      scene.focusNode();
+      scene.focus();
   }
 
   PShape shape() {

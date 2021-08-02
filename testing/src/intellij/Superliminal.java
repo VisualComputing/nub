@@ -144,11 +144,11 @@ public class Superliminal extends PApplet {
     if (focus == null)
       return;
     if (mouseButton == LEFT)
-      focus.mouseSpinNode();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.mouseTranslateNode();
+      focus.mouseShift();
     else {
-      focus.scaleNode(mouseX - pmouseX);
+      focus.zoom(mouseX - pmouseX);
     }
   }
 
@@ -167,7 +167,7 @@ public class Superliminal extends PApplet {
         node.translate(v, Scene.inertia);
       }
       else {
-        scene.translateNode(node, 0, 0, amount / 50, Scene.inertia);
+        scene.shift(node, 0, 0, amount / 50, Scene.inertia);
       }
       // */
     }
@@ -182,9 +182,9 @@ public class Superliminal extends PApplet {
       return;
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        focus.focusNode();
+        focus.focus();
       else
-        focus.alignNode();
+        focus.align();
   }
 
   public void draw() {

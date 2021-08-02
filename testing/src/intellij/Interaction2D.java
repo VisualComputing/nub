@@ -108,30 +108,30 @@ public class Interaction2D extends PApplet {
     // Mouse methods that don't take a node parameter (such as mouseCAD)
     // are only available to the scene.eye().
     if (mouseButton == LEFT)
-      scene.mouseSpinNode();
+      scene.mouseSpin();
       //scene.mouseCAD();
       //scene.lookAround(upVector);
       //scene.mouseCAD();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslateNode();
+      scene.mouseShift();
       //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);
-      scene.scaleNode(mouseX - pmouseX);
+      scene.zoom(mouseX - pmouseX);
     //scene.rotate(0, 0, mouseX - pmouseX, PI/width);
   }
 
   public void mouseWheel(MouseEvent event) {
     //scene.zoom(event.getCount() * 20);
-    scene.scaleNode(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focusNode();
+        scene.focus();
       else
-        scene.alignNode();
+        scene.align();
   }
 
   PShape shape() {

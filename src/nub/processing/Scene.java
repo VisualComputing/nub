@@ -88,9 +88,9 @@ import java.util.function.Consumer;
  * {@link PApplet#pmouseX} and {@link PApplet#pmouseY} Processing variables and thus simplify
  * the method signatures provide by the {@link Graph} counterparts. Refer to the method signatures
  * beginning with {@code mouse*}, such as: {@link #mouseTag(String)} and {@link #mouseTag()} for
- * node tagging; {@link #mouseTranslateNode(Node, float)} and {@link #mouseTranslateNode(String, float)}
- * for translation; {@link #mouseSpinNode(Node, float)} and {@link #mouseSpinNode(String, float)} for
- * spinning; {@link #mouseLookAround(float)} and {@link #mouseRotateCAD(float)} for eye look-around
+ * node tagging; {@link #mouseShift(Node, float)} and {@link #mouseShift(String, float)}
+ * for translation; {@link #mouseSpin(Node, float)} and {@link #mouseSpin(String, float)} for
+ * spinning; {@link #mouseLookAround(float)} and {@link #mouseCAD(float)} for eye look-around
  * and rotate-cad, to name a few.
  *
  * @see Graph
@@ -2986,49 +2986,49 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code mouseTranslateNode(Graph.inertia)}.
+   * Same as {@code mouseShift(Graph.inertia)}.
    *
-   * @see #mouseTranslateNode(float)
+   * @see #mouseShift(float)
    */
-  public void mouseTranslateNode() {
-    mouseTranslateNode(Graph.inertia);
+  public void mouseShift() {
+    mouseShift(Graph.inertia);
   }
 
   /**
-   * Same as {@code mouseTranslateNode((String)null, inertia)}.
+   * Same as {@code mouseShift((String)null, inertia)}.
    *
-   * @see #mouseTranslateNode(String, float)
+   * @see #mouseShift(String, float)
    */
-  public void mouseTranslateNode(float inertia) {
-    mouseTranslateNode((String)null, inertia);
+  public void mouseShift(float inertia) {
+    mouseShift((String)null, inertia);
   }
 
   /**
-   * Same as {@code mouseTranslateNode(tag, Graph.inertia)}.
+   * Same as {@code mouseShift(tag, Graph.inertia)}.
    *
-   * @see #mouseTranslateNode(String, float)
+   * @see #mouseShift(String, float)
    */
-  public void mouseTranslateNode(String tag) {
-    mouseTranslateNode(tag, Graph.inertia);
+  public void mouseShift(String tag) {
+    mouseShift(tag, Graph.inertia);
   }
 
   /**
-   * Same as {@code if (tag == null || node(tag) != null) mouseTranslateNode(node(tag), inertia)}.
+   * Same as {@code if (tag == null || node(tag) != null) mouseShift(node(tag), inertia)}.
    *
-   * @see #mouseTranslateNode(Node, float)
+   * @see #mouseShift(Node, float)
    */
-  public void mouseTranslateNode(String tag, float inertia) {
+  public void mouseShift(String tag, float inertia) {
     if (tag == null || node(tag) != null)
-      mouseTranslateNode(node(tag), inertia);
+      mouseShift(node(tag), inertia);
   }
 
   /**
    * Same as {@code }.
    *
-   * @see #mouseTranslateNode(Node, float)
+   * @see #mouseShift(Node, float)
    */
-  public void mouseTranslateNode(Node node) {
-    mouseTranslateNode(node, Graph.inertia);
+  public void mouseShift(Node node) {
+    mouseShift(node, Graph.inertia);
   }
 
   /**
@@ -3038,67 +3038,67 @@ public class Scene extends Graph {
    *
    * @see #mouseDX()
    * @see #mouseDY()
-   * @see #translateNode(Node, float, float, float, float)
+   * @see #shift(Node, float, float, float, float)
    */
-  public void mouseTranslateNode(Node node, float lag) {
+  public void mouseShift(Node node, float lag) {
     float l = Math.abs(lag);
     while (l > 1)
       l /= 10;
     if (l != lag)
       System.out.println("Warning: lag should be in [0..1]. Setting it as " + l);
     // hack: idea is to have node always under the cursor
-    super.translateNode(node, mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
+    super.shift(node, mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
   }
 
   /**
-   * Same as {@code mouseSpinNode((String)null)}.
+   * Same as {@code mouseSpin((String)null)}.
    *
-   * @see #mouseSpinNode(String)
+   * @see #mouseSpin(String)
    */
-  public void mouseSpinNode() {
-    mouseSpinNode((String)null);
+  public void mouseSpin() {
+    mouseSpin((String)null);
   }
 
   /**
-   * Same as {@code mouseSpinNode(tag, Graph.inertia)}.
+   * Same as {@code mouseSpin(tag, Graph.inertia)}.
    *
-   * @see #mouseSpinNode(String, float)
+   * @see #mouseSpin(String, float)
    */
-  public void mouseSpinNode(String tag) {
-    mouseSpinNode(tag, Graph.inertia);
+  public void mouseSpin(String tag) {
+    mouseSpin(tag, Graph.inertia);
   }
 
   /**
-   * Same as {@code mouseSpinNode((String)null, inertia)}.
+   * Same as {@code mouseSpin((String)null, inertia)}.
    *
-   * @see #mouseSpinNode(String, float)
+   * @see #mouseSpin(String, float)
    */
-  public void mouseSpinNode(float inertia) {
-    mouseSpinNode((String)null, inertia);
+  public void mouseSpin(float inertia) {
+    mouseSpin((String)null, inertia);
   }
 
   /**
-   * Same as {@code if (tag == null || node(tag) != null) mouseSpinNode(node(tag), inertia)}.
+   * Same as {@code if (tag == null || node(tag) != null) mouseSpin(node(tag), inertia)}.
    *
-   * @see #mouseSpinNode(Node, float)
+   * @see #mouseSpin(Node, float)
    */
-  public void mouseSpinNode(String tag, float inertia) {
+  public void mouseSpin(String tag, float inertia) {
     if (tag == null || node(tag) != null)
-      mouseSpinNode(node(tag), inertia);
+      mouseSpin(node(tag), inertia);
   }
 
   /**
    * Same as {@code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
    *
-   * @see #spinNode(Node, int, int, int, int, float)
+   * @see #spin(Node, int, int, int, int, float)
    */
-  public void mouseSpinNode(Node node, float inertia) {
+  public void mouseSpin(Node node, float inertia) {
     if (inertia == 1) {
       // Sensitivity is expressed in pixels per milliseconds. Default value is 30 (300 pixels per second).
       float sensitivity = 30;
-      super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.9f);
+      super.spin(node, pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.9f);
     } else
-      super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
+      super.spin(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
   }
 
   // only eye
@@ -3126,40 +3126,40 @@ public class Scene extends Graph {
   /**
    * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY(), new Vector(0, 1, 0), inertia)}.
    *
-   * @see #rotateCAD(float, float, Vector, float)
+   * @see #cad(float, float, Vector, float)
    */
-  public void mouseRotateCAD(float inertia) {
-    super.rotateCAD(mouseRADX(), mouseRADY(), new Vector(0, 1, 0), inertia);
+  public void mouseCAD(float inertia) {
+    super.cad(mouseRADX(), mouseRADY(), new Vector(0, 1, 0), inertia);
   }
 
   /**
    * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY())}.
    *
-   * @see #rotateCAD(float, float)
+   * @see #cad(float, float)
    * @see #mouseRADX()
    * @see #mouseRADY()
    */
-  public void mouseRotateCAD() {
-    super.rotateCAD(mouseRADX(), mouseRADY());
+  public void mouseCAD() {
+    super.cad(mouseRADX(), mouseRADY());
   }
 
   /**
    * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY(), up, inertia)}.
    *
-   * @see #rotateCAD(float, float, Vector, float)
+   * @see #cad(float, float, Vector, float)
    */
-  public void mouseRotateCAD(Vector up, float inertia) {
-    super.rotateCAD(mouseRADX(), mouseRADY(), up, inertia);
+  public void mouseCAD(Vector up, float inertia) {
+    super.cad(mouseRADX(), mouseRADY(), up, inertia);
   }
 
   /**
    * Same as {@code super.rotateCAD(mouseRADX(), mouseRADY(), up)}.
    *
-   * @see #rotateCAD(float, float, Vector)
+   * @see #cad(float, float, Vector)
    * @see #mouseRADX()
    * @see #mouseRADY()
    */
-  public void mouseRotateCAD(Vector up) {
-    super.rotateCAD(mouseRADX(), mouseRADY(), up);
+  public void mouseCAD(Vector up) {
+    super.cad(mouseRADX(), mouseRADY(), up);
   }
 }

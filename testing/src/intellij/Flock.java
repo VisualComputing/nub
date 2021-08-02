@@ -115,10 +115,10 @@ public class Flock extends PApplet {
     if (scene.eye().reference() == null)
       if (mouseButton == LEFT)
         // same as: scene.spin(scene.eye());
-        scene.mouseSpinNode();
+        scene.mouseSpin();
       else if (mouseButton == RIGHT)
         // same as: scene.translate(scene.eye());
-        scene.mouseTranslateNode();
+        scene.mouseShift();
       else
         scene.moveForward(mouseX - pmouseX);
   }
@@ -137,7 +137,7 @@ public class Flock extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     // same as: scene.scale(event.getCount() * 20, scene.eye());
-    scene.scaleNode(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
   }
 
   public void keyPressed() {

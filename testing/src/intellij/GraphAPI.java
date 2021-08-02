@@ -111,25 +111,25 @@ public class GraphAPI extends PApplet {
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpinNode();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslateNode();
+      scene.mouseShift();
     else
       scene.moveForward(mouseX - pmouseX);
   }
 
   @Override
   public void mouseWheel(MouseEvent event) {
-    scene.scaleNode(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
   }
 
   @Override
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focusNode();
+        scene.focus();
       else
-        scene.alignNode();
+        scene.align();
   }
 
   public static void main(String[] args) {

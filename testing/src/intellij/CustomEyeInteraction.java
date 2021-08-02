@@ -67,11 +67,11 @@ public class CustomEyeInteraction extends PApplet {
     if (keyMode)
       return;
     if (mouseButton == LEFT)
-      scene.mouseSpinNode();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslateNode();
+      scene.mouseShift();
     else
-      scene.scaleNode(scene.mouseDX());
+      scene.zoom(scene.mouseDX());
   }
 
   public void mouseWheel(MouseEvent event) {

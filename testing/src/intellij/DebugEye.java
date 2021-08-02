@@ -76,21 +76,21 @@ public class DebugEye extends PApplet {
   public void mouseDragged(MouseEvent event) {
     switch (mouseButton) {
       case LEFT:
-        scene.mouseSpinNode();
+        scene.mouseSpin();
         break;
       case RIGHT:
-        scene.mouseTranslateNode();
+        scene.mouseShift();
         break;
       case CENTER:
         if (event.isShiftDown()) {
-          scene.scaleNode((float) mouseX - pmouseX);
+          scene.zoom((float) mouseX - pmouseX);
         } else {
           if (scene.node() != null) {
             scene.interact(scene.mouseRADX());
           }
           else {
             if (cad)
-              scene.mouseRotateCAD();
+              scene.mouseCAD();
             else
               scene.mouseLookAround();
           }

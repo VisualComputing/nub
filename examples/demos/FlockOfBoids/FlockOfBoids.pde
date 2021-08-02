@@ -129,7 +129,7 @@ void mouseDragged() {
       scene.mouseSpin();
     else if (mouseButton == RIGHT)
       // same as: scene.translate(scene.eye());
-      scene.mouseTranslate();
+      scene.mouseShift();
     else
       scene.moveForward(mouseX - pmouseX);
 }
@@ -146,8 +146,8 @@ void mouseMoved(MouseEvent event) {
 }
 
 void mouseWheel(MouseEvent event) {
-  // same as: scene.scale(event.getCount() * 20, scene.eye());
-  scene.scale(event.getCount() * 20);
+  // same as: scene.zoom(event.getCount() * 20, scene.eye());
+  scene.zoom(event.getCount() * 20);
 }
 
 void keyPressed() {

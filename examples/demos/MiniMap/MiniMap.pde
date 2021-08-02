@@ -89,24 +89,24 @@ void mouseDragged() {
   if (mouseButton == LEFT)
     focus.mouseSpin();
   else if (mouseButton == RIGHT)
-    focus.mouseTranslate();
+    focus.mouseShift();
   else
-    focus.scale(focus.mouseDX());
+    focus.zoom(focus.mouseDX());
 }
 
 void mouseWheel(MouseEvent event) {
   if (renderer == P3D)
     focus.moveForward(event.getCount() * 40);
   else
-    focus.scale(event.getCount() * 40);
+    focus.zoom(event.getCount() * 40);
 }
 
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 2)
     if (event.getButton() == LEFT)
-      focus.focusEye();
+      focus.focus();
     else
-      focus.alignEye();
+      focus.align();
 }
 
 void draw() {

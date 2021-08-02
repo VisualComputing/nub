@@ -134,9 +134,9 @@ public class Framework extends PApplet {
     if (focus == null)
       return;
     if (mouseButton == LEFT)
-      focus.mouseSpinNode();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.mouseTranslateNode();
+      focus.mouseShift();
     else
       focus.moveForward(focus.mouseDX());
   }
@@ -144,7 +144,7 @@ public class Framework extends PApplet {
   public void mouseWheel(MouseEvent event) {
     if (focus == null)
       return;
-    focus.scaleNode(event.getCount() * 20);
+    focus.zoom(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
@@ -152,9 +152,9 @@ public class Framework extends PApplet {
       return;
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        focus.focusNode();
+        focus.focus();
       else
-        focus.alignNode();
+        focus.align();
   }
 
   public void draw() {

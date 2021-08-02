@@ -196,16 +196,16 @@ Another scene's eye (different than this one) can be drawn with `drawFrustum(Sce
 
 ## Node interaction methods
 
-To directly interact with a given `node` (or the _eye_ when no `node` param is given), call any of the following scene methods:
+To directly interact with a given `node` (or the _eye_ when no `node` param is given), call any of the following screen space scene methods:
 
-| Action    | Generic input device                                              | Mouse                                   |
-|-----------|-------------------------------------------------------------------|-----------------------------------------|
-| Align     | `alignNode([node])`                                               | n.a.                                    |
-| Focus     | `focusNode([node])`                                               | n.a.                                    |
-| Translate | `translateNode([node], dx, dy, dz, [inertia])`                    | `mouseTranslateNode([node], [inertia])` |
-| Rotate    | `rotateNode([node], roll, pitch, yaw, [inertia])`                 | n.a.                                    |
-| Scale     | `scaleNode([node], delta, [inertia])`                             | n.a.                                    |
-| Spin      | `spinNode([node], pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])` | `mouseSpinNode([node], [inertia])`      |
+| Action | Generic input device                                          | Mouse                           |
+|--------|---------------------------------------------------------------|---------------------------------|
+| Align  | `align([node])`                                               | n.a.                            |
+| Focus  | `focus([node])`                                               | n.a.                            |
+| Shift  | `shift([node], dx, dy, dz, [inertia])`                        | `mouseShift([node], [inertia])` |
+| Turn   | `turn([node], roll, pitch, yaw, [inertia])`                   | n.a.                            |
+| Zoom   | `zoom([node], delta, [inertia])`                              | n.a.                            |
+| Spin   | `spin([node], pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])` | `mouseSpin([node], [inertia])`  |
 
 **n.a.** doesn't mean the mouse action isn't available, but that it can be implemented in several ways (see the code snippets below). The provided mouse actions got _non-ambiguously_ implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts (e.g., `mouseTranslateNode([node])` is the same as `translateNode([node], pmouseX - mouseX, pmouseY - mouseY, 0)`), and hence their simpler signatures.
 
@@ -217,12 +217,11 @@ Customize node behaviors by registering a user gesture data parser `function_obj
 // define a mouse-dragged eye interaction
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.mouseSpinNode();
+    scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.mouseTranslateNode();
+    scene.mouseShift();
   else
-    // drag along x-axis: changes the scene field-of-view
-    scene.scaleNode(scene.mouseDX());
+    scene.zoom(scene.mouseDX());
 }
 ```
 
@@ -230,9 +229,7 @@ void mouseDragged() {
 // define a mouse-moved eye interaction
 void mouseMoved(MouseEvent event) {
   if (event.isShiftDown())
-    // move mouse along y-axis: roll
-    // move mouse along x-axis: pitch
-    scene.rotateNode(scene.mouseRADY(), scene.mouseRADX(), 0);
+    scene.turn(scene.mouseRADY(), scene.mouseRADX(), 0);
   else
     scene.mouseLookAround();
 }
@@ -242,11 +239,9 @@ void mouseMoved(MouseEvent event) {
 // define a mouse-wheel eye interaction
 void mouseWheel(MouseEvent event) {
   if (scene.is3D())
-    // move along z
     scene.moveForward(event.getCount() * 20);
   else
-    // changes the eye scaling
-    scene.scaleNode(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
 }
 ```
 
@@ -254,9 +249,9 @@ void mouseWheel(MouseEvent event) {
 // define a mouse-click eye interaction
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1)
-    scene.alignNode();
+    scene.align();
   else
-    scene.focusNode();
+    scene.focus();
 }
 ```
 
@@ -264,7 +259,7 @@ void mouseClicked(MouseEvent event) {
 // define a key-pressed eye interaction
 void keyPressed() {
   // roll with 'x' key
-  scene.rotateNode(key == 'x' ? QUARTER_PI / 2 : -QUARTER_PI / 2, 0, 0);
+  scene.turn(key == 'x' ? QUARTER_PI / 2 : -QUARTER_PI / 2, 0, 0);
 }
 ```
 
@@ -276,13 +271,13 @@ The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples
 void mouseDragged() {
   // spin n1
   if (mouseButton == LEFT)
-    scene.spinNode(n1);
-  // translate n3
+    scene.mouseSpin(n1);
+  // shift n3
   else if (mouseButton == RIGHT)
-    scene.translateNode(n3);
-  // scale n1
+    scene.mouseShift(n3);
+  // zoom n1
   else
-    scene.scaleNode(n1, scene.mouseDX());
+    scene.zoom(n1, scene.mouseDX());
 }
 ```
 
@@ -290,9 +285,11 @@ void mouseDragged() {
 void keyPressed() {
   if (key == CODED)
     if(keyCode == UP)
-      scene.translateNode(n2, 0, 10);
+      // shift n2 up
+      scene.shift(n2, 0, 10);
     if(keyCode == DOWN)
-      scene.translateNode(n2, 0, -10);
+      // shift n2 down
+      scene.shift(n2, 0, -10);
 }
 ```
 
@@ -312,14 +309,14 @@ Picking a node (which should be different than the scene eye) to interact with i
    
 2. Interact with your _tagged_ nodes by calling any `scene` method implementing the `interact(tag, gesture...)` which resolves the node param in the [methods above](#node-interaction-methods) (using the scene `node(tag)` method):
 
-   | Action    | Generic input device                                           | Mouse                                |
-   |-----------|----------------------------------------------------------------|--------------------------------------|
-   | Align     | `alignNode(tag)`                                               | n.a.                                 |
-   | Focus     | `focusNode(tag)`                                               | n.a.                                 |
-   | Translate | `translateNode(tag, dx, dy, dz, [inertia])`                    | `mouseTranslateNode(tag, [inertia])` |
-   | Rotate    | `rotateNode(tag, roll, pitch, yaw, [inertia])`                 | n.a.                                 |
-   | Scale     | `scaleNode(tag, delta, [inertia])`                             | n.a.                                 |
-   | Spin      | `spinNode(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])` | `mouseSpinNode(tag, [inertia])`      |
+   | Action | Generic input device                                       | Mouse                        |
+   |--------|------------------------------------------------------------|------------------------------|
+   | Align  | `align(tag)`                                               | n.a.                         |
+   | Focus  | `focus(tag)`                                               | n.a.                         |
+   | Shift  | `shift(tag, dx, dy, dz, [inertia])`                        | `mouseShift(tag, [inertia])` |
+   | Turn   | `turn(tag, roll, pitch, yaw, [inertia])`                   | n.a.                         |
+   | Zoom   | `zoom(tag, delta, [inertia])`                              | n.a.                         |
+   | Spin   | `spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])` | `mouseSpin(tag, [inertia])`  |
 
 Observations:
 
@@ -343,13 +340,13 @@ void mouseMoved() {
 void mouseDragged() {
   if (mouseButton == LEFT)
     // spin the picked node or the eye if no node has been picked
-    scene.mouseSpinNode();
+    scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    // spin the picked node or the eye if no node has been picked
-    scene.mouseTranslateNode();
+    // shift the picked node or the eye if no node has been picked
+    scene.mouseShift();
   else
-    // spin the picked node or the eye if no node has been picked
-    scene.scaleNode(mouseX - pmouseX);
+    // zoom the picked node or the eye if no node has been picked
+    scene.zoom(mouseX - pmouseX);
 }
 ```
 
@@ -367,13 +364,13 @@ void mouseClicked(MouseEvent event) {
 // interact with mouse-moved
 void mouseMoved() {
   // spin the node picked with one click
-  scene.mouseSpinNode();
+  scene.mouseSpin();
 }
 
 // interact with key-pressed
 void keyPressed() {
-  // focus the node picked with two clicks
-  scene.focusNode("key");
+  // focus the node that has been picked with two clicks
+  scene.focus("key");
 }
 ```
 

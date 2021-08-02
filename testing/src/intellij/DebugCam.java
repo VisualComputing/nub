@@ -73,20 +73,20 @@ public class DebugCam extends PApplet {
   public void mouseDragged(MouseEvent event) {
     switch (mouseButton) {
       case LEFT:
-          scene.mouseSpinNode(inertia);
+          scene.mouseSpin(inertia);
         break;
       case RIGHT:
-          scene.mouseTranslateNode(inertia);
+          scene.mouseShift(inertia);
         break;
       case CENTER:
         if (event.isShiftDown()) {
-          scene.scaleNode((float) mouseX - pmouseX, inertia);
+          scene.zoom((float) mouseX - pmouseX, inertia);
         } else {
           if (scene.node() != null) {
             scene.interact(scene.mouseRADX());
           } else {
             if (cad)
-              scene.mouseRotateCAD(inertia);
+              scene.mouseCAD(inertia);
             else
               scene.mouseLookAround(inertia);
           }

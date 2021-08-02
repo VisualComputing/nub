@@ -99,16 +99,16 @@ public class PUP extends PApplet {
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.mouseSpinNode();
+      focus.mouseSpin();
     else if (mouseButton == RIGHT)
-      focus.mouseTranslateNode();
+      focus.mouseShift();
     else
       focus.moveForward(focus.mouseDX());
   }
 
   @Override
   public void mouseWheel(MouseEvent event) {
-    focus.scaleNode(event.getCount() * 20);
+    focus.zoom(event.getCount() * 20);
   }
 
   @Override

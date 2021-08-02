@@ -186,7 +186,7 @@ void mouseDragged() {
   if (mouseButton == LEFT)
     scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.mouseTranslate();
+    scene.mouseShift();
   else
     scene.moveForward(mouseX - pmouseX);
 }
@@ -197,5 +197,5 @@ void mouseWheel(MouseEvent event) {
     if (zFar + shift > zNear)
       zFar += shift;
   } else
-    scene.scale(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
 }

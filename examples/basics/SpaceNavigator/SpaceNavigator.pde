@@ -68,8 +68,14 @@ void spaceNavigatorPicking() {
 void spaceNavigatorInteraction() {
   // translate(x, y, z) expects params in screen-space
   // which has dimensions width * height * 1
-  scene.translate("SPCNAV", 20 * snXPos.getValue(), 20 * snYPos.getValue(), snZPos.getValue() / 50);
-  scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
+  if (scene.node("SPCNAV") != null) {
+    scene.shift("SPCNAV", 20 * snXPos.getValue(), 20 * snYPos.getValue(), snZPos.getValue() / 50);
+    scene.turn("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
+  }
+  else {
+    scene.shift(20 * snXPos.getValue(), 20 * snYPos.getValue(), snZPos.getValue() / 50);
+    scene.turn(-snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
+  }
 }
 
 void mouseMoved() {
@@ -80,9 +86,9 @@ void mouseDragged() {
   if (mouseButton == LEFT)
     scene.mouseSpin();
   else if (mouseButton == RIGHT)
-    scene.mouseTranslate();
+    scene.mouseShift();
   else
-    scene.scale(scene.mouseDX());
+    scene.zoom(scene.mouseDX());
 }
 
 void mouseWheel(MouseEvent event) {
