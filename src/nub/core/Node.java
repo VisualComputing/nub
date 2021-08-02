@@ -121,7 +121,7 @@ import java.util.function.Consumer;
  * <li>Register a user gesture data parser, see {@link #setInteraction(BiConsumer)}
  * and {@link #setInteraction(Consumer)}.</li>
  * <li>Send gesture data to the node by calling {@link Graph#interact(Node, Object...)},
- * {@link Graph#interactTag(String, Object...)} or {@link Graph#interactTag(Object...)}.</li>
+ * {@link Graph#interact(String, Object...)} or {@link Graph#interact(Object...)}.</li>
  * </ul>
  */
 public class Node {
@@ -2571,7 +2571,7 @@ public class Node {
    * no params, or a gesture encoded as an array of on Object params.
    * <p>
    * The interaction is performed either after calling the
-   * {@link Graph#interactTag(String, Object...)}, {@link Graph#interactTag(Object...)}
+   * {@link Graph#interact(String, Object...)}, {@link Graph#interact(Object...)}
    * or {@link Graph#interact(Node, Object...)} scene procedures.
    * <p>
    * Same as {@code setInteraction((n, o) -> callback.accept(o))}.
@@ -2588,7 +2588,7 @@ public class Node {
    * an array of on Object params.
    * <p>
    * The interaction is performed either after calling the
-   * {@link Graph#interactTag(String, Object...)}, {@link Graph#interactTag(Object...)}
+   * {@link Graph#interact(String, Object...)}, {@link Graph#interact(Object...)}
    * or {@link Graph#interact(Node, Object...)} scene procedures.
    *
    * @see #setInteraction(Consumer)
