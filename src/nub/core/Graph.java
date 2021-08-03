@@ -850,29 +850,18 @@ public class Graph {
    * @see #isReachable(Node)
    * @see Node#setReference(Node)
    */
-  public static boolean prune(Node node) {
-    if (isReachable(node)) {
-      List<Node> branch = branch(node);
-      for (Node nodeBranch : branch) {
-        TimingHandler.unregisterTask(nodeBranch._translationTask);
-        TimingHandler.unregisterTask(nodeBranch._rotationTask);
-        TimingHandler.unregisterTask(nodeBranch._orbitTask);
-        TimingHandler.unregisterTask(nodeBranch._scalingTask);
-      }
-      if (node.reference() != null) {
-        node.reference()._removeChild(node);
-        node._reference = null;
-      } else
-        _removeLeadingNode(node);
-      return true;
-    } else {
-      if (node.reference() != null) {
-        node.reference()._removeChild(node);
-        node._reference = null;
-        return true;
-      }
+  public static void prune(Node node) {
+    List<Node> branch = branch(node);
+    for (Node branchNodes : branch) {
+      TimingHandler.unregisterTask(branchNodes._translationTask);
+      TimingHandler.unregisterTask(branchNodes._rotationTask);
+      TimingHandler.unregisterTask(branchNodes._orbitTask);
+      TimingHandler.unregisterTask(branchNodes._scalingTask);
     }
-    return false;
+    if (node.reference() != null) {
+      node.reference()._removeChild(node);
+    } else
+      _removeLeadingNode(node);
   }
 
   /**
@@ -913,8 +902,7 @@ public class Graph {
   }
 
   /**
-   * Collects {@code node} and all its descendant nodes. Note that for a node to be collected
-   * it must be reachable.
+   * Collects {@code node} and all its descendant nodes.
    *
    * @see #isReachable(Node)
    */

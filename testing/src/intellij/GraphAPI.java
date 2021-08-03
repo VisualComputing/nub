@@ -7,6 +7,7 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 /*
+1: red; 2: green; 3: blue; 4: yellow; 5: magenta; detached: cyan
 World
   ^
   |\
@@ -22,7 +23,7 @@ World
 
 public class GraphAPI extends PApplet {
   Scene scene;
-  Node n1, n2, n3, n4, n5, detached;
+  Node n1, n2, n3, n4, n5, detached, cacheRef;
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
@@ -80,8 +81,10 @@ public class GraphAPI extends PApplet {
       println(n4.toString());
     }
     if (key == 'b') {
-      Node cacheRef = n4.reference();
+      cacheRef = n4.reference();
       n4.resetReference();
+    }
+    if (key == 'c') {
       n4.setReference(cacheRef);
     }
     if (key == 'x')

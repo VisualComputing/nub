@@ -298,7 +298,9 @@ public class Node {
    */
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
-    setReference(reference);
+    _reference = reference;
+    _restorePath(reference(), this);
+    _restoreTasks(this);
     // hack
     Method method = null;
     try {
@@ -715,85 +717,56 @@ public class Node {
    * @see Graph#prune(Node)
    */
   public void setReference(Node node) {
+    if (node != null && node == reference()) {
+      System.out.println("Warning: Node reference already set. Nothing done!");
+      return;
+    }
     if (node == this) {
-      System.out.println("A node cannot be a reference of itself.");
+      System.out.println("Warning: A node cannot be a reference of itself. Nothing done!");
       return;
     }
     if (_isSuccessor(node)) {
-      System.out.println("A node descendant cannot be set as its reference.");
+      System.out.println("Warning: A node descendant cannot be set as its reference. Nothing done!");
       return;
     }
     // 0. Cache global geom attributes
-    Vector position = new Vector();
-    Quaternion orientation = new Quaternion();
-    float magnitude = 0;
-    // TODO
-    // condition fails when previous reference is null
-    //boolean needscache = /*reference() != null &&*/ reference() != node;
-    // condition works in all cases but ViewFrustumCulling example breaks
-    // refer to (key == 'b') in GraphAPI example
-    boolean needscache = reference() != node;
-    if(needscache) {
-      position = this.position().get();
-      orientation = this.orientation().get();
-      magnitude = this.magnitude();
-    }
-    // 1. reference is detached
+    Vector position = position = this.position().get();
+    Quaternion orientation = this.orientation().get();
+    float magnitude = this.magnitude();
     if (node != null && !Graph.isReachable(node)) {
-      if (Graph.isReachable(this))
-        Graph.prune(this);
-      if (reference() != node) {
-        if (reference() != null) {
-          reference()._removeChild(this);
-        }
-        _reference = node;// reference() returns now the new value
-        reference()._addChild(this);
-        // restore global geom attributes
-        if (needscache) {
-          this.setPosition(position);
-          this.setOrientation(orientation);
-          this.setMagnitude(magnitude);
-        }
+      Graph.prune(this);
+    }
+    else { // node == null || Graph.isReachable(node)
+      if (reference() != null) {
+        reference()._removeChild(this);
       }
-      return;
+      else {
+        Graph._removeLeadingNode(this);
+      }
     }
-    // 2. no need to re-parent, just check this needs to be added as a leading node
-    if (reference() == node) {
-      _restorePath(reference(), this);
-      _restoredTasks(this);
-      return;
-    }
-    // 3. else re-parenting
-    // 3a. before assigning new reference node
-    if (reference() != null) // old
-      reference()._removeChild(this);
-    else
-      Graph._removeLeadingNode(this);
-    // finally assign the reference node
-    _reference = node;// reference() returns now the new value
-    // 3b. after assigning new reference node
+    _reference = node;
     _restorePath(reference(), this);
-    _restoredTasks(this);
+    _restoreTasks(this);
     // restore global geom attributes
-    if (needscache) {
-      this.setPosition(position);
-      this.setOrientation(orientation);
-      this.setMagnitude(magnitude);
-    }
+    this.setPosition(position);
+    this.setOrientation(orientation);
+    this.setMagnitude(magnitude);
     _modified();
   }
 
   /**
    * Used by {@link #setReference(Node)}.
    */
-  protected void _restoredTasks(Node node) {
-    List<Node> branch = Graph.branch(node);
-    for (Node nodeBranch : branch)
-      nodeBranch._registerTasks();
+  protected void _restoreTasks(Node node) {
+    if (Graph.isReachable(node)) {
+      List<Node> branch = Graph.branch(node);
+      for (Node nodeBranch : branch)
+        nodeBranch._registerTasks();
+    }
   }
 
   /**
-   * Used by {@link #_restoredTasks(Node)}.
+   * Used by {@link #_restoreTasks(Node)}.
    */
   protected void _registerTasks() {
     if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
@@ -840,7 +813,6 @@ public class Node {
     } else {
       if (!parent._hasChild(child)) {
         parent._addChild(child);
-        _restorePath(parent.reference(), parent);
       }
     }
   }
