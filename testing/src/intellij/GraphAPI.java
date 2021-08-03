@@ -76,6 +76,14 @@ public class GraphAPI extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == 'a') {
+      println(n4.toString());
+    }
+    if (key == 'b') {
+      Node cacheRef = n4.reference();
+      n4.resetReference();
+      n4.setReference(cacheRef);
+    }
     if (key == 'x')
       detached.resetReference();
     if (key == 'y')
@@ -88,7 +96,7 @@ public class GraphAPI extends PApplet {
     }
     if (key == 'p')
       scene.prune(n4);
-    if (key == 'a')
+    if (key == 'q')
       n4.setReference(n2);
     if (key == 'r')
       n4.resetReference();

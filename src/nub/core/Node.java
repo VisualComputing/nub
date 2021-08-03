@@ -727,7 +727,12 @@ public class Node {
     Vector position = new Vector();
     Quaternion orientation = new Quaternion();
     float magnitude = 0;
-    boolean needscache = reference() != null && reference() != node;
+    // TODO
+    // condition fails when previous reference is null
+    //boolean needscache = /*reference() != null &&*/ reference() != node;
+    // condition works in all cases but ViewFrustumCulling example breaks
+    // refer to (key == 'b') in GraphAPI example
+    boolean needscache = reference() != node;
     if(needscache) {
       position = this.position().get();
       orientation = this.orientation().get();
@@ -1556,8 +1561,9 @@ public class Node {
    * {@link #reference()}).
    */
   public void setMagnitude(float magnitude) {
-    Node reference = reference();
-    setScaling(reference != null ? magnitude / reference.magnitude() : magnitude);
+    setScaling(reference() != null ? magnitude / reference().magnitude() : magnitude);
+    // option 2 mimics setOrientation (should produce same results)
+    //setScaling(reference() != null ? reference().displacement(magnitude) : magnitude);
   }
 
   // ALIGNMENT
