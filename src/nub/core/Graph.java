@@ -3986,7 +3986,7 @@ public class Graph {
    */
   public void moveForward(float delta, float inertia) {
     // we negate z which targets the Processing mouse wheel
-    shift(0, 0, delta / (zNear() - zFar()), inertia);
+    shift(eye(),0, 0, delta / (zNear() - zFar()), inertia);
   }
 
   // 8. lookAround
