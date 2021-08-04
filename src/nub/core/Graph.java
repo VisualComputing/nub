@@ -2749,7 +2749,7 @@ public class Graph {
     if (subtree == null) {
       for (Node node : _leadingNodes())
         _render(node);
-    } else {
+    } else if (subtree.isReachable()) {
       if (subtree.reference() != null) {
         _matrixHandler.pushMatrix();
         _matrixHandler.applyWorldTransformation(subtree.reference());

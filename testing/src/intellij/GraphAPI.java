@@ -25,6 +25,8 @@ public class GraphAPI extends PApplet {
   Scene scene;
   Node n1, n2, n3, n4, n5, detached, cacheRef;
 
+  boolean _detached;
+
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
 
@@ -60,9 +62,6 @@ public class GraphAPI extends PApplet {
     // cyan
     detached = Node.detach(n3);
     detached.setShape(shape(color(0, 255, 255)));
-    println(detached.position().toString());
-    println(detached.orientation().toString());
-    println(detached.magnitude());
     //scene.randomize(detached);
   }
 
@@ -71,8 +70,6 @@ public class GraphAPI extends PApplet {
     pShape.setFill(c);
     return pShape;
   }
-
-  boolean _detached;
 
   public void draw() {
     scene.render(_detached ? detached : null);
@@ -91,12 +88,16 @@ public class GraphAPI extends PApplet {
     }
     if (key == 'd') {
       _detached = !_detached;
+      if (_detached) {
+        detached.resetReference();
+      }
+      else {
+        scene.prune(detached);
+      }
     }
     if (key == 'e') {
       println(Scene.TimingHandler.tasks().size());
     }
-    if (key == 'x')
-      detached.resetReference();
     if (key == 'y')
       n4.setReference(detached);
     if (key == 'z') {
