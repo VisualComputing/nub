@@ -87,6 +87,9 @@ public class GraphAPI extends PApplet {
     if (key == 'c') {
       n4.setReference(cacheRef);
     }
+    if (key == 'd') {
+      println(Scene.TimingHandler.tasks().size());
+    }
     if (key == 'x')
       detached.resetReference();
     if (key == 'y')

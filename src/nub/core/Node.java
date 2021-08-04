@@ -300,7 +300,7 @@ public class Node {
     this(constraint, translation, rotation, scaling);
     _reference = reference;
     _restorePath(reference(), this);
-    _restoreTasks(this);
+    _registerTasks();
     // hack
     Method method = null;
     try {
@@ -729,24 +729,31 @@ public class Node {
       System.out.println("Warning: A node descendant cannot be set as its reference. Nothing done!");
       return;
     }
-    // 0. Cache global geom attributes
+    boolean prevReachable = Graph.isReachable(this);
     Vector position = position = this.position().get();
     Quaternion orientation = this.orientation().get();
     float magnitude = this.magnitude();
-    if (node != null && !Graph.isReachable(node)) {
-      Graph.prune(this);
+    if (reference() != null) {
+      reference()._removeChild(this);
     }
-    else { // node == null || Graph.isReachable(node)
-      if (reference() != null) {
-        reference()._removeChild(this);
-      }
-      else {
-        Graph._removeLeadingNode(this);
-      }
+    else {
+      Graph._removeLeadingNode(this);
     }
     _reference = node;
     _restorePath(reference(), this);
-    _restoreTasks(this);
+    boolean nowReachable = Graph.isReachable(this);
+    if (prevReachable && !nowReachable) {
+      List<Node> branch = Graph.branch(this);
+      for (Node descendant : branch) {
+        descendant._unregisterTasks();
+      }
+    }
+    if (!prevReachable && nowReachable) {
+      List<Node> branch = Graph.branch(this);
+      for (Node descendant : branch) {
+        descendant._registerTasks();
+      }
+    }
     // restore global geom attributes
     this.setPosition(position);
     this.setOrientation(orientation);
@@ -757,16 +764,24 @@ public class Node {
   /**
    * Used by {@link #setReference(Node)}.
    */
-  protected void _restoreTasks(Node node) {
-    if (Graph.isReachable(node)) {
-      List<Node> branch = Graph.branch(node);
-      for (Node nodeBranch : branch)
-        nodeBranch._registerTasks();
+
+  /*
+  protected void _updateTasks() {
+    if (Graph.isReachable(this)) {
+      if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
+        List<Node> branch = Graph.branch(this);
+        for (Node node : branch)
+          node._registerTasks();
+      }
+    }
+    else {
+      if (Graph.TimingHandler.isTaskRegistered(_translationTask)) {
+        List<Node> branch = Graph.branch(this);
+        for (Node node : branch)
+          node._unregisterTasks();
+      }
     }
   }
-
-  /**
-   * Used by {@link #_restoreTasks(Node)}.
    */
   protected void _registerTasks() {
     if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
@@ -802,6 +817,13 @@ public class Node {
         }
       };
     }
+  }
+
+  protected void _unregisterTasks() {
+    TimingHandler.unregisterTask(_translationTask);
+    TimingHandler.unregisterTask(_rotationTask);
+    TimingHandler.unregisterTask(_orbitTask);
+    TimingHandler.unregisterTask(_scalingTask);
   }
 
   /**

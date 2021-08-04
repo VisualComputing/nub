@@ -852,11 +852,8 @@ public class Graph {
    */
   public static void prune(Node node) {
     List<Node> branch = branch(node);
-    for (Node branchNodes : branch) {
-      TimingHandler.unregisterTask(branchNodes._translationTask);
-      TimingHandler.unregisterTask(branchNodes._rotationTask);
-      TimingHandler.unregisterTask(branchNodes._orbitTask);
-      TimingHandler.unregisterTask(branchNodes._scalingTask);
+    for (Node descendant : branch) {
+      descendant._unregisterTasks();
     }
     if (node.reference() != null) {
       node.reference()._removeChild(node);
