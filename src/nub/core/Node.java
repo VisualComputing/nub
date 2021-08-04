@@ -159,6 +159,7 @@ public class Node {
   protected List<Node> _children;
   public boolean cull;
   public boolean tagging;
+  protected boolean _reachable;
 
   // Visual hints
   protected int _picking;
@@ -299,6 +300,7 @@ public class Node {
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
     _reference = reference;
+    _reachable = true;
     _restorePath(reference(), this);
     _registerTasks();
     // hack
@@ -729,7 +731,11 @@ public class Node {
       System.out.println("Warning: A node descendant cannot be set as its reference. Nothing done!");
       return;
     }
-    boolean prevReachable = Graph.isReachable(this);
+    boolean prevReachable = _reachable;
+    boolean nowReachable = node == null;
+    if (!nowReachable) {
+      nowReachable = node._reachable;
+    }
     Vector position = position = this.position().get();
     Quaternion orientation = this.orientation().get();
     float magnitude = this.magnitude();
@@ -741,16 +747,17 @@ public class Node {
     }
     _reference = node;
     _restorePath(reference(), this);
-    boolean nowReachable = Graph.isReachable(this);
     if (prevReachable && !nowReachable) {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
+        descendant._reachable = false;
         descendant._unregisterTasks();
       }
     }
     if (!prevReachable && nowReachable) {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
+        descendant._reachable = true;
         descendant._registerTasks();
       }
     }
@@ -762,27 +769,15 @@ public class Node {
   }
 
   /**
-   * Used by {@link #setReference(Node)}.
+   * Returns whether or not the node is reachable by the rendering algorithm.
+   * 
+   * @see #setReference(Node) 
+   * @see Graph#prune(Node)
    */
-
-  /*
-  protected void _updateTasks() {
-    if (Graph.isReachable(this)) {
-      if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
-        List<Node> branch = Graph.branch(this);
-        for (Node node : branch)
-          node._registerTasks();
-      }
-    }
-    else {
-      if (Graph.TimingHandler.isTaskRegistered(_translationTask)) {
-        List<Node> branch = Graph.branch(this);
-        for (Node node : branch)
-          node._unregisterTasks();
-      }
-    }
+  public boolean isReachable() {
+    return _reachable;
   }
-   */
+  
   protected void _registerTasks() {
     if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
       _translationTask = new InertialTask() {

@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
- * {@link #prune(Node)}, {@link #isReachable(Node)}, {@link #branch(Node)}, and {@link #clear()}.
+ * {@link #prune(Node)}, {@link Node#isReachable()}, {@link #branch(Node)}, and {@link #clear()}.
  * <h2>The eye</h2>
  * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
  * (see {@link #setEye(Node)}). Several functions handle the eye, such as
@@ -779,7 +779,6 @@ public class Graph {
    * All leading nodes are also reachable by the {@link #render()} algorithm for which they are the seeds.
    *
    * @see #nodes()
-   * @see #isReachable(Node)
    * @see #prune(Node)
    */
   protected static List<Node> _leadingNodes() {
@@ -836,7 +835,7 @@ public class Graph {
   /**
    * Make all the nodes in the {@code node} branch eligible for garbage collection.
    * <p>
-   * A call to {@link #isReachable(Node)} on all {@code node} descendants
+   * A call to {@link Node#isReachable()} on all {@code node} descendants
    * (including {@code node}) will return false, after issuing this method. It also means
    * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #render()} algorithm.
@@ -847,38 +846,21 @@ public class Graph {
    * on the pruned node.
    *
    * @see #clear()
-   * @see #isReachable(Node)
    * @see Node#setReference(Node)
+   * @see Node#isReachable()
    */
   public static void prune(Node node) {
-    List<Node> branch = branch(node);
-    for (Node descendant : branch) {
-      descendant._unregisterTasks();
+    if (node._reachable) {
+      List<Node> branch = branch(node);
+      for (Node descendant : branch) {
+        descendant._reachable = false;
+        descendant._unregisterTasks();
+      }
     }
     if (node.reference() != null) {
       node.reference()._removeChild(node);
     } else
       _removeLeadingNode(node);
-  }
-
-  /**
-   * Returns {@code true} if the node is reachable by the {@link #render()}
-   * algorithm and {@code false} otherwise.
-   * <p>
-   * Nodes are made unreachable with {@link #prune(Node)} and reachable
-   * again with {@link Node#setReference(Node)}.
-   *
-   * @see #render()
-   * @see #nodes()
-   */
-  public static boolean isReachable(Node node) {
-    if (node == null)
-      return false;
-    List<Node> nodes = nodes();
-    for (Node n : nodes)
-      if (n == node)
-        return true;
-    return false;
   }
 
   /**
@@ -888,7 +870,6 @@ public class Graph {
    * The method render the hierarchy to collect. Node collections should thus be kept at user space
    * for efficiency.
    *
-   * @see #isReachable(Node)
    * @see #isEye(Node)
    */
   public static List<Node> nodes() {
@@ -900,8 +881,6 @@ public class Graph {
 
   /**
    * Collects {@code node} and all its descendant nodes.
-   *
-   * @see #isReachable(Node)
    */
   public static List<Node> branch(Node node) {
     ArrayList<Node> list = new ArrayList<Node>();
@@ -912,8 +891,6 @@ public class Graph {
   /**
    * Collects {@code node} and all its descendant nodes. Note that for a node to be collected
    * it must be reachable.
-   *
-   * @see #isReachable(Node)
    */
   protected static void _collect(List<Node> list, Node node) {
     if (node == null)
