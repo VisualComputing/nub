@@ -72,8 +72,10 @@ public class GraphAPI extends PApplet {
     return pShape;
   }
 
+  boolean _detached;
+
   public void draw() {
-    scene.render();
+    scene.render(_detached ? detached : null);
   }
 
   public void keyPressed() {
@@ -88,6 +90,9 @@ public class GraphAPI extends PApplet {
       n4.setReference(cacheRef);
     }
     if (key == 'd') {
+      _detached = !_detached;
+    }
+    if (key == 'e') {
       println(Scene.TimingHandler.tasks().size());
     }
     if (key == 'x')
