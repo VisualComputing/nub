@@ -718,6 +718,7 @@ public class Node {
    * @see Graph#prune(Node)
    */
   public void setReference(Node node) {
+    // 0. filter
     if (node != null && node == reference()) {
       System.out.println("Warning: Node reference already set. Nothing done!");
       return;
@@ -730,14 +731,17 @@ public class Node {
       System.out.println("Warning: A node descendant cannot be set as its reference. Nothing done!");
       return;
     }
+    // 1. Determine prev and target states
     boolean prevReachable = isReachable();
     boolean nowReachable = node == null;
     if (!nowReachable) {
       nowReachable = node.isReachable();
     }
+    // 2. cache prev state
     Vector position = position = this.position().get();
     Quaternion orientation = this.orientation().get();
     float magnitude = this.magnitude();
+    // 3. temporarily remove node from the graph while setting new reference
     if (reference() != null) {
       reference()._removeChild(this);
     }
@@ -745,20 +749,24 @@ public class Node {
       Graph._removeLeadingNode(this);
     }
     _reference = node;
+    // 4. re-add node to graph
     _restorePath(reference(), this);
+    // 5. Propagate state
+    // 5.1. prevReachable -> !nowReachable
     if (prevReachable && !nowReachable) {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
         descendant._unregisterTasks();
       }
     }
+    // 5.2. !prevReachable -> nowReachable
     if (!prevReachable && nowReachable) {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
         descendant._registerTasks();
       }
     }
-    // restore global geom attributes
+    // 6. restore cache prev state (step 2. above)
     this.setPosition(position);
     this.setOrientation(orientation);
     this.setMagnitude(magnitude);
