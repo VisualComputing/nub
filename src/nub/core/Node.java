@@ -159,7 +159,6 @@ public class Node {
   protected List<Node> _children;
   public boolean cull;
   public boolean tagging;
-  protected boolean _reachable;
 
   // Visual hints
   protected int _picking;
@@ -300,9 +299,9 @@ public class Node {
   public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
     this(constraint, translation, rotation, scaling);
     _reference = reference;
-    _reachable = true;
     _restorePath(reference(), this);
-    _registerTasks();
+    if (reference == null || reference.isReachable())
+      _registerTasks();
     // hack
     Method method = null;
     try {
@@ -731,10 +730,10 @@ public class Node {
       System.out.println("Warning: A node descendant cannot be set as its reference. Nothing done!");
       return;
     }
-    boolean prevReachable = _reachable;
+    boolean prevReachable = isReachable();
     boolean nowReachable = node == null;
     if (!nowReachable) {
-      nowReachable = node._reachable;
+      nowReachable = node.isReachable();
     }
     Vector position = position = this.position().get();
     Quaternion orientation = this.orientation().get();
@@ -750,14 +749,12 @@ public class Node {
     if (prevReachable && !nowReachable) {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
-        descendant._reachable = false;
         descendant._unregisterTasks();
       }
     }
     if (!prevReachable && nowReachable) {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
-        descendant._reachable = true;
         descendant._registerTasks();
       }
     }
@@ -775,7 +772,7 @@ public class Node {
    * @see Graph#prune(Node)
    */
   public boolean isReachable() {
-    return _reachable;
+    return Graph.TimingHandler.isTaskRegistered(_translationTask);
   }
   
   protected void _registerTasks() {

@@ -850,10 +850,9 @@ public class Graph {
    * @see Node#isReachable()
    */
   public static void prune(Node node) {
-    if (node._reachable) {
+    if (node.isReachable()) {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
-        descendant._reachable = false;
         descendant._unregisterTasks();
       }
     }
