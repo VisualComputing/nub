@@ -134,8 +134,8 @@ public class Interpolator {
      * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
      */
     protected Vector _translation() {
-      return node().reference() == _node.reference() ? _node.translation() :
-          node().reference() == null ? _node.position() : node().reference().location(_node.position());
+      return node().reference() == _node.reference() ? _node.position() :
+          node().reference() == null ? _node.worldPosition() : node().reference().location(_node.worldPosition());
       // perhaps less efficient but simpler equivalent form:
       // return node().reference() == null ? _node.position() : node().reference().location(_node.position());
     }
@@ -145,8 +145,8 @@ public class Interpolator {
      * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
      */
     protected Quaternion _rotation() {
-      return node().reference() == _node.reference() ? _node.rotation() :
-          node().reference() == null ? _node.orientation() : node().reference().displacement(_node.orientation());
+      return node().reference() == _node.reference() ? _node.orientation() :
+          node().reference() == null ? _node.worldOrientation() : node().reference().displacement(_node.worldOrientation());
       // perhaps less efficient but simpler equivalent form:
       // return node().reference() == null ? _node.orientation() : node().reference().displacement(_node.orientation());
     }
@@ -156,8 +156,8 @@ public class Interpolator {
      * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
      */
     protected float _scaling() {
-      return node().reference() == _node.reference() ? _node.scaling() :
-          node().reference() == null ? _node.magnitude() : node().reference().displacement(_node.magnitude());
+      return node().reference() == _node.reference() ? _node.magnitude() :
+          node().reference() == null ? _node.worldMagnitude() : node().reference().displacement(_node.worldMagnitude());
       // perhaps less efficient but simpler equivalent form:
       // return node().reference() == null ? _node.magnitude() : node().reference().displacement(_node.magnitude());
     }
@@ -774,9 +774,9 @@ public class Interpolator {
         _list.get(_backwards.nextIndex())._tangentQuaternion,
         _list.get(_forwards.nextIndex())._tangentQuaternion,
         _list.get(_forwards.nextIndex())._rotation(), alpha);
-    node().setTranslation(pos);
-    node().setRotation(q);
-    node().setScaling(mag);
+    node().setPosition(pos);
+    node().setOrientation(q);
+    node().setMagnitude(mag);
   }
 
   /**
@@ -847,7 +847,7 @@ public class Interpolator {
       if (!_valuesAreValid)
         _updateModifiedKeyFrames();
       if (_list.get(0) == _list.get(_list.size() - 1)) {
-        _path.add(Node.detach(_list.get(0)._node.position(), _list.get(0)._node.orientation(), _list.get(0)._node.magnitude()));
+        _path.add(Node.detach(_list.get(0)._node.worldPosition(), _list.get(0)._node.worldOrientation(), _list.get(0)._node.worldMagnitude()));
       }
       else {
         KeyFrame[] keyFrames = new KeyFrame[4];
@@ -858,7 +858,7 @@ public class Interpolator {
         index++;
         keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         while (keyFrames[2] != null) {
-          Vector pdiff = Vector.subtract(keyFrames[2]._node.position(), keyFrames[1]._node.position());
+          Vector pdiff = Vector.subtract(keyFrames[2]._node.worldPosition(), keyFrames[1]._node.worldPosition());
           Vector pvec1 = Vector.add(Vector.multiply(pdiff, 3.0f), Vector.multiply(keyFrames[1]._tangentVector(), (-2.0f)));
           pvec1 = Vector.subtract(pvec1, keyFrames[2]._tangentVector());
           Vector pvec2 = Vector.add(Vector.multiply(pdiff, (-2.0f)), keyFrames[1]._tangentVector());
@@ -866,9 +866,9 @@ public class Interpolator {
           for (int step = 0; step < maxSteps; ++step) {
             float alpha = step / (float) maxSteps;
             Node node = Node.detach(
-                Vector.add(keyFrames[1]._node.position(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
-                Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.orientation(), alpha),
-                Vector.lerp(keyFrames[1]._node.magnitude(), keyFrames[2]._node.magnitude(), alpha));
+                Vector.add(keyFrames[1]._node.worldPosition(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
+                Quaternion.squad(keyFrames[1]._node.worldOrientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.worldOrientation(), alpha),
+                Vector.lerp(keyFrames[1]._node.worldMagnitude(), keyFrames[2]._node.worldMagnitude(), alpha));
             if (step % Interpolator.maxSteps != 0) {
               node._mask = _stepsHint;
               if (node.isHintEnabled(Node.SHAPE) && (node()._imrShape != null || node()._rmrShape != null)) {
@@ -890,7 +890,7 @@ public class Interpolator {
           keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         }
         // Add last KeyFrame
-        _path.add(Node.detach(keyFrames[1]._node.position(), keyFrames[1]._node.orientation(), keyFrames[1]._node.magnitude()));
+        _path.add(Node.detach(keyFrames[1]._node.worldPosition(), keyFrames[1]._node.worldOrientation(), keyFrames[1]._node.worldMagnitude()));
       }
       _pathIsValid = true;
     }
@@ -910,9 +910,9 @@ public class Interpolator {
       if (next != null) {
         // Interpolate using the shortest path between two quaternions
         // See: https://stackoverflow.com/questions/2886606/flipping-issue-when-interpolating-rotations-using-quaternions
-        if (Quaternion.dot(next._node.rotation(), keyFrame._node.rotation()) < 0) {
+        if (Quaternion.dot(next._node.orientation(), keyFrame._node.orientation()) < 0) {
           // change sign
-          next._node.rotation().negate();
+          next._node.orientation().negate();
         }
         keyFrame._tangentVector = Vector.multiply(Vector.subtract(next._translation(), prev._translation()), 0.5f);
         keyFrame._tangentQuaternion = Quaternion.squadTangent(prev._rotation(), keyFrame._rotation(), next._rotation());

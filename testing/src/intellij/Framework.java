@@ -107,15 +107,15 @@ public class Framework extends PApplet {
       focus.togglePerspective();
     }
     if (key == 'u' && lastKeyFrame != null) {
-      n2.setPosition(lastKeyFrame);
-      n2.setOrientation(lastKeyFrame);
-      n2.setMagnitude(lastKeyFrame);
+      n2.setWorldPosition(lastKeyFrame);
+      n2.setWorldOrientation(lastKeyFrame);
+      n2.setWorldMagnitude(lastKeyFrame);
       n2.configHint(Node.TORUS, color(255, 0, 125));
     }
     if (key == 'U' && lastKeyFrame != null) {
-      n2.setPosition(lastKeyFrame);
-      n2.setOrientation(lastKeyFrame);
-      n2.setMagnitude(lastKeyFrame);
+      n2.setWorldPosition(lastKeyFrame);
+      n2.setWorldOrientation(lastKeyFrame);
+      n2.setWorldMagnitude(lastKeyFrame);
       n2.configHint(Node.TORUS, color(255, 0, 125, alpha));
     }
     if (key == '+')

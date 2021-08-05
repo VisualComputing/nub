@@ -93,13 +93,13 @@ class GLMatrixHandler extends MatrixHandler {
   @Override
   public void applyTransformation(Node node) {
     if (_pggl instanceof PGraphics3D) {
-      translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
-      rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
-      scale(node.scaling(), node.scaling(), node.scaling());
+      translate(node.position()._vector[0], node.position()._vector[1], node.position()._vector[2]);
+      rotate(node.orientation().angle(), (node.orientation()).axis()._vector[0], (node.orientation()).axis()._vector[1], (node.orientation()).axis()._vector[2]);
+      scale(node.magnitude(), node.magnitude(), node.magnitude());
     } else {
-      translate(node.translation().x(), node.translation().y());
-      rotate(node.rotation().angle2D());
-      scale(node.scaling(), node.scaling());
+      translate(node.position().x(), node.position().y());
+      rotate(node.orientation().angle2D());
+      scale(node.magnitude(), node.magnitude());
     }
   }
 

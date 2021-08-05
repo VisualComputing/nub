@@ -80,7 +80,7 @@ public class PUP extends PApplet {
       pup = scene.mouseLocation();
       if (pup != null) {
         visualHint.setBounds(pup, 300);
-        visualHint.eye().setPosition(pup);
+        visualHint.eye().setWorldPosition(pup);
         //hint.setViewDirection(scene.displacement(Vector.plusJ));
         visualHint.setViewDirection(scene.displacement(new Vector(0, 1, 0)));
         visualHint.setUpVector(scene.displacement(new Vector(0, 0, -1)));

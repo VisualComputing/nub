@@ -171,13 +171,13 @@ public class BasicUse extends PApplet {
     }
     if (key == 'r') {
       Quaternion q = Quaternion.random();
-      child.setOrientation(q);
+      child.setWorldOrientation(q);
       /*
       sibling.resetReference();
       sibling.setRotation(q);
       sibling.setReference(node);
       // */
-      sibling.setRotation(node.displacement(q));
+      sibling.setOrientation(node.displacement(q));
     }
   }
 

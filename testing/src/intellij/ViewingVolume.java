@@ -62,8 +62,8 @@ public class ViewingVolume extends PApplet {
     canvas2.fill(255, 255, 0, 125);
     canvas2.sphere(scene1.radius());
 
-    float zNear = scene1.zNear() / scene1.eye().magnitude();
-    float zFar = scene1.zFar() / scene1.eye().magnitude();
+    float zNear = scene1.zNear() / scene1.eye().worldMagnitude();
+    float zFar = scene1.zFar() / scene1.eye().worldMagnitude();
     Vector v1 = scene1.eye().worldLocation(new Vector(0, 0, -zNear));
     Vector v2 = scene1.eye().worldLocation(new Vector(0, 0, -zFar));
     canvas2.pushStyle();

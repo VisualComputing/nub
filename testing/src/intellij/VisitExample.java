@@ -66,7 +66,7 @@ public class VisitExample extends PApplet {
     for(int i = 0; i < n; i++){
       Node node = new CustomNode();
       node.randomize(new Vector(), 150,  true);
-      node.setScaling(1);
+      node.setMagnitude(1);
     }
   }
 
@@ -93,7 +93,7 @@ public class VisitExample extends PApplet {
     public void setupAttributesByGraph(Graph g) {
       if (relativeToGraph) {
         //keep the size of the node relative to the graph such that it always occupies 10 pixels
-        this.radius = this.radiusInPixels * g.sceneToPixelRatio(position());
+        this.radius = this.radiusInPixels * g.sceneToPixelRatio(worldPosition());
         //change color based on Graph
         for (int i = 0; i < n; i++) {
           if (g == scenes[i]) {

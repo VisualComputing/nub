@@ -122,8 +122,8 @@ A node `position`, `orientation` and `magnitude` may be set with the following m
 
 |Node localization|Position                      |Orientation                                                            |Magnitude                 |
 |-----------------|------------------------------|-----------------------------------------------------------------------|--------------------------|
-|Globally         |`setPosition(vector)`         |`setOrientation(quaternion)`                                           |`setMagnitude(mag)`       |
-|Locally          |`setTranslation(vector)`      |`setRotation(quaternion)`                                              |`setScaling(scl)`         |
+|Globally         |`setWorldPosition(vector)`    |`setWorldOrientation(quaternion)`                                      |`setWorldMagnitude(mag)`  |
+|Locally          |`setPosition(vector)`         |`setOrientation(quaternion)`                                           |`setMagnitude(scl)`       |
 |Incrementally    |`translate(vector, [inertia])`|`rotate(quaternion, [inertia])`, `orbit(quaternion, center, [inertia])`|`scale(amount, [inertia])`|
 
 The optional `inertia` parameter should be a value in [0..1], `0` no inertia (which is the default value) & `1` no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of `TimingTasks`.

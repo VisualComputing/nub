@@ -34,7 +34,7 @@ public abstract class Constraint {
    * Overload this method in your own Constraint class to define a new translation
    * constraint. {@code node} is the Node to which is applied the translation. You
    * should refrain from directly changing its value in the constraint. Use its
-   * {@link Node#position()} and update the translation
+   * {@link Node#worldPosition()} and update the translation
    * accordingly instead.
    * <p>
    * {@code translation} is expressed in the local Node coordinate system. Use

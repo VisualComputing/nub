@@ -818,9 +818,9 @@ public class Scene extends Graph {
    */
   protected JSONObject _toJSONObject(Node node) {
     JSONObject jsonNode = new JSONObject();
-    jsonNode.setFloat("magnitude", node.magnitude());
-    jsonNode.setJSONArray("position", _toJSONArray(node.position()));
-    jsonNode.setJSONArray("orientation", _toJSONArray(node.orientation()));
+    jsonNode.setFloat("magnitude", node.worldMagnitude());
+    jsonNode.setJSONArray("position", _toJSONArray(node.worldPosition()));
+    jsonNode.setJSONArray("orientation", _toJSONArray(node.worldOrientation()));
     return jsonNode;
   }
 
@@ -1318,7 +1318,7 @@ public class Scene extends Graph {
         context().stroke(_splineStroke(interpolator));
         context().beginShape();
         for (Node node : path) {
-          Vector position = node.position();
+          Vector position = node.worldPosition();
           vertex(position.x(), position.y(), position.z());
         }
         context().endShape();
@@ -2074,17 +2074,17 @@ public class Scene extends Graph {
     switch (graph.type()) {
       case TWO_D:
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph.eye().magnitude(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.zNear(), graph.zFar());
+        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph.eye().worldMagnitude(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.zNear(), graph.zFar());
         break;
       case PERSPECTIVE:
-        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph.eye().magnitude(), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar());
+        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph.eye().worldMagnitude(), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar());
         break;
     }
   }
 
   /**
    * Draws a representation of the {@code eyeBuffer} frustum onto {@code pGraphics} according to frustum parameters:
-   * {@code type}, eye {@link Node#magnitude()}, {@code zNear} and {@code zFar}, while taking into account
+   * {@code type}, eye {@link Node#worldMagnitude()}, {@code zNear} and {@code zFar}, while taking into account
    * whether or not the scene is {@code leftHanded}.
    *
    * @see #drawFrustum(Graph)
@@ -2095,10 +2095,10 @@ public class Scene extends Graph {
     switch (type) {
       case TWO_D:
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, eyeBuffer, eye.magnitude(), eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, zNear, zFar);
+        _drawOrthographicFrustum(pGraphics, eyeBuffer, eye.worldMagnitude(), eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, zNear, zFar);
         break;
       case PERSPECTIVE:
-        _drawPerspectiveFrustum(pGraphics, eyeBuffer, eye.magnitude(), leftHanded ? -eyeBuffer.width / eyeBuffer.height : eyeBuffer.width / eyeBuffer.height, zNear, zFar);
+        _drawPerspectiveFrustum(pGraphics, eyeBuffer, eye.worldMagnitude(), leftHanded ? -eyeBuffer.width / eyeBuffer.height : eyeBuffer.width / eyeBuffer.height, zNear, zFar);
         break;
     }
   }
@@ -2357,7 +2357,7 @@ public class Scene extends Graph {
           // Hence it should be multiplied by: 1 / eye.eye().magnitude()
           // The neg sign is because the zNear is positive but the eye view direction is
           // the negative Z-axis
-          Scene.vertex(context(), v.x(), v.y(), -(graph.zNear() * 1 / graph.eye().magnitude()));
+          Scene.vertex(context(), v.x(), v.y(), -(graph.zNear() * 1 / graph.eye().worldMagnitude()));
         } else {
           Scene.vertex(context(), s.x(), s.y(), s.z());
           Scene.vertex(context(), o.x(), o.y(), o.z());
@@ -2384,7 +2384,7 @@ public class Scene extends Graph {
     context().pushStyle();
     if (isTagged(node))
       context().strokeWeight(2 + context().strokeWeight);
-    drawCross(node, node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) : node.bullsEyeSize());
+    drawCross(node, node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.magnitude() * pixelToSceneRatio(node.worldPosition()) : node.bullsEyeSize());
     context().popStyle();
   }
 
@@ -2432,13 +2432,13 @@ public class Scene extends Graph {
   }
 
   /**
-   * Draws a bullseye around the node {@link Node#position()} projection.
+   * Draws a bullseye around the node {@link Node#worldPosition()} projection.
    * <p>
    * The shape of the bullseye may be squared or circled depending on the node
    * {@link Node#bullsEyeSize()} sign.
    *
    * @see Node#bullsEyeSize()
-   * @see Node#position()
+   * @see Node#worldPosition()
    * @see #_drawSquaredBullsEye(Node)
    * @see #_drawCircledBullsEye(Node)
    */
@@ -2467,7 +2467,7 @@ public class Scene extends Graph {
       context().strokeWeight(2 + context().strokeWeight);
     Vector center = screenLocation(node);
     if (center != null)
-      drawSquaredBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) : node.bullsEyeSize());
+      drawSquaredBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.magnitude() * pixelToSceneRatio(node.worldPosition()) : node.bullsEyeSize());
     context().popStyle();
   }
 
@@ -2541,7 +2541,7 @@ public class Scene extends Graph {
       context().strokeWeight(2 + context().strokeWeight);
     Vector center = screenLocation(node);
     if (center != null)
-      drawCircledBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.scaling() * pixelToSceneRatio(node.position()) : node.bullsEyeSize());
+      drawCircledBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.magnitude() * pixelToSceneRatio(node.worldPosition()) : node.bullsEyeSize());
     context().popStyle();
   }
 

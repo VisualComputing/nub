@@ -104,7 +104,7 @@ public class HolaMundo extends PApplet {
       // position the auxiliar viewer
       if (pup != null) {
         hintScene.setBounds(pup, 300);
-        hintScene.eye().setPosition(pup);
+        hintScene.eye().setWorldPosition(pup);
         hintScene.setViewDirection(mainScene.displacement(Vector.plusJ));
         hintScene.setUpVector(mainScene.displacement(Vector.minusK));
         hintScene.fit();

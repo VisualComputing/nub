@@ -222,19 +222,19 @@ public class NodeAPI2 extends PApplet {
     scene.beginHUD();
     textFont(font13);
     fill(f1Color);
-    pos = scene.screenLocation(f1.position());
+    pos = scene.screenLocation(f1.worldPosition());
     text("Node 1", pos.x(), pos.y());
     fill(f2Color);
-    pos = scene.screenLocation(f2.position());
+    pos = scene.screenLocation(f2.worldPosition());
     text("Node 2", pos.x(), pos.y());
     fill(f3Color);
-    pos = scene.screenLocation(f3.position());
+    pos = scene.screenLocation(f3.worldPosition());
     text("Node 3", pos.x(), pos.y());
     fill(f4Color);
-    pos = scene.screenLocation(f4.position());
+    pos = scene.screenLocation(f4.worldPosition());
     text("Node 4", pos.x(), pos.y());
     fill(f5Color);
-    pos = scene.screenLocation(f5.position());
+    pos = scene.screenLocation(f5.worldPosition());
     text("Node 5", pos.x(), pos.y());
     fill(wColor);
     textFont(font16);
@@ -315,9 +315,9 @@ public class NodeAPI2 extends PApplet {
     if (key == 'v' || key == 'V')
       Scene.leftHanded = !Scene.leftHanded;
     if (key == '+')
-      scene.eye().setScaling(scene.eye().scaling() * 1.1f);
+      scene.eye().setMagnitude(scene.eye().magnitude() * 1.1f);
     if (key == '-')
-      scene.eye().setScaling(scene.eye().scaling() / 1.1f);
+      scene.eye().setMagnitude(scene.eye().magnitude() / 1.1f);
   }
 
   @Override

@@ -30,10 +30,10 @@ public class Flock extends PApplet {
   public void setup() {
     scene = new Scene(this, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), 800);
     println(scene.fov());
-    println(scene.eye().magnitude());
+    println(scene.eye().worldMagnitude());
     scene.fit();
     println(scene.fov());
-    println(scene.eye().magnitude());
+    println(scene.eye().worldMagnitude());
     // create and fill the list of boids
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
@@ -84,7 +84,7 @@ public class Flock extends PApplet {
   // Sets current avatar as the eye reference and interpolate the eye to it
   void thirdPerson() {
     scene.eye().setReference(avatar);
-    avatar.setMagnitude(scene.eye());
+    avatar.setWorldMagnitude(scene.eye());
     scene.fit(avatar, 1);
   }
 
@@ -93,7 +93,7 @@ public class Flock extends PApplet {
     // same as: scene.eye().setReference(null);
     scene.eye().resetReference();
     scene.lookAt(scene.center());
-    avatar.setMagnitude(1);
+    avatar.setWorldMagnitude(1);
     scene.fit(1);
   }
 
@@ -144,7 +144,7 @@ public class Flock extends PApplet {
     switch (key) {
       case 'f':
           println(scene.fov());
-          println(scene.eye().magnitude());
+          println(scene.eye().worldMagnitude());
         break;
       case 'a':
         for (Boid boid : flock)
@@ -206,7 +206,7 @@ public class Flock extends PApplet {
       node = new Node(this::display);
       position = new Vector();
       position.set(inPos);
-      node.setPosition(new Vector(position.x(), position.y(), position.z()));
+      node.setWorldPosition(new Vector(position.x(), position.y(), position.z()));
       velocity = Vector.random();
       acceleration = new Vector();
       neighborhoodRadius = 100;
@@ -324,8 +324,8 @@ public class Flock extends PApplet {
       velocity.limit(maxSpeed); // make sure the velocity vector magnitude does not
       // exceed maxSpeed
       position.add(velocity); // add velocity to position
-      node.setPosition(position);
-      node.setRotation(Quaternion.multiply(Quaternion.from(Vector.plusJ, atan2(-velocity.z(), velocity.x())),
+      node.setWorldPosition(position);
+      node.setOrientation(Quaternion.multiply(Quaternion.from(Vector.plusJ, atan2(-velocity.z(), velocity.x())),
               Quaternion.from(Vector.plusK, asin(velocity.y() / velocity.magnitude()))));
       acceleration.multiply(0); // reset acceleration
     }

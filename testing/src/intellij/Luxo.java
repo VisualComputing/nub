@@ -83,13 +83,13 @@ public class Luxo extends PApplet {
       }
 
       // Initialize nodes
-      node(1).setTranslation(0f, 0f, 8f); // Base height
-      node(2).setTranslation(0, 0, 50);  // Arm length
-      node(3).setTranslation(0, 0, 50);  // Arm length
+      node(1).setPosition(0f, 0f, 8f); // Base height
+      node(2).setPosition(0, 0, 50);  // Arm length
+      node(3).setPosition(0, 0, 50);  // Arm length
 
-      node(1).setRotation(new Quaternion(new Vector(1.0f, 0.0f, 0.0f), 0.6f));
-      node(2).setRotation(new Quaternion(new Vector(1.0f, 0.0f, 0.0f), -2.0f));
-      node(3).setRotation(new Quaternion(new Vector(1.0f, -0.3f, 0.0f), -1.7f));
+      node(1).setOrientation(new Quaternion(new Vector(1.0f, 0.0f, 0.0f), 0.6f));
+      node(2).setOrientation(new Quaternion(new Vector(1.0f, 0.0f, 0.0f), -2.0f));
+      node(3).setOrientation(new Quaternion(new Vector(1.0f, -0.3f, 0.0f), -1.7f));
 
       // Set node graphics modes
       node(0).mode = 1;

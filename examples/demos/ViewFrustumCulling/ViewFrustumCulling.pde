@@ -54,13 +54,13 @@ void buildOctree(Node parent) {
 }
 
 float level(Node node) {
-  return 1 - log(node.magnitude()) / log(2);
+  return 1 - log(node.worldMagnitude()) / log(2);
 }
 
 Node node(Node parent, Vector vector) {
   Node node = new Node(parent);
   node.scale(parent == null ? 1 : 0.5);
-  node.translate(Vector.multiply(vector, node.scaling() / 2));
+  node.translate(Vector.multiply(vector, node.magnitude() / 2));
   node.tagging = false;
   node.setShape((PGraphics pg) -> {
     float level = level(node);

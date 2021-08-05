@@ -42,12 +42,12 @@ public class Basics extends PApplet {
     // */
     //node = new Node();
     node.enableHint(Node.BULLSEYE);
-    node.setRotation(Quaternion.random());
+    node.setOrientation(Quaternion.random());
     println(node.isHintEnabled(Node.SHAPE));
     //shape = new Node(scene, shape());
     shape = new Node();
     shape.setShape(shape());
-    shape.setRotation(Quaternion.random());
+    shape.setOrientation(Quaternion.random());
     shape.translate(275, 275, 275);
   }
 

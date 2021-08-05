@@ -25,7 +25,7 @@ public class CajasOrientadas extends PApplet {
     scene.togglePerspective();
     scene.fit();
     esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);
-    esfera.setPosition(new Vector(0, 1.4f, 0));
+    esfera.setWorldPosition(new Vector(0, 1.4f, 0));
     cajas = new Box[15];
     for (int i = 0; i < cajas.length; i++)
       cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)),
@@ -132,8 +132,8 @@ public class CajasOrientadas extends PApplet {
     }
 
     public void visit(Graph graph) {
-      Vector to = Vector.subtract(esfera.position(), position());
-      setOrientation(Quaternion.from(Vector.plusJ, to));
+      Vector to = Vector.subtract(esfera.worldPosition(), worldPosition());
+      setWorldOrientation(Quaternion.from(Vector.plusJ, to));
     }
   }
 

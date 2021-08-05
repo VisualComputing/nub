@@ -37,7 +37,7 @@ public class Orbit extends PApplet {
         pGraphics.rect(10, 10, 200, 200);
       pGraphics.popStyle();
     });
-    shape1.setRotation(Quaternion.random());
+    shape1.setOrientation(Quaternion.random());
     shape1.translate(-375, 175, -275);
 
     //shape2 = new Node(shape1);

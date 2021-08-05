@@ -54,7 +54,7 @@ public class MouseDragInteraction extends PApplet {
       pGraphics.popStyle();
     }
     );
-    shape1.setRotation(Quaternion.random());
+    shape1.setOrientation(Quaternion.random());
     shape1.translate(-375, 175, 0);
 
     shape2 = new Node(shape1, (PGraphics pGraphics) -> {
@@ -115,9 +115,9 @@ public class MouseDragInteraction extends PApplet {
       }
     }
     if (key == 'q') {
-      println(shape2.orientation().toString());
+      println(shape2.worldOrientation().toString());
       //Quaternion q = shape2.worldDisplacement(new Quaternion());
-      Quaternion q = shape2.worldDisplacement(shape2.rotation());
+      Quaternion q = shape2.worldDisplacement(shape2.orientation());
       println(q.toString());
     }
     if (key == 'a')

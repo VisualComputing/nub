@@ -73,10 +73,10 @@ public class ShadowMapping extends PApplet {
     animation = new TimingTask(() -> {
       if (!scene.isTagged(light)) {
         float lightAngle = frameCount * 0.002f;
-        light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
+        light.setWorldPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
       }
       light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), Vector.plusJ));
-      light.setZAxis(light.position());
+      light.setZAxis(light.worldPosition());
     });
     animation.run(60);
     frameRate(1000);
@@ -152,11 +152,11 @@ public class ShadowMapping extends PApplet {
     } else if (key == ' ') {
       if (shadowMapScene.type() == Graph.Type.PERSPECTIVE) {
         shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
-        light.setMagnitude(1);
+        light.setWorldMagnitude(1);
       }
       else {
         shadowMapScene.setType(Graph.Type.PERSPECTIVE);
-        light.setMagnitude(tan(fov / 2));
+        light.setWorldMagnitude(tan(fov / 2));
       }
     } else if (key == 'd') {
       light.toggleHint(Node.BULLSEYE | Node.AXES | Node.CAMERA | Node.BOUNDS);

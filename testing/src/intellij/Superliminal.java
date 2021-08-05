@@ -110,7 +110,7 @@ public class Superliminal extends PApplet {
       super();
       setShape(pg -> {
         //this.radius = this.radiusInPixels;
-        this.radius = this.radiusInPixels * scene.sceneToPixelRatio(position());
+        this.radius = this.radiusInPixels * scene.sceneToPixelRatio(worldPosition());
         pg.pushStyle();
         pg.stroke(strokeCol);
         pg.fill(fillCol);
@@ -161,7 +161,7 @@ public class Superliminal extends PApplet {
       //scene.translateNode(node, 0, 0, amount / 50, Scene.inertia);
       ///*
       if (scene.type() == Graph.Type.PERSPECTIVE) {
-        Vector v = Vector.subtract(node.position(), eye.position());
+        Vector v = Vector.subtract(node.worldPosition(), eye.worldPosition());
         v.normalize();
         v.multiply(amount * 100);
         node.translate(v, Scene.inertia);

@@ -28,34 +28,20 @@ import java.util.function.Consumer;
 
 /**
  * A node encapsulates a 2D or 3D coordinate system, represented by a {@link #position()}, an
- * {@link #orientation()} and {@link #magnitude()}. The order of these transformations is
- * important: the node is first translated, then rotated around the new translated origin
- * and then scaled. This class API partially conforms that of the great
- * <a href="http://libqglviewer.com/refManual/classqglviewer_1_1Frame.html">libQGLViewer</a>.
+ * {@link #orientation()} and {@link #magnitude()} defined respect to a {@link #reference()} node.
+ * The order of these transformations is important: the node is first translated, then rotated
+ * around the new translated origin and then scaled.
  * <h2>Hierarchy of nodes</h2>
- * The node position, orientation and magnitude are actually defined with respect to
- * a {@link #reference()} node. The default {@link #reference()} is the world
- * coordinate system (represented by a {@code null} {@link #reference()}). If you
- * {@link #setReference(Node)} to a different node, you must then differentiate:
+ * The default {@link #reference()} node is the world coordinate system
+ * (represented by a {@code null}). If you {@link #setReference(Node)} to a different node,
+ * you must then differentiate:
  * <ul>
- * <li>The <b>local</b> {@link #translation()}, {@link #rotation()} and {@link #scaling()},
+ * <li>The <b>local</b> {@link #position()}, {@link #orientation()} and {@link #magnitude()},
  * defined with respect to the {@link #reference()} which represents an angle preserving
  * transformation of space.</li>
- * <li>The <b>global</b> {@link #position()}, {@link #orientation()} and
- * {@link #magnitude()}, always defined with respect to the world coordinate system.</li>
+ * <li>The <b>global</b> {@link #worldPosition()}, {@link #worldOrientation()} and
+ * {@link #worldMagnitude()}, always defined with respect to the world coordinate system.</li>
  * </ul>
- * <p>
- * A node is actually defined by its {@link #translation()} with respect to its
- * {@link #reference()}, then by {@link #rotation()} of the coordinate system around
- * the new translated origin and then by a uniform positive {@link #scaling()} along its
- * rotated axes.
- * <p>
- * This terminology for <b>local</b> ({@link #translation()}, {@link #rotation()} and
- * {@link #scaling()}) and <b>global</b> ({@link #position()}, {@link #orientation()} and
- * {@link #magnitude()}) definitions is used in all the methods' names and should be
- * enough to prevent ambiguities. These notions are obviously identical when the
- * {@link #reference()} is {@code null}, i.e., when the node is defined in the world
- * coordinate system (the one you are left with after calling a graph preDraw() method).
  * <h2>Geometry transformations</h2>
  * A node is useful to define the position, orientation and magnitude of an arbitrary object
  * which may represent a point-of-view.
@@ -126,20 +112,20 @@ import java.util.function.Consumer;
  */
 public class Node {
   /**
-   * Returns whether or not this node matches other taking into account the {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()} node parameters, but not its {@link #reference()}.
+   * Returns whether or not this node matches other taking into account the {@link #position()},
+   * {@link #orientation()} and {@link #magnitude()} node parameters, but not its {@link #reference()}.
    *
    * @param node node
    */
   public boolean matches(Node node) {
     if (node == null)
       node = Node.detach(new Vector(), new Quaternion(), 1);
-    return translation().matches(node.translation()) && rotation().matches(node.rotation()) && scaling() == node.scaling();
+    return position().matches(node.position()) && orientation().matches(node.orientation()) && magnitude() == node.magnitude();
   }
 
-  protected Vector _translation;
-  protected float _scaling;
-  protected Quaternion _rotation;
+  protected Vector _position;
+  protected float _magnitude;
+  protected Quaternion _orientation;
   protected Node _reference;
   protected Constraint _constraint;
   protected long _lastUpdate;
@@ -209,30 +195,30 @@ public class Node {
   }
 
   /**
-   * Same as {@code this(null, null, translation, new Quaternion(), 1)}.
+   * Same as {@code this(null, null, position, new Quaternion(), 1)}.
    *
    * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Vector translation) {
-    this(null, null, translation, new Quaternion(), 1);
+  public Node(Vector position) {
+    this(null, null, position, new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(null, null, translation, rotation, 1)}.
+   * Same as {@code this(null, null, position, orientation, 1)}.
    *
    * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Vector translation, Quaternion rotation) {
-    this(null, null, translation, rotation, 1);
+  public Node(Vector position, Quaternion orientation) {
+    this(null, null, position, orientation, 1);
   }
 
   /**
-   * Same as {@code this(null, null, translation, rotation, scaling)}.
+   * Same as {@code this(null, null, position, orientation, magnitude)}.
    *
    * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Vector translation, Quaternion rotation, float scaling) {
-    this(null, null, translation, rotation, scaling);
+  public Node(Vector position, Quaternion orientation, float magnitude) {
+    this(null, null, position, orientation, magnitude);
   }
 
   /**
@@ -245,30 +231,30 @@ public class Node {
   }
 
   /**
-   * Same as {@code this(reference, null, translation, new Quaternion(), 1)}.
+   * Same as {@code this(reference, null, position, new Quaternion(), 1)}.
    *
    * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Node reference, Vector translation) {
-    this(reference, null, translation, new Quaternion(), 1);
+  public Node(Node reference, Vector position) {
+    this(reference, null, position, new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(reference, null, translation, rotation, 1)}.
+   * Same as {@code this(reference, null, position, orientation, 1)}.
    *
    * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Node reference, Vector translation, Quaternion rotation) {
-    this(reference, null, translation, rotation, 1);
+  public Node(Node reference, Vector position, Quaternion orientation) {
+    this(reference, null, position, orientation, 1);
   }
 
   /**
-   * Same as {@code this(reference, null, translation, rotation, scaling)}.
+   * Same as {@code this(reference, null, position, orientation, magnitude)}.
    *
    * @see #Node(Node, Constraint, Vector, Quaternion, float)
    */
-  public Node(Node reference, Vector translation, Quaternion rotation, float scaling) {
-    this(reference, null, translation, rotation, scaling);
+  public Node(Node reference, Vector position, Quaternion orientation, float magnitude) {
+    this(reference, null, position, orientation, magnitude);
   }
 
   /**
@@ -291,13 +277,13 @@ public class Node {
 
   /**
    * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
-   * as {@link #constraint()}, having {@code translation}, {@code rotation} and {@code scaling} as
-   * the {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
+   * as {@link #constraint()}, having {@code position}, {@code orientation} and {@code magnitude} as
+   * the {@link #position()}, {@link #orientation()} and {@link #magnitude()}, respectively.
    * The {@link #bullsEyeSize()} is set to {@code 0.2} and the {@link #highlight()} hint
    * magnitude to {@code 0.15}.
    */
-  public Node(Node reference, Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
-    this(constraint, translation, rotation, scaling);
+  public Node(Node reference, Constraint constraint, Vector position, Quaternion orientation, float magnitude) {
+    this(constraint, position, orientation, magnitude);
     _reference = reference;
     _restorePath(reference(), this);
     if (reference == null || reference.isReachable())
@@ -318,11 +304,11 @@ public class Node {
    * Internally used by both {@link #Node(Node, Constraint, Vector, Quaternion, float)}
    * (attached nodes) and {@link #detach(Constraint, Vector, Quaternion, float)} (detached nodes).
    */
-  protected Node(Constraint constraint, Vector translation, Quaternion rotation, float scaling) {
+  protected Node(Constraint constraint, Vector position, Quaternion orientation, float magnitude) {
     setConstraint(constraint);
-    setTranslation(translation);
-    setRotation(rotation);
-    setScaling(scaling);
+    setPosition(position);
+    setOrientation(orientation);
+    setMagnitude(magnitude);
     enablePicking(CAMERA | AXES | HUD | SHAPE | BOUNDS | BULLSEYE | TORUS | CONSTRAINT | BONE);
     _id = ++_counter;
     // unlikely but theoretically possible
@@ -404,20 +390,20 @@ public class Node {
     this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
   }
 
-  public Node(Node reference, Constraint constraint, Consumer<processing.core.PGraphics> shape, Vector translation, Quaternion rotation, float scaling) {
-    this(reference, constraint, translation, rotation, scaling);
+  public Node(Node reference, Constraint constraint, Consumer<processing.core.PGraphics> shape, Vector position, Quaternion orientation, float magnitude) {
+    this(reference, constraint, position, orientation, magnitude);
     setShape(shape);
   }
 
   /**
    * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
-   * as {@link #constraint()}, {@code shape}, having {@code translation},
-   * {@code rotation} and {@code scaling} as the {@link #translation()}, {@link #rotation()}
-   * and {@link #scaling()}, respectively. The {@link #bullsEyeSize()} is set to
+   * as {@link #constraint()}, {@code shape}, having {@code position},
+   * {@code orientation} and {@code magnitude} as the {@link #position()}, {@link #orientation()}
+   * and {@link #magnitude()}, respectively. The {@link #bullsEyeSize()} is set to
    * {@code 0} and the {@link #highlight()} hint to {@code 0.15}.
    */
-  public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector translation, Quaternion rotation, float scaling) {
-    this(reference, constraint, translation, rotation, scaling);
+  public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector position, Quaternion orientation, float magnitude) {
+    this(reference, constraint, position, orientation, magnitude);
     setShape(shape);
   }
 
@@ -443,7 +429,7 @@ public class Node {
    * @see #detach(Vector, Quaternion, float)
    */
   public static Node detach(Node node) {
-    return Node.detach(node.position(), node.orientation(), node.magnitude());
+    return Node.detach(node.worldPosition(), node.worldOrientation(), node.worldMagnitude());
   }
 
   /**
@@ -500,12 +486,12 @@ public class Node {
    */
   @Override
   public String toString() {
-    return "Position: " + position().toString() + " Orientation: " + orientation().toString() + " Magnitude: " + Float.toString(magnitude());
+    return "Position: " + worldPosition().toString() + " Orientation: " + worldOrientation().toString() + " Magnitude: " + Float.toString(worldMagnitude());
   }
 
   /**
-   * Performs a deep copy of this node and returns it. Only the {@link #position()},
-   * {@link #orientation()} and {@link #magnitude()} of the node are copied.
+   * Performs a deep copy of this node and returns it. Only the {@link #worldPosition()},
+   * {@link #worldOrientation()} and {@link #worldMagnitude()} of the node are copied.
    *
    * @see #detach()
    */
@@ -518,7 +504,7 @@ public class Node {
   }
 
   /**
-   * Sets {@link #position()}, {@link #orientation()}, {@link #magnitude()},
+   * Sets {@link #worldPosition()}, {@link #worldOrientation()}, {@link #worldMagnitude()},
    * {@link #hint()} and {@link #picking()} values from those of the {@code node}.
    * The node {@link #reference()} and {@link #constraint()}
    * are not affected by this call.
@@ -528,14 +514,14 @@ public class Node {
    *
    * @see #reset()
    * @see #worldMatrix()
-   * @see #setPosition(Node)
-   * @see #setOrientation(Node)
-   * @see #setMagnitude(Node)
+   * @see #setWorldPosition(Node)
+   * @see #setWorldOrientation(Node)
+   * @see #setWorldMagnitude(Node)
    */
   public void set(Node node) {
-    setPosition(node);
-    setOrientation(node);
-    setMagnitude(node);
+    setWorldPosition(node);
+    setWorldOrientation(node);
+    setWorldMagnitude(node);
     _mask = node.hint();
     _picking = node.picking();
     setShape(node);
@@ -551,18 +537,18 @@ public class Node {
   }
 
   /**
-   * Sets an identity node by resetting its {@link #translation()}, {@link #rotation()}
-   * and {@link #scaling()}. The node {@link #reference()} and {@link #constraint()}
+   * Sets an identity node by resetting its {@link #position()}, {@link #orientation()}
+   * and {@link #magnitude()}. The node {@link #reference()} and {@link #constraint()}
    * are not affected by this call. Call {@code set(null)} if you want to reset the
-   * global {@link #position()}, {@link #orientation()} and {@link #magnitude()} node
+   * global {@link #worldPosition()}, {@link #worldOrientation()} and {@link #worldMagnitude()} node
    * parameters instead.
    *
    * @see #set(Node)
    */
   public void reset() {
-    setTranslation(new Vector());
-    setRotation(new Quaternion());
-    setScaling(1);
+    setPosition(new Vector());
+    setOrientation(new Quaternion());
+    setMagnitude(1);
   }
 
   // colorID
@@ -586,8 +572,8 @@ public class Node {
   // MODIFIED
 
   /**
-   * @return the last frame this node affine transformation ({@link #position()},
-   * {@link #orientation()} or {@link #magnitude()}) or {@link #reference()} was updated.
+   * @return the last frame this node affine transformation ({@link #worldPosition()},
+   * {@link #worldOrientation()} or {@link #worldMagnitude()}) or {@link #reference()} was updated.
    */
   public long lastUpdate() {
     return _lastUpdate;
@@ -669,12 +655,12 @@ public class Node {
   /**
    * Returns the reference node, in which this node is defined.
    * <p>
-   * The node {@link #translation()}, {@link #rotation()} and {@link #scaling()} are
+   * The node {@link #position()}, {@link #orientation()} and {@link #magnitude()} are
    * defined with respect to the {@link #reference()} coordinate system. A
    * {@code null} reference node (default value) means that the node is defined in the
    * world coordinate system.
    * <p>
-   * Use {@link #position()}, {@link #orientation()} and {@link #magnitude()} to
+   * Use {@link #worldPosition()}, {@link #worldOrientation()} and {@link #worldMagnitude()} to
    * recursively convert values along the reference node chain and to get values
    * expressed in the world coordinate system. The values match when the reference node
    * is {@code null}.
@@ -701,10 +687,10 @@ public class Node {
   /**
    * Sets the {@link #reference()} of the node.
    * <p>
-   * The node {@link #translation()}, {@link #rotation()} and {@link #scaling()} are then
+   * The node {@link #position()}, {@link #orientation()} and {@link #magnitude()} are then
    * defined in the {@link #reference()} coordinate system.
    * <p>
-   * Use {@link #position()}, {@link #orientation()} and {@link #magnitude()} to express
+   * Use {@link #worldPosition()}, {@link #worldOrientation()} and {@link #worldMagnitude()} to express
    * the node global transformation in the world coordinate system.
    * <p>
    * Using this method, you can create a hierarchy of nodes. This hierarchy needs to be a
@@ -738,9 +724,9 @@ public class Node {
       nowReachable = node.isReachable();
     }
     // 2. cache prev state
-    Vector position = position = this.position().get();
-    Quaternion orientation = this.orientation().get();
-    float magnitude = this.magnitude();
+    Vector position = position = this.worldPosition().get();
+    Quaternion orientation = this.worldOrientation().get();
+    float magnitude = this.worldMagnitude();
     // 3. temporarily remove node from the graph while setting new reference
     if (reference() != null) {
       reference()._removeChild(this);
@@ -767,9 +753,9 @@ public class Node {
       }
     }
     // 6. restore cache prev state (step 2. above)
-    this.setPosition(position);
-    this.setOrientation(orientation);
-    this.setMagnitude(magnitude);
+    this.setWorldPosition(position);
+    this.setWorldOrientation(orientation);
+    this.setWorldMagnitude(magnitude);
     _modified();
   }
 
@@ -892,7 +878,7 @@ public class Node {
   /**
    * Randomized this node. The node is randomly re-positioned inside the ball
    * defined by {@code center} and {@code radius}, which in 2D is a
-   * circumference parallel to the x-y plane. The {@link #orientation()} is
+   * circumference parallel to the x-y plane. The {@link #worldOrientation()} is
    * randomized by {@link Quaternion#randomize()}. The new magnitude is a random
    * in old-magnitude * [0,5...2].
    *
@@ -913,16 +899,16 @@ public class Node {
       quaternion = new Quaternion(new Vector(0, 0, 1), _random(0, 2 * (float) Math.PI));
     }
     displacement.setMagnitude(_random(radius * 0.1f, radius * 0.9f));
-    setPosition(Vector.add(center, displacement));
-    setOrientation(quaternion);
-    setMagnitude(magnitude() * _random(0.5f, 2));
+    setWorldPosition(Vector.add(center, displacement));
+    setWorldOrientation(quaternion);
+    setWorldMagnitude(worldMagnitude() * _random(0.5f, 2));
   }
 
   /**
    * Returns a random node attached to {@code graph}. The node is randomly positioned inside
    * the {@code graph} viewing volume which is defined by {@link Graph#center()} and {@link Graph#radius()}
-   * (see {@link Vector#random()}). The {@link #orientation()} is set by {@link Quaternion#random()}. The
-   * {@link #magnitude()} is a random in [0,5...2].
+   * (see {@link Vector#random()}). The {@link #worldOrientation()} is set by {@link Quaternion#random()}. The
+   * {@link #worldMagnitude()} is a random in [0,5...2].
    *
    * @see #random(Vector, float, boolean)
    * @see Vector#random()
@@ -938,8 +924,8 @@ public class Node {
   /**
    * Returns a random node. The node is randomly positioned inside the ball defined
    * by {@code center} and {@code radius} (see {@link Vector#random()}), which in 2D is a
-   * circumference parallel to the x-y plane. The {@link #orientation()} is set by
-   * {@link Quaternion#random()}. The {@link #magnitude()} is a random in [0,5...2].
+   * circumference parallel to the x-y plane. The {@link #worldOrientation()} is set by
+   * {@link Quaternion#random()}. The {@link #worldMagnitude()} is a random in [0,5...2].
    *
    * @see #random(Graph)
    * @see Vector#random()
@@ -1013,7 +999,7 @@ public class Node {
    * Returns the current {@link Constraint} applied to the node.
    * <p>
    * A {@code null} value (default) means that no constraint is used to filter the node
-   * translation and rotation.
+   * position and orientation.
    * <p>
    * See the Constraint class documentation for details.
    */
@@ -1043,48 +1029,48 @@ public class Node {
   // TRANSLATION
 
   /**
-   * Returns the node translation, defined with respect to the {@link #reference()}.
+   * Returns the node position, defined with respect to the {@link #reference()}.
    * <p>
-   * Use {@link #position()} to get the result in world coordinates. These two values are
+   * Use {@link #worldPosition()} to get the result in world coordinates. These two values are
    * identical when the {@link #reference()} is {@code null} (default).
    *
-   * @see #setTranslation(Vector)
+   * @see #setPosition(Vector)
    */
-  public Vector translation() {
-    return _translation;
+  public Vector position() {
+    return _position;
   }
 
   /**
-   * Sets the {@link #translation()} of the node, locally defined with respect to the
+   * Sets the {@link #position()} of the node, locally defined with respect to the
    * {@link #reference()}.
    * <p>
    * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    * <p>
-   * Use {@link #setPosition(Vector)} to define the world coordinates {@link #position()}.
+   * Use {@link #setWorldPosition(Vector)} to define the world coordinates {@link #worldPosition()}.
    *
    * @see #setConstraint(Constraint)
    */
-  public void setTranslation(Vector translation) {
+  public void setPosition(Vector position) {
     if (constraint() == null)
-      _translation = translation;
+      _position = position;
     else
-      translation().add(constraint().constrainTranslation(Vector.subtract(translation, this.translation()), this));
+      position().add(constraint().constrainTranslation(Vector.subtract(position, this.position()), this));
     _modified();
   }
 
   /**
-   * Same as {@link #setTranslation(Vector)}, but with {@code float} parameters.
+   * Same as {@link #setPosition(Vector)}, but with {@code float} parameters.
    */
-  public void setTranslation(float x, float y) {
-    setTranslation(new Vector(x, y));
+  public void setPosition(float x, float y) {
+    setPosition(new Vector(x, y));
   }
 
   /**
-   * Same as {@link #setTranslation(Vector)}, but with {@code float} parameters.
+   * Same as {@link #setPosition(Vector)}, but with {@code float} parameters.
    */
-  public void setTranslation(float x, float y, float z) {
-    setTranslation(new Vector(x, y, z));
+  public void setPosition(float x, float y, float z) {
+    setPosition(new Vector(x, y, z));
   }
 
   /**
@@ -1138,7 +1124,7 @@ public class Node {
    * @see #translate(Vector, float)
    */
   public void translate(Vector vector) {
-    translation().add(constraint() != null ? constraint().constrainTranslation(vector, this) : vector);
+    position().add(constraint() != null ? constraint().constrainTranslation(vector, this) : vector);
     _modified();
   }
 
@@ -1147,29 +1133,29 @@ public class Node {
   /**
    * Returns the node position defined in the world coordinate system.
    *
-   * @see #orientation()
-   * @see #magnitude()
-   * @see #setPosition(Vector)
-   * @see #translation()
+   * @see #worldOrientation()
+   * @see #worldMagnitude()
+   * @see #setWorldPosition(Vector)
+   * @see #position()
    */
-  public Vector position() {
+  public Vector worldPosition() {
     return worldLocation(new Vector());
   }
 
   /**
-   * Sets the {@link #position()} to that of {@code node}.
+   * Sets the {@link #worldPosition()} to that of {@code node}.
    *
-   * @see #setPosition(Vector)
+   * @see #setWorldPosition(Vector)
    * @see #set(Node)
    */
-  public void setPosition(Node node) {
-    setPosition(node == null ? new Vector() : node.position());
+  public void setWorldPosition(Node node) {
+    setWorldPosition(node == null ? new Vector() : node.worldPosition());
   }
 
   /**
-   * Sets the node {@link #position()}, defined in the world coordinate system.
+   * Sets the node {@link #worldPosition()}, defined in the world coordinate system.
    * <p>
-   * Use {@link #setTranslation(Vector)} to define the local node translation (with respect
+   * Use {@link #setPosition(Vector)} to define the local node position (with respect
    * to the {@link #reference()}).
    * <p>
    * Note that the potential {@link #constraint()} of the node is taken into account, i.e.,
@@ -1177,73 +1163,71 @@ public class Node {
    *
    * @see #setConstraint(Constraint)
    */
-  public void setPosition(Vector position) {
-    setTranslation(reference() != null ? reference().location(position) : position);
+  public void setWorldPosition(Vector position) {
+    setPosition(reference() != null ? reference().location(position) : position);
   }
 
   /**
-   * Same as {@link #setPosition(Vector)}, but with {@code float} parameters.
+   * Same as {@link #setWorldPosition(Vector)}, but with {@code float} parameters.
    */
-  public void setPosition(float x, float y) {
-    setPosition(new Vector(x, y));
+  public void setWorldPosition(float x, float y) {
+    setWorldPosition(new Vector(x, y));
   }
 
   /**
-   * Same as {@link #setPosition(Vector)}, but with {@code float} parameters.
+   * Same as {@link #setWorldPosition(Vector)}, but with {@code float} parameters.
    */
-  public void setPosition(float x, float y, float z) {
-    setPosition(new Vector(x, y, z));
+  public void setWorldPosition(float x, float y, float z) {
+    setWorldPosition(new Vector(x, y, z));
   }
 
   // ROTATION
 
   /**
-   * Returns the node rotation, defined with respect to the {@link #reference()}
+   * Returns the node orientation, defined with respect to the {@link #reference()}
    * (i.e, the current Quaternion orientation).
    * <p>
-   * Use {@link #orientation()} to get the result in world coordinates. These two values
+   * Use {@link #worldOrientation()} to get the result in world coordinates. These two values
    * are identical when the {@link #reference()} is {@code null} (default).
    *
-   * @see #setRotation(Quaternion)
+   * @see #setOrientation(Quaternion)
    */
-  public Quaternion rotation() {
-    return _rotation;
+  public Quaternion orientation() {
+    return _orientation;
   }
 
   /**
-   * Same as {@link #setRotation(Quaternion)} but with {@code float} Quaternion parameters.
+   * Same as {@link #setOrientation(Quaternion)} but with {@code float} Quaternion parameters.
    */
-  public void setRotation(float x, float y, float z, float w) {
-    setRotation(new Quaternion(x, y, z, w));
+  public void setOrientation(float x, float y, float z, float w) {
+    setOrientation(new Quaternion(x, y, z, w));
   }
 
   /**
-   * Set the current rotation. See the different {@link Quaternion} constructors.
-   * <p>
-   * Sets the node {@link #rotation()}, locally defined with respect to the
-   * {@link #reference()}. Use {@link #setOrientation(Quaternion)} to define the
-   * world coordinates {@link #orientation()}.
+   * Sets the node {@link #orientation()}, locally defined with respect to the
+   * {@link #reference()}. Use {@link #setWorldOrientation(Quaternion)} to define the
+   * world coordinates {@link #worldOrientation()}.
    * <p>
    * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
    * @see #setConstraint(Constraint)
-   * @see #rotation()
-   * @see #setTranslation(Vector)
+   * @see #orientation()
+   * @see #setPosition(Vector)
    */
-  public void setRotation(Quaternion rotation) {
+  public void setOrientation(Quaternion orientation) {
     if (constraint() == null)
-      _rotation = rotation;
+      _orientation = orientation;
     else {
-      rotation().compose(constraint().constrainRotation(Quaternion.compose(rotation().inverse(), rotation), this));
-      rotation().normalize(); // Prevents numerical drift
+      orientation().compose(constraint().constrainRotation(Quaternion.compose(orientation().inverse(), orientation), this));
+      orientation().normalize(); // Prevents numerical drift
     }
     _modified();
   }
 
   /**
    * Rotates the node by {@code quaternion} (defined in the node coordinate system):
-   * {@code rotation().compose(quaternion)} and with an impulse defined with
+   * {@code orientation().compose(quaternion)} and with an impulse defined with
    * {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * <p>
    * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
@@ -1275,8 +1259,8 @@ public class Node {
    * @see #rotate(Quaternion, float)
    */
   public void rotate(Quaternion quaternion) {
-    rotation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
-    rotation().normalize(); // Prevents numerical drift
+    orientation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
+    orientation().normalize(); // Prevents numerical drift
     _modified();
   }
 
@@ -1354,14 +1338,14 @@ public class Node {
   protected void _orbit(Quaternion quaternion, Vector center) {
     if (constraint() != null)
       quaternion = constraint().constrainRotation(quaternion, this);
-    rotation().compose(quaternion);
-    rotation().normalize(); // Prevents numerical drift
+    orientation().compose(quaternion);
+    orientation().normalize(); // Prevents numerical drift
 
     // Original in nodes-0.1.x and proscene:
     //Vector vector = Vector.add(center, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), center)));
     // TODO test node hierarchy, we are using worldDisplacement instead of orientation().rotate
-    Vector vector = Vector.add(center, (new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), center)));
-    vector.subtract(translation());
+    Vector vector = Vector.add(center, (new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(worldPosition(), center)));
+    vector.subtract(position());
     translate(vector);
 
     // Previous three lines are equivalent to:
@@ -1370,7 +1354,7 @@ public class Node {
     Vector center2Position = Vector.subtract(position(), center);
     Vector center2PositionRotated = worldQuaternion.rotate(center2Position);
     Vector vector = Vector.add(center, center2PositionRotated);
-    vector.subtract(translation());
+    vector.subtract(position());
     translate(vector);
     */
   }
@@ -1421,68 +1405,68 @@ public class Node {
   /**
    * Returns the orientation of the node, defined in the world coordinate system.
    *
-   * @see #position()
-   * @see #magnitude()
-   * @see #setOrientation(Quaternion)
-   * @see #rotation()
+   * @see #worldPosition()
+   * @see #worldMagnitude()
+   * @see #setWorldOrientation(Quaternion)
+   * @see #orientation()
    */
-  public Quaternion orientation() {
+  public Quaternion worldOrientation() {
     return worldDisplacement(new Quaternion());
   }
 
   /**
-   * Sets the {@link #orientation()} to that of {@code node}.
+   * Sets the {@link #worldOrientation()} to that of {@code node}.
    *
-   * @see #setOrientation(Quaternion)
+   * @see #setWorldOrientation(Quaternion)
    * @see #set(Node)
    */
-  public void setOrientation(Node node) {
-    setOrientation(node == null ? new Quaternion() : node.orientation());
+  public void setWorldOrientation(Node node) {
+    setWorldOrientation(node == null ? new Quaternion() : node.worldOrientation());
   }
 
   /**
-   * Sets the {@link #orientation()} of the node, defined in the world coordinate system.
+   * Sets the {@link #worldOrientation()} of the node, defined in the world coordinate system.
    * <p>
-   * Use {@link #setRotation(Quaternion)} to define the local node rotation (with respect
+   * Use {@link #setOrientation(Quaternion)} to define the local node orientation (with respect
    * to the {@link #reference()}).
    * <p>
    * Note that the potential {@link #constraint()} of the node is taken into account, i.e.,
    * to bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    */
-  public void setOrientation(Quaternion quaternion) {
-    setRotation(reference() != null ? reference().displacement(quaternion) : quaternion);
+  public void setWorldOrientation(Quaternion quaternion) {
+    setOrientation(reference() != null ? reference().displacement(quaternion) : quaternion);
   }
 
   /**
-   * Same as {@link #setOrientation(Quaternion)}, but with {@code float} parameters.
+   * Same as {@link #setWorldOrientation(Quaternion)}, but with {@code float} parameters.
    */
-  public void setOrientation(float x, float y, float z, float w) {
-    setOrientation(new Quaternion(x, y, z, w));
+  public void setWorldOrientation(float x, float y, float z, float w) {
+    setWorldOrientation(new Quaternion(x, y, z, w));
   }
 
   // SCALING
 
   /**
-   * Returns the node scaling, defined with respect to the {@link #reference()}.
+   * Returns the node magnitude, defined with respect to the {@link #reference()}.
    * <p>
-   * Use {@link #magnitude()} to get the result in world coordinates. These two values are
+   * Use {@link #worldMagnitude()} to get the result in world coordinates. These two values are
    * identical when the {@link #reference()} is {@code null} (default).
    *
-   * @see #setScaling(float)
+   * @see #setMagnitude(float)
    */
-  public float scaling() {
-    return _scaling;
+  public float magnitude() {
+    return _magnitude;
   }
 
   /**
-   * Sets the {@link #scaling()} of the node, locally defined with respect to the
+   * Sets the {@link #magnitude()} of the node, locally defined with respect to the
    * {@link #reference()}.
    * <p>
-   * Use {@link #setMagnitude(float)} to define the world coordinates {@link #magnitude()}.
+   * Use {@link #setWorldMagnitude(float)} to define the world coordinates {@link #worldMagnitude()}.
    */
-  public void setScaling(float scaling) {
-    if (scaling > 0) {
-      _scaling = scaling;
+  public void setMagnitude(float magnitude) {
+    if (magnitude > 0) {
+      _magnitude = magnitude;
       _modified();
     } else
       System.out.println("Warning. Scaling should be positive. Nothing done");
@@ -1517,7 +1501,7 @@ public class Node {
    * @see #scale(float, float)
    */
   public void scale(float scaling) {
-    setScaling(scaling() * scaling);
+    setMagnitude(magnitude() * scaling);
   }
 
   // MAGNITUDE
@@ -1528,34 +1512,34 @@ public class Node {
    * Note that the magnitude is used to compute the node {@link Graph#projection()}
    * matrix to render a scene from the node point-of-view.
    *
-   * @see #orientation()
+   * @see #worldOrientation()
+   * @see #worldPosition()
+   * @see #setWorldPosition(Vector)
    * @see #position()
-   * @see #setPosition(Vector)
-   * @see #translation()
    * @see Graph#projection()
    */
-  public float magnitude() {
-    return reference() != null ? reference().magnitude() * scaling() : scaling();
+  public float worldMagnitude() {
+    return reference() != null ? reference().worldMagnitude() * magnitude() : magnitude();
   }
 
   /**
-   * Sets the {@link #magnitude()} to that of {@code node}.
+   * Sets the {@link #worldMagnitude()} to that of {@code node}.
    *
-   * @see #setMagnitude(float)
+   * @see #setWorldMagnitude(float)
    * @see #set(Node)
    */
-  public void setMagnitude(Node node) {
-    setMagnitude(node == null ? 1 : node.magnitude());
+  public void setWorldMagnitude(Node node) {
+    setWorldMagnitude(node == null ? 1 : node.worldMagnitude());
   }
 
   /**
-   * Sets the {@link #magnitude()} of the node, defined in the world coordinate system.
+   * Sets the {@link #worldMagnitude()} of the node, defined in the world coordinate system.
    * <p>
-   * Use {@link #setScaling(float)} to define the local node scaling (with respect to the
+   * Use {@link #setMagnitude(float)} to define the local node magnitude (with respect to the
    * {@link #reference()}).
    */
-  public void setMagnitude(float magnitude) {
-    setScaling(reference() != null ? magnitude / reference().magnitude() : magnitude);
+  public void setWorldMagnitude(float magnitude) {
+    setMagnitude(reference() != null ? magnitude / reference().worldMagnitude() : magnitude);
     // option 2 mimics setOrientation (should produce same results)
     //setScaling(reference() != null ? reference().displacement(magnitude) : magnitude);
   }
@@ -1639,8 +1623,8 @@ public class Node {
    * {@code threshold} measures how close two axis must be to be considered parallel. It
    * is compared with the absolute values of the dot product of the normalized axis.
    * <p>
-   * When {@code move} is set to {@code true}, the Node {@link #position()} is also
-   * affected by the alignment. The new Node {@link #position()} is such that the
+   * When {@code move} is set to {@code true}, the Node {@link #worldPosition()} is also
+   * affected by the alignment. The new Node {@link #worldPosition()} is such that the
    * {@code node} node position (computed with {@link #location(Vector)}, in the Node
    * coordinates system) does not change.
    * <p>
@@ -1652,10 +1636,10 @@ public class Node {
     for (int d = 0; d < 3; ++d) {
       Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
       if (node != null)
-        directions[0][d] = node.orientation().rotate(dir);
+        directions[0][d] = node.worldOrientation().rotate(dir);
       else
         directions[0][d] = dir;
-      directions[1][d] = orientation().rotate(dir);
+      directions[1][d] = worldOrientation().rotate(dir);
     }
     float maxProj = 0.0f;
     float proj;
@@ -1684,13 +1668,13 @@ public class Node {
         angle = -angle;
       // setOrientation(Quaternion(axis, angle) * orientation());
       Quaternion q = new Quaternion(axis, angle);
-      q = Quaternion.multiply(rotation().inverse(), q);
-      q = Quaternion.multiply(q, orientation());
+      q = Quaternion.multiply(orientation().inverse(), q);
+      q = Quaternion.multiply(q, worldOrientation());
       rotate(q);
       // Try to align an other axis direction
       short d = (short) ((index[1] + 1) % 3);
       Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
-      dir = orientation().rotate(dir);
+      dir = worldOrientation().rotate(dir);
       float max = 0.0f;
       for (int i = 0; i < 3; ++i) {
         vector.set(directions[0][i]);
@@ -1709,35 +1693,35 @@ public class Node {
           angle = -angle;
         // setOrientation(Quaternion(axis, angle) * orientation());
         q.fromAxisAngle(axis, angle);
-        q = Quaternion.multiply(rotation().inverse(), q);
-        q = Quaternion.multiply(q, orientation());
+        q = Quaternion.multiply(orientation().inverse(), q);
+        q = Quaternion.multiply(q, worldOrientation());
         rotate(q);
       }
     }
     if (move) {
       Vector center = new Vector(0.0f, 0.0f, 0.0f);
       if (node != null)
-        center = node.position();
+        center = node.worldPosition();
       vector = Vector.subtract(center, worldDisplacement(old.location(center)));
-      vector.subtract(translation());
+      vector.subtract(position());
       translate(vector);
     }
   }
 
 
   /**
-   * Translates the node so that its {@link #position()} lies on the line defined by
+   * Translates the node so that its {@link #worldPosition()} lies on the line defined by
    * {@code origin} and {@code direction} (defined in the world coordinate system).
    * <p>
    * Simply uses an orthogonal projection. {@code direction} does not need to be
    * normalized.
    */
   public void projectOnLine(Vector origin, Vector direction) {
-    Vector position = position();
+    Vector position = worldPosition();
     Vector shift = Vector.subtract(origin, position);
     Vector proj = shift;
     proj = Vector.projectVectorOnAxis(proj, direction);
-    setPosition(Vector.add(position, Vector.subtract(shift, proj)));
+    setWorldPosition(Vector.add(position, Vector.subtract(shift, proj)));
   }
 
   /**
@@ -1804,7 +1788,7 @@ public class Node {
    */
   public Vector xAxis(boolean positive) {
     Vector axis = worldDisplacement(new Vector(positive ? 1.0f : -1.0f, 0.0f, 0.0f));
-    if (magnitude() != 1)
+    if (worldMagnitude() != 1)
       axis.normalize();
     return axis;
   }
@@ -1828,7 +1812,7 @@ public class Node {
    */
   public Vector yAxis(boolean positive) {
     Vector axis = worldDisplacement(new Vector(0.0f, positive ? 1.0f : -1.0f, 0.0f));
-    if (magnitude() != 1)
+    if (worldMagnitude() != 1)
       axis.normalize();
     return axis;
   }
@@ -1852,7 +1836,7 @@ public class Node {
    */
   public Vector zAxis(boolean positive) {
     Vector axis = worldDisplacement(new Vector(0.0f, 0.0f, positive ? 1.0f : -1.0f));
-    if (magnitude() != 1)
+    if (worldMagnitude() != 1)
       axis.normalize();
     return axis;
   }
@@ -1873,24 +1857,24 @@ public class Node {
    * @see #viewInverse()
    */
   public Matrix matrix() {
-    Matrix matrix = rotation().matrix();
+    Matrix matrix = orientation().matrix();
 
-    matrix._matrix[12] = translation()._vector[0];
-    matrix._matrix[13] = translation()._vector[1];
-    matrix._matrix[14] = translation()._vector[2];
+    matrix._matrix[12] = position()._vector[0];
+    matrix._matrix[13] = position()._vector[1];
+    matrix._matrix[14] = position()._vector[2];
 
-    if (scaling() != 1) {
-      matrix.setM00(matrix.m00() * scaling());
-      matrix.setM10(matrix.m10() * scaling());
-      matrix.setM20(matrix.m20() * scaling());
+    if (magnitude() != 1) {
+      matrix.setM00(matrix.m00() * magnitude());
+      matrix.setM10(matrix.m10() * magnitude());
+      matrix.setM20(matrix.m20() * magnitude());
 
-      matrix.setM01(matrix.m01() * scaling());
-      matrix.setM11(matrix.m11() * scaling());
-      matrix.setM21(matrix.m21() * scaling());
+      matrix.setM01(matrix.m01() * magnitude());
+      matrix.setM11(matrix.m11() * magnitude());
+      matrix.setM21(matrix.m21() * magnitude());
 
-      matrix.setM02(matrix.m02() * scaling());
-      matrix.setM12(matrix.m12() * scaling());
-      matrix.setM22(matrix.m22() * scaling());
+      matrix.setM02(matrix.m02() * magnitude());
+      matrix.setM12(matrix.m12() * magnitude());
+      matrix.setM22(matrix.m22() * magnitude());
     }
 
     return matrix;
@@ -1923,7 +1907,7 @@ public class Node {
   /**
    * Returns the inverse of the matrix associated with the node position and orientation that
    * is to be used when the node represents an eye. This matrix matches the inverted of the
-   * {@link #worldMatrix()} when {@link #scaling()} is {@code 1}.
+   * {@link #worldMatrix()} when {@link #magnitude()} is {@code 1}.
    * <p>
    * The view matrix converts from the world coordinates system to the eye coordinates system,
    * so that coordinates can then be projected on screen using a projection matrix.
@@ -1936,12 +1920,12 @@ public class Node {
    * @see #set(Node)
    */
   public Matrix view() {
-    return Matrix.view(position(), orientation());
+    return Matrix.view(worldPosition(), worldOrientation());
   }
 
   /**
    * Returns the inverse of the {@link #view()} matrix. This matrix matches the
-   * {@link #worldMatrix()} when {@link #magnitude()} is {@code 1}.
+   * {@link #worldMatrix()} when {@link #worldMagnitude()} is {@code 1}.
    * <p>
    * This matrix converts from the eye to world space.
    *
@@ -1951,12 +1935,12 @@ public class Node {
    * @see #set(Node)
    */
   public Matrix viewInverse() {
-    return Node.detach(position(), orientation(), 1).matrix();
+    return Node.detach(worldPosition(), worldOrientation(), 1).matrix();
   }
 
   /**
-   * Sets the node from a {@link #matrix()} representation: rotation and scaling in the upper
-   * left 3x3 matrix and translation on the last column.
+   * Sets the node from a {@link #matrix()} representation: orientation and magnitude in the upper
+   * left 3x3 matrix and position on the last column.
    * <p>
    * Hence, if your openGL code fragment looks like:
    * <p>
@@ -1985,7 +1969,7 @@ public class Node {
       return;
     }
 
-    setTranslation(
+    setPosition(
         matrix._matrix[12] / matrix._matrix[15],
         matrix._matrix[13] / matrix._matrix[15],
         matrix._matrix[14] / matrix._matrix[15]
@@ -1994,19 +1978,19 @@ public class Node {
     float r00 = matrix._matrix[0] / matrix._matrix[15];
     float r01 = matrix._matrix[4] / matrix._matrix[15];
     float r02 = matrix._matrix[8] / matrix._matrix[15];
-    setScaling(new Vector(r00, r01, r02).magnitude());// calls _modified() :P
+    setMagnitude(new Vector(r00, r01, r02).magnitude());// calls _modified() :P
 
     float[][] r = new float[3][3];
-    r[0][0] = r00 / scaling();
-    r[0][1] = r01 / scaling();
-    r[0][2] = r02 / scaling();
-    r[1][0] = (matrix._matrix[1] / matrix._matrix[15]) / scaling();
-    r[1][1] = (matrix._matrix[5] / matrix._matrix[15]) / scaling();
-    r[1][2] = (matrix._matrix[9] / matrix._matrix[15]) / scaling();
-    r[2][0] = (matrix._matrix[2] / matrix._matrix[15]) / scaling();
-    r[2][1] = (matrix._matrix[6] / matrix._matrix[15]) / scaling();
-    r[2][2] = (matrix._matrix[10] / matrix._matrix[15]) / scaling();
-    setRotation(new Quaternion(
+    r[0][0] = r00 / magnitude();
+    r[0][1] = r01 / magnitude();
+    r[0][2] = r02 / magnitude();
+    r[1][0] = (matrix._matrix[1] / matrix._matrix[15]) / magnitude();
+    r[1][1] = (matrix._matrix[5] / matrix._matrix[15]) / magnitude();
+    r[1][2] = (matrix._matrix[9] / matrix._matrix[15]) / magnitude();
+    r[2][0] = (matrix._matrix[2] / matrix._matrix[15]) / magnitude();
+    r[2][1] = (matrix._matrix[6] / matrix._matrix[15]) / magnitude();
+    r[2][2] = (matrix._matrix[10] / matrix._matrix[15]) / magnitude();
+    setOrientation(new Quaternion(
         new Vector(r[0][0], r[1][0], r[2][0]),
         new Vector(r[0][1], r[1][1], r[2][1]),
         new Vector(r[0][2], r[1][2], r[2][2]))
@@ -2042,7 +2026,7 @@ public class Node {
       return;
     }
 
-    setPosition(
+    setWorldPosition(
         matrix._matrix[12] / matrix._matrix[15],
         matrix._matrix[13] / matrix._matrix[15],
         matrix._matrix[14] / matrix._matrix[15]
@@ -2051,19 +2035,19 @@ public class Node {
     float r00 = matrix._matrix[0] / matrix._matrix[15];
     float r01 = matrix._matrix[4] / matrix._matrix[15];
     float r02 = matrix._matrix[8] / matrix._matrix[15];
-    setMagnitude(new Vector(r00, r01, r02).magnitude());// calls _modified() :P
+    setWorldMagnitude(new Vector(r00, r01, r02).magnitude());// calls _modified() :P
 
     float[][] r = new float[3][3];
-    r[0][0] = r00 / scaling();
-    r[0][1] = r01 / scaling();
-    r[0][2] = r02 / scaling();
-    r[1][0] = (matrix._matrix[1] / matrix._matrix[15]) / scaling();
-    r[1][1] = (matrix._matrix[5] / matrix._matrix[15]) / scaling();
-    r[1][2] = (matrix._matrix[9] / matrix._matrix[15]) / scaling();
-    r[2][0] = (matrix._matrix[2] / matrix._matrix[15]) / scaling();
-    r[2][1] = (matrix._matrix[6] / matrix._matrix[15]) / scaling();
-    r[2][2] = (matrix._matrix[10] / matrix._matrix[15]) / scaling();
-    setOrientation(new Quaternion(
+    r[0][0] = r00 / magnitude();
+    r[0][1] = r01 / magnitude();
+    r[0][2] = r02 / magnitude();
+    r[1][0] = (matrix._matrix[1] / matrix._matrix[15]) / magnitude();
+    r[1][1] = (matrix._matrix[5] / matrix._matrix[15]) / magnitude();
+    r[1][2] = (matrix._matrix[9] / matrix._matrix[15]) / magnitude();
+    r[2][0] = (matrix._matrix[2] / matrix._matrix[15]) / magnitude();
+    r[2][1] = (matrix._matrix[6] / matrix._matrix[15]) / magnitude();
+    r[2][2] = (matrix._matrix[10] / matrix._matrix[15]) / magnitude();
+    setWorldOrientation(new Quaternion(
         new Vector(r[0][0], r[1][0], r[2][0]),
         new Vector(r[0][1], r[1][1], r[2][1]),
         new Vector(r[0][2], r[1][2], r[2][2]))
@@ -2073,13 +2057,13 @@ public class Node {
   /**
    * Returns a node representing the inverse of this node space transformation.
    * <p>
-   * The new node {@link #rotation()} is the
-   * {@link Quaternion#inverse()} of the original rotation. Its
-   * {@link #translation()} is the negated inverse rotated image of the original
-   * translation. Its {@link #scaling()} is 1 / original scaling.
+   * The new node {@link #orientation()} is the
+   * {@link Quaternion#inverse()} of the original orientation. Its
+   * {@link #position()} is the negated inverse rotated image of the original
+   * position. Its {@link #magnitude()} is 1 / original magnitude.
    * <p>
-   * If a node is considered as a space rigid transformation, i.e., translation and
-   * rotation, but no scaling (scaling=1), the inverse() node performs the inverse
+   * If a node is considered as a space rigid transformation, i.e., position and
+   * orientation, but no magnitude (magnitude=1), the inverse() node performs the inverse
    * transformation.
    * <p>
    * Only the local node transformation (i.e., defined with respect to the
@@ -2092,7 +2076,7 @@ public class Node {
    * @see #worldInverse()
    */
   public Node inverse() {
-    Node node = new Node(Vector.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
+    Node node = new Node(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
     node.setReference(reference());
     return node;
   }
@@ -2100,10 +2084,10 @@ public class Node {
   /**
    * Returns the {@link #inverse()} of the node world transformation.
    * <p>
-   * The {@link #orientation()} of the new node is the
+   * The {@link #worldOrientation()} of the new node is the
    * {@link Quaternion#inverse()} of the original orientation. Its
-   * {@link #position()} is the negated and inverse rotated image of the original
-   * position. The {@link #magnitude()} is the original magnitude multiplicative
+   * {@link #worldPosition()} is the negated and inverse rotated image of the original
+   * position. The {@link #worldMagnitude()} is the original magnitude multiplicative
    * inverse.
    * <p>
    * The result node has a {@code null} {@link #reference()} and a {@code null}
@@ -2115,7 +2099,7 @@ public class Node {
    * @see #inverse()
    */
   public Node worldInverse() {
-    return new Node(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
+    return new Node(Vector.multiply(worldOrientation().inverseRotate(worldPosition()), -1), worldOrientation().inverse(), 1 / worldMagnitude());
   }
 
   // SCALAR CONVERSION
@@ -2133,7 +2117,7 @@ public class Node {
    * @see #location(Vector)
    */
   public float displacement(float scalar) {
-    return scalar / magnitude();
+    return scalar / worldMagnitude();
   }
 
   /**
@@ -2149,7 +2133,7 @@ public class Node {
    * @see #worldDisplacement(Vector)
    */
   public float displacement(float scalar, Node node) {
-    return scalar * (node == null ? 1 : node.magnitude()) / magnitude();
+    return scalar * (node == null ? 1 : node.worldMagnitude()) / worldMagnitude();
   }
 
   /**
@@ -2165,7 +2149,7 @@ public class Node {
    * @see #displacement(float, Node)
    */
   public float worldDisplacement(float scalar) {
-    return scalar * magnitude();
+    return scalar * worldMagnitude();
   }
 
   // QUATERNION CONVERSION
@@ -2234,7 +2218,7 @@ public class Node {
    * @see #displacement(Vector)
    */
   protected Quaternion _displacement(Quaternion quaternion) {
-    return Quaternion.compose(rotation().inverse(), quaternion);
+    return Quaternion.compose(orientation().inverse(), quaternion);
   }
 
   /**
@@ -2247,7 +2231,7 @@ public class Node {
    * @see #worldDisplacement(Vector)
    */
   protected Quaternion _referenceDisplacement(Quaternion quaternion) {
-    return Quaternion.compose(rotation(), quaternion);
+    return Quaternion.compose(orientation(), quaternion);
   }
 
   // VECTOR CONVERSION
@@ -2309,7 +2293,7 @@ public class Node {
    * @see #displacement(Vector)
    */
   protected Vector _displacement(Vector vector) {
-    return Vector.divide(rotation().inverseRotate(vector), scaling());
+    return Vector.divide(orientation().inverseRotate(vector), magnitude());
   }
 
   /**
@@ -2321,7 +2305,7 @@ public class Node {
    * @see #worldDisplacement(Vector)
    */
   protected Vector _referenceDisplacement(Vector vector) {
-    return rotation().rotate(Vector.multiply(vector, scaling()));
+    return orientation().rotate(Vector.multiply(vector, magnitude()));
   }
 
   // POINT CONVERSION
@@ -2399,7 +2383,7 @@ public class Node {
    * @see #location(Vector)
    */
   protected Vector _location(Vector vector) {
-    return Vector.divide(rotation().inverseRotate(Vector.subtract(vector, translation())), scaling());
+    return Vector.divide(orientation().inverseRotate(Vector.subtract(vector, position())), magnitude());
   }
 
   /**
@@ -2411,7 +2395,7 @@ public class Node {
    * @see #worldLocation(Vector)
    */
   protected Vector _referenceLocation(Vector vector) {
-    return Vector.add(rotation().rotate(Vector.multiply(vector, scaling())), translation());
+    return Vector.add(orientation().rotate(Vector.multiply(vector, magnitude())), position());
   }
 
   // Attached nodes
@@ -2670,7 +2654,7 @@ public class Node {
   /**
    * Sets the node retained mode rendering (rmr) shape {@link #HUD} hint
    * (see {@link #hint()}). The 2D {@code shape} screen coordinates are
-   * interpreted relative to the node {@link #position()} screen projection
+   * interpreted relative to the node {@link #worldPosition()} screen projection
    * when the hint is rendered ({@link Graph#render(Node)}). Use
    * {@code enableHint(Node.HUD)}, {@code disableHint(Node.HUD)} and
    * {@code toggleHint(Node.HUD)} to (dis)enable the hint.
@@ -2694,7 +2678,7 @@ public class Node {
   /**
    * Sets the node immediate mode rendering (imr) drawing procedure
    * {@link #HUD} hint (see {@link #hint()}). The 2D {@code shape} screen
-   * coordinates are interpreted relative to the node {@link #position()}
+   * coordinates are interpreted relative to the node {@link #worldPosition()}
    * screen projection when the hint is rendered ({@link Graph#render(Node)}).
    * Use {@code enableHint(Node.HUD)}, {@code disableHint(Node.HUD)} and
    * {@code toggleHint(Node.HUD)} to (dis)enable the hint.
@@ -2870,7 +2854,7 @@ public class Node {
    * <li>{@link #CAMERA} which displays a camera hint centered at the node screen
    * projection.</li>
    * <li>{@link #AXES} which displays an axes hint centered at the node
-   * {@link #position()} an oriented according to the node {@link #orientation()}.</li>
+   * {@link #worldPosition()} an oriented according to the node {@link #worldOrientation()}.</li>
    * <li>{@link #HUD} which displays the node Heads-Up-Display set with
    * {@link #setHUD(processing.core.PShape)} or {@link #setHUD(Consumer)}.</li>
    * <li>{@link #BOUNDS} which displays the bounding volume of each graph for which
@@ -2879,7 +2863,7 @@ public class Node {
    * <li>{@link #SHAPE} which displays the node shape set with
    * {@link #setShape(processing.core.PShape)} or {@link #setShape(Consumer)}.</li>
    * <li>{@link #BULLSEYE} which displays a bullseye centered at the node
-   * {@link #position()} screen projection. Call {@link #setBullsEyeSize(float)}
+   * {@link #worldPosition()} screen projection. Call {@link #setBullsEyeSize(float)}
    * to set the size of the hint</li>
    * <li>{@link #TORUS} which displays a torus solenoid.</li>
    * </ol>

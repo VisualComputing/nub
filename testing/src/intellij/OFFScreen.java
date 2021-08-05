@@ -39,7 +39,7 @@ public class OFFScreen extends PApplet {
         pGraphics.rect(10, 10, 200, 200);
       pGraphics.popStyle();
     });
-    shape1.setRotation(Quaternion.random());
+    shape1.setOrientation(Quaternion.random());
     shape1.translate(-55, -55, -55);
     //shape1.setPickingPolicy(Node.SHAPE);
     shape1.enableHint(Node.BULLSEYE);

@@ -37,16 +37,16 @@ void setup() {
   base = new Node(this::base);
   base.setConstraint(baseConstraint);
   arm = new Node(base, this::limb);
-  arm.setTranslation(0, 0, 8);
-  arm.setRotation(Quaternion.from(Vector.plusI, 0.6));
+  arm.setPosition(0, 0, 8);
+  arm.setOrientation(Quaternion.from(Vector.plusI, 0.6));
   arm.setConstraint(tipConstraint);
   forarm = new Node(arm, this::limb);
-  forarm.setTranslation(0, 0, 50);
-  forarm.setRotation(Quaternion.from(Vector.plusI, -2));
+  forarm.setPosition(0, 0, 50);
+  forarm.setOrientation(Quaternion.from(Vector.plusI, -2));
   forarm.setConstraint(tipConstraint);
   shade = new Node(forarm, this::shade);
-  shade.setTranslation(0, 0, 50);
-  shade.setRotation(Quaternion.from(new Vector(1, -0.3, 0), -1.7));
+  shade.setPosition(0, 0, 50);
+  shade.setOrientation(Quaternion.from(new Vector(1, -0.3, 0), -1.7));
   shade.setConstraint(shadeConstraint);
   // for the lights to work the floor node should be the last to be added
   floor = new Node(this::floor);

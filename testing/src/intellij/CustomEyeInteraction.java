@@ -98,9 +98,9 @@ public class CustomEyeInteraction extends PApplet {
         // /*
         Vector t = new Vector(0, 0, 0.7f * globeRadius);
         float a = TWO_PI - 2;
-        scene.eye().setPosition(t);
+        scene.eye().setWorldPosition(t);
         //We need to line up the eye up vector along the anchor and the camera position:
-        scene.setUpVector(Vector.subtract(scene.eye().position(), scene.center()));
+        scene.setUpVector(Vector.subtract(scene.eye().worldPosition(), scene.center()));
         //The rest is just to make the scene appear in front of us.
         scene.eye().rotate(new Quaternion(a, 0, 0));
         // */

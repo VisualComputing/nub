@@ -96,14 +96,14 @@ public class ViewFrustumCulling extends PApplet {
     OctreeNode(OctreeNode node, Vector vector) {
       super(node);
       scale(0.5f);
-      translate(Vector.multiply(vector, scaling() / 2));
+      translate(Vector.multiply(vector, magnitude() / 2));
       tagging = false;
       setShape(this::draw);
       setVisit(mainScene, this::culling);
     }
 
     float level() {
-      return 1 - log(magnitude()) / log(2);
+      return 1 - log(worldMagnitude()) / log(2);
     }
 
     public void draw(PGraphics pg) {

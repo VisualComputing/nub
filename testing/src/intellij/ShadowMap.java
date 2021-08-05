@@ -43,7 +43,7 @@ public class ShadowMap extends PApplet {
     }
     scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
     scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
-    scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
+    scene.node("light").setWorldOrientation(Quaternion.from(Vector.plusK, scene.node("light").worldPosition()));
     // scene.enablePicking(false);
     shadowMapScene = new Scene(shadowMap, scene.node("light"), zNear, zFar);
     shadowMapScene.togglePerspective();

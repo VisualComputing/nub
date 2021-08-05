@@ -57,7 +57,7 @@ public class Interaction2D extends PApplet {
     scene.drawAxes();
 
     scene.beginHUD();
-    Vector position = scene.screenLocation(shape1.position());
+    Vector position = scene.screenLocation(shape1.worldPosition());
     fill(shape1.isTagged(scene) ? 0 : 255, shape1.isTagged(scene) ? 255 : 0, shape1.isTagged(scene) ? 0 : 255);
     textFont(font36);
     text("center", position.x(), position.y());
@@ -86,7 +86,7 @@ public class Interaction2D extends PApplet {
       shape3.setReference(null);
     }
     if (key == 'p') {
-      print(scene.screenLocation(shape1.position()).toString());
+      print(scene.screenLocation(shape1.worldPosition()).toString());
       println(mouseX + " " + mouseY);
     }
   }

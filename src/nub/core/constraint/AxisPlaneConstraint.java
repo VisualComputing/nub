@@ -72,7 +72,7 @@ public class AxisPlaneConstraint extends Constraint {
    * forced to stay into a plane ({@link Type#PLANE} ) or will not able to translate at
    * all ({@link Type#FORBIDDEN}).
    * <p>
-   * Use {@link Node#setPosition(Vector)} to define the position of
+   * Use {@link Node#setWorldPosition(Vector)} to define the position of
    * the constrained Node before it gets constrained.
    */
   public Type translationConstraintType() {
@@ -183,7 +183,7 @@ public class AxisPlaneConstraint extends Constraint {
    * be able to rotate around an axis ({@link Type#AXIS}), or will not able to rotate at
    * all {@link Type#FORBIDDEN}.
    * <p>
-   * Use {@link Node#setOrientation(Quaternion)} to define the
+   * Use {@link Node#setWorldOrientation(Quaternion)} to define the
    * orientation of the constrained Node before it gets constrained.
    *
    * <b>Attention:</b> An {@link Type#PLANE} Type is not meaningful for rotational
