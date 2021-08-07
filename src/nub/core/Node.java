@@ -1127,8 +1127,8 @@ public class Node {
    * @see #translate(BiFunction, Object[], float)
    */
   public void translate(Vector vector) {
-    //position().add(constraint() != null ? constraint().constrainTranslation(vector, this) : vector);
-    position().add(vector);
+    position().add(constraint() != null ? constraint().constrainTranslation(vector, this) : vector);
+    //position().add(vector);
     _modified();
   }
 
@@ -2234,7 +2234,7 @@ public class Node {
    * @see #worldDisplacement(Vector)
    */
   public Quaternion displacement(Quaternion quaternion, Node node) {
-    return this == node ? quaternion : _displacement(reference() != null ? reference().displacement(quaternion, node) : node == null ? quaternion : node.worldDisplacement(quaternion));
+    return this == node ? quaternion : inverseReferenceDisplacement(reference() != null ? reference().displacement(quaternion, node) : node == null ? quaternion : node.worldDisplacement(quaternion));
   }
 
   /**
@@ -2253,7 +2253,7 @@ public class Node {
     Node node = this;
     Quaternion result = quaternion;
     while (node != null) {
-      result = node._referenceDisplacement(result);
+      result = node.referenceDisplacement(result);
       node = node.reference();
     }
     return result;
@@ -2262,26 +2262,26 @@ public class Node {
   /**
    * Converts {@code quaternion} displacement from {@link #reference()} to this node.
    * <p>
-   * {@link #_referenceDisplacement(Quaternion)} performs the inverse transformation.
+   * {@link #referenceDisplacement(Quaternion)} performs the inverse transformation.
    * {@link #_location(Vector)} converts locations instead of displacements.
    *
    * @see #displacement(Quaternion)
    * @see #displacement(Vector)
    */
-  protected Quaternion _displacement(Quaternion quaternion) {
+  public Quaternion inverseReferenceDisplacement(Quaternion quaternion) {
     return Quaternion.compose(orientation().inverse(), quaternion);
   }
 
   /**
    * Converts {@code quaternion} displacement from this node to {@link #reference()}.
    * <p>
-   * {@link #_displacement(Quaternion)} performs the inverse transformation.
+   * {@link #inverseReferenceDisplacement(Quaternion)} performs the inverse transformation.
    * {@link #_referenceLocation(Vector)} converts locations instead of displacements.
    *
    * @see #worldDisplacement(Quaternion)
    * @see #worldDisplacement(Vector)
    */
-  protected Quaternion _referenceDisplacement(Quaternion quaternion) {
+  public Quaternion referenceDisplacement(Quaternion quaternion) {
     return Quaternion.compose(orientation(), quaternion);
   }
 
@@ -2312,7 +2312,7 @@ public class Node {
    * @see #worldDisplacement(Vector)
    */
   public Vector displacement(Vector vector, Node node) {
-    return this == node ? vector : _displacement(reference() != null ? reference().displacement(vector, node) : node == null ? vector : node.worldDisplacement(vector));
+    return this == node ? vector : inverseReferenceDisplacement(reference() != null ? reference().displacement(vector, node) : node == null ? vector : node.worldDisplacement(vector));
   }
 
   /**
@@ -2329,7 +2329,7 @@ public class Node {
     Node node = this;
     Vector result = vector;
     while (node != null) {
-      result = node._referenceDisplacement(result);
+      result = node.referenceDisplacement(result);
       node = node.reference();
     }
     return result;
@@ -2338,24 +2338,24 @@ public class Node {
   /**
    * Converts {@code vector} displacement from {@link #reference()} to this node.
    * <p>
-   * {@link #_referenceDisplacement(Vector)} performs the inverse transformation.
+   * {@link #referenceDisplacement(Vector)} performs the inverse transformation.
    * {@link #_location(Vector)} converts locations instead of displacements.
    *
    * @see #displacement(Vector)
    */
-  protected Vector _displacement(Vector vector) {
+  public Vector inverseReferenceDisplacement(Vector vector) {
     return Vector.divide(orientation().inverseRotate(vector), magnitude());
   }
 
   /**
    * Converts {@code vector} displacement from this node to {@link #reference()}.
    * <p>
-   * {@link #_displacement(Vector)} performs the inverse transformation.
+   * {@link #inverseReferenceDisplacement(Vector)} performs the inverse transformation.
    * {@link #_referenceLocation(Vector)} converts locations instead of displacements.
    *
    * @see #worldDisplacement(Vector)
    */
-  protected Vector _referenceDisplacement(Vector vector) {
+  public Vector referenceDisplacement(Vector vector) {
     return orientation().rotate(Vector.multiply(vector, magnitude()));
   }
 
@@ -2429,7 +2429,7 @@ public class Node {
    * Converts {@code vector} location from {@link #reference()} to this node.
    * <p>
    * {@link #_referenceLocation(Vector)} performs the inverse transformation.
-   * {@link #_displacement(Vector)} converts displacements instead of locations.
+   * {@link #inverseReferenceDisplacement(Vector)} converts displacements instead of locations.
    *
    * @see #location(Vector)
    */
@@ -2441,7 +2441,7 @@ public class Node {
    * Converts {@code vector} location from this node to {@link #reference()}.
    * <p>
    * {@link #_location(Vector)} performs the inverse transformation.
-   * {@link #_referenceDisplacement(Vector)} converts displacements instead of locations.
+   * {@link #referenceDisplacement(Vector)} converts displacements instead of locations.
    *
    * @see #worldLocation(Vector)
    */

@@ -36,12 +36,12 @@ public class LocalConstraint extends AxisPlaneConstraint {
       case FREE:
         break;
       case PLANE:
-        proj = node.orientation().rotate(translationConstraintDirection());
+        proj = node.referenceDisplacement(translationConstraintDirection());
         // proj = node._localInverseTransformOf(translationConstraintDirection());
         res = Vector.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
-        proj = node.orientation().rotate(translationConstraintDirection());
+        proj = node.referenceDisplacement(translationConstraintDirection());
         // proj = node._localInverseTransformOf(translationConstraintDirection());
         res = Vector.projectVectorOnAxis(translation, proj);
         break;
@@ -67,9 +67,9 @@ public class LocalConstraint extends AxisPlaneConstraint {
         break;
       case AXIS:
         Vector axis = rotationConstraintDirection();
-        Vector quat = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
+        Vector quat = rotation.axis();
         quat = Vector.projectVectorOnAxis(quat, axis);
-        res = new Quaternion(quat, 2.0f * (float) Math.acos(rotation._quaternion[3]));
+        res = new Quaternion(quat, rotation.angle());
         break;
       case FORBIDDEN:
         res = new Quaternion(); // identity
