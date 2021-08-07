@@ -2436,7 +2436,7 @@ public class Graph {
             (node._frustumGraphs != null && node.isPickingEnabled(Node.BOUNDS) && node.isHintEnabled(Node.BOUNDS)) ||
             (node.isPickingEnabled(Node.SHAPE) && node.isHintEnabled(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
             (node.isPickingEnabled(Node.TORUS) && node.isHintEnabled(Node.TORUS)) ||
-            (node.isPickingEnabled(Node.CONSTRAINT) && node.isHintEnabled(Node.CONSTRAINT)) ||
+            (node.isPickingEnabled(Node.FILTER) && node.isHintEnabled(Node.FILTER)) ||
             (node.isPickingEnabled(Node.BONE) && node.isHintEnabled(Node.BONE))
     );
   }

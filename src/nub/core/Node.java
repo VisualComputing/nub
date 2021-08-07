@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
@@ -132,6 +133,7 @@ public class Node {
 
   // Tagging & Precision
   protected float _bullsEyeSize;
+
   public enum BullsEyeShape {
     SQUARE, CIRCLE
   }
@@ -156,7 +158,7 @@ public class Node {
   public final static int BOUNDS = 1 << 4;
   public final static int BULLSEYE = 1 << 5;
   public final static int TORUS = 1 << 6;
-  public final static int CONSTRAINT = 1 << 7;
+  public final static int FILTER = 1 << 7;
   public final static int BONE = 1 << 8;
   protected float _highlight;
   // Bounds
@@ -309,7 +311,7 @@ public class Node {
     setPosition(position);
     setOrientation(orientation);
     setMagnitude(magnitude);
-    enablePicking(CAMERA | AXES | HUD | SHAPE | BOUNDS | BULLSEYE | TORUS | CONSTRAINT | BONE);
+    enablePicking(CAMERA | AXES | HUD | SHAPE | BOUNDS | BULLSEYE | TORUS | FILTER | BONE);
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -1122,10 +1124,59 @@ public class Node {
    * Same as {@code translate(vector, 0)}.
    *
    * @see #translate(Vector, float)
+   * @see #translate(BiFunction, Object[], float)
    */
   public void translate(Vector vector) {
-    position().add(constraint() != null ? constraint().constrainTranslation(vector, this) : vector);
+    //position().add(constraint() != null ? constraint().constrainTranslation(vector, this) : vector);
+    position().add(vector);
     _modified();
+  }
+
+  // TODO discard high level interface
+  public void translate(Vector vector, Vector axis, float inertia)  {
+    translate(axisFilter, this, new Object[] { vector, axis }, inertia);
+  }
+
+  // TODO missed implementation
+  public static BiFunction<Node, Object[], Vector> axisFilter = (node, params)->{
+    System.out.println("win!");
+    return new Vector();
+  };
+
+  /**
+   * Same as {@code translate(filter, this, params, inertia)}.
+   *
+   * @see #translate(BiFunction, Node, Object[], float)
+   */
+  public void translate(BiFunction<Node, Object[], Vector> filter, Object [] params, float inertia) {
+    translate(filter, this, params, inertia);
+  }
+
+  /**
+   * Same as {@code node.translate(filter.apply(node, params), inertia)}
+   * .
+   * @see #translate(Vector, float)
+   */
+  public static void translate(BiFunction<Node, Object[], Vector> filter, Node node, Object [] params, float inertia) {
+    node.translate(filter.apply(node, params), inertia);
+  }
+
+  /**
+   * Same as {@code translate(filter, this, params)}.
+   *
+   * @see #translate(BiFunction, Node, Object[])
+   */
+  public void translate(BiFunction<Node, Object[], Vector> filter, Object [] params) {
+    translate(filter, this, params);
+  }
+
+  /**
+   * Same as {@code node.translate(filter.apply(node, params))}.
+   *
+   * @see #translate(Vector)
+   */
+  public static void translate(BiFunction<Node, Object[], Vector> filter, Node node, Object [] params) {
+    node.translate(filter.apply(node, params));
   }
 
   // POSITION

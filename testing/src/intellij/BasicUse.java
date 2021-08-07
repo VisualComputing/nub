@@ -134,7 +134,7 @@ public class BasicUse extends PApplet {
     if (key == '6')
       node.toggleHint(Node.TORUS);
     if (key == '7')
-      node.toggleHint(Node.CONSTRAINT);
+      node.toggleHint(Node.FILTER);
     if (key == '8')
       node.toggleHint(Node.BONE);
 
@@ -164,7 +164,7 @@ public class BasicUse extends PApplet {
         //println("Node.FRUSTUM");
       if (node.isHintEnabled(Node.TORUS))
         println("Node.TORUS");
-      if (node.isHintEnabled(Node.CONSTRAINT))
+      if (node.isHintEnabled(Node.FILTER))
         println("Node.CONSTRAINT");
       if (node.isHintEnabled(Node.BONE))
         println("Node.BONE");

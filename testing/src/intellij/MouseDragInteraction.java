@@ -9,6 +9,9 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 /**
  * Created by pierre on 11/15/16.
  */
@@ -81,7 +84,19 @@ public class MouseDragInteraction extends PApplet {
     scene.drawArrow(randomVector);
   }
 
+  BiFunction<Node, Object[], Vector> styleOne = (node, params)->{
+    println(((Vector)params[0]).toString());
+    println(shape1.id() + " " + node.id());
+    return new Vector();
+  };
+
   public void keyPressed() {
+    if(key == 't') {
+      Vector v = new Vector(10,15,20);
+      shape1.translate(Node.axisFilter, new Object[] { v, v });
+      //shape1.translate(v, v);
+      //shape1.translate(styleOne, new Object[] { v });
+    }
     if (key == 'd') {
       if (node == null) {
         node = shape1.detach();
