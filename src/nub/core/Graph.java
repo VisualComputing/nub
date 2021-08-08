@@ -584,8 +584,7 @@ public class Graph {
    * for frustum shape.
    * <p>
    * A {@link Type#TWO_D} behaves like {@link Type#ORTHOGRAPHIC}, but instantiated graph
-   * nodes will be constrained so that they will remain at the x-y plane. See
-   * {@link nub.core.constraint.Constraint}.
+   * nodes will be constrained so that they will remain at the x-y plane.
    *
    * @see Node#worldMagnitude()
    */
