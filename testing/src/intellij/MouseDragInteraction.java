@@ -10,7 +10,6 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * Created by pierre on 11/15/16.
@@ -93,7 +92,7 @@ public class MouseDragInteraction extends PApplet {
   public void keyPressed() {
     if(key == 't') {
       Vector v = new Vector(10,15,20);
-      shape1.translate(Node.axisFilter, new Object[] { v, v });
+      shape1.translate(Node.translationalAxisFilter, new Object[] { v, v });
       //shape1.translate(v, v);
       //shape1.translate(styleOne, new Object[] { v });
     }

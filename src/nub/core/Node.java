@@ -11,7 +11,6 @@
 
 package nub.core;
 
-import nub.core.constraint.Constraint;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -78,19 +77,6 @@ import java.util.function.Consumer;
  * node transformations described above may be achieved with {@link Graph#render()} and
  * {@link Graph#render(Node)}. Customize the rendering traversal with
  * {@link Graph#setVisit(Node, BiConsumer)} (see also {@link #cull} and {@link #bypass()}).
- * <h2>Constraints</h2>
- * One interesting feature of a node is that its displacements can be constrained.
- * When a {@link Constraint} is attached to a node, it filters the input of
- * {@link #translate(Vector)}, {@link #rotate(Quaternion)}, and
- * {@link #orbit(Vector, float, Vector, float)} and only the resulting filtered motion
- * is applied to the node. The default {@link #constraint()} is {@code null} resulting in
- * no filtering. Use {@link #setConstraint(Constraint)} to attach a constraint to a node.
- * <p>
- * Classical constraints are provided for convenience (see
- * {@link nub.core.constraint.LocalConstraint},
- * {@link nub.core.constraint.WorldConstraint} and
- * {@link nub.core.constraint.EyeConstraint}) and new constraints can very
- * easily be implemented.
  * <h2>Visual hints</h2>
  * The node space visual representation may be configured using the following hints:
  * {@link #CAMERA}, {@link #AXES}, {@link #HUD}, {@link #BOUNDS},, {@link #SHAPE},
@@ -128,7 +114,6 @@ public class Node {
   protected float _magnitude;
   protected Quaternion _orientation;
   protected Node _reference;
-  protected Constraint _constraint;
   protected long _lastUpdate;
 
   // Tagging & Precision
@@ -188,104 +173,67 @@ public class Node {
   protected final float _scalingFactor = 800;
 
   /**
-   * Same as {@code this(null, null, null, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   * @see #Node(Node, Vector, Quaternion, float)
    */
   public Node() {
-    this(null, null, new Vector(), new Quaternion(), 1);
+    this(null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(null, null, position, new Quaternion(), 1)}.
+   * Same as {@code this(null, position, new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   * @see #Node(Node, Vector, Quaternion, float)
    */
   public Node(Vector position) {
-    this(null, null, position, new Quaternion(), 1);
+    this(null, position, new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(null, null, position, orientation, 1)}.
+   * Same as {@code this(null, position, orientation, 1)}.
    *
-   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   * @see #Node(Node, Vector, Quaternion, float)
    */
   public Node(Vector position, Quaternion orientation) {
-    this(null, null, position, orientation, 1);
+    this(null, position, orientation, 1);
   }
 
   /**
-   * Same as {@code this(null, null, position, orientation, magnitude)}.
+   * Same as {@code this(reference, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Vector, Quaternion, float)
-   */
-  public Node(Vector position, Quaternion orientation, float magnitude) {
-    this(null, null, position, orientation, magnitude);
-  }
-
-  /**
-   * Same as {@code this(reference, null, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   * @see #Node(Node, Vector, Quaternion, float)
    */
   public Node(Node reference) {
-    this(reference, null, new Vector(), new Quaternion(), 1);
+    this(reference, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(reference, null, position, new Quaternion(), 1)}.
+   * Same as {@code this(reference, position, new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   * @see #Node(Node, Vector, Quaternion, float)
    */
   public Node(Node reference, Vector position) {
-    this(reference, null, position, new Quaternion(), 1);
+    this(reference, position, new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(reference, null, position, orientation, 1)}.
+   * Same as {@code this(reference, position, orientation, 1)}.
    *
-   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   * @see #Node(Node, Vector, Quaternion, float)
    */
   public Node(Node reference, Vector position, Quaternion orientation) {
-    this(reference, null, position, orientation, 1);
+    this(reference, position, orientation, 1);
   }
 
   /**
-   * Same as {@code this(reference, null, position, orientation, magnitude)}.
-   *
-   * @see #Node(Node, Constraint, Vector, Quaternion, float)
+   * Creates a node with {@code reference} as {@link #reference()}, having {@code position},
+   * {@code orientation} and {@code magnitude} as the {@link #position()}, {@link #orientation()}
+   * and {@link #magnitude()}, respectively. The {@link #bullsEyeSize()} is set to {@code 0.2}
+   * and the {@link #highlight()} hint magnitude to {@code 0.15}.
    */
   public Node(Node reference, Vector position, Quaternion orientation, float magnitude) {
-    this(reference, null, position, orientation, magnitude);
-  }
-
-  /**
-   * Same as {@code this(null, constraint, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, Vector, Quaternion, float)
-   */
-  public Node(Constraint constraint) {
-    this(null, constraint, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(reference, constraint, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, Vector, Quaternion, float)
-   */
-  public Node(Node reference, Constraint constraint) {
-    this(reference, constraint, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
-   * as {@link #constraint()}, having {@code position}, {@code orientation} and {@code magnitude} as
-   * the {@link #position()}, {@link #orientation()} and {@link #magnitude()}, respectively.
-   * The {@link #bullsEyeSize()} is set to {@code 0.2} and the {@link #highlight()} hint
-   * magnitude to {@code 0.15}.
-   */
-  public Node(Node reference, Constraint constraint, Vector position, Quaternion orientation, float magnitude) {
-    this(constraint, position, orientation, magnitude);
+    this(position, orientation, magnitude);
     _reference = reference;
     _restorePath(reference(), this);
     if (reference == null || reference.isReachable())
@@ -303,11 +251,10 @@ public class Node {
   }
 
   /**
-   * Internally used by both {@link #Node(Node, Constraint, Vector, Quaternion, float)}
-   * (attached nodes) and {@link #detach(Constraint, Vector, Quaternion, float)} (detached nodes).
+   * Internally used by both {@link #Node(Node, Vector, Quaternion, float)}
+   * (attached nodes) and {@link #detach(Vector, Quaternion, float)} (detached nodes).
    */
-  protected Node(Constraint constraint, Vector position, Quaternion orientation, float magnitude) {
-    setConstraint(constraint);
+  protected Node(Vector position, Quaternion orientation, float magnitude) {
     setPosition(position);
     setOrientation(orientation);
     setMagnitude(magnitude);
@@ -340,72 +287,58 @@ public class Node {
 
   // From here only Java constructors
 
+  /**
+   * Same as {@code this(null, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, Consumer, Vector, Quaternion, float)
+   */
   public Node(Consumer<processing.core.PGraphics> shape) {
-    this(null, null, shape, new Vector(), new Quaternion(), 1);
+    this(null, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(null, null, shape, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   * @see #Node(Node, processing.core.PShape, Vector, Quaternion, float)
    */
   public Node(processing.core.PShape shape) {
-    this(null, null, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  public Node(Node reference, Consumer<processing.core.PGraphics> shape) {
-    this(reference, null, shape, new Vector(), new Quaternion(), 1);
+    this(null, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(reference, null, shape, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(reference, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   * @see #Node(Node, Consumer, Vector, Quaternion, float)
+   */
+  public Node(Node reference, Consumer<processing.core.PGraphics> shape) {
+    this(reference, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(reference, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Node(Node, processing.core.PShape, Vector, Quaternion, float)
    */
   public Node(Node reference, processing.core.PShape shape) {
-    this(reference, null, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  public Node(Constraint constraint, Consumer<processing.core.PGraphics> shape) {
-    this(null, constraint, shape, new Vector(), new Quaternion(), 1);
+    this(reference, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(null, constraint, shape, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
+   * Calls {@link #Node(Node, Vector, Quaternion, float)} and then {@link #setShape(Consumer)}.
    */
-  public Node(Constraint constraint, processing.core.PShape shape) {
-    this(null, constraint, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  public Node(Node reference, Constraint constraint, Consumer<processing.core.PGraphics> shape) {
-    this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(reference, constraint, shape, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Node(Node, Constraint, processing.core.PShape, Vector, Quaternion, float)
-   */
-  public Node(Node reference, Constraint constraint, processing.core.PShape shape) {
-    this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
-  }
-
-  public Node(Node reference, Constraint constraint, Consumer<processing.core.PGraphics> shape, Vector position, Quaternion orientation, float magnitude) {
-    this(reference, constraint, position, orientation, magnitude);
+  public Node(Node reference, Consumer<processing.core.PGraphics> shape, Vector position, Quaternion orientation, float magnitude) {
+    this(reference, position, orientation, magnitude);
     setShape(shape);
   }
 
   /**
-   * Creates a node with {@code reference} as {@link #reference()}, {@code constraint}
-   * as {@link #constraint()}, {@code shape}, having {@code position},
+   * Creates a node with {@code reference} as {@link #reference()} and {@code shape}, having {@code position},
    * {@code orientation} and {@code magnitude} as the {@link #position()}, {@link #orientation()}
    * and {@link #magnitude()}, respectively. The {@link #bullsEyeSize()} is set to
    * {@code 0} and the {@link #highlight()} hint to {@code 0.15}.
    */
-  public Node(Node reference, Constraint constraint, processing.core.PShape shape, Vector position, Quaternion orientation, float magnitude) {
-    this(reference, constraint, position, orientation, magnitude);
+  public Node(Node reference, processing.core.PShape shape, Vector position, Quaternion orientation, float magnitude) {
+    this(reference, position, orientation, magnitude);
     setShape(shape);
   }
 
@@ -435,20 +368,11 @@ public class Node {
   }
 
   /**
-   * Same as {@code return detach(null, position, orientation, magnitude)}.
-   *
-   * @see #detach(Constraint, Vector, Quaternion, float)
-   */
-  public static Node detach(Vector position, Quaternion orientation, float magnitude) {
-    return detach(null, position, orientation, magnitude);
-  }
-
-  /**
    * Returns a detached node (i.e., a pruned non-reachable node from the graph, see {@link Graph#prune(Node)})
    * whose {@link #reference()} is {@code null} for the given params. Mostly used internally.
    */
-  public static Node detach(Constraint constraint, Vector position, Quaternion orientation, float magnitude) {
-    return new Node(constraint, position, orientation, magnitude);
+  public static Node detach(Vector position, Quaternion orientation, float magnitude) {
+    return new Node(position, orientation, magnitude);
   }
 
   /**
@@ -508,8 +432,7 @@ public class Node {
   /**
    * Sets {@link #worldPosition()}, {@link #worldOrientation()}, {@link #worldMagnitude()},
    * {@link #hint()} and {@link #picking()} values from those of the {@code node}.
-   * The node {@link #reference()} and {@link #constraint()}
-   * are not affected by this call.
+   * The node {@link #reference()} is not affected by this call.
    * <p>
    * After calling {@code set(node)} a call to {@code this.matches(node)} should
    * return {@code true}.
@@ -540,10 +463,9 @@ public class Node {
 
   /**
    * Sets an identity node by resetting its {@link #position()}, {@link #orientation()}
-   * and {@link #magnitude()}. The node {@link #reference()} and {@link #constraint()}
-   * are not affected by this call. Call {@code set(null)} if you want to reset the
-   * global {@link #worldPosition()}, {@link #worldOrientation()} and {@link #worldMagnitude()} node
-   * parameters instead.
+   * and {@link #magnitude()}. The node {@link #reference()} is not affected by this call.
+   * Call {@code set(null)} if you want to reset the global {@link #worldPosition()},
+   * {@link #worldOrientation()} and {@link #worldMagnitude()} node parameters instead.
    *
    * @see #set(Node)
    */
@@ -680,7 +602,6 @@ public class Node {
    * Same as {@code setReference(null)}.
    *
    * @see #setReference(Node)
-   * @see #resetConstraint()
    */
   public void resetReference() {
     setReference(null);
@@ -995,39 +916,6 @@ public class Node {
     return _bullsEyeSize;
   }
 
-  // CONSTRAINT
-
-  /**
-   * Returns the current {@link Constraint} applied to the node.
-   * <p>
-   * A {@code null} value (default) means that no constraint is used to filter the node
-   * position and orientation.
-   * <p>
-   * See the Constraint class documentation for details.
-   */
-  public Constraint constraint() {
-    return _constraint;
-  }
-
-  /**
-   * Sets the {@link #constraint()} attached to the node.
-   * <p>
-   * A {@code null} value means set no constraint (also reset it if there was one).
-   */
-  public void setConstraint(Constraint constraint) {
-    _constraint = constraint;
-  }
-
-  /**
-   * Same as {@code setConstraint(null)}.
-   *
-   * @see #setConstraint(Constraint)
-   * @see #resetReference()
-   */
-  public void resetConstraint() {
-    setConstraint(null);
-  }
-
   // TRANSLATION
 
   /**
@@ -1046,18 +934,10 @@ public class Node {
    * Sets the {@link #position()} of the node, locally defined with respect to the
    * {@link #reference()}.
    * <p>
-   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
-   * <p>
    * Use {@link #setWorldPosition(Vector)} to define the world coordinates {@link #worldPosition()}.
-   *
-   * @see #setConstraint(Constraint)
    */
   public void setPosition(Vector position) {
-    if (constraint() == null)
-      _position = position;
-    else
-      position().add(constraint().constrainTranslation(Vector.subtract(position, this.position()), this));
+    _position = position;
     _modified();
   }
 
@@ -1095,15 +975,10 @@ public class Node {
    * Translates the node according to {@code vector}, locally defined with respect to the
    * {@link #reference()} and with an impulse defined with {@code inertia} which should
    * be in {@code [0..1]}, 0 no inertia & 1 no friction.
-   * <p>
-   * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
-   * applied to the node may differ from {@code vector} (since it can be filtered by the
-   * {@link #constraint()}).
    *
    * @see #rotate(Quaternion, float)
    * @see #scale(float, float)
    * @see #orbit(Vector, float, Vector, float)
-   * @see #setConstraint(Constraint)
    */
   public void translate(Vector vector, float inertia) {
     translate(vector);
@@ -1125,28 +1000,50 @@ public class Node {
    *
    * @see #translate(Vector, float)
    * @see #translate(BiFunction, Object[], float)
+   * @see #translationalAxisFilter
+   * @see #translationalPlaneFilter
    */
   public void translate(Vector vector) {
-    position().add(constraint() != null ? constraint().constrainTranslation(vector, this) : vector);
-    //position().add(vector);
+    position().add(vector);
     _modified();
   }
 
-  // TODO discard high level interface
-  public void translate(Vector vector, Vector axis, float inertia)  {
-    translate(axisFilter, this, new Object[] { vector, axis }, inertia);
-  }
+  /**
+   * Filters {@code vector} so that the node is translated along {@code axis}
+   * (defined in this node coordinate system). Call it as:
+   * <p>
+   * {@code translate(translationalAxisFilter, this, new Object[] { vector, axis }))} or
+   * {@code translate(translationalAxisFilter, this, new Object[] { vector, axis }, inertia)}.
+   *
+   * @see #translate(BiFunction, Node, Object[])
+   * @see #translate(BiFunction, Node, Object[], float)
+   * @see #translationalPlaneFilter
+   */
+  public static BiFunction<Node, Object[], Vector> translationalAxisFilter = (node, params)-> {
+    return Vector.projectVectorOnAxis((Vector) params[0], node.referenceDisplacement((Vector) params[1]));
+  };
 
-  // TODO missed implementation
-  public static BiFunction<Node, Object[], Vector> axisFilter = (node, params)->{
-    System.out.println("win!");
-    return new Vector();
+  /**
+   * Filters {@code vector} so that the node is translated along the plane defined by {@code normal}
+   * (defined in this node coordinate system). Call it as:
+   * <p>
+   * {@code translate(translationalPlaneFilter, this, new Object[] { vector, normal }))} or
+   * {@code translate(translationalPlaneFilter, this, new Object[] { vector, normal }, inertia)}.
+   *
+   * @see #translate(BiFunction, Node, Object[])
+   * @see #translate(BiFunction, Node, Object[], float)
+   * @see #translationalAxisFilter
+   */
+  public static BiFunction<Node, Object[], Vector> translationalPlaneFilter = (node, params)-> {
+    return Vector.projectVectorOnPlane((Vector) params[0], node.referenceDisplacement((Vector) params[1]));
   };
 
   /**
    * Same as {@code translate(filter, this, params, inertia)}.
    *
    * @see #translate(BiFunction, Node, Object[], float)
+   * @see #translationalAxisFilter
+   * @see #translationalPlaneFilter
    */
   public void translate(BiFunction<Node, Object[], Vector> filter, Object [] params, float inertia) {
     translate(filter, this, params, inertia);
@@ -1156,6 +1053,8 @@ public class Node {
    * Same as {@code node.translate(filter.apply(node, params), inertia)}
    * .
    * @see #translate(Vector, float)
+   * @see #translationalAxisFilter
+   * @see #translationalPlaneFilter
    */
   public static void translate(BiFunction<Node, Object[], Vector> filter, Node node, Object [] params, float inertia) {
     node.translate(filter.apply(node, params), inertia);
@@ -1165,6 +1064,8 @@ public class Node {
    * Same as {@code translate(filter, this, params)}.
    *
    * @see #translate(BiFunction, Node, Object[])
+   * @see #translationalAxisFilter
+   * @see #translationalPlaneFilter
    */
   public void translate(BiFunction<Node, Object[], Vector> filter, Object [] params) {
     translate(filter, this, params);
@@ -1174,6 +1075,8 @@ public class Node {
    * Same as {@code node.translate(filter.apply(node, params))}.
    *
    * @see #translate(Vector)
+   * @see #translationalAxisFilter
+   * @see #translationalPlaneFilter
    */
   public static void translate(BiFunction<Node, Object[], Vector> filter, Node node, Object [] params) {
     node.translate(filter.apply(node, params));
@@ -1208,11 +1111,6 @@ public class Node {
    * <p>
    * Use {@link #setPosition(Vector)} to define the local node position (with respect
    * to the {@link #reference()}).
-   * <p>
-   * Note that the potential {@link #constraint()} of the node is taken into account, i.e.,
-   * to bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
-   *
-   * @see #setConstraint(Constraint)
    */
   public void setWorldPosition(Vector position) {
     setPosition(reference() != null ? reference().location(position) : position);
@@ -1258,60 +1156,12 @@ public class Node {
    * Sets the node {@link #orientation()}, locally defined with respect to the
    * {@link #reference()}. Use {@link #setWorldOrientation(Quaternion)} to define the
    * world coordinates {@link #worldOrientation()}.
-   * <p>
-   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
-   * @see #setConstraint(Constraint)
    * @see #orientation()
    * @see #setPosition(Vector)
    */
   public void setOrientation(Quaternion orientation) {
-    if (constraint() == null)
-      _orientation = orientation;
-    else {
-      orientation().compose(constraint().constrainRotation(Quaternion.compose(orientation().inverse(), orientation), this));
-      orientation().normalize(); // Prevents numerical drift
-    }
-    _modified();
-  }
-
-  /**
-   * Rotates the node by {@code quaternion} (defined in the node coordinate system):
-   * {@code orientation().compose(quaternion)} and with an impulse defined with
-   * {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
-   * <p>
-   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
-   *
-   * @see #translate(Vector, float)
-   * @see #orbit(Vector, float, Vector, float)
-   * @see #scale(float, float)
-   * @see #setConstraint(Constraint)
-   */
-  public void rotate(Quaternion quaternion, float inertia) {
-    rotate(quaternion);
-    if (!Graph.TimingHandler.isTaskRegistered(_rotationTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use rotate(quaternion) instead");
-      return;
-    }
-    _rotationTask.setInertia(inertia);
-    Vector e = quaternion.eulerAngles();
-    _rotationTask._x += e.x();
-    _rotationTask._y += e.y();
-    _rotationTask._z += e.z();
-    if (!_rotationTask.isActive())
-      _rotationTask.run();
-  }
-
-  /**
-   * Same as {@code rotate(quaternion, 0)}.
-   *
-   * @see #rotate(Quaternion, float)
-   */
-  public void rotate(Quaternion quaternion) {
-    orientation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
-    orientation().normalize(); // Prevents numerical drift
+    _orientation = orientation;
     _modified();
   }
 
@@ -1352,17 +1202,105 @@ public class Node {
   }
 
   /**
+   * Rotates the node by {@code quaternion} (defined in the node coordinate system):
+   * {@code orientation().compose(quaternion)} and with an impulse defined with
+   * {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
+   *
+   * @see #translate(Vector, float)
+   * @see #orbit(Vector, float, Vector, float)
+   * @see #scale(float, float)
+   */
+  public void rotate(Quaternion quaternion, float inertia) {
+    rotate(quaternion);
+    if (!Graph.TimingHandler.isTaskRegistered(_rotationTask)) {
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use rotate(quaternion) instead");
+      return;
+    }
+    _rotationTask.setInertia(inertia);
+    Vector e = quaternion.eulerAngles();
+    _rotationTask._x += e.x();
+    _rotationTask._y += e.y();
+    _rotationTask._z += e.z();
+    if (!_rotationTask.isActive())
+      _rotationTask.run();
+  }
+
+  /**
+   * Same as {@code rotate(quaternion, 0)}.
+   *
+   * @see #rotate(Quaternion, float)
+   * @see #rotate(BiFunction, Node, Object[])
+   * @see #rotate(BiFunction, Node, Object[], float)
+   * @see #rotationalAxisFilter
+   */
+  public void rotate(Quaternion quaternion) {
+    orientation().compose(quaternion);
+    orientation().normalize(); // Prevents numerical drift
+    _modified();
+  }
+
+  /**
+   * Filters {@code quaternion} so that its {@link Quaternion#axis()} become {@code axis}
+   * (defined in this node coordinate system). Call it as:
+   * <p>
+   * {@code rotate(rotationalAxisFilter, this, new Object[] { quaternion, axis })} or
+   * {@code rotate(rotationalAxisFilter, this, new Object[] { quaternion, axis }, inertia)}.
+   *
+   * @see #rotate(BiFunction, Node, Object[])
+   * @see #rotate(BiFunction, Node, Object[], float)
+   */
+  public static BiFunction<Node, Object[], Quaternion> rotationalAxisFilter = (node, params)-> {
+    return new Quaternion(Vector.projectVectorOnAxis(((Quaternion) params[0]).axis(), (Vector)params[1]), ((Quaternion) params[0]).angle());
+  };
+
+  /**
+   * Same as {@code rotate(filter, this, params, inertia)}.
+   *
+   * @see #rotate(BiFunction, Node, Object[], float)
+   * @see #rotationalAxisFilter
+   */
+  public void rotate(BiFunction<Node, Object[], Quaternion> filter, Object [] params, float inertia) {
+    rotate(filter, this, params, inertia);
+  }
+
+  /**
+   * Same as {@code node.rotate(filter.apply(node, params), inertia)}.
+   *
+   * @see #rotate(Quaternion)
+   * @see #rotationalAxisFilter
+   */
+  public static void rotate(BiFunction<Node, Object[], Quaternion> filter, Node node, Object [] params, float inertia) {
+    node.rotate(filter.apply(node, params));
+  }
+
+  /**
+   * Same as {@code rotate(filter, this, params)}.
+   *
+   * @see #rotate(BiFunction, Node, Object[])
+   * @see #rotationalAxisFilter
+   */
+  public void rotate(BiFunction<Node, Object[], Quaternion> filter, Object [] params) {
+    rotate(filter, this, params);
+  }
+
+  /**
+   * Same as {@code node.rotate(filter.apply(node, params))}.
+   *
+   * @see #rotate(Quaternion)
+   * @see #rotationalAxisFilter
+   */
+  public static void rotate(BiFunction<Node, Object[], Quaternion> filter, Node node, Object [] params) {
+    node.rotate(filter.apply(node, params));
+  }
+
+  /**
    * Rotates the node by the {@code quaternion} (defined in the node coordinate system)
    * around {@code center} defined in the world coordinate system, and with an impulse
    * defined with {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
-   * <p>
-   * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
    * @see #translate(Vector, float)
    * @see #rotate(Quaternion, float)
    * @see #scale(float, float)
-   * @see #setConstraint(Constraint)
    */
   protected void _orbit(Quaternion quaternion, Vector center, float inertia) {
     _orbit(quaternion, center);
@@ -1387,8 +1325,6 @@ public class Node {
    */
   // TODO should not be constrained!
   protected void _orbit(Quaternion quaternion, Vector center) {
-    if (constraint() != null)
-      quaternion = constraint().constrainRotation(quaternion, this);
     orientation().compose(quaternion);
     orientation().normalize(); // Prevents numerical drift
 
@@ -1480,9 +1416,6 @@ public class Node {
    * <p>
    * Use {@link #setOrientation(Quaternion)} to define the local node orientation (with respect
    * to the {@link #reference()}).
-   * <p>
-   * Note that the potential {@link #constraint()} of the node is taken into account, i.e.,
-   * to bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    */
   public void setWorldOrientation(Quaternion quaternion) {
     setOrientation(reference() != null ? reference().displacement(quaternion) : quaternion);
@@ -1531,7 +1464,6 @@ public class Node {
    * @see #translate(Vector, float)
    * @see #rotate(Quaternion, float)
    * @see #_orbit(Quaternion, Vector, float)
-   * @see #setConstraint(Constraint)
    */
   public void scale(float scaling, float inertia) {
     scale(scaling);
@@ -2121,8 +2053,7 @@ public class Node {
    * {@link #reference()}) is inverted. Use {@link #worldInverse()} for a global
    * inverse.
    * <p>
-   * The resulting node has the same {@link #reference()} as the this node and a
-   * {@code null} {@link #constraint()}.
+   * The resulting node has the same {@link #reference()} as the this node.
    *
    * @see #worldInverse()
    */
@@ -2140,9 +2071,6 @@ public class Node {
    * {@link #worldPosition()} is the negated and inverse rotated image of the original
    * position. The {@link #worldMagnitude()} is the original magnitude multiplicative
    * inverse.
-   * <p>
-   * The result node has a {@code null} {@link #reference()} and a {@code null}
-   * {@link #constraint()}.
    * <p>
    * Use {@link #inverse()} for a local (i.e., with respect to {@link #reference()})
    * transformation inverse.
@@ -2203,6 +2131,30 @@ public class Node {
     return scalar * worldMagnitude();
   }
 
+  /**
+   * Converts {@code scalar} displacement from {@link #reference()} to this node.
+   * <p>
+   * {@link #referenceDisplacement(float)} performs the inverse transformation.
+   *
+   * @see #displacement(Quaternion)
+   * @see #displacement(Vector)
+   */
+  public float localDisplacement(float scalar) {
+    return scalar / magnitude();
+  }
+
+  /**
+   * Converts {@code scalar} displacement from this node to {@link #reference()}.
+   * <p>
+   * {@link #localDisplacement(float)} performs the inverse transformation.
+   *
+   * @see #worldDisplacement(Quaternion)
+   * @see #worldDisplacement(Vector)
+   */
+  public float referenceDisplacement(float scalar) {
+    return scalar * magnitude();
+  }
+
   // QUATERNION CONVERSION
 
   /**
@@ -2234,7 +2186,7 @@ public class Node {
    * @see #worldDisplacement(Vector)
    */
   public Quaternion displacement(Quaternion quaternion, Node node) {
-    return this == node ? quaternion : inverseReferenceDisplacement(reference() != null ? reference().displacement(quaternion, node) : node == null ? quaternion : node.worldDisplacement(quaternion));
+    return this == node ? quaternion : localDisplacement(reference() != null ? reference().displacement(quaternion, node) : node == null ? quaternion : node.worldDisplacement(quaternion));
   }
 
   /**
@@ -2268,14 +2220,14 @@ public class Node {
    * @see #displacement(Quaternion)
    * @see #displacement(Vector)
    */
-  public Quaternion inverseReferenceDisplacement(Quaternion quaternion) {
+  public Quaternion localDisplacement(Quaternion quaternion) {
     return Quaternion.compose(orientation().inverse(), quaternion);
   }
 
   /**
    * Converts {@code quaternion} displacement from this node to {@link #reference()}.
    * <p>
-   * {@link #inverseReferenceDisplacement(Quaternion)} performs the inverse transformation.
+   * {@link #localDisplacement(Quaternion)} performs the inverse transformation.
    * {@link #_referenceLocation(Vector)} converts locations instead of displacements.
    *
    * @see #worldDisplacement(Quaternion)
@@ -2312,7 +2264,7 @@ public class Node {
    * @see #worldDisplacement(Vector)
    */
   public Vector displacement(Vector vector, Node node) {
-    return this == node ? vector : inverseReferenceDisplacement(reference() != null ? reference().displacement(vector, node) : node == null ? vector : node.worldDisplacement(vector));
+    return this == node ? vector : localDisplacement(reference() != null ? reference().displacement(vector, node) : node == null ? vector : node.worldDisplacement(vector));
   }
 
   /**
@@ -2343,14 +2295,14 @@ public class Node {
    *
    * @see #displacement(Vector)
    */
-  public Vector inverseReferenceDisplacement(Vector vector) {
+  public Vector localDisplacement(Vector vector) {
     return Vector.divide(orientation().inverseRotate(vector), magnitude());
   }
 
   /**
    * Converts {@code vector} displacement from this node to {@link #reference()}.
    * <p>
-   * {@link #inverseReferenceDisplacement(Vector)} performs the inverse transformation.
+   * {@link #localDisplacement(Vector)} performs the inverse transformation.
    * {@link #_referenceLocation(Vector)} converts locations instead of displacements.
    *
    * @see #worldDisplacement(Vector)
@@ -2429,7 +2381,7 @@ public class Node {
    * Converts {@code vector} location from {@link #reference()} to this node.
    * <p>
    * {@link #_referenceLocation(Vector)} performs the inverse transformation.
-   * {@link #inverseReferenceDisplacement(Vector)} converts displacements instead of locations.
+   * {@link #localDisplacement(Vector)} converts displacements instead of locations.
    *
    * @see #location(Vector)
    */
