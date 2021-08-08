@@ -1487,6 +1487,42 @@ public class Node {
     setMagnitude(magnitude() * scaling);
   }
 
+  /**
+   * Same as {@code scale(filter, this, params, inertia)}.
+   *
+   * @see #scale(BiFunction, Node, Object[], float)
+   */
+  public void scale(BiFunction<Node, Object[], Float> filter, Object [] params, float inertia) {
+    scale(filter,this, params, inertia);
+  }
+
+  /**
+   * Same as {@code node.scale(filter.apply(node, params))}.
+   *
+   * @see #scale(float)
+   */
+  public static void scale(BiFunction<Node, Object[], Float> filter, Node node, Object [] params, float inertia) {
+    node.scale(filter.apply(node, params));
+  }
+
+  /**
+   * Same as {@code scale(filter, this, params)}.
+   *
+   * @see #scale(BiFunction, Node, Object[])
+   */
+  public void scale(BiFunction<Node, Object[], Float> filter, Object [] params) {
+    scale(filter, this, params);
+  }
+
+  /**
+   * Same as {@code node.scale(filter.apply(node, params))}.
+   *
+   * @see #scale(float)
+   */
+  public static void scale(BiFunction<Node, Object[], Float> filter, Node node, Object [] params) {
+    node.scale(filter.apply(node, params));
+  }
+
   // MAGNITUDE
 
   /**
