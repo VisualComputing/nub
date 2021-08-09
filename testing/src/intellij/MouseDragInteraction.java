@@ -84,9 +84,9 @@ public class MouseDragInteraction extends PApplet {
     scene.drawArrow(randomVector);
   }
 
-  static BiFunction<Node, Object[], Float> scalingFilter = (node, params) -> {
-    float delta = (float)params[0] * 20;
-    float factor = 1 + Math.abs(delta) / (float)params[1];
+  static BiFunction<Node, Object[], Float> scalarFilter = (node, params) -> {
+    float delta = node.cacheTargetScaling * 20;
+    float factor = 1 + Math.abs(delta) / (float)params[0];
     float scl = delta >= 0 ? factor : 1 / factor;
     float bottom = 0.5f;
     float top = 2;
@@ -161,7 +161,7 @@ public class MouseDragInteraction extends PApplet {
         Vector axis = Vector.plusI;
         // uncomment to express the filter axis in the world coordinate system
         // axis = shape2.displacement(axis);
-        shape2.translate(Node.translationalAxisFilter, new Object[] { vector, axis }, 0);
+        shape2.translate(vector, Node.vectorAxisFilter, new Object[] { axis }, 0);
       }
       else if (scene.node() == null) {
         Node _node = scene.eye().detach();
@@ -171,7 +171,7 @@ public class MouseDragInteraction extends PApplet {
         Vector axis = Vector.plusI;
         // uncomment to express the filter axis in the world coordinate system
         // axis = scene.eye().displacement(axis);
-        scene.eye().translate(Node.translationalAxisFilter, new Object[] { vector, axis }, 0.8f);
+        scene.eye().translate(vector, Node.vectorAxisFilter, new Object[] { axis }, 0.8f);
       }
       /*
       else {
@@ -186,7 +186,7 @@ public class MouseDragInteraction extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     if (scene.node() != null) {
-      scene.node().scale(scalingFilter, new Object[] {(float) event.getCount(), (float) height });
+      scene.node().scale((float) event.getCount(), scalarFilter, new Object[] { (float) height });
     }
     else
       scene.moveForward(event.getCount() * 20);

@@ -133,6 +133,11 @@ public class Node {
   public boolean cull;
   public boolean tagging;
 
+  // filter caches
+  public Vector cacheTargetPosition, cacheTargetTranslation;
+  public Quaternion cacheTargetOrientation, cacheTargetRotation;
+  public float cacheTargetMagnitude, cacheTargetScaling;
+
   // Visual hints
   protected int _picking;
   protected int _mask;
@@ -999,9 +1004,9 @@ public class Node {
    * Same as {@code translate(vector, 0)}.
    *
    * @see #translate(Vector, float)
-   * @see #translate(BiFunction, Object[], float)
-   * @see #translationalAxisFilter
-   * @see #translationalPlaneFilter
+   * @see #translate(Vector, BiFunction, Object[], float)
+   * @see #vectorAxisFilter
+   * @see #vectorPlaneFilter
    */
   public void translate(Vector vector) {
     position().add(vector);
@@ -1012,73 +1017,77 @@ public class Node {
    * Filters {@code vector} so that the node is translated along {@code axis}
    * (defined in this node coordinate system). Call it as:
    * <p>
-   * {@code translate(translationalAxisFilter, this, new Object[] { vector, axis }))} or
-   * {@code translate(translationalAxisFilter, this, new Object[] { vector, axis }, inertia)}.
+   * {@code translate(vector, vectorAxisFilter, this, new Object[] { axis }))} or
+   * {@code translate(vector, vectorAxisFilter, this, new Object[] { axis }, inertia)}.
    *
-   * @see #translate(BiFunction, Node, Object[])
-   * @see #translate(BiFunction, Node, Object[], float)
-   * @see #translationalPlaneFilter
+   * @see #translate(Vector, BiFunction, Node, Object[])
+   * @see #translate(Vector, BiFunction, Node, Object[], float)
+   * @see #vectorPlaneFilter
    */
-  public static BiFunction<Node, Object[], Vector> translationalAxisFilter = (node, params)-> {
-    return Vector.projectVectorOnAxis((Vector) params[0], node.referenceDisplacement((Vector) params[1]));
+  public static BiFunction<Node, Object[], Vector> vectorAxisFilter = (node, params)-> {
+    return Vector.projectVectorOnAxis(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
   };
 
   /**
    * Filters {@code vector} so that the node is translated along the plane defined by {@code normal}
    * (defined in this node coordinate system). Call it as:
    * <p>
-   * {@code translate(translationalPlaneFilter, this, new Object[] { vector, normal }))} or
-   * {@code translate(translationalPlaneFilter, this, new Object[] { vector, normal }, inertia)}.
+   * {@code translate(vector, vectorPlaneFilter, this, new Object[] { normal }))} or
+   * {@code translate(vector, vectorPlaneFilter, this, new Object[] { normal }, inertia)}.
    *
-   * @see #translate(BiFunction, Node, Object[])
-   * @see #translate(BiFunction, Node, Object[], float)
-   * @see #translationalAxisFilter
+   * @see #translate(Vector, BiFunction, Node, Object[])
+   * @see #translate(Vector, BiFunction, Node, Object[], float)
+   * @see #vectorAxisFilter
    */
-  public static BiFunction<Node, Object[], Vector> translationalPlaneFilter = (node, params)-> {
-    return Vector.projectVectorOnPlane((Vector) params[0], node.referenceDisplacement((Vector) params[1]));
+  public static BiFunction<Node, Object[], Vector> vectorPlaneFilter = (node, params)-> {
+    return Vector.projectVectorOnPlane(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
   };
 
   /**
-   * Same as {@code translate(filter, this, params, inertia)}.
+   * Same as {@code translate(vector, filter, this, params, inertia)}.
    *
-   * @see #translate(BiFunction, Node, Object[], float)
-   * @see #translationalAxisFilter
-   * @see #translationalPlaneFilter
+   * @see #translate(Vector, BiFunction, Node, Object[], float)
+   * @see #vectorAxisFilter
+   * @see #vectorPlaneFilter
    */
-  public void translate(BiFunction<Node, Object[], Vector> filter, Object [] params, float inertia) {
-    translate(filter, this, params, inertia);
+  public void translate(Vector vector, BiFunction<Node, Object[], Vector> filter, Object [] params, float inertia) {
+    translate(vector, filter, this, params, inertia);
   }
 
   /**
-   * Same as {@code node.translate(filter.apply(node, params), inertia)}
+   * Same as {@code node.translate(filter.apply(node, params), inertia)}. Note that the filter may access the
+   * {@code vector} as {@code cacheTargetTranslation}.
    * .
    * @see #translate(Vector, float)
-   * @see #translationalAxisFilter
-   * @see #translationalPlaneFilter
+   * @see #vectorAxisFilter
+   * @see #vectorPlaneFilter
    */
-  public static void translate(BiFunction<Node, Object[], Vector> filter, Node node, Object [] params, float inertia) {
+  public static void translate(Vector vector, BiFunction<Node, Object[], Vector> filter, Node node, Object [] params, float inertia) {
+    node.cacheTargetTranslation = vector;
     node.translate(filter.apply(node, params), inertia);
   }
 
   /**
-   * Same as {@code translate(filter, this, params)}.
+   * Same as {@code translate(vector, filter, this, params)}.
    *
-   * @see #translate(BiFunction, Node, Object[])
-   * @see #translationalAxisFilter
-   * @see #translationalPlaneFilter
+   * @see #translate(Vector, BiFunction, Node, Object[])
+   * @see #vectorAxisFilter
+   * @see #vectorPlaneFilter
    */
-  public void translate(BiFunction<Node, Object[], Vector> filter, Object [] params) {
-    translate(filter, this, params);
+  public void translate(Vector vector, BiFunction<Node, Object[], Vector> filter, Object [] params) {
+    translate(vector, filter, this, params);
   }
 
   /**
-   * Same as {@code node.translate(filter.apply(node, params))}.
+   * Same as {@code node.translate(filter.apply(node, params))}. Note that the filter may access the
+   * {@code vector} as {@code cacheTargetTranslation}.
    *
    * @see #translate(Vector)
-   * @see #translationalAxisFilter
-   * @see #translationalPlaneFilter
+   * @see #vectorAxisFilter
+   * @see #vectorPlaneFilter
    */
-  public static void translate(BiFunction<Node, Object[], Vector> filter, Node node, Object [] params) {
+  public static void translate(Vector vector, BiFunction<Node, Object[], Vector> filter, Node node, Object[] params) {
+    node.cacheTargetTranslation = vector;
     node.translate(filter.apply(node, params));
   }
 
@@ -1229,9 +1238,9 @@ public class Node {
    * Same as {@code rotate(quaternion, 0)}.
    *
    * @see #rotate(Quaternion, float)
-   * @see #rotate(BiFunction, Node, Object[])
-   * @see #rotate(BiFunction, Node, Object[], float)
-   * @see #rotationalAxisFilter
+   * @see #rotate(Quaternion, BiFunction, Node, Object[])
+   * @see #rotate(Quaternion, BiFunction, Node, Object[], float)
+   * @see #quaternionAxisFilter
    */
   public void rotate(Quaternion quaternion) {
     orientation().compose(quaternion);
@@ -1243,53 +1252,57 @@ public class Node {
    * Filters {@code quaternion} so that its {@link Quaternion#axis()} become {@code axis}
    * (defined in this node coordinate system). Call it as:
    * <p>
-   * {@code rotate(rotationalAxisFilter, this, new Object[] { quaternion, axis })} or
-   * {@code rotate(rotationalAxisFilter, this, new Object[] { quaternion, axis }, inertia)}.
+   * {@code rotate(quaternion, quaternionAxisFilter, this, new Object[] { axis })} or
+   * {@code rotate(quaternion, quaternionAxisFilter, this, new Object[] { axis }, inertia)}.
    *
-   * @see #rotate(BiFunction, Node, Object[])
-   * @see #rotate(BiFunction, Node, Object[], float)
+   * @see #rotate(Quaternion, BiFunction, Node, Object[])
+   * @see #rotate(Quaternion, BiFunction, Node, Object[], float)
    */
-  public static BiFunction<Node, Object[], Quaternion> rotationalAxisFilter = (node, params)-> {
-    return new Quaternion(Vector.projectVectorOnAxis(((Quaternion) params[0]).axis(), (Vector)params[1]), ((Quaternion) params[0]).angle());
+  public static BiFunction<Node, Object[], Quaternion> quaternionAxisFilter = (node, params)-> {
+    return new Quaternion(Vector.projectVectorOnAxis(node.cacheTargetRotation.axis(), (Vector)params[0]), node.cacheTargetRotation.angle());
   };
 
   /**
-   * Same as {@code rotate(filter, this, params, inertia)}.
+   * Same as {@code rotate(quaternion, filter, this, params, inertia)}.
    *
-   * @see #rotate(BiFunction, Node, Object[], float)
-   * @see #rotationalAxisFilter
+   * @see #rotate(Quaternion, BiFunction, Node, Object[], float)
+   * @see #quaternionAxisFilter
    */
-  public void rotate(BiFunction<Node, Object[], Quaternion> filter, Object [] params, float inertia) {
-    rotate(filter, this, params, inertia);
+  public void rotate(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Object [] params, float inertia) {
+    rotate(quaternion, filter, this, params, inertia);
   }
 
   /**
-   * Same as {@code node.rotate(filter.apply(node, params), inertia)}.
+   * Same as {@code node.rotate(filter.apply(node, params), inertia)}. Note that filter may access the
+   * {@code quaternion} as {@code cacheTargetRotation}.
    *
    * @see #rotate(Quaternion)
-   * @see #rotationalAxisFilter
+   * @see #quaternionAxisFilter
    */
-  public static void rotate(BiFunction<Node, Object[], Quaternion> filter, Node node, Object [] params, float inertia) {
+  public static void rotate(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Node node, Object[] params, float inertia) {
+    node.cacheTargetRotation = quaternion;
     node.rotate(filter.apply(node, params));
   }
 
   /**
-   * Same as {@code rotate(filter, this, params)}.
+   * Same as {@code rotate(quaternion, filter, this, params)}.
    *
-   * @see #rotate(BiFunction, Node, Object[])
-   * @see #rotationalAxisFilter
+   * @see #rotate(Quaternion, BiFunction, Node, Object[])
+   * @see #quaternionAxisFilter
    */
-  public void rotate(BiFunction<Node, Object[], Quaternion> filter, Object [] params) {
-    rotate(filter, this, params);
+  public void rotate(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Object [] params) {
+    rotate(quaternion, filter, this, params);
   }
 
   /**
-   * Same as {@code node.rotate(filter.apply(node, params))}.
+   * Same as {@code node.rotate(filter.apply(node, params))}. Note that filter may access the
+   * {@code quaternion} as {@code cacheTargetRotation}.
    *
    * @see #rotate(Quaternion)
-   * @see #rotationalAxisFilter
+   * @see #quaternionAxisFilter
    */
-  public static void rotate(BiFunction<Node, Object[], Quaternion> filter, Node node, Object [] params) {
+  public static void rotate(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Node node, Object[] params) {
+    node.cacheTargetRotation = quaternion;
     node.rotate(filter.apply(node, params));
   }
 
@@ -1479,7 +1492,7 @@ public class Node {
   }
 
   /**
-   * Same as {@code scale(scaling, 0)}.
+   * Same as {@code setMagnitude(magnitude() * scaling)}.
    *
    * @see #scale(float, float)
    */
@@ -1488,38 +1501,42 @@ public class Node {
   }
 
   /**
-   * Same as {@code scale(filter, this, params, inertia)}.
+   * Same as {@code scale(scaling, filter, this, params, inertia)}.
    *
-   * @see #scale(BiFunction, Node, Object[], float)
+   * @see #scale(float, BiFunction, Node, Object[], float)
    */
-  public void scale(BiFunction<Node, Object[], Float> filter, Object [] params, float inertia) {
-    scale(filter,this, params, inertia);
+  public void scale(float scaling, BiFunction<Node, Object[], Float> filter, Object [] params, float inertia) {
+    scale(scaling, filter, this, params, inertia);
   }
 
   /**
-   * Same as {@code node.scale(filter.apply(node, params))}.
+   * Same as {@code node.scale(filter.apply(node, params))}. Note that the filter may access the
+   * {@code scaling} as {@code cacheTargetScaling}.
    *
    * @see #scale(float)
    */
-  public static void scale(BiFunction<Node, Object[], Float> filter, Node node, Object [] params, float inertia) {
+  public static void scale(float scaling, BiFunction<Node, Object[], Float> filter, Node node, Object[] params, float inertia) {
+    node.cacheTargetScaling = scaling;
     node.scale(filter.apply(node, params));
   }
 
   /**
-   * Same as {@code scale(filter, this, params)}.
+   * Same as {@code scale(scaling, filter, this, params)}.
    *
-   * @see #scale(BiFunction, Node, Object[])
+   * @see #scale(float, BiFunction, Node, Object[])
    */
-  public void scale(BiFunction<Node, Object[], Float> filter, Object [] params) {
-    scale(filter, this, params);
+  public void scale(float scaling, BiFunction<Node, Object[], Float> filter, Object [] params) {
+    scale(scaling, filter, this, params);
   }
 
   /**
-   * Same as {@code node.scale(filter.apply(node, params))}.
+   * Same as {@code node.scale(filter.apply(node, params))}. Note that the filter may access the
+   * {@code scaling} as {@code cacheTargetScaling}.
    *
    * @see #scale(float)
    */
-  public static void scale(BiFunction<Node, Object[], Float> filter, Node node, Object [] params) {
+  public static void scale(float scaling, BiFunction<Node, Object[], Float> filter, Node node, Object[] params) {
+    node.cacheTargetScaling = scaling;
     node.scale(filter.apply(node, params));
   }
 
