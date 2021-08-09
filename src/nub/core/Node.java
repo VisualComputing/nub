@@ -1056,7 +1056,7 @@ public class Node {
 
   /**
    * Same as {@code node.translate(filter.apply(node, params), inertia)}. Note that the filter may access the
-   * {@code vector} as {@code cacheTargetTranslation}.
+   * {@code vector} as {@code cacheTargetTranslation} and the target position as {@code cacheTargetPosition}.
    * .
    * @see #translate(Vector, float)
    * @see #vectorAxisFilter
@@ -1064,6 +1064,7 @@ public class Node {
    */
   public static void translate(Vector vector, BiFunction<Node, Object[], Vector> filter, Node node, Object [] params, float inertia) {
     node.cacheTargetTranslation = vector;
+    node.cacheTargetPosition = Vector.add(node.position(), vector);
     node.translate(filter.apply(node, params), inertia);
   }
 
@@ -1080,7 +1081,7 @@ public class Node {
 
   /**
    * Same as {@code node.translate(filter.apply(node, params))}. Note that the filter may access the
-   * {@code vector} as {@code cacheTargetTranslation}.
+   * {@code vector} as {@code cacheTargetTranslation} and the target position as {@code cacheTargetPosition}.
    *
    * @see #translate(Vector)
    * @see #vectorAxisFilter
@@ -1088,6 +1089,7 @@ public class Node {
    */
   public static void translate(Vector vector, BiFunction<Node, Object[], Vector> filter, Node node, Object[] params) {
     node.cacheTargetTranslation = vector;
+    node.cacheTargetPosition = Vector.add(node.position(), vector);
     node.translate(filter.apply(node, params));
   }
 
@@ -1274,13 +1276,14 @@ public class Node {
 
   /**
    * Same as {@code node.rotate(filter.apply(node, params), inertia)}. Note that filter may access the
-   * {@code quaternion} as {@code cacheTargetRotation}.
+   * {@code quaternion} as {@code cacheTargetRotation} and the target orientation as {@code cacheTargetOrientation}.
    *
    * @see #rotate(Quaternion)
    * @see #quaternionAxisFilter
    */
   public static void rotate(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Node node, Object[] params, float inertia) {
     node.cacheTargetRotation = quaternion;
+    node.cacheTargetOrientation = Quaternion.compose(node.orientation(), quaternion);
     node.rotate(filter.apply(node, params));
   }
 
@@ -1296,13 +1299,14 @@ public class Node {
 
   /**
    * Same as {@code node.rotate(filter.apply(node, params))}. Note that filter may access the
-   * {@code quaternion} as {@code cacheTargetRotation}.
+   * {@code quaternion} as {@code cacheTargetRotation} and the target orientation as {@code cacheTargetOrientation}.
    *
    * @see #rotate(Quaternion)
    * @see #quaternionAxisFilter
    */
   public static void rotate(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Node node, Object[] params) {
     node.cacheTargetRotation = quaternion;
+    node.cacheTargetOrientation = Quaternion.compose(node.orientation(), quaternion);
     node.rotate(filter.apply(node, params));
   }
 
@@ -1517,6 +1521,7 @@ public class Node {
    */
   public static void scale(float scaling, BiFunction<Node, Object[], Float> filter, Node node, Object[] params, float inertia) {
     node.cacheTargetScaling = scaling;
+    node.cacheTargetMagnitude = node.magnitude() * scaling;
     node.scale(filter.apply(node, params));
   }
 
