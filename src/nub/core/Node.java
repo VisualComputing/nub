@@ -957,7 +957,8 @@ public class Node {
 
   /**
    * Same as {@code node.translate(node.cacheTargetTranslation, filter, params)}. Note that the filter may access the
-   * {@code vector} as {@code cacheTargetPosition} and the target translation as {@code cacheTargetTranslation}.
+   * {@code vector} as {@code cacheTargetPosition} and the target translation as {@code cacheTargetTranslation}
+   * which is computed as {@code Vector.subtract(vector, node.position())}.
    *
    * @see #translate(Vector)
    * @see #vectorAxisFilter
@@ -1215,6 +1216,31 @@ public class Node {
   public void setOrientation(Quaternion orientation) {
     _orientation = orientation;
     _modified();
+  }
+
+  /**
+   * Same as {@code setOrientation(quaternion, filter, this, params)}.
+   *
+   * @see #setOrientation(Quaternion, BiFunction, Node, Object[])
+   */
+  public void setOrientation(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Object [] params) {
+    setOrientation(quaternion, filter, this, params);
+  }
+
+  /**
+   * Same as {@code node.rotate(node.cacheTargetRotation, filter, params)}. Note that the filter may
+   * access the {@code quaternion} as {@code cacheTargetOrientation} and the target orientation as
+   * {@code cacheTargetRotation} which is computed as
+   * {@code Quaternion.compose(node.orientation().inverse(), quaternion)}.
+   *
+   * @see #translate(Vector)
+   * @see #vectorAxisFilter
+   * @see #vectorPlaneFilter
+   */
+  public static void setOrientation(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Node node, Object[] params) {
+    node.cacheTargetOrientation = quaternion;
+    node.cacheTargetRotation = Quaternion.compose(node.orientation().inverse(), quaternion);
+    node.rotate(node.cacheTargetRotation, filter, params);
   }
 
   /**
@@ -1477,6 +1503,24 @@ public class Node {
    */
   public void setWorldOrientation(Quaternion quaternion) {
     setOrientation(reference() != null ? reference().displacement(quaternion) : quaternion);
+  }
+
+  /**
+   * Same as {@code setWorldOrientation(quaternion, filter, this, params)}.
+   *
+   * @see #setWorldOrientation(Quaternion, BiFunction, Node, Object[])
+   */
+  public void setWorldOrientation(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Object [] params) {
+    setWorldOrientation(quaternion, filter, this, params);
+  }
+
+  /**
+   * Same as {@code Node.setOrientation(node.reference() != null ? node.reference().displacement(quaternion) : quaternion, filter, node, params)}.
+   *
+   * @see #setOrientation(Quaternion, BiFunction, Node, Object[])
+   */
+  public static void setWorldOrientation(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Node node, Object[] params) {
+    Node.setOrientation(node.reference() != null ? node.reference().displacement(quaternion) : quaternion, filter, node, params);
   }
 
   /**
