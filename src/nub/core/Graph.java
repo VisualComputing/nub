@@ -3685,13 +3685,13 @@ public class Graph {
   public void shift(Node node, float dx, float dy, float dz, float inertia) {
     if (node == null || node == eye()) {
       node = eye().detach();
-      node.setWorldPosition(center().get());
+      node.setWorldPosition(center());
       Vector vector = displacement(new Vector(dx, dy, dz), node);
       vector.multiply(-1);
+      Vector translation = eye().referenceDisplacement(vector);
       // Option 1: don't compensate orthographic, i.e., use Node.translate(vector, inertia)
-      //eye().translate(eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye()), inertia);
+      //eye().translate(translation);
       // Option 2: compensate orthographic, i.e., use Graph inertial translation task
-      Vector translation = eye().reference() == null ? eye().worldDisplacement(vector) : eye().reference().displacement(vector, eye());
       _shift(translation.x(), translation.y(), translation.z());
       _translationTask.setInertia(inertia);
       _translationTask._x += translation.x();
@@ -3702,8 +3702,7 @@ public class Graph {
       }
     }
     else {
-      Vector vector = displacement(new Vector(dx, dy, dz), node);
-      node.translate(node.reference() == null ? node.worldDisplacement(vector) : node.reference().displacement(vector, node), inertia);
+      node.translate(node.referenceDisplacement(displacement(new Vector(dx, dy, dz), node)), inertia);
     }
   }
 
