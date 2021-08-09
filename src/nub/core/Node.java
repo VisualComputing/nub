@@ -2251,7 +2251,7 @@ public class Node {
    * Converts {@code quaternion} displacement from {@link #reference()} to this node.
    * <p>
    * {@link #referenceDisplacement(Quaternion)} performs the inverse transformation.
-   * {@link #_location(Vector)} converts locations instead of displacements.
+   * {@link #localLocation(Vector)} converts locations instead of displacements.
    *
    * @see #displacement(Quaternion)
    * @see #displacement(Vector)
@@ -2264,7 +2264,7 @@ public class Node {
    * Converts {@code quaternion} displacement from this node to {@link #reference()}.
    * <p>
    * {@link #localDisplacement(Quaternion)} performs the inverse transformation.
-   * {@link #_referenceLocation(Vector)} converts locations instead of displacements.
+   * {@link #referenceLocation(Vector)} converts locations instead of displacements.
    *
    * @see #worldDisplacement(Quaternion)
    * @see #worldDisplacement(Vector)
@@ -2327,7 +2327,7 @@ public class Node {
    * Converts {@code vector} displacement from {@link #reference()} to this node.
    * <p>
    * {@link #referenceDisplacement(Vector)} performs the inverse transformation.
-   * {@link #_location(Vector)} converts locations instead of displacements.
+   * {@link #localLocation(Vector)} converts locations instead of displacements.
    *
    * @see #displacement(Vector)
    */
@@ -2339,7 +2339,7 @@ public class Node {
    * Converts {@code vector} displacement from this node to {@link #reference()}.
    * <p>
    * {@link #localDisplacement(Vector)} performs the inverse transformation.
-   * {@link #_referenceLocation(Vector)} converts locations instead of displacements.
+   * {@link #referenceLocation(Vector)} converts locations instead of displacements.
    *
    * @see #worldDisplacement(Vector)
    */
@@ -2390,7 +2390,7 @@ public class Node {
    * @see #worldLocation(Vector)
    */
   public Vector location(Vector vector, Node node) {
-    return this == node ? vector : _location(reference() != null ? reference().location(vector, node) : node == null ? vector : node.worldLocation(vector));
+    return this == node ? vector : localLocation(reference() != null ? reference().location(vector, node) : node == null ? vector : node.worldLocation(vector));
   }
 
   /**
@@ -2407,7 +2407,7 @@ public class Node {
     Node node = this;
     Vector result = vector;
     while (node != null) {
-      result = node._referenceLocation(result);
+      result = node.referenceLocation(result);
       node = node.reference();
     }
     return result;
@@ -2416,24 +2416,24 @@ public class Node {
   /**
    * Converts {@code vector} location from {@link #reference()} to this node.
    * <p>
-   * {@link #_referenceLocation(Vector)} performs the inverse transformation.
+   * {@link #referenceLocation(Vector)} performs the inverse transformation.
    * {@link #localDisplacement(Vector)} converts displacements instead of locations.
    *
    * @see #location(Vector)
    */
-  protected Vector _location(Vector vector) {
+  public Vector localLocation(Vector vector) {
     return Vector.divide(orientation().inverseRotate(Vector.subtract(vector, position())), magnitude());
   }
 
   /**
    * Converts {@code vector} location from this node to {@link #reference()}.
    * <p>
-   * {@link #_location(Vector)} performs the inverse transformation.
+   * {@link #localLocation(Vector)} performs the inverse transformation.
    * {@link #referenceDisplacement(Vector)} converts displacements instead of locations.
    *
    * @see #worldLocation(Vector)
    */
-  protected Vector _referenceLocation(Vector vector) {
+  public Vector referenceLocation(Vector vector) {
     return Vector.add(orientation().rotate(Vector.multiply(vector, magnitude())), position());
   }
 

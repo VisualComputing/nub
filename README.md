@@ -114,7 +114,7 @@ void setup() {
 }
 ```
 
-Note that the hierarchy of nodes may be modified with `setReference(Node)` and the scene `eye()` set from an arbitrary node instance with `setEye(Node)`. Calling `setConstraint(Constraint)` will apply a `Constraint` to a node to limit its motion, see the [ConstrainedEye](https://github.com/VisualComputing/nub/tree/master/examples/basics/ConstrainedEye) and [ConstrainedNode](https://github.com/VisualComputing/nub/tree/master/examples/basics/ConstrainedNode) examples.
+Note that the hierarchy of nodes may be modified with `setReference(Node)` and the scene `eye()` set from an arbitrary node instance with `setEye(Node)`.
 
 ### Localization
 
@@ -125,8 +125,9 @@ A node `position`, `orientation` and `magnitude` may be set with the following m
 |Globally         |`setWorldPosition(vector)`    |`setWorldOrientation(quaternion)`                                      |`setWorldMagnitude(mag)`  |
 |Locally          |`setPosition(vector)`         |`setOrientation(quaternion)`                                           |`setMagnitude(scl)`       |
 |Incrementally    |`translate(vector, [inertia])`|`rotate(quaternion, [inertia])`, `orbit(quaternion, center, [inertia])`|`scale(amount, [inertia])`|
+|Incrementally    |`translate(filter, params, [inertia])`|`rotate(filter, params, [inertia])`, `orbit(quaternion, center, [inertia])`|`scale(filter, params, [inertia])`|
 
-The optional `inertia` parameter should be a value in [0..1], `0` no inertia (which is the default value) & `1` no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of `TimingTasks`.
+Note that `filter` (that goes together with its `params`) is a function implementing a constraint to limit the node movement and that the node provides the following default filters: `translationalAxisFilter`, `translationalPlaneFilter` and `rotationalAxisFilter` (see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo/Luxo.pde)). The optional `inertia` parameter should be a value in [0..1], `0` no inertia (which is the default value) & `1` no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of `TimingTasks`.
 
 ### Shapes
 
@@ -149,11 +150,13 @@ Note that `point`, `pixel` and `vector` are `Vector` instances.
 
 The following `Node` methods transform points (_locations_) and scalars / vectors/ quaternions (_displacements_) between different node instances (including the world):
 
-| Space transformation  | Points                  |Scalars / Vectors / Quaternions|
-|-----------------------|-------------------------|-------------------------------|
-| Node to (this) Node   | `location(point, node)` | `displacement(element, node)` |
-| World to (this) Node  | `location(point)`       | `displacement(element)`       |
-| (this) Node to World  | `worldLocation(point)`  | `worldDisplacement(element)`  |
+| Space transformation     | Points                     |Scalars / Vectors / Quaternions   |
+|--------------------------|----------------------------|----------------------------------|
+| Node to (this) Node      | `location(point, node)`    | `displacement(element, node)`    |
+| (this) Node to Reference | `referenceLocation(point)` | `referenceDisplacement(element)` |
+| Reference to (this) Node | `localLocation(point)`     | `localDisplacement(element)` |
+| World to (this) Node     | `location(point)`          | `displacement(element)`          |
+| (this) Node to World     | `worldLocation(point)`     | `worldDisplacement(element)`     |
 
 Note that `point` is a `Vector` instance and `element` is either a `float` (scalar), `Vector` or `Quaternion` one.
 
