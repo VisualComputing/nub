@@ -52,10 +52,6 @@ import java.util.ListIterator;
  * {@link #configHint(int, Object...)} {@link #enableHint(int)},
  * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
  * and {@link #resetHint()}.
- * <b>Attention:</b> If a {@link nub.core.constraint.Constraint} is attached to
- * the {@link #node()} (see {@link Node#constraint()}), it should be reset before
- * {@link #run()} is called, otherwise the interpolated motion (computed as if
- * there was no constraint) will probably be erroneous.
  */
 public class Interpolator {
   /**
@@ -106,12 +102,12 @@ public class Interpolator {
 
     protected KeyFrame(KeyFrame other) {
       this._time = other._time;
-      this._node = other._node.get();
+      this._node = other._node.copy();
       this._hint = other._hint;
       this._cacheHint = other._cacheHint;
     }
 
-    public KeyFrame get() {
+    public KeyFrame copy() {
       return new KeyFrame(this);
     }
 
@@ -226,7 +222,7 @@ public class Interpolator {
     _splineWeight = 3;
     _steps = 3;
 
-    // hack (refer to Node.get())
+    // hack (refer to Node.copy())
     if (node().isHintEnabled(Node.SHAPE) && node()._imrShape != null || node()._rmrShape != null) {
       //if (node()._imrShape != null || node()._rmrShape != null) {
       _stepsHint = Node.SHAPE;
@@ -242,7 +238,7 @@ public class Interpolator {
   protected Interpolator(Interpolator other) {
     this._list = new ArrayList<KeyFrame>();
     for (KeyFrame element : other._list) {
-      KeyFrame keyFrame = element.get();
+      KeyFrame keyFrame = element.copy();
       this._list.add(keyFrame);
     }
     this._path = new ArrayList<Node>();
@@ -269,7 +265,7 @@ public class Interpolator {
   /**
    * Returns a deep copy of this interpolator.
    */
-  public Interpolator get() {
+  public Interpolator copy() {
     return new Interpolator(this);
   }
 
@@ -613,7 +609,7 @@ public class Interpolator {
   }
 
   /**
-   * Same as {@code addKeyFrame(node().get(), hint, time)}.
+   * Same as {@code addKeyFrame(node().copy(), hint, time)}.
    *
    * @see #addKeyFrame(Node, int, float)
    * @see #addKeyFrame(Node)
@@ -622,7 +618,7 @@ public class Interpolator {
    * @see #addKeyFrame()
    */
   public void addKeyFrame(int hint, float time) {
-    addKeyFrame(node().get(), hint, time);
+    addKeyFrame(node().copy(), hint, time);
   }
 
   /**

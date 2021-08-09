@@ -1482,7 +1482,7 @@ public class Graph {
     float absAngle = Math.abs(angle);
     if (absAngle >= Math.PI / 2)
       return true;
-    Vector faceNormal = axis.get();
+    Vector faceNormal = axis.copy();
     faceNormal.normalize();
     return Math.acos(Vector.dot(camAxis, faceNormal)) + absAngle < Math.PI / 2;
   }

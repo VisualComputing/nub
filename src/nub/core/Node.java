@@ -346,7 +346,7 @@ public class Node {
    * Same as {@code return detach(this)}.
    *
    * @see #detach(Node)
-   * @see #get()
+   * @see #copy()
    */
   public Node detach() {
     Node node = detach(this);
@@ -421,7 +421,7 @@ public class Node {
    *
    * @see #detach()
    */
-  public Node get() {
+  public Node copy() {
     Node node = new Node();
     node.set(this);
     if (!isHintEnabled(Node.SHAPE))
@@ -647,8 +647,8 @@ public class Node {
       nowReachable = node.isReachable();
     }
     // 2. cache prev state
-    Vector position = position = this.worldPosition().get();
-    Quaternion orientation = this.worldOrientation().get();
+    Vector position = position = this.worldPosition().copy();
+    Quaternion orientation = this.worldOrientation().copy();
     float magnitude = this.worldMagnitude();
     // 3. temporarily remove node from the graph while setting new reference
     if (reference() != null) {

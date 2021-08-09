@@ -213,7 +213,7 @@ public class Quaternion {
   /**
    * Returns a deep copy of this quaternion.
    */
-  public Quaternion get() {
+  public Quaternion copy() {
     return new Quaternion(this);
   }
 
@@ -234,7 +234,7 @@ public class Quaternion {
    * <ul>
    * <li>One {@code params}: if its type is {@link Matrix} it returns a quaternion from
    * the given 'matrix-form' (see {@link #Quaternion(Matrix)}). If its type is {@code Quaternion}
-   * then the quaternion is cloned (see {@link #get()}) and returned. If it's of type {@code float[]}
+   * then the quaternion is cloned (see {@link #copy()}) and returned. If it's of type {@code float[]}
    * then a quaternion is returned from the 4-array elements (see {@link #Quaternion(float[])}).</li>
    * <li>Two {@code params}: if both params are of type {@link Vector} it returns the quaternion
    * which would produce the rotation from the first vector param to the second (see
@@ -249,7 +249,7 @@ public class Quaternion {
    * It {@code params} cannot be parsed a new Quaternion ({@code #identity}) is returned.
    *
    * @see #Quaternion(Matrix)
-   * @see #get()
+   * @see #copy()
    * @see #Quaternion(float[])
    * @see #Quaternion(Vector, Vector)
    * @see #Quaternion(Vector, float)
@@ -261,7 +261,7 @@ public class Quaternion {
         if (params[0] instanceof Matrix)
           return new Quaternion((Matrix) params[0]);
         else if (params[0] instanceof Quaternion)
-          return ((Quaternion) params[0]).get();
+          return ((Quaternion) params[0]).copy();
         else if (params[0] instanceof float[])
           return new Quaternion((float[]) params[0]);
         break;

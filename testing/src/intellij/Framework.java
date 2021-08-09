@@ -91,7 +91,7 @@ public class Framework extends PApplet {
       interpolator.addKeyFrame(n2.get());
     // */
     if (key == 'a') {
-      lastKeyFrame = n2.get();
+      lastKeyFrame = n2.copy();
       lastKeyFrame.configHint(Node.TORUS, color(255, 0, 125, alpha));
       interpolator.addKeyFrame(lastKeyFrame);
     }

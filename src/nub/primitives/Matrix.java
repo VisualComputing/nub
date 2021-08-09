@@ -315,7 +315,7 @@ public class Matrix {
   /**
    * Returns a copy of this matrix.
    */
-  public Matrix get() {
+  public Matrix copy() {
     return new Matrix(this);
   }
 

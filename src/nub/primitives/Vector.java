@@ -177,7 +177,7 @@ public class Vector {
    * need to be normalized, but must be non null) that passes through the origin.
    */
   public static Vector projectVectorOnAxis(Vector vector, Vector direction) {
-    Vector b = direction.get();
+    Vector b = direction.copy();
     b.normalize();
     if (b.magnitude() == 0)
       throw new RuntimeException("Direction squared norm is nearly 0");
@@ -309,7 +309,7 @@ public class Vector {
   /**
    * Returns a deep copy of this vector.
    */
-  public Vector get() {
+  public Vector copy() {
     return new Vector(this);
   }
 
@@ -737,7 +737,7 @@ public class Vector {
    * @param vector2 the vector to lerp to
    */
   public static Vector lerp(Vector vector1, Vector vector2, float amount) {
-    Vector v = vector1.get();
+    Vector v = vector1.copy();
     v.lerp(vector2, amount);
     return v;
   }
