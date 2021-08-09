@@ -1233,9 +1233,7 @@ public class Node {
    * {@code cacheTargetRotation} which is computed as
    * {@code Quaternion.compose(node.orientation().inverse(), quaternion)}.
    *
-   * @see #translate(Vector)
-   * @see #vectorAxisFilter
-   * @see #vectorPlaneFilter
+   * @see #rotate(Quaternion, BiFunction, Object[])
    */
   public static void setOrientation(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Node node, Object[] params) {
     node.cacheTargetOrientation = quaternion;
@@ -1559,6 +1557,28 @@ public class Node {
   }
 
   /**
+   * Same as {@code setMagnitude(magnitude, filter, this, params)}.
+   *
+   * @see #setMagnitude(float, BiFunction, Node, Object[])
+   */
+  public void setMagnitude(float magnitude, BiFunction<Node, Object[], Float> filter, Object [] params) {
+    setMagnitude(magnitude, filter, this, params);
+  }
+
+  /**
+   * Same as {@code node.scale(node.cacheTargetScaling, filter, params)}. Note that the filter may
+   * access the {@code magnitude} as {@code cacheTargetMagnitude} and the target scaling as
+   * {@code cacheTargetScaling} which is computed as {@code magnitude / node.magnitude()}.
+   *
+   * @see #scale(float, BiFunction, Object[])
+   */
+  public static void setMagnitude(float magnitude, BiFunction<Node, Object[], Float> filter, Node node, Object[] params) {
+    node.cacheTargetMagnitude = magnitude;
+    node.cacheTargetScaling = magnitude / node.magnitude();
+    node.scale(node.cacheTargetScaling, filter, params);
+  }
+
+  /**
    * Scales the node according to {@code scaling}, locally defined with respect to the
    * {@link #reference()}  and with an impulse defined with {@code inertia} which should
    * be in {@code [0..1]}, 0 no inertia & 1 no friction.
@@ -1621,12 +1641,14 @@ public class Node {
 
   /**
    * Same as {@code node.scale(filter.apply(node, params))}. Note that the filter may access the
-   * {@code scaling} as {@code cacheTargetScaling}.
+   * {@code scaling} as {@code cacheTargetScaling} and the resulting target magnitude as
+   * {@code cacheTargetMagnitude}.
    *
    * @see #scale(float)
    */
   public static void scale(float scaling, BiFunction<Node, Object[], Float> filter, Node node, Object[] params) {
     node.cacheTargetScaling = scaling;
+    node.cacheTargetMagnitude = node.magnitude() * scaling;
     node.scale(filter.apply(node, params));
   }
 
@@ -1668,6 +1690,24 @@ public class Node {
     setMagnitude(reference() != null ? magnitude / reference().worldMagnitude() : magnitude);
     // option 2 mimics setOrientation (should produce same results)
     //setScaling(reference() != null ? reference().displacement(magnitude) : magnitude);
+  }
+
+  /**
+   * Same as {@code setWorldMagnitude(magnitude, filter, this, params)}.
+   *
+   * @see #setWorldMagnitude(float, BiFunction, Node, Object[])
+   */
+  public void setWorldMagnitude(float magnitude, BiFunction<Node, Object[], Float> filter, Object [] params) {
+    setWorldMagnitude(magnitude, filter, this, params);
+  }
+
+  /**
+   * Same as {@code Node.setMagnitude(node.reference() != null ? magnitude / node.reference().worldMagnitude() : magnitude, filter, node, params)}.
+   *
+   * @see #setMagnitude(float, BiFunction, Node, Object[])
+   */
+  public static void setWorldMagnitude(float magnitude, BiFunction<Node, Object[], Float> filter, Node node, Object[] params) {
+    Node.setMagnitude(node.reference() != null ? magnitude / node.reference().worldMagnitude() : magnitude, filter, node, params);
   }
 
   // ALIGNMENT
