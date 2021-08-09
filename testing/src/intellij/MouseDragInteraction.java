@@ -18,7 +18,7 @@ public class MouseDragInteraction extends PApplet {
   Scene scene;
   Vector randomVector;
   boolean cad, lookAround;
-  Node node, shape1, shape2;
+  Node shape3, shape1, shape2;
 
   public void settings() {
     size(1200, 600, P3D);
@@ -27,8 +27,6 @@ public class MouseDragInteraction extends PApplet {
   public void setup() {
     rectMode(CENTER);
 
-    //scene = new Scene(this, 100, 1600);
-    //scene.eye().setPosition(new Vector(0, 0, 850));
     scene = new Scene(this, 1500);
     scene.setHUD((PGraphics pg) -> {
       pg.pushStyle();
@@ -36,7 +34,6 @@ public class MouseDragInteraction extends PApplet {
       pg.strokeWeight(5);
       pg.fill(255, 255, 0, 125);
       pg.rect(pixelX, pixelY, 2 * h, h);
-      //pg.point(pixelX, pixelY);
       pg.popStyle();
     });
     //scene.togglePerspective();
@@ -72,6 +69,10 @@ public class MouseDragInteraction extends PApplet {
     }
     );
     shape2.translate(275, 275, 0);
+    shape3 = shape1.detach();
+    scene.randomize(shape3);
+    shape3.setShape(shape());
+    shape3.setReference(shape2);
     randomVector = Vector.random();
     randomVector.setMagnitude(scene.radius() * 0.5f);
   }
@@ -83,37 +84,28 @@ public class MouseDragInteraction extends PApplet {
     scene.drawArrow(randomVector);
   }
 
-  BiFunction<Node, Object[], Vector> styleOne = (node, params)->{
-    println(((Vector)params[0]).toString());
-    println(shape1.id() + " " + node.id());
-    return new Vector();
+  static BiFunction<Node, Object[], Float> scalingFilter = (node, params) -> {
+    float delta = (float)params[0] * 20;
+    float factor = 1 + Math.abs(delta) / (float)params[1];
+    float scl = delta >= 0 ? factor : 1 / factor;
+    float bottom = 0.5f;
+    float top = 2;
+    if((delta < 0 && node.magnitude() < bottom) || (delta > 0 && node.magnitude() > top))
+      return 1.0f;
+    return scl;
   };
 
   public void keyPressed() {
-    if(key == 't') {
-      Vector v = new Vector(10,15,20);
-      shape1.translate(Node.translationalAxisFilter, new Object[] { v, v });
-      //shape1.translate(v, v);
-      //shape1.translate(styleOne, new Object[] { v });
-    }
-    if (key == 'd') {
-      if (node == null) {
-        node = shape1.detach();
-        scene.randomize(node);
-        node.setShape(shape());
-        node.setReference(shape2);
-      }
-    }
     if (key == 'e') {
-      if (node != null)
-        node.setReference(shape1);
+      if (shape3 != null)
+        shape3.setReference(shape1);
     }
     if (key == 'x') {
-      Scene.prune(node);
+      Scene.prune(shape3);
     }
     if (key == 'y') {
-      if (node != null)
-        node.resetReference();
+      if (shape3 != null)
+        shape3.resetReference();
     }
     if (key == 'i')
       Scene.leftHanded = !Scene.leftHanded;
@@ -162,19 +154,42 @@ public class MouseDragInteraction extends PApplet {
         scene.mouseLookAround();
       } else {
         scene.mouseSpin();
-        //if (!scene.mouseSpinTag(1))
-        //scene.mouseSpinEye(1);
       }
     else if (mouseButton == RIGHT) {
-      scene.mouseShift();
+      if (scene.node() == shape2) {
+        Vector vector = scene.displacement(new Vector(scene.mouseDX(), scene.mouseDY(), 0), shape2);
+        Vector axis = Vector.plusI;
+        // uncomment to express the filter axis in the world coordinate system
+        // axis = shape2.displacement(axis);
+        shape2.translate(Node.translationalAxisFilter, new Object[] { vector, axis }, 0);
+      }
+      else if (scene.node() == null) {
+        Node _node = scene.eye().detach();
+        _node.setWorldPosition(scene.center());
+        Vector vector = scene.displacement(new Vector(scene.mouseDX(), scene.mouseDY(), 0), _node);
+        vector = scene.eye().displacement(vector, _node);
+        Vector axis = Vector.plusI;
+        // uncomment to express the filter axis in the world coordinate system
+        // axis = scene.eye().displacement(axis);
+        scene.eye().translate(Node.translationalAxisFilter, new Object[] { vector, axis }, 0.8f);
+      }
+      /*
+      else {
+        scene.mouseShift();
+      }
+      // */
     } else {
-      //scene.scaleNode(scene.mouseDX());
-      scene.turn(scene.mouseRADX(), 0, 0);
+      scene.zoom(scene.mouseDX());
+      //scene.turn(scene.mouseRADX(), 0, 0);
     }
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.moveForward(event.getCount() * 20);
+    if (scene.node() != null) {
+      scene.node().scale(scalingFilter, new Object[] {(float) event.getCount(), (float) height });
+    }
+    else
+      scene.moveForward(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
