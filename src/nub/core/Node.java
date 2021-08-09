@@ -947,6 +947,29 @@ public class Node {
   }
 
   /**
+   * Same as {@code setPosition(vector, filter, this, params)}.
+   *
+   * @see #setPosition(Vector, BiFunction, Node, Object[])
+   */
+  public void setPosition(Vector vector, BiFunction<Node, Object[], Vector> filter, Object [] params) {
+    setPosition(vector, filter, this, params);
+  }
+
+  /**
+   * Same as {@code node.translate(node.cacheTargetTranslation, filter, params)}. Note that the filter may access the
+   * {@code vector} as {@code cacheTargetPosition} and the target translation as {@code cacheTargetTranslation}.
+   *
+   * @see #translate(Vector)
+   * @see #vectorAxisFilter
+   * @see #vectorPlaneFilter
+   */
+  public static void setPosition(Vector vector, BiFunction<Node, Object[], Vector> filter, Node node, Object[] params) {
+    node.cacheTargetPosition = vector;
+    node.cacheTargetTranslation = Vector.subtract(vector, node.position());
+    node.translate(node.cacheTargetTranslation, filter, params);
+  }
+
+  /**
    * Same as {@link #setPosition(Vector)}, but with {@code float} parameters.
    */
   public void setPosition(float x, float y) {
@@ -1125,6 +1148,24 @@ public class Node {
    */
   public void setWorldPosition(Vector position) {
     setPosition(reference() != null ? reference().location(position) : position);
+  }
+
+  /**
+   * Same as {@code setWorldPosition(vector, filter, this, params)}.
+   *
+   * @see #setWorldPosition(Vector, BiFunction, Node, Object[])
+   */
+  public void setWorldPosition(Vector vector, BiFunction<Node, Object[], Vector> filter, Object [] params) {
+    setWorldPosition(vector, filter, this, params);
+  }
+
+  /**
+   * Same as {@code Node.setPosition(node.reference() != null ? node.reference().location(vector) : vector, filter, node, params)}.
+   *
+   * @see #setPosition(Vector, BiFunction, Node, Object[])
+   */
+  public static void setWorldPosition(Vector vector, BiFunction<Node, Object[], Vector> filter, Node node, Object[] params) {
+    Node.setPosition(node.reference() != null ? node.reference().location(vector) : vector, filter, node, params);
   }
 
   /**

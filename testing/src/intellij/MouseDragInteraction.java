@@ -73,6 +73,7 @@ public class MouseDragInteraction extends PApplet {
     scene.randomize(shape3);
     shape3.setShape(shape());
     shape3.setReference(shape2);
+    shape3.enableHint(Node.AXES);
     randomVector = Vector.random();
     randomVector.setMagnitude(scene.radius() * 0.5f);
   }
@@ -135,6 +136,14 @@ public class MouseDragInteraction extends PApplet {
 
     if (key == 'g') {
       scene.fit(pixelX, pixelY, 2 * h, h, 1);
+    }
+    if (key == 'w') {
+      Vector axis = Vector.plusI;
+      shape2.setPosition(new Vector(), Node.vectorAxisFilter, new Object[] { axis });
+    }
+    if (key == 'z') {
+      Vector axis = Vector.plusI;
+      shape3.setWorldPosition(new Vector(), Node.vectorAxisFilter, new Object[] { axis });
     }
   }
 
