@@ -120,14 +120,13 @@ Note that the hierarchy of nodes may be modified with `setReference(Node)` and t
 
 A node `position`, `orientation` and `magnitude` may be set with the following methods:
 
-|Node localization|Position                      |Orientation                                                            |Magnitude                 |
-|-----------------|------------------------------|-----------------------------------------------------------------------|--------------------------|
-|Globally         |`setWorldPosition(vector)`    |`setWorldOrientation(quaternion)`                                      |`setWorldMagnitude(mag)`  |
-|Locally          |`setPosition(vector)`         |`setOrientation(quaternion)`                                           |`setMagnitude(scl)`       |
-|Incrementally    |`translate(vector, [inertia])`|`rotate(quaternion, [inertia])`, `orbit(quaternion, center, [inertia])`|`scale(amount, [inertia])`|
-|Incrementally    |`translate(filter, params, [inertia])`|`rotate(filter, params, [inertia])`, `orbit(quaternion, center, [inertia])`|`scale(filter, params, [inertia])`|
+|Node localization|Position                                |Orientation                                 |Magnitude                             |
+|-----------------|----------------------------------------|--------------------------------------------|--------------------------------------|
+|Globally         |`setWorldPosition(vector, [filter])`    |`setWorldOrientation(quaternion, [filter])` |`setWorldMagnitude(scalar, [filter])` |
+|Locally          |`setPosition(vector, [filter])`         |`setOrientation(quaternion, [filter])`      |`setMagnitude(scalar, [filter])`      |
+|Incrementally    |`translate(vector, [filter], [inertia])`|`rotate(quaternion, [filter], [inertia])`,  |`scale(scalar, [filter], [inertia])`  |
 
-Note that `filter` (that goes together with its `params`) is a function implementing a constraint to limit the node movement and that the node provides the following default filters: `translationalAxisFilter`, `translationalPlaneFilter` and `rotationalAxisFilter` (see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo/Luxo.pde)). The optional `inertia` parameter should be a value in [0..1], `0` no inertia (which is the default value) & `1` no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of `TimingTasks`.
+Note that `filter` is a function implementing a node transformation constrain and that the node provides the following default filters: `translationalAxisFilter`, `translationalPlaneFilter` and `rotationalAxisFilter` (see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo/Luxo.pde)). The optional `inertia` parameter should be a value in [0..1], `0` no inertia (which is the default value) & `1` no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of `TimingTasks`.
 
 ### Shapes
 
