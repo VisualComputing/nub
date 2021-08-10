@@ -21,32 +21,16 @@ public class Luxo extends PApplet {
     scene.enableHint(Scene.BACKGROUND);
     //scene.setShape(this::floor);
     scene.fit(1);
-    // Constraints
-    /*
-    WorldConstraint baseConstraint = new WorldConstraint();
-    baseConstraint.setTranslationConstraint(AxisPlaneConstraint.Type.PLANE, Vector.plusK);
-    baseConstraint.setRotationConstraint(AxisPlaneConstraint.Type.AXIS, Vector.plusK);
-    LocalConstraint tipConstraint = new LocalConstraint();
-    tipConstraint.setTranslationConstraint(AxisPlaneConstraint.Type.FORBIDDEN, Vector.zero);
-    tipConstraint.setRotationConstraint(AxisPlaneConstraint.Type.AXIS, Vector.plusI);
-    LocalConstraint shadeConstraint = new LocalConstraint();
-    shadeConstraint.setTranslationConstraint(AxisPlaneConstraint.Type.FORBIDDEN, Vector.zero);
-    // */
-    // Nodes
     base = new Node(this::base);
-    //base.setConstraint(baseConstraint);
     arm = new Node(base, this::limb);
     arm.setPosition(0, 0, 8);
     arm.setOrientation(Quaternion.from(Vector.plusI, 0.6));
-    //arm.setConstraint(tipConstraint);
     forarm = new Node(arm, this::limb);
     forarm.setPosition(0, 0, 50);
     forarm.setOrientation(Quaternion.from(Vector.plusI, -2));
-    //forarm.setConstraint(tipConstraint);
     shade = new Node(forarm, this::shade);
     shade.setPosition(0, 0, 50);
     shade.setOrientation(Quaternion.from(new Vector(1, -0.3f, 0), -1.7));
-    //shade.setConstraint(shadeConstraint);
     // for the lights to work the floor node should be the last to be added
     floor = new Node(this::floor);
     floor.tagging = false;
@@ -118,17 +102,30 @@ public class Luxo extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.mouseTag("piece");
   }
 
   public void mouseDragged() {
-    // no inertia for the nodes, but for the eye
-    if (mouseButton == LEFT) {
-      scene.mouseSpin(scene.node() != null ? 0 : 0.85f);
-    } else if (mouseButton == RIGHT) {
-      scene.mouseShift(scene.node() != null ? 0 : 0.85f);
-    } else {
-      scene.zoom(mouseX - pmouseX, scene.node() != null ? 0 : 0.85f);
+    Node piece = scene.node("piece");
+    if (piece == base) {
+      Vector translateFromMouse = scene.displacement(new Vector(scene.mouseDX(), scene.mouseDY(), 0), piece);
+      Vector axis = piece.displacement(Vector.plusK);
+      piece.translate(translateFromMouse, Node.vectorPlaneFilter, new Object[] { axis });
+    }
+    else if (piece == arm || piece == forarm) {
+      piece.rotate(Quaternion.from(scene.mouseRADX(), 0, 0));
+    }
+    else if (piece == shade) {
+      scene.mouseSpin(piece);
+    }
+    else {
+      if (mouseButton == LEFT) {
+        scene.mouseSpin();
+      } else if (mouseButton == RIGHT) {
+        scene.mouseShift();
+      } else {
+        scene.zoom(mouseX - pmouseX);
+      }
     }
   }
 

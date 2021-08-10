@@ -3088,6 +3088,15 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code mouseSpin(node, Graph.inertia)}.
+   *
+   * @see #mouseSpin(Node, float)
+   */
+  public void mouseSpin(Node node) {
+    mouseSpin(node, Graph.inertia);
+  }
+
+  /**
    * Same as {@code super.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
    *
    * @see #spin(Node, int, int, int, int, float)

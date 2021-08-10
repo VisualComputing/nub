@@ -65,12 +65,17 @@ void keyPressed() {
 }
 
 void mouseDragged() {
-  if (mouseButton == LEFT)
-    scene.mouseSpin("key");
-  else if (mouseButton == CENTER)
-    scene.zoom("key", scene.mouseDX());
-  else
-    scene.mouseShift("key");
+  if (scene.node("key") != null) {
+    if (mouseButton == LEFT)
+      scene.mouseSpin("key");
+    else if (mouseButton == CENTER)
+      scene.zoom("key", scene.mouseDX());
+    else
+      scene.mouseShift("key");
+  }
+  else {
+    scene.mouseSpin();
+  }
 }
 
 void mouseWheel(MouseEvent event) {
