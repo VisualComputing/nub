@@ -1086,9 +1086,7 @@ public class Node {
   /**
    * Filters {@code vector} so that the node is translated along {@code axis}
    * (defined in this node coordinate system). Call it as:
-   * <p>
-   * {@code translate(vector, vectorAxisFilter, this, new Object[] { axis }))} or
-   * {@code translate(vector, vectorAxisFilter, this, new Object[] { axis }, inertia)}.
+   * {@code setTranslationFilter(Node.vectorAxisFilter, new Object[] { axis })}.
    *
    * @see #vectorPlaneFilter
    */
@@ -1099,9 +1097,7 @@ public class Node {
   /**
    * Filters {@code vector} so that the node is translated along the plane defined by {@code normal}
    * (defined in this node coordinate system). Call it as:
-   * <p>
-   * {@code translate(vector, vectorPlaneFilter, this, new Object[] { normal }))} or
-   * {@code translate(vector, vectorPlaneFilter, this, new Object[] { normal }, inertia)}.
+   * {@code setTranslationFilter(Node.vectorPlaneFilter, new Object[] { normal })}.
    *
    * @see #vectorAxisFilter
    */
@@ -1313,9 +1309,7 @@ public class Node {
   /**
    * Filters {@code quaternion} so that its {@link Quaternion#axis()} become {@code axis}
    * (defined in this node coordinate system). Call it as:
-   * <p>
-   * {@code rotate(quaternion, quaternionAxisFilter, this, new Object[] { axis })} or
-   * {@code rotate(quaternion, quaternionAxisFilter, this, new Object[] { axis }, inertia)}.
+   * {@code setRotationFilter(Node.quaternionAxisFilter, new Object[] { axis })}.
    *
    * @see #rotate(Quaternion)
    */
