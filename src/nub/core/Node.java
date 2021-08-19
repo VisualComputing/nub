@@ -1474,7 +1474,7 @@ public class Node {
       System.out.println("Warning. Magnitude should be positive. Nothing done");
       return;
     }
-    if (_scalingFilter != null) {
+    if (filter) {
       cacheTargetMagnitude = magnitude;
       scale(magnitude / _magnitude);
     }
