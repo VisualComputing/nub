@@ -4,9 +4,10 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
 - [Description](#description)
 - [Scene](#scene)
 - [Nodes](#nodes)
-    - [Localization](#localization)
-    - [Shapes](#shapes)
-    - [Space transformations](#space-transformations)
+  - [Localization](#localization)
+  - [Motion filters](#motion-filters)
+  - [Shapes](#shapes)
+  - [Space transformations](#space-transformations)
 - [Rendering](#rendering)
   - [Drawing functionality](#drawing-functionality)
 - [Interactivity](#interactivity)
@@ -116,23 +117,27 @@ void setup() {
 
 Note that the hierarchy of nodes may be modified with `setReference(Node)` and the scene `eye()` set from an arbitrary node instance with `setEye(Node)`.
 
-### Localization
+## Localization
 
 A node `position`, `orientation` and `magnitude` may be set with the following methods:
 
-|Node localization|Position                                |Orientation                                 |Magnitude                             |
-|-----------------|----------------------------------------|--------------------------------------------|--------------------------------------|
-|Globally         |`setWorldPosition(vector, [filter])`    |`setWorldOrientation(quaternion, [filter])` |`setWorldMagnitude(scalar, [filter])` |
-|Locally          |`setPosition(vector, [filter])`         |`setOrientation(quaternion, [filter])`      |`setMagnitude(scalar, [filter])`      |
-|Incrementally    |`translate(vector, [filter], [inertia])`|`rotate(quaternion, [filter], [inertia])`,  |`scale(scalar, [filter], [inertia])`  |
+|Node localization|Position                      |Orientation                       |Magnitude                   |
+|-----------------|------------------------------|----------------------------------|----------------------------|
+|Globally         |`setWorldPosition(vector)`    |`setWorldOrientation(quaternion)` |`setWorldMagnitude(scalar)` |
+|Locally          |`setPosition(vector)`         |`setOrientation(quaternion)`      |`setMagnitude(scalar)`      |
+|Incrementally    |`translate(vector, [inertia])`|`rotate(quaternion, [inertia])`,  |`scale(scalar, [inertia])`  |
 
-Note that `filter` is a function implementing a node transformation constrain and that the node provides the following default filters: `translationalAxisFilter`, `translationalPlaneFilter` and `rotationalAxisFilter` (see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo/Luxo.pde)). The optional `inertia` parameter should be a value in [0..1], `0` no inertia (which is the default value) & `1` no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of `TimingTasks`.
+Note that the optional `inertia` parameter should be a value in [0..1], `0` no inertia (which is the default value) & `1` no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of `TimingTasks`.
 
-### Shapes
+## Motion filters
+
+Calling `setTranslationFilter(filter params)`, `setRotationFilter(filter, params)` and/or `setScalingFilter(filter, params) will apply a `filter` which is a function used to limit the node motion when calling any of the methods found in the previous section. The node provides the following default filters: `translationalAxisFilter`, `translationalPlaneFilter` and `rotationalAxisFilter` (see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo/Luxo.pde)).
+
+## Shapes
 
 Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see [shape(PShape)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#shape-processing.core.PShape-)). Shapes can be picked precisely using their projection onto the screen. Note that even the _eye_ can have a shape which may be useful to depict the viewer in first person camera style.
 
-### Space transformations
+## Space transformations
 
 The following `Scene` methods transform points (_locations_) and vectors (_displacements_) between screen space (a box of `width * height * 1` dimensions where user interaction takes place), [NDC](http://www.songho.ca/opengl/gl_projectionmatrix.html) and nodes (including the world, i.e., the `null` node):
 

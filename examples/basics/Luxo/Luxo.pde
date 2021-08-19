@@ -2,7 +2,7 @@
  * Luxo.
  * by Jean Pierre Charalambos.
  *
- * A more complex example that combines Shapes, selection and constraints.
+ * A more complex example that combines Shapes, selection and filters.
  *
  * This example displays a famous luxo lamp (Pixar) that can be interactively
  * manipulated with the mouse.
@@ -23,15 +23,19 @@ void setup() {
   scene.enableHint(Scene.BACKGROUND);
   scene.fit(1);
   base = new Node(this::base);
+  base.setTranslationFilter(Node.vectorPlaneFilter, new Object[] { Vector.plusK });
+  base.setRotationFilter(Node.quaternionAxisFilter, new Object[] { Vector.plusK });
   arm = new Node(base, this::limb);
   arm.setPosition(0, 0, 8);
   arm.setOrientation(Quaternion.from(Vector.plusI, 0.6));
+  arm.setRotationFilter(Node.quaternionAxisFilter, new Object[] { Vector.plusI });
   forarm = new Node(arm, this::limb);
   forarm.setPosition(0, 0, 50);
   forarm.setOrientation(Quaternion.from(Vector.plusI, -2));
+  forarm.setRotationFilter(Node.quaternionAxisFilter, new Object[] { Vector.plusI });
   shade = new Node(forarm, this::shade);
   shade.setPosition(0, 0, 50);
-  shade.setOrientation(Quaternion.from(new Vector(1, -0.3, 0), -1.7));
+  shade.setOrientation(Quaternion.from(new Vector(1, -0.3f, 0), -1.7));
   // for the lights to work the floor node should be the last to be added
   floor = new Node(this::floor);
   floor.tagging = false;
@@ -103,28 +107,18 @@ void draw() {
 }
 
 void mouseMoved() {
-  scene.mouseTag("piece");
+  scene.mouseTag();
 }
 
 void mouseDragged() {
-  Node piece = scene.node("piece");
-  if (piece == base) {
-    Vector translateFromMouse = scene.displacement(new Vector(scene.mouseDX(), scene.mouseDY(), 0), piece);
-    Vector axis = piece.displacement(Vector.plusK);
-    piece.translate(translateFromMouse, Node.vectorPlaneFilter, new Object[] { axis });
-  } else if (piece == arm || piece == forarm) {
-    piece.rotate(Quaternion.from(scene.mouseRADX(), 0, 0));
-  } else if (piece == shade) {
-    scene.mouseSpin(piece);
-  } else {
-    if (mouseButton == LEFT) {
-      scene.mouseSpin();
-    } else if (mouseButton == RIGHT) {
-      scene.mouseShift();
-    } else {
-      scene.zoom(mouseX - pmouseX);
-    }
-  }
+ if (mouseButton == LEFT)
+   scene.mouseSpin();
+ else if (mouseButton == RIGHT) {
+   if (scene.node() == base || scene.node() == null)
+     scene.mouseShift();
+ }
+ else
+   scene.zoom(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {

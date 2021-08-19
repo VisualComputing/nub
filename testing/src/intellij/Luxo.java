@@ -22,14 +22,16 @@ public class Luxo extends PApplet {
     //scene.setShape(this::floor);
     scene.fit(1);
     base = new Node(this::base);
-    Vector normal = base.displacement(Vector.plusK);
-    base.setTranslationFilter(Node.vectorPlaneFilter, new Object[] { normal });
+    base.setTranslationFilter(Node.vectorPlaneFilter, new Object[] { Vector.plusK });
+    base.setRotationFilter(Node.quaternionAxisFilter, new Object[] { Vector.plusK });
     arm = new Node(base, this::limb);
     arm.setPosition(0, 0, 8);
     arm.setOrientation(Quaternion.from(Vector.plusI, 0.6));
+    arm.setRotationFilter(Node.quaternionAxisFilter, new Object[] { Vector.plusI });
     forarm = new Node(arm, this::limb);
     forarm.setPosition(0, 0, 50);
     forarm.setOrientation(Quaternion.from(Vector.plusI, -2));
+    forarm.setRotationFilter(Node.quaternionAxisFilter, new Object[] { Vector.plusI });
     shade = new Node(forarm, this::shade);
     shade.setPosition(0, 0, 50);
     shade.setOrientation(Quaternion.from(new Vector(1, -0.3f, 0), -1.7));
@@ -104,31 +106,18 @@ public class Luxo extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseTag("piece");
+    scene.mouseTag();
   }
 
   public void mouseDragged() {
-    Node piece = scene.node("piece");
-    if (piece == base) {
-      Vector translateFromMouse = scene.displacement(new Vector(scene.mouseDX(), scene.mouseDY(), 0), piece);
-      Vector axis = piece.displacement(Vector.plusK);
-      piece.translate(translateFromMouse);
-    }
-    else if (piece == arm || piece == forarm) {
-      piece.rotate(Quaternion.from(scene.mouseRADX(), 0, 0));
-    }
-    else if (piece == shade) {
-      scene.mouseSpin(piece);
-    }
-    else {
-      if (mouseButton == LEFT) {
-        scene.mouseSpin();
-      } else if (mouseButton == RIGHT) {
+    if (mouseButton == LEFT)
+      scene.mouseSpin();
+    else if (mouseButton == RIGHT) {
+      if (scene.node() == base || scene.node() == null)
         scene.mouseShift();
-      } else {
-        scene.zoom(mouseX - pmouseX);
-      }
     }
+    else
+      scene.zoom(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
