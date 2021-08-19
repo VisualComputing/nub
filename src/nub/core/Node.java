@@ -950,6 +950,7 @@ public class Node {
    * Use {@link #setWorldPosition(Vector)} to define the world coordinates {@link #worldPosition()}.
    *
    * @see #translate(Vector)
+   * @see #setOrientation(Quaternion)
    */
   public void setPosition(Vector position) {
     if (_translationfilter != null) {
@@ -1023,6 +1024,7 @@ public class Node {
    * @see #vectorAxisFilter
    * @see #vectorPlaneFilter
    * @see #translationFilter()
+   * @see #rotate(Quaternion)
    */
   public void translate(Vector vector) {
     boolean filter = _translationfilter != null;
@@ -1165,38 +1167,24 @@ public class Node {
 
   /**
    * Sets the node {@link #orientation()}, locally defined with respect to the
-   * {@link #reference()}. Use {@link #setWorldOrientation(Quaternion)} to define the
+   * {@link #reference()}. If there's a {@link #rotationFilter()} it actually calls
+   * {@code rotate(Quaternion.compose(orientation().inverse(), orientation))}.
+   * <p>
+   * Use {@link #setWorldOrientation(Quaternion)} to define the
    * world coordinates {@link #worldOrientation()}.
    *
    * @see #orientation()
    * @see #setPosition(Vector)
    */
   public void setOrientation(Quaternion orientation) {
-    _orientation = orientation;
-    _modified();
-  }
-
-  /**
-   * Same as {@code setOrientation(quaternion, filter, this, params)}.
-   *
-   * @see #setOrientation(Quaternion, BiFunction, Node, Object[])
-   */
-  public void setOrientation(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Object [] params) {
-    setOrientation(quaternion, filter, this, params);
-  }
-
-  /**
-   * Same as {@code node.rotate(node.cacheTargetRotation, filter, params)}. Note that the filter may
-   * access the {@code quaternion} as {@code cacheTargetOrientation} and the target orientation as
-   * {@code cacheTargetRotation} which is computed as
-   * {@code Quaternion.compose(node.orientation().inverse(), quaternion)}.
-   *
-   * @see #rotate(Quaternion, BiFunction, Object[])
-   */
-  public static void setOrientation(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Node node, Object[] params) {
-    node.cacheTargetOrientation = quaternion;
-    node.cacheTargetRotation = Quaternion.compose(node.orientation().inverse(), quaternion);
-    node.rotate(node.cacheTargetRotation, filter, params);
+    if (_rotationfilter != null) {
+      cacheTargetOrientation = orientation;
+      rotate(Quaternion.compose(orientation().inverse(), orientation));
+    }
+    else {
+      _orientation = orientation;
+      _modified();
+    }
   }
 
   /**
@@ -1260,17 +1248,50 @@ public class Node {
   }
 
   /**
-   * Same as {@code rotate(quaternion, 0)}.
+   * Same as {@code orientation().compose((rotationfilter() != null) ? rotationfilter().apply(this, cacheRotationParams) : quaternion)}.
    *
    * @see #rotate(Quaternion, float)
-   * @see #rotate(Quaternion, BiFunction, Node, Object[])
-   * @see #rotate(Quaternion, BiFunction, Node, Object[], float)
+   * @see #rotationFilter()
    * @see #quaternionAxisFilter
+   * @see #translate(Vector)
    */
   public void rotate(Quaternion quaternion) {
-    orientation().compose(quaternion);
-    orientation().normalize(); // Prevents numerical drift
+    boolean filter = _rotationfilter != null;
+    if (filter) {
+      cacheTargetRotation = quaternion;
+      if (cacheTargetOrientation != null) {
+        cacheTargetOrientation = Quaternion.compose(orientation(), quaternion);
+      }
+    }
+    _orientation.compose(filter ? this._rotationfilter.apply(this, cacheRotationParams) : quaternion);
+    _orientation.normalize(); // Prevents numerical drift
+    cacheTargetRotation = null;
+    cacheTargetOrientation = null;
     _modified();
+  }
+
+  /**
+   * Sets the {@link #translationFilter()} and its {@code cacheTranslationParams}.
+   */
+  public void setRotationFilter(BiFunction<Node, Object[], Quaternion> filter, Object [] params) {
+    this._rotationfilter = filter;
+    this.cacheRotationParams = params;
+  }
+
+  /**
+   * Returns the rotation filter used by {@link #rotate(Quaternion)}.
+   *
+   * @see #setRotationFilter(BiFunction, Object[])
+   */
+  public BiFunction<Node, Object[], Quaternion> rotationFilter() {
+    return this._rotationfilter;
+  }
+
+  /**
+   * Nullifies the {@link #rotationFilter()}.
+   */
+  public void resetRotationFilter() {
+    this._rotationfilter = null;
   }
 
   /**
@@ -1280,58 +1301,11 @@ public class Node {
    * {@code rotate(quaternion, quaternionAxisFilter, this, new Object[] { axis })} or
    * {@code rotate(quaternion, quaternionAxisFilter, this, new Object[] { axis }, inertia)}.
    *
-   * @see #rotate(Quaternion, BiFunction, Node, Object[])
-   * @see #rotate(Quaternion, BiFunction, Node, Object[], float)
+   * @see #rotate(Quaternion)
    */
   public static BiFunction<Node, Object[], Quaternion> quaternionAxisFilter = (node, params)-> {
     return new Quaternion(Vector.projectVectorOnAxis(node.cacheTargetRotation.axis(), (Vector)params[0]), node.cacheTargetRotation.angle());
   };
-
-  /**
-   * Same as {@code rotate(quaternion, filter, this, params, inertia)}.
-   *
-   * @see #rotate(Quaternion, BiFunction, Node, Object[], float)
-   * @see #quaternionAxisFilter
-   */
-  public void rotate(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Object [] params, float inertia) {
-    rotate(quaternion, filter, this, params, inertia);
-  }
-
-  /**
-   * Same as {@code node.rotate(filter.apply(node, params), inertia)}. Note that filter may access the
-   * {@code quaternion} as {@code cacheTargetRotation} and the target orientation as {@code cacheTargetOrientation}.
-   *
-   * @see #rotate(Quaternion)
-   * @see #quaternionAxisFilter
-   */
-  public static void rotate(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Node node, Object[] params, float inertia) {
-    node.cacheTargetRotation = quaternion;
-    node.cacheTargetOrientation = Quaternion.compose(node.orientation(), quaternion);
-    node.rotate(filter.apply(node, params));
-  }
-
-  /**
-   * Same as {@code rotate(quaternion, filter, this, params)}.
-   *
-   * @see #rotate(Quaternion, BiFunction, Node, Object[])
-   * @see #quaternionAxisFilter
-   */
-  public void rotate(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Object [] params) {
-    rotate(quaternion, filter, this, params);
-  }
-
-  /**
-   * Same as {@code node.rotate(filter.apply(node, params))}. Note that filter may access the
-   * {@code quaternion} as {@code cacheTargetRotation} and the target orientation as {@code cacheTargetOrientation}.
-   *
-   * @see #rotate(Quaternion)
-   * @see #quaternionAxisFilter
-   */
-  public static void rotate(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Node node, Object[] params) {
-    node.cacheTargetRotation = quaternion;
-    node.cacheTargetOrientation = Quaternion.compose(node.orientation(), quaternion);
-    node.rotate(filter.apply(node, params));
-  }
 
   /**
    * Rotates the node by the {@code quaternion} (defined in the node coordinate system)
@@ -1459,24 +1433,6 @@ public class Node {
    */
   public void setWorldOrientation(Quaternion quaternion) {
     setOrientation(reference() != null ? reference().displacement(quaternion) : quaternion);
-  }
-
-  /**
-   * Same as {@code setWorldOrientation(quaternion, filter, this, params)}.
-   *
-   * @see #setWorldOrientation(Quaternion, BiFunction, Node, Object[])
-   */
-  public void setWorldOrientation(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Object [] params) {
-    setWorldOrientation(quaternion, filter, this, params);
-  }
-
-  /**
-   * Same as {@code Node.setOrientation(node.reference() != null ? node.reference().displacement(quaternion) : quaternion, filter, node, params)}.
-   *
-   * @see #setOrientation(Quaternion, BiFunction, Node, Object[])
-   */
-  public static void setWorldOrientation(Quaternion quaternion, BiFunction<Node, Object[], Quaternion> filter, Node node, Object[] params) {
-    Node.setOrientation(node.reference() != null ? node.reference().displacement(quaternion) : quaternion, filter, node, params);
   }
 
   /**
