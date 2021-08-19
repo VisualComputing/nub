@@ -18,7 +18,7 @@ public class MouseDragInteraction extends PApplet {
   Scene scene;
   Vector randomVector;
   boolean cad, lookAround;
-  Node shape3, shape1, shape2;
+  Node shape1, shape2, shape3;
 
   public void settings() {
     size(1200, 600, P3D);
@@ -55,6 +55,7 @@ public class MouseDragInteraction extends PApplet {
     );
     shape1.setOrientation(Quaternion.random());
     shape1.translate(-375, 175, 0);
+    shape1.setScalingFilter(scalarFilter, new Object[] { (float) height });
 
     shape2 = new Node(shape1, (PGraphics pGraphics) -> {
       Scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -69,11 +70,15 @@ public class MouseDragInteraction extends PApplet {
     }
     );
     shape2.translate(275, 275, 0);
+    shape2.setTranslationFilter(Node.vectorAxisFilter, new Object[] { Vector.plusI });
+    shape2.setScalingFilter(scalarFilter, new Object[] { (float) height });
     shape3 = shape1.detach();
     scene.randomize(shape3);
     shape3.setShape(shape());
     shape3.setReference(shape2);
     shape3.enableHint(Node.AXES);
+    shape3.setTranslationFilter(Node.vectorAxisFilter, new Object[] { Vector.plusJ });
+    shape3.setScalingFilter(scalarFilter, new Object[] { (float) height });
     randomVector = Vector.random();
     randomVector.setMagnitude(scene.radius() * 0.5f);
   }
@@ -138,12 +143,10 @@ public class MouseDragInteraction extends PApplet {
       scene.fit(pixelX, pixelY, 2 * h, h, 1);
     }
     if (key == 'w') {
-      Vector axis = Vector.plusI;
-      shape2.setPosition(new Vector(), Node.vectorAxisFilter, new Object[] { axis });
+      shape2.setPosition(new Vector());
     }
     if (key == 'z') {
-      Vector axis = Vector.plusI;
-      shape3.setWorldPosition(new Vector(), Node.vectorAxisFilter, new Object[] { axis });
+      shape3.setWorldPosition(new Vector());
     }
   }
 
@@ -170,7 +173,7 @@ public class MouseDragInteraction extends PApplet {
         Vector axis = Vector.plusI;
         // uncomment to express the filter axis in the world coordinate system
         // axis = shape2.displacement(axis);
-        shape2.translate(vector, Node.vectorAxisFilter, new Object[] { axis }, 0);
+        shape2.translate(vector, 0);
       }
       else if (scene.node() == null) {
         Node _node = scene.eye().detach();
@@ -180,7 +183,7 @@ public class MouseDragInteraction extends PApplet {
         Vector axis = Vector.plusI;
         // uncomment to express the filter axis in the world coordinate system
         // axis = scene.eye().displacement(axis);
-        scene.eye().translate(vector, Node.vectorAxisFilter, new Object[] { axis }, 0.8f);
+        scene.eye().translate(vector, 0.8f);
       }
       /*
       else {
@@ -195,7 +198,7 @@ public class MouseDragInteraction extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     if (scene.node() != null) {
-      scene.node().scale((float) event.getCount(), scalarFilter, new Object[] { (float) height });
+      scene.node().scale((float) event.getCount());
     }
     else
       scene.moveForward(event.getCount() * 20);

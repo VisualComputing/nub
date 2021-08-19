@@ -1469,7 +1469,8 @@ public class Node {
    * @see #scale(float)
    */
   public void setMagnitude(float magnitude) {
-    if (magnitude <= 0) {
+    boolean filter = _scalingFilter != null;
+    if (magnitude <= 0 && !filter) {
       System.out.println("Warning. Magnitude should be positive. Nothing done");
       return;
     }
@@ -1513,11 +1514,11 @@ public class Node {
    * @see #rotate(Quaternion)
    */
   public void scale(float scaling) {
-    if (scaling <= 0) {
+    boolean filter = _scalingFilter != null;
+    if (scaling <= 0 && !filter) {
       System.out.println("Warning. Scaling should be positive. Nothing done");
       return;
     }
-    boolean filter = _scalingFilter != null;
     if (filter) {
       cacheTargetScaling = scaling;
       if (cacheTargetMagnitude != 0) {
