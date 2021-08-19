@@ -1525,9 +1525,14 @@ public class Node {
         cacheTargetMagnitude = magnitude() * scaling;
       }
     }
-    _magnitude = _magnitude * (filter ? this._scalingFilter.apply(this, cacheScalingParams) : scaling);
+    float value = filter ? this._scalingFilter.apply(this, cacheScalingParams) : scaling;
     cacheTargetScaling = 0;
     cacheTargetMagnitude = 0;
+    if (value <= 0) {
+      System.out.println("Warning. Scaling should be positive. Nothing done");
+      return;
+    }
+    _magnitude = _magnitude * value;
     _modified();
   }
 
