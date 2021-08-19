@@ -1337,9 +1337,8 @@ public class Node {
    *
    * @see #_orbit(Quaternion, Vector, float)
    */
-  // TODO should not be constrained!
   protected void _orbit(Quaternion quaternion, Vector center) {
-    orientation().compose(quaternion);
+    orientation().compose(_rotationfilter != null ? this._rotationfilter.apply(this, cacheRotationParams) : quaternion);
     orientation().normalize(); // Prevents numerical drift
 
     // Original in nodes-0.1.x and proscene:
