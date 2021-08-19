@@ -22,6 +22,8 @@ public class Luxo extends PApplet {
     //scene.setShape(this::floor);
     scene.fit(1);
     base = new Node(this::base);
+    Vector normal = base.displacement(Vector.plusK);
+    base.setTranslationFilter(Node.vectorPlaneFilter, new Object[] { normal });
     arm = new Node(base, this::limb);
     arm.setPosition(0, 0, 8);
     arm.setOrientation(Quaternion.from(Vector.plusI, 0.6));
@@ -110,7 +112,7 @@ public class Luxo extends PApplet {
     if (piece == base) {
       Vector translateFromMouse = scene.displacement(new Vector(scene.mouseDX(), scene.mouseDY(), 0), piece);
       Vector axis = piece.displacement(Vector.plusK);
-      piece.translate(translateFromMouse, Node.vectorPlaneFilter, new Object[] { axis });
+      piece.translate(translateFromMouse);
     }
     else if (piece == arm || piece == forarm) {
       piece.rotate(Quaternion.from(scene.mouseRADX(), 0, 0));

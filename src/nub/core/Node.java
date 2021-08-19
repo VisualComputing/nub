@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * A node encapsulates a 2D or 3D coordinate system, represented by a {@link #position()}, an
@@ -134,8 +135,14 @@ public class Node {
   public boolean tagging;
 
   // filter caches
+  protected BiFunction<Node, Object[], Vector> _translationfilter;
+  public Object[] cacheTranslationParams;
   public Vector cacheTargetPosition, cacheTargetTranslation;
+  protected BiFunction<Node, Object[], Quaternion> _rotationfilter;
+  public Object[] cacheRotationParams;
   public Quaternion cacheTargetOrientation, cacheTargetRotation;
+  protected BiFunction<Node, Object[], Float> _scalingfilter;
+  public Object[] cacheScalingParams;
   public float cacheTargetMagnitude, cacheTargetScaling;
 
   // Visual hints
@@ -936,38 +943,23 @@ public class Node {
   }
 
   /**
-   * Sets the {@link #position()} of the node, locally defined with respect to the
-   * {@link #reference()}.
+   * Caches the {@link #position()} of the node, locally defined with respect to the
+   * {@link #reference()}. If there's a {@link #translationFilter()} it actually calls
+   * {@code translate(Vector.subtract(position, this.position()))}.
    * <p>
    * Use {@link #setWorldPosition(Vector)} to define the world coordinates {@link #worldPosition()}.
-   */
-  public void setPosition(Vector position) {
-    _position = position;
-    _modified();
-  }
-
-  /**
-   * Same as {@code setPosition(vector, filter, this, params)}.
-   *
-   * @see #setPosition(Vector, BiFunction, Node, Object[])
-   */
-  public void setPosition(Vector vector, BiFunction<Node, Object[], Vector> filter, Object [] params) {
-    setPosition(vector, filter, this, params);
-  }
-
-  /**
-   * Same as {@code node.translate(node.cacheTargetTranslation, filter, params)}. Note that the filter may access the
-   * {@code vector} as {@code cacheTargetPosition} and the target translation as {@code cacheTargetTranslation}
-   * which is computed as {@code Vector.subtract(vector, node.position())}.
    *
    * @see #translate(Vector)
-   * @see #vectorAxisFilter
-   * @see #vectorPlaneFilter
    */
-  public static void setPosition(Vector vector, BiFunction<Node, Object[], Vector> filter, Node node, Object[] params) {
-    node.cacheTargetPosition = vector;
-    node.cacheTargetTranslation = Vector.subtract(vector, node.position());
-    node.translate(node.cacheTargetTranslation, filter, params);
+  public void setPosition(Vector position) {
+    if (_translationfilter != null) {
+      cacheTargetPosition = position;
+      translate(Vector.subtract(position, this.position()));
+    }
+    else {
+      _position = position;
+      _modified();
+    }
   }
 
   /**
@@ -1025,16 +1017,54 @@ public class Node {
   }
 
   /**
-   * Same as {@code translate(vector, 0)}.
+   * Same as {@code position().add((translationFilter() != null) ? translationFilter().apply(this, cacheTranslationParams) : vector)}.
    *
    * @see #translate(Vector, float)
-   * @see #translate(Vector, BiFunction, Object[], float)
    * @see #vectorAxisFilter
    * @see #vectorPlaneFilter
+   * @see #translationFilter()
    */
   public void translate(Vector vector) {
-    position().add(vector);
+    boolean filter = _translationfilter != null;
+    if (filter) {
+      cacheTargetTranslation = vector;
+      if (cacheTargetPosition != null) {
+        cacheTargetPosition = Vector.add(position(), vector);
+      }
+    }
+    _position.add(filter ? this._translationfilter.apply(this, cacheTranslationParams) : vector);
+    cacheTargetTranslation = null;
+    cacheTargetPosition = null;
     _modified();
+  }
+
+  //TODO needs testing
+  public void setTranslationFilter(Function<Object[], Vector> filter, Object [] params) {
+    this.setTranslationFilter(((n, o) -> filter.apply(o)), params);
+  }
+
+  /**
+   * Sets the {@link #translationFilter()} and its {@code cacheTranslationParams}.
+   */
+  public void setTranslationFilter(BiFunction<Node, Object[], Vector> filter, Object [] params) {
+    this._translationfilter = filter;
+    this.cacheTranslationParams = params;
+  }
+
+  /**
+   * Returns the translation filter used by {@link #translate(Vector)}.
+   *
+   * @see #setTranslationFilter(BiFunction, Object[])
+   */
+  public BiFunction<Node, Object[], Vector> translationFilter() {
+    return this._translationfilter;
+  }
+
+  /**
+   * Nullifies the {@link #translationFilter()}.
+   */
+  public void resetTranslationFilter() {
+    this._translationfilter = null;
   }
 
   /**
@@ -1044,8 +1074,6 @@ public class Node {
    * {@code translate(vector, vectorAxisFilter, this, new Object[] { axis }))} or
    * {@code translate(vector, vectorAxisFilter, this, new Object[] { axis }, inertia)}.
    *
-   * @see #translate(Vector, BiFunction, Node, Object[])
-   * @see #translate(Vector, BiFunction, Node, Object[], float)
    * @see #vectorPlaneFilter
    */
   public static BiFunction<Node, Object[], Vector> vectorAxisFilter = (node, params)-> {
@@ -1059,63 +1087,11 @@ public class Node {
    * {@code translate(vector, vectorPlaneFilter, this, new Object[] { normal }))} or
    * {@code translate(vector, vectorPlaneFilter, this, new Object[] { normal }, inertia)}.
    *
-   * @see #translate(Vector, BiFunction, Node, Object[])
-   * @see #translate(Vector, BiFunction, Node, Object[], float)
    * @see #vectorAxisFilter
    */
   public static BiFunction<Node, Object[], Vector> vectorPlaneFilter = (node, params)-> {
     return Vector.projectVectorOnPlane(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
   };
-
-  /**
-   * Same as {@code translate(vector, filter, this, params, inertia)}.
-   *
-   * @see #translate(Vector, BiFunction, Node, Object[], float)
-   * @see #vectorAxisFilter
-   * @see #vectorPlaneFilter
-   */
-  public void translate(Vector vector, BiFunction<Node, Object[], Vector> filter, Object [] params, float inertia) {
-    translate(vector, filter, this, params, inertia);
-  }
-
-  /**
-   * Same as {@code node.translate(filter.apply(node, params), inertia)}. Note that the filter may access the
-   * {@code vector} as {@code cacheTargetTranslation} and the target position as {@code cacheTargetPosition}.
-   * .
-   * @see #translate(Vector, float)
-   * @see #vectorAxisFilter
-   * @see #vectorPlaneFilter
-   */
-  public static void translate(Vector vector, BiFunction<Node, Object[], Vector> filter, Node node, Object [] params, float inertia) {
-    node.cacheTargetTranslation = vector;
-    node.cacheTargetPosition = Vector.add(node.position(), vector);
-    node.translate(filter.apply(node, params), inertia);
-  }
-
-  /**
-   * Same as {@code translate(vector, filter, this, params)}.
-   *
-   * @see #translate(Vector, BiFunction, Node, Object[])
-   * @see #vectorAxisFilter
-   * @see #vectorPlaneFilter
-   */
-  public void translate(Vector vector, BiFunction<Node, Object[], Vector> filter, Object [] params) {
-    translate(vector, filter, this, params);
-  }
-
-  /**
-   * Same as {@code node.translate(filter.apply(node, params))}. Note that the filter may access the
-   * {@code vector} as {@code cacheTargetTranslation} and the target position as {@code cacheTargetPosition}.
-   *
-   * @see #translate(Vector)
-   * @see #vectorAxisFilter
-   * @see #vectorPlaneFilter
-   */
-  public static void translate(Vector vector, BiFunction<Node, Object[], Vector> filter, Node node, Object[] params) {
-    node.cacheTargetTranslation = vector;
-    node.cacheTargetPosition = Vector.add(node.position(), vector);
-    node.translate(filter.apply(node, params));
-  }
 
   // POSITION
 
@@ -1149,24 +1125,6 @@ public class Node {
    */
   public void setWorldPosition(Vector position) {
     setPosition(reference() != null ? reference().location(position) : position);
-  }
-
-  /**
-   * Same as {@code setWorldPosition(vector, filter, this, params)}.
-   *
-   * @see #setWorldPosition(Vector, BiFunction, Node, Object[])
-   */
-  public void setWorldPosition(Vector vector, BiFunction<Node, Object[], Vector> filter, Object [] params) {
-    setWorldPosition(vector, filter, this, params);
-  }
-
-  /**
-   * Same as {@code Node.setPosition(node.reference() != null ? node.reference().location(vector) : vector, filter, node, params)}.
-   *
-   * @see #setPosition(Vector, BiFunction, Node, Object[])
-   */
-  public static void setWorldPosition(Vector vector, BiFunction<Node, Object[], Vector> filter, Node node, Object[] params) {
-    Node.setPosition(node.reference() != null ? node.reference().location(vector) : vector, filter, node, params);
   }
 
   /**
