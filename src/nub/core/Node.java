@@ -78,6 +78,18 @@ import java.util.function.Function;
  * node transformations described above may be achieved with {@link Graph#render()} and
  * {@link Graph#render(Node)}. Customize the rendering traversal with
  * {@link Graph#setVisit(Node, BiConsumer)} (see also {@link #cull} and {@link #bypass()}).
+ * <h2>Motion filters</h2>
+ * One interesting feature of a node is that its displacements can be constrained.
+ * When a filter is attached to a node, it filters the input of {@link #translate(Vector)},
+ * {@link #rotate(Quaternion)}, {@link #orbit(Vector, float)} and {@link #scale(float)} and
+ * only the resulting filtered motion is applied to the node. The default filters are
+ * {@code null} resulting in no filtering. Use {@link #setTranslationFilter(BiFunction, Object[])},
+ * {@link #setRotationFilter(BiFunction, Object[])} and {@link #setScalingFilter(BiFunction, Object[])}
+ * to set different filters to a node.
+ * <p>
+ * Classical filters are provided for convenience (see {@link #vectorAxisFilter},
+ * {@link #vectorPlaneFilter} and {@link #quaternionAxisFilter}) and new filters can very
+ * easily be implemented.
  * <h2>Visual hints</h2>
  * The node space visual representation may be configured using the following hints:
  * {@link #CAMERA}, {@link #AXES}, {@link #HUD}, {@link #BOUNDS},, {@link #SHAPE},
