@@ -135,13 +135,13 @@ public class Node {
   public boolean tagging;
 
   // filter caches
-  protected BiFunction<Node, Object[], Vector> _translationfilter;
+  protected BiFunction<Node, Object[], Vector> _translationFilter;
   public Object[] cacheTranslationParams;
   public Vector cacheTargetPosition, cacheTargetTranslation;
-  protected BiFunction<Node, Object[], Quaternion> _rotationfilter;
+  protected BiFunction<Node, Object[], Quaternion> _rotationFilter;
   public Object[] cacheRotationParams;
   public Quaternion cacheTargetOrientation, cacheTargetRotation;
-  protected BiFunction<Node, Object[], Float> _scalingfilter;
+  protected BiFunction<Node, Object[], Float> _scalingFilter;
   public Object[] cacheScalingParams;
   public float cacheTargetMagnitude, cacheTargetScaling;
 
@@ -951,9 +951,10 @@ public class Node {
    *
    * @see #translate(Vector)
    * @see #setOrientation(Quaternion)
+   * @see #setMagnitude(float)
    */
   public void setPosition(Vector position) {
-    if (_translationfilter != null) {
+    if (_translationFilter != null) {
       cacheTargetPosition = position;
       translate(Vector.subtract(position, this.position()));
     }
@@ -1025,16 +1026,17 @@ public class Node {
    * @see #vectorPlaneFilter
    * @see #translationFilter()
    * @see #rotate(Quaternion)
+   * @see #scale(float)
    */
   public void translate(Vector vector) {
-    boolean filter = _translationfilter != null;
+    boolean filter = _translationFilter != null;
     if (filter) {
       cacheTargetTranslation = vector;
       if (cacheTargetPosition != null) {
         cacheTargetPosition = Vector.add(position(), vector);
       }
     }
-    _position.add(filter ? this._translationfilter.apply(this, cacheTranslationParams) : vector);
+    _position.add(filter ? this._translationFilter.apply(this, cacheTranslationParams) : vector);
     cacheTargetTranslation = null;
     cacheTargetPosition = null;
     _modified();
@@ -1049,7 +1051,7 @@ public class Node {
    * Sets the {@link #translationFilter()} and its {@code cacheTranslationParams}.
    */
   public void setTranslationFilter(BiFunction<Node, Object[], Vector> filter, Object [] params) {
-    this._translationfilter = filter;
+    this._translationFilter = filter;
     this.cacheTranslationParams = params;
   }
 
@@ -1059,14 +1061,14 @@ public class Node {
    * @see #setTranslationFilter(BiFunction, Object[])
    */
   public BiFunction<Node, Object[], Vector> translationFilter() {
-    return this._translationfilter;
+    return this._translationFilter;
   }
 
   /**
    * Nullifies the {@link #translationFilter()}.
    */
   public void resetTranslationFilter() {
-    this._translationfilter = null;
+    this._translationFilter = null;
   }
 
   /**
@@ -1175,9 +1177,10 @@ public class Node {
    *
    * @see #orientation()
    * @see #setPosition(Vector)
+   * @see #setMagnitude(float)
    */
   public void setOrientation(Quaternion orientation) {
-    if (_rotationfilter != null) {
+    if (_rotationFilter != null) {
       cacheTargetOrientation = orientation;
       rotate(Quaternion.compose(orientation().inverse(), orientation));
     }
@@ -1254,16 +1257,17 @@ public class Node {
    * @see #rotationFilter()
    * @see #quaternionAxisFilter
    * @see #translate(Vector)
+   * @see #scale(float)
    */
   public void rotate(Quaternion quaternion) {
-    boolean filter = _rotationfilter != null;
+    boolean filter = _rotationFilter != null;
     if (filter) {
       cacheTargetRotation = quaternion;
       if (cacheTargetOrientation != null) {
         cacheTargetOrientation = Quaternion.compose(orientation(), quaternion);
       }
     }
-    _orientation.compose(filter ? this._rotationfilter.apply(this, cacheRotationParams) : quaternion);
+    _orientation.compose(filter ? this._rotationFilter.apply(this, cacheRotationParams) : quaternion);
     _orientation.normalize(); // Prevents numerical drift
     cacheTargetRotation = null;
     cacheTargetOrientation = null;
@@ -1274,7 +1278,7 @@ public class Node {
    * Sets the {@link #translationFilter()} and its {@code cacheTranslationParams}.
    */
   public void setRotationFilter(BiFunction<Node, Object[], Quaternion> filter, Object [] params) {
-    this._rotationfilter = filter;
+    this._rotationFilter = filter;
     this.cacheRotationParams = params;
   }
 
@@ -1284,14 +1288,14 @@ public class Node {
    * @see #setRotationFilter(BiFunction, Object[])
    */
   public BiFunction<Node, Object[], Quaternion> rotationFilter() {
-    return this._rotationfilter;
+    return this._rotationFilter;
   }
 
   /**
    * Nullifies the {@link #rotationFilter()}.
    */
   public void resetRotationFilter() {
-    this._rotationfilter = null;
+    this._rotationFilter = null;
   }
 
   /**
@@ -1338,7 +1342,7 @@ public class Node {
    * @see #_orbit(Quaternion, Vector, float)
    */
   protected void _orbit(Quaternion quaternion, Vector center) {
-    orientation().compose(_rotationfilter != null ? this._rotationfilter.apply(this, cacheRotationParams) : quaternion);
+    orientation().compose(_rotationFilter != null ? this._rotationFilter.apply(this, cacheRotationParams) : quaternion);
     orientation().normalize(); // Prevents numerical drift
 
     // Original in nodes-0.1.x and proscene:
@@ -1457,38 +1461,26 @@ public class Node {
 
   /**
    * Sets the {@link #magnitude()} of the node, locally defined with respect to the
-   * {@link #reference()}.
+   * {@link #reference()}. If there's a {@link #scalingFilter()} it actually calls
+   * {@code scale(magnitude / magnitude())}.
    * <p>
    * Use {@link #setWorldMagnitude(float)} to define the world coordinates {@link #worldMagnitude()}.
+   *
+   * @see #scale(float)
    */
   public void setMagnitude(float magnitude) {
-    if (magnitude > 0) {
+    if (magnitude <= 0) {
+      System.out.println("Warning. Magnitude should be positive. Nothing done");
+      return;
+    }
+    if (_scalingFilter != null) {
+      cacheTargetMagnitude = magnitude;
+      scale(magnitude / _magnitude);
+    }
+    else {
       _magnitude = magnitude;
       _modified();
-    } else
-      System.out.println("Warning. Scaling should be positive. Nothing done");
-  }
-
-  /**
-   * Same as {@code setMagnitude(magnitude, filter, this, params)}.
-   *
-   * @see #setMagnitude(float, BiFunction, Node, Object[])
-   */
-  public void setMagnitude(float magnitude, BiFunction<Node, Object[], Float> filter, Object [] params) {
-    setMagnitude(magnitude, filter, this, params);
-  }
-
-  /**
-   * Same as {@code node.scale(node.cacheTargetScaling, filter, params)}. Note that the filter may
-   * access the {@code magnitude} as {@code cacheTargetMagnitude} and the target scaling as
-   * {@code cacheTargetScaling} which is computed as {@code magnitude / node.magnitude()}.
-   *
-   * @see #scale(float, BiFunction, Object[])
-   */
-  public static void setMagnitude(float magnitude, BiFunction<Node, Object[], Float> filter, Node node, Object[] params) {
-    node.cacheTargetMagnitude = magnitude;
-    node.cacheTargetScaling = magnitude / node.magnitude();
-    node.scale(node.cacheTargetScaling, filter, params);
+    }
   }
 
   /**
@@ -1498,7 +1490,7 @@ public class Node {
    *
    * @see #translate(Vector, float)
    * @see #rotate(Quaternion, float)
-   * @see #_orbit(Quaternion, Vector, float)
+   * @see #orbit(Vector, float)
    */
   public void scale(float scaling, float inertia) {
     scale(scaling);
@@ -1514,55 +1506,52 @@ public class Node {
   }
 
   /**
-   * Same as {@code setMagnitude(magnitude() * scaling)}.
+   * Same as {@code magnitude() = magnitude() * (scalingFilter() != null ? scalingFilter().apply(this, cacheScalingParams) : scaling)}.
    *
    * @see #scale(float, float)
+   * @see #translate(Vector)
+   * @see #rotate(Quaternion)
    */
   public void scale(float scaling) {
-    setMagnitude(magnitude() * scaling);
+    if (scaling <= 0) {
+      System.out.println("Warning. Scaling should be positive. Nothing done");
+      return;
+    }
+    boolean filter = _scalingFilter != null;
+    if (filter) {
+      cacheTargetScaling = scaling;
+      if (cacheTargetMagnitude != 0) {
+        cacheTargetMagnitude = magnitude() * scaling;
+      }
+    }
+    _magnitude = _magnitude * (filter ? this._scalingFilter.apply(this, cacheScalingParams) : scaling);
+    cacheTargetScaling = 0;
+    cacheTargetMagnitude = 0;
+    _modified();
   }
 
   /**
-   * Same as {@code scale(scaling, filter, this, params, inertia)}.
-   *
-   * @see #scale(float, BiFunction, Node, Object[], float)
+   * Sets the {@link #scalingFilter()} and its {@code cacheScalingParams}.
    */
-  public void scale(float scaling, BiFunction<Node, Object[], Float> filter, Object [] params, float inertia) {
-    scale(scaling, filter, this, params, inertia);
+  public void setScalingFilter(BiFunction<Node, Object[], Float> filter, Object [] params) {
+    this._scalingFilter = filter;
+    this.cacheScalingParams = params;
   }
 
   /**
-   * Same as {@code node.scale(filter.apply(node, params))}. Note that the filter may access the
-   * {@code scaling} as {@code cacheTargetScaling}.
+   * Returns the scaling filter used by {@link #scale(float)}.
    *
-   * @see #scale(float)
+   * @see #setScalingFilter(BiFunction, Object[])
    */
-  public static void scale(float scaling, BiFunction<Node, Object[], Float> filter, Node node, Object[] params, float inertia) {
-    node.cacheTargetScaling = scaling;
-    node.cacheTargetMagnitude = node.magnitude() * scaling;
-    node.scale(filter.apply(node, params));
+  public BiFunction<Node, Object[], Float> scalingFilter() {
+    return this._scalingFilter;
   }
 
   /**
-   * Same as {@code scale(scaling, filter, this, params)}.
-   *
-   * @see #scale(float, BiFunction, Node, Object[])
+   * Nullifies the {@link #scalingFilter()}.
    */
-  public void scale(float scaling, BiFunction<Node, Object[], Float> filter, Object [] params) {
-    scale(scaling, filter, this, params);
-  }
-
-  /**
-   * Same as {@code node.scale(filter.apply(node, params))}. Note that the filter may access the
-   * {@code scaling} as {@code cacheTargetScaling} and the resulting target magnitude as
-   * {@code cacheTargetMagnitude}.
-   *
-   * @see #scale(float)
-   */
-  public static void scale(float scaling, BiFunction<Node, Object[], Float> filter, Node node, Object[] params) {
-    node.cacheTargetScaling = scaling;
-    node.cacheTargetMagnitude = node.magnitude() * scaling;
-    node.scale(filter.apply(node, params));
+  public void resetScalingFilter() {
+    this._scalingFilter = null;
   }
 
   // MAGNITUDE
@@ -1603,24 +1592,6 @@ public class Node {
     setMagnitude(reference() != null ? magnitude / reference().worldMagnitude() : magnitude);
     // option 2 mimics setOrientation (should produce same results)
     //setScaling(reference() != null ? reference().displacement(magnitude) : magnitude);
-  }
-
-  /**
-   * Same as {@code setWorldMagnitude(magnitude, filter, this, params)}.
-   *
-   * @see #setWorldMagnitude(float, BiFunction, Node, Object[])
-   */
-  public void setWorldMagnitude(float magnitude, BiFunction<Node, Object[], Float> filter, Object [] params) {
-    setWorldMagnitude(magnitude, filter, this, params);
-  }
-
-  /**
-   * Same as {@code Node.setMagnitude(node.reference() != null ? magnitude / node.reference().worldMagnitude() : magnitude, filter, node, params)}.
-   *
-   * @see #setMagnitude(float, BiFunction, Node, Object[])
-   */
-  public static void setWorldMagnitude(float magnitude, BiFunction<Node, Object[], Float> filter, Node node, Object[] params) {
-    Node.setMagnitude(node.reference() != null ? magnitude / node.reference().worldMagnitude() : magnitude, filter, node, params);
   }
 
   // ALIGNMENT
