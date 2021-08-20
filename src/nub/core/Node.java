@@ -1283,7 +1283,7 @@ public class Node {
   }
 
   /**
-   * Sets the {@link #translationFilter()} and its {@code cacheTranslationParams}.
+   * Sets the {@link #rotationFilter()} and its {@code cacheRotationParams}.
    */
   public void setRotationFilter(BiFunction<Node, Object[], Quaternion> filter, Object [] params) {
     this._rotationFilter = filter;
