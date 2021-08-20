@@ -53,7 +53,7 @@ import java.util.ListIterator;
  * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
  * and {@link #resetHint()}.
  */
-public class Interpolator {
+class Interpolator {
   /**
    * Returns whether or not this interpolator matches other.
    *
@@ -84,27 +84,15 @@ public class Interpolator {
     protected Vector _tangentVector;
     protected float _time;
     protected Node _node;
-    protected int _hint;
-    protected int _cacheHint;
 
     KeyFrame(Node node, float time) {
-      this(node, node.hint(), time);
-    }
-
-    KeyFrame(Node node, int hint, float time) {
       _node = node;
-      _cacheHint = node.hint();
-      _hint = hint;
       _time = time;
-      if (isHintEnabled(SPLINE) && _hint != _cacheHint)
-        _node._mask = _hint;
     }
 
     protected KeyFrame(KeyFrame other) {
       this._time = other._time;
       this._node = other._node.copy();
-      this._hint = other._hint;
-      this._cacheHint = other._cacheHint;
     }
 
     public KeyFrame copy() {
@@ -584,7 +572,6 @@ public class Interpolator {
   /**
    * Same as {@code addKeyFrame(1)}.
    *
-   * @see #addKeyFrame(Node, int, float)
    * @see #addKeyFrame(Node, float)
    * @see #addKeyFrame(int, float)
    * @see #addKeyFrame(float)
@@ -595,36 +582,30 @@ public class Interpolator {
   }
 
   /**
-   * Same as
-   * {@code addKeyFrame(node().isEye() ? (Node.CAMERA | Node.BULLSEYE) : node().hint() == 0 ? (Node.AXES | Node.BULLSEYE) : node().hint(), time)}.
+   * Same as {@code addKeyFrame(node().hint(), time)}.
    *
-   * @see #addKeyFrame(Node, int, float)
-   * @see #addKeyFrame(Node, float)
    * @see #addKeyFrame(int, float)
    * @see #addKeyFrame(float)
+   * @see #addKeyFrame(Node, float)
    * @see #addKeyFrame(Node)
    */
   public void addKeyFrame(float time) {
-    addKeyFrame(node().isEye() ? (Node.CAMERA | Node.BULLSEYE) : node().hint() == 0 ? (Node.AXES | Node.BULLSEYE) : node().hint(), time);
+    addKeyFrame(node().hint(), time);
   }
 
   /**
-   * Same as {@code addKeyFrame(node().copy(), hint, time)}.
-   *
-   * @see #addKeyFrame(Node, int, float)
-   * @see #addKeyFrame(Node)
-   * @see #addKeyFrame(int, float)
-   * @see #addKeyFrame(float)
-   * @see #addKeyFrame()
+   * Adds a {@link #node()} detached instance as a keyframe at {@code time} and a mask {@code hint}.
    */
   public void addKeyFrame(int hint, float time) {
-    addKeyFrame(node().copy(), hint, time);
+    Node node = node().detach();
+    node._mask = hint;
+    node.setShape(node());
+    addKeyFrame(node, time);
   }
 
   /**
    * Same as {@code addKeyFrame(node, _list.isEmpty() ? 0.0f : 1.0f)}.
    *
-   * @see #addKeyFrame(Node, int, float)
    * @see #addKeyFrame(Node, float)
    * @see #addKeyFrame(int, float)
    * @see #addKeyFrame(float)
@@ -632,20 +613,6 @@ public class Interpolator {
    */
   public void addKeyFrame(Node node) {
     addKeyFrame(node, _list.isEmpty() ? 0.0f : 1.0f);
-  }
-
-  /**
-   * Same as
-   * {@code addKeyFrame(node, node.isEye() ? (Node.CAMERA | Node.BULLSEYE) : node.hint() == 0 ? (Node.AXES | Node.BULLSEYE) : node().hint(), time)}.
-   *
-   * @see #addKeyFrame(Node, int, float)
-   * @see #addKeyFrame(Node)
-   * @see #addKeyFrame(int, float)
-   * @see #addKeyFrame(float)
-   * @see #addKeyFrame()
-   */
-  public void addKeyFrame(Node node, float time) {
-    addKeyFrame(node, node.isEye() ? (Node.CAMERA | Node.BULLSEYE) : node.hint() == 0 ? (Node.AXES | Node.BULLSEYE) : node().hint(), time);
   }
 
   /**
@@ -664,7 +631,7 @@ public class Interpolator {
    * @see #addKeyFrame(float)
    * @see #addKeyFrame()
    */
-  public void addKeyFrame(Node node, int hint, float time) {
+  public void addKeyFrame(Node node, float time) {
     if (_list.size() == 0) {
       if (time < 0)
         return;
@@ -672,7 +639,7 @@ public class Interpolator {
       return;
     if (node == null)
       return;
-    _list.add(new KeyFrame(node, hint, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time));
+    _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time));
     _valuesAreValid = false;
     _pathIsValid = false;
     _currentKeyFrameValid = false;
@@ -705,7 +672,6 @@ public class Interpolator {
     if (index == _list.size())
       index--;
     KeyFrame keyFrame = _list.get(index);
-    keyFrame._node._mask = keyFrame._cacheHint;
     _valuesAreValid = false;
     _pathIsValid = false;
     _currentKeyFrameValid = false;
@@ -996,7 +962,6 @@ public class Interpolator {
    */
   public void resetHint() {
     _mask = 0;
-    Graph._interpolators.remove(this);
   }
 
   /**
@@ -1012,7 +977,6 @@ public class Interpolator {
    */
   public void disableHint(int hint) {
     _mask &= ~hint;
-    if (_mask == 0) _disabled();
   }
 
   /**
@@ -1044,23 +1008,6 @@ public class Interpolator {
    */
   public void enableHint(int hint) {
     _mask |= hint;
-    if (_mask != 0) _enabled();
-  }
-
-  protected void _enabled() {
-    for (KeyFrame keyFrame : _list) {
-      if (keyFrame._hint != keyFrame._cacheHint)
-        keyFrame._node._mask = keyFrame._hint;
-    }
-    Graph._interpolators.add(this);
-  }
-
-  protected void _disabled() {
-    for (KeyFrame keyFrame : _list) {
-      if (keyFrame._hint != keyFrame._cacheHint)
-        keyFrame._node._mask = keyFrame._cacheHint;
-    }
-    Graph._interpolators.remove(this);
   }
 
   /**
@@ -1076,10 +1023,6 @@ public class Interpolator {
    */
   public void toggleHint(int hint) {
     _mask ^= hint;
-    if (_mask != 0)
-      _enabled();
-    else
-      _disabled();
   }
 
   /**
@@ -1151,14 +1094,5 @@ public class Interpolator {
       _steps = steps;
     else
       System.out.println("Warning: spline steps should be in [0..maxSteps-1]. Nothing done!");
-  }
-
-  /**
-   * Clear every key-frame cache hint.
-   */
-  public void clearKeyFrameCacheHint() {
-    for (KeyFrame keyFrame : _list) {
-      keyFrame._hint = keyFrame._cacheHint;
-    }
   }
 }

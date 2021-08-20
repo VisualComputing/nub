@@ -146,7 +146,6 @@ public class Graph {
   protected int _centerStroke;
   protected int _gridSubDiv;
   protected Object _background;
-  protected static HashSet<Interpolator> _interpolators = new HashSet<Interpolator>();
   protected static HashSet<Node> _hudSet = new HashSet<Node>();
 
   // Custom render
@@ -173,8 +172,6 @@ public class Graph {
   protected InertialTask _cadRotateTask;
   protected Vector _eyeUp;
 
-  //Interpolator
-  protected Interpolator _interpolator;
   //bounds eqns
   protected float[][] _coefficients;
   protected Vector[] _normal;
