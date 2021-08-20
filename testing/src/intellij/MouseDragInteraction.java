@@ -70,14 +70,14 @@ public class MouseDragInteraction extends PApplet {
     }
     );
     shape2.translate(275, 275, 0);
-    shape2.setTranslationFilter(Node.vectorAxisFilter, new Object[] { Vector.plusI });
+    shape2.setTranslationFilter(Node.translationAxisFilter, new Object[] { Vector.plusI });
     shape2.setScalingFilter(scalarFilter, new Object[] { (float) height });
     shape3 = shape1.detach();
     scene.randomize(shape3);
     shape3.setShape(shape());
     shape3.setReference(shape2);
     shape3.enableHint(Node.AXES);
-    shape3.setTranslationFilter(Node.vectorAxisFilter, new Object[] { Vector.plusJ });
+    shape3.setTranslationFilter(Node.translationAxisFilter, new Object[] { Vector.plusJ });
     shape3.setScalingFilter(scalarFilter, new Object[] { (float) height });
     randomVector = Vector.random();
     randomVector.setMagnitude(scene.radius() * 0.5f);

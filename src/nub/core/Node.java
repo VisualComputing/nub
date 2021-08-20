@@ -87,8 +87,8 @@ import java.util.function.Function;
  * {@link #setRotationFilter(BiFunction, Object[])} and {@link #setScalingFilter(BiFunction, Object[])}
  * to set different filters to a node.
  * <p>
- * Classical filters are provided for convenience (see {@link #vectorAxisFilter},
- * {@link #vectorPlaneFilter} and {@link #quaternionAxisFilter}) and new filters can very
+ * Classical filters are provided for convenience (see {@link #translationAxisFilter},
+ * {@link #translationPlaneFilter} and {@link #rotationAxisFilter}) and new filters can very
  * easily be implemented.
  * <h2>Visual hints</h2>
  * The node space visual representation may be configured using the following hints:
@@ -1034,8 +1034,8 @@ public class Node {
    * Same as {@code position().add((translationFilter() != null) ? translationFilter().apply(this, cacheTranslationParams) : vector)}.
    *
    * @see #translate(Vector, float)
-   * @see #vectorAxisFilter
-   * @see #vectorPlaneFilter
+   * @see #translationAxisFilter
+   * @see #translationPlaneFilter
    * @see #translationFilter()
    * @see #rotate(Quaternion)
    * @see #scale(float)
@@ -1084,24 +1084,42 @@ public class Node {
   }
 
   /**
+   * Same as {@code setTranslationFilter(translationAxisFilter, new Object[] { axis })}.
+   *
+   * @see #setTranslationFilter(BiFunction, Object[])
+   */
+  public void setTranslationAxisFilter(Vector axis) {
+    setTranslationFilter(translationAxisFilter, new Object[] { axis });
+  }
+
+  /**
    * Filters {@code vector} so that the node is translated along {@code axis}
    * (defined in this node coordinate system). Call it as:
-   * {@code setTranslationFilter(Node.vectorAxisFilter, new Object[] { axis })}.
+   * {@code setTranslationFilter(Node.translationAxisFilter, new Object[] { axis })}.
    *
-   * @see #vectorPlaneFilter
+   * @see #translationPlaneFilter
    */
-  public static BiFunction<Node, Object[], Vector> vectorAxisFilter = (node, params)-> {
+  public static BiFunction<Node, Object[], Vector> translationAxisFilter = (node, params)-> {
     return Vector.projectVectorOnAxis(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
   };
+
+  /**
+   * Same as {@code setTranslationFilter(translationPlaneFilter, new Object[] { axis })}.
+   *
+   * @see #setTranslationFilter(BiFunction, Object[])
+   */
+  public void setTranslationPlaneFilter(Vector normal) {
+    setTranslationFilter(translationPlaneFilter, new Object[] { normal });
+  }
 
   /**
    * Filters {@code vector} so that the node is translated along the plane defined by {@code normal}
    * (defined in this node coordinate system). Call it as:
    * {@code setTranslationFilter(Node.vectorPlaneFilter, new Object[] { normal })}.
    *
-   * @see #vectorAxisFilter
+   * @see #translationAxisFilter
    */
-  public static BiFunction<Node, Object[], Vector> vectorPlaneFilter = (node, params)-> {
+  public static BiFunction<Node, Object[], Vector> translationPlaneFilter = (node, params)-> {
     return Vector.projectVectorOnPlane(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
   };
 
@@ -1263,7 +1281,7 @@ public class Node {
    *
    * @see #rotate(Quaternion, float)
    * @see #rotationFilter()
-   * @see #quaternionAxisFilter
+   * @see #rotationAxisFilter
    * @see #translate(Vector)
    * @see #scale(float)
    */
@@ -1307,13 +1325,22 @@ public class Node {
   }
 
   /**
+   * Same as {@code setRotationFilter(Node.rotationAxisFilter, new Object[] { axis })}.
+   *
+   * @see #setRotationFilter(BiFunction, Object[])
+   */
+  public void setRotationAxisFilter(Vector axis) {
+    setRotationFilter(Node.rotationAxisFilter, new Object[] { axis });
+  }
+
+  /**
    * Filters {@code quaternion} so that its {@link Quaternion#axis()} become {@code axis}
    * (defined in this node coordinate system). Call it as:
-   * {@code setRotationFilter(Node.quaternionAxisFilter, new Object[] { axis })}.
+   * {@code setRotationFilter(Node.rotationAxisFilter, new Object[] { axis })}.
    *
    * @see #rotate(Quaternion)
    */
-  public static BiFunction<Node, Object[], Quaternion> quaternionAxisFilter = (node, params)-> {
+  public static BiFunction<Node, Object[], Quaternion> rotationAxisFilter = (node, params)-> {
     return new Quaternion(Vector.projectVectorOnAxis(node.cacheTargetRotation.axis(), (Vector)params[0]), node.cacheTargetRotation.angle());
   };
 
