@@ -1087,17 +1087,24 @@ public class Node {
    * Same as {@code setTranslationFilter(translationAxisFilter, new Object[] { axis })}.
    *
    * @see #setTranslationFilter(BiFunction, Object[])
+   * @see #translationAxisFilter
+   * @see #setTranslationPlaneFilter(Vector)
+   * @see #setRotationAxisFilter(Vector)
+   * @see #setMinMaxScalingFilter(float, float)
    */
   public void setTranslationAxisFilter(Vector axis) {
     setTranslationFilter(translationAxisFilter, new Object[] { axis });
   }
 
   /**
-   * Filters {@code vector} so that the node is translated along {@code axis}
+   * Filters translation so that the node is translated along {@code axis}
    * (defined in this node coordinate system). Call it as:
    * {@code setTranslationFilter(Node.translationAxisFilter, new Object[] { axis })}.
    *
    * @see #translationPlaneFilter
+   * @see #translationPlaneFilter
+   * @see #rotationAxisFilter
+   * @see #minMaxScalingFilter
    */
   public static BiFunction<Node, Object[], Vector> translationAxisFilter = (node, params)-> {
     return Vector.projectVectorOnAxis(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
@@ -1107,17 +1114,23 @@ public class Node {
    * Same as {@code setTranslationFilter(translationPlaneFilter, new Object[] { axis })}.
    *
    * @see #setTranslationFilter(BiFunction, Object[])
+   * @see #translationPlaneFilter
+   * @see #setTranslationAxisFilter(Vector) Filter(Vector)
+   * @see #setRotationAxisFilter(Vector)
+   * @see #setMinMaxScalingFilter(float, float)
    */
   public void setTranslationPlaneFilter(Vector normal) {
     setTranslationFilter(translationPlaneFilter, new Object[] { normal });
   }
 
   /**
-   * Filters {@code vector} so that the node is translated along the plane defined by {@code normal}
+   * Filters translation so that the node is translated along the plane defined by {@code normal}
    * (defined in this node coordinate system). Call it as:
    * {@code setTranslationFilter(Node.vectorPlaneFilter, new Object[] { normal })}.
    *
    * @see #translationAxisFilter
+   * @see #rotationAxisFilter
+   * @see #minMaxScalingFilter
    */
   public static BiFunction<Node, Object[], Vector> translationPlaneFilter = (node, params)-> {
     return Vector.projectVectorOnPlane(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
@@ -1328,6 +1341,10 @@ public class Node {
    * Same as {@code setRotationFilter(Node.rotationAxisFilter, new Object[] { axis })}.
    *
    * @see #setRotationFilter(BiFunction, Object[])
+   * @see #rotationAxisFilter
+   * @see #setTranslationAxisFilter(Vector)
+   * @see #setTranslationPlaneFilter(Vector)
+   * @see #setMinMaxScalingFilter(float, float)
    */
   public void setRotationAxisFilter(Vector axis) {
     setRotationFilter(Node.rotationAxisFilter, new Object[] { axis });
@@ -1339,6 +1356,10 @@ public class Node {
    * {@code setRotationFilter(Node.rotationAxisFilter, new Object[] { axis })}.
    *
    * @see #rotate(Quaternion)
+   * @see #setRotationAxisFilter(Vector)
+   * @see #translationAxisFilter
+   * @see #translationPlaneFilter
+   * @see #minMaxScalingFilter
    */
   public static BiFunction<Node, Object[], Quaternion> rotationAxisFilter = (node, params)-> {
     return new Quaternion(Vector.projectVectorOnAxis(node.cacheTargetRotation.axis(), (Vector)params[0]), node.cacheTargetRotation.angle());
@@ -1592,6 +1613,37 @@ public class Node {
   public void resetScalingFilter() {
     this._scalingFilter = null;
   }
+
+  /**
+   * Same as {@code setScalingFilter(Node.minMaxScalingFilter, new Object[] { min, max })}.
+   *
+   * @see #setScalingFilter(BiFunction, Object[])
+   * @see #minMaxScalingFilter
+   * @see #setTranslationAxisFilter(Vector)
+   * @see #setTranslationPlaneFilter(Vector)
+   * @see #setRotationAxisFilter(Vector)
+   */
+  public void setMinMaxScalingFilter(float min, float max) {
+    setScalingFilter(Node.minMaxScalingFilter, new Object[] { min, max });
+  }
+
+  /**
+   * Filters scaling so that the node magnitude lies in {@code [min..max]}. Call it as:
+   * {@code setScalingFilter(Node.minMaxScalingFilter, new Object[] { min, max })}.
+   *
+   * @see #translationPlaneFilter
+   * @see #translationAxisFilter
+   * @see #rotationAxisFilter
+   * @see #setMinMaxScalingFilter(float, float)
+   */
+  // TODO needs testing
+  public static BiFunction<Node, Object[], Float> minMaxScalingFilter = (node, params)-> {
+    float min = (float) params[0];
+    float max = (float) params[1];
+    if(node.cacheTargetMagnitude < min || node.cacheTargetMagnitude > max)
+      return 1.0f;
+    return node.cacheTargetScaling;
+  };
 
   // MAGNITUDE
 
