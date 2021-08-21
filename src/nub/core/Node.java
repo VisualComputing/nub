@@ -129,6 +129,8 @@ public class Node {
   protected Node _reference;
   protected long _lastUpdate;
 
+  protected Interpolator _interpolator;
+
   // Tagging & Precision
   protected float _bullsEyeSize;
 
@@ -167,11 +169,17 @@ public class Node {
   public final static int BOUNDS = 1 << 4;
   public final static int BULLSEYE = 1 << 5;
   public final static int TORUS = 1 << 6;
-  public final static int FILTER = 1 << 7;
-  public final static int BONE = 1 << 8;
+  public final static int KEYFRAMES = 1 << 7;
+  public final static int FILTER = 1 << 8;
+  public final static int BONE = 1 << 9;
   protected float _highlight;
   // Bounds
   protected HashSet<Graph> _frustumGraphs;
+  // keyframes
+  protected int _keyframesMask;
+  protected int _splineStroke;
+  protected int _splineWeight;
+  protected int _steps;
   // torus
   protected int _torusColor;
   protected int _torusFaces;
@@ -251,13 +259,22 @@ public class Node {
   }
 
   /**
+   * Same as {@code this(null, position, orientation, magnitude)}.
+   *
+   * @see #Node(Node, Vector, Quaternion, float)
+   */
+  public Node(Vector position, Quaternion orientation, float magnitude) {
+    this(null, position, orientation, magnitude);
+  }
+
+  /**
    * Creates a node with {@code reference} as {@link #reference()}, having {@code position},
    * {@code orientation} and {@code magnitude} as the {@link #position()}, {@link #orientation()}
    * and {@link #magnitude()}, respectively. The {@link #bullsEyeSize()} is set to {@code 0.2}
    * and the {@link #highlight()} hint magnitude to {@code 0.15}.
    */
   public Node(Node reference, Vector position, Quaternion orientation, float magnitude) {
-    this(position, orientation, magnitude);
+    this(position, orientation, magnitude, false);
     _reference = reference;
     _restorePath(reference(), this);
     if (reference == null || reference.isReachable())
@@ -267,7 +284,7 @@ public class Node {
     try {
       method = this.getClass().getMethod("graphics", processing.core.PGraphics.class);
     } catch(NoSuchMethodException e) {
-      System.out.println(e.toString()); //print exception object
+      System.out.println(e); //print exception object
     }
     if (!method.getDeclaringClass().equals(Node.class)) {
       setShape(this::graphics);
@@ -278,7 +295,7 @@ public class Node {
    * Internally used by both {@link #Node(Node, Vector, Quaternion, float)}
    * (attached nodes) and {@link #detach(Vector, Quaternion, float)} (detached nodes).
    */
-  protected Node(Vector position, Quaternion orientation, float magnitude) {
+  protected Node(Vector position, Quaternion orientation, float magnitude, boolean detachDummy) {
     setPosition(position);
     setOrientation(orientation);
     setMagnitude(magnitude);
@@ -304,8 +321,18 @@ public class Node {
     _bullsEyeStroke = -16711681;
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
     _cameraStroke = -65281;
+    // keyframes
+    _interpolator = new Interpolator(this);
+    _splineStroke = -65281;
+    _splineWeight = 3;
+    _steps = 3;
     _children = new ArrayList<Node>();
     _frustumGraphs = new HashSet<Graph>();
+    if (isEye()) {
+      _keyframesMask = Node.CAMERA;
+    } else {
+      _keyframesMask = Node.AXES;
+    }
     setInteraction(this::interact);
   }
 
@@ -353,6 +380,7 @@ public class Node {
   public Node(Node reference, Consumer<processing.core.PGraphics> shape, Vector position, Quaternion orientation, float magnitude) {
     this(reference, position, orientation, magnitude);
     setShape(shape);
+    _keyframesMask = Node.SHAPE;
   }
 
   /**
@@ -364,39 +392,24 @@ public class Node {
   public Node(Node reference, processing.core.PShape shape, Vector position, Quaternion orientation, float magnitude) {
     this(reference, position, orientation, magnitude);
     setShape(shape);
+    _keyframesMask = Node.SHAPE;
   }
 
   /**
-   * Same as {@code return detach(this)}.
+   * Same as {@code return detach(worldPosition(), worldOrientation(), worldMagnitude())}.
    *
-   * @see #detach(Node)
    * @see #copy()
    */
   public Node detach() {
-    Node node = detach(this);
-    node._torusFaces = this._torusFaces;
-    node._torusColor = this._torusColor;
-    node._bullsEyeStroke = this._bullsEyeStroke;
-    node._cameraStroke = this._cameraStroke;
-    node._axesLength = this._axesLength;
-    return node;
+    return detach(worldPosition(), worldOrientation(), worldMagnitude());
   }
 
   /**
-   * Same as {@code return Node.detach(node.position(), node.orientation(), node.magnitude())}.
-   *
-   * @see #detach(Vector, Quaternion, float)
-   */
-  public static Node detach(Node node) {
-    return Node.detach(node.worldPosition(), node.worldOrientation(), node.worldMagnitude());
-  }
-
-  /**
-   * Returns a detached node (i.e., a pruned non-reachable node from the graph, see {@link Graph#prune(Node)})
+   * Returns a detached node (i.e., a shapeless, pruned non-reachable node from the graph, see {@link Graph#prune(Node)})
    * whose {@link #reference()} is {@code null} for the given params. Mostly used internally.
    */
   public static Node detach(Vector position, Quaternion orientation, float magnitude) {
-    return new Node(position, orientation, magnitude);
+    return new Node(position, orientation, magnitude, true);
   }
 
   /**
@@ -440,23 +453,42 @@ public class Node {
   }
 
   /**
-   * Performs a deep copy of this node and returns it. Only the {@link #worldPosition()},
-   * {@link #worldOrientation()} and {@link #worldMagnitude()} of the node are copied.
+   * Performs a deep copy of this node and returns it. The newly created node reference is the world.
    *
    * @see #detach()
    */
+  // TODO should keyframes be copied?
   public Node copy() {
-    Node node = new Node();
-    node.set(this);
-    if (!isHintEnabled(Node.SHAPE))
-      node.disableHint(SHAPE);
+    Node node = isReachable() ? new Node(worldPosition(), worldOrientation(), worldMagnitude()) : detach();
+    node._setHint(this);
     return node;
   }
 
+  protected void _setHint(Node node) {
+    _setHint(node, node._mask);
+  }
+
+  protected void _setHint(Node node, int hint) {
+    _mask = hint;
+    setShape(node);
+    setHUD(node);
+    _updateHUD();
+    _torusFaces = node._torusFaces;
+    _torusColor = node._torusColor;
+    _bullsEyeSize = node._bullsEyeSize;
+    _bullsEyeShape = node._bullsEyeShape;
+    _bullsEyeStroke = node._bullsEyeStroke;
+    _cameraStroke = node._cameraStroke;
+    _axesLength = node._axesLength;
+    _splineStroke = node._splineStroke;
+    _splineWeight = node._splineWeight;
+    _steps = node._steps;
+    _keyframesMask = node._keyframesMask;
+  }
+
   /**
-   * Sets {@link #worldPosition()}, {@link #worldOrientation()}, {@link #worldMagnitude()},
-   * {@link #hint()} and {@link #picking()} values from those of the {@code node}.
-   * The node {@link #reference()} is not affected by this call.
+   * Sets {@link #worldPosition()}, {@link #worldOrientation()} and {@link #worldMagnitude()}
+   * values from those of the {@code node}. The node {@link #reference()} is not affected by this call.
    * <p>
    * After calling {@code set(node)} a call to {@code this.matches(node)} should
    * return {@code true}.
@@ -471,18 +503,6 @@ public class Node {
     setWorldPosition(node);
     setWorldOrientation(node);
     setWorldMagnitude(node);
-    _mask = node.hint();
-    _picking = node.picking();
-    setShape(node);
-    setHUD(node);
-    _bullsEyeSize = node._bullsEyeSize;
-    _bullsEyeShape = node._bullsEyeShape;
-    tagging = node.tagging;
-    _highlight = node._highlight;
-    _torusFaces = node._torusFaces;
-    _torusColor = node._torusColor;
-    _bullsEyeStroke = node._bullsEyeStroke;
-    _cameraStroke = node._cameraStroke;
   }
 
   /**
@@ -667,6 +687,9 @@ public class Node {
     // 1. Determine prev and target states
     boolean prevReachable = isReachable();
     boolean nowReachable = node == null;
+    if (!prevReachable == nowReachable) {
+      System.out.println("Warning: Resetting the node reference will make it reachable. You may also use detach() and / or Graph.prune");
+    }
     if (!nowReachable) {
       nowReachable = node.isReachable();
     }
@@ -2216,7 +2239,7 @@ public class Node {
    * @see #worldInverse()
    */
   public Node inverse() {
-    Node node = new Node(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
+    Node node = detach(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
     node.setReference(reference());
     return node;
   }
@@ -2236,7 +2259,7 @@ public class Node {
    * @see #inverse()
    */
   public Node worldInverse() {
-    return new Node(Vector.multiply(worldOrientation().inverseRotate(worldPosition()), -1), worldOrientation().inverse(), 1 / worldMagnitude());
+    return detach(Vector.multiply(worldOrientation().inverseRotate(worldPosition()), -1), worldOrientation().inverse(), 1 / worldMagnitude());
   }
 
   // SCALAR CONVERSION
@@ -3262,5 +3285,291 @@ public class Node {
    */
   public boolean isEye(Graph graph) {
     return _frustumGraphs.contains(graph);
+  }
+
+  /**
+   * <p>
+   * The interpolator visual representation may be configured using the following hints:
+   * {@link #SPLINE} and {@link #STEPS}. See {@link #hint()},
+   * {@link #configHint(int, Object...)} {@link #enableHint(int)},
+   * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
+   * and {@link #resetHint()}.
+   */
+
+  /**
+   * Returns whether or not all single visual hints encoded in the bitwise-or
+   * {@code hint} mask are enable or not.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #resetHint()
+   */
+  /*
+  public boolean isHintEnabled(int hint) {
+    return ~(_mask | ~hint) == 0;
+  }
+
+   */
+
+  /**
+   * Returns the current visual hint mask. The mask is a bitwise-or of the following
+   * single visual hints available the interpolator:
+   * <p>
+   * <ol>
+   * <li>{@link #SPLINE} which displays a Catmull-Rom spline having the key-frames
+   * as its control points.</li>
+   * <li>{@link #STEPS} which defines what to draw between consecutive key-frames.</li>
+   * </ol>
+   * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
+   * calling either {@link Graph#render(Node)} or {@link Graph#render()}.
+   * Use {@link #configHint(int, Object...)} to configure the hint different visual aspects.
+   *
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #isHintEnabled(int)
+   * @see #resetHint()
+   */
+  /*
+  public int hint() {
+    return this._mask;
+  }
+   */
+
+  /**
+   * Resets the current {@link #hint()}, i.e., disables all single
+   * visual hints available for the node.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #isHintEnabled(int)
+   */
+  /*
+  public void resetHint() {
+    _mask = 0;
+  }
+   */
+
+  /**
+   * Disables all the single visual hints encoded in the bitwise-or {@code hint} mask.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #resetHint()
+   * @see #toggleHint(int)
+   * @see #isHintEnabled(int)
+   */
+  /*
+  public void disableHint(int hint) {
+    _mask &= ~hint;
+  }
+   */
+
+  /**
+   * Calls {@link #enableHint(int)} followed by {@link #configHint(int, Object...)}.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #resetHint()
+   * @see #toggleHint(int)
+   * @see #isHintEnabled(int)
+   */
+  /*
+  public void enableHint(int hint, Object... params) {
+    enableHint(hint);
+    configHint(hint, params);
+  }
+   */
+
+  /**
+   * Enables all single visual hints encoded in the bitwise-or {@code hint} mask.
+   *
+   * @see #hint()
+   * @see #disableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #resetHint()
+   * @see #toggleHint(int)
+   * @see #isHintEnabled(int)
+   */
+  /*
+  public void enableHint(int hint) {
+    _mask |= hint;
+  }
+
+   */
+
+  /**
+   * Toggles all single visual hints encoded in the bitwise-or {@code hint} mask.
+   *
+   * @see #hint()
+   * @see #disableHint(int)
+   * @see #configHint(int, Object...)
+   * @see #enableHint(int, Object...)
+   * @see #resetHint()
+   * @see #enableHint(int)
+   * @see #isHintEnabled(int)
+   */
+  /*
+  public void toggleHint(int hint) {
+    _mask ^= hint;
+  }
+   */
+
+  /**
+   * Configures the hint using varargs as follows:
+   * <p>
+   * <ol>
+   * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke)}.</li>
+   * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke, splineWeight)}.</li>
+   * <li>{@link #STEPS} hint: {@code configHint(Interpolator.STEPS, hint)}.</li>
+   * </ol>
+   * Note that the {@code splineStroke} is a color {@code int} var;{@code splineWeight}
+   * is a stroke weight int var; and, {@code hint} is a node {@link Node#hint()} defining
+   * what to draw between two consecutives key-frames. See also {@link #setSteps(int)}.
+   *
+   * @see #hint()
+   * @see #enableHint(int)
+   * @see #enableHint(int, Object...)
+   * @see #disableHint(int)
+   * @see #toggleHint(int)
+   * @see #isHintEnabled(int)
+   * @see #resetHint()
+   */
+  /*
+  public void configHint(int hint, Object... params) {
+    switch (params.length) {
+      case 1:
+        if (Graph.isNumInstance(params[0])) {
+          if (hint == SPLINE) {
+            _splineStroke = Graph.castToInt(params[0]);
+            return;
+          }
+          if (hint == STEPS) {
+            _stepsHint = Graph.castToInt(params[0]);
+            return;
+          }
+        }
+        break;
+      case 2:
+        if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
+          if (hint == SPLINE) {
+            _splineStroke = Graph.castToInt(params[0]);
+            _splineWeight = Graph.castToInt(params[1]);
+            return;
+          }
+        }
+        break;
+    }
+    System.out.println("Warning: some params in Interpolator.configHint(hint, params) couldn't be parsed!");
+  }
+   */
+
+  public static int maxSteps = 30;
+
+  /**
+   * Returns the number of steps between two consecutive key-frames
+   * to be drawn by the interpolator hint. Sets this value with {@link #setSteps(int)}.
+   *
+   * @see #hint()
+   */
+  public int steps() {
+    return _steps;
+  }
+
+  /**
+   * Sets the number of steps between two consecutive key-frames to be drawn
+   * by the interpolator hint.
+   *
+   * @see #steps()
+   * @see #hint()
+   */
+  public void setSteps(int steps) {
+    if (0 <= steps && steps < maxSteps)
+      _steps = steps;
+    else
+      System.out.println("Warning: spline steps should be in [0..maxSteps-1]. Nothing done!");
+  }
+
+  public void toggleAnimation() {
+    _interpolator.toggle();
+  }
+
+  public void animate() {
+    _interpolator.run();
+  }
+
+  /*
+  public void animate(float time) {
+    _interpolator.run(time);
+  }
+  // */
+
+  public void animate(float speed, int period) {
+    _interpolator.run(speed, period);
+  }
+
+  /*
+  public void animate(float time, float speed, int period) {
+    _interpolator.run(time, speed, period);
+  }
+  // */
+
+  public void resetAnimation() {
+    _interpolator.reset();
+  }
+
+  public float animationTime() {
+    return _interpolator.time();
+  }
+
+  public void setAnimationTime(float time) {
+    _interpolator.setTime(time);
+  }
+
+  public void addKeyFrame() {
+    _interpolator.addKeyFrame();
+  }
+
+  public void addKeyFrame(float time) {
+    _interpolator.addKeyFrame(time);
+  }
+
+  public void addKeyFrame(int hint, float time) {
+    _interpolator.addKeyFrame(hint, time);
+  }
+
+  public void addKeyFrame(Node node) {
+    _interpolator.addKeyFrame(node);
+  }
+
+  public void addKeyFrame(Node node, float time) {
+    _interpolator.addKeyFrame(node, time);
+  }
+
+  public Node removeKeyFrame(float time) {
+    return _interpolator.removeKeyFrame(time);
+  }
+
+  public void removeKeyFrames() {
+    _interpolator.clear();
+  }
+
+  public void interpolate(float time) {
+    _interpolator.interpolate(time);
   }
 }

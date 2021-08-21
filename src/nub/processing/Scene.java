@@ -15,7 +15,6 @@
 package nub.processing;
 
 import nub.core.Graph;
-import nub.core.Interpolator;
 import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
@@ -95,7 +94,6 @@ import java.util.function.Consumer;
  *
  * @see Graph
  * @see Node
- * @see Interpolator
  * @see TimingTask
  */
 public class Scene extends Graph {
@@ -752,51 +750,6 @@ public class Scene extends Graph {
   }
 
   /**
-   * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONArray into an interpolator.
-   */
-  protected Interpolator _toInterpolator(JSONArray jsonInterpolator) {
-    Interpolator interpolator = new Interpolator(new Node());
-    for (int j = 0; j < jsonInterpolator.size(); j++) {
-      Node node = new Node();
-      node.set(_toNode(jsonInterpolator.getJSONObject(j)));
-      interpolator.addKeyFrame(node, jsonInterpolator.getJSONObject(j).getFloat("time"));
-      /*
-      if (pathsVisualHint())
-        inputHandler().addNode(keyNode);
-      if (!eye().keyFrameInterpolatorMap().containsKey(_id))
-        eye().setKeyFrameInterpolator(_id, new Interpolator(this, eyeFrame()));
-      eye().keyFrameInterpolator(_id).addKeyFrame(keyNode, keyFrames.getJSONObject(j).getFloat("time"));
-      //*/
-    }
-    return interpolator;
-  }
-
-  /**
-   * Used internally by {@link #saveConfig(String)}. Converts the {@code interpolator}
-   * to a P5 JSONArray.
-   */
-  protected JSONArray _toJSONArray(Interpolator interpolator) {
-    JSONArray jsonKeyFrames = new JSONArray();
-    // TODO needs testing
-    int i = 0;
-    for (Map.Entry<Float, Node> entry : interpolator.keyFrames().entrySet()) {
-      JSONObject jsonKeyFrame = _toJSONObject(entry.getValue());
-      jsonKeyFrame.setFloat("time", entry.getKey());
-      jsonKeyFrames.setJSONObject(i, jsonKeyFrame);
-      i++;
-    }
-    /*
-    // it previously was
-    for (int i = 0; i < interpolator.size(); i++) {
-      JSONObject jsonKeyFrame = _toJSONObject(interpolator.keyFrame(i));
-      jsonKeyFrame.setFloat("time", interpolator.timeBluf(i));
-      jsonKeyFrames.setJSONObject(i, jsonKeyFrame);
-    }
-    */
-    return jsonKeyFrames;
-  }
-
-  /**
    * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONObject into a node.
    */
   protected Node _toNode(JSONObject jsonNode) {
@@ -996,11 +949,6 @@ public class Scene extends Graph {
       }
       context().popStyle();
     }
-    for (Interpolator interpolator : _interpolators) {
-      context().pushStyle();
-      _drawSpline(interpolator);
-      context().popStyle();
-    }
     if (isHintEnabled(Graph.SHAPE) && (_rmrShape != null || _imrShape != null)) {
       context().push();
       if (_rmrShape != null) {
@@ -1067,6 +1015,15 @@ public class Scene extends Graph {
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_bullsEyeStroke(node));
       _drawBullsEye(node);
+      pg.popStyle();
+    }
+    if (node.isHintEnabled(Node.KEYFRAMES)) {
+      // TODO draw locally!!!
+      pg.pushStyle();
+      _matrixHandler.pushMatrix();
+      _bind();
+      _drawSpline(node);
+      _matrixHandler.popMatrix();
       pg.popStyle();
     }
   }
@@ -1288,7 +1245,7 @@ public class Scene extends Graph {
   // DRAWING
 
   /**
-   * Draws the {@link Interpolator} path.
+   * Draws the {@link Node} path.
    * <p>
    * {@code mask} controls what is drawn: If ( (mask &amp; 1) != 0 ), the position path is
    * drawn. If ( (mask &amp; 2) != 0 ), an eye representation is regularly drawn and if
@@ -1307,10 +1264,11 @@ public class Scene extends Graph {
    * {@code scale} controls the scaling of the eye and axes drawing. A value of
    * {@link #radius()} should give good results.
    */
-  protected void _drawSpline(Interpolator interpolator) {
+  protected void _drawSpline(Node interpolator) {
     if (interpolator.hint() != 0) {
       List<Node> path = _path(interpolator);
-      if (interpolator.isHintEnabled(Interpolator.SPLINE) && path.size() > 1) {
+      //if (interpolator.isHintEnabled(Interpolator.SPLINE) && path.size() > 1) {
+      if (_splineWeight(interpolator) > 0 && path.size() > 1) {
         context().pushStyle();
         context().noFill();
         context().colorMode(PApplet.RGB, 255);
@@ -1324,14 +1282,16 @@ public class Scene extends Graph {
         context().endShape();
         context().popStyle();
       }
-      if (interpolator.isHintEnabled(Interpolator.STEPS)) {
+      /*
+      //if (interpolator.isHintEnabled(Interpolator.STEPS)) {
+      if (interpolator.steps() > 0) {
         context().pushStyle();
         int count = 0;
         float goal = 0.0f;
         for (Node node : path) {
           if (count >= goal) {
-            goal += Interpolator.maxSteps / ((float) interpolator.steps() + 1);
-            if (count % Interpolator.maxSteps != 0) {
+            goal += Node.maxSteps / ((float) interpolator.steps() + 1);
+            if (count % Node.maxSteps != 0) {
               _matrixHandler.pushMatrix();
               _matrixHandler.applyTransformation(node);
               _displayFrontHint(node);
@@ -1342,6 +1302,7 @@ public class Scene extends Graph {
         }
         context().popStyle();
       }
+      // */
     }
   }
 

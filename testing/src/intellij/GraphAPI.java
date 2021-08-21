@@ -60,7 +60,7 @@ public class GraphAPI extends PApplet {
     scene.randomize(n5);
 
     // cyan
-    detached = Node.detach(n3);
+    detached = n3.detach();
     detached.setShape(shape(color(0, 255, 255)));
     //scene.randomize(detached);
   }

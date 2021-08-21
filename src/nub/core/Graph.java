@@ -99,7 +99,7 @@ import java.util.function.Consumer;
  * {@link TimingHandler} wrapper functions, such as {@link TimingHandler#registerTask(Task)}
  * are provided for convenience.
  * <p>
- * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
+ * A default interpolator may perform several {@link #eye()} interpolations
  * such as {@link #fit(float)}, {@link #fit(int, int, int, int)}, {@link #fit(Node)} and {@link #fit(Node, float)}.
  * Refer to the {@link Interpolator} documentation for details.
  * <h1>5. Visual hints</h2>
@@ -990,10 +990,6 @@ public class Graph {
     }
     _eye = eye;
     _eye._frustumGraphs.add(this);
-    if (_interpolator == null)
-      _interpolator = new Interpolator(_eye);
-    else
-      _interpolator.setNode(_eye);
     _modified();
   }
 
@@ -1733,14 +1729,6 @@ public class Graph {
   }
 
   /**
-   * Returns the {@link #eye()} {@link Interpolator} used by {@link #fit(float)},
-   * {@link #fit(int, int, int, int)}, {@link #fit(Node)}, etc.
-   */
-  public Interpolator interpolator() {
-    return _interpolator;
-  }
-
-  /**
    * Convenience function that simply calls {@code fit(node, 0)}.
    *
    * @see #fit(Node, float)
@@ -1777,15 +1765,14 @@ public class Graph {
    */
   public void fit(Node node, float duration) {
     if (duration <= 0) {
-      eye().setWorldPosition(node);
-      eye().setWorldOrientation(node);
-      eye().setWorldMagnitude(node);
+      eye().set(node);
     } else {
-      _interpolator.reset();
-      _interpolator.clear();
-      _interpolator.addKeyFrame(eye().detach());
-      _interpolator.addKeyFrame(node, duration);
-      _interpolator.run();
+      // TODO reimplement me!
+      eye()._interpolator.reset();
+      eye()._interpolator.clear();
+      eye()._interpolator.addKeyFrame(eye().detach());
+      eye()._interpolator.addKeyFrame(node, duration);
+      eye()._interpolator.run();
     }
   }
 
@@ -1874,15 +1861,16 @@ public class Graph {
     if (duration <= 0)
       fit(center, radius);
     else {
-      _interpolator.reset();
-      _interpolator.clear();
+      // TODO reimplement me!
+      eye()._interpolator.reset();
+      eye()._interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
-      _interpolator.addKeyFrame(eye().detach());
+      eye()._interpolator.addKeyFrame(eye().detach());
       fit(center, radius);
-      _interpolator.addKeyFrame(eye().detach(), duration);
+      eye()._interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.run();
+      eye()._interpolator.run();
     }
   }
 
@@ -1961,15 +1949,16 @@ public class Graph {
     if (duration <= 0)
       fitFOV();
     else {
-      _interpolator.reset();
-      _interpolator.clear();
+      // TODO reimplement me!
+      eye()._interpolator.reset();
+      eye()._interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
-      _interpolator.addKeyFrame(eye().detach());
+      eye()._interpolator.addKeyFrame(eye().detach());
       fitFOV();
-      _interpolator.addKeyFrame(eye().detach(), duration);
+      eye()._interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.run();
+      eye()._interpolator.run();
     }
   }
 
@@ -2043,15 +2032,16 @@ public class Graph {
     if (duration <= 0)
       fit(corner1, corner2);
     else {
-      _interpolator.reset();
-      _interpolator.clear();
+      // TODO reimplement me!
+      eye()._interpolator.reset();
+      eye()._interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
-      _interpolator.addKeyFrame(eye().detach());
+      eye()._interpolator.addKeyFrame(eye().detach());
       fit(corner1, corner2);
-      _interpolator.addKeyFrame(eye().detach(), duration);
+      eye()._interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.run();
+      eye()._interpolator.run();
     }
   }
 
@@ -2111,15 +2101,16 @@ public class Graph {
     if (duration <= 0)
       fit(x, y, width, height);
     else {
-      _interpolator.reset();
-      _interpolator.clear();
+      // TODO reimplement me!
+      eye()._interpolator.reset();
+      eye()._interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
-      _interpolator.addKeyFrame(eye().detach());
+      eye()._interpolator.addKeyFrame(eye().detach());
       fit(x, y, width, height);
-      _interpolator.addKeyFrame(eye().detach(), duration);
+      eye()._interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.run();
+      eye()._interpolator.run();
     }
   }
 
@@ -4448,18 +4439,18 @@ public class Graph {
   /**
    * Used to display the interpolator in {@link #_displayHint()}.
    */
-  protected int _splineStroke(Interpolator interpolator) {
+  protected int _splineStroke(Node interpolator) {
     return interpolator._splineStroke;
   }
 
   /**
    * Used to display the interpolator in {@link #_displayHint()}.
    */
-  protected int _splineWeight(Interpolator interpolator) {
+  protected int _splineWeight(Node interpolator) {
     return interpolator._splineWeight;
   }
 
-  protected List<Node> _path(Interpolator interpolator) {
-    return interpolator._path();
+  protected List<Node> _path(Node interpolator) {
+    return interpolator._interpolator._path();
   }
 }

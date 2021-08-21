@@ -46,12 +46,6 @@ import java.util.ListIterator;
  * containing 10 keyframes (see {@link #addKeyFrame(Node)}). The interpolation is
  * also run (see {@link #run()}). The interpolation is stopped when {@link #time()} is
  * greater than the {@link #lastTime()} (unless {@link #enableRecurrence()} is called).
- * <p>
- * The interpolator visual representation may be configured using the following hints:
- * {@link #SPLINE} and {@link #STEPS}. See {@link #hint()},
- * {@link #configHint(int, Object...)} {@link #enableHint(int)},
- * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
- * and {@link #resetHint()}.
  */
 class Interpolator {
   /**
@@ -151,7 +145,6 @@ class Interpolator {
   // Attention: We should go like this: protected Map<Float, Node> _list;
   // but Java doesn't allow to iterate backwards a map
   protected List<KeyFrame> _list;
-  public static int maxSteps = 30;
   protected ListIterator<KeyFrame> _backwards;
   protected ListIterator<KeyFrame> _forwards;
   protected List<Node> _path;
@@ -174,15 +167,6 @@ class Interpolator {
   protected boolean _splineCacheIsValid;
   protected Vector _vector1, _vector2;
 
-  // Visual hint
-  protected int _mask;
-  public final static int SPLINE = 1 << 0;
-  public final static int STEPS = 1 << 1;
-  protected int _splineStroke;
-  protected int _splineWeight;
-  protected int _steps;
-  protected int _stepsHint;
-
   /**
    * Creates an interpolator, with {@code node} as associated {@link #node()}.
    * <p>
@@ -204,23 +188,6 @@ class Interpolator {
     _splineCacheIsValid = false;
     _backwards = _list.listIterator();
     _forwards = _list.listIterator();
-    // hints
-    // magenta (color(255, 0, 255)) encoded as a processing int rgb color
-    _splineStroke = -65281;
-    _splineWeight = 3;
-    _steps = 3;
-
-    // hack (refer to Node.copy())
-    if (node().isHintEnabled(Node.SHAPE) && node()._imrShape != null || node()._rmrShape != null) {
-      //if (node()._imrShape != null || node()._rmrShape != null) {
-      _stepsHint = Node.SHAPE;
-    } else {
-      if (node().isEye()) {
-        _stepsHint = Node.CAMERA;
-      } else {
-        _stepsHint = Node.AXES;
-      }
-    }
   }
 
   protected Interpolator(Interpolator other) {
@@ -243,11 +210,6 @@ class Interpolator {
     this._splineCacheIsValid = false;
     this._backwards = _list.listIterator();
     this._forwards = _list.listIterator();
-    // hints
-    this._splineStroke = other._splineStroke;
-    this._splineWeight = other._splineWeight;
-    this._steps = other._steps;
-    this._stepsHint = other._stepsHint;
   }
 
   /**
@@ -325,7 +287,7 @@ class Interpolator {
    * {@link #firstTime()} or {@link #lastTime()}, unless {@link #isRecurrent()}
    * is {@code true}.
    *
-   * @see #run(int, float)
+   * @see #run(float, int)
    * @see #time()
    */
   protected void _execute() {
@@ -369,7 +331,7 @@ class Interpolator {
    * Same as {@code task().run()}.
    *
    * @see Task#run()
-   * @see #run(int, float)
+   * @see #run(float, int)
    * @see #run(float)
    */
   public void run() {
@@ -377,21 +339,40 @@ class Interpolator {
   }
 
   /**
-   * Sets the speed ({@link #setSpeed(float)}) and then call {@code task().run()}.
+   * Sets the time (see {@link #setTime(float)}) and then call {@code task().run()}.
    *
    * @see #run()
-   * @see #run(int, float)
+   * @see #run(float, int)
    */
+  public void run(float time) {
+    setTime(time);
+    run();
+  }
+
+  /*
   public void run(float speed) {
     setSpeed(speed);
     _task.run();
+  }
+   */
+
+  /**
+   * Sets the speed (see {@link #setSpeed(float)}) and then call {@code task().run(period)}.
+   *
+   * @see #run()
+   * @see #run(float, int)
+   */
+  public void run(float speed, int period) {
+    setSpeed(speed);
+    _task.run(period);
   }
 
   /**
    * Starts the interpolation process.
    * <p>
-   * A task is started which will update the {@link #node()}'s position,
-   * orientation and magnitude at the current {@link #time()}.
+   * A task is started at {@code time } (see {@link #setTime(float)}) which
+   * will update the {@link #node()}'s position, orientation and magnitude
+   * at the current {@link #time()}.
    * <p>
    * If {@link #time()} is larger than {@link #lastTime()},
    * {@link #time()} is reset to {@link #firstTime()} before interpolation
@@ -410,7 +391,8 @@ class Interpolator {
    * @see #run()
    * @see #run(float)
    */
-  public void run(int period, float speed) {
+  public void run(float time, float speed, int period) {
+    setTime(time);
     setSpeed(speed);
     _task.run(period);
   }
@@ -509,12 +491,12 @@ class Interpolator {
    * <p>
    * When {@code false} (default), the interpolation stops when
    * {@link #time()} reaches {@link #firstTime()} (with negative
-   * {@code speed} which is set with {@link #run(int, float)}) or
+   * {@code speed} which is set with {@link #run(float, int)}) or
    * {@link #lastTime()}.
    * <p>
    * {@link #time()} is otherwise reset to {@link #firstTime()} (+
    * {@link #time()} - {@link #lastTime()}) (and inversely for negative
-   * {@code speed} which is set with {@link #run(int, float)}) and
+   * {@code speed} which is set with {@link #run(float, int)}) and
    * interpolation continues.
    */
   public boolean isRecurrent() {
@@ -598,8 +580,7 @@ class Interpolator {
    */
   public void addKeyFrame(int hint, float time) {
     Node node = node().detach();
-    node._mask = hint;
-    node.setShape(node());
+    node._setHint(node(), hint);
     addKeyFrame(node, time);
   }
 
@@ -616,8 +597,7 @@ class Interpolator {
   }
 
   /**
-   * Appends a new keyframe which will display the node {@code hint} when the interpolator
-   * {@link #SPLINE} hint is enabled, {@code time} seconds after the previously added one.
+   * Appends a new keyframe {@code time} seconds after the previously added one.
    * <p>
    * Note that when {@code node} is modified, the interpolator path is updated accordingly.
    * This allows for dynamic paths, where keyframes can be edited, even during the
@@ -825,23 +805,13 @@ class Interpolator {
           pvec1 = Vector.subtract(pvec1, keyFrames[2]._tangentVector());
           Vector pvec2 = Vector.add(Vector.multiply(pdiff, (-2.0f)), keyFrames[1]._tangentVector());
           pvec2 = Vector.add(pvec2, keyFrames[2]._tangentVector());
-          for (int step = 0; step < maxSteps; ++step) {
-            float alpha = step / (float) maxSteps;
+          for (int step = 0; step < Node.maxSteps; ++step) {
+            float alpha = step / (float) Node.maxSteps;
             Node node = Node.detach(
                 Vector.add(keyFrames[1]._node.worldPosition(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
                 Quaternion.squad(keyFrames[1]._node.worldOrientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.worldOrientation(), alpha),
                 Vector.lerp(keyFrames[1]._node.worldMagnitude(), keyFrames[2]._node.worldMagnitude(), alpha));
-            if (step % Interpolator.maxSteps != 0) {
-              node._mask = _stepsHint;
-              if (node.isHintEnabled(Node.SHAPE) && (node()._imrShape != null || node()._rmrShape != null)) {
-                node.setShape(node());
-              }
-            }
-            node._torusFaces = node()._torusFaces;
-            node._torusColor = node()._torusColor;
-            node._bullsEyeStroke = node()._bullsEyeStroke;
-            node._cameraStroke = node()._cameraStroke;
-            node._axesLength = node()._axesLength;
+            node._setHint(node(), node()._keyframesMask);
             _path.add(node);
           }
           // Shift
@@ -905,194 +875,5 @@ class Interpolator {
       _pathIsValid = false;
       _splineCacheIsValid = false;
     }
-  }
-
-  /**
-   * Returns whether or not all single visual hints encoded in the bitwise-or
-   * {@code hint} mask are enable or not.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #resetHint()
-   */
-  public boolean isHintEnabled(int hint) {
-    return ~(_mask | ~hint) == 0;
-  }
-
-  /**
-   * Returns the current visual hint mask. The mask is a bitwise-or of the following
-   * single visual hints available the interpolator:
-   * <p>
-   * <ol>
-   * <li>{@link #SPLINE} which displays a Catmull-Rom spline having the key-frames
-   * as its control points.</li>
-   * <li>{@link #STEPS} which defines what to draw between consecutive key-frames.</li>
-   * </ol>
-   * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
-   * calling either {@link Graph#render(Node)} or {@link Graph#render()}.
-   * Use {@link #configHint(int, Object...)} to configure the hint different visual aspects.
-   *
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   * @see #resetHint()
-   */
-  public int hint() {
-    return this._mask;
-  }
-
-  /**
-   * Resets the current {@link #hint()}, i.e., disables all single
-   * visual hints available for the node.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  public void resetHint() {
-    _mask = 0;
-  }
-
-  /**
-   * Disables all the single visual hints encoded in the bitwise-or {@code hint} mask.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #resetHint()
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  public void disableHint(int hint) {
-    _mask &= ~hint;
-  }
-
-  /**
-   * Calls {@link #enableHint(int)} followed by {@link #configHint(int, Object...)}.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #resetHint()
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  public void enableHint(int hint, Object... params) {
-    enableHint(hint);
-    configHint(hint, params);
-  }
-
-  /**
-   * Enables all single visual hints encoded in the bitwise-or {@code hint} mask.
-   *
-   * @see #hint()
-   * @see #disableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #resetHint()
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  public void enableHint(int hint) {
-    _mask |= hint;
-  }
-
-  /**
-   * Toggles all single visual hints encoded in the bitwise-or {@code hint} mask.
-   *
-   * @see #hint()
-   * @see #disableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #resetHint()
-   * @see #enableHint(int)
-   * @see #isHintEnabled(int)
-   */
-  public void toggleHint(int hint) {
-    _mask ^= hint;
-  }
-
-  /**
-   * Configures the hint using varargs as follows:
-   * <p>
-   * <ol>
-   * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke)}.</li>
-   * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke, splineWeight)}.</li>
-   * <li>{@link #STEPS} hint: {@code configHint(Interpolator.STEPS, hint)}.</li>
-   * </ol>
-   * Note that the {@code splineStroke} is a color {@code int} var;{@code splineWeight}
-   * is a stroke weight int var; and, {@code hint} is a node {@link Node#hint()} defining
-   * what to draw between two consecutives key-frames. See also {@link #setSteps(int)}.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   * @see #resetHint()
-   */
-  public void configHint(int hint, Object... params) {
-    switch (params.length) {
-      case 1:
-        if (Graph.isNumInstance(params[0])) {
-          if (hint == SPLINE) {
-            _splineStroke = Graph.castToInt(params[0]);
-            return;
-          }
-          if (hint == STEPS) {
-             _stepsHint = Graph.castToInt(params[0]);
-            return;
-          }
-        }
-        break;
-      case 2:
-        if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
-          if (hint == SPLINE) {
-            _splineStroke = Graph.castToInt(params[0]);
-            _splineWeight = Graph.castToInt(params[1]);
-            return;
-          }
-        }
-        break;
-    }
-    System.out.println("Warning: some params in Interpolator.configHint(hint, params) couldn't be parsed!");
-  }
-
-  /**
-   * Returns the number of steps between two consecutive key-frames
-   * to be drawn by the interpolator hint. Sets this value with {@link #setSteps(int)}.
-   *
-   * @see #hint()
-   */
-  public int steps() {
-    return _steps;
-  }
-
-  /**
-   * Sets the number of steps between two consecutive key-frames to be drawn
-   * by the interpolator hint.
-   *
-   * @see #steps()
-   * @see #hint()
-   */
-  public void setSteps(int steps) {
-    if (0 <= steps && steps < maxSteps)
-      _steps = steps;
-    else
-      System.out.println("Warning: spline steps should be in [0..maxSteps-1]. Nothing done!");
   }
 }

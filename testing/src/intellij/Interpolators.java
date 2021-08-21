@@ -1,6 +1,5 @@
 package intellij;
 
-import nub.core.Interpolator;
 import nub.core.Node;
 import nub.processing.Scene;
 import nub.timing.Task;
@@ -14,7 +13,6 @@ import processing.event.MouseEvent;
  */
 public class Interpolators extends PApplet {
   Scene scene;
-  Interpolator shapeInterpolator, eyeInterpolator;
   Node shape;
 
   //Choose P3D or P2D
@@ -40,26 +38,24 @@ public class Interpolators extends PApplet {
     shape = new Node(pshape);
     shape.enableHint(Node.AXES);
     shape.enableHint(Node.BULLSEYE);
+    shape.enableHint(Node.KEYFRAMES);
     shape.configHint(Node.BULLSEYE, color(255, 0, 0));
     shape.setBullsEyeSize(50);
 
-    shapeInterpolator = new Interpolator(shape);
-    shapeInterpolator.configHint(Interpolator.SPLINE, color(255));
-    shapeInterpolator.enableRecurrence();
+    //shapeInterpolator.configHint(Interpolator.SPLINE, color(255));
     // Create an initial shape interpolator path
     int count = (int) random(4, 10);
     count = 5;
     for (int i = 0; i < count; i++) {
-      shapeInterpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+      shape.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
       //shapeInterpolator.addKeyFrame(scene.randomNode());
     }
     // decide what to reproduce along path
     //shapeInterpolator.configHint(Interpolator.STEPS, Node.AXES);
-    shapeInterpolator.setSteps(1);
-    shapeInterpolator.run();
+    //shapeInterpolator.setSteps(1);
+    shape.animate();
 
-    eyeInterpolator = new Interpolator(scene.eye());
-    eyeInterpolator.configHint(Interpolator.SPLINE, color(255, 255, 0));
+    //eyeInterpolator.configHint(Interpolator.SPLINE, color(255, 255, 0));
 
     scene.enableHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(0, 255, 0));
@@ -101,21 +97,19 @@ public class Interpolators extends PApplet {
       println(scene.eye().worldMagnitude());
     }
     if (key == ' ') {
-      shapeInterpolator.toggleHint(Interpolator.SPLINE /* | Interpolator.STEPS */);
-      eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
+      //shapeInterpolator.toggleHint(Interpolator.SPLINE /* | Interpolator.STEPS */);
+      //eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
     }
     if (key == 'r') {
-      shapeInterpolator.removeKeyFrame(3);
+      shape.removeKeyFrame(3);
     }
     if (key == 'p') {
-      shapeInterpolator.toggle();
-    }
-    if (key == 'i') {
-      println(shapeInterpolator.keyFrames().size());
+      shape.toggleAnimation();
     }
     if (key == '-' || key == '+') {
-      shapeInterpolator.increaseSpeed(key == '+' ? 0.25f : -0.25f);
+      //shapeInterpolator.increaseSpeed(key == '+' ? 0.25f : -0.25f);
     }
+    /*
     if (key == '1') {
       eyeInterpolator.addKeyFrame();
     }
@@ -123,6 +117,8 @@ public class Interpolators extends PApplet {
       eyeInterpolator.toggle();
     if (key == 'b')
       eyeInterpolator.clear();
+
+     */
     if (key == 's')
       scene.fit(1);
     if (key == 'f')
