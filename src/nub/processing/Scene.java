@@ -1282,7 +1282,6 @@ public class Scene extends Graph {
         context().endShape();
         context().popStyle();
       }
-      /*
       //if (interpolator.isHintEnabled(Interpolator.STEPS)) {
       if (interpolator.steps() > 0) {
         context().pushStyle();
@@ -1302,7 +1301,6 @@ public class Scene extends Graph {
         }
         context().popStyle();
       }
-      // */
     }
   }
 

@@ -48,6 +48,7 @@ public class Interpolators extends PApplet {
     count = 5;
     for (int i = 0; i < count; i++) {
       shape.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+      shape.setAnimationRecurrence(true);
       //shapeInterpolator.addKeyFrame(scene.randomNode());
     }
     // decide what to reproduce along path

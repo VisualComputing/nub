@@ -325,7 +325,7 @@ public class Node {
     _interpolator = new Interpolator(this);
     _splineStroke = -65281;
     _splineWeight = 3;
-    _steps = 3;
+    _steps = 1;
     _children = new ArrayList<Node>();
     _frustumGraphs = new HashSet<Graph>();
     if (isEye()) {
@@ -3571,5 +3571,13 @@ public class Node {
 
   public void interpolate(float time) {
     _interpolator.interpolate(time);
+  }
+
+  public boolean animationRecurrence() {
+    return _interpolator.isRecurrent();
+  }
+
+  public void setAnimationRecurrence(boolean enable) {
+    _interpolator.enableRecurrence(enable);
   }
 }
