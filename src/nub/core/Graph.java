@@ -4453,4 +4453,8 @@ public class Graph {
   protected List<Node> _path(Node interpolator) {
     return interpolator._interpolator._path();
   }
+
+  protected List<Node> _nonReachableNodes(Node interpolator) {
+    return interpolator._interpolator._nonReachableKeyFrames;
+  }
 }

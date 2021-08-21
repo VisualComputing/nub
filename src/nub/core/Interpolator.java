@@ -148,6 +148,7 @@ class Interpolator {
   protected ListIterator<KeyFrame> _backwards;
   protected ListIterator<KeyFrame> _forwards;
   protected List<Node> _path;
+  protected List<Node> _nonReachableKeyFrames;
 
   // Main node
   protected Node _node;
@@ -176,6 +177,7 @@ class Interpolator {
    */
   public Interpolator(Node node) {
     _list = new ArrayList<KeyFrame>();
+    _nonReachableKeyFrames = new ArrayList<Node>();
     _path = new ArrayList<Node>();
     setNode(node);
     _t = 0.0f;
@@ -196,6 +198,7 @@ class Interpolator {
       KeyFrame keyFrame = element.copy();
       this._list.add(keyFrame);
     }
+    this._nonReachableKeyFrames = new ArrayList<Node>(other._nonReachableKeyFrames);
     this._path = new ArrayList<Node>();
     this.setNode(other.node());
     this._t = other._t;
@@ -348,13 +351,6 @@ class Interpolator {
     setTime(time);
     run();
   }
-
-  /*
-  public void run(float speed) {
-    setSpeed(speed);
-    _task.run();
-  }
-   */
 
   /**
    * Sets the speed (see {@link #setSpeed(float)}) and then call {@code task().run(period)}.
@@ -619,6 +615,8 @@ class Interpolator {
       return;
     if (node == null)
       return;
+    if (!node.isReachable())
+      _nonReachableKeyFrames.add(node);
     _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time));
     _valuesAreValid = false;
     _pathIsValid = false;
@@ -660,6 +658,8 @@ class Interpolator {
       _task.stop();
     }
     _list.remove(index);
+    if (!keyFrame._node.isReachable())
+      this._nonReachableKeyFrames.remove(keyFrame._node);
     setTime(firstTime());
     if (rerun /* && _list.size() > 1 */)
       _task.run();
@@ -679,6 +679,7 @@ class Interpolator {
       Graph.prune(keyFrame._node);
     }
     _list.clear();
+    _nonReachableKeyFrames.clear();
     _pathIsValid = false;
     _valuesAreValid = false;
     _currentKeyFrameValid = false;
@@ -811,7 +812,7 @@ class Interpolator {
                 Vector.add(keyFrames[1]._node.worldPosition(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
                 Quaternion.squad(keyFrames[1]._node.worldOrientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.worldOrientation(), alpha),
                 Vector.lerp(keyFrames[1]._node.worldMagnitude(), keyFrames[2]._node.worldMagnitude(), alpha));
-            node._setHint(node(), node()._keyframesMask);
+            node._setHint(node(), node()._animationMask);
             _path.add(node);
           }
           // Shift

@@ -38,7 +38,7 @@ public class Interpolators extends PApplet {
     shape = new Node(pshape);
     shape.enableHint(Node.AXES);
     shape.enableHint(Node.BULLSEYE);
-    shape.enableHint(Node.KEYFRAMES);
+    shape.enableHint(Node.ANIMATION);
     shape.configHint(Node.BULLSEYE, color(255, 0, 0));
     shape.setBullsEyeSize(50);
 
@@ -47,10 +47,21 @@ public class Interpolators extends PApplet {
     int count = (int) random(4, 10);
     count = 5;
     for (int i = 0; i < count; i++) {
-      shape.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
-      shape.setAnimationRecurrence(true);
-      //shapeInterpolator.addKeyFrame(scene.randomNode());
+      //shape.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+      /*
+      Node node = scene.randomNode();
+      node.enableHint(Node.BULLSEYE);
+      shape.addKeyFrame(node, i % 2 == 1 ? 1 : 4);
+      // */
+      // /*
+      scene.randomize(shape);
+      shape.addKeyFrame(Node.CAMERA, i % 2 == 1 ? 1 : 4);
+      // */
     }
+
+    shape.setAnimationRecurrence(true);
+    shape.resetAnimationHint();
+    shape.enableAnimationHint(Node.AXES);
     // decide what to reproduce along path
     //shapeInterpolator.configHint(Interpolator.STEPS, Node.AXES);
     //shapeInterpolator.setSteps(1);
@@ -93,6 +104,10 @@ public class Interpolators extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == 't') {
+      shape.resetAnimationHint();
+      shape.enableAnimationHint(Node.CAMERA);
+    }
     if (key == 'z') {
       println(scene.fov());
       println(scene.eye().worldMagnitude());

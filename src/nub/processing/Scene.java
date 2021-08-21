@@ -28,7 +28,6 @@ import processing.opengl.*;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -1017,13 +1016,55 @@ public class Scene extends Graph {
       _drawBullsEye(node);
       pg.popStyle();
     }
-    if (node.isHintEnabled(Node.KEYFRAMES)) {
+    if (node.isHintEnabled(Node.ANIMATION)) {
       // TODO draw locally!!!
       pg.pushStyle();
       _matrixHandler.pushMatrix();
       _bind();
       _drawSpline(node);
       _matrixHandler.popMatrix();
+      pg.popStyle();
+    }
+  }
+
+  public void _displayAnimationHint(Node node) {
+    PGraphics pg = context();
+    if (node.isAnimationHintEnabled(Node.SHAPE)) {
+      pg.pushStyle();
+      if (_rmrShape(node) != null) {
+        pg.shapeMode(pg.shapeMode);
+        pg.shape(_rmrShape(node));
+      }
+      if (_imrShape(node) != null) {
+        _imrShape(node).accept(pg);
+      }
+      pg.popStyle();
+    }
+    if (node.isAnimationHintEnabled(Node.TORUS)) {
+      pg.pushStyle();
+      pg.colorMode(PApplet.RGB, 255);
+      pg.fill(_torusColor(node));
+      drawTorusSolenoid(pg, _torusFaces(node), 5);
+      pg.popStyle();
+    }
+    if (node.isAnimationHintEnabled(Node.AXES)) {
+      pg.pushStyle();
+      drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
+      pg.popStyle();
+    }
+    if (node.isAnimationHintEnabled(Node.CAMERA)) {
+      pg.pushStyle();
+      pg.colorMode(PApplet.RGB, 255);
+      pg.stroke(_cameraStroke(node));
+      pg.fill(_cameraStroke(node));
+      _drawEye(pg, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
+      pg.popStyle();
+    }
+    if (node.isAnimationHintEnabled(Node.BULLSEYE)) {
+      pg.pushStyle();
+      pg.colorMode(PApplet.RGB, 255);
+      pg.stroke(_bullsEyeStroke(node));
+      _drawBullsEye(node);
       pg.popStyle();
     }
   }
@@ -1267,7 +1308,6 @@ public class Scene extends Graph {
   protected void _drawSpline(Node interpolator) {
     if (interpolator.hint() != 0) {
       List<Node> path = _path(interpolator);
-      //if (interpolator.isHintEnabled(Interpolator.SPLINE) && path.size() > 1) {
       if (_splineWeight(interpolator) > 0 && path.size() > 1) {
         context().pushStyle();
         context().noFill();
@@ -1282,9 +1322,14 @@ public class Scene extends Graph {
         context().endShape();
         context().popStyle();
       }
-      //if (interpolator.isHintEnabled(Interpolator.STEPS)) {
       if (interpolator.steps() > 0) {
         context().pushStyle();
+        for (Node node : _nonReachableNodes(interpolator)) {
+          _matrixHandler.pushMatrix();
+          _matrixHandler.applyTransformation(node);
+          _displayFrontHint(node);
+          _matrixHandler.popMatrix();
+        }
         int count = 0;
         float goal = 0.0f;
         for (Node node : path) {
@@ -1293,7 +1338,7 @@ public class Scene extends Graph {
             if (count % Node.maxSteps != 0) {
               _matrixHandler.pushMatrix();
               _matrixHandler.applyTransformation(node);
-              _displayFrontHint(node);
+              _displayAnimationHint(node);
               _matrixHandler.popMatrix();
             }
           }

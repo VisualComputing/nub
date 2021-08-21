@@ -169,14 +169,14 @@ public class Node {
   public final static int BOUNDS = 1 << 4;
   public final static int BULLSEYE = 1 << 5;
   public final static int TORUS = 1 << 6;
-  public final static int KEYFRAMES = 1 << 7;
-  public final static int FILTER = 1 << 8;
-  public final static int BONE = 1 << 9;
+  public final static int FILTER = 1 << 7;
+  public final static int BONE = 1 << 8;
+  public final static int ANIMATION = 1 << 9;
   protected float _highlight;
   // Bounds
   protected HashSet<Graph> _frustumGraphs;
   // keyframes
-  protected int _keyframesMask;
+  protected int _animationMask;
   protected int _splineStroke;
   protected int _splineWeight;
   protected int _steps;
@@ -329,9 +329,9 @@ public class Node {
     _children = new ArrayList<Node>();
     _frustumGraphs = new HashSet<Graph>();
     if (isEye()) {
-      _keyframesMask = Node.CAMERA;
+      _animationMask = Node.CAMERA;
     } else {
-      _keyframesMask = Node.AXES;
+      _animationMask = Node.AXES;
     }
     setInteraction(this::interact);
   }
@@ -380,7 +380,7 @@ public class Node {
   public Node(Node reference, Consumer<processing.core.PGraphics> shape, Vector position, Quaternion orientation, float magnitude) {
     this(reference, position, orientation, magnitude);
     setShape(shape);
-    _keyframesMask = Node.SHAPE;
+    _animationMask = Node.SHAPE;
   }
 
   /**
@@ -392,7 +392,7 @@ public class Node {
   public Node(Node reference, processing.core.PShape shape, Vector position, Quaternion orientation, float magnitude) {
     this(reference, position, orientation, magnitude);
     setShape(shape);
-    _keyframesMask = Node.SHAPE;
+    _animationMask = Node.SHAPE;
   }
 
   /**
@@ -469,10 +469,10 @@ public class Node {
   }
 
   protected void _setHint(Node node, int hint) {
-    _mask = hint;
     setShape(node);
     setHUD(node);
     _updateHUD();
+    _mask = hint;
     _torusFaces = node._torusFaces;
     _torusColor = node._torusColor;
     _bullsEyeSize = node._bullsEyeSize;
@@ -483,7 +483,7 @@ public class Node {
     _splineStroke = node._splineStroke;
     _splineWeight = node._splineWeight;
     _steps = node._steps;
-    _keyframesMask = node._keyframesMask;
+    _animationMask = node._animationMask;
   }
 
   /**
@@ -3273,6 +3273,34 @@ public class Node {
     System.out.println("Warning: some params in Node.configHint(hint, params) couldn't be parsed!");
   }
 
+  public boolean isAnimationHintEnabled(int hint) {
+    return ~(_animationMask | ~hint) == 0;
+  }
+
+  public int animationHint() {
+    return this._animationMask;
+  }
+
+  public void resetAnimationHint() {
+    _animationMask = 0;
+    _interpolator._pathIsValid = false;
+  }
+
+  public void disableAnimationHint(int hint) {
+    _animationMask &= ~hint;
+    _interpolator._pathIsValid = false;
+  }
+
+  public void enableAnimationHint(int hint) {
+    _animationMask |= hint;
+    _interpolator._pathIsValid = false;
+  }
+
+  public void toggleAnimationHint(int hint) {
+    _animationMask ^= hint;
+    _interpolator._pathIsValid = false;
+  }
+
   /**
    * Returns whether or not this node is some graph {@link Graph#eye()}.
    */
@@ -3513,21 +3541,9 @@ public class Node {
     _interpolator.run();
   }
 
-  /*
-  public void animate(float time) {
-    _interpolator.run(time);
-  }
-  // */
-
   public void animate(float speed, int period) {
     _interpolator.run(speed, period);
   }
-
-  /*
-  public void animate(float time, float speed, int period) {
-    _interpolator.run(time, speed, period);
-  }
-  // */
 
   public void resetAnimation() {
     _interpolator.reset();
