@@ -1006,6 +1006,7 @@ public class Graph {
     }
     _eye = eye;
     _eye._frustumGraphs.add(this);
+    _eye._registerTasks();
     _modified();
   }
 
