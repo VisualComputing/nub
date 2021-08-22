@@ -55,7 +55,7 @@ public class Interpolators extends PApplet {
       // */
       // /*
       scene.randomize(shape);
-      shape.addKeyFrame(Node.CAMERA, i % 2 == 1 ? 1 : 4);
+      shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1 : 4);
       // */
     }
 
@@ -113,6 +113,7 @@ public class Interpolators extends PApplet {
       println(scene.eye().worldMagnitude());
     }
     if (key == ' ') {
+      shape.toggleHint(Node.ANIMATION);
       //shapeInterpolator.toggleHint(Interpolator.SPLINE /* | Interpolator.STEPS */);
       //eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
     }

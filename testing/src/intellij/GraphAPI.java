@@ -24,7 +24,7 @@ World
 
 public class GraphAPI extends PApplet {
   Scene scene;
-  Node n1, n2, n3, n4, n5, detached, cacheRef;
+  Node n1, n2, n3, n4, n5, detached, cacheRef, clone;
 
   boolean _detached;
 
@@ -41,31 +41,33 @@ public class GraphAPI extends PApplet {
     scene.enableHint(Scene.BACKGROUND | Scene.AXES);
 
     // red
-    n1 = new Node(shape(color(255, 0, 0)));
+    n1 = new Node(shape(color(255, 0, 0, 125)));
 
     // green
-    n2 = new Node(n1, shape(color(0, 255, 0)));
+    n2 = new Node(n1, shape(color(0, 255, 0, 125)));
     scene.randomize(n2);
     n2.scale(0.5f);
 
     // blue
-    n3 = new Node(n1, shape(color(0, 0, 255)));
+    n3 = new Node(n1, shape(color(0, 0, 255, 125)));
     scene.randomize(n3);
 
     // yellow
-    n4 = new Node(n2, shape(color(255, 255, 0)));
+    n4 = new Node(n2, shape(color(255, 255, 0, 125)));
     scene.randomize(n4);
 
     // magenta
-    n5 = new Node(n4, shape(color(255, 0, 255)));
+    n5 = new Node(n4, shape(color(255, 0, 255, 125)));
     scene.randomize(n5);
 
+    /*
     // cyan
     detached = new Node();
     Graph.prune(detached);
     detached.set(n3);
-    detached.setShape(shape(color(0, 255, 255)));
+    detached.setShape(shape(color(0, 255, 255, 125)));
     //scene.randomize(detached);
+     */
   }
 
   PShape shape(int c) {
@@ -79,6 +81,26 @@ public class GraphAPI extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == 'l') {
+      println("n5: " + n5.id());
+      clone = n5.copy();
+      //clone.resetReference();
+      //clone.setReference(n4);
+      println("n5: " + n5.id() + " clone: " + clone.id());
+      //if (n5.reference() == n4 && clone.reference() == n4)
+        //println("win");
+      clone.resetHint();
+      clone.enableHint(Node.TORUS);
+      n5.resetHint();
+      n5.enableHint(Node.AXES);
+    }
+    if (key == 'v') {
+      if (scene.node() == n5)
+        println("n5");
+      if (scene.node() == clone)
+        println("clone");
+    }
+    /*
     if (key == 'a') {
       println(n4.toString());
     }
@@ -124,6 +146,7 @@ public class GraphAPI extends PApplet {
         println("yes");
       else
         println("no");
+    // */
   }
 
   @Override

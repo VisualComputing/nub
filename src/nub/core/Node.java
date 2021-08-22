@@ -457,15 +457,21 @@ public class Node {
    */
   // TODO should keyframes be copied?
   public Node copy() {
-    Node node = isReachable() ? new Node(worldPosition(), worldOrientation(), worldMagnitude()) : _detach();
-    node._setHint(this);
+    return copy(hint());
+  }
+
+  protected Node copy(int hint) {
+    Node node = new Node(reference(), position().copy(), orientation().copy(), magnitude());
+    node._setHint(this, hint);
     return node;
   }
 
+  // TODO discard
   protected void _setHint(Node node) {
     _setHint(node, node._mask);
   }
 
+  // TODO discard
   protected void _setHint(Node node, int hint) {
     setShape(node);
     setHUD(node);
@@ -3123,6 +3129,7 @@ public class Node {
   public void resetHint() {
     _mask = 0;
     _updateHUD();
+    _updateHandledKeyFrames();
   }
 
   /**
@@ -3145,6 +3152,7 @@ public class Node {
   public void disableHint(int hint) {
     _mask &= ~hint;
     _updateHUD();
+    _updateHandledKeyFrames();
   }
 
   /**
@@ -3189,6 +3197,7 @@ public class Node {
   public void enableHint(int hint) {
     _mask |= hint;
     _updateHUD();
+    _updateHandledKeyFrames();
   }
 
   /**
@@ -3211,6 +3220,7 @@ public class Node {
   public void toggleHint(int hint) {
     _mask ^= hint;
     _updateHUD();
+    _updateHandledKeyFrames();
   }
 
   /**
@@ -3301,6 +3311,15 @@ public class Node {
         break;
     }
     System.out.println("Warning: some params in Node.configHint(hint, params) couldn't be parsed!");
+  }
+
+  protected void _updateHandledKeyFrames() {
+    for (Interpolator.KeyFrame keyFrame : _interpolator._list) {
+      if (keyFrame._handled) {
+        keyFrame._node.tagging = isHintEnabled(Node.ANIMATION);
+        keyFrame._node.cull = !keyFrame._node.tagging;
+      }
+    }
   }
 
   public boolean isAnimationHintEnabled(int hint) {

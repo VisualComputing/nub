@@ -77,18 +77,22 @@ class Interpolator {
     protected Quaternion _tangentQuaternion;
     protected Vector _tangentVector;
     protected float _time;
+    protected boolean _handled;
     protected Node _node;
 
-    KeyFrame(Node node, float time) {
+    KeyFrame(Node node, float time, boolean handled) {
       _node = node;
       _time = time;
+      _handled = handled;
     }
 
+    // TODO rethink
     protected KeyFrame(KeyFrame other) {
       this._time = other._time;
       this._node = other._node.copy();
     }
 
+    // TODO rethink
     public KeyFrame copy() {
       return new KeyFrame(this);
     }
@@ -96,6 +100,7 @@ class Interpolator {
     /**
      * Returns the cache {@code _tangentVector} world-view. Good for drawing. See {@link #_updatePath()}.
      */
+    // TODO remove this one
     protected Vector _tangentVector() {
       return node().reference() == null ? _tangentVector : node().reference().worldDisplacement(_tangentVector);
     }
@@ -103,6 +108,7 @@ class Interpolator {
     /**
      * Returns the cache {@code _tangentQuaternion} world-view. Good for drawing. See {@link #_updatePath()}.
      */
+    // TODO remove this one
     protected Quaternion _tangentQuaternion() {
       return node().reference() == null ? _tangentQuaternion : node().reference().worldDisplacement(_tangentQuaternion);
     }
@@ -148,7 +154,6 @@ class Interpolator {
   protected ListIterator<KeyFrame> _backwards;
   protected ListIterator<KeyFrame> _forwards;
   protected List<Node> _path;
-  protected List<Node> _nonReachableKeyFrames;
 
   // Main node
   protected Node _node;
@@ -177,7 +182,6 @@ class Interpolator {
    */
   public Interpolator(Node node) {
     _list = new ArrayList<KeyFrame>();
-    _nonReachableKeyFrames = new ArrayList<Node>();
     _path = new ArrayList<Node>();
     setNode(node);
     _t = 0.0f;
@@ -198,7 +202,6 @@ class Interpolator {
       KeyFrame keyFrame = element.copy();
       this._list.add(keyFrame);
     }
-    this._nonReachableKeyFrames = new ArrayList<Node>(other._nonReachableKeyFrames);
     this._path = new ArrayList<Node>();
     this.setNode(other.node());
     this._t = other._t;
@@ -575,9 +578,8 @@ class Interpolator {
    * Adds a {@link #node()} detached instance as a keyframe at {@code time} and a mask {@code hint}.
    */
   public void addKeyFrame(int hint, float time) {
-    Node node = node()._detach();
-    node._setHint(node(), hint);
-    addKeyFrame(node, time);
+    Node node = node().copy(hint);
+    addKeyFrame(node, time, true);
   }
 
   /**
@@ -608,6 +610,10 @@ class Interpolator {
    * @see #addKeyFrame()
    */
   public void addKeyFrame(Node node, float time) {
+    addKeyFrame(node, time, false);
+  }
+
+  protected void addKeyFrame(Node node, float time, boolean handled) {
     if (_list.size() == 0) {
       if (time < 0)
         return;
@@ -615,9 +621,11 @@ class Interpolator {
       return;
     if (node == null)
       return;
-    if (!node.isReachable())
-      _nonReachableKeyFrames.add(node);
-    _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time));
+    _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time, handled));
+    if (handled) {
+      node.tagging = node().isHintEnabled(Node.ANIMATION);
+      node.cull = !node.tagging;
+    }
     _valuesAreValid = false;
     _pathIsValid = false;
     _currentKeyFrameValid = false;
@@ -658,8 +666,6 @@ class Interpolator {
       _task.stop();
     }
     _list.remove(index);
-    if (!keyFrame._node.isReachable())
-      this._nonReachableKeyFrames.remove(keyFrame._node);
     setTime(firstTime());
     if (rerun /* && _list.size() > 1 */)
       _task.run();
@@ -679,7 +685,6 @@ class Interpolator {
       Graph.prune(keyFrame._node);
     }
     _list.clear();
-    _nonReachableKeyFrames.clear();
     _pathIsValid = false;
     _valuesAreValid = false;
     _currentKeyFrameValid = false;

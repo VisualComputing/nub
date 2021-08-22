@@ -1018,6 +1018,8 @@ public class Scene extends Graph {
       _drawBullsEye(node);
       pg.popStyle();
     }
+    /*
+    // TODO discard this
     if (node.isHintEnabled(Node.ANIMATION)) {
       // TODO draw locally!!!
       pg.pushStyle();
@@ -1027,6 +1029,7 @@ public class Scene extends Graph {
       _matrixHandler.popMatrix();
       pg.popStyle();
     }
+    // */
   }
 
   public void _displayAnimationHint(Node node) {
@@ -1307,6 +1310,8 @@ public class Scene extends Graph {
    * {@code scale} controls the scaling of the eye and axes drawing. A value of
    * {@link #radius()} should give good results.
    */
+  /*
+  // TODO discard this
   protected void _drawSpline(Node interpolator) {
     if (interpolator.hint() != 0) {
       List<Node> path = _path(interpolator);
@@ -1326,12 +1331,12 @@ public class Scene extends Graph {
       }
       if (interpolator.steps() > 0) {
         context().pushStyle();
-        for (Node node : _nonReachableNodes(interpolator)) {
-          _matrixHandler.pushMatrix();
-          _matrixHandler.applyTransformation(node);
-          _displayFrontHint(node);
-          _matrixHandler.popMatrix();
-        }
+        //for (Node node : _nonReachableNodes(interpolator)) {
+        //  _matrixHandler.pushMatrix();
+        //  _matrixHandler.applyTransformation(node);
+        //  _displayFrontHint(node);
+        //  _matrixHandler.popMatrix();
+        //}
         int count = 0;
         float goal = 0.0f;
         for (Node node : path) {
@@ -1350,6 +1355,7 @@ public class Scene extends Graph {
       }
     }
   }
+  // */
 
   /**
    * Internal use.
