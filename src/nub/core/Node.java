@@ -128,6 +128,7 @@ public class Node {
   protected Quaternion _orientation;
   protected Node _reference;
   protected long _lastUpdate;
+  protected boolean _reachable;
 
   protected Interpolator _interpolator;
 
@@ -315,8 +316,10 @@ public class Node {
     // TODO comment
     _reference = reference;
     _restorePath(reference(), this);
-    if (reference == null || reference.isReachable())
+    if (reference == null || reference.isReachable()) {
       _registerTasks();
+      _reachable = true;
+    }
     // hack
     Method method = null;
     try {
@@ -650,6 +653,7 @@ public class Node {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
         descendant._registerTasks();
+        descendant._reachable = true;
       }
     }
     if (reference() != null) {
@@ -734,6 +738,7 @@ public class Node {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
         descendant._unregisterTasks();
+        descendant._reachable = false;
       }
     }
     // 6.2. !prevReachable -> nowReachable
@@ -741,6 +746,7 @@ public class Node {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
         descendant._registerTasks();
+        descendant._reachable = true;
       }
     }
     // 7. restore cache prev state (step 2. above)
@@ -757,7 +763,7 @@ public class Node {
    * @see Graph#prune(Node)
    */
   public boolean isReachable() {
-    return Graph.TimingHandler.isTaskRegistered(_translationTask);
+    return _reachable;
   }
   
   protected void _registerTasks() {
@@ -797,6 +803,9 @@ public class Node {
   }
 
   protected void _unregisterTasks() {
+    if (isEye()) {
+      return;
+    }
     TimingHandler.unregisterTask(_translationTask);
     TimingHandler.unregisterTask(_rotationTask);
     TimingHandler.unregisterTask(_orbitTask);

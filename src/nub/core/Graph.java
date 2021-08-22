@@ -852,6 +852,7 @@ public class Graph {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
         descendant._unregisterTasks();
+        descendant._reachable = false;
       }
     }
     if (node.reference() != null) {
