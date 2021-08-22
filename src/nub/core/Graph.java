@@ -839,23 +839,37 @@ public class Graph {
    * Note that all the node inertial tasks are unregistered from the {@link #TimingHandler}.
    * <p>
    * To make all the nodes in the branch reachable again, call {@link Node#setReference(Node)}
-   * on the pruned node.
+   * or {@link Node#resetReference()} on the pruned node.
    *
    * @see #clear()
    * @see Node#setReference(Node)
+   * @see Node#resetReference()
    * @see Node#isReachable()
    */
   public static void prune(Node node) {
+    // 1. Make node and its descendants unreachable
     if (node.isReachable()) {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
         descendant._unregisterTasks();
       }
     }
+    // 2. cache prev state
+    Vector position = position = node.worldPosition().copy();
+    Quaternion orientation = node.worldOrientation().copy();
+    float magnitude = node.worldMagnitude();
     if (node.reference() != null) {
       node.reference()._removeChild(node);
-    } else
+    } else {
       _removeLeadingNode(node);
+    }
+    // 3. nullify reference
+    node._reference = null;
+    // 4. restore cache prev state (step 2. above)
+    node.setWorldPosition(position);
+    node.setWorldOrientation(orientation);
+    node.setWorldMagnitude(magnitude);
+    // note that restoring the cache always call node._modified()
   }
 
   /**

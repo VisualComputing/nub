@@ -643,12 +643,38 @@ public class Node {
   }
 
   /**
-   * Same as {@code setReference(null)}.
+   * Sets {@link #reference()} to the world and make this node reachable
+   * (see {@link #isReachable()}).
    *
    * @see #setReference(Node)
+   * @see Graph#prune(Node) 
    */
   public void resetReference() {
-    setReference(null);
+    // 1. Make node and its descendants reachable
+    if (!isReachable()) {
+      List<Node> branch = Graph.branch(this);
+      for (Node descendant : branch) {
+        descendant._registerTasks();
+      }
+    }
+    if (reference() != null) {
+      // 2. cache prev state
+      Vector position = position = this.worldPosition().copy();
+      Quaternion orientation = this.worldOrientation().copy();
+      float magnitude = this.worldMagnitude();
+      // 3. nullify reference
+      _reference = null;
+      // 4. re-add node to graph
+      Graph._addLeadingNode(this);
+      // 5. restore cache prev state (step 2. above)
+      this.setWorldPosition(position);
+      this.setWorldOrientation(orientation);
+      this.setWorldMagnitude(magnitude);
+      // note that restoring the cache always call _modified()
+    }
+    else {
+      Graph._addLeadingNode(this);
+    }
   }
 
   /**
@@ -671,8 +697,13 @@ public class Node {
    * @see Graph#prune(Node)
    */
   public void setReference(Node node) {
+    // null avoid
+    if (node == null) {
+      System.out.println("setReference to null warning: nothing done! You're looking for resetReference instead");
+      return;
+    }
     // 0. filter
-    if (node != null && node == reference()) {
+    if (node == reference()) {
       System.out.println("Warning: Node reference already set. Nothing done!");
       return;
     }
@@ -686,13 +717,7 @@ public class Node {
     }
     // 1. Determine prev and target states
     boolean prevReachable = isReachable();
-    boolean nowReachable = node == null;
-    if (!prevReachable == nowReachable) {
-      System.out.println("Warning: Resetting the node reference will make it reachable. You may also use detach() and / or Graph.prune");
-    }
-    if (!nowReachable) {
-      nowReachable = node.isReachable();
-    }
+    boolean nowReachable = node.isReachable();
     // 2. cache prev state
     Vector position = position = this.worldPosition().copy();
     Quaternion orientation = this.worldOrientation().copy();
@@ -704,29 +729,30 @@ public class Node {
     else {
       Graph._removeLeadingNode(this);
     }
+    // 4. actually assign reference
     _reference = node;
-    // 4. re-add node to graph
+    // 5. re-add node to graph
     _restorePath(reference(), this);
-    // 5. Propagate state
-    // 5.1. prevReachable -> !nowReachable
+    // 6. Propagate state
+    // 6.1. prevReachable -> !nowReachable
     if (prevReachable && !nowReachable) {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
         descendant._unregisterTasks();
       }
     }
-    // 5.2. !prevReachable -> nowReachable
+    // 6.2. !prevReachable -> nowReachable
     if (!prevReachable && nowReachable) {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
         descendant._registerTasks();
       }
     }
-    // 6. restore cache prev state (step 2. above)
+    // 7. restore cache prev state (step 2. above)
     this.setWorldPosition(position);
     this.setWorldOrientation(orientation);
     this.setWorldMagnitude(magnitude);
-    _modified();
+    // note that restoring the cache always call _modified()
   }
 
   /**
