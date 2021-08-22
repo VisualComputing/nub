@@ -29,11 +29,11 @@ public class Flock extends PApplet {
 
   public void setup() {
     scene = new Scene(this, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), 800);
-    println(scene.fov());
-    println(scene.eye().worldMagnitude());
+    //println(scene.fov());
+    //println(scene.eye().worldMagnitude());
     scene.fit();
-    println(scene.fov());
-    println(scene.eye().worldMagnitude());
+    //println(scene.fov());
+    //println(scene.eye().worldMagnitude());
     // create and fill the list of boids
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
@@ -85,16 +85,19 @@ public class Flock extends PApplet {
   void thirdPerson() {
     scene.eye().setReference(avatar);
     avatar.setWorldMagnitude(scene.eye());
-    scene.fit(avatar, 1);
+    // TODO reimplement it
+    //scene.fit(avatar, 1);
+    scene.fit(avatar);
   }
 
   // Resets the eye
   void resetEye() {
-    // same as: scene.eye().setReference(null);
     scene.eye().resetReference();
     scene.lookAt(scene.center());
     avatar.setWorldMagnitude(1);
-    scene.fit(1);
+    // TODO reimplement it
+    //scene.fit(1);
+    scene.fit();
   }
 
   // picks up a boid avatar, may be null

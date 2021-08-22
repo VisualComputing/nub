@@ -83,7 +83,7 @@ public class Interaction2D extends PApplet {
         shape3.setReference(shape2);
       }
     if (key == 'w') {
-      shape3.setReference(null);
+      shape3.resetReference();
     }
     if (key == 'p') {
       print(scene.screenLocation(shape1.worldPosition()).toString());

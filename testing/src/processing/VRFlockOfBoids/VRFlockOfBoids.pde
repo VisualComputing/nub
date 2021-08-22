@@ -103,7 +103,6 @@ void thirdPerson() {
 
 // Resets the eye
 void resetEye() {
-  // same as: scene.eye().setReference(null);
   scene.eye().resetReference();
   scene.lookAt(scene.center());
   scene.fit(1);

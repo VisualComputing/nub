@@ -119,7 +119,7 @@ public class Node {
    */
   public boolean matches(Node node) {
     if (node == null)
-      node = Node.detach(new Vector(), new Quaternion(), 1);
+      node = Node._detach(new Vector(), new Quaternion(), 1);
     return position().matches(node.position()) && orientation().matches(node.orientation()) && magnitude() == node.magnitude();
   }
 
@@ -274,28 +274,6 @@ public class Node {
    * and the {@link #highlight()} hint magnitude to {@code 0.15}.
    */
   public Node(Node reference, Vector position, Quaternion orientation, float magnitude) {
-    this(position, orientation, magnitude, false);
-    _reference = reference;
-    _restorePath(reference(), this);
-    if (reference == null || reference.isReachable())
-      _registerTasks();
-    // hack
-    Method method = null;
-    try {
-      method = this.getClass().getMethod("graphics", processing.core.PGraphics.class);
-    } catch(NoSuchMethodException e) {
-      System.out.println(e); //print exception object
-    }
-    if (!method.getDeclaringClass().equals(Node.class)) {
-      setShape(this::graphics);
-    }
-  }
-
-  /**
-   * Internally used by both {@link #Node(Node, Vector, Quaternion, float)}
-   * (attached nodes) and {@link #detach(Vector, Quaternion, float)} (detached nodes).
-   */
-  protected Node(Vector position, Quaternion orientation, float magnitude, boolean detachDummy) {
     setPosition(position);
     setOrientation(orientation);
     setMagnitude(magnitude);
@@ -334,6 +312,21 @@ public class Node {
       _animationMask = Node.AXES;
     }
     setInteraction(this::interact);
+    // TODO comment
+    _reference = reference;
+    _restorePath(reference(), this);
+    if (reference == null || reference.isReachable())
+      _registerTasks();
+    // hack
+    Method method = null;
+    try {
+      method = this.getClass().getMethod("graphics", processing.core.PGraphics.class);
+    } catch(NoSuchMethodException e) {
+      System.out.println(e); //print exception object
+    }
+    if (!method.getDeclaringClass().equals(Node.class)) {
+      setShape(this::graphics);
+    }
   }
 
   // From here only Java constructors
@@ -400,16 +393,18 @@ public class Node {
    *
    * @see #copy()
    */
-  public Node detach() {
-    return detach(worldPosition(), worldOrientation(), worldMagnitude());
+  protected Node _detach() {
+    return _detach(worldPosition(), worldOrientation(), worldMagnitude());
   }
 
   /**
    * Returns a detached node (i.e., a shapeless, pruned non-reachable node from the graph, see {@link Graph#prune(Node)})
    * whose {@link #reference()} is {@code null} for the given params. Mostly used internally.
    */
-  public static Node detach(Vector position, Quaternion orientation, float magnitude) {
-    return new Node(position, orientation, magnitude, true);
+  protected static Node _detach(Vector position, Quaternion orientation, float magnitude) {
+    Node node = new Node(position, orientation, magnitude);
+    Graph.prune(node);
+    return node;
   }
 
   /**
@@ -455,11 +450,11 @@ public class Node {
   /**
    * Performs a deep copy of this node and returns it. The newly created node reference is the world.
    *
-   * @see #detach()
+   * @see #_detach()
    */
   // TODO should keyframes be copied?
   public Node copy() {
-    Node node = isReachable() ? new Node(worldPosition(), worldOrientation(), worldMagnitude()) : detach();
+    Node node = isReachable() ? new Node(worldPosition(), worldOrientation(), worldMagnitude()) : _detach();
     node._setHint(this);
     return node;
   }
@@ -647,7 +642,7 @@ public class Node {
    * (see {@link #isReachable()}).
    *
    * @see #setReference(Node)
-   * @see Graph#prune(Node) 
+   * @see Graph#prune(Node)
    */
   public void resetReference() {
     // 1. Make node and its descendants reachable
@@ -1847,7 +1842,7 @@ public class Node {
         }
       }
     }
-    Node old = detach();
+    Node old = _detach();
     vector.set(directions[0][index[0]]);
     float coef = vector.dot(directions[1][index[1]]);
     if (Math.abs(coef) >= threshold) {
@@ -2089,7 +2084,7 @@ public class Node {
    */
   public Matrix worldMatrix() {
     if (reference() != null)
-      return detach().matrix();
+      return _detach().matrix();
     else
       return matrix();
   }
@@ -2125,7 +2120,7 @@ public class Node {
    * @see #set(Node)
    */
   public Matrix viewInverse() {
-    return Node.detach(worldPosition(), worldOrientation(), 1).matrix();
+    return Node._detach(worldPosition(), worldOrientation(), 1).matrix();
   }
 
   /**
@@ -2265,7 +2260,7 @@ public class Node {
    * @see #worldInverse()
    */
   public Node inverse() {
-    Node node = detach(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
+    Node node = _detach(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
     node.setReference(reference());
     return node;
   }
@@ -2285,7 +2280,7 @@ public class Node {
    * @see #inverse()
    */
   public Node worldInverse() {
-    return detach(Vector.multiply(worldOrientation().inverseRotate(worldPosition()), -1), worldOrientation().inverse(), 1 / worldMagnitude());
+    return _detach(Vector.multiply(worldOrientation().inverseRotate(worldPosition()), -1), worldOrientation().inverse(), 1 / worldMagnitude());
   }
 
   // SCALAR CONVERSION

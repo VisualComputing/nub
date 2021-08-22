@@ -1,5 +1,6 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -72,7 +73,10 @@ public class MouseDragInteraction extends PApplet {
     shape2.translate(275, 275, 0);
     shape2.setTranslationFilter(Node.translationAxisFilter, new Object[] { Vector.plusI });
     shape2.setScalingFilter(scalarFilter, new Object[] { (float) height });
-    shape3 = shape1.detach();
+
+    shape3 = new Node();
+    Graph.prune(shape3);
+    shape3.set(shape1);
     scene.randomize(shape3);
     shape3.setShape(shape());
     shape3.setReference(shape2);
@@ -176,7 +180,8 @@ public class MouseDragInteraction extends PApplet {
         shape2.translate(vector, 0);
       }
       else if (scene.node() == null) {
-        Node _node = scene.eye().detach();
+        Node _node = scene.eye().copy();
+        Graph.prune(_node);
         _node.setWorldPosition(scene.center());
         Vector vector = scene.displacement(new Vector(scene.mouseDX(), scene.mouseDY(), 0), _node);
         vector = scene.eye().displacement(vector, _node);

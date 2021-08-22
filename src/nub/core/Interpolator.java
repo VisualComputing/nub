@@ -575,7 +575,7 @@ class Interpolator {
    * Adds a {@link #node()} detached instance as a keyframe at {@code time} and a mask {@code hint}.
    */
   public void addKeyFrame(int hint, float time) {
-    Node node = node().detach();
+    Node node = node()._detach();
     node._setHint(node(), hint);
     addKeyFrame(node, time);
   }
@@ -790,7 +790,7 @@ class Interpolator {
       if (!_valuesAreValid)
         _updateModifiedKeyFrames();
       if (_list.get(0) == _list.get(_list.size() - 1)) {
-        _path.add(Node.detach(_list.get(0)._node.worldPosition(), _list.get(0)._node.worldOrientation(), _list.get(0)._node.worldMagnitude()));
+        _path.add(Node._detach(_list.get(0)._node.worldPosition(), _list.get(0)._node.worldOrientation(), _list.get(0)._node.worldMagnitude()));
       }
       else {
         KeyFrame[] keyFrames = new KeyFrame[4];
@@ -808,7 +808,7 @@ class Interpolator {
           pvec2 = Vector.add(pvec2, keyFrames[2]._tangentVector());
           for (int step = 0; step < Node.maxSteps; ++step) {
             float alpha = step / (float) Node.maxSteps;
-            Node node = Node.detach(
+            Node node = Node._detach(
                 Vector.add(keyFrames[1]._node.worldPosition(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
                 Quaternion.squad(keyFrames[1]._node.worldOrientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.worldOrientation(), alpha),
                 Vector.lerp(keyFrames[1]._node.worldMagnitude(), keyFrames[2]._node.worldMagnitude(), alpha));
@@ -823,7 +823,7 @@ class Interpolator {
           keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         }
         // Add last KeyFrame
-        _path.add(Node.detach(keyFrames[1]._node.worldPosition(), keyFrames[1]._node.worldOrientation(), keyFrames[1]._node.worldMagnitude()));
+        _path.add(Node._detach(keyFrames[1]._node.worldPosition(), keyFrames[1]._node.worldOrientation(), keyFrames[1]._node.worldMagnitude()));
       }
       _pathIsValid = true;
     }

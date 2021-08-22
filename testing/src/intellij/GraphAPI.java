@@ -1,5 +1,6 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
@@ -60,7 +61,9 @@ public class GraphAPI extends PApplet {
     scene.randomize(n5);
 
     // cyan
-    detached = n3.detach();
+    detached = new Node();
+    Graph.prune(detached);
+    detached.set(n3);
     detached.setShape(shape(color(0, 255, 255)));
     //scene.randomize(detached);
   }

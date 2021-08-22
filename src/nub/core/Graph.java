@@ -854,22 +854,23 @@ public class Graph {
         descendant._unregisterTasks();
       }
     }
-    // 2. cache prev state
-    Vector position = position = node.worldPosition().copy();
-    Quaternion orientation = node.worldOrientation().copy();
-    float magnitude = node.worldMagnitude();
     if (node.reference() != null) {
+      // 2. cache prev state
+      Vector position = position = node.worldPosition().copy();
+      Quaternion orientation = node.worldOrientation().copy();
+      float magnitude = node.worldMagnitude();
       node.reference()._removeChild(node);
-    } else {
+      // 3. nullify reference
+      node._reference = null;
+      // 4. restore cache prev state (step 2. above)
+      node.setWorldPosition(position);
+      node.setWorldOrientation(orientation);
+      node.setWorldMagnitude(magnitude);
+      // note that restoring the cache always call node._modified()
+    }
+    else {
       _removeLeadingNode(node);
     }
-    // 3. nullify reference
-    node._reference = null;
-    // 4. restore cache prev state (step 2. above)
-    node.setWorldPosition(position);
-    node.setWorldOrientation(orientation);
-    node.setWorldMagnitude(magnitude);
-    // note that restoring the cache always call node._modified()
   }
 
   /**
@@ -1784,7 +1785,7 @@ public class Graph {
       // TODO reimplement me!
       eye()._interpolator.reset();
       eye()._interpolator.clear();
-      eye()._interpolator.addKeyFrame(eye().detach());
+      eye()._interpolator.addKeyFrame(eye()._detach());
       eye()._interpolator.addKeyFrame(node, duration);
       eye()._interpolator.run();
     }
@@ -1879,10 +1880,10 @@ public class Graph {
       eye()._interpolator.reset();
       eye()._interpolator.clear();
       Node eye = eye();
-      setEye(eye().detach());
-      eye()._interpolator.addKeyFrame(eye().detach());
+      setEye(eye()._detach());
+      eye()._interpolator.addKeyFrame(eye()._detach());
       fit(center, radius);
-      eye()._interpolator.addKeyFrame(eye().detach(), duration);
+      eye()._interpolator.addKeyFrame(eye()._detach(), duration);
       setEye(eye);
       eye()._interpolator.run();
     }
@@ -1967,10 +1968,10 @@ public class Graph {
       eye()._interpolator.reset();
       eye()._interpolator.clear();
       Node eye = eye();
-      setEye(eye().detach());
-      eye()._interpolator.addKeyFrame(eye().detach());
+      setEye(eye()._detach());
+      eye()._interpolator.addKeyFrame(eye()._detach());
       fitFOV();
-      eye()._interpolator.addKeyFrame(eye().detach(), duration);
+      eye()._interpolator.addKeyFrame(eye()._detach(), duration);
       setEye(eye);
       eye()._interpolator.run();
     }
@@ -2050,10 +2051,10 @@ public class Graph {
       eye()._interpolator.reset();
       eye()._interpolator.clear();
       Node eye = eye();
-      setEye(eye().detach());
-      eye()._interpolator.addKeyFrame(eye().detach());
+      setEye(eye()._detach());
+      eye()._interpolator.addKeyFrame(eye()._detach());
       fit(corner1, corner2);
-      eye()._interpolator.addKeyFrame(eye().detach(), duration);
+      eye()._interpolator.addKeyFrame(eye()._detach(), duration);
       setEye(eye);
       eye()._interpolator.run();
     }
@@ -2119,10 +2120,10 @@ public class Graph {
       eye()._interpolator.reset();
       eye()._interpolator.clear();
       Node eye = eye();
-      setEye(eye().detach());
-      eye()._interpolator.addKeyFrame(eye().detach());
+      setEye(eye()._detach());
+      eye()._interpolator.addKeyFrame(eye()._detach());
       fit(x, y, width, height);
-      eye()._interpolator.addKeyFrame(eye().detach(), duration);
+      eye()._interpolator.addKeyFrame(eye()._detach(), duration);
       setEye(eye);
       eye()._interpolator.run();
     }
@@ -3686,7 +3687,7 @@ public class Graph {
    */
   public void shift(Node node, float dx, float dy, float dz, float inertia) {
     if (node == null || node == eye()) {
-      node = eye().detach();
+      node = eye()._detach();
       node.setWorldPosition(center());
       Vector vector = displacement(new Vector(dx, dy, dz), node);
       vector.multiply(-1);
