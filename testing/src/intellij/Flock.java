@@ -86,8 +86,8 @@ public class Flock extends PApplet {
     scene.eye().setReference(avatar);
     avatar.setWorldMagnitude(scene.eye());
     // TODO reimplement it
-    //scene.fit(avatar, 1);
-    scene.fit(avatar);
+    scene.fit(avatar, 1);
+    //scene.fit(avatar);
   }
 
   // Resets the eye
@@ -96,8 +96,8 @@ public class Flock extends PApplet {
     scene.lookAt(scene.center());
     avatar.setWorldMagnitude(1);
     // TODO reimplement it
-    //scene.fit(1);
-    scene.fit();
+    scene.fit(1);
+    //scene.fit();
   }
 
   // picks up a boid avatar, may be null

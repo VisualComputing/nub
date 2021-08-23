@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
- * {@link #prune(Node)}, {@link Node#isReachable()}, {@link #branch(Node)}, and {@link #clear()}.
+ * {@link #detach(Node)}, {@link Node#isReachable()}, {@link #branch(Node)}, and {@link #clear()}.
  * <h2>The eye</h2>
  * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
  * (see {@link #setEye(Node)}). Several functions handle the eye, such as
@@ -776,7 +776,7 @@ public class Graph {
    * All leading nodes are also reachable by the {@link #render()} algorithm for which they are the seeds.
    *
    * @see #nodes()
-   * @see #prune(Node)
+   * @see #detach(Node)
    */
   protected static List<Node> _leadingNodes() {
     return _seeds;
@@ -822,11 +822,11 @@ public class Graph {
   /**
    * Same as {@code for(Node node : _leadingNodes()) pruneBranch(node)}.
    *
-   * @see #prune(Node)
+   * @see #detach(Node)
    */
   public static void clear() {
     for (Node node : _leadingNodes())
-      prune(node);
+      detach(node);
   }
 
   /**
@@ -839,39 +839,72 @@ public class Graph {
    * <p>
    * Note that all the node inertial tasks are unregistered from the {@link #TimingHandler}.
    * <p>
-   * To make all the nodes in the branch reachable again, call {@link Node#setReference(Node)}
-   * or {@link Node#resetReference()} on the pruned node.
+   * Note that there's no means to make the nodes in the branch reachable again.
    *
    * @see #clear()
-   * @see Node#setReference(Node)
-   * @see Node#resetReference()
+   * @see #attach(Node)
+   * @see #detach(Node)
    * @see Node#isReachable()
    */
   public static void prune(Node node) {
-    // 1. Make node and its descendants unreachable
+    if (node.isEye()) {
+      System.out.println("Waning: eye nodes can't be pruned. Nothing done!");
+      return;
+    }
+    detach(node);
+    List<Node> branch = branch(node);
+    for (Node descendant : branch) {
+      descendant._unregisterTasks();
+      descendant._pruned = true;
+    }
+  }
+
+  /**
+   * Detach node from the tree so that it's not reached from the {@link #render()} algorithm.
+   * A call to {@link Node#isReachable()} (including the node descendants) will then return {@code false}.
+   *
+   * @see #attach(Node)
+   * @see #prune(Node)
+   */
+  public static void detach(Node node) {
     if (node.isReachable()) {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
-        descendant._unregisterTasks();
         descendant._reachable = false;
       }
     }
     if (node.reference() != null) {
-      // 2. cache prev state
-      Vector position = position = node.worldPosition().copy();
-      Quaternion orientation = node.worldOrientation().copy();
-      float magnitude = node.worldMagnitude();
       node.reference()._removeChild(node);
-      // 3. nullify reference
-      node._reference = null;
-      // 4. restore cache prev state (step 2. above)
-      node.setWorldPosition(position);
-      node.setWorldOrientation(orientation);
-      node.setWorldMagnitude(magnitude);
-      // note that restoring the cache always call node._modified()
     }
     else {
       _removeLeadingNode(node);
+    }
+  }
+
+  /**
+   * Attaches node to the tree so that it's reached from the {@link #render()} algorithm.
+   * A call to {@link Node#isReachable()} will then return {@code true}.
+   *
+   * @see #detach(Node)
+   * @see #prune(Node)
+   */
+  public static void attach(Node node) {
+    if (node._pruned) {
+      System.out.println("Waning: pruned nodes can't be attached. Nothing done!");
+      return;
+    }
+    if (node.isReachable()) {
+      System.out.println("Waning: no need to restore an already reachable node. Nothing done!");
+      return;
+    }
+    if (node.reference() == null) {
+      Graph._addLeadingNode(node);
+      node._reachable = true;
+    } else {
+      if (!node.reference()._hasChild(node)) {
+        node.reference()._addChild(node);
+        node._reachable = node.reference().isReachable();
+      }
     }
   }
 
@@ -1007,7 +1040,6 @@ public class Graph {
     }
     _eye = eye;
     _eye._frustumGraphs.add(this);
-    _eye._registerTasks();
     _modified();
   }
 
@@ -1788,7 +1820,7 @@ public class Graph {
       // TODO reimplement me!
       eye()._interpolator.reset();
       eye()._interpolator.clear();
-      eye()._interpolator.addKeyFrame(eye()._detach());
+      eye()._interpolator.addKeyFrame(eye().transientCopy());
       eye()._interpolator.addKeyFrame(node, duration);
       eye()._interpolator.run();
     }
@@ -1880,15 +1912,15 @@ public class Graph {
       fit(center, radius);
     else {
       // TODO reimplement me!
-      eye()._interpolator.reset();
-      eye()._interpolator.clear();
       Node eye = eye();
-      setEye(eye()._detach());
-      eye()._interpolator.addKeyFrame(eye()._detach());
+      eye._interpolator.reset();
+      eye._interpolator.clear();
+      setEye(eye().transientCopy());
+      eye._interpolator.addKeyFrame(eye().transientCopy());
       fit(center, radius);
-      eye()._interpolator.addKeyFrame(eye()._detach(), duration);
+      eye._interpolator.addKeyFrame(eye().transientCopy(), duration);
       setEye(eye);
-      eye()._interpolator.run();
+      eye._interpolator.run();
     }
   }
 
@@ -1968,15 +2000,15 @@ public class Graph {
       fitFOV();
     else {
       // TODO reimplement me!
-      eye()._interpolator.reset();
-      eye()._interpolator.clear();
       Node eye = eye();
-      setEye(eye()._detach());
-      eye()._interpolator.addKeyFrame(eye()._detach());
+      eye._interpolator.reset();
+      eye._interpolator.clear();
+      setEye(eye().transientCopy());
+      eye._interpolator.addKeyFrame(eye().transientCopy());
       fitFOV();
-      eye()._interpolator.addKeyFrame(eye()._detach(), duration);
+      eye._interpolator.addKeyFrame(eye().transientCopy(), duration);
       setEye(eye);
-      eye()._interpolator.run();
+      eye._interpolator.run();
     }
   }
 
@@ -2051,15 +2083,15 @@ public class Graph {
       fit(corner1, corner2);
     else {
       // TODO reimplement me!
-      eye()._interpolator.reset();
-      eye()._interpolator.clear();
       Node eye = eye();
-      setEye(eye()._detach());
-      eye()._interpolator.addKeyFrame(eye()._detach());
+      eye._interpolator.reset();
+      eye._interpolator.clear();
+      setEye(eye().transientCopy());
+      eye._interpolator.addKeyFrame(eye().transientCopy());
       fit(corner1, corner2);
-      eye()._interpolator.addKeyFrame(eye()._detach(), duration);
+      eye._interpolator.addKeyFrame(eye().transientCopy(), duration);
       setEye(eye);
-      eye()._interpolator.run();
+      eye._interpolator.run();
     }
   }
 
@@ -2120,15 +2152,15 @@ public class Graph {
       fit(x, y, width, height);
     else {
       // TODO reimplement me!
-      eye()._interpolator.reset();
-      eye()._interpolator.clear();
       Node eye = eye();
-      setEye(eye()._detach());
-      eye()._interpolator.addKeyFrame(eye()._detach());
+      eye._interpolator.reset();
+      eye._interpolator.clear();
+      setEye(eye().transientCopy());
+      eye._interpolator.addKeyFrame(eye().transientCopy());
       fit(x, y, width, height);
-      eye()._interpolator.addKeyFrame(eye()._detach(), duration);
+      eye._interpolator.addKeyFrame(eye().transientCopy(), duration);
       setEye(eye);
-      eye()._interpolator.run();
+      eye._interpolator.run();
     }
   }
 
@@ -3690,7 +3722,7 @@ public class Graph {
    */
   public void shift(Node node, float dx, float dy, float dz, float inertia) {
     if (node == null || node == eye()) {
-      node = eye()._detach();
+      node = eye().transientWorldCopy();
       node.setWorldPosition(center());
       Vector vector = displacement(new Vector(dx, dy, dz), node);
       vector.multiply(-1);

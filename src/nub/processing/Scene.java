@@ -762,7 +762,7 @@ public class Scene extends Graph {
     qz = jsonNode.getJSONArray("orientation").getFloat(2);
     qw = jsonNode.getJSONArray("orientation").getFloat(3);
     Node node = new Node(new Vector(x, y, z), new Quaternion(qx, qy, qz, qw), jsonNode.getFloat("magnitude"));
-    prune(node);
+    detach(node);
     return node;
   }
 

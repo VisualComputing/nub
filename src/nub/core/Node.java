@@ -119,7 +119,7 @@ public class Node {
    */
   public boolean matches(Node node) {
     if (node == null)
-      node = Node._detach(new Vector(), new Quaternion(), 1);
+      node = transientNode(null, new Vector(), new Quaternion(), 1);
     return position().matches(node.position()) && orientation().matches(node.orientation()) && magnitude() == node.magnitude();
   }
 
@@ -129,6 +129,7 @@ public class Node {
   protected Node _reference;
   protected long _lastUpdate;
   protected boolean _reachable;
+  protected boolean _pruned;
 
   protected Interpolator _interpolator;
 
@@ -215,12 +216,34 @@ public class Node {
   }
 
   /**
+   * Same as {this(null, new Vector(), new Quaternion(), 1, attach)}.
+   *
+   * The {@code attach} var controls whether or not the node {@link #isReachable()} by the {@link Graph#render()} algorithm.
+   *
+   * @see #Node(Node, Vector, Quaternion, float, boolean)
+   */
+  public Node(boolean attach) {
+    this(null, new Vector(), new Quaternion(), 1, attach);
+  }
+
+  /**
    * Same as {@code this(null, position, new Quaternion(), 1)}.
    *
    * @see #Node(Node, Vector, Quaternion, float)
    */
   public Node(Vector position) {
     this(null, position, new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(null, position, new Quaternion(), 1, attach)}.
+   *
+   * The {@code attach} var controls whether or not the node {@link #isReachable()} by the {@link Graph#render()} algorithm.
+   *
+   * @see #Node(Node, Vector, Quaternion, float, boolean)
+   */
+  public Node(Vector position, boolean attach) {
+    this(null, position, new Quaternion(), 1, attach);
   }
 
   /**
@@ -233,30 +256,42 @@ public class Node {
   }
 
   /**
+   * Same as {@code this(null, position, orientation, 1, attach)}.
+   *
+   * The {@code attach} var controls whether or not the node {@link #isReachable()} by the {@link Graph#render()} algorithm.
+   *
+   * @see #Node(Node, Vector, Quaternion, float, boolean)
+   */
+  public Node(Vector position, Quaternion orientation, boolean attach) {
+    this(null, position, orientation, 1, attach);
+  }
+
+  /**
    * Same as {@code this(reference, new Vector(), new Quaternion(), 1)}.
    *
    * @see #Node(Node, Vector, Quaternion, float)
    */
   public Node(Node reference) {
-    this(reference, new Vector(), new Quaternion(), 1);
+    this(reference, new Vector(), new Quaternion(), 1, true);
   }
 
   /**
-   * Same as {@code this(reference, position, new Quaternion(), 1)}.
+   * Same as {@code this(reference, position, new Quaternion(), 1}.
    *
    * @see #Node(Node, Vector, Quaternion, float)
    */
   public Node(Node reference, Vector position) {
-    this(reference, position, new Quaternion(), 1);
+    this(reference, position, new Quaternion(), 1, true);
   }
 
   /**
-   * Same as {@code this(reference, position, orientation, 1)}.
+   * Same as {@code this(reference, position, orientation, 1}.
    *
    * @see #Node(Node, Vector, Quaternion, float)
+   * @see #isReachable()
    */
   public Node(Node reference, Vector position, Quaternion orientation) {
-    this(reference, position, orientation, 1);
+    this(reference, position, orientation, 1, true);
   }
 
   /**
@@ -269,15 +304,48 @@ public class Node {
   }
 
   /**
+   * Same as {@code this(null, position, orientation, magnitude, attach)}.
+   *
+   * @see #Node(Node, Vector, Quaternion, float, boolean)
+   */
+  public Node(Vector position, Quaternion orientation, float magnitude, boolean attach) {
+    this(null, position, orientation, magnitude, attach);
+  }
+
+  /**
    * Creates a node with {@code reference} as {@link #reference()}, having {@code position},
    * {@code orientation} and {@code magnitude} as the {@link #position()}, {@link #orientation()}
    * and {@link #magnitude()}, respectively. The {@link #bullsEyeSize()} is set to {@code 0.2}
    * and the {@link #highlight()} hint magnitude to {@code 0.15}.
+   *
+   * The node {@link #isReachable()} by the {@link Graph#render()} algorithm iff the node
+   * {@code reference} happens to be.
+   *
+   * @see Graph#attach(Node)
+   * @see Graph#detach(Node)
+   * @see #Node(Node, Vector, Quaternion, float, boolean)
    */
   public Node(Node reference, Vector position, Quaternion orientation, float magnitude) {
+    this(reference, position, orientation, magnitude, true);
+  }
+
+  /**
+   * Creates a node with {@code reference} as {@link #reference()}, having {@code position},
+   * {@code orientation} and {@code magnitude} as the {@link #position()}, {@link #orientation()}
+   * and {@link #magnitude()}, respectively. The {@link #bullsEyeSize()} is set to {@code 0.2}
+   * and the {@link #highlight()} hint magnitude to {@code 0.15}.
+   *
+   * The {@code attach} var controls whether or the node {@link #isReachable()} by the {@link Graph#render()} algorithm.
+   *
+   * @see Graph#attach(Node)
+   * @see Graph#detach(Node)
+   */
+  protected Node(Node reference, Vector position, Quaternion orientation, float magnitude, boolean attach) {
+    _reference = reference;
     setPosition(position);
     setOrientation(orientation);
     setMagnitude(magnitude);
+    _registerTasks();
     enablePicking(CAMERA | AXES | HUD | SHAPE | BOUNDS | BULLSEYE | TORUS | FILTER | BONE);
     _id = ++_counter;
     // unlikely but theoretically possible
@@ -313,13 +381,6 @@ public class Node {
       _animationMask = Node.AXES;
     }
     setInteraction(this::interact);
-    // TODO comment
-    _reference = reference;
-    _restorePath(reference(), this);
-    if (reference == null || reference.isReachable()) {
-      _registerTasks();
-      _reachable = true;
-    }
     // hack
     Method method = null;
     try {
@@ -329,6 +390,9 @@ public class Node {
     }
     if (!method.getDeclaringClass().equals(Node.class)) {
       setShape(this::graphics);
+    }
+    if (attach) {
+      Graph.attach(this);
     }
   }
 
@@ -391,27 +455,6 @@ public class Node {
     _animationMask = Node.SHAPE;
   }
 
-  // TODO mem handling: check node counting agaisnt path toggling
-
-  /**
-   * Same as {@code return detach(worldPosition(), worldOrientation(), worldMagnitude())}.
-   *
-   * @see #copy()
-   */
-  protected Node _detach() {
-    return _detach(worldPosition(), worldOrientation(), worldMagnitude());
-  }
-
-  /**
-   * Returns a detached node (i.e., a shapeless, pruned non-reachable node from the graph, see {@link Graph#prune(Node)})
-   * whose {@link #reference()} is {@code null} for the given params. Mostly used internally.
-   */
-  protected static Node _detach(Vector position, Quaternion orientation, float magnitude) {
-    Node node = new Node(position, orientation, magnitude);
-    Graph.prune(node);
-    return node;
-  }
-
   /**
    * Returns the translation inertial task.
    * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
@@ -453,27 +496,37 @@ public class Node {
   }
 
   /**
-   * Performs a deep copy of this node and returns it. The newly created node reference is the world.
+   * Same as {@code return copy(hint(), isReachable())}.
    *
-   * @see #_detach()
+   * @see #copy(boolean)
    */
-  // TODO should keyframes be copied?
   public Node copy() {
-    return copy(hint());
+    // TODO should keyframes be copied?
+    return _copy(hint(), isReachable());
   }
 
-  protected Node copy(int hint) {
-    Node node = new Node(reference(), position().copy(), orientation().copy(), magnitude());
+  /**
+   * Performs a deep copy of this node and returns it.
+   *
+   * The {@code attach} var controls whether or the node {@link #isReachable()} by the {@link Graph#render()} algorithm.
+   *
+   * @see Graph#attach(Node)
+   * @see Graph#detach(Node)
+   */
+  public Node copy(boolean attach) {
+    return _copy(hint(), attach);
+  }
+
+  protected Node _copy(int hint, boolean attach) {
+    Node node = new Node(reference(), position().copy(), orientation().copy(), magnitude(), attach);
     node._setHint(this, hint);
     return node;
   }
 
-  // TODO discard
   protected void _setHint(Node node) {
     _setHint(node, node._mask);
   }
 
-  // TODO discard
   protected void _setHint(Node node, int hint) {
     setShape(node);
     setHUD(node);
@@ -490,6 +543,37 @@ public class Node {
     _splineWeight = node._splineWeight;
     _steps = node._steps;
     _animationMask = node._animationMask;
+  }
+
+  /**
+   * Makes a local temporal copy of the node.
+   * Same as {@code return transientNode(reference(), position(), orientation(), magnitude())}.
+   *
+   * @see #transientNode(Node, Vector, Quaternion, float)
+   */
+  public Node transientCopy() {
+    return transientNode(reference(), position(), orientation(), magnitude());
+  }
+
+  /**
+   * Makes a wold temporal copy of the node.
+   * Same as {@code return transientNode(null, worldPosition(), worldOrientation(), worldMagnitude())}.
+   *
+   * @see #transientNode(Node, Vector, Quaternion, float)
+   */
+  public Node transientWorldCopy() {
+    return transientNode(null, worldPosition(), worldOrientation(), worldMagnitude());
+  }
+
+  /**
+   * Creates a temporal node that is to be pruned.
+   *
+   * @see Graph#prune(Node)
+   */
+  public static Node transientNode(Node reference, Vector position, Quaternion orientation, float magnitude) {
+    Node node = new Node(reference, position, orientation, magnitude, false);
+    Graph.prune(node);
+    return node;
   }
 
   /**
@@ -653,35 +737,10 @@ public class Node {
    * (see {@link #isReachable()}).
    *
    * @see #setReference(Node)
-   * @see Graph#prune(Node)
+   * @see Graph#detach(Node)
    */
   public void resetReference() {
-    // 1. Make node and its descendants reachable
-    if (!isReachable()) {
-      List<Node> branch = Graph.branch(this);
-      for (Node descendant : branch) {
-        descendant._registerTasks();
-        descendant._reachable = true;
-      }
-    }
-    if (reference() != null) {
-      // 2. cache prev state
-      Vector position = position = this.worldPosition().copy();
-      Quaternion orientation = this.worldOrientation().copy();
-      float magnitude = this.worldMagnitude();
-      // 3. nullify reference
-      _reference = null;
-      // 4. re-add node to graph
-      Graph._addLeadingNode(this);
-      // 5. restore cache prev state (step 2. above)
-      this.setWorldPosition(position);
-      this.setWorldOrientation(orientation);
-      this.setWorldMagnitude(magnitude);
-      // note that restoring the cache always call _modified()
-    }
-    else {
-      Graph._addLeadingNode(this);
-    }
+    setReference(null);
   }
 
   /**
@@ -699,16 +758,11 @@ public class Node {
    * {@link #reference()} would create a loop in the hierarchy.
    * <p>
    * To make all the nodes in the {@code node} branch eligible for garbage collection
-   * call {@link Graph#prune(Node)}.
+   * call {@link Graph#detach(Node)}.
    *
-   * @see Graph#prune(Node)
+   * @see Graph#detach(Node)
    */
   public void setReference(Node node) {
-    // null avoid
-    if (node == null) {
-      System.out.println("setReference to null warning: nothing done! You're looking for resetReference instead");
-      return;
-    }
     // 0. filter
     if (node == reference()) {
       System.out.println("Warning: Node reference already set. Nothing done!");
@@ -722,53 +776,39 @@ public class Node {
       System.out.println("Warning: A node descendant cannot be set as its reference. Nothing done!");
       return;
     }
-    // 1. Determine prev and target states
-    boolean prevReachable = isReachable();
-    boolean nowReachable = node.isReachable();
     // 2. cache prev state
-    Vector position = position = this.worldPosition().copy();
-    Quaternion orientation = this.worldOrientation().copy();
-    float magnitude = this.worldMagnitude();
+    boolean needs_cache = _position != null;
+    Vector position = null;
+    Quaternion orientation = null;
+    float magnitude = 0;
+    if (needs_cache) {
+      position = this.worldPosition().copy();
+      orientation = this.worldOrientation().copy();
+      magnitude = this.worldMagnitude();
+    }
     // 3. temporarily remove node from the graph while setting new reference
-    if (reference() != null) {
-      reference()._removeChild(this);
+    if (reference() == null) {
+      Graph._removeLeadingNode(this);
     }
     else {
-      Graph._removeLeadingNode(this);
+      reference()._removeChild(this);
     }
     // 4. actually assign reference
     _reference = node;
-    // 5. re-add node to graph
-    _restorePath(reference(), this);
-    // 6. Propagate state
-    // 6.1. prevReachable -> !nowReachable
-    if (prevReachable && !nowReachable) {
-      List<Node> branch = Graph.branch(this);
-      for (Node descendant : branch) {
-        descendant._unregisterTasks();
-        descendant._reachable = false;
-      }
+    // 5. restore cache prev state (step 2. above)
+    if (needs_cache) {
+      this.setWorldPosition(position);
+      this.setWorldOrientation(orientation);
+      this.setWorldMagnitude(magnitude);
+      // note that restoring the cache always call _modified()
     }
-    // 6.2. !prevReachable -> nowReachable
-    if (!prevReachable && nowReachable) {
-      List<Node> branch = Graph.branch(this);
-      for (Node descendant : branch) {
-        descendant._registerTasks();
-        descendant._reachable = true;
-      }
-    }
-    // 7. restore cache prev state (step 2. above)
-    this.setWorldPosition(position);
-    this.setWorldOrientation(orientation);
-    this.setWorldMagnitude(magnitude);
-    // note that restoring the cache always call _modified()
   }
 
   /**
    * Returns whether or not the node is reachable by the rendering algorithm.
    * 
    * @see #setReference(Node) 
-   * @see Graph#prune(Node)
+   * @see Graph#detach(Node)
    */
   public boolean isReachable() {
     return _reachable;
@@ -821,20 +861,7 @@ public class Node {
   }
 
   /**
-   * Used by {@link #setReference(Node)}.
-   */
-  protected void _restorePath(Node parent, Node child) {
-    if (parent == null) {
-      Graph._addLeadingNode(child);
-    } else {
-      if (!parent._hasChild(child)) {
-        parent._addChild(child);
-      }
-    }
-  }
-
-  /**
-   * Used by {@link #_restorePath(Node, Node)}.
+   * Used by {@link Graph#attach(Node)}.
    */
   protected boolean _addChild(Node node) {
     if (node == null)
@@ -1079,7 +1106,7 @@ public class Node {
   public void translate(Vector vector, float inertia) {
     translate(vector);
     if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use translate(vector) instead");
+      System.out.println("Warning: inertia is disabled. Perhaps your node is pruned. Use translate(vector) instead");
       return;
     }
     _translationTask.setInertia(inertia);
@@ -1338,7 +1365,7 @@ public class Node {
   public void rotate(Quaternion quaternion, float inertia) {
     rotate(quaternion);
     if (!Graph.TimingHandler.isTaskRegistered(_rotationTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use rotate(quaternion) instead");
+      System.out.println("Warning: inertia is disabled. Perhaps your node is pruned. Use rotate(quaternion) instead");
       return;
     }
     _rotationTask.setInertia(inertia);
@@ -1438,7 +1465,7 @@ public class Node {
   protected void _orbit(Quaternion quaternion, Vector center, float inertia) {
     _orbit(quaternion, center);
     if (!Graph.TimingHandler.isTaskRegistered(_orbitTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use orbit(quaternion, center) instead");
+      System.out.println("Warning: inertia is disabled. Perhaps your node is pruned. Use orbit(quaternion, center) instead");
       return;
     }
     _orbitTask.setInertia(inertia);
@@ -1611,7 +1638,7 @@ public class Node {
   public void scale(float scaling, float inertia) {
     scale(scaling);
     if (!Graph.TimingHandler.isTaskRegistered(_scalingTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use scale(scaling) instead");
+      System.out.println("Warning: inertia is disabled. Perhaps your node is pruned. Use scale(scaling) instead");
       return;
     }
     _scalingTask._inertia = inertia;
@@ -1859,7 +1886,7 @@ public class Node {
         }
       }
     }
-    Node old = _detach();
+    Node old = transientWorldCopy();
     vector.set(directions[0][index[0]]);
     float coef = vector.dot(directions[1][index[1]]);
     if (Math.abs(coef) >= threshold) {
@@ -2101,7 +2128,7 @@ public class Node {
    */
   public Matrix worldMatrix() {
     if (reference() != null)
-      return _detach().matrix();
+      return transientWorldCopy().matrix();
     else
       return matrix();
   }
@@ -2137,7 +2164,7 @@ public class Node {
    * @see #set(Node)
    */
   public Matrix viewInverse() {
-    return Node._detach(worldPosition(), worldOrientation(), 1).matrix();
+    return transientNode(null, worldPosition(), worldOrientation(), 1).matrix();
   }
 
   /**
@@ -2256,6 +2283,10 @@ public class Node {
     );
   }
 
+  public Node inverse() {
+    return inverse(true);
+  }
+
   /**
    * Returns a node representing the inverse of this node space transformation.
    * <p>
@@ -2276,10 +2307,12 @@ public class Node {
    *
    * @see #worldInverse()
    */
-  public Node inverse() {
-    Node node = _detach(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
-    node.setReference(reference());
-    return node;
+  public Node inverse(boolean attach) {
+    return transientNode(reference(), Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
+  }
+
+  public Node worldInverse() {
+    return worldInverse(true);
   }
 
   /**
@@ -2296,8 +2329,8 @@ public class Node {
    *
    * @see #inverse()
    */
-  public Node worldInverse() {
-    return _detach(Vector.multiply(worldOrientation().inverseRotate(worldPosition()), -1), worldOrientation().inverse(), 1 / worldMagnitude());
+  public Node worldInverse(boolean attach) {
+    return transientNode(null, Vector.multiply(worldOrientation().inverseRotate(worldPosition()), -1), worldOrientation().inverse(), 1 / worldMagnitude());
   }
 
   // SCALAR CONVERSION
@@ -3319,8 +3352,12 @@ public class Node {
     // 1. Handled keyframes
     for (Interpolator.KeyFrame keyFrame : _interpolator._list) {
       if (keyFrame._handled) {
-        keyFrame._node.tagging = isHintEnabled(Node.ANIMATION);
-        keyFrame._node.cull = !keyFrame._node.tagging;
+        if (isHintEnabled(Node.ANIMATION)) {
+          Graph.attach(keyFrame._node);
+        }
+        else {
+          Graph.detach(keyFrame._node);
+        }
       }
     }
     // TODO mem handling

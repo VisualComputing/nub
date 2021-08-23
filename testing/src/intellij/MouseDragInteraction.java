@@ -75,7 +75,7 @@ public class MouseDragInteraction extends PApplet {
     shape2.setScalingFilter(scalarFilter, new Object[] { (float) height });
 
     shape3 = new Node();
-    Graph.prune(shape3);
+    Graph.detach(shape3);
     shape3.set(shape1);
     scene.randomize(shape3);
     shape3.setShape(shape());
@@ -111,7 +111,7 @@ public class MouseDragInteraction extends PApplet {
         shape3.setReference(shape1);
     }
     if (key == 'x') {
-      Scene.prune(shape3);
+      Scene.detach(shape3);
     }
     if (key == 'y') {
       if (shape3 != null)
@@ -181,7 +181,7 @@ public class MouseDragInteraction extends PApplet {
       }
       else if (scene.node() == null) {
         Node _node = scene.eye().copy();
-        Graph.prune(_node);
+        Graph.detach(_node);
         _node.setWorldPosition(scene.center());
         Vector vector = scene.displacement(new Vector(scene.mouseDX(), scene.mouseDY(), 0), _node);
         vector = scene.eye().displacement(vector, _node);

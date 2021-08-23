@@ -88,8 +88,13 @@ class Interpolator {
     }
 
     protected KeyFrame(KeyFrame other) {
+      if (other._handled) {
+        this._node = other._node.copy();
+      }
+      else {
+        this._node = other._node;
+      }
       this._time = other._time;
-      this._node = other._node.copy();
       this._handled = other._handled;
     }
 
@@ -573,10 +578,10 @@ class Interpolator {
   }
 
   /**
-   * Adds a {@link #node()} detached instance as a keyframe at {@code time} and a mask {@code hint}.
+   * Adds a {@link #node()} copy as a keyframe at {@code time} and a mask {@code hint}.
    */
   public void addKeyFrame(int hint, float time) {
-    Node node = node().copy(hint);
+    Node node = node()._copy(hint, true);
     addKeyFrame(node, time, true);
   }
 
@@ -673,14 +678,14 @@ class Interpolator {
   /**
    * Removes all keyframes from the path.
    *
-   * @see Graph#prune(Node)
+   * @see Graph#detach(Node)
    */
   public void clear() {
     _task.stop();
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
-      Graph.prune(keyFrame._node);
+      Graph.detach(keyFrame._node);
     }
     _list.clear();
     _pathIsValid = false;
@@ -793,7 +798,7 @@ class Interpolator {
       if (!_valuesAreValid)
         _updateModifiedKeyFrames();
       if (_list.get(0) == _list.get(_list.size() - 1)) {
-        _path.add(Node._detach(_list.get(0)._node.worldPosition(), _list.get(0)._node.worldOrientation(), _list.get(0)._node.worldMagnitude()));
+        _path.add(Node.transientNode(null, _list.get(0)._node.worldPosition(), _list.get(0)._node.worldOrientation(), _list.get(0)._node.worldMagnitude()));
       }
       else {
         KeyFrame[] keyFrames = new KeyFrame[4];
@@ -811,7 +816,7 @@ class Interpolator {
           pvec2 = Vector.add(pvec2, keyFrames[2]._tangentVector());
           for (int step = 0; step < Node.maxSteps; ++step) {
             float alpha = step / (float) Node.maxSteps;
-            Node node = Node._detach(
+            Node node = Node.transientNode(null,
                 Vector.add(keyFrames[1]._node.worldPosition(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
                 Quaternion.squad(keyFrames[1]._node.worldOrientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.worldOrientation(), alpha),
                 Vector.lerp(keyFrames[1]._node.worldMagnitude(), keyFrames[2]._node.worldMagnitude(), alpha));
@@ -826,7 +831,7 @@ class Interpolator {
           keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         }
         // Add last KeyFrame
-        _path.add(Node._detach(keyFrames[1]._node.worldPosition(), keyFrames[1]._node.worldOrientation(), keyFrames[1]._node.worldMagnitude()));
+        _path.add(Node.transientNode(null, keyFrames[1]._node.worldPosition(), keyFrames[1]._node.worldOrientation(), keyFrames[1]._node.worldMagnitude()));
       }
       _pathIsValid = true;
     }
