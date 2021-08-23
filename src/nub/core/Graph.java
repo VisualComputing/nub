@@ -147,7 +147,7 @@ public class Graph {
   protected int _gridSubDiv;
   protected Object _background;
   protected static HashSet<Node> _hudSet = new HashSet<Node>();
-  protected static HashSet<Node> _pathsSet = new HashSet<Node>();
+  protected static HashSet<Node> _interpolators = new HashSet<Node>();
 
   // Custom render
   protected HashMap<Integer, BiConsumer<Graph, Node>> _functors;
@@ -4485,21 +4485,39 @@ public class Graph {
 
   // Interpolator
 
-  /**
-   * Used to display the interpolator in {@link #_displayHint()}.
-   */
+  protected int _steps(Node interpolator) {
+    return interpolator._steps;
+  }
+
+  protected int _animationMask(Node interpolator) {
+    return interpolator._animationMask;
+  }
+
   protected int _splineStroke(Node interpolator) {
     return interpolator._splineStroke;
   }
 
-  /**
-   * Used to display the interpolator in {@link #_displayHint()}.
-   */
   protected int _splineWeight(Node interpolator) {
     return interpolator._splineWeight;
   }
 
   protected List<Node> _path(Node interpolator) {
     return interpolator._interpolator._path();
+  }
+
+  protected static boolean _isHintEnabled(int mask, int hint) {
+    return ~(mask | ~hint) == 0;
+  }
+
+  protected static void _disableHint(int mask, int hint) {
+    mask &= ~hint;
+  }
+
+  protected void _enableHint(int mask, int hint) {
+    mask |= hint;
+  }
+
+  protected void _toggleHint(int mask, int hint) {
+    mask ^= hint;
   }
 }

@@ -175,6 +175,7 @@ public class Node {
   public final static int BONE = 1 << 8;
   public final static int ANIMATION = 1 << 9;
   protected float _highlight;
+  public static int maxSteps = 30;
   // Bounds
   protected HashSet<Graph> _frustumGraphs;
   // keyframes
@@ -372,7 +373,7 @@ public class Node {
     _interpolator = new Interpolator(this);
     _splineStroke = -65281;
     _splineWeight = 3;
-    _steps = 1;
+    _steps = 3;
     _children = new ArrayList<Node>();
     _frustumGraphs = new HashSet<Graph>();
     if (isEye()) {
@@ -3275,6 +3276,10 @@ public class Node {
    * {@code configHint(Node.BULLSEYE, bullseyeStroke, bullseyeShape)}.</li>
    * <li>{@link #TORUS} hint: configHint(Node.TORUS, torusStroke)}, or
    * configHint(Node.TORUS, torusStroke, torusFaces)}.</li>
+   * <li>{@link #ANIMATION} hint: configHint(Node.ANIMATION, animationMask)} or
+   * configHint(Node.ANIMATION, animationMask, steps)} or
+   * configHint(Node.ANIMATION, animationMask, steps, splineStroke)}, or
+   * configHint(Node.ANIMATION, animationMask, steps, splineStroke, splineWeight)}.</li>
    * </ol>
    * Note that the {@code cameraStroke}, {@code splineStroke}, {@code bullseyeStroke}
    * and {@code torusStroke} are color {@code int} vars; {@code cameraLength} and
@@ -3282,8 +3287,9 @@ public class Node {
    * numerical value in {@code [0..1]} which represents the scale factor to be
    * applied to the node when it gets tagged (see {@link Graph#tag(String, Node)});
    * {@code bullseyeShape} is either of type {@link BullsEyeShape#SQUARE} or
-   * {@link BullsEyeShape#CIRCLE}; {@code graph} is of type {@link Graph}; and,
-   * {@code graph} may be of type {@link processing.core.PGraphics}.
+   * {@link BullsEyeShape#CIRCLE}; {@code graph} is of type {@link Graph};
+   * {@code graph} may be of type {@link processing.core.PGraphics}; and,
+   * {@code splineWeight} is an int defining the spline stroke.
    *
    * @see #hint()
    * @see #enableHint(int)
@@ -3322,6 +3328,11 @@ public class Node {
           _torusColor = Graph.castToInt(params[0]);
           return;
         }
+        if (hint == ANIMATION && Graph.isNumInstance(params[0])) {
+          _animationMask = Graph.castToInt(params[0]);
+          _interpolator._pathIsValid = false;
+          return;
+        }
         break;
       case 2:
         if (hint == BULLSEYE && params[0] instanceof BullsEyeShape && Graph.isNumInstance(params[1])) {
@@ -3348,6 +3359,33 @@ public class Node {
             return;
           }
         }
+        if (hint == ANIMATION && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
+          _animationMask = Graph.castToInt(params[0]);
+          _setSteps(Graph.castToInt(params[1]));
+          _interpolator._pathIsValid = false;
+          return;
+        }
+        break;
+      case 3:
+        if (hint == ANIMATION && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])
+                && Graph.isNumInstance(params[2])) {
+          _animationMask = Graph.castToInt(params[0]);
+          _setSteps(Graph.castToInt(params[1]));
+          _splineStroke = Graph.castToInt(params[2]);
+          _interpolator._pathIsValid = false;
+          return;
+        }
+        break;
+      case 4:
+        if (hint == ANIMATION && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])
+                && Graph.isNumInstance(params[2]) && Graph.isNumInstance(params[3])) {
+          _animationMask = Graph.castToInt(params[0]);
+          _setSteps(Graph.castToInt(params[1]));
+          _splineStroke = Graph.castToInt(params[2]);
+          _splineWeight = Graph.castToInt(params[3]);
+          _interpolator._pathIsValid = false;
+          return;
+        }
         break;
     }
     System.out.println("Warning: some params in Node.configHint(hint, params) couldn't be parsed!");
@@ -3365,41 +3403,12 @@ public class Node {
         }
       }
     }
-    // TODO mem handling
     // 2. Paths
     if (isHintEnabled(ANIMATION)) {
-      Graph._pathsSet.add(this);
+      Graph._interpolators.add(this);
     } else {
-      Graph._pathsSet.remove(this);
+      Graph._interpolators.remove(this);
     }
-  }
-
-  public boolean isAnimationHintEnabled(int hint) {
-    return ~(_animationMask | ~hint) == 0;
-  }
-
-  public int animationHint() {
-    return this._animationMask;
-  }
-
-  public void resetAnimationHint() {
-    _animationMask = 0;
-    _interpolator._pathIsValid = false;
-  }
-
-  public void disableAnimationHint(int hint) {
-    _animationMask &= ~hint;
-    _interpolator._pathIsValid = false;
-  }
-
-  public void enableAnimationHint(int hint) {
-    _animationMask |= hint;
-    _interpolator._pathIsValid = false;
-  }
-
-  public void toggleAnimationHint(int hint) {
-    _animationMask ^= hint;
-    _interpolator._pathIsValid = false;
   }
 
   /**
@@ -3416,226 +3425,11 @@ public class Node {
     return _frustumGraphs.contains(graph);
   }
 
-  /**
-   * <p>
-   * The interpolator visual representation may be configured using the following hints:
-   * {@link #SPLINE} and {@link #STEPS}. See {@link #hint()},
-   * {@link #configHint(int, Object...)} {@link #enableHint(int)},
-   * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
-   * and {@link #resetHint()}.
-   */
-
-  /**
-   * Returns whether or not all single visual hints encoded in the bitwise-or
-   * {@code hint} mask are enable or not.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #resetHint()
-   */
-  /*
-  public boolean isHintEnabled(int hint) {
-    return ~(_mask | ~hint) == 0;
-  }
-
-   */
-
-  /**
-   * Returns the current visual hint mask. The mask is a bitwise-or of the following
-   * single visual hints available the interpolator:
-   * <p>
-   * <ol>
-   * <li>{@link #SPLINE} which displays a Catmull-Rom spline having the key-frames
-   * as its control points.</li>
-   * <li>{@link #STEPS} which defines what to draw between consecutive key-frames.</li>
-   * </ol>
-   * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
-   * calling either {@link Graph#render(Node)} or {@link Graph#render()}.
-   * Use {@link #configHint(int, Object...)} to configure the hint different visual aspects.
-   *
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   * @see #resetHint()
-   */
-  /*
-  public int hint() {
-    return this._mask;
-  }
-   */
-
-  /**
-   * Resets the current {@link #hint()}, i.e., disables all single
-   * visual hints available for the node.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  /*
-  public void resetHint() {
-    _mask = 0;
-  }
-   */
-
-  /**
-   * Disables all the single visual hints encoded in the bitwise-or {@code hint} mask.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #resetHint()
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  /*
-  public void disableHint(int hint) {
-    _mask &= ~hint;
-  }
-   */
-
-  /**
-   * Calls {@link #enableHint(int)} followed by {@link #configHint(int, Object...)}.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #resetHint()
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  /*
-  public void enableHint(int hint, Object... params) {
-    enableHint(hint);
-    configHint(hint, params);
-  }
-   */
-
-  /**
-   * Enables all single visual hints encoded in the bitwise-or {@code hint} mask.
-   *
-   * @see #hint()
-   * @see #disableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #resetHint()
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  /*
-  public void enableHint(int hint) {
-    _mask |= hint;
-  }
-
-   */
-
-  /**
-   * Toggles all single visual hints encoded in the bitwise-or {@code hint} mask.
-   *
-   * @see #hint()
-   * @see #disableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #resetHint()
-   * @see #enableHint(int)
-   * @see #isHintEnabled(int)
-   */
-  /*
-  public void toggleHint(int hint) {
-    _mask ^= hint;
-  }
-   */
-
-  /**
-   * Configures the hint using varargs as follows:
-   * <p>
-   * <ol>
-   * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke)}.</li>
-   * <li>{@link #SPLINE} hint: {@code configHint(Interpolator.SPLINE, splineStroke, splineWeight)}.</li>
-   * <li>{@link #STEPS} hint: {@code configHint(Interpolator.STEPS, hint)}.</li>
-   * </ol>
-   * Note that the {@code splineStroke} is a color {@code int} var;{@code splineWeight}
-   * is a stroke weight int var; and, {@code hint} is a node {@link Node#hint()} defining
-   * what to draw between two consecutives key-frames. See also {@link #setSteps(int)}.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   * @see #resetHint()
-   */
-  /*
-  public void configHint(int hint, Object... params) {
-    switch (params.length) {
-      case 1:
-        if (Graph.isNumInstance(params[0])) {
-          if (hint == SPLINE) {
-            _splineStroke = Graph.castToInt(params[0]);
-            return;
-          }
-          if (hint == STEPS) {
-            _stepsHint = Graph.castToInt(params[0]);
-            return;
-          }
-        }
-        break;
-      case 2:
-        if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
-          if (hint == SPLINE) {
-            _splineStroke = Graph.castToInt(params[0]);
-            _splineWeight = Graph.castToInt(params[1]);
-            return;
-          }
-        }
-        break;
-    }
-    System.out.println("Warning: some params in Interpolator.configHint(hint, params) couldn't be parsed!");
-  }
-   */
-
-  public static int maxSteps = 30;
-
-  /**
-   * Returns the number of steps between two consecutive key-frames
-   * to be drawn by the interpolator hint. Sets this value with {@link #setSteps(int)}.
-   *
-   * @see #hint()
-   */
-  public int steps() {
-    return _steps;
-  }
-
-  /**
-   * Sets the number of steps between two consecutive key-frames to be drawn
-   * by the interpolator hint.
-   *
-   * @see #steps()
-   * @see #hint()
-   */
-  public void setSteps(int steps) {
+  protected void _setSteps(int steps) {
     if (0 <= steps && steps < maxSteps)
       _steps = steps;
     else
       System.out.println("Warning: spline steps should be in [0..maxSteps-1]. Nothing done!");
-  }
-
-  public void toggleAnimation() {
-    _interpolator.toggle();
   }
 
   public void animate() {
@@ -3652,6 +3446,10 @@ public class Node {
 
   public void animate(float speed, long period) {
     _interpolator.run(speed, period);
+  }
+
+  public void toggleAnimation() {
+    _interpolator.toggle();
   }
 
   public void resetAnimation() {

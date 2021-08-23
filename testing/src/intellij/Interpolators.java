@@ -37,14 +37,12 @@ public class Interpolators extends PApplet {
     }
     pshape.setFill(color(0, 255, 255, 125));
     shape = new Node(pshape);
+    shape.setAnimationRecurrence(true);
     shape.enableHint(Node.AXES);
     shape.enableHint(Node.BULLSEYE);
-    shape.enableHint(Node.ANIMATION);
+    shape.enableHint(Node.ANIMATION, Node.AXES | Node.BULLSEYE, 2, color(0, 255, 0), 10);
     shape.configHint(Node.BULLSEYE, color(255, 0, 0));
     shape.setBullsEyeSize(50);
-
-    //shapeInterpolator.configHint(Interpolator.SPLINE, color(255));
-    // Create an initial shape interpolator path
     int count = (int) random(4, 10);
     count = 5;
     for (int i = 0; i < count; i++) {
@@ -59,13 +57,6 @@ public class Interpolators extends PApplet {
       shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1 : 4);
       // */
     }
-
-    shape.setAnimationRecurrence(true);
-    shape.resetAnimationHint();
-    shape.enableAnimationHint(Node.AXES);
-    // decide what to reproduce along path
-    //shapeInterpolator.configHint(Interpolator.STEPS, Node.AXES);
-    //shapeInterpolator.setSteps(1);
     shape.animate();
 
     //eyeInterpolator.configHint(Interpolator.SPLINE, color(255, 255, 0));
@@ -73,7 +64,6 @@ public class Interpolators extends PApplet {
     scene.enableHint(Scene.AXES | Scene.GRID);
     scene.configHint(Scene.GRID, color(0, 255, 0));
     scene.enableHint(Scene.BACKGROUND, color(125));
-
     scene.eye().configHint(Node.CAMERA, color(0, 255, 0));
 
     frameRate(1000);
@@ -112,17 +102,12 @@ public class Interpolators extends PApplet {
       shape.removeKeyFrame(1);
       println(Graph.nodes().size());
     }
-    if (key == 't') {
-      shape.resetAnimationHint();
-      shape.enableAnimationHint(Node.CAMERA);
-    }
     if (key == 'z') {
       println(scene.fov());
       println(scene.eye().worldMagnitude());
     }
     if (key == ' ') {
       shape.toggleHint(Node.ANIMATION);
-      //shapeInterpolator.toggleHint(Interpolator.SPLINE /* | Interpolator.STEPS */);
       //eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
     }
     if (key == 'r') {

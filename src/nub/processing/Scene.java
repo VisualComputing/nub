@@ -950,7 +950,7 @@ public class Scene extends Graph {
       }
       context().popStyle();
     }
-    for (Node interpolator : _pathsSet) {
+    for (Node interpolator : _interpolators) {
       context().pushStyle();
       _drawSpline(interpolator);
       context().popStyle();
@@ -1027,7 +1027,7 @@ public class Scene extends Graph {
 
   public void _displayAnimationHint(Node node) {
     PGraphics pg = context();
-    if (node.isAnimationHintEnabled(Node.SHAPE)) {
+    if (Graph._isHintEnabled(_animationMask(node), Node.SHAPE)) {
       pg.pushStyle();
       if (_rmrShape(node) != null) {
         pg.shapeMode(pg.shapeMode);
@@ -1038,19 +1038,19 @@ public class Scene extends Graph {
       }
       pg.popStyle();
     }
-    if (node.isAnimationHintEnabled(Node.TORUS)) {
+    if (Graph._isHintEnabled(_animationMask(node), Node.TORUS)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.fill(_torusColor(node));
       drawTorusSolenoid(pg, _torusFaces(node), 5);
       pg.popStyle();
     }
-    if (node.isAnimationHintEnabled(Node.AXES)) {
+    if (Graph._isHintEnabled(_animationMask(node), Node.AXES)) {
       pg.pushStyle();
       drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
       pg.popStyle();
     }
-    if (node.isAnimationHintEnabled(Node.CAMERA)) {
+    if (Graph._isHintEnabled(_animationMask(node), Node.CAMERA)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_cameraStroke(node));
@@ -1058,7 +1058,7 @@ public class Scene extends Graph {
       _drawEye(pg, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
       pg.popStyle();
     }
-    if (node.isAnimationHintEnabled(Node.BULLSEYE)) {
+    if (Graph._isHintEnabled(_animationMask(node), Node.BULLSEYE)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_bullsEyeStroke(node));
@@ -1283,26 +1283,6 @@ public class Scene extends Graph {
 
   // DRAWING
 
-  /**
-   * Draws the {@link Node} path.
-   * <p>
-   * {@code mask} controls what is drawn: If ( (mask &amp; 1) != 0 ), the position path is
-   * drawn. If ( (mask &amp; 2) != 0 ), an eye representation is regularly drawn and if
-   * ( (mask &amp; 4) != 0 ), oriented axes are regularly drawn. Examples:
-   * <p>
-   * {@code _drawSpline(1); // Simply draws the interpolation path} <br>
-   * {@code _drawSpline(3); // Draws path and eyes} <br>
-   * {@code _drawSpline(5); // Draws path and axes} <br>
-   * <p>
-   * In the case where the eye or axes are drawn, {@code steps} controls the number of
-   * objects (axes or eyes) drawn between two successive keyframes. When
-   * {@code steps = 1}, only the keyframes are drawn, when {@code steps = 2} it
-   * also draws the intermediate orientation, etc. The maximum value is 30, so that an object
-   * is drawn for each keyframe. Default value is 6.
-   * <p>
-   * {@code scale} controls the scaling of the eye and axes drawing. A value of
-   * {@link #radius()} should give good results.
-   */
   protected void _drawSpline(Node interpolator) {
     if (interpolator.hint() != 0) {
       List<Node> path = _path(interpolator);
@@ -1320,13 +1300,13 @@ public class Scene extends Graph {
         context().endShape();
         context().popStyle();
       }
-      if (interpolator.steps() > 0) {
+      if (_steps(interpolator) > 0) {
         context().pushStyle();
         int count = 0;
         float goal = 0.0f;
         for (Node node : path) {
           if (count >= goal) {
-            goal += Node.maxSteps / ((float) interpolator.steps() + 1);
+            goal += Node.maxSteps / ((float) _steps(interpolator) + 1);
             if (count % Node.maxSteps != 0) {
               _matrixHandler.pushMatrix();
               _matrixHandler.applyTransformation(node);
