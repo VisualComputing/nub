@@ -820,13 +820,13 @@ public class Graph {
   }
 
   /**
-   * Same as {@code for(Node node : _leadingNodes()) pruneBranch(node)}.
+   * Same as {@code for(Node node : _leadingNodes()) prune(node)}.
    *
-   * @see #detach(Node)
+   * @see #prune(Node)
    */
   public static void clear() {
     for (Node node : _leadingNodes())
-      detach(node);
+      prune(node);
   }
 
   /**
