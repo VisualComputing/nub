@@ -637,7 +637,7 @@ class Interpolator {
 
   /**
    * Remove the closest keyframe to {@code time} and returns it.
-   * May return {@code null} is the interpolator is empty.
+   * May return {@code null} if the interpolator is empty.
    */
   public Node removeKeyFrame(float time) {
     if (_list.isEmpty())

@@ -3432,74 +3432,139 @@ public class Node {
       System.out.println("Warning: spline steps should be in [0..maxSteps-1]. Nothing done!");
   }
 
+  /**
+   * Run the animation defined by the node keyframes.
+   */
   public void animate() {
     _interpolator.run();
   }
 
+  /**
+   * Run the animation with the given {@code speed} defined by the node keyframes.
+   */
   public void animate(float speed) {
     _interpolator.run(speed, _interpolator._task.period());
   }
 
+  /**
+   * Run the animation with the given {@code period} defined by the node keyframes.
+   */
   public void animate(long period) {
     _interpolator.run(_interpolator._speed, period);
   }
 
+  /**
+   * Run the animation with the given {@code speed} and {@code period} defined by the node keyframes.
+   */
   public void animate(float speed, long period) {
     _interpolator.run(speed, period);
   }
 
+  /**
+   * Toggles the node animation.
+   */
   public void toggleAnimation() {
     _interpolator.toggle();
   }
 
+  /**
+   * Resets the node animation.
+   */
   public void resetAnimation() {
     _interpolator.reset();
   }
 
+  /**
+   * Returns the current interpolation time (in seconds) along the keyframes path.
+   */
   public float animationTime() {
     return _interpolator.time();
   }
 
+  /**
+   * Sets the animation time used for the next {@link #animate()} call.
+   */
   public void setAnimationTime(float time) {
     _interpolator.setTime(time);
   }
 
+  /**
+   * Same as {@code addKeyFrame(1)}.
+   *
+   * @see #addKeyFrame(Node, float)
+   * @see #addKeyFrame(int, float)
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame(Node)
+   */
   public void addKeyFrame() {
     _interpolator.addKeyFrame();
   }
 
+  /**
+   * Same as {@code addKeyFrame(node().hint(), time)}.
+   *
+   * @see #addKeyFrame(int, float)
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame(Node, float)
+   * @see #addKeyFrame(Node)
+   */
   public void addKeyFrame(float time) {
     _interpolator.addKeyFrame(time);
   }
 
+  /**
+   * Adds a node copy as a keyframe at {@code time} and a mask {@code hint}.
+   */
   public void addKeyFrame(int hint, float time) {
     _interpolator.addKeyFrame(hint, time);
   }
 
+  /**
+   * Adds {@code node} (as is) as a keyframe.
+   */
   public void addKeyFrame(Node node) {
     _interpolator.addKeyFrame(node);
   }
 
+  /**
+   * Adds {@code node} (as is) as a keyframe at the given {@code time}.
+   */
   public void addKeyFrame(Node node, float time) {
     _interpolator.addKeyFrame(node, time);
   }
 
+  /**
+   * Remove the closest keyframe to {@code time} and returns it.
+   * May return {@code null} if the interpolator is empty.
+   */
   public Node removeKeyFrame(float time) {
     return _interpolator.removeKeyFrame(time);
   }
 
+  /**
+   * Removes all keyframes from the animation path.
+   */
   public void removeKeyFrames() {
     _interpolator.clear();
   }
 
+  /**
+   * Interpolate the at the given time along the keyframes path.
+   */
   public void interpolate(float time) {
     _interpolator.interpolate(time);
   }
 
+  /**
+   * Tells whether or not the keyframes animation is recurrent or not.
+   */
   public boolean animationRecurrence() {
     return _interpolator.isRecurrent();
   }
 
+  /**
+   * Enables (or disables) the recurrence of the keyframes animation.
+   */
   public void setAnimationRecurrence(boolean enable) {
     _interpolator.enableRecurrence(enable);
   }
