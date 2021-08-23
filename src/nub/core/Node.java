@@ -2313,7 +2313,7 @@ public class Node {
    * @see #worldInverse()
    */
   public Node inverse(boolean attach) {
-    return transientNode(reference(), Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
+    return new Node(reference(), Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
   }
 
   public Node worldInverse() {
@@ -2335,7 +2335,7 @@ public class Node {
    * @see #inverse()
    */
   public Node worldInverse(boolean attach) {
-    return transientNode(null, Vector.multiply(worldOrientation().inverseRotate(worldPosition()), -1), worldOrientation().inverse(), 1 / worldMagnitude());
+    return new Node(null, Vector.multiply(worldOrientation().inverseRotate(worldPosition()), -1), worldOrientation().inverse(), 1 / worldMagnitude());
   }
 
   // SCALAR CONVERSION
