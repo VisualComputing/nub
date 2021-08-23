@@ -1029,7 +1029,7 @@ public class Graph {
    * @see #eye()
    */
   public void setEye(Node eye) {
-    if (eye == null || _eye == eye)
+    if (eye == null || _eye == eye || eye._pruned)
       return;
     if (isTagged(eye)) {
       untag(eye);
