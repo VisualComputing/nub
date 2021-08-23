@@ -1023,8 +1023,7 @@ public class Graph {
   }
 
   /**
-   * Replaces the current {@link #eye()} with {@code eye}. If {@code eye} is instance of
-   * {@link Node} it should belong to this graph object.
+   * Replaces the current {@link #eye()} with {@code eye}.
    *
    * @see #eye()
    */
