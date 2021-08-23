@@ -296,7 +296,7 @@ class Interpolator {
    * {@link #firstTime()} or {@link #lastTime()}, unless {@link #isRecurrent()}
    * is {@code true}.
    *
-   * @see #run(float, int)
+   * @see #run(float, long)
    * @see #time()
    */
   protected void _execute() {
@@ -340,7 +340,7 @@ class Interpolator {
    * Same as {@code task().run()}.
    *
    * @see Task#run()
-   * @see #run(float, int)
+   * @see #run(float, long)
    * @see #run(float)
    */
   public void run() {
@@ -351,7 +351,7 @@ class Interpolator {
    * Sets the time (see {@link #setTime(float)}) and then call {@code task().run()}.
    *
    * @see #run()
-   * @see #run(float, int)
+   * @see #run(float, long)
    */
   public void run(float time) {
     setTime(time);
@@ -362,9 +362,9 @@ class Interpolator {
    * Sets the speed (see {@link #setSpeed(float)}) and then call {@code task().run(period)}.
    *
    * @see #run()
-   * @see #run(float, int)
+   * @see #run(float, long)
    */
-  public void run(float speed, int period) {
+  public void run(float speed, long period) {
     setSpeed(speed);
     _task.run(period);
   }
@@ -493,12 +493,12 @@ class Interpolator {
    * <p>
    * When {@code false} (default), the interpolation stops when
    * {@link #time()} reaches {@link #firstTime()} (with negative
-   * {@code speed} which is set with {@link #run(float, int)}) or
+   * {@code speed} which is set with {@link #run(float, long)}) or
    * {@link #lastTime()}.
    * <p>
    * {@link #time()} is otherwise reset to {@link #firstTime()} (+
    * {@link #time()} - {@link #lastTime()}) (and inversely for negative
-   * {@code speed} which is set with {@link #run(float, int)}) and
+   * {@code speed} which is set with {@link #run(float, long)}) and
    * interpolation continues.
    */
   public boolean isRecurrent() {
@@ -672,20 +672,23 @@ class Interpolator {
     setTime(firstTime());
     if (rerun /* && _list.size() > 1 */)
       _task.run();
+    if (keyFrame._handled)
+      Graph.prune(keyFrame._node);
     return keyFrame._node;
   }
 
   /**
    * Removes all keyframes from the path.
    *
-   * @see Graph#detach(Node)
+   * @see Graph#prune(Node)
    */
   public void clear() {
     _task.stop();
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
-      Graph.detach(keyFrame._node);
+      if (keyFrame._handled)
+        Graph.prune(keyFrame._node);
     }
     _list.clear();
     _pathIsValid = false;

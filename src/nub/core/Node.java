@@ -3642,7 +3642,15 @@ public class Node {
     _interpolator.run();
   }
 
-  public void animate(float speed, int period) {
+  public void animate(float speed) {
+    _interpolator.run(speed, _interpolator._task.period());
+  }
+
+  public void animate(long period) {
+    _interpolator.run(_interpolator._speed, period);
+  }
+
+  public void animate(float speed, long period) {
     _interpolator.run(speed, period);
   }
 

@@ -1,5 +1,6 @@
 package intellij;
 
+import nub.core.Graph;
 import nub.core.Node;
 import nub.processing.Scene;
 import nub.timing.Task;
@@ -103,7 +104,14 @@ public class Interpolators extends PApplet {
       scene.zoom(event.getCount() * 20);
   }
 
+  float speed = 1;
+
   public void keyPressed() {
+    if (key == 'c') {
+      println(Graph.nodes().size());
+      shape.removeKeyFrame(1);
+      println(Graph.nodes().size());
+    }
     if (key == 't') {
       shape.resetAnimationHint();
       shape.enableAnimationHint(Node.CAMERA);
@@ -124,6 +132,8 @@ public class Interpolators extends PApplet {
       shape.toggleAnimation();
     }
     if (key == '-' || key == '+') {
+      speed += key == '+' ? 0.25f : -0.25f;
+      shape.animate(speed);
       //shapeInterpolator.increaseSpeed(key == '+' ? 0.25f : -0.25f);
     }
     /*
