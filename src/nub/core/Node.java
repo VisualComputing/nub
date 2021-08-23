@@ -391,6 +391,8 @@ public class Node {
     _animationMask = Node.SHAPE;
   }
 
+  // TODO mem handling: check node counting agaisnt path toggling
+
   /**
    * Same as {@code return detach(worldPosition(), worldOrientation(), worldMagnitude())}.
    *
@@ -3129,7 +3131,7 @@ public class Node {
   public void resetHint() {
     _mask = 0;
     _updateHUD();
-    _updateHandledKeyFrames();
+    _updateAnimation();
   }
 
   /**
@@ -3152,7 +3154,7 @@ public class Node {
   public void disableHint(int hint) {
     _mask &= ~hint;
     _updateHUD();
-    _updateHandledKeyFrames();
+    _updateAnimation();
   }
 
   /**
@@ -3197,7 +3199,7 @@ public class Node {
   public void enableHint(int hint) {
     _mask |= hint;
     _updateHUD();
-    _updateHandledKeyFrames();
+    _updateAnimation();
   }
 
   /**
@@ -3220,7 +3222,7 @@ public class Node {
   public void toggleHint(int hint) {
     _mask ^= hint;
     _updateHUD();
-    _updateHandledKeyFrames();
+    _updateAnimation();
   }
 
   /**
@@ -3313,12 +3315,20 @@ public class Node {
     System.out.println("Warning: some params in Node.configHint(hint, params) couldn't be parsed!");
   }
 
-  protected void _updateHandledKeyFrames() {
+  protected void _updateAnimation() {
+    // 1. Handled keyframes
     for (Interpolator.KeyFrame keyFrame : _interpolator._list) {
       if (keyFrame._handled) {
         keyFrame._node.tagging = isHintEnabled(Node.ANIMATION);
         keyFrame._node.cull = !keyFrame._node.tagging;
       }
+    }
+    // TODO mem handling
+    // 2. Paths
+    if (isHintEnabled(ANIMATION)) {
+      Graph._pathsSet.add(this);
+    } else {
+      Graph._pathsSet.remove(this);
     }
   }
 

@@ -48,6 +48,7 @@ import java.util.ListIterator;
  * greater than the {@link #lastTime()} (unless {@link #enableRecurrence()} is called).
  */
 class Interpolator {
+  // TODO mem handling all over the place
   /**
    * Returns whether or not this interpolator matches other.
    *
@@ -86,13 +87,12 @@ class Interpolator {
       _handled = handled;
     }
 
-    // TODO rethink
     protected KeyFrame(KeyFrame other) {
       this._time = other._time;
       this._node = other._node.copy();
+      this._handled = other._handled;
     }
 
-    // TODO rethink
     public KeyFrame copy() {
       return new KeyFrame(this);
     }
@@ -100,7 +100,6 @@ class Interpolator {
     /**
      * Returns the cache {@code _tangentVector} world-view. Good for drawing. See {@link #_updatePath()}.
      */
-    // TODO remove this one
     protected Vector _tangentVector() {
       return node().reference() == null ? _tangentVector : node().reference().worldDisplacement(_tangentVector);
     }
@@ -108,7 +107,6 @@ class Interpolator {
     /**
      * Returns the cache {@code _tangentQuaternion} world-view. Good for drawing. See {@link #_updatePath()}.
      */
-    // TODO remove this one
     protected Quaternion _tangentQuaternion() {
       return node().reference() == null ? _tangentQuaternion : node().reference().worldDisplacement(_tangentQuaternion);
     }

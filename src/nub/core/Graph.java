@@ -147,6 +147,7 @@ public class Graph {
   protected int _gridSubDiv;
   protected Object _background;
   protected static HashSet<Node> _hudSet = new HashSet<Node>();
+  protected static HashSet<Node> _pathsSet = new HashSet<Node>();
 
   // Custom render
   protected HashMap<Integer, BiConsumer<Graph, Node>> _functors;
