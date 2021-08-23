@@ -341,7 +341,7 @@ public class Node {
    * @see Graph#detach(Node)
    */
   protected Node(Node reference, Vector position, Quaternion orientation, float magnitude, boolean attach) {
-    _reference = reference;
+    setReference(reference);
     setPosition(position);
     setOrientation(orientation);
     setMagnitude(magnitude);
@@ -765,7 +765,6 @@ public class Node {
   public void setReference(Node node) {
     // 0. filter
     if (node == reference()) {
-      System.out.println("Warning: Node reference already set. Nothing done!");
       return;
     }
     if (node == this) {
@@ -775,6 +774,12 @@ public class Node {
     if (_isSuccessor(node)) {
       System.out.println("Warning: A node descendant cannot be set as its reference. Nothing done!");
       return;
+    }
+    if (node._pruned) {
+      throw new RuntimeException("Cannot set a pruned node as reference");
+    }
+    if (_pruned) {
+      throw new RuntimeException("Cannot set reference on pruned nodes");
     }
     // 2. cache prev state
     boolean needs_cache = _position != null;
