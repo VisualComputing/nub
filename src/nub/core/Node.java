@@ -776,13 +776,16 @@ public class Node {
       System.out.println("Warning: A node descendant cannot be set as its reference. Nothing done!");
       return;
     }
-    if (node._pruned) {
-      throw new RuntimeException("Cannot set a pruned node as reference");
+    if (node != null) {
+      if (node._pruned) {
+        throw new RuntimeException("Cannot set a pruned node as reference");
+      }
     }
     if (_pruned) {
       throw new RuntimeException("Cannot set reference on pruned nodes");
     }
     // 2. cache prev state
+    // TODO debug flock
     boolean needs_cache = _position != null;
     Vector position = null;
     Quaternion orientation = null;
@@ -791,6 +794,7 @@ public class Node {
       position = this.worldPosition().copy();
       orientation = this.worldOrientation().copy();
       magnitude = this.worldMagnitude();
+      System.out.println("1 " + worldMagnitude());
     }
     // 3. temporarily remove node from the graph while setting new reference
     if (reference() == null) {
@@ -806,6 +810,7 @@ public class Node {
       this.setWorldPosition(position);
       this.setWorldOrientation(orientation);
       this.setWorldMagnitude(magnitude);
+      System.out.println("2 " + worldMagnitude());
       // note that restoring the cache always call _modified()
     }
   }

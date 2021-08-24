@@ -1028,8 +1028,10 @@ public class Graph {
    * @see #eye()
    */
   public void setEye(Node eye) {
-    if (eye == null || _eye == eye || eye._pruned)
+    if (eye == null || _eye == eye || eye._pruned) {
+      System.out.println("Warning: eye not set");
       return;
+    }
     if (isTagged(eye)) {
       untag(eye);
       System.out.println("Warning: node was untagged since it was set as the eye");
@@ -1816,12 +1818,14 @@ public class Graph {
     if (duration <= 0) {
       eye().set(node);
     } else {
-      // TODO reimplement me!
-      eye()._interpolator.reset();
-      eye()._interpolator.clear();
-      eye()._interpolator.addKeyFrame(eye().transientCopy());
-      eye()._interpolator.addKeyFrame(node, duration);
-      eye()._interpolator.run();
+      _eye.resetAnimation();
+      Interpolator cacheInterpolator = _eye._interpolator;
+      Interpolator tempInterpolator = new Interpolator(_eye);
+      _eye._interpolator = tempInterpolator;
+      tempInterpolator.addKeyFrame(_eye.transientCopy());
+      tempInterpolator.addKeyFrame(node, duration);
+      tempInterpolator.run();
+      _eye._interpolator = cacheInterpolator;
     }
   }
 
@@ -1910,16 +1914,20 @@ public class Graph {
     if (duration <= 0)
       fit(center, radius);
     else {
-      // TODO reimplement me!
-      Node eye = eye();
-      eye._interpolator.reset();
-      eye._interpolator.clear();
-      setEye(eye().transientCopy());
-      eye._interpolator.addKeyFrame(eye().transientCopy());
+      Node cacheEye = _eye;
+      cacheEye.resetAnimation();
+      Interpolator cacheInterpolator = cacheEye._interpolator;
+      Interpolator tempInterpolator = new Interpolator(cacheEye);
+      cacheEye._interpolator = tempInterpolator;
+      Node tempEye = eye().copy();
+      setEye(tempEye);
+      tempInterpolator.addKeyFrame(tempEye.transientCopy());
       fit(center, radius);
-      eye._interpolator.addKeyFrame(eye().transientCopy(), duration);
-      setEye(eye);
-      eye._interpolator.run();
+      tempInterpolator.addKeyFrame(tempEye.transientCopy(), duration);
+      tempInterpolator.run();
+      cacheEye._interpolator = cacheInterpolator;
+      setEye(cacheEye);
+      prune(tempEye);
     }
   }
 
@@ -1998,16 +2006,20 @@ public class Graph {
     if (duration <= 0)
       fitFOV();
     else {
-      // TODO reimplement me!
-      Node eye = eye();
-      eye._interpolator.reset();
-      eye._interpolator.clear();
-      setEye(eye().transientCopy());
-      eye._interpolator.addKeyFrame(eye().transientCopy());
+      Node cacheEye = _eye;
+      cacheEye.resetAnimation();
+      Interpolator cacheInterpolator = cacheEye._interpolator;
+      Interpolator tempInterpolator = new Interpolator(cacheEye);
+      cacheEye._interpolator = tempInterpolator;
+      Node tempEye = eye().copy();
+      setEye(tempEye);
+      tempInterpolator.addKeyFrame(tempEye.transientCopy());
       fitFOV();
-      eye._interpolator.addKeyFrame(eye().transientCopy(), duration);
-      setEye(eye);
-      eye._interpolator.run();
+      tempInterpolator.addKeyFrame(tempEye.transientCopy(), duration);
+      tempInterpolator.run();
+      cacheEye._interpolator = cacheInterpolator;
+      setEye(cacheEye);
+      prune(tempEye);
     }
   }
 
@@ -2081,16 +2093,20 @@ public class Graph {
     if (duration <= 0)
       fit(corner1, corner2);
     else {
-      // TODO reimplement me!
-      Node eye = eye();
-      eye._interpolator.reset();
-      eye._interpolator.clear();
-      setEye(eye().transientCopy());
-      eye._interpolator.addKeyFrame(eye().transientCopy());
+      Node cacheEye = _eye;
+      cacheEye.resetAnimation();
+      Interpolator cacheInterpolator = cacheEye._interpolator;
+      Interpolator tempInterpolator = new Interpolator(cacheEye);
+      cacheEye._interpolator = tempInterpolator;
+      Node tempEye = eye().copy();
+      setEye(tempEye);
+      tempInterpolator.addKeyFrame(tempEye.transientCopy());
       fit(corner1, corner2);
-      eye._interpolator.addKeyFrame(eye().transientCopy(), duration);
-      setEye(eye);
-      eye._interpolator.run();
+      tempInterpolator.addKeyFrame(tempEye.transientCopy(), duration);
+      tempInterpolator.run();
+      cacheEye._interpolator = cacheInterpolator;
+      setEye(cacheEye);
+      prune(tempEye);
     }
   }
 
@@ -2150,16 +2166,20 @@ public class Graph {
     if (duration <= 0)
       fit(x, y, width, height);
     else {
-      // TODO reimplement me!
-      Node eye = eye();
-      eye._interpolator.reset();
-      eye._interpolator.clear();
-      setEye(eye().transientCopy());
-      eye._interpolator.addKeyFrame(eye().transientCopy());
+      Node cacheEye = _eye;
+      cacheEye.resetAnimation();
+      Interpolator cacheInterpolator = cacheEye._interpolator;
+      Interpolator tempInterpolator = new Interpolator(cacheEye);
+      cacheEye._interpolator = tempInterpolator;
+      Node tempEye = eye().copy();
+      setEye(tempEye);
+      tempInterpolator.addKeyFrame(tempEye.transientCopy());
       fit(x, y, width, height);
-      eye._interpolator.addKeyFrame(eye().transientCopy(), duration);
-      setEye(eye);
-      eye._interpolator.run();
+      tempInterpolator.addKeyFrame(tempEye.transientCopy(), duration);
+      tempInterpolator.run();
+      cacheEye._interpolator = cacheInterpolator;
+      setEye(cacheEye);
+      prune(tempEye);
     }
   }
 
