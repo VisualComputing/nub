@@ -1,6 +1,5 @@
 package intellij;
 
-import nub.core.Interpolator;
 import nub.core.Node;
 import nub.processing.Scene;
 import nub.timing.Task;
@@ -16,7 +15,6 @@ import java.util.function.Consumer;
  */
 public class Lambda extends PApplet {
   Scene scene;
-  Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
   Node shape;
   boolean showEyePath = true;
   float speed = 1;
@@ -35,10 +33,6 @@ public class Lambda extends PApplet {
     // interpolation 1. Default eye interpolations
     scene.fit(1);
 
-    // interpolation 2. Custom eye interpolations
-    eyeInterpolator1 = new Interpolator(scene.eye());
-    eyeInterpolator2 = new Interpolator(scene.eye());
-
     // interpolation 3. Custom (arbitrary) node interpolations
 
     shape = new Node((PGraphics pg) -> {
@@ -52,12 +46,11 @@ public class Lambda extends PApplet {
         pg.box(30);
       pg.popStyle();
     });
-    interpolator = new Interpolator(shape);
-    interpolator.enableRecurrence();
+    shape.setAnimationRecurrence(true);
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
-      interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
-    interpolator.run();
+      shape.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+    shape.animate();
 
     // key lines:
     callback = (pg) -> {
@@ -109,26 +102,12 @@ public class Lambda extends PApplet {
     if (key == ' ')
       showEyePath = !showEyePath;
 
-    if (key == '1')
-      eyeInterpolator1.addKeyFrame(scene.eye().copy());
-    if (key == 'a')
-      eyeInterpolator1.toggle();
-    if (key == 'b')
-      eyeInterpolator1.clear();
-
-    if (key == '2')
-      eyeInterpolator2.addKeyFrame(scene.eye().copy());
-    if (key == 'c')
-      eyeInterpolator2.toggle();
-    if (key == 'd')
-      eyeInterpolator2.clear();
-
     if (key == '-' || key == '+') {
       if (key == '-')
         speed -= 0.25f;
       else
         speed += 0.25f;
-      interpolator.run(speed);
+      shape.animate(speed);
     }
 
     if (key == 's')

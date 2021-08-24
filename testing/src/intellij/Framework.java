@@ -1,6 +1,5 @@
 package intellij;
 
-import nub.core.Interpolator;
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
@@ -10,7 +9,6 @@ import processing.event.MouseEvent;
 public class Framework extends PApplet {
   Node n2, n4, lastKeyFrame;
   Scene scene1, scene2, focus;
-  Interpolator interpolator;
   boolean displayAuxiliarViewers = true;
   // whilst scene1 is either on-screen or not; scene2 and scene3 are off-screen
   // test both cases here
@@ -21,7 +19,6 @@ public class Framework extends PApplet {
   int w = 1400;
   int h = 1400;
   float alpha = 125;
-  int steps = 5;
 
   public void settings() {
     size(w, h, P3D);
@@ -55,9 +52,7 @@ public class Framework extends PApplet {
     //n4.enableHint(Node.TORUS, );
     scene1.randomize(n4);
 
-    interpolator = new Interpolator(n2);
-    interpolator.configHint(Interpolator.STEPS, Node.TORUS);
-    interpolator.setSteps(steps);
+    n2.configHint(Node.ANIMATION, Node.TORUS);
   }
 
   PShape boxShape() {
@@ -72,19 +67,13 @@ public class Framework extends PApplet {
     if (key == 'L' && alpha + 5 < 256) {
       alpha += 5;
       n2.configHint(Node.TORUS, color(255, 0, 125, alpha), 4);
-      for (Node node : interpolator.keyFrames().values()) {
-        node.configHint(Node.TORUS, color(255, 0, 125, alpha), 4);
-      }
     }
     if (key == 'l' && alpha - 5 >= 0) {
       alpha -= 5;
       n2.configHint(Node.TORUS, color(255, 0, 125, alpha), 4);
-      for (Node node : interpolator.keyFrames().values()) {
-        node.configHint(Node.TORUS, color(255, 0, 125, alpha), 4);
-      }
     }
     if (key == 'r') {
-      interpolator.removeKeyFrame(0);
+      n2.removeKeyFrame(0);
     }
     /*
     if (key == 'a')
@@ -93,10 +82,10 @@ public class Framework extends PApplet {
     if (key == 'a') {
       lastKeyFrame = n2.copy();
       lastKeyFrame.configHint(Node.TORUS, color(255, 0, 125, alpha));
-      interpolator.addKeyFrame(lastKeyFrame);
+      n2.addKeyFrame(lastKeyFrame);
     }
     if (key == 's')
-      interpolator.toggleHint(/*Interpolator.SPLINE |*/ Interpolator.STEPS);
+      n2.toggleHint(Node.ANIMATION);
     if (key == ' ')
       displayAuxiliarViewers = !displayAuxiliarViewers;
     if (key == 'f')
@@ -118,10 +107,6 @@ public class Framework extends PApplet {
       n2.setWorldMagnitude(lastKeyFrame);
       n2.configHint(Node.TORUS, color(255, 0, 125, alpha));
     }
-    if (key == '+')
-      interpolator.setSteps(++steps);
-    if (key == '-' && steps - 1 > 0)
-      interpolator.setSteps(--steps);
   }
 
   public void mouseMoved() {
