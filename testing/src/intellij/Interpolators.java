@@ -25,8 +25,9 @@ public class Interpolators extends PApplet {
 
   public void setup() {
     scene = new Scene(this, 150);
-    println(scene.fov());
-    println(scene.eye().worldMagnitude());
+    scene.enableHint(Scene.AXES | Scene.GRID);
+    scene.configHint(Scene.GRID, color(0, 255, 0));
+    scene.enableHint(Scene.BACKGROUND, color(125));
     PShape pshape;
     if (scene.is2D()) {
       rectMode(CENTER);
@@ -59,12 +60,7 @@ public class Interpolators extends PApplet {
     }
     shape.animate();
 
-    //eyeInterpolator.configHint(Interpolator.SPLINE, color(255, 255, 0));
-
-    scene.enableHint(Scene.AXES | Scene.GRID);
-    scene.configHint(Scene.GRID, color(0, 255, 0));
-    scene.enableHint(Scene.BACKGROUND, color(125));
-    scene.eye().configHint(Node.CAMERA, color(0, 255, 0));
+    scene.eye().enableHint(Node.ANIMATION);
 
     frameRate(1000);
   }
@@ -97,6 +93,8 @@ public class Interpolators extends PApplet {
   float speed = 1;
 
   public void keyPressed() {
+    if (key == 'x')
+      shape.removeKeyFrames();
     if (key == 'c') {
       println(Graph.nodes().size());
       shape.removeKeyFrame(1);
@@ -108,7 +106,7 @@ public class Interpolators extends PApplet {
     }
     if (key == ' ') {
       shape.toggleHint(Node.ANIMATION);
-      //eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
+      scene.eye().toggleHint(Node.ANIMATION);
     }
     if (key == 'r') {
       shape.removeKeyFrame(3);
@@ -121,24 +119,23 @@ public class Interpolators extends PApplet {
       shape.animate(speed);
       //shapeInterpolator.increaseSpeed(key == '+' ? 0.25f : -0.25f);
     }
-    /*
+
     if (key == '1') {
-      eyeInterpolator.addKeyFrame();
+      scene.eye().addKeyFrame(Node.CAMERA | Node.BULLSEYE, 1);
     }
     if (key == 'a')
-      eyeInterpolator.toggle();
+      scene.eye().toggleAnimation();
     if (key == 'b')
-      eyeInterpolator.clear();
+      scene.eye().removeKeyFrames();
 
-     */
     if (key == 's')
       scene.fit(1);
     if (key == 'f')
       scene.fit();
-    if (key == 'x')
+    if (key == 'e')
       for (Task task : Scene.TimingHandler.tasks())
         task.enableConcurrence();
-    if (key == 'y')
+    if (key == 'f')
       for (Task task : Scene.TimingHandler.tasks())
         task.disableConcurrence();
   }

@@ -376,11 +376,7 @@ public class Node {
     _steps = 3;
     _children = new ArrayList<Node>();
     _frustumGraphs = new HashSet<Graph>();
-    if (isEye()) {
-      _animationMask = Node.CAMERA;
-    } else {
-      _animationMask = Node.AXES;
-    }
+    _animationMask = Node.AXES;
     setInteraction(this::interact);
     // hack
     Method method = null;
@@ -3502,6 +3498,8 @@ public class Node {
     _interpolator.addKeyFrame();
   }
 
+  // TODO: decide these two
+
   /**
    * Same as {@code addKeyFrame(node().hint(), time)}.
    *
@@ -3510,9 +3508,22 @@ public class Node {
    * @see #addKeyFrame(Node, float)
    * @see #addKeyFrame(Node)
    */
+  /*
   public void addKeyFrame(float time) {
     _interpolator.addKeyFrame(time);
   }
+  //  */
+
+  /**
+   * Same as {@code addKeyFrame(hint, 1)}.
+   *
+   * @see #addKeyFrame(int, float)
+   */
+  /*
+  public void addKeyFrame(int hint) {
+    addKeyFrame(hint, 1);
+  }
+  // */
 
   /**
    * Adds a node copy as a keyframe at {@code time} and a mask {@code hint}.

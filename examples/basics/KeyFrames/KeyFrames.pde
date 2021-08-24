@@ -1,8 +1,8 @@
 /**
- * Interpolators.
+ * KeyFrames.
  * by Jean Pierre Charalambos.
  *
- * This example introduces the three different node interpolations.
+ * This example introduces the three different node animations.
  *
  * Press ' ' to toggle the eye path display.
  * Press 's' to interpolate to fit the scene bounding volume.
@@ -17,16 +17,19 @@ import nub.core.*;
 import nub.processing.*;
 
 Scene scene;
-Interpolator shapeInterpolator, eyeInterpolator;
 boolean edit;
 Node shape;
 
 // Choose P3D or P2D
 String renderer = P3D;
+float speed = 1;
 
 void setup() {
   size(1000, 700, renderer);
   scene = new Scene(this, 150);
+  scene.enableHint(Scene.AXES | Scene.GRID);
+  scene.configHint(Scene.GRID, color(0, 255, 0));
+  scene.enableHint(Scene.BACKGROUND, color(125));
   scene.fit(1);
   PShape pshape;
   if (scene.is2D()) {
@@ -41,23 +44,15 @@ void setup() {
   shape.enableHint(Node.BULLSEYE);
   shape.configHint(Node.BULLSEYE, color(255, 0, 0));
   shape.setBullsEyeSize(50);
-
-  shapeInterpolator = new Interpolator(shape);
-  shapeInterpolator.configHint(Interpolator.SPLINE, color(255));
-  shapeInterpolator.enableRecurrence();
+  shape.enableHint(Node.ANIMATION, Node.AXES, 2, color(0, 255, 0), 6);
+  shape.setAnimationRecurrence(true);
   // Create an initial shape interpolator path
   for (int i = 0; i < random(4, 10); i++) {
-    shapeInterpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+    scene.randomize(shape);
+    shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1 : 4);
   }
-  shapeInterpolator.setSteps(1);
-  shapeInterpolator.run();
-
-  eyeInterpolator = new Interpolator(scene.eye());
-  eyeInterpolator.configHint(Interpolator.SPLINE, color(255, 255, 0));
-
-  scene.enableHint(Scene.AXES | Scene.GRID);
-  scene.configHint(Scene.GRID, color(0, 255, 0));
-  scene.enableHint(Scene.BACKGROUND, color(125));
+  shape.animate();
+  scene.eye().enableHint(Node.ANIMATION);
 }
 
 void draw() {
@@ -86,21 +81,21 @@ void mouseWheel(MouseEvent event) {
 
 void keyPressed() {
   if (key == ' ') {
-    shapeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
-    eyeInterpolator.toggleHint(Interpolator.SPLINE | Interpolator.STEPS);
+    shape.toggleHint(Node.ANIMATION);
+    scene.eye().toggleHint(Node.ANIMATION);
   }
   if (key == '-' || key == '+') {
-    shapeInterpolator.increaseSpeed(key == '+' ? 0.25 : -0.25);
+    speed += key == '+' ? 0.25f : -0.25f;
+    shape.animate(speed);
   }
-  if (key == '1') {
-    eyeInterpolator.addKeyFrame();
-  }
+  if (key == '1')
+    scene.eye().addKeyFrame(Node.CAMERA | Node.BULLSEYE, 1);
   if (key == 'a')
-    eyeInterpolator.toggle();
+    scene.eye().toggleAnimation();
   if (key == 'b')
-    eyeInterpolator.clear();
+    scene.eye().removeKeyFrames();
   if (key == 's')
-    scene.fit(1);
+    shape.toggleAnimation();
   if (key == 'f')
-    scene.fit();
+    scene.fit(1);
 }

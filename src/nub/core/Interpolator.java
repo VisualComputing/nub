@@ -691,6 +691,7 @@ class Interpolator {
         Graph.prune(keyFrame._node);
     }
     _list.clear();
+    _path.clear();
     _pathIsValid = false;
     _valuesAreValid = false;
     _currentKeyFrameValid = false;

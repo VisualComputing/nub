@@ -1038,9 +1038,11 @@ public class Graph {
     }
     if (_eye != null) {
       _eye._frustumGraphs.remove(this);
+      _eye._animationMask = Node.AXES;
     }
     _eye = eye;
     _eye._frustumGraphs.add(this);
+    _eye._animationMask = Node.CAMERA;
     _modified();
   }
 
