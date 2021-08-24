@@ -195,6 +195,7 @@ Note that `point` is a `Vector` instance and `element` is either a `float` (scal
 Scene scene;
 PShape pshape;
 Node shape;
+
 void setup() {
   // ...
   shape = new Node(pshape);
