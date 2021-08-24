@@ -2,12 +2,14 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 - [Description](#description)
+- [Timing tasks](#timing-tasks)
 - [Scene](#scene)
 - [Nodes](#nodes)
   - [Localization](#localization)
   - [Motion filters](#motion-filters)
   - [Shapes](#shapes)
   - [Space transformations](#space-transformations)
+  - [Keyframes](#keyframes)
 - [Rendering](#rendering)
   - [Drawing functionality](#drawing-functionality)
 - [Interactivity](#interactivity)
@@ -16,9 +18,6 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
     - [Node mouse and keyboard code snippets](#node-mouse-and-keyboard-code-snippets)
   - [Picking](#picking)
     - [Mouse and keyboard code snippets](#mouse-and-keyboard-code-snippets)
-- [Timing](#timing)
-  - [Timing tasks](#timing-tasks)
-  - [Interpolators](#interpolators)
 - [Installation](#installation)
 - [Contributors](#contributors)
 
@@ -31,6 +30,30 @@ _nub_ is meant to be coupled with third party real and non-real time [renderers]
 If looking for the API docs, check them [here](https://visualcomputing.github.io/nub-javadocs/).
 
 Readers unfamiliar with geometry transformations may first check the great [Processing 2D transformations tutorial](https://processing.org/tutorials/transform2d/) by _J David Eisenberg_ and the [affine transformations](http://visualcomputing.github.io/Transformations) and [scene-graphs](http://visualcomputing.github.io/SceneGraphs) presentations that discuss some related formal foundations.
+
+# Timing tasks
+
+_Timing tasks_ are (non)recurrent, (non)concurrent callbacks defined by overriding the `execute()` method. For example:
+
+```processing
+// import all nub classes
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
+
+void setup() {
+  // ...
+  TimingTask spinningTask = new TimingTask() {
+    @Override
+    public void execute() {
+      println("hello nub");
+    }
+  };
+  spinningTask.run();
+}
+```
+
+will run the timing-task at 25Hz (which is its default `frequency()`). See the [ParticleSystem](https://github.com/VisualComputing/nub/tree/master/examples/basics/ParticleSystem) example.
 
 # Scene
 
@@ -163,6 +186,29 @@ The following `Node` methods transform points (_locations_) and scalars / vector
 | (this) Node to World     | `worldLocation(point)`     | `worldDisplacement(element)`     |
 
 Note that `point` is a `Vector` instance and `element` is either a `float` (scalar), `Vector` or `Quaternion` one.
+
+## Keyframes
+
+[Keyframes](https://en.wikipedia.org/wiki/Key_frame) are [timing-tasks](#timing-tasks) that allow to define the position, orientation and magnitude a node (including the eye) should have at a particular moment in time, a.k.a., . When the interpolator is run the node is then animated through a [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) spline, matching in space-time the key-frames which defines it. Use code such as the following:
+
+```processing
+Scene scene;
+PShape pshape;
+Node shape;
+void setup() {
+  // ...
+  shape = new Node(pshape);
+  for (int i = 0; i < random(4, 10); i++) {
+    scene.randomize(shape);
+    // addKeyFrame(hint, elapsedTime) where elapsedTime is defined respect
+    // to the previously added key-frame and expressed in seconds.
+    shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1 : 4);
+  }
+  shape.animte();
+}
+```
+
+which will create a `shape` interpolator containing [4..10] random key-frames. See the [KeyFrames](https://github.com/VisualComputing/nub/tree/master/examples/basics/KeyFrames) example.
 
 # Rendering
 
@@ -380,51 +426,6 @@ void keyPressed() {
   scene.focus("key");
 }
 ```
-
-# Timing
-
-## Timing tasks
-
-_Timing tasks_ are (non)recurrent, (non)concurrent callbacks defined by overriding the `execute()` method. For example:
-
-```processing
-Scene scene;
-void setup() {
-  scene = new Scene(this);
-  TimingTask spinningTask = new TimingTask() {
-    @Override
-    public void execute() {
-      scene.eye().orbit(new Vector.plusJ, PI / 100);
-    }
-  };
-  spinningTask.run();
-}
-```
-
-will run the timing-task at 25Hz (which is its default `frequency()`). See the [ParticleSystem](https://github.com/VisualComputing/nub/tree/master/examples/basics/ParticleSystem) example.
-
-## Interpolators
-
-An _interpolator_ is a timing-task that allows to define the position, orientation and magnitude a node (including the eye) should have at a particular moment in time, a.k.a., [key-frame](https://en.wikipedia.org/wiki/Key_frame). When the interpolator is run the node is then animated through a [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) spline, matching in space-time the key-frames which defines it. Use code such as the following:
-
-```processing
-Scene scene;
-PShape pshape;
-Node shape;
-Interpolator interpolator;
-void setup() {
-  ...
-  shape = new Node(pshape);
-  interpolator = new Interpolator(shape);
-  for (int i = 0; i < random(4, 10); i++)
-    // addKeyFrame(node, elapsedTime) where elapsedTime is defined respect
-    // to the previously added key-frame and expressed in seconds.
-    interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
-  interpolator.run();
-}
-```
-
-which will create a `shape` interpolator containing [4..10] random key-frames. See the [Interpolators](https://github.com/VisualComputing/nub/tree/master/examples/basics/Interpolators) example.
 
 # Installation
 
