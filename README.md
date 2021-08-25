@@ -189,7 +189,7 @@ Note that `point` is a `Vector` instance and `element` is either a `float` (scal
 
 ## Keyframes
 
-[Keyframes](https://en.wikipedia.org/wiki/Key_frame) are [timing-tasks](#timing-tasks) that allow to define the position, orientation and magnitude a node (including the eye) should have at a particular moment in time, a.k.a., . When the interpolator is run the node is then animated through a [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) spline, matching in space-time the key-frames which defines it. Use code such as the following:
+[Keyframes](https://en.wikipedia.org/wiki/Key_frame) are [timing-tasks](#timing-tasks) that allow to define the position, orientation and magnitude a node (including the eye) should have at a particular moment in time. The node may then be animated through a [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) spline, matching in space-time the key-frames which defines it. Use code such as the following:
 
 ```processing
 Scene scene;

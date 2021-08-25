@@ -173,7 +173,7 @@ public class Node {
   public final static int TORUS = 1 << 6;
   public final static int FILTER = 1 << 7;
   public final static int BONE = 1 << 8;
-  public final static int ANIMATION = 1 << 9;
+  public final static int KEYFRAMES = 1 << 9;
   protected float _highlight;
   public static int maxSteps = 30;
   // Bounds
@@ -1203,6 +1203,23 @@ public class Node {
   };
 
   /**
+   * Same as {@code setTranslationFilter(forbidTranslationFilter, new Object[] {})}.
+   */
+  public void setForbidTranslationFilter() {
+    setTranslationFilter(forbidTranslationFilter, new Object[] {});
+  }
+
+  /**
+   * Filters translation so that it gets nullified. Call it as:
+   * {@code setTranslationFilter(Node.forbidtranslationFilter, new Object[] { })}.
+   *
+   * @see #setForbidTranslationFilter()
+   */
+  public static BiFunction<Node, Object[], Vector> forbidTranslationFilter = (node, params)-> {
+    return new Vector();
+  };
+
+  /**
    * Same as {@code setTranslationFilter(translationPlaneFilter, new Object[] { axis })}.
    *
    * @see #setTranslationFilter(BiFunction, Object[])
@@ -1455,6 +1472,25 @@ public class Node {
    */
   public static BiFunction<Node, Object[], Quaternion> rotationAxisFilter = (node, params)-> {
     return new Quaternion(Vector.projectVectorOnAxis(node.cacheTargetRotation.axis(), (Vector)params[0]), node.cacheTargetRotation.angle());
+  };
+
+  /**
+   * Same as {@code setRotationFilter(forbidRotationFilter, new Object[] {})}.
+   *
+   * @see #setRotationFilter(BiFunction, Object[])
+   */
+  public void setForbidRotationFilter() {
+    setRotationFilter(forbidRotationFilter, new Object[] {});
+  }
+
+  /**
+   * Filters rotation so that it gets nullified. Call it as:
+   * {@code setRotationFilter(Node.forbidRotationFilter, new Object[] { })}.
+   *
+   * @see #setForbidRotationFilter()
+   */
+  public static BiFunction<Node, Object[], Quaternion> forbidRotationFilter = (node, params)-> {
+    return new Quaternion();
   };
 
   /**
@@ -1735,6 +1771,25 @@ public class Node {
     if(node.cacheTargetMagnitude < min || node.cacheTargetMagnitude > max)
       return 1.0f;
     return node.cacheTargetScaling;
+  };
+
+  /**
+   * Same as {@code setScalingFilter(forbidScalingFilter, new Object[] {})}.
+   *
+   * @see #setScalingFilter(BiFunction, Object[])
+   */
+  public void setForbidScalingFilter() {
+    setScalingFilter(forbidScalingFilter, new Object[] {});
+  }
+
+  /**
+   * Filters scaling so that it gets nullified. Call it as:
+   * {@code setScalingFilter(Node.forbidScalingilter, new Object[] { })}.
+   *
+   * @see #setForbidScalingFilter()
+   */
+  public static BiFunction<Node, Object[], Float> forbidScalingFilter = (node, params)-> {
+    return 1.0f;
   };
 
   // MAGNITUDE
@@ -3274,7 +3329,7 @@ public class Node {
    * {@code configHint(Node.BULLSEYE, bullseyeStroke, bullseyeShape)}.</li>
    * <li>{@link #TORUS} hint: configHint(Node.TORUS, torusStroke)}, or
    * configHint(Node.TORUS, torusStroke, torusFaces)}.</li>
-   * <li>{@link #ANIMATION} hint: configHint(Node.ANIMATION, animationMask)} or
+   * <li>{@link #KEYFRAMES} hint: configHint(Node.ANIMATION, animationMask)} or
    * configHint(Node.ANIMATION, animationMask, steps)} or
    * configHint(Node.ANIMATION, animationMask, steps, splineStroke)}, or
    * configHint(Node.ANIMATION, animationMask, steps, splineStroke, splineWeight)}.</li>
@@ -3326,7 +3381,7 @@ public class Node {
           _torusColor = Graph.castToInt(params[0]);
           return;
         }
-        if (hint == ANIMATION && Graph.isNumInstance(params[0])) {
+        if (hint == KEYFRAMES && Graph.isNumInstance(params[0])) {
           _animationMask = Graph.castToInt(params[0]);
           _interpolator._pathIsValid = false;
           return;
@@ -3357,7 +3412,7 @@ public class Node {
             return;
           }
         }
-        if (hint == ANIMATION && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
+        if (hint == KEYFRAMES && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
           _animationMask = Graph.castToInt(params[0]);
           _setSteps(Graph.castToInt(params[1]));
           _interpolator._pathIsValid = false;
@@ -3365,7 +3420,7 @@ public class Node {
         }
         break;
       case 3:
-        if (hint == ANIMATION && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])
+        if (hint == KEYFRAMES && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])
                 && Graph.isNumInstance(params[2])) {
           _animationMask = Graph.castToInt(params[0]);
           _setSteps(Graph.castToInt(params[1]));
@@ -3375,7 +3430,7 @@ public class Node {
         }
         break;
       case 4:
-        if (hint == ANIMATION && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])
+        if (hint == KEYFRAMES && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])
                 && Graph.isNumInstance(params[2]) && Graph.isNumInstance(params[3])) {
           _animationMask = Graph.castToInt(params[0]);
           _setSteps(Graph.castToInt(params[1]));
@@ -3393,7 +3448,7 @@ public class Node {
     // 1. Handled keyframes
     for (Interpolator.KeyFrame keyFrame : _interpolator._list) {
       if (keyFrame._handled) {
-        if (isHintEnabled(Node.ANIMATION)) {
+        if (isHintEnabled(Node.KEYFRAMES)) {
           Graph.attach(keyFrame._node);
         }
         else {
@@ -3402,7 +3457,7 @@ public class Node {
       }
     }
     // 2. Paths
-    if (isHintEnabled(ANIMATION)) {
+    if (isHintEnabled(KEYFRAMES)) {
       Graph._interpolators.add(this);
     } else {
       Graph._interpolators.remove(this);
@@ -3491,7 +3546,6 @@ public class Node {
    *
    * @see #addKeyFrame(Node, float)
    * @see #addKeyFrame(int, float)
-   * @see #addKeyFrame(float)
    * @see #addKeyFrame(Node)
    */
   public void addKeyFrame() {

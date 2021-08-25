@@ -52,7 +52,7 @@ public class Framework extends PApplet {
     //n4.enableHint(Node.TORUS, );
     scene1.randomize(n4);
 
-    n2.configHint(Node.ANIMATION, Node.TORUS);
+    n2.configHint(Node.KEYFRAMES, Node.TORUS);
   }
 
   PShape boxShape() {
@@ -85,7 +85,7 @@ public class Framework extends PApplet {
       n2.addKeyFrame(lastKeyFrame);
     }
     if (key == 's')
-      n2.toggleHint(Node.ANIMATION);
+      n2.toggleHint(Node.KEYFRAMES);
     if (key == ' ')
       displayAuxiliarViewers = !displayAuxiliarViewers;
     if (key == 'f')

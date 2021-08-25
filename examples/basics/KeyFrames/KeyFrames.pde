@@ -2,7 +2,7 @@
  * KeyFrames.
  * by Jean Pierre Charalambos.
  *
- * This example introduces the three different node animations.
+ * This example introduces keyframes.
  *
  * Press ' ' to toggle the eye path display.
  * Press 's' to interpolate to fit the scene bounding volume.
@@ -44,7 +44,7 @@ void setup() {
   shape.enableHint(Node.BULLSEYE);
   shape.configHint(Node.BULLSEYE, color(255, 0, 0));
   shape.setBullsEyeSize(50);
-  shape.enableHint(Node.ANIMATION, Node.AXES, 2, color(0, 255, 0), 6);
+  shape.enableHint(Node.KEYFRAMES, Node.AXES, 2, color(0, 255, 0), 6);
   shape.setAnimationRecurrence(true);
   // Create an initial shape interpolator path
   for (int i = 0; i < random(4, 10); i++) {
@@ -52,7 +52,7 @@ void setup() {
     shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1 : 4);
   }
   shape.animate();
-  scene.eye().enableHint(Node.ANIMATION);
+  scene.eye().enableHint(Node.KEYFRAMES);
 }
 
 void draw() {
@@ -81,8 +81,8 @@ void mouseWheel(MouseEvent event) {
 
 void keyPressed() {
   if (key == ' ') {
-    shape.toggleHint(Node.ANIMATION);
-    scene.eye().toggleHint(Node.ANIMATION);
+    shape.toggleHint(Node.KEYFRAMES);
+    scene.eye().toggleHint(Node.KEYFRAMES);
   }
   if (key == '-' || key == '+') {
     speed += key == '+' ? 0.25f : -0.25f;

@@ -41,7 +41,7 @@ public class Interpolators extends PApplet {
     shape.setAnimationRecurrence(true);
     shape.enableHint(Node.AXES);
     shape.enableHint(Node.BULLSEYE);
-    shape.enableHint(Node.ANIMATION, Node.AXES | Node.BULLSEYE, 2, color(0, 255, 0), 10);
+    shape.enableHint(Node.KEYFRAMES, Node.AXES | Node.BULLSEYE, 2, color(0, 255, 0), 10);
     shape.configHint(Node.BULLSEYE, color(255, 0, 0));
     shape.setBullsEyeSize(50);
     int count = (int) random(4, 10);
@@ -60,7 +60,7 @@ public class Interpolators extends PApplet {
     }
     shape.animate();
 
-    scene.eye().enableHint(Node.ANIMATION);
+    scene.eye().enableHint(Node.KEYFRAMES);
 
     frameRate(1000);
   }
@@ -105,8 +105,8 @@ public class Interpolators extends PApplet {
       println(scene.eye().worldMagnitude());
     }
     if (key == ' ') {
-      shape.toggleHint(Node.ANIMATION);
-      scene.eye().toggleHint(Node.ANIMATION);
+      shape.toggleHint(Node.KEYFRAMES);
+      scene.eye().toggleHint(Node.KEYFRAMES);
     }
     if (key == 'r') {
       shape.removeKeyFrame(3);

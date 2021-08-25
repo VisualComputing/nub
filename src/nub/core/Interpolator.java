@@ -626,7 +626,7 @@ class Interpolator {
       return;
     _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time, handled));
     if (handled) {
-      node.tagging = node().isHintEnabled(Node.ANIMATION);
+      node.tagging = node().isHintEnabled(Node.KEYFRAMES);
       node.cull = !node.tagging;
     }
     _valuesAreValid = false;
