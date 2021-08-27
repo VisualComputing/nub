@@ -780,6 +780,11 @@ public class Node {
     if (_pruned) {
       throw new RuntimeException("Cannot set reference on pruned nodes");
     }
+    // 1. Check node needs to be reattached
+    boolean reachable = isReachable();
+    if (reachable) {
+      Graph.detach(this);
+    }
     // 2. cache prev state
     boolean needs_cache = _position != null;
     Vector position = null;
@@ -805,6 +810,20 @@ public class Node {
       this.setWorldOrientation(orientation);
       this.setWorldMagnitude(magnitude);
       // note that restoring the cache always call _modified()
+    }
+    // 6. re-attach when in need (step 1. above)
+    if (reachable) {
+      if (reference() == null) {
+        Graph.attach(this);
+      } else if (reference().isReachable()) {
+        Graph.attach(this);
+      } else {
+        reference()._addChild(this);
+      }
+    } else if (reference() != null) {
+      if (!reference().isReachable()) {
+        reference()._addChild(this);
+      }
     }
   }
 

@@ -860,52 +860,65 @@ public class Graph {
   }
 
   /**
-   * Detach node from the tree so that it's not reached from the {@link #render()} algorithm.
-   * A call to {@link Node#isReachable()} (including the node descendants) will then return {@code false}.
+   * Detach node from the tree so that it's not reached from the {@link #render()} algorithm. A call
+   * to {@link Node#isReachable()} (including the node descendants) will then return {@code false}. Only
+   * reachable nodes may be detached. Returns {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #attach(Node)
    * @see #prune(Node)
    */
-  public static void detach(Node node) {
+  public static boolean detach(Node node) {
     if (node.isReachable()) {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
         descendant._reachable = false;
       }
+      if (node.reference() != null) {
+        node.reference()._removeChild(node);
+      }
+      else {
+        _removeLeadingNode(node);
+      }
+      return true;
     }
-    if (node.reference() != null) {
-      node.reference()._removeChild(node);
-    }
-    else {
-      _removeLeadingNode(node);
-    }
+    return false;
   }
 
   /**
-   * Attaches node to the tree so that it's reached from the {@link #render()} algorithm.
-   * A call to {@link Node#isReachable()} will then return {@code true}.
+   * Attaches node to the tree so that it may be reached from the {@link #render()} algorithm.
+   * A call to {@link Node#isReachable()} will then return {@code true} only if the node reference
+   * is itself reachable or it is the world. Only non-reachable nodes may be attached. Returns
+   * {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #detach(Node)
    * @see #prune(Node)
    */
-  public static void attach(Node node) {
+  public static boolean attach(Node node) {
     if (node._pruned) {
       System.out.println("Waning: pruned nodes can't be attached. Nothing done!");
-      return;
+      return false;
     }
     if (node.isReachable()) {
       System.out.println("Waning: no need to restore an already reachable node. Nothing done!");
-      return;
+      return false;
     }
+    boolean reach = false;
     if (node.reference() == null) {
       Graph._addLeadingNode(node);
-      node._reachable = true;
+      reach = true;
     } else {
-      if (!node.reference()._hasChild(node)) {
-        node.reference()._addChild(node);
-        node._reachable = node.reference().isReachable();
+      node.reference()._addChild(node);
+      if (node.reference().isReachable()) {
+        reach = true;
       }
     }
+    if (reach) {
+      List<Node> branch = branch(node);
+      for (Node descendant : branch) {
+        descendant._reachable = true;
+      }
+    }
+    return true;
   }
 
   /**

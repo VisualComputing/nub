@@ -8,7 +8,7 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 /*
-1: red; 2: green; 3: blue; 4: yellow; 5: magenta; detached: cyan
+1: red; 2: green; 3: blue; 4: yellow; 5: magenta; detached1: cyan; detached2:grey
 World
   ^
   |\
@@ -24,9 +24,7 @@ World
 
 public class GraphAPI extends PApplet {
   Scene scene;
-  Node n1, n2, n3, n4, n5, detached, cacheRef, clone;
-
-  boolean _detached;
+  Node n1, n2, n3, n4, n5, detached1, detached2, clone;
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
@@ -60,14 +58,17 @@ public class GraphAPI extends PApplet {
     n5 = new Node(n4, shape(color(255, 0, 255, 125)));
     scene.randomize(n5);
 
-    /*
     // cyan
-    detached = new Node();
-    Graph.prune(detached);
-    detached.set(n3);
-    detached.setShape(shape(color(0, 255, 255, 125)));
-    //scene.randomize(detached);
-     */
+    //detached1 = new Node();
+    //Graph.detach(detached1);
+    // same as two prev lines
+    detached1 = new Node(false);
+    detached1.set(n3);
+    detached1.setShape(shape(color(0, 255, 255, 125)));
+
+    // grey
+    detached2 = new Node(false);
+    detached2.setShape(shape(color(125, 125)));
   }
 
   PShape shape(int c) {
@@ -77,76 +78,37 @@ public class GraphAPI extends PApplet {
   }
 
   public void draw() {
-    scene.render(_detached ? detached : null);
+    scene.render();
   }
 
   public void keyPressed() {
-    if (key == 'l') {
-      println("n5: " + n5.id());
+    if (key == 'c') {
       clone = n5.copy();
-      //clone.resetReference();
-      //clone.setReference(n4);
-      println("n5: " + n5.id() + " clone: " + clone.id());
-      //if (n5.reference() == n4 && clone.reference() == n4)
-        //println("win");
       clone.resetHint();
       clone.enableHint(Node.TORUS);
       n5.resetHint();
       n5.enableHint(Node.AXES);
     }
-    if (key == 'v') {
-      if (scene.node() == n5)
-        println("n5");
-      if (scene.node() == clone)
-        println("clone");
-    }
-    /*
-    if (key == 'a') {
-      println(n4.toString());
-    }
-    if (key == 'b') {
-      cacheRef = n4.reference();
-      n4.resetReference();
-    }
-    if (key == 'c') {
-      n4.setReference(cacheRef);
-    }
-    if (key == 'd') {
-      _detached = !_detached;
-      if (_detached) {
-        detached.resetReference();
-      }
-      else {
-        scene.prune(detached);
-      }
-    }
-    if (key == 'e') {
-      println(Scene.TimingHandler.tasks().size());
-    }
-    if (key == 'y')
-      n4.setReference(detached);
-    if (key == 'z') {
-      detached.setReference(n4);
-      println(detached.worldPosition().toString());
-      println(detached.worldOrientation().toString());
-      println(detached.worldMagnitude());
-    }
-    if (key == 'p')
-      scene.prune(n4);
-    if (key == 'q')
-      n4.setReference(n2);
-    if (key == 'r')
-      n4.resetReference();
-    if (key == 's')
-      n5.setReference(n2);
-    if (key == 't')
+    if (key == '1') {
       n4.setReference(n3);
-    if (key == 'u')
-      if (n4.isReachable())
-        println("yes");
-      else
-        println("no");
-    // */
+    }
+    if (key == '2') {
+      detached1.setReference(n2);
+    }
+    if (key == '3') {
+      n2.setReference(detached1);
+    }
+    if (key == '4') {
+      detached2.setReference(detached1);
+    }
+    if (key == '5') {
+      if (detached1 != null)
+        Scene.attach(detached1);
+    }
+    if (key == '6') {
+      if (detached2 != null)
+        Scene.attach(detached2);
+    }
   }
 
   @Override
