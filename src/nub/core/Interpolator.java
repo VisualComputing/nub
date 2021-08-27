@@ -670,12 +670,11 @@ class Interpolator {
     }
     _list.remove(index);
     setTime(firstTime());
-    if (rerun /* && _list.size() > 1 */) {
-      if (_list.size() > 1 && isRecurrent()) {
-        System.out.println("Warning: animation made non recurrent since there's only a single keyframe");
-        enableRecurrence(false);
-      }
-      _task.run();
+    if (rerun) {
+      if (_list.size() > 1)
+        _task.run();
+      else
+        interpolate(0);
     }
     if (keyFrame._handled)
       Graph.prune(keyFrame._node);
