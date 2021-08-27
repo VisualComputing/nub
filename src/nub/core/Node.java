@@ -219,7 +219,7 @@ public class Node {
   /**
    * Same as {this(null, new Vector(), new Quaternion(), 1, attach)}.
    *
-   * The {@code attach} var controls whether or not the node {@link #isReachable()} by the {@link Graph#render()} algorithm.
+   * The {@code attach} var controls whether or not the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
    *
    * @see #Node(Node, Vector, Quaternion, float, boolean)
    */
@@ -239,7 +239,7 @@ public class Node {
   /**
    * Same as {@code this(null, position, new Quaternion(), 1, attach)}.
    *
-   * The {@code attach} var controls whether or not the node {@link #isReachable()} by the {@link Graph#render()} algorithm.
+   * The {@code attach} var controls whether or not the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
    *
    * @see #Node(Node, Vector, Quaternion, float, boolean)
    */
@@ -259,7 +259,7 @@ public class Node {
   /**
    * Same as {@code this(null, position, orientation, 1, attach)}.
    *
-   * The {@code attach} var controls whether or not the node {@link #isReachable()} by the {@link Graph#render()} algorithm.
+   * The {@code attach} var controls whether or not the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
    *
    * @see #Node(Node, Vector, Quaternion, float, boolean)
    */
@@ -289,7 +289,7 @@ public class Node {
    * Same as {@code this(reference, position, orientation, 1}.
    *
    * @see #Node(Node, Vector, Quaternion, float)
-   * @see #isReachable()
+   * @see #isAttached()
    */
   public Node(Node reference, Vector position, Quaternion orientation) {
     this(reference, position, orientation, 1, true);
@@ -319,7 +319,7 @@ public class Node {
    * and {@link #magnitude()}, respectively. The {@link #bullsEyeSize()} is set to {@code 0.2}
    * and the {@link #highlight()} hint magnitude to {@code 0.15}.
    *
-   * The node {@link #isReachable()} by the {@link Graph#render()} algorithm iff the node
+   * The node {@link #isAttached()} by the {@link Graph#render()} algorithm iff the node
    * {@code reference} happens to be.
    *
    * @see Graph#attach(Node)
@@ -336,7 +336,7 @@ public class Node {
    * and {@link #magnitude()}, respectively. The {@link #bullsEyeSize()} is set to {@code 0.2}
    * and the {@link #highlight()} hint magnitude to {@code 0.15}.
    *
-   * The {@code attach} var controls whether or the node {@link #isReachable()} by the {@link Graph#render()} algorithm.
+   * The {@code attach} var controls whether or the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
    *
    * @see Graph#attach(Node)
    * @see Graph#detach(Node)
@@ -499,13 +499,13 @@ public class Node {
    */
   public Node copy() {
     // TODO should keyframes be copied?
-    return _copy(hint(), isReachable());
+    return _copy(hint(), isAttached());
   }
 
   /**
    * Performs a deep copy of this node and returns it.
    *
-   * The {@code attach} var controls whether or the node {@link #isReachable()} by the {@link Graph#render()} algorithm.
+   * The {@code attach} var controls whether or the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
    *
    * @see Graph#attach(Node)
    * @see Graph#detach(Node)
@@ -731,7 +731,7 @@ public class Node {
 
   /**
    * Sets {@link #reference()} to the world and make this node reachable
-   * (see {@link #isReachable()}).
+   * (see {@link #isAttached()}).
    *
    * @see #setReference(Node)
    * @see Graph#detach(Node)
@@ -760,6 +760,8 @@ public class Node {
    * @see Graph#detach(Node)
    */
   public void setReference(Node node) {
+    // invariant: keep top-down (either tree leading nodes or reference to child) references
+    // except for the root node of a detached branch.
     // 0. filter
     if (node == reference()) {
       return;
@@ -780,12 +782,7 @@ public class Node {
     if (_pruned) {
       throw new RuntimeException("Cannot set reference on pruned nodes");
     }
-    // 1. Check node needs to be reattached
-    boolean reachable = isReachable();
-    if (reachable) {
-      Graph.detach(this);
-    }
-    // 2. cache prev state
+    // 1. cache prev state
     boolean needs_cache = _position != null;
     Vector position = null;
     Quaternion orientation = null;
@@ -795,12 +792,36 @@ public class Node {
       orientation = this.worldOrientation().copy();
       magnitude = this.worldMagnitude();
     }
-    // 3. temporarily remove node from the graph while setting new reference
+    // 2. Update node tree paths
+    // 2a. Delete prev path
+    boolean attached = isAttached();
     if (reference() == null) {
       Graph._removeLeadingNode(this);
     }
     else {
       reference()._removeChild(this);
+    }
+    // 2b. Create new path
+    if (attached) {
+      if (node == null) {
+        Graph._addLeadingNode(this);
+      }
+      else {
+        // detach the (attached) node only if new reference is detached
+        if (!node.isAttached()) {
+          Graph.detach(this);
+        }
+        // any case add this as a child of new reference (invariant above)
+        node._addChild(this);
+      }
+    }
+    else {
+      if (node != null) {
+        // add the (detached) node as child only if new reference is detached (invariant above)
+        if (!node.isAttached()) {
+          node._addChild(this);
+        }
+      }
     }
     // 4. actually assign reference
     _reference = node;
@@ -811,20 +832,6 @@ public class Node {
       this.setWorldMagnitude(magnitude);
       // note that restoring the cache always call _modified()
     }
-    // 6. re-attach when in need (step 1. above)
-    if (reachable) {
-      if (reference() == null) {
-        Graph.attach(this);
-      } else if (reference().isReachable()) {
-        Graph.attach(this);
-      } else {
-        reference()._addChild(this);
-      }
-    } else if (reference() != null) {
-      if (!reference().isReachable()) {
-        reference()._addChild(this);
-      }
-    }
   }
 
   /**
@@ -833,7 +840,7 @@ public class Node {
    * @see #setReference(Node) 
    * @see Graph#detach(Node)
    */
-  public boolean isReachable() {
+  public boolean isAttached() {
     return _reachable;
   }
   

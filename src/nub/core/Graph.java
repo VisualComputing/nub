@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
- * {@link #detach(Node)}, {@link Node#isReachable()}, {@link #branch(Node)}, and {@link #clear()}.
+ * {@link #detach(Node)}, {@link Node#isAttached()}, {@link #branch(Node)}, and {@link #clear()}.
  * <h2>The eye</h2>
  * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
  * (see {@link #setEye(Node)}). Several functions handle the eye, such as
@@ -832,7 +832,7 @@ public class Graph {
   /**
    * Make all the nodes in the {@code node} branch eligible for garbage collection.
    * <p>
-   * A call to {@link Node#isReachable()} on all {@code node} descendants
+   * A call to {@link Node#isAttached()} on all {@code node} descendants
    * (including {@code node}) will return false, after issuing this method. It also means
    * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #render()} algorithm.
@@ -844,14 +844,16 @@ public class Graph {
    * @see #clear()
    * @see #attach(Node)
    * @see #detach(Node)
-   * @see Node#isReachable()
+   * @see Node#isAttached()
    */
   public static void prune(Node node) {
     if (node.isEye()) {
       System.out.println("Waning: eye nodes can't be pruned. Nothing done!");
       return;
     }
-    detach(node);
+    if (node.isAttached()) {
+      detach(node);
+    }
     List<Node> branch = branch(node);
     for (Node descendant : branch) {
       descendant._unregisterTasks();
@@ -861,14 +863,14 @@ public class Graph {
 
   /**
    * Detach node from the tree so that it's not reached from the {@link #render()} algorithm. A call
-   * to {@link Node#isReachable()} (including the node descendants) will then return {@code false}. Only
-   * reachable nodes may be detached. Returns {@code true} if succeeded and {@code false} otherwise.
+   * to {@link Node#isAttached()} (including the node descendants) will then return {@code false}. Only
+   * attached nodes may be detached. Returns {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #attach(Node)
    * @see #prune(Node)
    */
   public static boolean detach(Node node) {
-    if (node.isReachable()) {
+    if (node.isAttached()) {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
         descendant._reachable = false;
@@ -881,13 +883,16 @@ public class Graph {
       }
       return true;
     }
-    return false;
+    else {
+      System.out.println("Warning: node already detached. Nothing done!");
+      return false;
+    }
   }
 
   /**
    * Attaches node to the tree so that it may be reached from the {@link #render()} algorithm.
-   * A call to {@link Node#isReachable()} will then return {@code true} only if the node reference
-   * is itself reachable or it is the world. Only non-reachable nodes may be attached. Returns
+   * A call to {@link Node#isAttached()} will then return {@code true} only if the node reference
+   * is itself attached or it is the world. Only detached nodes may be attached. Returns
    * {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #detach(Node)
@@ -895,11 +900,11 @@ public class Graph {
    */
   public static boolean attach(Node node) {
     if (node._pruned) {
-      System.out.println("Waning: pruned nodes can't be attached. Nothing done!");
+      System.out.println("Warning: pruned nodes can't be attached. Nothing done!");
       return false;
     }
-    if (node.isReachable()) {
-      System.out.println("Waning: no need to restore an already reachable node. Nothing done!");
+    if (node.isAttached()) {
+      System.out.println("Warning: node already attached. Nothing done!");
       return false;
     }
     boolean reach = false;
@@ -908,7 +913,7 @@ public class Graph {
       reach = true;
     } else {
       node.reference()._addChild(node);
-      if (node.reference().isReachable()) {
+      if (node.reference().isAttached()) {
         reach = true;
       }
     }
@@ -2820,7 +2825,7 @@ public class Graph {
     if (subtree == null) {
       for (Node node : _leadingNodes())
         _render(node);
-    } else if (subtree.isReachable()) {
+    } else if (subtree.isAttached()) {
       if (subtree.reference() != null) {
         _matrixHandler.pushMatrix();
         _matrixHandler.applyWorldTransformation(subtree.reference());
