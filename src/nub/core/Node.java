@@ -1162,7 +1162,7 @@ public class Node {
     boolean filter = _translationFilter != null;
     if (filter) {
       cacheTargetTranslation = vector;
-      if (cacheTargetPosition != null) {
+      if (cacheTargetPosition == null) {
         cacheTargetPosition = Vector.add(position(), vector);
       }
     }
@@ -1437,7 +1437,7 @@ public class Node {
     boolean filter = _rotationFilter != null;
     if (filter) {
       cacheTargetRotation = quaternion;
-      if (cacheTargetOrientation != null) {
+      if (cacheTargetOrientation == null) {
         cacheTargetOrientation = Quaternion.compose(orientation(), quaternion);
       }
     }
@@ -1729,7 +1729,7 @@ public class Node {
     }
     if (filter) {
       cacheTargetScaling = scaling;
-      if (cacheTargetMagnitude != 0) {
+      if (cacheTargetMagnitude == 0) {
         cacheTargetMagnitude = magnitude() * scaling;
       }
     }
