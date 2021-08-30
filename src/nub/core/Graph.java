@@ -873,7 +873,7 @@ public class Graph {
     if (node.isAttached()) {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
-        descendant._reachable = false;
+        descendant._attached = false;
       }
       if (node.reference() != null) {
         node.reference()._removeChild(node);
@@ -920,7 +920,7 @@ public class Graph {
     if (reach) {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
-        descendant._reachable = true;
+        descendant._attached = true;
       }
     }
     return true;

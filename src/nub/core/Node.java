@@ -128,7 +128,7 @@ public class Node {
   protected Quaternion _orientation;
   protected Node _reference;
   protected long _lastUpdate;
-  protected boolean _reachable;
+  protected boolean _attached;
   protected boolean _pruned;
 
   protected Interpolator _interpolator;
@@ -841,7 +841,7 @@ public class Node {
    * @see Graph#detach(Node)
    */
   public boolean isAttached() {
-    return _reachable;
+    return _attached;
   }
   
   protected void _registerTasks() {
