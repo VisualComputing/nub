@@ -506,20 +506,28 @@ public class Node {
    * Performs a deep copy of this node, and its descendants iff {@code recursive} is {@code true}.
    */
   public Node copy(boolean recursive) {
+    // TODO replace?
+    // Node node = this._copy(this.hint(), this.isAttached());
     Node node = this._copy();
     if (recursive) {
-      List<Node> branch = Graph.branch(this);
-      for (Node descendant : branch) {
-        if (descendant != this) {
-          descendant._copy();
-        }
-      }
+      _copy(this, node);
     }
     return node;
   }
 
+  protected static void _copy(Node node, Node reference) {
+    for (Node child : node.children()) {
+      Node copy = child._copy(reference);
+      _copy(child, copy);
+    }
+  }
+
   protected Node _copy() {
-    return this._copy(hint(), isAttached());
+    return this._copy(this.hint(), this.isAttached());
+  }
+
+  protected Node _copy(Node reference) {
+    return _copy(reference, this.hint(), this.isAttached());
   }
 
   protected Node _copy(int hint, boolean attach) {
