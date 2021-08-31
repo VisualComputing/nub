@@ -479,6 +479,7 @@ public class Node {
   /**
    * Returns the scaling inertial task.
    * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
+
    */
   public Task scalingInertialTask() {
     return _scalingTask;
@@ -493,35 +494,39 @@ public class Node {
   }
 
   /**
-   * Same as {@code return copy(hint(), isReachable())}.
+   * Same as {@code return copy(true)}.
    *
    * @see #copy(boolean)
    */
   public Node copy() {
-    // TODO should keyframes be copied?
-    return _copy(hint(), isAttached());
+    return copy(true);
   }
 
   /**
-   * Performs a deep copy of this node and returns it.
-   *
-   * The {@code attach} var controls whether or the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
-   *
-   * @see Graph#attach(Node)
-   * @see Graph#detach(Node)
+   * Performs a deep copy of this node, and its descendants iff {@code recursive} is {@code true}.
    */
-  public Node copy(boolean attach) {
-    return _copy(hint(), attach);
-  }
-
-  protected Node _copy(int hint, boolean attach) {
-    Node node = new Node(reference(), position().copy(), orientation().copy(), magnitude(), attach);
-    node._setHint(this, hint);
+  public Node copy(boolean recursive) {
+    Node node = this._copy();
+    if (recursive) {
+      List<Node> branch = Graph.branch(this);
+      for (Node descendant : branch) {
+        if (descendant != this) {
+          descendant._copy();
+        }
+      }
+    }
     return node;
   }
 
-  protected void _setHint(Node node) {
-    _setHint(node, node._mask);
+  protected Node _copy() {
+    return this._copy(hint(), isAttached());
+  }
+
+  protected Node _copy(int hint, boolean attach) {
+    // TODO should keyframes be copied?
+    Node node = new Node(reference(), position().copy(), orientation().copy(), magnitude(), attach);
+    node._setHint(this, hint);
+    return node;
   }
 
   protected void _setHint(Node node, int hint) {

@@ -1939,7 +1939,7 @@ public class Graph {
       Interpolator cacheInterpolator = cacheEye._interpolator;
       Interpolator tempInterpolator = new Interpolator(cacheEye);
       cacheEye._interpolator = tempInterpolator;
-      Node tempEye = eye().copy();
+      Node tempEye = eye().copy(false);
       setEye(tempEye);
       tempInterpolator.addKeyFrame(tempEye.transientCopy());
       fit(center, radius);
@@ -2031,7 +2031,7 @@ public class Graph {
       Interpolator cacheInterpolator = cacheEye._interpolator;
       Interpolator tempInterpolator = new Interpolator(cacheEye);
       cacheEye._interpolator = tempInterpolator;
-      Node tempEye = eye().copy();
+      Node tempEye = eye().copy(false);
       setEye(tempEye);
       tempInterpolator.addKeyFrame(tempEye.transientCopy());
       fitFOV();
@@ -2118,7 +2118,7 @@ public class Graph {
       Interpolator cacheInterpolator = cacheEye._interpolator;
       Interpolator tempInterpolator = new Interpolator(cacheEye);
       cacheEye._interpolator = tempInterpolator;
-      Node tempEye = eye().copy();
+      Node tempEye = eye().copy(false);
       setEye(tempEye);
       tempInterpolator.addKeyFrame(tempEye.transientCopy());
       fit(corner1, corner2);
@@ -2191,7 +2191,7 @@ public class Graph {
       Interpolator cacheInterpolator = cacheEye._interpolator;
       Interpolator tempInterpolator = new Interpolator(cacheEye);
       cacheEye._interpolator = tempInterpolator;
-      Node tempEye = eye().copy();
+      Node tempEye = eye().copy(false);
       setEye(tempEye);
       tempInterpolator.addKeyFrame(tempEye.transientCopy());
       fit(x, y, width, height);

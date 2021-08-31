@@ -89,7 +89,7 @@ class Interpolator {
 
     protected KeyFrame(KeyFrame other) {
       if (other._handled) {
-        this._node = other._node.copy();
+        this._node = other._node.copy(false);
       }
       else {
         this._node = other._node;

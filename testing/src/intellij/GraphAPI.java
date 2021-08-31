@@ -109,6 +109,9 @@ public class GraphAPI extends PApplet {
       if (detached2 != null)
         Scene.attach(detached2);
     }
+    if (key == '7') {
+      n2.copy();
+    }
   }
 
   @Override
