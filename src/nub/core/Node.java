@@ -515,13 +515,9 @@ public class Node {
 
   protected static void _copy(Node node, Node reference) {
     for (Node child : node.children()) {
-      Node copy = child._copy(reference);
+      Node copy = child._copy(reference, child.hint(), child.isAttached());
       _copy(child, copy);
     }
-  }
-
-  protected Node _copy(Node reference) {
-    return _copy(reference, this.hint(), this.isAttached());
   }
 
   protected Node _copy(int hint, boolean attach) {
