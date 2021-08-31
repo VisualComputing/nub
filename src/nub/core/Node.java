@@ -523,8 +523,12 @@ public class Node {
   }
 
   protected Node _copy(int hint, boolean attach) {
+    return _copy(this.reference(), hint, attach);
+  }
+
+  protected Node _copy(Node reference, int hint, boolean attach) {
     // TODO should keyframes be copied?
-    Node node = new Node(reference(), position().copy(), orientation().copy(), magnitude(), attach);
+    Node node = new Node(reference, this.position().copy(), this.orientation().copy(), this.magnitude(), attach);
     node._setHint(this, hint);
     return node;
   }
