@@ -506,9 +506,7 @@ public class Node {
    * Performs a deep copy of this node, and its descendants iff {@code recursive} is {@code true}.
    */
   public Node copy(boolean recursive) {
-    // TODO replace?
-    // Node node = this._copy(this.hint(), this.isAttached());
-    Node node = this._copy();
+    Node node = this._copy(this.hint(), this.isAttached());
     if (recursive) {
       _copy(this, node);
     }
@@ -520,10 +518,6 @@ public class Node {
       Node copy = child._copy(reference);
       _copy(child, copy);
     }
-  }
-
-  protected Node _copy() {
-    return this._copy(this.hint(), this.isAttached());
   }
 
   protected Node _copy(Node reference) {
