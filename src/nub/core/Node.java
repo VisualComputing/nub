@@ -829,9 +829,9 @@ public class Node {
         }
       }
     }
-    // 4. actually assign reference
+    // 3. actually assign reference
     _reference = node;
-    // 5. restore cache prev state (step 2. above)
+    // 4. restore cache prev state (step 2. above)
     if (needs_cache) {
       this.setWorldPosition(position);
       this.setWorldOrientation(orientation);
