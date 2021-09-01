@@ -504,7 +504,7 @@ public class Node {
 
   /**
    * Performs a deep copy of this node, and its descendants iff {@code recursive} is {@code true}.
-   * Note that neither the node keyframes nor the filters get copied.
+   * Note that neither the keyframes nor the node filters get copied.
    */
   public Node copy(boolean recursive) {
     Node node = this._copy(this.hint(), this.isAttached());
