@@ -1027,7 +1027,7 @@ public class Scene extends Graph {
 
   public void _displayAnimationHint(Node node) {
     PGraphics pg = context();
-    if (Graph._isHintEnabled(_animationMask(node), Node.SHAPE)) {
+    if (Graph._isHintEnabled(_keyframesMask(node), Node.SHAPE)) {
       pg.pushStyle();
       if (_rmrShape(node) != null) {
         pg.shapeMode(pg.shapeMode);
@@ -1038,19 +1038,19 @@ public class Scene extends Graph {
       }
       pg.popStyle();
     }
-    if (Graph._isHintEnabled(_animationMask(node), Node.TORUS)) {
+    if (Graph._isHintEnabled(_keyframesMask(node), Node.TORUS)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.fill(_torusColor(node));
       drawTorusSolenoid(pg, _torusFaces(node), 5);
       pg.popStyle();
     }
-    if (Graph._isHintEnabled(_animationMask(node), Node.AXES)) {
+    if (Graph._isHintEnabled(_keyframesMask(node), Node.AXES)) {
       pg.pushStyle();
       drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
       pg.popStyle();
     }
-    if (Graph._isHintEnabled(_animationMask(node), Node.CAMERA)) {
+    if (Graph._isHintEnabled(_keyframesMask(node), Node.CAMERA)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_cameraStroke(node));
@@ -1058,7 +1058,7 @@ public class Scene extends Graph {
       _drawEye(pg, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
       pg.popStyle();
     }
-    if (Graph._isHintEnabled(_animationMask(node), Node.BULLSEYE)) {
+    if (Graph._isHintEnabled(_keyframesMask(node), Node.BULLSEYE)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(_bullsEyeStroke(node));

@@ -1056,11 +1056,11 @@ public class Graph {
     }
     if (_eye != null) {
       _eye._frustumGraphs.remove(this);
-      _eye._animationMask = Node.AXES;
+      _eye._keyframesMask = Node.AXES;
     }
     _eye = eye;
     _eye._frustumGraphs.add(this);
-    _eye._animationMask = Node.CAMERA;
+    _eye._keyframesMask = Node.CAMERA;
     _modified();
   }
 
@@ -4529,8 +4529,8 @@ public class Graph {
     return interpolator._steps;
   }
 
-  protected int _animationMask(Node interpolator) {
-    return interpolator._animationMask;
+  protected int _keyframesMask(Node interpolator) {
+    return interpolator._keyframesMask;
   }
 
   protected int _splineStroke(Node interpolator) {

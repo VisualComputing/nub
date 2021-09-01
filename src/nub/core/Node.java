@@ -179,7 +179,7 @@ public class Node {
   // Bounds
   protected HashSet<Graph> _frustumGraphs;
   // keyframes
-  protected int _animationMask;
+  protected int _keyframesMask;
   protected int _splineStroke;
   protected int _splineWeight;
   protected int _steps;
@@ -376,7 +376,7 @@ public class Node {
     _steps = 3;
     _children = new ArrayList<Node>();
     _frustumGraphs = new HashSet<Graph>();
-    _animationMask = Node.AXES;
+    _keyframesMask = Node.AXES;
     setInteraction(this::interact);
     // hack
     Method method = null;
@@ -437,7 +437,7 @@ public class Node {
   public Node(Node reference, Consumer<processing.core.PGraphics> shape, Vector position, Quaternion orientation, float magnitude) {
     this(reference, position, orientation, magnitude);
     setShape(shape);
-    _animationMask = Node.SHAPE;
+    _keyframesMask = Node.SHAPE;
   }
 
   /**
@@ -449,7 +449,7 @@ public class Node {
   public Node(Node reference, processing.core.PShape shape, Vector position, Quaternion orientation, float magnitude) {
     this(reference, position, orientation, magnitude);
     setShape(shape);
-    _animationMask = Node.SHAPE;
+    _keyframesMask = Node.SHAPE;
   }
 
   /**
@@ -545,7 +545,7 @@ public class Node {
     _splineStroke = node._splineStroke;
     _splineWeight = node._splineWeight;
     _steps = node._steps;
-    _animationMask = node._animationMask;
+    _keyframesMask = node._keyframesMask;
   }
 
   /**
@@ -3361,10 +3361,10 @@ public class Node {
    * {@code configHint(Node.BULLSEYE, bullseyeStroke, bullseyeShape)}.</li>
    * <li>{@link #TORUS} hint: configHint(Node.TORUS, torusStroke)}, or
    * configHint(Node.TORUS, torusStroke, torusFaces)}.</li>
-   * <li>{@link #KEYFRAMES} hint: configHint(Node.ANIMATION, animationMask)} or
-   * configHint(Node.ANIMATION, animationMask, steps)} or
-   * configHint(Node.ANIMATION, animationMask, steps, splineStroke)}, or
-   * configHint(Node.ANIMATION, animationMask, steps, splineStroke, splineWeight)}.</li>
+   * <li>{@link #KEYFRAMES} hint: configHint(Node.KEYFRAMES, keyframesMask)} or
+   * configHint(Node.KEYFRAMES, keyframesMask, steps)} or
+   * configHint(Node.KEYFRAMES, keyframesMask, steps, splineStroke)}, or
+   * configHint(Node.KEYFRAMES, keyframesMask, steps, splineStroke, splineWeight)}.</li>
    * </ol>
    * Note that the {@code cameraStroke}, {@code splineStroke}, {@code bullseyeStroke}
    * and {@code torusStroke} are color {@code int} vars; {@code cameraLength} and
@@ -3414,7 +3414,7 @@ public class Node {
           return;
         }
         if (hint == KEYFRAMES && Graph.isNumInstance(params[0])) {
-          _animationMask = Graph.castToInt(params[0]);
+          _keyframesMask = Graph.castToInt(params[0]);
           _interpolator._pathIsValid = false;
           return;
         }
@@ -3445,7 +3445,7 @@ public class Node {
           }
         }
         if (hint == KEYFRAMES && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
-          _animationMask = Graph.castToInt(params[0]);
+          _keyframesMask = Graph.castToInt(params[0]);
           _setSteps(Graph.castToInt(params[1]));
           _interpolator._pathIsValid = false;
           return;
@@ -3454,7 +3454,7 @@ public class Node {
       case 3:
         if (hint == KEYFRAMES && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])
                 && Graph.isNumInstance(params[2])) {
-          _animationMask = Graph.castToInt(params[0]);
+          _keyframesMask = Graph.castToInt(params[0]);
           _setSteps(Graph.castToInt(params[1]));
           _splineStroke = Graph.castToInt(params[2]);
           _interpolator._pathIsValid = false;
@@ -3464,7 +3464,7 @@ public class Node {
       case 4:
         if (hint == KEYFRAMES && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])
                 && Graph.isNumInstance(params[2]) && Graph.isNumInstance(params[3])) {
-          _animationMask = Graph.castToInt(params[0]);
+          _keyframesMask = Graph.castToInt(params[0]);
           _setSteps(Graph.castToInt(params[1]));
           _splineStroke = Graph.castToInt(params[2]);
           _splineWeight = Graph.castToInt(params[3]);
@@ -3586,25 +3586,12 @@ public class Node {
 
   // TODO: decide these two
 
-  /**
-   * Same as {@code addKeyFrame(node().hint(), time)}.
-   *
-   * @see #addKeyFrame(int, float)
-   * @see #addKeyFrame(float)
-   * @see #addKeyFrame(Node, float)
-   * @see #addKeyFrame(Node)
-   */
   /*
   public void addKeyFrame(float time) {
     _interpolator.addKeyFrame(time);
   }
   //  */
 
-  /**
-   * Same as {@code addKeyFrame(hint, 1)}.
-   *
-   * @see #addKeyFrame(int, float)
-   */
   /*
   public void addKeyFrame(int hint) {
     addKeyFrame(hint, 1);
@@ -3648,7 +3635,7 @@ public class Node {
   }
 
   /**
-   * Interpolate the at the given time along the keyframes path.
+   * Interpolate the node at the given time along the keyframes path.
    */
   public void interpolate(float time) {
     _interpolator.interpolate(time);
