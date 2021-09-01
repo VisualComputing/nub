@@ -79,9 +79,9 @@ import java.util.function.Function;
  * {@link Graph#render(Node)}. Customize the rendering traversal with
  * {@link Graph#setVisit(Node, BiConsumer)} (see also {@link #cull} and {@link #bypass()}).
  * <h2>Motion filters</h2>
- * One interesting feature of a node is that its displacements can be constrained.
- * When a filter is attached to a node, it filters the input of {@link #translate(Vector)},
- * {@link #rotate(Quaternion)}, {@link #orbit(Vector, float)} and {@link #scale(float)} and
+ * One interesting feature of a node is that its displacements can be filtered.
+ * Setting a node filter allows to refine the input of {@link #translate(Vector)},
+ * {@link #rotate(Quaternion)}, {@link #orbit(Vector, float)} and {@link #scale(float)} so that
  * only the resulting filtered motion is applied to the node. The default filters are
  * {@code null} resulting in no filtering. Use {@link #setTranslationFilter(BiFunction, Object[])},
  * {@link #setRotationFilter(BiFunction, Object[])} and {@link #setScalingFilter(BiFunction, Object[])}
@@ -747,7 +747,10 @@ public class Node {
   }
 
   /**
-   * Sets the {@link #reference()} of the node.
+   * Sets the {@link #reference()} of the node. The node {@link #worldPosition()},
+   * {@link #worldOrientation()} and {@link #worldMagnitude()} are kept. Setting a detached
+   * reference of an attached node will make the node detached, while setting an attached reference
+   * of a detached node will keep it detached.
    * <p>
    * The node {@link #position()}, {@link #orientation()} and {@link #magnitude()} are then
    * defined in the {@link #reference()} coordinate system.
@@ -842,9 +845,12 @@ public class Node {
 
   /**
    * Returns whether or not the node is reachable by the rendering algorithm.
+   * Note that a detached child of an attached node is not listed in
+   * {@link #children()}, even though they hold a {@link #reference()} to the parent node.
    * 
-   * @see #setReference(Node) 
    * @see Graph#detach(Node)
+   * @see Graph#attach(Node) 
+   * @see #setReference(Node)
    */
   public boolean isAttached() {
     return _attached;
@@ -931,7 +937,12 @@ public class Node {
   }
 
   /**
-   * Returns the list a child nodes of this node.
+   * Returns the list a child nodes of this node. Note that detached children of an attached
+   * node are not listed, even though they hold a {@link #reference()} to the node.
+   *
+   * @see #isAttached()
+   * @see Graph#attach(Node)
+   * @see Graph#detach(Node)
    */
   public List<Node> children() {
     return _children;

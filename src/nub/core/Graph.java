@@ -930,8 +930,7 @@ public class Graph {
    * Returns a list of all the nodes that are reachable by the {@link #render()}
    * algorithm.
    * <p>
-   * The method render the hierarchy to collect. Node collections should thus be kept at user space
-   * for efficiency.
+   * Note that node collections should be kept at user space for efficiency.
    *
    * @see #isEye(Node)
    */
