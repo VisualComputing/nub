@@ -84,8 +84,8 @@ public class Flock extends PApplet {
   // Sets current avatar as the eye reference and interpolate the eye to it
   void thirdPerson() {
     scene.eye().setReference(avatar);
-    // TODO reimplement it
-    // avatar.setWorldMagnitude(scene.eye());
+    if (avatar != null)
+      avatar.setWorldMagnitude(scene.eye());
     scene.fit(avatar, 1);
   }
 
@@ -93,8 +93,8 @@ public class Flock extends PApplet {
   void resetEye() {
     scene.eye().resetReference();
     scene.lookAt(scene.center());
-    // TODO reimplement it
-    // avatar.setWorldMagnitude(1);
+    if (avatar != null)
+      avatar.setWorldMagnitude(1);
     scene.fit(1);
   }
 
