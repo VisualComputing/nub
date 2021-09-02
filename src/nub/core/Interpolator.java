@@ -48,7 +48,7 @@ import java.util.ListIterator;
  * greater than the {@link #lastTime()} (unless {@link #enableRecurrence()} is called).
  */
 class Interpolator {
-  // TODO mem handling all over the place
+  // TODO mem handling. Check for: if (Graph.TimingHandler.isTaskRegistered(_task))
   /**
    * Returns whether or not this interpolator matches other.
    *
@@ -189,6 +189,7 @@ class Interpolator {
     setNode(node);
     _t = 0.0f;
     _speed = 1.0f;
+    // TODO decouple !?
     _task = new nub.processing.TimingTask(() -> Interpolator.this._execute());
     _recurrent = false;
     _pathIsValid = false;
@@ -209,9 +210,12 @@ class Interpolator {
     this.setNode(other.node());
     this._t = other._t;
     this._speed = other._speed;
-    this._task = new nub.processing.TimingTask(() -> Interpolator.this._execute());
-    this._task.setPeriod(other.task().period());
-    this._task.enableConcurrence(other._task.isConcurrent());
+    // TODO experimental
+    if (Graph.TimingHandler.isTaskRegistered(other._task)) {
+      this._task = new nub.processing.TimingTask(() -> Interpolator.this._execute());
+      this._task.setPeriod(other._task.period());
+      this._task.enableConcurrence(other._task.isConcurrent());
+    }
     this._recurrent = other._recurrent;
     this._pathIsValid = false;
     this._valuesAreValid = false;
@@ -333,7 +337,8 @@ class Interpolator {
    * @see Task#toggle()
    */
   public void toggle() {
-    _task.toggle();
+    if (Graph.TimingHandler.isTaskRegistered(_task))
+      _task.toggle();
   }
 
   /**
@@ -344,7 +349,8 @@ class Interpolator {
    * @see #run(float)
    */
   public void run() {
-    _task.run();
+    if (Graph.TimingHandler.isTaskRegistered(_task))
+      _task.run();
   }
 
   /**
@@ -366,7 +372,8 @@ class Interpolator {
    */
   public void run(float speed, long period) {
     setSpeed(speed);
-    _task.run(period);
+    if (Graph.TimingHandler.isTaskRegistered(_task))
+      _task.run(period);
   }
 
   /**
@@ -396,7 +403,8 @@ class Interpolator {
   public void run(float time, float speed, int period) {
     setTime(time);
     setSpeed(speed);
-    _task.run(period);
+    if (Graph.TimingHandler.isTaskRegistered(_task))
+      _task.run(period);
   }
 
   /**
@@ -406,7 +414,8 @@ class Interpolator {
    * the {@link #node()} to {@link #firstTime()}.
    */
   public void reset() {
-    _task.stop();
+    if (Graph.TimingHandler.isTaskRegistered(_task))
+      _task.stop();
     setTime(firstTime());
   }
 
@@ -664,7 +673,9 @@ class Interpolator {
     _valuesAreValid = false;
     _pathIsValid = false;
     _currentKeyFrameValid = false;
-    boolean rerun = _task.isActive();
+    boolean rerun = false;
+    if (Graph.TimingHandler.isTaskRegistered(_task))
+      rerun = _task.isActive();
     if (rerun) {
       _task.stop();
     }
@@ -687,7 +698,8 @@ class Interpolator {
    * @see Graph#prune(Node)
    */
   public void clear() {
-    _task.stop();
+    if (Graph.TimingHandler.isTaskRegistered(_task))
+      _task.stop();
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();

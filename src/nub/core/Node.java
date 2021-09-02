@@ -346,6 +346,7 @@ public class Node {
     setPosition(position);
     setOrientation(orientation);
     setMagnitude(magnitude);
+    _interpolator = new Interpolator(this);
     _registerTasks();
     enablePicking(CAMERA | AXES | HUD | SHAPE | BOUNDS | BULLSEYE | TORUS | FILTER | BONE);
     _id = ++_counter;
@@ -370,7 +371,6 @@ public class Node {
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
     _cameraStroke = -65281;
     // keyframes
-    _interpolator = new Interpolator(this);
     _splineStroke = -65281;
     _splineWeight = 3;
     _steps = 3;
@@ -857,6 +857,9 @@ public class Node {
   }
   
   protected void _registerTasks() {
+    if (!Graph.TimingHandler.isTaskRegistered(_interpolator._task)) {
+      _interpolator._task = new nub.processing.TimingTask(() -> _interpolator._execute());
+    }
     if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
       _translationTask = new InertialTask() {
         @Override
@@ -893,9 +896,7 @@ public class Node {
   }
 
   protected void _unregisterTasks() {
-    if (isEye()) {
-      return;
-    }
+    TimingHandler.unregisterTask(_interpolator._task);
     TimingHandler.unregisterTask(_translationTask);
     TimingHandler.unregisterTask(_rotationTask);
     TimingHandler.unregisterTask(_orbitTask);
