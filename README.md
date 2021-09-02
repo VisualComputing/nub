@@ -154,7 +154,7 @@ Note that the optional `inertia` parameter should be a value in [0..1], `0` no i
 
 ## Motion filters
 
-Calling `setTranslationFilter(filter params)`, `setRotationFilter(filter, params)` and/or `setScalingFilter(filter, params) will apply a `filter` which is a function used to limit the node motion when calling any of the methods found in the previous section. The node provides the following default filters: `translationalAxisFilter`, `translationalPlaneFilter` and `rotationalAxisFilter` (see the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo/Luxo.pde)).
+Calling `setTranslationFilter(filter params)`, `setRotationFilter(filter, params)` and/or `setScalingFilter(filter, params)` will apply a `filter` which is a function used to limit the node motion when calling any of the methods found in the previous section. The node provides the following default filters: `translationalAxisFilter`, `translationalPlaneFilter` and `rotationalAxisFilter` (see the [NodeFilters](https://github.com/VisualComputing/nub/tree/master/examples/basics/NodeFilters/NodeFilters.pde) and the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo/Luxo.pde) examples).
 
 ## Shapes
 
