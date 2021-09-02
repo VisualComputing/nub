@@ -205,7 +205,7 @@ void setup() {
     // to the previously added key-frame and expressed in seconds.
     shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1 : 4);
   }
-  shape.animte();
+  shape.animate();
 }
 ```
 
