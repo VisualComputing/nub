@@ -1567,8 +1567,16 @@ public class Node {
    * @see #_orbit(Quaternion, Vector, float)
    */
   protected void _orbit(Quaternion quaternion, Vector center) {
-    orientation().compose(_rotationFilter != null ? this._rotationFilter.apply(this, cacheRotationParams) : quaternion);
-    orientation().normalize(); // Prevents numerical drift
+    boolean filter = _rotationFilter != null;
+    if (filter) {
+      cacheTargetRotation = quaternion;
+      if (cacheTargetOrientation == null) {
+        cacheTargetOrientation = Quaternion.compose(orientation(), quaternion);
+      }
+      quaternion = this._rotationFilter.apply(this, cacheRotationParams);
+    }
+    _orientation.compose(quaternion);
+    _orientation.normalize(); // Prevents numerical drift
 
     // Original in nodes-0.1.x and proscene:
     //Vector vector = Vector.add(center, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), center)));

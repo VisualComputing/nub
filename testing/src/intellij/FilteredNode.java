@@ -26,11 +26,11 @@ public class FilteredNode extends PApplet {
   String renderer = P3D;
 
   public void settings() {
-    size(700, 700, P3D);
+    size(1080, 1080, renderer);
   }
 
   public void setup() {
-    font = loadFont("FreeSans-16.vlw");
+    font = loadFont("FreeSans-24.vlw");
     textFont(font);
     scene = new Scene(this);
     node = new Node();
@@ -52,6 +52,7 @@ public class FilteredNode extends PApplet {
   public void mouseMoved() {
     if (!scene.isTagValid("key"))
       scene.mouseTag();
+    updateFilters();
   }
 
   public void mouseDragged() {
@@ -102,35 +103,36 @@ public class FilteredNode extends PApplet {
   }
 
   void updateFilters() {
+    Node filteredNode = scene.isTagValid("key") ? node : scene.eye();
     translationAxis = translationAxisType == 0 ? Vector.plusI : translationAxisType == 1 ? Vector.plusJ : Vector.plusK;
     rotationAxis = rotationAxisType == 0 ? Vector.plusI : rotationAxisType == 1 ? Vector.plusJ : Vector.plusK;
     if (space == WORLD || space == EYE) {
-      translationAxis = node.displacement(translationAxis, space == EYE ? scene.eye() : null);
-      rotationAxis = node.displacement(rotationAxis, space == EYE ? scene.eye() : null);
+      translationAxis = filteredNode.displacement(translationAxis, space == EYE ? scene.eye() : null);
+      rotationAxis = filteredNode.displacement(rotationAxis, space == EYE ? scene.eye() : null);
     }
     switch (translationFilter) {
       case FREE:
-        node.resetTranslationFilter();
+        filteredNode.resetTranslationFilter();
         break;
       case PLANE:
-        node.setTranslationPlaneFilter(translationAxis);
+        filteredNode.setTranslationPlaneFilter(translationAxis);
         break;
       case AXIS:
-        node.setTranslationAxisFilter(translationAxis);
+        filteredNode.setTranslationAxisFilter(translationAxis);
         break;
       case FORBIDDEN:
-        node.setForbidTranslationFilter();
+        filteredNode.setForbidTranslationFilter();
         break;
     }
     switch (rotationFilter) {
       case FREE:
-        node.resetRotationFilter();
+        filteredNode.resetRotationFilter();
         break;
       case AXIS:
-        node.setRotationAxisFilter(rotationAxis);
+        filteredNode.setRotationAxisFilter(rotationAxis);
         break;
       case FORBIDDEN:
-        node.setForbidRotationFilter();
+        filteredNode.setForbidRotationFilter();
         break;
     }
   }
@@ -197,12 +199,12 @@ public class FilteredNode extends PApplet {
 
   void displayText() {
     text("TRANSLATION :", 340, height - 30);
-    displayDirection(translationAxisType, (340 + 125), height - 30, 'D');
+    displayDirection(translationAxisType, (340 + 185), height - 30, 'D');
     displayType(translationFilter, 340, height - 60, 'T');
 
-    text("ROTATION :", width - 140, height - 30);
-    displayDirection(rotationAxisType, width - 40, height - 30, 'B');
-    displayType(rotationFilter, width - 140, height - 60, 'R');
+    text("ROTATION :", width - 210, height - 30);
+    displayDirection(rotationAxisType, width - 60, height - 30, 'B');
+    displayType(rotationFilter, width - 210, height - 60, 'R');
 
     switch (space) {
       case LOCAL:
