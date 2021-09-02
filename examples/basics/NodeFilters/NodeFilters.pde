@@ -1,3 +1,13 @@
+/**
+ * Node Filters.
+ * by Jean Pierre Charalambos.
+ *
+ * This example illustrates how to add filters to your nodes
+ * to limit their motion. Filters can be defined respect to
+ * the local, world or camera node. Try all the possibilities
+ * following the on screen helping text.
+ */
+
 import nub.core.*;
 import nub.primitives.*;
 import nub.processing.*;
