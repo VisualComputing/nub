@@ -95,8 +95,7 @@ void updateAvatar(Node node) {
 // Sets current avatar as the eye reference and interpolate the eye to it
 void thirdPerson() {
   scene.eye().setReference(avatar);
-  if (avatar != null)
-    avatar.setWorldMagnitude(scene.eye());
+  avatar.setWorldMagnitude(scene.eye());
   scene.fit(avatar, 1);
 }
 

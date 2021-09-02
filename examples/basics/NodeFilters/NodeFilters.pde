@@ -40,6 +40,7 @@ void setup() {
   node.translate(new Vector(20, 20, 0));
   scene.enableHint(Scene.GRID | Scene.AXES | Scene.BACKGROUND);
   scene.configHint(Scene.GRID, Scene.GridType.LINES, color(0, 255, 0));
+  scene.loadConfig();
 }
 
 void draw() {

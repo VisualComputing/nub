@@ -678,20 +678,7 @@ public class Scene extends Graph {
     json.setFloat("radius", _radius);
     json.setString("type", _type.name());
     json.setJSONObject("eye", _toJSONObject(eye()));
-
-    //TODO restore
-    /*
-    // keyFrames
-    JSONArray jsonPaths = new JSONArray();
-    int i = 0;
-    for (int _id : eye().keyFrameInterpolatorMap().keySet()) {
-      JSONObject jsonPath = new JSONObject();
-      jsonPath.setInt("_key", _id);
-      jsonPath.setJSONArray("keyFrames", _toJSONArray(_id));
-      jsonPaths.setJSONObject(i++, jsonPath);
-    }
-    json.setJSONArray("paths", jsonPaths);
-    //*/
+    // TODO: handle nodes (hint, ... restore keyframes)
     pApplet.saveJSONObject(json, fileName);
   }
 
@@ -726,25 +713,14 @@ public class Scene extends Graph {
       System.out.println("No such " + fileName + " found!");
     }
     if (json != null) {
-      // TODO pending
       _radius = json.getFloat("radius");
       String type = json.getString("type");
-      setType(type.equals("PERSPECTIVE") ? Type.PERSPECTIVE :
-          type.equals("ORTHOGRAPHIC") ? Type.ORTHOGRAPHIC : type.equals("TWO_D") ? Type.TWO_D : Type.CUSTOM);
+      setType(type.equals("PERSPECTIVE") ? Type.PERSPECTIVE : type.equals("ORTHOGRAPHIC") ? Type.ORTHOGRAPHIC : type.equals("TWO_D") ? Type.TWO_D : Type.CUSTOM);
+      //JSONObject jsonEye = json.getJSONObject("eye");
+      //eye().set(_toNode(jsonEye));
+      // same as previous two lines
       eye().set(_toNode(json.getJSONObject("eye")));
-
-      /*
-      JSONObject jsonEye = json.getJSONObject("eye");
-      eye().set(_toNode(jsonEye));
-      JSONArray paths = jsonEye.getJSONArray("paths");
-      for (int i = 0; i < paths.size(); i++) {
-        JSONObject path = paths.getJSONObject(i);
-        int _id = path.getInt("_key");
-        eye().clear(_id);
-        JSONArray keyFrames = path.getJSONArray("keyFrames");
-        _toInterpolator(keyFrames);
-      }
-      //*/
+      // TODO: handle nodes (hint, ... restore keyframes)
     }
   }
 
@@ -761,8 +737,7 @@ public class Scene extends Graph {
     qy = jsonNode.getJSONArray("orientation").getFloat(1);
     qz = jsonNode.getJSONArray("orientation").getFloat(2);
     qw = jsonNode.getJSONArray("orientation").getFloat(3);
-    Node node = new Node(new Vector(x, y, z), new Quaternion(qx, qy, qz, qw), jsonNode.getFloat("magnitude"));
-    detach(node);
+    Node node = new Node(new Vector(x, y, z), new Quaternion(qx, qy, qz, qw), jsonNode.getFloat("magnitude"), false);
     return node;
   }
 
