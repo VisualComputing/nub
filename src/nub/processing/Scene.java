@@ -716,9 +716,6 @@ public class Scene extends Graph {
       _radius = json.getFloat("radius");
       String type = json.getString("type");
       setType(type.equals("PERSPECTIVE") ? Type.PERSPECTIVE : type.equals("ORTHOGRAPHIC") ? Type.ORTHOGRAPHIC : type.equals("TWO_D") ? Type.TWO_D : Type.CUSTOM);
-      //JSONObject jsonEye = json.getJSONObject("eye");
-      //eye().set(_toNode(jsonEye));
-      // same as previous two lines
       eye().set(_toNode(json.getJSONObject("eye")));
       // TODO: handle nodes (hint, ... restore keyframes)
     }
