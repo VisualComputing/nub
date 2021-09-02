@@ -190,7 +190,7 @@ class Interpolator {
     _t = 0.0f;
     _speed = 1.0f;
     // TODO decouple !?
-    _task = new nub.processing.TimingTask(() -> Interpolator.this._execute());
+    //_task = new nub.processing.TimingTask(() -> Interpolator.this._execute());
     _recurrent = false;
     _pathIsValid = false;
     _valuesAreValid = false;
@@ -688,14 +688,14 @@ class Interpolator {
         interpolate(0);
     }
     if (keyFrame._handled)
-      Graph.prune(keyFrame._node);
+      Graph.detach(keyFrame._node);
     return keyFrame._node;
   }
 
   /**
    * Removes all keyframes from the path.
    *
-   * @see Graph#prune(Node)
+   * @see Graph#detach(Node)
    */
   public void clear() {
     if (Graph.TimingHandler.isTaskRegistered(_task))
@@ -704,7 +704,7 @@ class Interpolator {
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
       if (keyFrame._handled)
-        Graph.prune(keyFrame._node);
+        Graph.detach(keyFrame._node);
     }
     _list.clear();
     _path.clear();
@@ -818,7 +818,7 @@ class Interpolator {
       if (!_valuesAreValid)
         _updateModifiedKeyFrames();
       if (_list.get(0) == _list.get(_list.size() - 1)) {
-        _path.add(Node.transientNode(null, _list.get(0)._node.worldPosition(), _list.get(0)._node.worldOrientation(), _list.get(0)._node.worldMagnitude()));
+        _path.add(new Node(null, _list.get(0)._node.worldPosition(), _list.get(0)._node.worldOrientation(), _list.get(0)._node.worldMagnitude(), false));
       }
       else {
         KeyFrame[] keyFrames = new KeyFrame[4];
@@ -836,10 +836,10 @@ class Interpolator {
           pvec2 = Vector.add(pvec2, keyFrames[2]._tangentVector());
           for (int step = 0; step < Node.maxSteps; ++step) {
             float alpha = step / (float) Node.maxSteps;
-            Node node = Node.transientNode(null,
-                Vector.add(keyFrames[1]._node.worldPosition(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
-                Quaternion.squad(keyFrames[1]._node.worldOrientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.worldOrientation(), alpha),
-                Vector.lerp(keyFrames[1]._node.worldMagnitude(), keyFrames[2]._node.worldMagnitude(), alpha));
+            Node node = new Node(null,
+                    Vector.add(keyFrames[1]._node.worldPosition(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
+                    Quaternion.squad(keyFrames[1]._node.worldOrientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.worldOrientation(), alpha),
+                    Vector.lerp(keyFrames[1]._node.worldMagnitude(), keyFrames[2]._node.worldMagnitude(), alpha), false);
             node._setHint(node(), node()._keyframesMask);
             _path.add(node);
           }
@@ -851,7 +851,7 @@ class Interpolator {
           keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         }
         // Add last KeyFrame
-        _path.add(Node.transientNode(null, keyFrames[1]._node.worldPosition(), keyFrames[1]._node.worldOrientation(), keyFrames[1]._node.worldMagnitude()));
+        _path.add(new Node(null, keyFrames[1]._node.worldPosition(), keyFrames[1]._node.worldOrientation(), keyFrames[1]._node.worldMagnitude(),false));
       }
       _pathIsValid = true;
     }

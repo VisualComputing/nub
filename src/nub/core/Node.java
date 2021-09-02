@@ -119,7 +119,7 @@ public class Node {
    */
   public boolean matches(Node node) {
     if (node == null)
-      node = transientNode(null, new Vector(), new Quaternion(), 1);
+      node = new Node(null, new Vector(), new Quaternion(), 1, false);
     return position().matches(node.position()) && orientation().matches(node.orientation()) && magnitude() == node.magnitude();
   }
 
@@ -129,7 +129,6 @@ public class Node {
   protected Node _reference;
   protected long _lastUpdate;
   protected boolean _attached;
-  protected boolean _pruned;
 
   protected Interpolator _interpolator;
 
@@ -347,7 +346,6 @@ public class Node {
     setOrientation(orientation);
     setMagnitude(magnitude);
     _interpolator = new Interpolator(this);
-    _registerTasks();
     enablePicking(CAMERA | AXES | HUD | SHAPE | BOUNDS | BULLSEYE | TORUS | FILTER | BONE);
     _id = ++_counter;
     // unlikely but theoretically possible
@@ -546,37 +544,6 @@ public class Node {
     _splineWeight = node._splineWeight;
     _steps = node._steps;
     _keyframesMask = node._keyframesMask;
-  }
-
-  /**
-   * Makes a local temporal copy of the node.
-   * Same as {@code return transientNode(reference(), position(), orientation(), magnitude())}.
-   *
-   * @see #transientNode(Node, Vector, Quaternion, float)
-   */
-  public Node transientCopy() {
-    return transientNode(reference(), position(), orientation(), magnitude());
-  }
-
-  /**
-   * Makes a wold temporal copy of the node.
-   * Same as {@code return transientNode(null, worldPosition(), worldOrientation(), worldMagnitude())}.
-   *
-   * @see #transientNode(Node, Vector, Quaternion, float)
-   */
-  public Node transientWorldCopy() {
-    return transientNode(null, worldPosition(), worldOrientation(), worldMagnitude());
-  }
-
-  /**
-   * Creates a temporal node that is to be pruned.
-   *
-   * @see Graph#prune(Node)
-   */
-  public static Node transientNode(Node reference, Vector position, Quaternion orientation, float magnitude) {
-    Node node = new Node(reference, position, orientation, magnitude, false);
-    Graph.prune(node);
-    return node;
   }
 
   /**
@@ -782,14 +749,6 @@ public class Node {
     if (_isSuccessor(node)) {
       System.out.println("Warning: A node descendant cannot be set as its reference. Nothing done!");
       return;
-    }
-    if (node != null) {
-      if (node._pruned) {
-        throw new RuntimeException("Cannot set a pruned node as reference");
-      }
-    }
-    if (_pruned) {
-      throw new RuntimeException("Cannot set reference on pruned nodes");
     }
     // 1. cache prev state
     boolean needs_cache = _position != null;
@@ -1154,7 +1113,7 @@ public class Node {
   public void translate(Vector vector, float inertia) {
     translate(vector);
     if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is pruned. Use translate(vector) instead");
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use translate(vector) instead");
       return;
     }
     _translationTask.setInertia(inertia);
@@ -1430,7 +1389,7 @@ public class Node {
   public void rotate(Quaternion quaternion, float inertia) {
     rotate(quaternion);
     if (!Graph.TimingHandler.isTaskRegistered(_rotationTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is pruned. Use rotate(quaternion) instead");
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use rotate(quaternion) instead");
       return;
     }
     _rotationTask.setInertia(inertia);
@@ -1549,7 +1508,7 @@ public class Node {
   protected void _orbit(Quaternion quaternion, Vector center, float inertia) {
     _orbit(quaternion, center);
     if (!Graph.TimingHandler.isTaskRegistered(_orbitTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is pruned. Use orbit(quaternion, center) instead");
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use orbit(quaternion, center) instead");
       return;
     }
     _orbitTask.setInertia(inertia);
@@ -1730,7 +1689,7 @@ public class Node {
   public void scale(float scaling, float inertia) {
     scale(scaling);
     if (!Graph.TimingHandler.isTaskRegistered(_scalingTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is pruned. Use scale(scaling) instead");
+      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use scale(scaling) instead");
       return;
     }
     _scalingTask._inertia = inertia;
@@ -1997,7 +1956,7 @@ public class Node {
         }
       }
     }
-    Node old = transientWorldCopy();
+    Node old = new Node(null, worldPosition(), worldOrientation(), worldMagnitude(), false);
     vector.set(directions[0][index[0]]);
     float coef = vector.dot(directions[1][index[1]]);
     if (Math.abs(coef) >= threshold) {
@@ -2239,7 +2198,7 @@ public class Node {
    */
   public Matrix worldMatrix() {
     if (reference() != null)
-      return transientWorldCopy().matrix();
+      return new Node(null, worldPosition(), worldOrientation(), worldMagnitude(), false).matrix();
     else
       return matrix();
   }
@@ -2275,7 +2234,7 @@ public class Node {
    * @see #set(Node)
    */
   public Matrix viewInverse() {
-    return transientNode(null, worldPosition(), worldOrientation(), 1).matrix();
+    return new Node(null, worldPosition(), worldOrientation(), 1, false).matrix();
   }
 
   /**

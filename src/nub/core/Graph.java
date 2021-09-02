@@ -821,60 +821,32 @@ public class Graph {
   }
 
   /**
-   * Same as {@code for(Node node : _leadingNodes()) prune(node)}.
+   * Same as {@code for(Node node : _leadingNodes()) detach(node)}.
    *
-   * @see #prune(Node)
+   * @see #detach(Node)
    */
   public static void clear() {
     for (Node node : _leadingNodes())
-      prune(node);
+      detach(node);
   }
 
   /**
-   * Make all the nodes in the {@code node} branch eligible for garbage collection.
+   * Detach node from the tree so that it's not reached from the {@link #render()} algorithm and make
+   * all the nodes in the {@code node} branch eligible for garbage collection. A call to
+   * {@link Node#isAttached()} (including the node descendants) will then return {@code false}. Only
+   * attached nodes may be detached. Returns {@code true} if succeeded and {@code false} otherwise.
    * <p>
-   * A call to {@link Node#isAttached()} on all {@code node} descendants
-   * (including {@code node}) will return false, after issuing this method. It also means
-   * that all nodes in the {@code node} branch will become unreachable by the
-   * {@link #render()} algorithm.
-   * <p>
-   * Note that all the node inertial tasks are unregistered from the {@link #TimingHandler}.
-   * <p>
-   * Note that there's no means to make the nodes in the branch reachable again.
+   * {@link #attach(Node)} performs the inverse operation.
    *
    * @see #clear()
    * @see #attach(Node)
-   * @see #detach(Node)
    * @see Node#isAttached()
-   */
-  public static void prune(Node node) {
-    // TODO decide
-    if (node.isEye()) {
-      System.out.println("Waning: eye nodes can't be pruned. Nothing done!");
-      return;
-    }
-    if (node.isAttached()) {
-      detach(node);
-    }
-    List<Node> branch = branch(node);
-    for (Node descendant : branch) {
-      descendant._unregisterTasks();
-      descendant._pruned = true;
-    }
-  }
-
-  /**
-   * Detach node from the tree so that it's not reached from the {@link #render()} algorithm. A call
-   * to {@link Node#isAttached()} (including the node descendants) will then return {@code false}. Only
-   * attached nodes may be detached. Returns {@code true} if succeeded and {@code false} otherwise.
-   *
-   * @see #attach(Node)
-   * @see #prune(Node)
    */
   public static boolean detach(Node node) {
     if (node.isAttached()) {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
+        descendant._unregisterTasks();
         descendant._attached = false;
       }
       if (node.reference() != null) {
@@ -896,15 +868,12 @@ public class Graph {
    * A call to {@link Node#isAttached()} will then return {@code true} only if the node reference
    * is itself attached or it is the world. Only detached nodes may be attached. Returns
    * {@code true} if succeeded and {@code false} otherwise.
+   * <p>
+   * {@link #detach(Node)} performs the inverse operation.
    *
    * @see #detach(Node)
-   * @see #prune(Node)
    */
   public static boolean attach(Node node) {
-    if (node._pruned) {
-      System.out.println("Warning: pruned nodes can't be attached. Nothing done!");
-      return false;
-    }
     if (node.isAttached()) {
       System.out.println("Warning: node already attached. Nothing done!");
       return false;
@@ -922,6 +891,7 @@ public class Graph {
     if (reach) {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
+        descendant._registerTasks();
         descendant._attached = true;
       }
     }
@@ -1047,7 +1017,7 @@ public class Graph {
    * @see #eye()
    */
   public void setEye(Node eye) {
-    if (eye == null || _eye == eye || eye._pruned) {
+    if (eye == null || _eye == eye) {
       System.out.println("Warning: eye not set");
       return;
     }
@@ -1064,7 +1034,7 @@ public class Graph {
     if (_interpolator == null) {
       _interpolator = new Interpolator(_eye);
       // TODO decouple !? refer to Interpolator constructor
-      // _interpolator._task = new nub.processing.TimingTask(() -> _interpolator._execute());
+      _interpolator._task = new nub.processing.TimingTask(() -> _interpolator._execute());
     }
     else {
       _interpolator.setNode(_eye);
@@ -1847,11 +1817,10 @@ public class Graph {
     if (duration <= 0) {
       _eye.set(node);
     } else {
-      // TODO test 1st line
       _eye.resetAnimation();
       _interpolator.reset();
       _interpolator.clear();
-      _interpolator.addKeyFrame(_eye.transientCopy());
+      _interpolator.addKeyFrame(new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false));
       _interpolator.addKeyFrame(node, duration);
       _interpolator.run();
     }
@@ -1942,22 +1911,17 @@ public class Graph {
     if (duration <= 0)
       fit(center, radius);
     else {
-      // TODO test 1st line
       _eye.resetAnimation();
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
-      // TODO test copy
-      Node tempEye = _eye.copy(false);
+      Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
       setEye(tempEye);
-      // TODO test transientCopy
-      _interpolator.addKeyFrame(tempEye.transientCopy());
+      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       fit(center, radius);
-      _interpolator.addKeyFrame(tempEye.transientCopy(), duration);
+      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
       _interpolator.run();
       setEye(cacheEye);
-      // TODO test prune
-      prune(tempEye);
     }
   }
 
@@ -2036,22 +2000,17 @@ public class Graph {
     if (duration <= 0)
       fitFOV();
     else {
-      // TODO test 1st line
       _eye.resetAnimation();
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
-      // TODO test copy
-      Node tempEye = _eye.copy(false);
+      Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
       setEye(tempEye);
-      // TODO test transientCopy
-      _interpolator.addKeyFrame(tempEye.transientCopy());
+      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       fitFOV();
-      _interpolator.addKeyFrame(tempEye.transientCopy(), duration);
+      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
       _interpolator.run();
       setEye(cacheEye);
-      // TODO test prune
-      prune(tempEye);
     }
   }
 
@@ -2125,22 +2084,17 @@ public class Graph {
     if (duration <= 0)
       fit(corner1, corner2);
     else {
-      // TODO test 1st line
       _eye.resetAnimation();
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
-      // TODO test copy
-      Node tempEye = _eye.copy(false);
+      Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
       setEye(tempEye);
-      // TODO test transientCopy
-      _interpolator.addKeyFrame(tempEye.transientCopy());
+      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       fit(corner1, corner2);
-      _interpolator.addKeyFrame(tempEye.transientCopy(), duration);
+      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
       _interpolator.run();
       setEye(cacheEye);
-      // TODO test prune
-      prune(tempEye);
     }
   }
 
@@ -2200,22 +2154,17 @@ public class Graph {
     if (duration <= 0)
       fit(x, y, width, height);
     else {
-      // TODO test 1st line
       _eye.resetAnimation();
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
-      // TODO test copy
-      Node tempEye = _eye.copy(false);
+      Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
       setEye(tempEye);
-      // TODO test transientCopy
-      _interpolator.addKeyFrame(tempEye.transientCopy());
+      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       fit(x, y, width, height);
-      _interpolator.addKeyFrame(tempEye.transientCopy(), duration);
+      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
       _interpolator.run();
       setEye(cacheEye);
-      // TODO test prune
-      prune(tempEye);
     }
   }
 
@@ -3777,7 +3726,7 @@ public class Graph {
    */
   public void shift(Node node, float dx, float dy, float dz, float inertia) {
     if (node == null || node == eye()) {
-      node = eye().transientWorldCopy();
+      node = new Node(null, eye().worldPosition(), eye().worldOrientation(), eye().worldMagnitude(), false);
       node.setWorldPosition(center());
       Vector vector = displacement(new Vector(dx, dy, dz), node);
       vector.multiply(-1);
