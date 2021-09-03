@@ -22,30 +22,11 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * A keyframe Catmull-Rom interpolator.
- * <p>
- * An interpolator holds keyframes (that define a path) and, optionally, a
- * reference to a node of your application (which will be interpolated).
- * In this case, when the user call {@link #run()}, an interpolator
- * {@link #task()} will regularly updates the {@link #node()} position,
- * orientation and magnitude along the path.
- * <p>
- * Here is a typical usage example:
- * <pre>
- * {@code
- * void setup() {
- *   Graph graph = new Graph(1200, 800);
- *   Interpolator interpolator = new Interpolator();
- *   for (int i = 0; i < 10; i++)
- *     interpolator.addKeyFrame(scene.randomNode());
- *   interpolator.run();
- * }
- * }
- * </pre>
- * which will create a random (see {@link Node#random(Graph)}) interpolator path
- * containing 10 keyframes (see {@link #addKeyFrame(Node)}). The interpolation is
- * also run (see {@link #run()}). The interpolation is stopped when {@link #time()} is
- * greater than the {@link #lastTime()} (unless {@link #enableRecurrence()} is called).
+ * An internal keyframe Catmull-Rom interpolator class having the
+ * keyframes to be interpolated by a given node. See to
+ * {@link Node#animate()}, {@link Node#addKeyFrame()},
+ * {@link Node#setAnimationTime(float)} and {@link Node#interpolate(float)},
+ * among others.
  */
 class Interpolator {
   /**
@@ -176,11 +157,11 @@ class Interpolator {
   protected Vector _vector1, _vector2;
 
   /**
-   * Creates an interpolator, with {@code node} as associated {@link #node()}.
-   * <p>
-   * The {@link #node()} can be set or changed using {@link #setNode(Node)}.
-   * <p>
+   * Creates an interpolator for the given {@code node}. Note that
    * {@link #time()}, {@link #speed()} are set to their default values.
+   * <p>
+   * Note that the interpolator {@link Task} is decoupled from this class
+   * and thus should be handled i.e., (un)register, outside this class.
    */
   public Interpolator(Node node) {
     _list = new ArrayList<KeyFrame>();
