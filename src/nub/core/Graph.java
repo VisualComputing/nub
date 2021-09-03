@@ -1016,7 +1016,6 @@ public class Graph {
    */
   public void setEye(Node eye) {
     if (eye == null || _eye == eye) {
-      System.out.println("Warning: eye not set");
       return;
     }
     if (isTagged(eye)) {
@@ -1031,7 +1030,6 @@ public class Graph {
     _eye._frustumGraphs.add(this);
     if (_interpolator == null) {
       _interpolator = new Interpolator(_eye);
-      // TODO decouple !? refer to Interpolator constructor
       _interpolator._task = new nub.processing.TimingTask(() -> _interpolator._execute());
     }
     else {

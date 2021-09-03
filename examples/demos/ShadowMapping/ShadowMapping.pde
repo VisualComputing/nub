@@ -71,7 +71,6 @@ void setup() {
   // light node
   light = new Node();
   light.enableHint(Node.BULLSEYE | Node.AXES | Node.CAMERA);
-  light.configHint(Node.BOUNDS, shadowMap, shadowMapType, zNear, zFar);
   animation = new TimingTask(() -> {
     if (!scene.isTagged(light)) {
       float lightAngle = frameCount * 0.002;
