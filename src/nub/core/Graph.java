@@ -191,8 +191,6 @@ public class Graph {
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected long _cacheProjectionViewInverse;
 
-  // TODO these three are not only related to Quaternion.from but mainly to hint stuff
-
   /**
    * Returns {@code true} if {@code o} is instance of {@link Integer}, {@link Float} or {@link Double},
    * and {@code false} otherwise.

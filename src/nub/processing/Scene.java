@@ -285,7 +285,6 @@ public class Scene extends Graph {
     // 3. Register P5 methods
     pApplet.registerMethod("pre", this);
     pApplet.registerMethod("draw", this);
-    // TODO buggy
     pApplet.registerMethod("dispose", this);
     // 4. Handed
     leftHanded = true;
@@ -645,7 +644,6 @@ public class Scene extends Graph {
    * @see #loadConfig(String)
    */
   public void dispose() {
-    System.out.println("Debug: saveConfig() (i.e., dispose()) called!");
     if (!this.isOffscreen())
       saveConfig();
   }

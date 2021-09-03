@@ -48,7 +48,6 @@ import java.util.ListIterator;
  * greater than the {@link #lastTime()} (unless {@link #enableRecurrence()} is called).
  */
 class Interpolator {
-  // TODO mem handling. Check for: if (Graph.TimingHandler.isTaskRegistered(_task))
   /**
    * Returns whether or not this interpolator matches other.
    *
@@ -189,8 +188,6 @@ class Interpolator {
     setNode(node);
     _t = 0.0f;
     _speed = 1.0f;
-    // TODO decouple !?
-    //_task = new nub.processing.TimingTask(() -> Interpolator.this._execute());
     _recurrent = false;
     _pathIsValid = false;
     _valuesAreValid = false;
@@ -210,7 +207,6 @@ class Interpolator {
     this.setNode(other.node());
     this._t = other._t;
     this._speed = other._speed;
-    // TODO experimental
     if (Graph.TimingHandler.isTaskRegistered(other._task)) {
       this._task = new nub.processing.TimingTask(() -> Interpolator.this._execute());
       this._task.setPeriod(other._task.period());
@@ -224,6 +220,8 @@ class Interpolator {
     this._backwards = _list.listIterator();
     this._forwards = _list.listIterator();
   }
+
+  // TODO copy is experimental
 
   /**
    * Returns a deep copy of this interpolator.
