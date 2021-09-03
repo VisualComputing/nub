@@ -3,9 +3,9 @@
  * by Jean Pierre Charalambos.
  *
  * This example illustrates how to add filters to your nodes
- * to limit their motion. Filters can be defined respect to
- * the local, world or eye node. Try all the possibilities
- * following the on screen helping text.
+ * (including the eye) to limit their motion. Filters can be
+ * defined respect to the local, world or eye node. Try all
+ * the possibilities by following the on screen helping text.
  */
 
 import nub.core.*;
@@ -40,7 +40,6 @@ void setup() {
   node.translate(new Vector(20, 20, 0));
   scene.enableHint(Scene.GRID | Scene.AXES | Scene.BACKGROUND);
   scene.configHint(Scene.GRID, Scene.GridType.LINES, color(0, 255, 0));
-  scene.loadConfig();
 }
 
 void draw() {
@@ -52,9 +51,12 @@ void draw() {
 }
 
 void mouseMoved() {
-  if (!scene.isTagValid("key"))
-    scene.mouseTag();
+  scene.mouseTag();
   updateFilters();
+}
+
+void mouseClicked() {
+  scene.clearTags();
 }
 
 void mouseDragged() {
@@ -105,7 +107,7 @@ void keyPressed() {
 }
 
 void updateFilters() {
-  Node filteredNode = scene.isTagValid("key") ? node : scene.eye();
+  Node filteredNode = scene.isTagged(node) ? node : scene.eye();
   translationAxis = translationAxisType == 0 ? Vector.plusI : translationAxisType == 1 ? Vector.plusJ : Vector.plusK;
   rotationAxis = rotationAxisType == 0 ? Vector.plusI : rotationAxisType == 1 ? Vector.plusJ : Vector.plusK;
   if (space == WORLD || space == EYE) {
@@ -200,9 +202,10 @@ void displayDirection(int dir, int x, int y, char c) {
 }
 
 void displayText() {
-  text("TRANSLATION :", 340, height - 30);
-  displayDirection(translationAxisType, (340 + 185), height - 30, 'D');
-  displayType(translationFilter, 340, height - 60, 'T');
+  text("Filter apply to: " + (scene.isTagged(node) ? "TORUS" : "EYE"), 30, 30);
+  text("TRANSLATION :", 30, height - 30);
+  displayDirection(translationAxisType, (30 + 185), height - 30, 'D');
+  displayType(translationFilter, 30, height - 60, 'T');
 
   text("ROTATION :", width - 210, height - 30);
   displayDirection(rotationAxisType, width - 60, height - 30, 'B');
@@ -210,13 +213,13 @@ void displayText() {
 
   switch (space) {
   case LOCAL:
-    text("Filter defined w/r to LOCAL (U)", 350, 20);
+    text("Filter defined w/r to LOCAL (U)", 750, 30);
     break;
   case WORLD:
-    text("Filter defined w/r to WORLD (U)", 350, 20);
+    text("Filter defined w/r to WORLD (U)", 750, 30);
     break;
   case EYE:
-    text("Filter defined w/r to EYE (U)", 350, 20);
+    text("Filter defined w/r to EYE (U)", 750, 30);
     break;
   }
 }

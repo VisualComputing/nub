@@ -2,7 +2,7 @@
  * KeyFrames.
  * by Jean Pierre Charalambos.
  *
- * This example introduces keyframes.
+ * This example introduces node keyframes.
  *
  * Press ' ' to toggle the shape end eye keyframes hint.
  * Press 's' to toggle the shape animation.

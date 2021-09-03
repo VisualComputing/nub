@@ -3123,7 +3123,7 @@ public class Graph {
   }
 
   /**
-   * Removes all tags {@link #node(String)}.
+   * Removes all tags so that {@link #node(String)} returns {@code null}.
    *
    * @see #node(String)
    * @see #tracks(Node, int, int)

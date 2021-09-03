@@ -54,6 +54,10 @@ public class FilteredNode extends PApplet {
     updateFilters();
   }
 
+  public void mouseClicked() {
+    scene.clearTags();
+  }
+
   public void mouseDragged() {
     if (mouseButton == LEFT) {
       if (scene.node("key") != null)
@@ -197,7 +201,7 @@ public class FilteredNode extends PApplet {
   }
 
   void displayText() {
-    text(scene.isTagged(node) ? "TORUS" : "EYE", 30, 30);
+    text("Filter apply to: " + (scene.isTagged(node) ? "TORUS" : "EYE"), 30, 30);
     text("TRANSLATION :", 30, height - 30);
     displayDirection(translationAxisType, (30 + 185), height - 30, 'D');
     displayType(translationFilter, 30, height - 60, 'T');
