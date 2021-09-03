@@ -96,8 +96,8 @@ import java.util.function.Consumer;
  * @see TimingTask
  */
 public class Scene extends Graph {
-  public static String prettyVersion = "0.7.90";
-  public static String version = "8";
+  public static String prettyVersion = "0.9.95";
+  public static String version = "9";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   public static PApplet pApplet;
