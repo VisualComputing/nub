@@ -4,9 +4,7 @@
  *
  * This example shows how to generate and display a depth map from a light point-of-view.
  *
- * The actual shadow mapping implementation is left as an exercise. Readers may refer to:
- * http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/ and,
- * https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
+ * Refer also to the shadow mapping demo.
  *
  * Press shift and pick (mouse move) a box to define it as the light source.
  * Press shift and scroll (mouse wheel) the light source to change the shadow map zFar plane.

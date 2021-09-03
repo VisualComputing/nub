@@ -3,7 +3,7 @@
  * by Jean Pierre Charalambos.
  *
  * This example illustrates how to use off-screen rendering to build
- * a mini-map of the main Scene where all objects are interactive.
+ * a mini-map of the main scene where all objects are interactive.
  * Note that the minimap displays the projection of the scene onto
  * the near plane in 3D.
  *

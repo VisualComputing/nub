@@ -2,7 +2,7 @@
  * Space Navigator
  * by Jean Pierre Charalambos.
  *
- * This demo shows how to control your scene shapes using a Space Navigator
+ * This example shows how to control your scene shapes using a Space Navigator
  * (3D mouse), with 6 degrees-of-freedom (DOFs). It requires the GameControlPlus
  * library and a Space Navigator and it has been tested only under Linux.
  */

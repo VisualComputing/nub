@@ -2,10 +2,10 @@
  * Particle System.
  * by Jean Pierre Charalambos.
  *
- * Each particle animation is control by a timing task.
+ * Each particle animation is control by a task.
  *
  * You can tune the particles animation frequency (default is 25Hz)
- * by calling the setPeriod(). The frame rate will then be fixed,
+ * by calling setPeriod(). The frame rate will then be fixed,
  * provided that your animation loop function is fast enough.
  *
  * Press '+' to speed up the particles animation.

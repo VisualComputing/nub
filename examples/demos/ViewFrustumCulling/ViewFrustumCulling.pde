@@ -8,7 +8,7 @@
  * A customized traversal rendering algorithm is implemented by overriding the
  * node visit() method to clip an octree against the camera's viewing frustum.
  * A second viewer displays an external view of the main frustum scene (using
- * the drawFrustum(Scene otherScene) method) and the clipped octree.
+ * the main scene eye BOUNDS hint) and the clipped octree.
  *
  * Press the space-bar to change the scene type: PERSPECTIVE or ORTHOGRAPHIC.
  */

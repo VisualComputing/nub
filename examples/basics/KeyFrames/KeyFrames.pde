@@ -4,12 +4,14 @@
  *
  * This example introduces keyframes.
  *
- * Press ' ' to toggle the eye path display.
- * Press 's' to interpolate to fit the scene bounding volume.
- * Press 'f' to fit the scene bounding volume.
- * Press '1' and '2' to add eye key-frame to the eye paths.
- * Press 'a' and 'c' to play the eye paths.
- * Press 'b' and 'd' to remove the eye paths.
+ * Press ' ' to toggle the shape end eye keyframes hint.
+ * Press 's' to toggle the shape animation.
+ * Press '+' to speed up the shape animation.
+ * Press '-' to speed down the shape animation.
+ * Press 'f' to interpolate the eye to fit the scene bounding volume.
+ * Press '1' to add key-frame to the eye path.
+ * Press 'a' to play the eye path.
+ * Press 'b' to remove the eye path.
  */
 
 import nub.primitives.*;
@@ -84,6 +86,8 @@ void keyPressed() {
     shape.toggleHint(Node.KEYFRAMES);
     scene.eye().toggleHint(Node.KEYFRAMES);
   }
+  if (key == 's')
+    shape.toggleAnimation();
   if (key == '-' || key == '+') {
     speed += key == '+' ? 0.25f : -0.25f;
     shape.animate(speed);
@@ -94,8 +98,6 @@ void keyPressed() {
     scene.eye().toggleAnimation();
   if (key == 'b')
     scene.eye().removeKeyFrames();
-  if (key == 's')
-    shape.toggleAnimation();
   if (key == 'f')
     scene.fit(1);
 }

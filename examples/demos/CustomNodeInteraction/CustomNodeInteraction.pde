@@ -2,12 +2,12 @@
  * Custom Node Interaction.
  * by Jean Pierre Charalambos.
  *
- * This example illustrates how to customize shape behaviors by
- * overriding the node interact(Object... gesture) method and
+ * This example illustrates how to customize the toruses behaviors
+ * by overriding the interact(Object... gesture) method and
  * sending gesture data to the node with the scene
- * interactTag(Object... gesture) method.
+ * interact(Object... gesture) method.
  *
- * The toruses color and number of faces are controled with the
+ * The toruses color and number of faces are controlled with the
  * keys and the mouse. To pick a torus press the [0..9] keys
  * or double-click on it; press other key or double-click on the
  * the background to reset your picking selection. Once a torus

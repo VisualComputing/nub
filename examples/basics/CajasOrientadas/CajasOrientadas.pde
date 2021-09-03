@@ -2,7 +2,7 @@
  * Cajas Orientadas.
  * by Jean Pierre Charalambos.
  *
- * This example illustrates some basic Node properties, particularly how to
+ * This example illustrates some basic node properties, particularly how to
  * orient them.
  *
  * The sphere and the boxes are interactive. Pick and drag them with the

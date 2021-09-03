@@ -50,8 +50,7 @@ public class FilteredNode extends PApplet {
   }
 
   public void mouseMoved() {
-    if (!scene.isTagValid("key"))
-      scene.mouseTag();
+    scene.mouseTag();
     updateFilters();
   }
 
@@ -103,7 +102,7 @@ public class FilteredNode extends PApplet {
   }
 
   void updateFilters() {
-    Node filteredNode = scene.isTagValid("key") ? node : scene.eye();
+    Node filteredNode = scene.isTagged(node) ? node : scene.eye();
     translationAxis = translationAxisType == 0 ? Vector.plusI : translationAxisType == 1 ? Vector.plusJ : Vector.plusK;
     rotationAxis = rotationAxisType == 0 ? Vector.plusI : rotationAxisType == 1 ? Vector.plusJ : Vector.plusK;
     if (space == WORLD || space == EYE) {
@@ -198,9 +197,10 @@ public class FilteredNode extends PApplet {
   }
 
   void displayText() {
-    text("TRANSLATION :", 340, height - 30);
-    displayDirection(translationAxisType, (340 + 185), height - 30, 'D');
-    displayType(translationFilter, 340, height - 60, 'T');
+    text(scene.isTagged(node) ? "TORUS" : "EYE", 30, 30);
+    text("TRANSLATION :", 30, height - 30);
+    displayDirection(translationAxisType, (30 + 185), height - 30, 'D');
+    displayType(translationFilter, 30, height - 60, 'T');
 
     text("ROTATION :", width - 210, height - 30);
     displayDirection(rotationAxisType, width - 60, height - 30, 'B');
@@ -208,13 +208,13 @@ public class FilteredNode extends PApplet {
 
     switch (space) {
       case LOCAL:
-        text("Filter defined w/r to LOCAL (U)", 350, 20);
+        text("Filter defined w/r to LOCAL (U)", 750, 30);
         break;
       case WORLD:
-        text("Filter defined w/r to WORLD (U)", 350, 20);
+        text("Filter defined w/r to WORLD (U)", 750, 30);
         break;
       case EYE:
-        text("Filter defined w/r to EYE (U)", 350, 20);
+        text("Filter defined w/r to EYE (U)", 750, 30);
         break;
     }
   }

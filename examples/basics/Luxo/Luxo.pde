@@ -2,12 +2,10 @@
  * Luxo.
  * by Jean Pierre Charalambos.
  *
- * A more complex example that combines Shapes, selection and filters.
- *
  * This example displays a famous luxo lamp (Pixar) that can be interactively
- * manipulated with the mouse.
+ * manipulated with the mouse. It combines node shapes, filters and picking.
  *
- * Hover over lamp elements to select them, and then drag them with the mouse.
+ * Hover over lamp elements to pick them, and then drag them with the mouse.
  */
 
 import nub.primitives.*;
