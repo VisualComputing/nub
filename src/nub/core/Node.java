@@ -128,7 +128,6 @@ public class Node {
   protected Quaternion _orientation;
   protected Node _reference;
   protected long _lastUpdate;
-  protected boolean _attached;
 
   protected Interpolator _interpolator;
 
@@ -812,14 +811,10 @@ public class Node {
    * @see #setReference(Node)
    */
   public boolean isAttached() {
-    return _attached;
+    return Graph.TimingHandler.isTaskRegistered(_translationTask);
   }
   
   protected void _registerTasks() {
-    _attached = true;
-    if (!Graph.TimingHandler.isTaskRegistered(_interpolator._task)) {
-      _interpolator._task = new nub.processing.TimingTask(() -> _interpolator._execute());
-    }
     if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
       _translationTask = new InertialTask() {
         @Override
@@ -853,15 +848,17 @@ public class Node {
         }
       };
     }
+    if (!Graph.TimingHandler.isTaskRegistered(_interpolator._task)) {
+      _interpolator._task = new nub.processing.TimingTask(() -> _interpolator._execute());
+    }
   }
 
   protected void _unregisterTasks() {
-    _attached = false;
-    TimingHandler.unregisterTask(_interpolator._task);
     TimingHandler.unregisterTask(_translationTask);
     TimingHandler.unregisterTask(_rotationTask);
     TimingHandler.unregisterTask(_orbitTask);
     TimingHandler.unregisterTask(_scalingTask);
+    TimingHandler.unregisterTask(_interpolator._task);
   }
 
   /**
