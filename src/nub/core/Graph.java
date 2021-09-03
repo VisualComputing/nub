@@ -847,7 +847,6 @@ public class Graph {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
         descendant._unregisterTasks();
-        descendant._attached = false;
       }
       if (node.reference() != null) {
         node.reference()._removeChild(node);
@@ -892,7 +891,6 @@ public class Graph {
       List<Node> branch = branch(node);
       for (Node descendant : branch) {
         descendant._registerTasks();
-        descendant._attached = true;
       }
     }
     return true;

@@ -816,6 +816,7 @@ public class Node {
   }
   
   protected void _registerTasks() {
+    _attached = true;
     if (!Graph.TimingHandler.isTaskRegistered(_interpolator._task)) {
       _interpolator._task = new nub.processing.TimingTask(() -> _interpolator._execute());
     }
@@ -855,6 +856,7 @@ public class Node {
   }
 
   protected void _unregisterTasks() {
+    _attached = false;
     TimingHandler.unregisterTask(_interpolator._task);
     TimingHandler.unregisterTask(_translationTask);
     TimingHandler.unregisterTask(_rotationTask);
