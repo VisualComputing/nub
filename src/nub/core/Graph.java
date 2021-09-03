@@ -1815,7 +1815,7 @@ public class Graph {
     if (duration <= 0) {
       _eye.set(node);
     } else {
-      _eye.resetAnimation();
+      _eye._interpolator._task.stop();
       _interpolator.reset();
       _interpolator.clear();
       _interpolator.addKeyFrame(new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false));
@@ -1909,7 +1909,7 @@ public class Graph {
     if (duration <= 0)
       fit(center, radius);
     else {
-      _eye.resetAnimation();
+      _eye._interpolator._task.stop();
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
@@ -1998,7 +1998,7 @@ public class Graph {
     if (duration <= 0)
       fitFOV();
     else {
-      _eye.resetAnimation();
+      _eye._interpolator._task.stop();
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
@@ -2082,7 +2082,7 @@ public class Graph {
     if (duration <= 0)
       fit(corner1, corner2);
     else {
-      _eye.resetAnimation();
+      _eye._interpolator._task.stop();
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
@@ -2152,7 +2152,7 @@ public class Graph {
     if (duration <= 0)
       fit(x, y, width, height);
     else {
-      _eye.resetAnimation();
+      _eye._interpolator._task.stop();
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
