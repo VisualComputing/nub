@@ -804,15 +804,14 @@ public class Node {
   // In JS attach / detach should be made just an attach property
 
   /**
-   * Attaches the branch to which this node belongs to the tree so that it is reached from the
-   * {@link Graph#render()} algorithm. A call to {@link Node#isAttached()} will then return
-   * {@code true} only if the node reference is itself attached or it is the world. Only
-   * detached nodes may be attached. Returns {@code true} if succeeded and {@code false} otherwise.
+   * Attaches the branch to which this node belongs to the tree so that this node (together with
+   * all nodes in the branch) is reached from the {@link Graph#render()} algorithm. A call to
+   * {@link Node#isAttached()} will then return {@code true}.
    * <p>
-   * {@link #_detach(Node)} performs the inverse operation.
+   * {@link #detach()} performs the inverse operation.
    *
    * @see Graph#clearNodes()
-   * @see #_detach(Node)
+   * @see #detach()
    * @see #isAttached()
    */
   public void attach() {
@@ -850,10 +849,9 @@ public class Node {
   /**
    * Detach node from the tree so that it's not reached from the {@link Graph#render()} algorithm and make
    * all the nodes in the {@code node} branch eligible for garbage collection. A call to
-   * {@link Node#isAttached()} (including the node descendants) will then return {@code false}. Only
-   * attached nodes may be detached. Returns {@code true} if succeeded and {@code false} otherwise.
+   * {@link Node#isAttached()} (including the node descendants) will then return {@code false}.
    * <p>
-   * {@link Node#_attach(Node)} performs the inverse operation.
+   * {@link #attach()} performs the inverse operation.
    *
    * @see Graph#clearNodes()
    * @see #attach()
