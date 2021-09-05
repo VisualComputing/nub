@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
- * {@link #detach(Node)}, {@link Node#isAttached()}, {@link #branch(Node)}, and {@link #clear()}.
+ * {@link Node#_detach(Node)}, {@link Node#isAttached()}, {@link #branch(Node)}, and {@link #clearNodes()}.
  * <h2>The eye</h2>
  * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
  * (see {@link #setEye(Node)}). Several functions handle the eye, such as
@@ -775,7 +775,7 @@ public class Graph {
    * All leading nodes are also reachable by the {@link #render()} algorithm for which they are the seeds.
    *
    * @see #nodes()
-   * @see #detach(Node)
+   * @see Node#_detach(Node)
    */
   protected static List<Node> _leadingNodes() {
     return _seeds;
@@ -821,77 +821,11 @@ public class Graph {
   /**
    * Same as {@code for(Node node : _leadingNodes()) detach(node)}.
    *
-   * @see #detach(Node)
+   * @see Node#_detach(Node)
    */
-  public static void clear() {
+  public static void clearNodes() {
     for (Node node : _leadingNodes())
-      detach(node);
-  }
-
-  /**
-   * Detach node from the tree so that it's not reached from the {@link #render()} algorithm and make
-   * all the nodes in the {@code node} branch eligible for garbage collection. A call to
-   * {@link Node#isAttached()} (including the node descendants) will then return {@code false}. Only
-   * attached nodes may be detached. Returns {@code true} if succeeded and {@code false} otherwise.
-   * <p>
-   * {@link #attach(Node)} performs the inverse operation.
-   *
-   * @see #clear()
-   * @see #attach(Node)
-   * @see Node#isAttached()
-   */
-  public static boolean detach(Node node) {
-    if (node.isAttached()) {
-      List<Node> branch = branch(node);
-      for (Node descendant : branch) {
-        descendant._unregisterTasks();
-      }
-      if (node.reference() != null) {
-        node.reference()._removeChild(node);
-      }
-      else {
-        _removeLeadingNode(node);
-      }
-      return true;
-    }
-    else {
-      System.out.println("Warning: node already detached. Nothing done!");
-      return false;
-    }
-  }
-
-  /**
-   * Attaches node to the tree so that it may be reached from the {@link #render()} algorithm.
-   * A call to {@link Node#isAttached()} will then return {@code true} only if the node reference
-   * is itself attached or it is the world. Only detached nodes may be attached. Returns
-   * {@code true} if succeeded and {@code false} otherwise.
-   * <p>
-   * {@link #detach(Node)} performs the inverse operation.
-   *
-   * @see #detach(Node)
-   */
-  public static boolean attach(Node node) {
-    if (node.isAttached()) {
-      System.out.println("Warning: node already attached. Nothing done!");
-      return false;
-    }
-    boolean reach = false;
-    if (node.reference() == null) {
-      Graph._addLeadingNode(node);
-      reach = true;
-    } else {
-      node.reference()._addChild(node);
-      if (node.reference().isAttached()) {
-        reach = true;
-      }
-    }
-    if (reach) {
-      List<Node> branch = branch(node);
-      for (Node descendant : branch) {
-        descendant._registerTasks();
-      }
-    }
-    return true;
+      Node._detach(node);
   }
 
   /**

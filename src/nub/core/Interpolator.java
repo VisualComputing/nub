@@ -667,14 +667,14 @@ class Interpolator {
         interpolate(0);
     }
     if (keyFrame._handled)
-      Graph.detach(keyFrame._node);
+      Node._detach(keyFrame._node);
     return keyFrame._node;
   }
 
   /**
    * Removes all keyframes from the path.
    *
-   * @see Graph#detach(Node)
+   * @see Node#_detach(Node)
    */
   public void clear() {
     if (Graph.TimingHandler.isTaskRegistered(_task))
@@ -683,7 +683,7 @@ class Interpolator {
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
       if (keyFrame._handled)
-        Graph.detach(keyFrame._node);
+        Node._detach(keyFrame._node);
     }
     _list.clear();
     _path.clear();

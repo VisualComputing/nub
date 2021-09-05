@@ -1,6 +1,5 @@
 package intellij;
 
-import nub.core.Graph;
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
@@ -103,11 +102,11 @@ public class GraphAPI extends PApplet {
     }
     if (key == '5') {
       if (detached1 != null)
-        Scene.attach(detached1);
+        detached1.attach();
     }
     if (key == '6') {
       if (detached2 != null)
-        Scene.attach(detached2);
+        detached2.attach();
     }
     if (key == '7') {
       n2.copy();

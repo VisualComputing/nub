@@ -95,9 +95,9 @@ public class Interpolators extends PApplet {
   public void keyPressed() {
     if (key == 'y') {
       if (shape.isAttached())
-        Scene.detach(shape);
+        shape.detach();
       else
-        Scene.attach(shape);
+        shape.attach();
     }
     if (key == 'x')
       shape.removeKeyFrames();

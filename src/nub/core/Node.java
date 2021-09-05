@@ -320,8 +320,8 @@ public class Node {
    * The node {@link #isAttached()} by the {@link Graph#render()} algorithm iff the node
    * {@code reference} happens to be.
    *
-   * @see Graph#attach(Node)
-   * @see Graph#detach(Node)
+   * @see Node#_attach(Node)
+   * @see Node#_detach(Node)
    * @see #Node(Node, Vector, Quaternion, float, boolean)
    */
   public Node(Node reference, Vector position, Quaternion orientation, float magnitude) {
@@ -336,8 +336,8 @@ public class Node {
    *
    * The {@code attach} var controls whether or the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
    *
-   * @see Graph#attach(Node)
-   * @see Graph#detach(Node)
+   * @see Node#_attach(Node)
+   * @see Node#_detach(Node)
    */
   protected Node(Node reference, Vector position, Quaternion orientation, float magnitude, boolean attach) {
     setReference(reference);
@@ -386,7 +386,7 @@ public class Node {
       setShape(this::graphics);
     }
     if (attach) {
-      Graph.attach(this);
+      _attach(this);
     }
   }
 
@@ -706,7 +706,7 @@ public class Node {
    * (see {@link #isAttached()}).
    *
    * @see #setReference(Node)
-   * @see Graph#detach(Node)
+   * @see Node#_detach(Node)
    */
   public void resetReference() {
     setReference(null);
@@ -730,9 +730,9 @@ public class Node {
    * {@link #reference()} would create a loop in the hierarchy.
    * <p>
    * To make all the nodes in the {@code node} branch eligible for garbage collection
-   * call {@link Graph#detach(Node)}.
+   * call {@link Node#_detach(Node)}.
    *
-   * @see Graph#detach(Node)
+   * @see Node#_detach(Node)
    */
   public void setReference(Node node) {
     // invariant: keep top-down (either tree leading nodes or reference to child) references
@@ -776,7 +776,7 @@ public class Node {
       else {
         // detach the (attached) node only if new reference is detached
         if (!node.isAttached()) {
-          Graph.detach(this);
+          _detach(this);
         }
         // any case add this as a child of new reference (invariant above)
         node._addChild(this);
@@ -801,13 +801,95 @@ public class Node {
     }
   }
 
+  // In JS attach / detach should be made just an attach property
+
+  /**
+   * Attaches the branch to which this node belongs to the tree so that it is reached from the
+   * {@link Graph#render()} algorithm. A call to {@link Node#isAttached()} will then return
+   * {@code true} only if the node reference is itself attached or it is the world. Only
+   * detached nodes may be attached. Returns {@code true} if succeeded and {@code false} otherwise.
+   * <p>
+   * {@link #_detach(Node)} performs the inverse operation.
+   *
+   * @see Graph#clearNodes()
+   * @see #_detach(Node)
+   * @see #isAttached()
+   */
+  public void attach() {
+    _attach(this);
+  }
+
+  protected static boolean _attach(Node node) {
+    if (node.isAttached()) {
+      System.out.println("Warning: node already attached. Nothing done!");
+      return false;
+    }
+    boolean reach = false;
+    if (node.reference() == null) {
+      Graph._addLeadingNode(node);
+      reach = true;
+    } else {
+      node.reference()._addChild(node);
+      if (node.reference().isAttached()) {
+        reach = true;
+      }
+    }
+    if (reach) {
+      List<Node> branch = Graph.branch(node);
+      for (Node descendant : branch) {
+        descendant._registerTasks();
+      }
+    }
+    else {
+      System.out.println("Warning: attaching branch to which the node belongs to make it reachable");
+      _attach(node.reference());
+    }
+    return true;
+  }
+
+  /**
+   * Detach node from the tree so that it's not reached from the {@link Graph#render()} algorithm and make
+   * all the nodes in the {@code node} branch eligible for garbage collection. A call to
+   * {@link Node#isAttached()} (including the node descendants) will then return {@code false}. Only
+   * attached nodes may be detached. Returns {@code true} if succeeded and {@code false} otherwise.
+   * <p>
+   * {@link Node#_attach(Node)} performs the inverse operation.
+   *
+   * @see Graph#clearNodes()
+   * @see #attach()
+   * @see #isAttached()
+   */
+  public void detach() {
+    _detach(this);
+  }
+
+  protected static boolean _detach(Node node) {
+    if (node.isAttached()) {
+      List<Node> branch = Graph.branch(node);
+      for (Node descendant : branch) {
+        descendant._unregisterTasks();
+      }
+      if (node.reference() != null) {
+        node.reference()._removeChild(node);
+      }
+      else {
+        Graph._removeLeadingNode(node);
+      }
+      return true;
+    }
+    else {
+      System.out.println("Warning: node already detached. Nothing done!");
+      return false;
+    }
+  }
+
   /**
    * Returns whether or not the node is reachable by the rendering algorithm.
    * Note that a detached child of an attached node is not listed in
    * {@link #children()}, even though they hold a {@link #reference()} to the parent node.
    * 
-   * @see Graph#detach(Node)
-   * @see Graph#attach(Node) 
+   * @see #_detach(Node)
+   * @see #attach()
    * @see #setReference(Node)
    */
   public boolean isAttached() {
@@ -862,7 +944,7 @@ public class Node {
   }
 
   /**
-   * Used by {@link Graph#attach(Node)}.
+   * Used by {@link Node#_attach(Node)}.
    */
   protected boolean _addChild(Node node) {
     if (node == null)
@@ -900,8 +982,8 @@ public class Node {
    * node are not listed, even though they hold a {@link #reference()} to the node.
    *
    * @see #isAttached()
-   * @see Graph#attach(Node)
-   * @see Graph#detach(Node)
+   * @see Node#_attach(Node)
+   * @see Node#_detach(Node)
    */
   public List<Node> children() {
     return _children;
@@ -3459,10 +3541,10 @@ public class Node {
     for (Interpolator.KeyFrame keyFrame : _interpolator._list) {
       if (keyFrame._handled) {
         if (isHintEnabled(Node.KEYFRAMES)) {
-          Graph.attach(keyFrame._node);
+          _attach(keyFrame._node);
         }
         else {
-          Graph.detach(keyFrame._node);
+          _detach(keyFrame._node);
         }
       }
     }
