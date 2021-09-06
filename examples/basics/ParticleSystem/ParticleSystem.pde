@@ -28,11 +28,13 @@ void setup() {
   particles = new Particle[nbPart];
   for (int i = 0; i < particles.length; i++)
     particles[i] = new Particle();
-  scene.enableHint(Scene.BACKGROUND | Scene.GRID);
 }
 
 void draw() {
+  background(0);
   scene.render();
+  stroke(255, 0, 255);
+  scene.drawGrid();
   pushStyle();
   stroke(255, 0, 0);
   strokeWeight(3);

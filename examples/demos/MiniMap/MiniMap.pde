@@ -36,7 +36,6 @@ void setup() {
   scene.eye().disablePicking(Node.BULLSEYE);
   scene.eye().setBullsEyeSize(50);
   scene.eye().setHighlight(0);
-  scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
   models = new Node[30];
   for (int i = 0; i < models.length; i++) {
     if ((i & 1) == 0) {
@@ -53,7 +52,6 @@ void setup() {
   minimap = new Scene(createGraphics(width / 2, height / 2, renderer), 2000);
   if (renderer == P3D)
     minimap.togglePerspective();
-  minimap.enableHint(Scene.BACKGROUND, color(125, 80, 90));
 }
 
 PShape shape() {
@@ -111,8 +109,16 @@ void mouseClicked(MouseEvent event) {
 
 void draw() {
   focus = minimap.hasMouseFocus() ? minimap : scene;
-  scene.display();
+  scene.openContext();
+  scene.context().background(75, 25, 15);
+  scene.render();
+  scene.closeContext();
+  scene.image();
   if (displayMinimap) {
-    minimap.display(width / 2, height / 2);
+    minimap.openContext();
+    minimap.context().background(125, 80, 90);
+    minimap.render();
+    minimap.closeContext();
+    minimap.image(width / 2, height / 2);
   }
 }

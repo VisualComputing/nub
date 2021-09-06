@@ -41,11 +41,12 @@ void setup() {
     scene.randomize(shapes[i]);
   }
   smooth();
-  scene.enableHint(Scene.BACKGROUND | Scene.AXES);
 }
 
 void draw() {
+  background(0);
   scene.render();
+  scene.drawAxes();
   if (snPicking)
     spaceNavigatorPicking();
   else

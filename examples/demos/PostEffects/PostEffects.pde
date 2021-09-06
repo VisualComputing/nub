@@ -28,12 +28,10 @@ public void setup() {
   colorMode(HSB, 255);
   // both the main and depth scenes share the same eye
   scene = new Scene(createGraphics(width, height, P3D), 1000);
-  scene.enableHint(Scene.BACKGROUND, color(0));
   depthScene = new Scene(createGraphics(width, height, P3D), scene.eye(), 1000);
   depthShader = loadShader("depth.glsl");
   depthScene.context().shader(depthShader);
   depthScene.picking = false;
-  depthScene.enableHint(Scene.BACKGROUND, color(0));
   // nodes
   models = new Node[100];
   for (int i = 0; i < models.length; i++) {
@@ -82,10 +80,15 @@ public void setup() {
 public void draw() {
   PGraphics graphics = drawGraphics = scene.context();
   // 1. Render into main buffer
+  scene.openContext();
+  scene.context().background(0);
   scene.render();
+  scene.closeContext();
+  scene.image();
   // 2. Draw into depth buffer
   if (depth) {
     depthScene.openContext();
+    depthScene.context().background(0);
     depthShader.set("near", depthScene.zNear());
     depthShader.set("far", depthScene.zFar());
     depthScene.render();

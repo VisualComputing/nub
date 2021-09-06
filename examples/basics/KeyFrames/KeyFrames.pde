@@ -29,9 +29,6 @@ float speed = 1;
 void setup() {
   size(1000, 700, renderer);
   scene = new Scene(this, 150);
-  scene.enableHint(Scene.AXES | Scene.GRID);
-  scene.configHint(Scene.GRID, color(0, 255, 0));
-  scene.enableHint(Scene.BACKGROUND, color(125));
   scene.fit(1);
   PShape pshape;
   if (scene.is2D()) {
@@ -58,7 +55,11 @@ void setup() {
 }
 
 void draw() {
+  background(125);
   scene.render();
+  scene.drawAxes();
+  stroke(255, 255, 0);
+  scene.drawGrid();
 }
 
 void mouseMoved() {

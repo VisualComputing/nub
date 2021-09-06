@@ -18,8 +18,6 @@ Node floor, base, arm, forarm, shade;
 void setup() {
   size(1000, 700, P3D);
   scene = new Scene(this);
-  scene.enableHint(Scene.BACKGROUND);
-  scene.fit(1);
   base = new Node(this::base);
   base.setTranslationPlaneFilter(Vector.plusK);
   base.setRotationAxisFilter(Vector.plusK);
@@ -100,6 +98,7 @@ void floor(PGraphics pg) {
 }
 
 void draw() {
+  background(0);
   lights();
   scene.render();
 }

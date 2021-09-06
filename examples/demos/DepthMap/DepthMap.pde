@@ -33,7 +33,6 @@ void settings() {
 void setup() {
   // main scene
   scene = new Scene(this, max(w, h));
-  scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
   // shapes
   shapes = new Node[20];
   for (int i = 0; i < shapes.length; i++) {
@@ -64,16 +63,20 @@ void setup() {
   // shadow map scene
   shadowMapScene = new Scene(shadowMap, scene.node("light"), zNear, zFar);
   shadowMapScene.togglePerspective();
-  shadowMapScene.enableHint(Scene.BACKGROUND, color(140, 160, 125));
   shadowMapScene.picking = false;
 }
 
 public void draw() {
   // 1. Fill in and display front-buffer
+  background(75, 25, 15);
   scene.render();
   // 2. Fill in shadow map using the light point of view
   if (scene.isTagValid("light")) {
-    shadowMapScene.display(w / 2, h / 2);
+    shadowMapScene.openContext();
+    shadowMapScene.context().background(140, 160, 125);
+    shadowMapScene.render();
+    shadowMapScene.closeContext();
+    shadowMapScene.image(w / 2, h / 2);
   }
 }
 

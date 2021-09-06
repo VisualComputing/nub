@@ -27,8 +27,6 @@ void settings() {
 void setup() {
   rectMode(CENTER);
   scene = new Scene(createGraphics(w, h /2, renderer), max(w, h));
-  scene.enableHint(Scene.BACKGROUND, color(10, 50, 25));
-
   shapes = new Node[100];
   for (int i = 0; i < shapes.length; i++) {
     shapes[i] = new Node(caja());
@@ -39,7 +37,11 @@ void setup() {
 
 void draw() {
   // 1. Fill in and display front-buffer
-  scene.display();
+  scene.openContext();
+  scene.context().background(10, 50, 25);
+  scene.render();
+  scene.closeContext();
+  scene.image();
   // 2. Display back buffer
   scene.displayBackBuffer(0, h / 2);
 }

@@ -43,7 +43,6 @@ void settings() {
 
 void setup() {
   scene = new Scene(this, max(w, h) / 3);
-  scene.enableHint(Scene.BACKGROUND, color(0));
   scene.togglePerspective();
   scene.fit(1);
   Node floor = new Node((PGraphics pg) -> {
@@ -84,7 +83,6 @@ void setup() {
   // shadow map scene
   shadowMapScene = new Scene(shadowMap, light, 10, 600);
   shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
-  shadowMapScene.enableHint(Scene.BACKGROUND, 0xffffffff);
   shadowMapScene.picking = false;
 }
 
@@ -137,7 +135,10 @@ void landscape3(PGraphics pg) {
 
 void draw() {
   // 1. Render the shadowmap
+  shadowMapScene.openContext();
+  shadowMapScene.context().background(0xffffffff);
   shadowMapScene.render();
+  shadowMapScene.closeContext();
   // 2. Display the scene
   if (!debug) {
     Matrix lightMatrix = Matrix.multiply(biasMatrix, shadowMapScene.projectionView());
@@ -146,6 +147,7 @@ void draw() {
     Scene.setUniform(shadowShader, "lightDirection", lightDirection);
     shadowShader.set("shadowMap", shadowMap);
   }
+  background(0);
   scene.display();
 }
 

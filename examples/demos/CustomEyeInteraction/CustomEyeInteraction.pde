@@ -54,8 +54,8 @@ void setup() {
 void draw() {
   scene.openContext();
   background(0);
-  scene.closeContext();
   scene.render();
+  scene.closeContext();
   fill(200);
   noStroke();
   textureMode(IMAGE);
