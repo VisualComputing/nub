@@ -28,17 +28,7 @@ public class MouseDragInteraction extends PApplet {
     rectMode(CENTER);
 
     scene = new Scene(this, 1500);
-    scene.setHUD((PGraphics pg) -> {
-      pg.pushStyle();
-      pg.stroke(255, 255, 0);
-      pg.strokeWeight(5);
-      pg.fill(255, 255, 0, 125);
-      pg.rect(pixelX, pixelY, 2 * h, h);
-      pg.popStyle();
-    });
     //scene.togglePerspective();
-    scene.enableHint(Scene.AXES);
-    scene.enableHint(Scene.BACKGROUND, color(0));
     //scene.fit(1);
 
     shape1 = new Node((PGraphics pGraphics) -> {
@@ -88,7 +78,17 @@ public class MouseDragInteraction extends PApplet {
 
   public void draw() {
     // render scene nodes (shapes simply get drawn)
+    background(0);
     scene.render();
+    scene.drawAxes();
+    scene.beginHUD();
+    pushStyle();
+    stroke(255, 255, 0);
+    strokeWeight(5);
+    fill(255, 255, 0, 125);
+    rect(pixelX, pixelY, 2 * h, h);
+    popStyle();
+    scene.endHUD();
     fill(0, 255, 255);
     scene.drawArrow(randomVector);
   }

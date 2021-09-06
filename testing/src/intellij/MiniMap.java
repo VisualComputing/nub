@@ -36,7 +36,6 @@ public class MiniMap extends PApplet {
     scene.eye().setHighlight(0);
     //scene.eye().enableHint(Node.BULLSEYE);
     //scene.eye().enableHint(Node.FRUSTUM, scene, color(255, 0, 0, 125));
-    scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
     models = new Node[30];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
@@ -54,7 +53,6 @@ public class MiniMap extends PApplet {
     if (renderer == P3D)
       minimap.togglePerspective();
     minimap.fit(1);
-    minimap.enableHint(Scene.BACKGROUND, color(125, 80, 90));
     //minimap.enableFrustum(scene, color(255, 0, 0, 125));
     //scene.eye().enableHint(Node.BOUNDS);
   }
@@ -118,8 +116,10 @@ public class MiniMap extends PApplet {
   @Override
   public void draw() {
     focus = minimap.hasMouseFocus() ? minimap : scene;
+    scene.context().background(75, 25, 15);
     scene.display();
     if (displayMinimap) {
+      minimap.context().background(125, 80, 90);
       minimap.display(w / 2, h / 2);
     }
   }

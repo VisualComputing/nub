@@ -25,7 +25,6 @@ public class NoHint extends PApplet {
       pg.popStyle();
     });
     */
-    scene.resetHint();
     for (int i = 0; i <= 10; i++) {
       Node node = new Node();
       scene.randomize(node);

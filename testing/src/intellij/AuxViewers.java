@@ -25,9 +25,6 @@ public class AuxViewers extends PApplet {
 
   public void setup() {
     scene1 = onScreen ? new Scene(g) : new Scene(createGraphics(w, h, P3D));
-    //scene1.enableHint(Scene.BACKGROUND, color(75, 25, 15, 100));
-    scene1.enableHint(Scene.BACKGROUND, color(75, 25, 15));
-    scene1.enableHint(Scene.GRID, color(0, 225, 15));
     scene1.eye().tagging = false;
     scene1.setBounds(1000);
     scene1.fit(1);
@@ -54,18 +51,12 @@ public class AuxViewers extends PApplet {
     // Note that we pass the upper left corner coordinates where the scene1
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(createGraphics(w / 2, h / 2, P3D));
-    scene2.enableHint(Scene.BACKGROUND | Scene.AXES);
-    //scene2.configHint(Scene.BACKGROUND, color(75, 25, 175, 100));
-    scene2.configHint(Scene.BACKGROUND, color(75, 25, 175));
     scene2.eye().tagging = false;
     scene2.setBounds(1000);
     scene2.fit(1);
 
     // idem here
     scene3 = new Scene(createGraphics(w / 2, h / 2, P3D));
-    scene3.enableHint(Scene.BACKGROUND | Scene.AXES);
-    //scene3.configHint(Scene.BACKGROUND, color(175, 200, 20, 170));
-    scene3.configHint(Scene.BACKGROUND, color(175, 200, 20));
     scene3.eye().tagging = false;
     scene3.setBounds(1000);
     scene3.fit(1);
@@ -136,9 +127,20 @@ public class AuxViewers extends PApplet {
 
   public void draw() {
     focus = scene2.hasMouseFocus() ? scene2 : scene3.hasMouseFocus() ? scene3 : scene1.hasMouseFocus() ? scene1 : null;
+    scene1.context().background(75, 25, 15);
     scene1.display();
+    //scene1.drawAxes();
+    scene1.context().stroke(0, 225, 15);
+    scene1.drawGrid();
     if (displayAuxiliarViewers) {
+      scene2.context().background(75, 25, 175);
+      scene2.display();
+      scene2.drawAxes();
       scene2.display(w / 2, 0);
+      scene2.display(w / 2, 0);
+      scene3.context().background(175, 200, 20);
+      scene3.display();
+      scene3.drawAxes();
       scene3.display(w / 2, h / 2);
     }
     println(frameRate);

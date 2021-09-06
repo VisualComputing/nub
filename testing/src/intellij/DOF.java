@@ -27,7 +27,6 @@ public class DOF extends PApplet {
   @Override
   public void setup() {
     scene = new Scene(createGraphics(width, height, P3D), 1000);
-    scene.enableHint(Scene.BACKGROUND, color(0));
     scene.fit(1);
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
@@ -47,7 +46,6 @@ public class DOF extends PApplet {
     depthScene.context().shader(depthShader);
     // TODO make API more consistent
     depthScene.picking = false;
-    depthScene.enableHint(Scene.BACKGROUND, color(0));
     // DOF shader
     dofShader = loadShader(Paths.get("testing/data/dof/dof.glsl").toAbsolutePath().toString());
     dofShader.set("aspect", width / (float) height);
@@ -62,9 +60,11 @@ public class DOF extends PApplet {
   @Override
   public void draw() {
     // 1. Render into main buffer
+    scene.context().background(0);
     scene.render();
     // 2. Draw into depth buffer
     depthScene.openContext();
+    depthScene.context().background(0);
     depthShader.set("near", depthScene.zNear());
     depthShader.set("far", depthScene.zFar());
     depthScene.render();

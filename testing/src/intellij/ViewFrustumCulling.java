@@ -25,13 +25,11 @@ public class ViewFrustumCulling extends PApplet {
   public void setup() {
     // main scene
     mainScene = new Scene(createGraphics(w, h / 2, P3D));
-    mainScene.enableHint(Scene.BACKGROUND, color(255));
     mainScene.eye().enableHint(Node.BOUNDS);
     mainScene.togglePerspective();
     mainScene.fit(1);
     // secondary scene
     secondaryScene = new Scene(createGraphics(w, h / 2, P3D), 200);
-    secondaryScene.enableHint(Scene.BACKGROUND, color(185));
     secondaryScene.togglePerspective();
     secondaryScene.fit();
     // declare and build the octree hierarchy
@@ -49,7 +47,9 @@ public class ViewFrustumCulling extends PApplet {
     focus = mainScene.hasMouseFocus() ? mainScene : secondaryScene;
     // culling condition should be retested every frame
     root.cull = false;
+    mainScene.context().background(255);
     mainScene.display();
+    secondaryScene.context().background(185);
     secondaryScene.display(0, h / 2);
   }
 

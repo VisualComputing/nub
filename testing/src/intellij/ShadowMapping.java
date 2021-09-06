@@ -39,7 +39,6 @@ public class ShadowMapping extends PApplet {
   public void setup() {
     //scene = new Scene(createGraphics(w, h, P3D));
     scene = new Scene(this, max(w, h) / 3f);
-    scene.enableHint(Scene.BACKGROUND, color(0));
     scene.togglePerspective();
     scene.fit(1);
     // initDefaultPass
@@ -68,7 +67,6 @@ public class ShadowMapping extends PApplet {
     //shadowMap.noSmooth();
     shadowMapScene = new Scene(shadowMap, light, 10, 600);
     shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
-    shadowMapScene.enableHint(Scene.BACKGROUND, 0xffffffff);
     shadowMapScene.picking = false;
     animation = new TimingTask(() -> {
       if (!scene.isTagged(light)) {
@@ -132,6 +130,7 @@ public class ShadowMapping extends PApplet {
 
   public void draw() {
     // 1. Render the shadowmap
+    shadowMapScene.context().background(0xffffffff);
     shadowMapScene.render();
     // 2. Display the scene
     if (!debug) {
@@ -141,6 +140,7 @@ public class ShadowMapping extends PApplet {
       Scene.setUniform(shadowShader, "lightDirection", lightDirection);
       shadowShader.set("shadowMap", shadowMap);
     }
+    background(0);
     scene.display();
   }
 

@@ -37,12 +37,14 @@ public class FilteredNode extends PApplet {
     node.enableHint(Node.TORUS | Node.BULLSEYE | Node.AXES);
     scene.randomize(node);
     node.translate(new Vector(20, 20, 0));
-    scene.enableHint(Scene.GRID | Scene.AXES | Scene.BACKGROUND);
-    scene.configHint(Scene.GRID, Scene.GridType.LINES, color(0, 255, 0));
   }
 
   public void draw() {
+    background(0);
     scene.render();
+    scene.drawAxes();
+    stroke(0,255,0);
+    scene.drawDottedGrid();
     fill(0, 255, 255);
     scene.beginHUD();
     displayText();

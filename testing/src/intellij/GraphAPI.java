@@ -34,8 +34,6 @@ public class GraphAPI extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    scene.configHint(Scene.BACKGROUND, color(125));
-    scene.enableHint(Scene.BACKGROUND | Scene.AXES);
 
     // red
     n1 = new Node(shape(color(255, 0, 0, 125)));
@@ -77,7 +75,9 @@ public class GraphAPI extends PApplet {
   }
 
   public void draw() {
+    background(125);
     scene.render();
+    scene.drawAxes();
   }
 
   public void keyPressed() {

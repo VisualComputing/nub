@@ -24,7 +24,6 @@ public class PickingMode extends PApplet {
     rectMode(CENTER);
     scene = new Scene(createGraphics(w, h / 2, renderer), max(w, h));
     //scene = new Scene(this);
-    scene.enableHint(Scene.BACKGROUND, color(125));
 
     shapes = new Node[100];
     for (int i = 0; i < shapes.length; i++) {
@@ -35,12 +34,13 @@ public class PickingMode extends PApplet {
       shapes[i].enableHint(Node.AXES);
     }
     //scene.fit(1);
-    scene.enableHint(Scene.AXES);
   }
 
   public void draw() {
     // 1. Fill in and display front-buffer
+    background(125);
     scene.display();
+    scene.drawAxes();
     // 2. Display back buffer
     scene.displayBackBuffer(0, h / 2);
   }

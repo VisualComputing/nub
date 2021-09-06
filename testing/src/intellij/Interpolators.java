@@ -25,9 +25,6 @@ public class Interpolators extends PApplet {
 
   public void setup() {
     scene = new Scene(this, 150);
-    scene.enableHint(Scene.AXES | Scene.GRID);
-    scene.configHint(Scene.GRID, color(0, 255, 0));
-    scene.enableHint(Scene.BACKGROUND, color(125));
     PShape pshape;
     if (scene.is2D()) {
       rectMode(CENTER);
@@ -66,6 +63,12 @@ public class Interpolators extends PApplet {
   }
 
   public void draw() {
+    background(125);
+    scene.render();
+    scene.drawAxes();
+    stroke(0,255,0);
+    scene.drawGrid();
+
     scene.render();
     // println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");
   }

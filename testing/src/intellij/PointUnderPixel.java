@@ -30,9 +30,6 @@ public class PointUnderPixel extends PApplet {
 
   public void setup() {
     scene = offScreen ? new Scene(createGraphics(width, height, P3D), 1000) : new Scene(this, 1000);
-    scene.enableHint(Scene.BACKGROUND, color(0));
-    scene.enableHint(Scene.SHAPE);
-    scene.setShape(this::drawRay);
     scene.fit(1);
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
@@ -45,19 +42,24 @@ public class PointUnderPixel extends PApplet {
   }
 
   public void draw() {
+    background(0);
     scene.display();
+    scene.drawAxes();
+    stroke(0,255,0);
+    scene.drawGrid();
+    drawRay();
   }
 
-  void drawRay(PGraphics pg) {
+  void drawRay() {
     if (pup != null) {
-      pg.pushStyle();
-      pg.strokeWeight(20);
-      pg.stroke(255, 255, 0);
-      pg.point(pup.x(), pup.y(), pup.z());
-      pg.strokeWeight(8);
-      pg.stroke(0, 0, 255);
-      pg.line(orig.x(), orig.y(), orig.z(), end.x(), end.y(), end.z());
-      pg.popStyle();
+      pushStyle();
+      strokeWeight(20);
+      stroke(255, 255, 0);
+      point(pup.x(), pup.y(), pup.z());
+      strokeWeight(8);
+      stroke(0, 0, 255);
+      line(orig.x(), orig.y(), orig.z(), end.x(), end.y(), end.z());
+      popStyle();
     }
   }
 

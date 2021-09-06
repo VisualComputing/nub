@@ -24,8 +24,6 @@ public class Superliminal extends PApplet {
 
   public void setup() {
     scene = onScreen ? new Scene(g) : new Scene(createGraphics(w, h, P3D));
-    scene.enableHint(Scene.BACKGROUND, color(75, 25, 15));
-    scene.enableHint(Scene.GRID, color(0, 225, 15));
     scene.eye().enableHint(Node.BOUNDS);
     scene.eye().tagging = false;
     scene.setBounds(1000);
@@ -44,8 +42,6 @@ public class Superliminal extends PApplet {
     // is to be drawn (see drawing code below) to its constructor.
     lateralView = new Scene(createGraphics(w / 2, h, P3D));
     lateralView.togglePerspective();
-    lateralView.enableHint(Scene.BACKGROUND | Scene.AXES);
-    lateralView.configHint(Scene.BACKGROUND, color(75, 25, 175));
     lateralView.eye().tagging = false;
     lateralView.setBounds(4000);
 
@@ -189,9 +185,14 @@ public class Superliminal extends PApplet {
 
   public void draw() {
     focus = lateralView.hasMouseFocus() ? lateralView : scene;
+    scene.context().background(75, 25, 15);
     scene.display();
+    stroke(0, 225, 15);
+    scene.drawGrid();
     if (displayLateralView) {
+      lateralView.context().background(75, 25, 175);
       lateralView.display(w / 2, 0);
+      lateralView.drawAxes();
     }
   }
 

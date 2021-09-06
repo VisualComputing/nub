@@ -16,7 +16,6 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
-import processing.core.PShape;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -102,17 +101,10 @@ import java.util.function.Consumer;
  * Several animations may be performed to make the {@link #eye()} reach a target, such as
  * {@link #fit(float)},{@link #fit(int, int, int, int)}, {@link #fit(Node)} and
  * {@link #fit(Node, float)}.
- * <h1>5. Visual hints</h2>
- * The world space visual representation may be configured using the following hints:
- * {@link #AXES}, {@link #HUD}, {@link #GRID}, {@link #BACKGROUND} and {@link #SHAPE}.
- * <p>
- * See {@link #hint()}, {@link #configHint(int, Object...)} {@link #enableHint(int)},
- * {@link #enableHint(int, Object...)}, {@link #disableHint(int)}, {@link #toggleHint(int)}
- * and {@link #resetHint()}.
- * <h1>6. Visibility and culling techniques</h1>
+ * <h1>5. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
  * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}.
- * <h1>7. Matrix handling</h1>
+ * <h1>6. Matrix handling</h1>
  * The graph performs matrix handling through a matrix-handler. Refer to the {@link MatrixHandler}
  * documentation for details.
  * <p>
@@ -127,25 +119,6 @@ import java.util.function.Consumer;
 public class Graph {
   protected static Graph _onscreenGraph;
   public static Random random = new Random();
-  // Visual hints
-  protected int _mask;
-  public final static int GRID = 1 << 0;
-  public final static int AXES = 1 << 1;
-  public final static int HUD = 1 << 2;
-  public final static int SHAPE = 1 << 3;
-  public final static int BACKGROUND = 1 << 4;
-  protected Consumer<processing.core.PGraphics> _imrHUD;
-  protected processing.core.PShape _rmrHUD;
-  protected Consumer<processing.core.PGraphics> _imrShape;
-  protected processing.core.PShape _rmrShape;
-  public enum GridType {
-    LINES, DOTS
-  }
-  protected GridType _gridType;
-  protected int _gridStroke;
-  protected int _centerStroke;
-  protected int _gridSubDiv;
-  protected Object _background;
   protected static HashSet<Node> _hudSet = new HashSet<Node>();
   protected static HashSet<Node> _interpolators = new HashSet<Node>();
 
@@ -486,15 +459,7 @@ public class Graph {
       }
     };
     setType(type);
-    enableHint(HUD | SHAPE);
     picking = true;
-    // middle grey encoded as a processing int rgb color
-    _gridStroke = -8553091;
-    // green encoded as a processing int rgb color
-    _centerStroke = -16711936;
-    _gridType = GridType.DOTS;
-    _gridSubDiv = 10;
-    _background = -16777216;
   }
 
   /**
@@ -2617,12 +2582,10 @@ public class Graph {
 
   /**
    * Begins the rendering process (see {@link #render(Node)}). Use it always before
-   * {@link #closeContext()}. Binds the matrices to the renderer and displays the scene
-   * {@link #hint()}.
+   * {@link #closeContext()}. Binds the matrices to the renderer.
    * <p>
-   * This method is automatically called by {@link #render(Node)}. Call it explicitly only
-   * when the scene {@link #hint()} is reset (see also {@link #resetHint()}) and you need
-   * to customize that which is to be rendered, as follows:
+   * This method is automatically called by {@link #render(Node)}. Call it explicitly when
+   * you need to customize that which is to be rendered, as follows:
    * <pre>
    * {@code
    * scene.openContext();
@@ -2648,7 +2611,7 @@ public class Graph {
         _initFrontBuffer();
       _bind();
       _matrixHandler.pushMatrix();
-      _displayHint();
+      _displayPaths();
     }
   }
 
@@ -2886,11 +2849,10 @@ public class Graph {
   }
 
   /**
-   * Draws the graph {@link #hint()}.
-   * <p>
-   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   * Displays all node keyframes' spline hints. Default implementation is empty, i.e., it is
+   * meant to be implemented by derived classes.
    */
-  protected void _displayHint() {
+  protected void _displayPaths() {
   }
 
   /**
@@ -4011,357 +3973,7 @@ public class Graph {
     eye()._orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _cadRotateTask._y : -_cadRotateTask._y)), center());
   }
 
-  // visual hints
-
-  /**
-   * Returns whether or not all single visual hints encoded in the bitwise-or
-   * {@code hint} mask are enable or not.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #resetHint()
-   */
-  public boolean isHintEnabled(int hint) {
-    return ~(_mask | ~hint) == 0;
-  }
-
-  /**
-   * Returns the current visual hint mask. The mask is a bitwise-or of the following
-   * single visual hints available for the graph:
-   * <p>
-   * <ol>
-   * <li>{@link #GRID} which displays a grid hint centered at the world origin.</li>
-   * <li>{@link #AXES} which displays an axes hint centered at the world origin.</li>
-   * <li>{@link #HUD} which displays the graph Heads-Up-Display set with
-   * {@link #setHUD(PShape)} or {@link #setHUD(Consumer)}.</li>
-   * <li>{@link #SHAPE} which displays the node shape set with
-   * {@link #setShape(PShape)} or {@link #setShape(Consumer)}.</li>
-   * <li>{@link #BACKGROUND} which sets up the graph background to be displayed.</li>
-   * </ol>
-   * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
-   * calling either {@link #render(Node)} or {@link #render()}.
-   *
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   * @see #resetHint()
-   */
-  public int hint() {
-    return this._mask;
-  }
-
-  /**
-   * Resets the current {@link #hint()}, i.e., disables all single
-   * visual hints available for the node.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  public void resetHint() {
-    _mask = 0;
-  }
-
-  /**
-   * Disables all the single visual hints encoded in the bitwise-or {@code hint} mask.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #resetHint()
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  public void disableHint(int hint) {
-    _mask &= ~hint;
-  }
-
-  /**
-   * Calls {@link #enableHint(int)} followed by {@link #configHint(int, Object...)}.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #resetHint()
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  public void enableHint(int hint, Object... params) {
-    enableHint(hint);
-    configHint(hint, params);
-  }
-
-  /**
-   * Enables all single visual hints encoded in the bitwise-or {@code hint} mask.
-   *
-   * @see #hint()
-   * @see #disableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #resetHint()
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   */
-  public void enableHint(int hint) {
-    _mask |= hint;
-  }
-
-  /**
-   * Toggles all single visual hints encoded in the bitwise-or {@code hint} mask.
-   *
-   * @see #hint()
-   * @see #disableHint(int)
-   * @see #configHint(int, Object...)
-   * @see #enableHint(int, Object...)
-   * @see #resetHint()
-   * @see #enableHint(int)
-   * @see #isHintEnabled(int)
-   */
-  public void toggleHint(int hint) {
-    _mask ^= hint;
-  }
-
-  /**
-   * Configures the hint using varargs as follows:
-   * <p>
-   * <ol>
-   * <li>{@link #GRID} hint: {@code configHint(Graph.GRID, gridStroke)},
-   * {@code configHint(Graph.GRID, gridType)},
-   * {@code configHint(Graph.GRID, gridStroke, gridType)},
-   * {@code configHint(Graph.GRID, gridStroke, gridSubdivs)}
-   * {@code configHint(Graph.GRID, gridStroke, gridSubdivs, gridType)}.</li>
-   * <li>{@link #BACKGROUND} hint: {@code configHint(Graph.BACKGROUND, background)}.</li>
-   * </ol>
-   * Note that the {@code gridStroke}, {@code cameraStroke} and {@code frustumColor}
-   * are color {@code int} vars; {@code otherGraph} is of type {@link Graph};
-   * {@code gridType} is either {@link GridType#DOTS} or {@link GridType#LINES};
-   * {@code gridSubdivs} is the number of grid subdivisions to be displayed; and,
-   * {@code background} is either a color {@code int} var, or a
-   * {@code processing.core.PImage} type.
-   *
-   * @see #hint()
-   * @see #enableHint(int)
-   * @see #enableHint(int, Object...)
-   * @see #disableHint(int)
-   * @see #toggleHint(int)
-   * @see #isHintEnabled(int)
-   * @see #resetHint()
-   */
-  public void configHint(int hint, Object... params) {
-    switch (params.length) {
-      case 1:
-        if (hint == GRID) {
-          if (isNumInstance(params[0])) {
-            _gridStroke = castToInt(params[0]);
-            return;
-          }
-          if (params[0] instanceof GridType) {
-            _gridType = (GridType) params[0];
-            return;
-          }
-        }
-        if (hint == BACKGROUND) {
-          if (isNumInstance(params[0])) {
-            _background = castToInt(params[0]);
-            return;
-          }
-          if (params[0] instanceof processing.core.PImage) {
-            _background = params[0];
-            return;
-          }
-        }
-        break;
-      case 2:
-        if (hint == GRID) {
-          if (isNumInstance(params[0]) && isNumInstance(params[1])) {
-            _gridStroke = castToInt(params[0]);
-            _gridSubDiv = castToInt(params[1]);
-            return;
-          }
-          if (isNumInstance(params[0]) && params[1] instanceof GridType) {
-            _gridStroke = castToInt(params[0]);
-            _gridType = (GridType) params[1];
-            return;
-          }
-          if (params[0] instanceof GridType && isNumInstance(params[1])) {
-            _gridType = (GridType) params[0];
-            _gridStroke = castToInt(params[1]);
-            return;
-          }
-        }
-        break;
-      case 3:
-        if (hint == GRID) {
-          if (isNumInstance(params[0]) && isNumInstance(params[1]) && params[2] instanceof GridType) {
-            _gridStroke = castToInt(params[0]);
-            _gridSubDiv = castToInt(params[1]);
-            _gridType = (GridType) params[2];
-            return;
-          }
-          if (params[0] instanceof GridType && isNumInstance(params[1]) && isNumInstance(params[2])) {
-            _gridType = (GridType) params[0];
-            _gridStroke = castToInt(params[1]);
-            _gridSubDiv = castToInt(params[2]);
-            return;
-          }
-        }
-        break;
-    }
-    System.out.println("Warning: some params in Scene.configHint(hint, params) couldn't be parsed!");
-  }
-
-  /**
-   * Sets this (H)eads (U)p (D)isplay from the {@code graph} hud.
-   */
-  public void setHUD(Graph graph) {
-    setHUD(graph._rmrHUD);
-    setHUD(graph._imrHUD);
-  }
-
-  /**
-   * Sets the graph retained mode rendering (rmr) shape {@link #HUD} hint
-   * (see {@link #hint()}). Use {@code enableHint(Node.HUD)},
-   * {@code disableHint(Node.HUD)} and {@code toggleHint(Node.HUD)} to (dis)enable the hint.
-   *
-   * @see #setHUD(Consumer)
-   * @see #resetHUD()
-   * @see #resetIMRHUD()
-   * @see #resetRMRHUD()
-   */
-  public void setHUD(processing.core.PShape hud) {
-    _rmrHUD = hud;
-    enableHint(HUD);
-  }
-
-  /**
-   * Sets the node immediate mode rendering (imr) drawing procedure
-   * {@link #HUD} hint (see {@link #hint()}). Use {@code enableHint(Node.HUD)},
-   * {@code disableHint(Node.HUD)} and {@code toggleHint(Node.HUD)} to (dis)enable the hint.
-   *
-   * @see #setShape(processing.core.PShape)
-   * @see #resetHUD()
-   * @see #resetIMRHUD()
-   * @see #resetRMRHUD()
-   */
-  public void setHUD(Consumer<processing.core.PGraphics> hud) {
-    _imrHUD = hud;
-    enableHint(HUD);
-  }
-
-  /**
-   * Same as calling {@link #resetRMRHUD()} and {@link #resetIMRHUD()}.
-   */
-  public void resetHUD() {
-    _imrHUD = null;
-    _rmrHUD = null;
-    disableHint(HUD);
-  }
-
-  /**
-   * Same as {@code setIMRShape(null)}.
-   *
-   * @see #setShape(Consumer)
-   */
-  public void resetIMRHUD() {
-    _imrHUD = null;
-    if (_rmrHUD == null)
-      disableHint(HUD);
-  }
-
-  /**
-   * Same as {@code setRMRShape(null)}.
-   *
-   * @see #setShape(processing.core.PShape)
-   */
-  public void resetRMRHUD() {
-    _rmrHUD = null;
-    if (_imrHUD == null)
-      disableHint(HUD);
-  }
-
-  /**
-   * Calls {@link #resetIMRShape()} and {@link #resetRMRShape()} .
-   */
-  public void resetShape() {
-    _rmrShape = null;
-    _imrShape = null;
-    disableHint(SHAPE);
-  }
-
-  /**
-   * Resets the retained-mode rendering shape.
-   *
-   * @see #setShape(Consumer)
-   */
-  public void resetRMRShape() {
-    _rmrShape = null;
-    if (_imrShape == null)
-      disableHint(SHAPE);
-  }
-
-  /**
-   * Resets the immediate-mode rendering shape.
-   *
-   * @see #setShape(processing.core.PShape)
-   */
-  public void resetIMRShape() {
-    _imrShape = null;
-    if (_rmrShape == null)
-      disableHint(SHAPE);
-  }
-
-  /**
-   * Sets the node retained mode rendering (rmr) {@link #SHAPE} hint
-   * (see {@link #hint()}). Use {@code enableHint(Node.SHAPE)},
-   * {@code disableHint(Node.SHAPE)} and {@code toggleHint(Node.SHAPE)}
-   * to (dis)enable the hint.
-   *
-   * @see #setShape(Consumer)
-   * @see #resetShape()
-   * @see #resetIMRShape()
-   * @see #resetRMRShape()
-   */
-  public void setShape(processing.core.PShape shape) {
-    _rmrShape = shape;
-    enableHint(SHAPE);
-  }
-
-  /**
-   * Sets the node immediate mode rendering (imr) {@link #SHAPE} procedure
-   * hint (see {@link #hint()}). Use {@code enableHint(Node.SHAPE)},
-   * {@code disableHint(Node.SHAPE)} and {@code toggleHint(Node.SHAPE)}
-   * to (dis)enable the hint.
-   *
-   * @see #setShape(PShape)
-   * @see #resetShape()
-   * @see #resetIMRShape()
-   * @see #resetRMRShape()
-   */
-  public void setShape(Consumer<processing.core.PGraphics> callback) {
-    _imrShape = callback;
-    enableHint(SHAPE);
-  }
-
-  // Hack to hide node & interpolator hint properties
-
-  // Graph
-
-  protected Object _background(Graph graph) {
-    return graph._background;
-  }
+  // Hack to hide hint properties
 
   // Node
 

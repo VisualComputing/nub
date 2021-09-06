@@ -23,8 +23,6 @@ public class CustomNodeInteraction extends PApplet {
   public void setup() {
     font36 = loadFont("FreeSans-36.vlw");
     scene = new Scene(this);
-    scene.enableHint(Scene.AXES | Scene.BACKGROUND);
-    scene.configHint(Scene.BACKGROUND, color(0));
     scene.fit(1);
     shapes = new Torus[10];
     for (int i = 0; i < shapes.length; i++) {
@@ -33,6 +31,7 @@ public class CustomNodeInteraction extends PApplet {
   }
 
   public void draw() {
+    background(0);
     scene.render();
   }
 

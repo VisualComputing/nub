@@ -24,9 +24,7 @@ public class ViewingVolume extends PApplet {
   public void setup() {
     //scene1 = new Scene(createGraphics(w, h / 2, P3D), 150);
     scene1 = new Scene(createGraphics(w, h / 2, P3D), 50, 4000);
-    scene1.enableHint(Scene.BACKGROUND, color(125));
-    scene1.enableHint(Scene.AXES | Scene.SHAPE);
-    scene1.setShape(this::draw1);
+    scene1.eye().enableHint(Node.BOUNDS);
     //scene1.togglePerspective();
     //scene1.fit();
     //scene1.eye().setMagnitude(1);
@@ -34,10 +32,7 @@ public class ViewingVolume extends PApplet {
     // Note that we pass the upper left corner coordinates where the scene
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(createGraphics(w, h / 2, P3D), 600);
-    scene2.enableHint(Scene.BACKGROUND, color(85));
     scene1.eye().enableHint(Node.BOUNDS);
-    scene2.enableHint(Scene.SHAPE);
-    scene2.setShape(this::draw2);
     scene2.togglePerspective();
     scene2.fit();
 
@@ -47,8 +42,14 @@ public class ViewingVolume extends PApplet {
   @Override
   public void draw() {
     focus = scene1.hasMouseFocus() ? scene1 : scene2;
+    scene1.context().background(125);
     scene1.display();
+    scene1.drawAxes();
+    draw1(scene1.context());
+    scene2.context().background(85);
     scene2.display(0, h / 2);
+    scene2.drawAxes();
+    draw2(scene2.context());
   }
 
   public void draw1(PGraphics pg) {

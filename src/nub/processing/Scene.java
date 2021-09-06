@@ -860,7 +860,7 @@ public class Scene extends Graph {
 
   @Override
   protected void _displayHUD() {
-    if (!_hudSet.isEmpty() || (isHintEnabled(HUD) && ((_imrHUD != null) || _rmrHUD != null))) {
+    if (!_hudSet.isEmpty()) {
       context().pushStyle();
       beginHUD();
       if (!_hudSet.isEmpty()) {
@@ -879,62 +879,18 @@ public class Scene extends Graph {
           context().popMatrix();
         }
       }
-      if (isHintEnabled(HUD) && ((_imrHUD != null) || _rmrHUD != null)) {
-        if (_imrHUD != null) {
-          _imrHUD.accept(context());
-        }
-        if (_rmrHUD != null) {
-          context().shape(_rmrHUD);
-        }
-      }
       endHUD();
       context().popStyle();
     }
   }
 
   @Override
-  protected void _displayHint() {
+  protected void _displayPaths() {
     context().pushStyle();
-    if (isHintEnabled(BACKGROUND)) {
-      if (isNumInstance(_background)) {
-        context().background(castToInt(_background));
-      } else if (_background instanceof PImage) {
-        context().background((PImage) _background);
-      }
-    }
-    if (isHintEnabled(AXES)) {
-      context().pushStyle();
-      drawAxes();
-      context().popStyle();
-    }
-    if (isHintEnabled(GRID)) {
-      context().pushStyle();
-      context().colorMode(PApplet.RGB, 255);
-      context().stroke(_gridStroke);
-      if (_gridType == GridType.DOTS) {
-        context().strokeWeight(5);
-        drawDottedGrid(_radius, _gridSubDiv);
-      } else {
-        context().strokeWeight(1);
-        drawGrid(_radius, _gridSubDiv);
-      }
-      context().popStyle();
-    }
     for (Node interpolator : _interpolators) {
       context().pushStyle();
       _drawSpline(interpolator);
       context().popStyle();
-    }
-    if (isHintEnabled(Graph.SHAPE) && (_rmrShape != null || _imrShape != null)) {
-      context().push();
-      if (_rmrShape != null) {
-        context().shapeMode(context().shapeMode);
-        context().shape(_rmrShape);
-      }
-      if (_imrShape != null) {
-        _imrShape.accept(context());
-      }
-      context().pop();
     }
     context().popStyle();
   }
@@ -966,8 +922,9 @@ public class Scene extends Graph {
           pg.pushStyle();
           pg.colorMode(PApplet.RGB, 255);
           // 2113928960: yellow (with alpha: color(255, 255, 0, 125)) encoded as a processing int rgb color
-          pg.stroke(isNumInstance(_background(graph)) ? castToInt(_background(graph)) : 2113928960);
-          pg.fill(isNumInstance(_background(graph)) ? castToInt(_background(graph)) : 2113928960);
+          // TODO add Node configHint for the BOUNDS
+          pg.stroke(2113928960);
+          pg.fill(2113928960);
           drawFrustum(pg, graph);
           pg.popStyle();
         }

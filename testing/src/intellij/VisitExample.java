@@ -36,11 +36,8 @@ public class VisitExample extends PApplet {
       scenes[i].setBounds(50);
       strokeColors[i] = color(random(255), random(255), random(255));
       fillColors[i] = color(random(255), random(255), random(255));
-      scenes[i].setHUD((pg) -> sceneHUD(idx, pg));
       scenes[i].fit();
       if(Math.random() < 0.5) scenes[i].togglePerspective();
-      scenes[i].enableHint(Scene.BACKGROUND | Scene.AXES);
-      scenes[i].configHint(Scene.BACKGROUND, random(0, 100));
 
     }
     generateRandomNodes(10);
@@ -50,6 +47,12 @@ public class VisitExample extends PApplet {
   public void draw(){
     for(int i = 0; i < n; i++){
       focus = scenes[i].hasMouseFocus() ? scenes[i] : focus;
+      scenes[i].context().background(125);
+      scenes[i].render();
+      scenes[i].drawAxes();
+      scenes[i].beginHUD();
+      sceneHUD(i, scenes[i].context());
+      scenes[i].endHUD();
       scenes[i].display(i / rows * h / rows, (i % cols) * w / cols);
     }
   }

@@ -18,7 +18,6 @@ public class Luxo extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    scene.enableHint(Scene.BACKGROUND);
     //scene.setShape(this::floor);
     scene.fit(1);
     base = new Node(this::base);
@@ -101,6 +100,7 @@ public class Luxo extends PApplet {
   }
 
   public void draw() {
+    background(0);
     lights();
     scene.render();
   }

@@ -163,9 +163,9 @@ public class Node {
   protected int _picking;
   protected int _mask;
   public final static int CAMERA = 1 << 0;
-  public final static int AXES = Graph.AXES;
-  public final static int HUD = Graph.HUD;
-  public final static int SHAPE = Graph.SHAPE;
+  public final static int AXES = 1 << 1;
+  public final static int HUD = 1 << 2;
+  public final static int SHAPE = 1 << 3;
   public final static int BOUNDS = 1 << 4;
   public final static int BULLSEYE = 1 << 5;
   public final static int TORUS = 1 << 6;
@@ -2943,14 +2943,6 @@ public class Node {
       _imrShape = callback;
       enableHint(SHAPE);
     }
-  }
-
-  /**
-   * Sets this shape from the {@code graph} shape.
-   */
-  public void setShape(Graph graph) {
-    setShape(graph._rmrShape);
-    setShape(graph._imrShape);
   }
 
   /**

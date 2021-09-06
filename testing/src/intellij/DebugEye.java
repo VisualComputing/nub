@@ -20,7 +20,6 @@ public class DebugEye extends PApplet {
 
   public void setup() {
     scene = new Scene(this, 50);
-    scene.enableHint(Scene.BACKGROUND | Scene.AXES | Scene.GRID);
     //scene.togglePerspective();
     Node box1 = new Node();
     box1.setShape((PGraphics pg) -> {
@@ -63,7 +62,11 @@ public class DebugEye extends PApplet {
 
   public void draw() {
     lights();
+    background(125);
     scene.render();
+    scene.drawAxes();
+    stroke(0,255,0);
+    scene.drawGrid();
     noStroke();
     fill(255, 255, 0);
     scene.drawArrow(axis);
