@@ -36,6 +36,16 @@ public class NoHint extends PApplet {
     //scene.fit(1);
   }
 
+  public void shape() {
+    push();
+    translate(30, 20, 50);
+    strokeWeight(5);
+    stroke(255, 0, 255);
+    fill(0, 255, 255, 125);
+    box(60);
+    pop();
+  }
+
   public void draw() {
     switch (sty) {
       case 0:
@@ -44,6 +54,7 @@ public class NoHint extends PApplet {
         scene.drawAxes();
         stroke(0,255,0);
         scene.drawGrid();
+        shape();
         scene.beginHUD();
         pushStyle();
         stroke(255, 255, 0);
@@ -67,6 +78,7 @@ public class NoHint extends PApplet {
         scene.drawAxes();
         stroke(0,255,0);
         scene.drawGrid();
+        shape();
         break;
       case 2:
         scene.openContext();
@@ -74,6 +86,7 @@ public class NoHint extends PApplet {
         scene.drawAxes();
         stroke(0, 255, 0);
         scene.drawGrid();
+        shape();
         scene.render();
         scene.beginHUD();
         pushStyle();
@@ -91,6 +104,7 @@ public class NoHint extends PApplet {
         scene.drawAxes();
         stroke(0, 255, 0);
         scene.drawGrid();
+        shape();
         scene.beginHUD();
         pushStyle();
         stroke(255, 255, 0);
@@ -108,6 +122,7 @@ public class NoHint extends PApplet {
         scene.drawAxes();
         stroke(0,255,0);
         scene.drawGrid();
+        shape();
         scene.beginHUD();
         pushStyle();
         stroke(255, 255, 0);
@@ -126,6 +141,7 @@ public class NoHint extends PApplet {
         scene.drawAxes();
         stroke(0,255,0);
         scene.drawGrid();
+        shape();
         scene.beginHUD();
         pushStyle();
         stroke(255, 255, 0);
@@ -142,6 +158,7 @@ public class NoHint extends PApplet {
         scene.drawAxes();
         stroke(0,255,0);
         scene.drawGrid();
+        shape();
         scene.beginHUD();
         pushStyle();
         stroke(255, 255, 0);
