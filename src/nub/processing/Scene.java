@@ -573,7 +573,7 @@ public class Scene extends Graph {
 
   /**
    * Similar to {@link #pApplet} {@code image()}. Used to display the offscreen scene {@link #context()}.
-   * Does nothing if the scene is on-creen.
+   * Does nothing if the scene is on-screen.
    * <p>
    * Call this method, instead of {@link #pApplet} {@code image()}, to make {@link #hasMouseFocus()}
    * work always properly.

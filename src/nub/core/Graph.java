@@ -2625,18 +2625,13 @@ public class Graph {
    * to customize that which is to be rendered, as follows:
    * <pre>
    * {@code
-   * scene.beginRender();
-   * scene.render(subtree);
-   * // render your world located stuff here
-   * // enable also the hud here if you want too:
-   * // scene.beginHUD();
-   * // draw your screen located stuff here
-   * // scene.endHUD();
-   * scene.endRender();
-   * // call scene.image(pixelX, pixelY) to display the customized rendered scene:
-   * scene.image();
+   * scene.openContext();
+   * worldCustomRender()
+   * scene.closeContext();
    * }
    * </pre>
+   * You may call {@link #render(Node)} within {@code openContext} and {@code closeContext},
+   * before {@code openContext} or after {@code closeContext}, or not even call it.
    *
    * @see #render(Node)
    * @see #closeContext()
@@ -2701,7 +2696,9 @@ public class Graph {
   /**
    * Calls {@link #openContext()}, then renders the node {@code subtree} (or the whole tree
    * when {@code subtree} is {@code null}) onto the {@link #context()} from the {@link #eye()}
-   * viewpoint, and calls {@link #closeContext()}.
+   * viewpoint, and calls {@link #closeContext()}. After issuing a render command you'll be left out
+   * at the world coordinate system.
+   *
    * <p>
    * Note that the rendering algorithm calls {@link #setVisit(Node, BiConsumer)} on each visited node
    * (refer to the {@link Node} documentation).
