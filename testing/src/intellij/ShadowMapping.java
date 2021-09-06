@@ -130,8 +130,10 @@ public class ShadowMapping extends PApplet {
 
   public void draw() {
     // 1. Render the shadowmap
+    shadowMapScene.openContext();
     shadowMapScene.context().background(0xffffffff);
     shadowMapScene.render();
+    shadowMapScene.closeContext();
     // 2. Display the scene
     if (!debug) {
       Matrix lightMatrix = Matrix.multiply(biasMatrix, shadowMapScene.projectionView());

@@ -127,7 +127,7 @@ public class Graph {
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
-  protected long _lastDisplayed;
+  protected long _lastDisplayed, _lastClosed;
   protected boolean _offscreen;
 
   // 0. Contexts
@@ -2607,8 +2607,9 @@ public class Graph {
       throw new RuntimeException("Error: render() should be nested within a single openContext() / closeContext() call!");
     }
     if (_renderCount == 1) {
-      if (isOffscreen())
+      if (isOffscreen()) {
         _initFrontBuffer();
+      }
       _bind();
       _matrixHandler.pushMatrix();
       _displayPaths();
@@ -2633,10 +2634,13 @@ public class Graph {
       _rays.clear();
       _displayHUD();
       _matrixHandler.popMatrix();
-      if (isOffscreen())
+      if (isOffscreen()) {
+        _lastClosed = TimingHandler.frameCount;
         _endFrontBuffer();
-      else
+      }
+      else {
         _lastDisplayed = TimingHandler.frameCount;
+      }
     }
   }
 
@@ -2660,7 +2664,8 @@ public class Graph {
    * Calls {@link #openContext()}, then renders the node {@code subtree} (or the whole tree
    * when {@code subtree} is {@code null}) onto the {@link #context()} from the {@link #eye()}
    * viewpoint, and calls {@link #closeContext()}. After issuing a render command you'll be left out
-   * at the world coordinate system.
+   * at the world coordinate system. If the scene is offscreen this method should be called
+   * within {@link #openContext()} and {@link #closeContext()}.
    *
    * <p>
    * Note that the rendering algorithm calls {@link #setVisit(Node, BiConsumer)} on each visited node
@@ -2673,6 +2678,9 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
+    if (_lastClosed == TimingHandler.frameCount && isOffscreen()) {
+      throw new RuntimeException("Error: offscreen scenes should call render() within openContext() / closeContext()!");
+    }
     openContext();
     _subtree = subtree;
     if (subtree == null) {

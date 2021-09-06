@@ -50,9 +50,12 @@ public class OFFScreen extends PApplet {
   }
 
   public void draw() {
-    background(0);
-    scene.display(50, 50);
+    scene.openContext();
+    scene.context().background(0);
     scene.drawAxes();
+    scene.render();
+    scene.closeContext();
+    scene.image(50, 50);
   }
 
   @Override

@@ -116,11 +116,17 @@ public class MiniMap extends PApplet {
   @Override
   public void draw() {
     focus = minimap.hasMouseFocus() ? minimap : scene;
+    scene.openContext();
     scene.context().background(75, 25, 15);
-    scene.display();
+    scene.render();
+    scene.closeContext();
+    scene.image();
     if (displayMinimap) {
+      minimap.openContext();
       minimap.context().background(125, 80, 90);
-      minimap.display(w / 2, h / 2);
+      minimap.render();
+      minimap.closeContext();
+      minimap.image(w / 2, h / 2);
     }
   }
 

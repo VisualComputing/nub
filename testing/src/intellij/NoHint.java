@@ -79,6 +79,7 @@ public class NoHint extends PApplet {
         scene.drawGrid();
         shape();
         break;
+        // warning: openContext / closeContext should always be used by off-screen scenes!
       case 2:
         scene.openContext();
         background(125);

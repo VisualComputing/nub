@@ -185,14 +185,20 @@ public class Superliminal extends PApplet {
 
   public void draw() {
     focus = lateralView.hasMouseFocus() ? lateralView : scene;
+    scene.openContext();
     scene.context().background(75, 25, 15);
-    scene.display();
+    scene.render();
+    scene.closeContext();
+    scene.image();
     stroke(0, 225, 15);
     scene.drawGrid();
     if (displayLateralView) {
+      lateralView.openContext();
       lateralView.context().background(75, 25, 175);
-      lateralView.display(w / 2, 0);
       lateralView.drawAxes();
+      lateralView.render();
+      lateralView.closeContext();
+      lateralView.image(w / 2, 0);
     }
   }
 

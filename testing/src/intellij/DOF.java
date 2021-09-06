@@ -60,8 +60,10 @@ public class DOF extends PApplet {
   @Override
   public void draw() {
     // 1. Render into main buffer
+    scene.openContext();
     scene.context().background(0);
     scene.render();
+    scene.closeContext();
     // 2. Draw into depth buffer
     depthScene.openContext();
     depthScene.context().background(0);

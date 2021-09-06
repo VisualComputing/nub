@@ -47,10 +47,16 @@ public class ViewFrustumCulling extends PApplet {
     focus = mainScene.hasMouseFocus() ? mainScene : secondaryScene;
     // culling condition should be retested every frame
     root.cull = false;
+    mainScene.openContext();
     mainScene.context().background(255);
-    mainScene.display();
+    mainScene.render();
+    mainScene.closeContext();
+    mainScene.image();
+    secondaryScene.openContext();
     secondaryScene.context().background(185);
-    secondaryScene.display(0, h / 2);
+    secondaryScene.render();
+    secondaryScene.closeContext();
+    secondaryScene.image(0, h / 2);
   }
 
   void handleMouse() {

@@ -42,14 +42,20 @@ public class ViewingVolume extends PApplet {
   @Override
   public void draw() {
     focus = scene1.hasMouseFocus() ? scene1 : scene2;
+    scene1.openContext();
     scene1.context().background(125);
-    scene1.display();
     scene1.drawAxes();
     draw1(scene1.context());
+    scene1.render();
+    scene1.closeContext();
+    scene1.image();
+    scene2.openContext();
     scene2.context().background(85);
-    scene2.display(0, h / 2);
     scene2.drawAxes();
     draw2(scene2.context());
+    scene2.render();
+    scene2.closeContext();
+    scene2.image(0, h / 2);
   }
 
   public void draw1(PGraphics pg) {

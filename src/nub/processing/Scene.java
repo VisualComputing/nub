@@ -573,7 +573,8 @@ public class Scene extends Graph {
 
   /**
    * Similar to {@link #pApplet} {@code image()}. Used to display the offscreen scene {@link #context()}.
-   * Does nothing if the scene is on-screen.
+   * Does nothing if the scene is on-screen. Throws an error if there's an onscreen scene and this method
+   * is called within {@link #openContext()} and {@link #closeContext()}.
    * <p>
    * Call this method, instead of {@link #pApplet} {@code image()}, to make {@link #hasMouseFocus()}
    * work always properly.
@@ -582,16 +583,21 @@ public class Scene extends Graph {
    */
   public void image(int pixelX, int pixelY) {
     if (isOffscreen()) {
-      if (_onscreenGraph != null)
+      if (_onscreenGraph != null) {
+        if (_renderCount > 0) {
+          throw new RuntimeException("Error: offscreen scenes should call image() after openContext() / closeContext() when there's an onscreen scene!");
+        }
         _onscreenGraph.beginHUD();
+      }
       pApplet.pushStyle();
       _setUpperLeftCorner(pixelX, pixelY);
       _lastDisplayed = TimingHandler.frameCount;
       pApplet.imageMode(PApplet.CORNER);
       pApplet.image(context(), pixelX, pixelY);
       pApplet.popStyle();
-      if (_onscreenGraph != null)
+      if (_onscreenGraph != null) {
         _onscreenGraph.endHUD();
+      }
     }
   }
 
