@@ -57,7 +57,6 @@ void setup() {
 void draw() {
   background(125);
   scene.render();
-  scene.drawAxes();
   stroke(255, 255, 0);
   scene.drawGrid();
 }

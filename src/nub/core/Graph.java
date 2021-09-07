@@ -2678,6 +2678,7 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
+    // TODO try better way to handle picking issue; refer to AuxViewers example
     if (_lastClosed == TimingHandler.frameCount && isOffscreen()) {
       throw new RuntimeException("Error: offscreen scenes should call render() within openContext() / closeContext()!");
     }
