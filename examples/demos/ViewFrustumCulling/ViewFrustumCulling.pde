@@ -33,7 +33,7 @@ void settings() {
 void setup() {
   // main scene
   mainScene = new Scene(createGraphics(w, h / 2, P3D));
-  mainScene.eye().enableHint(Node.BOUNDS);
+  mainScene.eye().enableHint(Node.BOUNDS, color(75, 205, 65), 5);
   mainScene.togglePerspective();
   mainScene.fit(1);
   // secondary scene
@@ -101,7 +101,7 @@ void draw() {
   // culling condition should be retested every frame
   root.cull = false;
   mainScene.openContext();
-  mainScene.context().background(255);
+  mainScene.context().background(75, 205, 65);
   mainScene.render();
   mainScene.closeContext();
   mainScene.image();

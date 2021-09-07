@@ -4033,6 +4033,14 @@ public class Graph {
     return node._rmrHUD;
   }
 
+  protected int _boundsStroke(Node node) {
+    return node._boundsStroke;
+  }
+
+  protected int _boundsWeight(Node node) {
+    return node._boundsWeight;
+  }
+
   // Interpolator
 
   protected int _steps(Node interpolator) {

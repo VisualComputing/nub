@@ -928,9 +928,9 @@ public class Scene extends Graph {
           pg.pushStyle();
           pg.colorMode(PApplet.RGB, 255);
           // 2113928960: yellow (with alpha: color(255, 255, 0, 125)) encoded as a processing int rgb color
-          // TODO add Node configHint for the BOUNDS
-          pg.stroke(2113928960);
-          pg.fill(2113928960);
+          pg.strokeWeight(_boundsWeight(node));
+          pg.stroke(_boundsStroke(node));
+          pg.fill(_boundsStroke(node));
           drawFrustum(pg, graph);
           pg.popStyle();
         }
