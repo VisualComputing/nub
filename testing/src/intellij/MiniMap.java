@@ -53,8 +53,6 @@ public class MiniMap extends PApplet {
     if (renderer == P3D)
       minimap.togglePerspective();
     minimap.fit(1);
-    //minimap.enableFrustum(scene, color(255, 0, 0, 125));
-    //scene.eye().enableHint(Node.BOUNDS);
   }
 
   PShape shape() {
