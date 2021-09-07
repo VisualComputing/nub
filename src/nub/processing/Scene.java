@@ -927,7 +927,6 @@ public class Scene extends Graph {
         if (graph != this) {
           pg.pushStyle();
           pg.colorMode(PApplet.RGB, 255);
-          // 2113928960: yellow (with alpha: color(255, 255, 0, 125)) encoded as a processing int rgb color
           pg.strokeWeight(_boundsWeight(node));
           pg.stroke(_boundsStroke(node));
           pg.fill(_boundsStroke(node));
