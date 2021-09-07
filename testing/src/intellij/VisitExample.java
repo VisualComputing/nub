@@ -47,13 +47,15 @@ public class VisitExample extends PApplet {
   public void draw(){
     for(int i = 0; i < n; i++){
       focus = scenes[i].hasMouseFocus() ? scenes[i] : focus;
+      scenes[i].openContext();
       scenes[i].context().background(125);
       scenes[i].render();
       scenes[i].drawAxes();
       scenes[i].beginHUD();
       sceneHUD(i, scenes[i].context());
       scenes[i].endHUD();
-      scenes[i].display(i / rows * h / rows, (i % cols) * w / cols);
+      scenes[i].closeContext();
+      scenes[i].image(i / rows * h / rows, (i % cols) * w / cols);
     }
   }
 

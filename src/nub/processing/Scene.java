@@ -522,45 +522,32 @@ public class Scene extends Graph {
       setHeight(context().height);
   }
 
-  /**
-   * Same as {@code display(null, 0, 0)}.
-   *
-   * @see #render()
-   * @see #display(Node, int, int)
-   */
-  public void display() {
-    display(null, 0, 0);
-  }
-
-  /**
-   * Same as {@code display(null, x, y)}.
-   *
-   * @see #display(Node, int, int)
-   */
-  public void display(int x, int y) {
-    display(null, x, y);
-  }
-
-  /**
-   * Same as {@code display(subtree, 0, 0)}.
-   *
-   * @see #render(Node)
-   * @see #display(Node, int, int)
-   */
-  public void display(Node subtree) {
-    display(subtree, 0, 0);
-  }
-
-  /**
-   * Same as {@code render(subtree); image(x, y);}.
-   *
-   * @see #render(Node)
-   * @see #image(int, int)
-   */
-  public void display(Node subtree, int x, int y) {
+  /*
+  public void display(Node subtree, Object background, PShape worldShape, boolean axes, boolean grid, int x, int y) {
+    openContext();
+    if (background instanceof PImage) {
+      context().background((PImage)background);
+    }
+    else if (isNumInstance(background)) {
+      context().background(castToInt(background));
+    }
     render(subtree);
+    closeContext();
     image(x, y);
   }
+
+  public void render(Node subtree, Object background) {
+    openContext();
+    if (background instanceof PImage) {
+      context().background((PImage)background);
+    }
+    else if (isNumInstance(background)) {
+      context().background(castToInt(background));
+    }
+    render(subtree);
+    closeContext();
+  }
+  // */
 
   /**
    * Same as {@code image(0, 0)}.
@@ -578,8 +565,6 @@ public class Scene extends Graph {
    * <p>
    * Call this method, instead of {@link #pApplet} {@code image()}, to make {@link #hasMouseFocus()}
    * work always properly.
-   *
-   * @see #display(Node, int, int)
    */
   public void image(int pixelX, int pixelY) {
     if (isOffscreen()) {

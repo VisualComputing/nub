@@ -43,7 +43,7 @@ public class PointUnderPixel extends PApplet {
 
   public void draw() {
     background(0);
-    scene.display();
+    scene.render();
     scene.drawAxes();
     stroke(0,255,0);
     scene.drawGrid();

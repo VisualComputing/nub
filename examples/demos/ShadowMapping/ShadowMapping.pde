@@ -148,7 +148,7 @@ void draw() {
     shadowShader.set("shadowMap", shadowMap);
   }
   background(0);
-  scene.display();
+  scene.render();
 }
 
 void keyPressed() {

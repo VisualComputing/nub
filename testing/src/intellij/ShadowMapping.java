@@ -143,7 +143,7 @@ public class ShadowMapping extends PApplet {
       shadowShader.set("shadowMap", shadowMap);
     }
     background(0);
-    scene.display();
+    scene.render();
   }
 
   public void keyPressed() {

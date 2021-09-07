@@ -39,8 +39,12 @@ public class PickingMode extends PApplet {
   public void draw() {
     // 1. Fill in and display front-buffer
     background(125);
-    scene.display();
+    scene.openContext();
+    scene.context().background(0);
+    scene.render();
     scene.drawAxes();
+    scene.closeContext();
+    scene.image();
     // 2. Display back buffer
     scene.displayBackBuffer(0, h / 2);
   }

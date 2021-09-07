@@ -33,7 +33,7 @@ Readers unfamiliar with geometry transformations may first check the great [Proc
 
 # Timing tasks
 
-_Timing tasks_ are (non)recurrent, (non)concurrent callbacks defined by overriding the `execute()` method. For example:
+_Timing tasks_ are (non)recurrent, (non)concurrent callbacks which (behind the scenes) use the Processing main event loop to run. For example:
 
 ```processing
 // import all nub classes
@@ -43,13 +43,11 @@ import nub.processing.*;
 
 void setup() {
   // ...
-  TimingTask spinningTask = new TimingTask() {
-    @Override
-    public void execute() {
-      println("hello nub");
-    }
-  };
-  spinningTask.run();
+  task = new TimingTask(() -> {
+    // code defining the (non)recurrent,
+    // (non)concurrent callback goes here
+  });
+  task.run();
 }
 ```
 
@@ -213,24 +211,33 @@ which will create a `shape` interpolator containing [4..10] random key-frames. S
 
 # Rendering
 
-Display the scene node hierarchy from its `eye` point-of-view with:
+Render and display the scene node hierarchy from its `eye` point-of-view with:
 
 ```processing
 void draw() {
-  scene.display();
+  scene.openContext();
+  // drawing commands here takes place at the world coordinate system
+  // use scene.context() to access the scene Processing PGraphics instance,
+  // e.g., reset the background with:
+  scene.context().background(0);
+  scene.render(subtree); // the subtree param is optional
+  scene.closeContext();
+  scene.image(cornerX, cornerY);
 }
 ```
 
-Render the scene node hierarchy from its `eye` point-of-view with:
 
 ```processing
 void draw() {
   // the subtree param is optional
-  scene.render();
+  scene.render(subtree);
 }
 ```
 
-Note that the `display` and `render` commands are equivalent when the scene is onscreen. Observations:
+Note that if the scene is onscreen it will also get displayed.
+
+
+Observations:
 
 1. Call `scene.display(subtree)` and `scene.render(subtree)` to just `display` / `render` the scene subtree.
 2. Call `scene.display(pixelX, pixelY)` (or `scene.display(subtree, pixelX, pixelY)`) to display the offscreen scene at `(pixelX, pixelY)` left corner.
