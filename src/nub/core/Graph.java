@@ -127,7 +127,7 @@ public class Graph {
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
-  protected long _lastDisplayed, _lastClosed;
+  protected long _lastDisplayed, _lastRendered;
   protected boolean _offscreen;
 
   // 0. Contexts
@@ -2603,10 +2603,10 @@ public class Graph {
    */
   public void openContext() {
     _renderCount++;
-    if (_renderCount < 1 || _renderCount > 2) {
+    if (_renderCount != 1) {
       throw new RuntimeException("Error: render() should be nested within a single openContext() / closeContext() call!");
     }
-    if (_renderCount == 1) {
+    else {
       if (isOffscreen()) {
         _initFrontBuffer();
       }
@@ -2627,15 +2627,16 @@ public class Graph {
    */
   public void closeContext() {
     _renderCount--;
-    if (_renderCount < 0 || _renderCount > 1) {
+    if (_renderCount != 0) {
       throw new RuntimeException("Error: render() should be nested within a single openContext() / closeContext() call!");
     }
-    if (_renderCount == 0) {
-      _rays.clear();
+    else {
+      if (_lastRendered == TimingHandler.frameCount) {
+        _rays.clear();
+      }
       _displayHUD();
       _matrixHandler.popMatrix();
       if (isOffscreen()) {
-        _lastClosed = TimingHandler.frameCount;
         _endFrontBuffer();
       }
       else {
@@ -2678,11 +2679,16 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
-    // TODO try better way to handle picking issue; refer to AuxViewers example
-    if (_lastClosed == TimingHandler.frameCount && isOffscreen()) {
-      throw new RuntimeException("Error: offscreen scenes should call render() within openContext() / closeContext()!");
+    if (_lastRendered == TimingHandler.frameCount) {
+      System.out.println("Warning: render() already called. Nothing done!");
+      return;
     }
-    openContext();
+    _lastRendered = TimingHandler.frameCount;
+    boolean handled = false;
+    if (_renderCount == 0) {
+      openContext();
+      handled = true;
+    }
     _subtree = subtree;
     if (subtree == null) {
       for (Node node : _leadingNodes())
@@ -2697,7 +2703,9 @@ public class Graph {
         _matrixHandler.popMatrix();
       }
     }
-    closeContext();
+    if (handled) {
+      closeContext();
+    }
   }
 
   /**

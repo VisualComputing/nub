@@ -14,7 +14,7 @@ public class AuxViewers extends PApplet {
   boolean displayAuxiliarViewers = true;
   // whilst scene1 is either on-screen or not; scene2 and scene3 are off-screen
   // test both cases here
-  boolean onScreen = true;
+  boolean onScreen = false;
 
   int w = 1920;
   int h = 1080;
@@ -127,15 +127,29 @@ public class AuxViewers extends PApplet {
 
   public void draw() {
     focus = scene2.hasMouseFocus() ? scene2 : scene3.hasMouseFocus() ? scene3 : scene1.hasMouseFocus() ? scene1 : null;
+    // /*
     scene1.openContext();
     scene1.context().background(75, 25, 15);
     scene1.context().stroke(0, 225, 15);
     scene1.drawGrid();
     scene1.render();
-    //scene1.display();
+    scene1.closeContext();
+    //scene1.render();// if offscreen, render should be forbidden after close context!
+    scene1.image();
+    // */
+
+    /*
+    // works
+    scene1.openContext();
+    scene1.context().background(75, 25, 15);
+    scene1.context().stroke(0, 225, 15);
+    scene1.drawGrid();
+    scene1.closeContext();
+    scene1.openContext();
+    scene1.render();
     scene1.closeContext();
     scene1.image();
-    //scene1.render();// if offscreen, render should be forbidden after close context!
+    // */
     if (displayAuxiliarViewers) {
       scene2.openContext();
       scene2.context().background(75, 25, 175);
@@ -143,16 +157,16 @@ public class AuxViewers extends PApplet {
       scene2.render();
       //scene2.image(w / 2, 0);// if there's a onscreen scene, image should be forbidden before close context!
       scene2.closeContext();
+      //scene2.render();
       scene2.image(w / 2, 0);
-      //scene2.display(w / 2, 0);// if offscreen, render should be forbidden after close context!
       scene3.openContext();
       scene3.context().background(175, 200, 20);
       scene3.drawAxes();
       scene3.render();
       //scene3.image(w / 2, h / 2);// if there's a onscreen scene, image should be forbidden before close context!
       scene3.closeContext();
+      //scene3.render();
       scene3.image(w / 2, h / 2);
-      //scene3.display(w / 2, h / 2);// if offscreen, render should be forbidden after close context!
     }
     //println(frameRate);
   }

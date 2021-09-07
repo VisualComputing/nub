@@ -522,6 +522,8 @@ public class Scene extends Graph {
       setHeight(context().height);
   }
 
+  // TODO nub1 final release re-think display methods, something like these:
+
   /*
   public void display(Node subtree, Object background, PShape worldShape, boolean axes, boolean grid, int x, int y) {
     openContext();
@@ -530,6 +532,12 @@ public class Scene extends Graph {
     }
     else if (isNumInstance(background)) {
       context().background(castToInt(background));
+    }
+    if (axes) {
+      drawAxes();
+    }
+    if (grid) {
+      drawGrid();
     }
     render(subtree);
     closeContext();
@@ -568,22 +576,33 @@ public class Scene extends Graph {
    */
   public void image(int pixelX, int pixelY) {
     if (isOffscreen()) {
-      if (_onscreenGraph != null) {
-        if (_renderCount > 0) {
-          throw new RuntimeException("Error: offscreen scenes should call image() after openContext() / closeContext() when there's an onscreen scene!");
-        }
-        _onscreenGraph.beginHUD();
+      if (_lastRendered != TimingHandler.frameCount) {
+        System.out.println("Warning: image() not updated since render wasn't called @" + TimingHandler.frameCount);
       }
-      pApplet.pushStyle();
-      _setUpperLeftCorner(pixelX, pixelY);
-      _lastDisplayed = TimingHandler.frameCount;
-      pApplet.imageMode(PApplet.CORNER);
-      pApplet.image(context(), pixelX, pixelY);
-      pApplet.popStyle();
-      if (_onscreenGraph != null) {
-        _onscreenGraph.endHUD();
+      if (_renderCount != 0) {
+        throw new RuntimeException("Error: offscreen scenes should call image() after openContext() / closeContext()");
+      }
+      else {
+        if (_onscreenGraph != null) {
+          _onscreenGraph.beginHUD();
+        }
+        pApplet.pushStyle();
+        _setUpperLeftCorner(pixelX, pixelY);
+        _lastDisplayed = TimingHandler.frameCount;
+        pApplet.imageMode(PApplet.CORNER);
+        pApplet.image(context(), pixelX, pixelY);
+        pApplet.popStyle();
+        if (_onscreenGraph != null) {
+          _onscreenGraph.endHUD();
+        }
       }
     }
+    /*
+    // TODO debug
+    else {
+      System.out.println("Warning: image() is only available for offscreen scenes. Nothing done!");
+    }
+    // */
   }
 
   /**
@@ -828,7 +847,9 @@ public class Scene extends Graph {
   protected void _endFrontBuffer() {
     if (isOffscreen()) {
       context().endDraw();
-      _renderBackBuffer();
+      if (_lastRendered == TimingHandler.frameCount) {
+        _renderBackBuffer();
+      }
     }
   }
 
