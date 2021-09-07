@@ -211,38 +211,37 @@ which will create a `shape` interpolator containing [4..10] random key-frames. S
 
 # Rendering
 
-Render and display the scene node hierarchy from its `eye` point-of-view with:
+Render the scene node hierarchy from its `eye` point-of-view with `render(subtree)` and display it with `image(cornerX, cornerY)`, e.g.,
 
 ```processing
 void draw() {
   scene.openContext();
-  // drawing commands here takes place at the world coordinate system
+  // drawing commands here take place at the world coordinate system
   // use scene.context() to access the scene Processing PGraphics instance,
   // e.g., reset the background with:
   scene.context().background(0);
   scene.render(subtree); // the subtree param is optional
+  // drawing commands here also take place at the world coordinate system
   scene.closeContext();
   scene.image(cornerX, cornerY);
 }
 ```
 
+Onscreen scenes may just call `render(subtree)`, e.g.,
 
 ```processing
 void draw() {
-  // the subtree param is optional
-  scene.render(subtree);
+  background(0);
+  scene.render(subtree); // the subtree param is optional
+  // drawing commands here take place at the world coordinate system
+  scene.drawAxes();
 }
 ```
 
-Note that if the scene is onscreen it will also get displayed.
-
-
 Observations:
 
-1. Call `scene.display(subtree)` and `scene.render(subtree)` to just `display` / `render` the scene subtree.
-2. Call `scene.display(pixelX, pixelY)` (or `scene.display(subtree, pixelX, pixelY)`) to display the offscreen scene at `(pixelX, pixelY)` left corner.
-3. Enclose 2D screen space with `scene.beginHUD()` and `scene.endHUD()` stuff (such as gui elements and text) with to render it on top of a 3D scene.
-4. Customize the rendering traversal algorithm by overriding the node `visit(graph)` method, see the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
+1. Enclose 2D screen space with `scene.beginHUD()` and `scene.endHUD()` stuff (such as gui elements and text) with to render it on top of a 3D scene.
+2. Customize the rendering traversal algorithm by overriding the node `visit(graph)` method, see the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
 
 ## Drawing functionality
 

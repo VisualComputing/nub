@@ -161,8 +161,8 @@ public class AuxViewers extends PApplet {
       scene2.image(w / 2, 0);
       scene3.openContext();
       scene3.context().background(175, 200, 20);
-      scene3.drawAxes();
       scene3.render();
+      scene3.drawAxes();
       //scene3.image(w / 2, h / 2);// if there's a onscreen scene, image should be forbidden before close context!
       scene3.closeContext();
       //scene3.render();
