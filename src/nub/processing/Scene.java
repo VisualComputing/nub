@@ -928,8 +928,8 @@ public class Scene extends Graph {
           pg.pushStyle();
           pg.colorMode(PApplet.RGB, 255);
           pg.strokeWeight(_boundsWeight(node));
-          pg.stroke(_boundsStroke(node));
-          pg.fill(_boundsStroke(node));
+          pg.stroke(((PGraphics)graph.context()).backgroundColor);
+          pg.fill(((PGraphics)graph.context()).backgroundColor);
           drawFrustum(pg, graph);
           pg.popStyle();
         }

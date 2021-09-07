@@ -176,7 +176,6 @@ public class Node {
   public static int maxSteps = 30;
   // Bounds
   protected HashSet<Graph> _frustumGraphs;
-  protected int _boundsStroke;
   protected int _boundsWeight;
   // keyframes
   protected int _keyframesMask;
@@ -370,8 +369,6 @@ public class Node {
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
     _cameraStroke = -65281;
     // bounds
-    // yellow (with alpha: color(255, 255, 0, 125)) encoded as a processing int rgb color
-    _boundsStroke = 2113928960;
     _boundsWeight = 3;
     // keyframes
     _splineStroke = -65281;
@@ -545,7 +542,6 @@ public class Node {
     _bullsEyeStroke = node._bullsEyeStroke;
     _cameraStroke = node._cameraStroke;
     _axesLength = node._axesLength;
-    _boundsStroke = node._boundsStroke;
     _boundsWeight = node._boundsWeight;
     _splineStroke = node._splineStroke;
     _splineWeight = node._splineWeight;
@@ -3419,23 +3415,21 @@ public class Node {
    * {@code configHint(Node.BULLSEYE, bullseyeStroke, bullseyeShape)}.</li>
    * <li>{@link #TORUS} hint: {@code configHint(Node.TORUS, torusStroke)}, or
    * {@code configHint(Node.TORUS, torusStroke, torusFaces)}.</li>
-   * <li>{@link #BOUNDS} hint: {@code configHint(Node.BOUNDS, boundsStroke)} or
-   * {@code configHint(Node.BOUNDS, boundsStroke, boundsWeight)}.</li>
+   * <li>{@link #BOUNDS} hint: {@code configHint(Node.BOUNDS, boundsWeight)}.</li>
    * <li>{@link #KEYFRAMES} hint: {@code configHint(Node.KEYFRAMES, keyframesMask)} or
    * {@code configHint(Node.KEYFRAMES, keyframesMask, steps)} or
    * {@code configHint(Node.KEYFRAMES, keyframesMask, steps, splineStroke)}, or
    * {@code configHint(Node.KEYFRAMES, keyframesMask, steps, splineStroke, splineWeight)}.</li>
    * </ol>
-   * Note that the {@code cameraStroke}, {@code boundsStroke} {@code splineStroke},
-   * {@code bullseyeStroke} and {@code torusStroke} are color {@code int} vars;
-   * {@code cameraLength} and {@code exesLength} are world magnitude numerical values;
-   * {@code highlight} is a numerical value in {@code [0..1]} which represents the scale factor
-   * to be applied to the node when it gets tagged (see {@link Graph#tag(String, Node)});
-   * {@code bullseyeShape} is either of type {@link BullsEyeShape#SQUARE} or
-   * {@link BullsEyeShape#CIRCLE}; {@code graph} is of type {@link Graph};
-   * {@code graph} may be of type {@link processing.core.PGraphics}; and,
-   * {@code boundsWeight} is an int defining the bounds stroke and
-   * {@code splineWeight} is an int defining the spline stroke.
+   * Note that the {@code cameraStroke}, {@code splineStroke}, {@code bullseyeStroke} and
+   * {@code torusStroke} are color {@code int} vars; {@code cameraLength} and {@code exesLength}
+   * are world magnitude numerical values; {@code highlight} is a numerical value in
+   * {@code [0..1]} which represents the scale factor to be applied to the node when it gets
+   * tagged (see {@link Graph#tag(String, Node)}); {@code bullseyeShape} is either of type
+   * {@link BullsEyeShape#SQUARE} or {@link BullsEyeShape#CIRCLE}; {@code graph} is of type
+   * {@link Graph}; {@code graph} may be of type {@link processing.core.PGraphics}; and,
+   * {@code boundsWeight} is an int defining the bounds stroke and {@code splineWeight} is
+   * an int defining the spline stroke.
    *
    * @see #hint()
    * @see #enableHint(int)
@@ -3475,7 +3469,7 @@ public class Node {
           return;
         }
         if (hint == BOUNDS && Graph.isNumInstance(params[0])) {
-          _boundsStroke = Graph.castToInt(params[0]);
+          _boundsWeight = Graph.castToInt(params[0]);
           return;
         }
         if (hint == KEYFRAMES && Graph.isNumInstance(params[0])) {
@@ -3508,11 +3502,6 @@ public class Node {
             _torusFaces = Graph.castToInt(params[1]);
             return;
           }
-        }
-        if (hint == BOUNDS && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
-          _boundsStroke = Graph.castToInt(params[0]);
-          _boundsWeight = Graph.castToInt(params[1]);
-          return;
         }
         if (hint == KEYFRAMES && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
           _keyframesMask = Graph.castToInt(params[0]);
