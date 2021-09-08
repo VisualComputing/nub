@@ -109,16 +109,8 @@ void mouseClicked(MouseEvent event) {
 
 void draw() {
   focus = minimap.hasMouseFocus() ? minimap : scene;
-  scene.openContext();
-  scene.context().background(75, 25, 15);
-  scene.render();
-  scene.closeContext();
-  scene.image();
+  scene.display(color(75, 25, 15));
   if (displayMinimap) {
-    minimap.openContext();
-    minimap.context().background(125, 80, 90);
-    minimap.render();
-    minimap.closeContext();
-    minimap.image(width / 2, height / 2);
+    minimap.display(color(125, 80, 90), width / 2, height / 2);
   }
 }

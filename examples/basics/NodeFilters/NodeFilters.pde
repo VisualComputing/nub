@@ -41,11 +41,9 @@ void setup() {
 }
 
 void draw() {
-  background(0);
-  scene.render();
-  scene.drawAxes();
+  // grid stroke
   stroke(0, 255, 0);
-  scene.drawGrid();
+  scene.display(color(0), true, true);
   fill(0, 255, 255);
   scene.beginHUD();
   displayText();

@@ -100,16 +100,8 @@ void draw() {
   focus = mainScene.hasMouseFocus() ? mainScene : secondaryScene;
   // culling condition should be retested every frame
   root.cull = false;
-  mainScene.openContext();
-  mainScene.context().background(75, 205, 65);
-  mainScene.render();
-  mainScene.closeContext();
-  mainScene.image();
-  secondaryScene.openContext();
-  secondaryScene.context().background(185);
-  secondaryScene.render();
-  secondaryScene.closeContext();
-  secondaryScene.image(0, h / 2);
+  mainScene.display(color(75, 205, 65));
+  secondaryScene.display(color(185), 0, h / 2);
 }
 
 void mouseDragged() {

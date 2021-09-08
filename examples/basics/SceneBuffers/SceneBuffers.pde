@@ -37,11 +37,7 @@ void setup() {
 
 void draw() {
   // 1. Fill in and display front-buffer
-  scene.openContext();
-  scene.context().background(10, 50, 25);
-  scene.render();
-  scene.closeContext();
-  scene.image();
+  scene.display(color(10, 50, 25));
   // 2. Display back buffer
   scene.displayBackBuffer(0, h / 2);
 }

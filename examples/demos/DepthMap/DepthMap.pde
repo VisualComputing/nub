@@ -72,11 +72,7 @@ public void draw() {
   scene.render();
   // 2. Fill in shadow map using the light point of view
   if (scene.isTagValid("light")) {
-    shadowMapScene.openContext();
-    shadowMapScene.context().background(140, 160, 125);
-    shadowMapScene.render();
-    shadowMapScene.closeContext();
-    shadowMapScene.image(w / 2, h / 2);
+    shadowMapScene.display(color(140, 160, 125), w / 2, h / 2);
   }
 }
 
