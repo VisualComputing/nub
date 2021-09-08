@@ -96,6 +96,11 @@ import java.util.function.Consumer;
  * @see TimingTask
  */
 public class Scene extends Graph {
+  @FunctionalInterface
+  public interface Callback {
+    void execute();
+  }
+
   public static String prettyVersion = "0.9.95";
   public static String version = "9";
 
@@ -522,10 +527,153 @@ public class Scene extends Graph {
       setHeight(context().height);
   }
 
-  // TODO nub1 final release re-think display methods, something like these:
+  /**
+   * Same as {@code display(background, false, false, null, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background) {
+    display(background, false, false, null, null, 0, 0);
+  }
 
-  /*
-  public void display(Node subtree, Object background, PShape worldShape, boolean axes, boolean grid, int x, int y) {
+  /**
+   * Same as {@code display(background, false, false, null, null, x, y)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, int x, int y) {
+    display(background, false, false, null, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, false, false, callback, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, Callback callback) {
+    display(background, false, false, callback, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, false, false, callback, null, x, y)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, Callback callback, int x, int y) {
+    display(background, false, false, callback, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, callback, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, boolean axes, boolean grid, Callback callback) {
+    display(background, axes, grid, callback, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, callback, null, x, y)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, boolean axes, boolean grid, Callback callback, int x, int y) {
+    display(background, axes, grid, callback, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, false, false, null, subtree, 0, 0)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, Node subtree) {
+    display(background, false, false, null, subtree, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, false, false, null, subtree, x, y)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, Node subtree, int x, int y) {
+    display(background, false, false, null, subtree, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, null, subtree, 0, 0)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, boolean axes, boolean grid, Node subtree) {
+    display(background, axes, grid, null, subtree, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, null, subtree, x, y)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, boolean axes, boolean grid, Node subtree, int x, int y) {
+    display(background, axes, grid, null, subtree, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, false, false, callback, subtree, 0, 0)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, Callback callback, Node subtree) {
+    display(background, false, false, callback, subtree, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, false, false, callback, subtree, x, y)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, Callback callback, Node subtree, int x, int y) {
+    display(background, false, false, callback, subtree, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, null, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, boolean axes, boolean grid) {
+    display(background, axes, grid, null, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, null, null, x, y)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, boolean axes, boolean grid, int x, int y) {
+    display(background, axes, grid, null, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, callback, subtree, 0, 0)}.
+   *
+   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   */
+  public void display(Object background, boolean axes, boolean grid, Callback callback, Node subtree) {
+    display(background, axes, grid, callback, subtree, 0, 0);
+  }
+
+  /**
+   * Display the scene tree.
+   *
+   * @param background color or image; may be null (don't refresh)
+   * @param axes
+   * @param grid
+   * @param worldCallback
+   * @param subtree
+   * @param cornerX
+   * @param cornerY
+   */
+  public void display(Object background, boolean axes, boolean grid, Callback worldCallback, Node subtree, int cornerX, int cornerY) {
     openContext();
     if (background instanceof PImage) {
       context().background((PImage)background);
@@ -539,23 +687,15 @@ public class Scene extends Graph {
     if (grid) {
       drawGrid();
     }
-    render(subtree);
-    closeContext();
-    image(x, y);
-  }
-
-  public void render(Node subtree, Object background) {
-    openContext();
-    if (background instanceof PImage) {
-      context().background((PImage)background);
-    }
-    else if (isNumInstance(background)) {
-      context().background(castToInt(background));
+    if (worldCallback != null) {
+      worldCallback.execute();
     }
     render(subtree);
     closeContext();
+    if (isOffscreen()) {
+      image(cornerX, cornerY);
+    }
   }
-  // */
 
   /**
    * Same as {@code image(0, 0)}.
