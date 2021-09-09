@@ -5,6 +5,7 @@ import nub.core.Node;
 import nub.processing.Scene;
 import nub.timing.Task;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
@@ -24,7 +25,9 @@ public class Interpolators extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this, 150);
+    //scene = new Scene(this, 150);
+    scene = new Scene(createGraphics(1920, 1080, P3D), 150);
+    scene.eye().enableHint(Node.KEYFRAMES);
     PShape pshape;
     if (scene.is2D()) {
       rectMode(CENTER);
@@ -33,8 +36,9 @@ public class Interpolators extends PApplet {
     else {
       pshape = createShape(BOX, 30);
     }
-    pshape.setFill(color(0, 255, 255, 125));
+    pshape.setFill(color(0, 255, 255/*, 125*/));
     shape = new Node(pshape);
+    shape.setHUD(this::hud);
     shape.setAnimationRecurrence(true);
     shape.enableHint(Node.AXES);
     shape.enableHint(Node.BULLSEYE);
@@ -56,21 +60,54 @@ public class Interpolators extends PApplet {
       // */
     }
     shape.animate();
-
-    scene.eye().enableHint(Node.KEYFRAMES);
-
     frameRate(1000);
   }
 
   public void draw() {
+    /*
+    // WARNING: works only for onscreen scenes
     background(125);
     scene.render();
     scene.drawAxes();
     stroke(0,255,0);
     scene.drawGrid();
+    scene.beginHUD();
+    hud(scene.context());
+    scene.endHUD();
+    // */
+    // /*
+    // Works for both onscreen and offscreen scenes!!!
+    scene.context().stroke(0,255,0);
+    scene.display(color(125), true, true, this::sceneHUD);
+    //scene.display(color(125), true, true, this::customBox);
+    // */
+  }
 
-    scene.render();
-    // println("-> frameRate: " + Scene.TimingHandler.frameRate + " (nub) " + frameRate + " (p5)");
+  public void customBox() {
+    PGraphics pg = scene.context();
+    pg.pushStyle();
+    // /*
+    pg.fill(255, 0, 0, 125);
+    pg.box(30);
+    // */
+    // pg.shape(box);
+    pg.popStyle();
+  }
+
+  public void sceneHUD() {
+    scene.beginHUD();
+    hud(scene.context());
+    scene.endHUD();
+  }
+
+  public void hud(PGraphics pg) {
+    pg.pushStyle();
+    pg.rectMode(CENTER);
+    pg.fill(255, 0, 255, 125);
+    pg.stroke(0,0,255);
+    pg.strokeWeight(3);
+    pg.rect(0, 0, 80, 50);
+    pg.popStyle();
   }
 
   public void mouseMoved() {

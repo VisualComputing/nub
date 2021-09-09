@@ -510,7 +510,7 @@ public class Scene extends Graph {
    * @see #isOffscreen()
    */
   public void draw() {
-    if (!isOffscreen()) {
+    if (!isOffscreen() && _lastRendered == TimingHandler.frameCount) {
       _renderBackBuffer();
     }
   }
@@ -530,7 +530,7 @@ public class Scene extends Graph {
   /**
    * Same as {@code display(background, false, false, null, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
   public void display(Object background) {
     display(background, false, false, null, null, 0, 0);
@@ -539,106 +539,106 @@ public class Scene extends Graph {
   /**
    * Same as {@code display(background, false, false, null, null, x, y)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
   public void display(Object background, int x, int y) {
     display(background, false, false, null, null, x, y);
   }
 
   /**
-   * Same as {@code display(background, false, false, callback, null, 0, 0)}.
+   * Same as {@code display(background, false, false, null, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
-  public void display(Object background, Callback callback) {
-    display(background, false, false, callback, null, 0, 0);
+  public void display(Object background, Callback worldCallback) {
+    display(background, false, false, null, worldCallback, 0, 0);
   }
 
   /**
-   * Same as {@code display(background, false, false, callback, null, x, y)}.
+   * Same as {@code display(background, false, false, null, worldCallback, x, y)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
-  public void display(Object background, Callback callback, int x, int y) {
-    display(background, false, false, callback, null, x, y);
+  public void display(Object background, Callback worldCallback, int x, int y) {
+    display(background, false, false, null, worldCallback, x, y);
   }
 
   /**
-   * Same as {@code display(background, axes, grid, callback, null, 0, 0)}.
+   * Same as {@code display(background, axes, grid, null, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
-  public void display(Object background, boolean axes, boolean grid, Callback callback) {
-    display(background, axes, grid, callback, null, 0, 0);
+  public void display(Object background, boolean axes, boolean grid, Callback worldCallback) {
+    display(background, axes, grid, null, worldCallback, 0, 0);
   }
 
   /**
-   * Same as {@code display(background, axes, grid, callback, null, x, y)}.
+   * Same as {@code display(background, axes, grid, null, worldCallback, x, y)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
-  public void display(Object background, boolean axes, boolean grid, Callback callback, int x, int y) {
-    display(background, axes, grid, callback, null, x, y);
+  public void display(Object background, boolean axes, boolean grid, Callback worldCallback, int x, int y) {
+    display(background, axes, grid, null, worldCallback, x, y);
   }
 
   /**
-   * Same as {@code display(background, false, false, null, subtree, 0, 0)}.
+   * Same as {@code display(background, false, false, subtree, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
   public void display(Object background, Node subtree) {
-    display(background, false, false, null, subtree, 0, 0);
+    display(background, false, false, subtree, null, 0, 0);
   }
 
   /**
    * Same as {@code display(background, false, false, null, subtree, x, y)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
   public void display(Object background, Node subtree, int x, int y) {
-    display(background, false, false, null, subtree, x, y);
+    display(background, false, false, subtree, null, x, y);
   }
 
   /**
-   * Same as {@code display(background, axes, grid, null, subtree, 0, 0)}.
+   * Same as {@code display(background, axes, grid, subtree, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, boolean grid, Node subtree) {
-    display(background, axes, grid, null, subtree, 0, 0);
+    display(background, axes, grid, subtree, null, 0, 0);
   }
 
   /**
-   * Same as {@code display(background, axes, grid, null, subtree, x, y)}.
+   * Same as {@code display(background, axes, grid, subtree, null, x, y)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, boolean grid, Node subtree, int x, int y) {
-    display(background, axes, grid, null, subtree, x, y);
+    display(background, axes, grid, subtree, null, x, y);
   }
 
   /**
-   * Same as {@code display(background, false, false, callback, subtree, 0, 0)}.
+   * Same as {@code display(background, false, false, subtree, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
-  public void display(Object background, Callback callback, Node subtree) {
-    display(background, false, false, callback, subtree, 0, 0);
+  public void display(Object background, Node subtree, Callback worldCallback) {
+    display(background, false, false, subtree, worldCallback, 0, 0);
   }
 
   /**
-   * Same as {@code display(background, false, false, callback, subtree, x, y)}.
+   * Same as {@code display(background, false, false, subtree, worldCallback, x, y)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
-  public void display(Object background, Callback callback, Node subtree, int x, int y) {
-    display(background, false, false, callback, subtree, x, y);
+  public void display(Object background, Node subtree, Callback worldCallback, int x, int y) {
+    display(background, false, false, subtree, worldCallback, x, y);
   }
 
   /**
    * Same as {@code display(background, axes, grid, null, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, boolean grid) {
     display(background, axes, grid, null, null, 0, 0);
@@ -647,19 +647,19 @@ public class Scene extends Graph {
   /**
    * Same as {@code display(background, axes, grid, null, null, x, y)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, boolean grid, int x, int y) {
     display(background, axes, grid, null, null, x, y);
   }
 
   /**
-   * Same as {@code display(background, axes, grid, callback, subtree, 0, 0)}.
+   * Same as {@code display(background, axes, grid, subtree, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, boolean, Callback, Node, int, int)
+   * @see #display(Object, boolean, boolean, Node, Callback, int, int)
    */
-  public void display(Object background, boolean axes, boolean grid, Callback callback, Node subtree) {
-    display(background, axes, grid, callback, subtree, 0, 0);
+  public void display(Object background, boolean axes, boolean grid, Node subtree, Callback worldCallback) {
+    display(background, axes, grid, subtree, worldCallback, 0, 0);
   }
 
   /**
@@ -668,12 +668,12 @@ public class Scene extends Graph {
    * @param background color or image; may be null (don't refresh)
    * @param axes
    * @param grid
-   * @param worldCallback
    * @param subtree
+   * @param worldCallback
    * @param cornerX
    * @param cornerY
    */
-  public void display(Object background, boolean axes, boolean grid, Callback worldCallback, Node subtree, int cornerX, int cornerY) {
+  public void display(Object background, boolean axes, boolean grid, Node subtree, Callback worldCallback, int cornerX, int cornerY) {
     openContext();
     if (background instanceof PImage) {
       context().background((PImage)background);
@@ -687,10 +687,10 @@ public class Scene extends Graph {
     if (grid) {
       drawGrid();
     }
+    render(subtree);
     if (worldCallback != null) {
       worldCallback.execute();
     }
-    render(subtree);
     closeContext();
     if (isOffscreen()) {
       image(cornerX, cornerY);
@@ -953,20 +953,22 @@ public class Scene extends Graph {
     if (!_hudSet.isEmpty()) {
       _bbMatrixHandler.beginHUD(width(), height());
       for (Node node : _hudSet) {
-        if (node.isPickingEnabled(Node.HUD)) {
-          _emitBackBufferUniforms(node);
-          _backBuffer().pushMatrix();
-          Vector location = screenLocation(node);
-          if (location != null) {
-            _backBuffer().translate(location.x(), location.y());
-            if (_imrHUD(node) != null) {
-              _imrHUD(node).accept(_backBuffer());
+        if (_lastRendered(node) == TimingHandler.frameCount) {
+          if (node.isPickingEnabled(Node.HUD)) {
+            _emitBackBufferUniforms(node);
+            _backBuffer().pushMatrix();
+            Vector location = screenLocation(node);
+            if (location != null) {
+              _backBuffer().translate(location.x(), location.y());
+              if (_imrHUD(node) != null) {
+                _imrHUD(node).accept(_backBuffer());
+              }
+              if (_rmrHUD(node) != null) {
+                _backBuffer().shape(_rmrHUD(node));
+              }
             }
-            if (_rmrHUD(node) != null) {
-              _backBuffer().shape(_rmrHUD(node));
-            }
+            _backBuffer().popMatrix();
           }
-          _backBuffer().popMatrix();
         }
       }
       _bbMatrixHandler.endHUD();
@@ -1017,18 +1019,20 @@ public class Scene extends Graph {
       beginHUD();
       if (!_hudSet.isEmpty()) {
         for (Node node : _hudSet) {
-          context().pushMatrix();
-          Vector location = screenLocation(node);
-          if (location != null) {
-            context().translate(location.x(), location.y());
-            if (_imrHUD(node) != null) {
-              _imrHUD(node).accept(context());
+          if (_lastRendered(node) == TimingHandler.frameCount) {
+            context().pushMatrix();
+            Vector location = screenLocation(node);
+            if (location != null) {
+              context().translate(location.x(), location.y());
+              if (_imrHUD(node) != null) {
+                _imrHUD(node).accept(context());
+              }
+              if (_rmrHUD(node) != null) {
+                context().shape(_rmrHUD(node));
+              }
             }
-            if (_rmrHUD(node) != null) {
-              context().shape(_rmrHUD(node));
-            }
+            context().popMatrix();
           }
-          context().popMatrix();
         }
       }
       endHUD();
@@ -1040,9 +1044,11 @@ public class Scene extends Graph {
   protected void _displayPaths() {
     context().pushStyle();
     for (Node interpolator : _interpolators) {
-      context().pushStyle();
-      _drawSpline(interpolator);
-      context().popStyle();
+      if (_lastRendered(interpolator) == TimingHandler.frameCount) {
+        context().pushStyle();
+        _drawSpline(interpolator);
+        context().popStyle();
+      }
     }
     context().popStyle();
   }

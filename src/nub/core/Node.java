@@ -197,7 +197,7 @@ public class Node {
   // Retained mode rendering
   // PShape is only available in Java
   protected processing.core.PShape _rmrShape;
-  protected long _bypass = -1;
+  protected long _bypass = -1, _lastRendered = -1;
 
   //Object... gesture
   protected BiConsumer<Node, Object[]> _interact;

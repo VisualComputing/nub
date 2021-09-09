@@ -866,7 +866,8 @@ public class Graph {
    * then draw first all your 3d before doing any call to a {@link #beginHUD()}
    * and {@link #endHUD()} pair.
    * <p>
-   * Wrapper for {@link MatrixHandler#beginHUD(int, int)}.
+   * <b>Warning:</b> Offscreen scenes should call {@link #beginHUD()} and {@link #endHUD()}
+   * before closing the context ({@link #closeContext()}).
    *
    * @see #endHUD()
    * @see MatrixHandler#beginHUD(int, int)
@@ -2612,7 +2613,6 @@ public class Graph {
       }
       _bind();
       _matrixHandler.pushMatrix();
-      _displayPaths();
     }
   }
 
@@ -2633,8 +2633,9 @@ public class Graph {
     else {
       if (_lastRendered == TimingHandler.frameCount) {
         _rays.clear();
+        _displayPaths();
+        _displayHUD();
       }
-      _displayHUD();
       _matrixHandler.popMatrix();
       if (isOffscreen()) {
         _endFrontBuffer();
@@ -2782,6 +2783,7 @@ public class Graph {
       functor.accept(this, node);
     if (!node.cull) {
       if (node._bypass != TimingHandler.frameCount) {
+        node._lastRendered = TimingHandler.frameCount;
         _trackFrontBuffer(node);
         if (isOffscreen())
           _trackBackBuffer(node);
@@ -2828,8 +2830,9 @@ public class Graph {
           _bbMatrixHandler.popMatrix();
         }
       }
-      if (isOffscreen())
+      if (isOffscreen()) {
         _rays.clear();
+      }
       _endBackBuffer();
       _bbCount = _bbNeed;
     }
@@ -4045,6 +4048,8 @@ public class Graph {
   protected int _boundsWeight(Node node) {
     return node._boundsWeight;
   }
+
+  protected long _lastRendered(Node node) { return node._lastRendered; }
 
   // Interpolator
 
