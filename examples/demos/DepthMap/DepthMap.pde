@@ -66,7 +66,7 @@ void setup() {
   shadowMapScene.picking = false;
 }
 
-public void draw() {
+void draw() {
   // 1. Fill in and display front-buffer
   background(75, 25, 15);
   scene.render();
@@ -76,7 +76,7 @@ public void draw() {
   }
 }
 
-public void mouseMoved(MouseEvent event) {
+void mouseMoved(MouseEvent event) {
   if (event.isShiftDown()) {
     if (scene.isTagValid("light")) {
       scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
