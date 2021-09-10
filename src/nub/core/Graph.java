@@ -37,8 +37,8 @@ import java.util.function.Consumer;
  * Note that rendering routines should be called within your main-event loop.
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
- * The graph provides other useful routines to handle the hierarchy, such as
- * {@link Node#_detach(Node)}, {@link Node#isAttached()}, {@link #branch(Node)}, and {@link #clearNodes()}.
+ * Nub provides other useful routines to handle the hierarchy, such as {@link Node#setReference(Node)},
+ * {@link Node#detach()}, {@link Node#attach()}, {@link #branch(Node)}, and {@link #clearNodes()}.
  * <h2>The eye</h2>
  * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
  * (see {@link #setEye(Node)}). Several functions handle the eye, such as
@@ -740,7 +740,7 @@ public class Graph {
    * All leading nodes are also reachable by the {@link #render()} algorithm for which they are the seeds.
    *
    * @see #nodes()
-   * @see Node#_detach(Node)
+   * @see Node#detach()
    */
   protected static List<Node> _leadingNodes() {
     return _seeds;
@@ -786,11 +786,12 @@ public class Graph {
   /**
    * Same as {@code for(Node node : _leadingNodes()) detach(node)}.
    *
-   * @see Node#_detach(Node)
+   * @see Node#detach()
    */
   public static void clearNodes() {
-    for (Node node : _leadingNodes())
-      Node._detach(node);
+    for (Node node : _leadingNodes()) {
+      node.detach();
+    }
   }
 
   /**

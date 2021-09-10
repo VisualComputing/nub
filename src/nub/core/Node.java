@@ -321,8 +321,8 @@ public class Node {
    * The node {@link #isAttached()} by the {@link Graph#render()} algorithm iff the node
    * {@code reference} happens to be.
    *
-   * @see Node#_attach(Node)
-   * @see Node#_detach(Node)
+   * @see #attach()
+   * @see #detach()
    * @see #Node(Node, Vector, Quaternion, float, boolean)
    */
   public Node(Node reference, Vector position, Quaternion orientation, float magnitude) {
@@ -337,8 +337,8 @@ public class Node {
    *
    * The {@code attach} var controls whether or the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
    *
-   * @see Node#_attach(Node)
-   * @see Node#_detach(Node)
+   * @see #attach()
+   * @see #detach()
    */
   protected Node(Node reference, Vector position, Quaternion orientation, float magnitude, boolean attach) {
     setReference(reference);
@@ -389,7 +389,7 @@ public class Node {
       setShape(this::graphics);
     }
     if (attach) {
-      _attach(this);
+      attach();
     }
   }
 
@@ -710,7 +710,7 @@ public class Node {
    * (see {@link #isAttached()}).
    *
    * @see #setReference(Node)
-   * @see Node#_detach(Node)
+   * @see #detach()
    */
   public void resetReference() {
     setReference(null);
@@ -734,9 +734,9 @@ public class Node {
    * {@link #reference()} would create a loop in the hierarchy.
    * <p>
    * To make all the nodes in the {@code node} branch eligible for garbage collection
-   * call {@link Node#_detach(Node)}.
+   * call {@link #detach()}.
    *
-   * @see Node#_detach(Node)
+   * @see #detach()
    */
   public void setReference(Node node) {
     // invariant: keep top-down (either tree leading nodes or reference to child) references
@@ -780,7 +780,7 @@ public class Node {
       else {
         // detach the (attached) node only if new reference is detached
         if (!node.isAttached()) {
-          _detach(this);
+          detach();
         }
         // any case add this as a child of new reference (invariant above)
         node._addChild(this);
@@ -822,10 +822,10 @@ public class Node {
     _attach(this);
   }
 
-  protected static boolean _attach(Node node) {
+  protected static void _attach(Node node) {
     if (node.isAttached()) {
       System.out.println("Warning: node already attached. Nothing done!");
-      return false;
+      return;
     }
     boolean reach = false;
     if (node.reference() == null) {
@@ -847,7 +847,6 @@ public class Node {
       System.out.println("Warning: attaching branch to which the node belongs to make it reachable");
       _attach(node.reference());
     }
-    return true;
   }
 
   /**
@@ -862,26 +861,22 @@ public class Node {
    * @see #isAttached()
    */
   public void detach() {
-    _detach(this);
-  }
-
-  protected static boolean _detach(Node node) {
-    if (node.isAttached()) {
-      List<Node> branch = Graph.branch(node);
+    if (isAttached()) {
+      List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
         descendant._unregisterTasks();
+        // remove also possible references to graph interpolators and hud sets
+        descendant._mask &= ~(Node.KEYFRAMES | Node.HUD);
       }
-      if (node.reference() != null) {
-        node.reference()._removeChild(node);
+      if (reference() != null) {
+        reference()._removeChild(this);
       }
       else {
-        Graph._removeLeadingNode(node);
+        Graph._removeLeadingNode(this);
       }
-      return true;
     }
     else {
       System.out.println("Warning: node already detached. Nothing done!");
-      return false;
     }
   }
 
@@ -890,7 +885,7 @@ public class Node {
    * Note that a detached child of an attached node is not listed in
    * {@link #children()}, even though they hold a {@link #reference()} to the parent node.
    * 
-   * @see #_detach(Node)
+   * @see #detach()
    * @see #attach()
    * @see #setReference(Node)
    */
@@ -946,7 +941,7 @@ public class Node {
   }
 
   /**
-   * Used by {@link Node#_attach(Node)}.
+   * Used by {@link #attach()}.
    */
   protected boolean _addChild(Node node) {
     if (node == null)
@@ -984,8 +979,8 @@ public class Node {
    * node are not listed, even though they hold a {@link #reference()} to the node.
    *
    * @see #isAttached()
-   * @see Node#_attach(Node)
-   * @see Node#_detach(Node)
+   * @see Node#attach()
+   * @see Node#detach()
    */
   public List<Node> children() {
     return _children;
@@ -3540,10 +3535,14 @@ public class Node {
     for (Interpolator.KeyFrame keyFrame : _interpolator._list) {
       if (keyFrame._handled) {
         if (isHintEnabled(Node.KEYFRAMES)) {
-          _attach(keyFrame._node);
+          keyFrame._node.attach();
+          if (keyFrame._hud) {
+            keyFrame._node.enableHint(Node.HUD);
+          }
         }
         else {
-          _detach(keyFrame._node);
+          keyFrame._hud = keyFrame._node.isHintEnabled(Node.HUD);
+          keyFrame._node.detach();
         }
       }
     }

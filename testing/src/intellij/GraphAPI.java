@@ -111,6 +111,12 @@ public class GraphAPI extends PApplet {
     if (key == '7') {
       n2.copy();
     }
+    if (key == '8') {
+      n2.detach();
+    }
+    if (key == '9') {
+      detached1.detach();
+    }
   }
 
   @Override
