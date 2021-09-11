@@ -56,7 +56,7 @@ public class Interpolators extends PApplet {
       // */
       // /*
       scene.randomize(shape);
-      shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1 : 4);
+      shape.addKeyFrame(Node.AXES | Node.SHAPE | Node.HUD, i % 2 == 1 ? 1 : 4);
       // */
     }
     shape.animate();

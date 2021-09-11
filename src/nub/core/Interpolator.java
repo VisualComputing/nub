@@ -59,14 +59,12 @@ class Interpolator {
     protected Vector _tangentVector;
     protected float _time;
     protected boolean _handled;
-    protected boolean _hud;
     protected Node _node;
 
     KeyFrame(Node node, float time, boolean handled) {
       _node = node;
       _time = time;
       _handled = handled;
-      _hud = false;
     }
 
     protected KeyFrame(KeyFrame other) {
@@ -78,7 +76,6 @@ class Interpolator {
       }
       this._time = other._time;
       this._handled = other._handled;
-      this._hud = other._hud;
     }
 
     public KeyFrame copy() {
@@ -572,8 +569,7 @@ class Interpolator {
    * Adds a {@link #node()} copy as a keyframe at {@code time} and a mask {@code hint}.
    */
   public void addKeyFrame(int hint, float time) {
-    Node node = node()._copy(hint, true);
-    addKeyFrame(node, time, true);
+    addKeyFrame(node()._copy(hint, true), time, true);
   }
 
   /**

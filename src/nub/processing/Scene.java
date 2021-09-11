@@ -1076,7 +1076,7 @@ public class Scene extends Graph {
       beginHUD();
       if (!_hudSet.isEmpty()) {
         for (Node node : _hudSet) {
-          if (_lastRendered(node) == TimingHandler.frameCount) {
+          if (_lastRendered(node) == TimingHandler.frameCount && node.isHintEnabled(Node.HUD)) {
             context().pushMatrix();
             Vector location = screenLocation(node);
             if (location != null) {
@@ -1101,7 +1101,7 @@ public class Scene extends Graph {
   protected void _displayPaths() {
     context().pushStyle();
     for (Node interpolator : _interpolators) {
-      if (_lastRendered(interpolator) == TimingHandler.frameCount) {
+      if (_lastRendered(interpolator) == TimingHandler.frameCount && interpolator.isHintEnabled(Node.KEYFRAMES)) {
         context().pushStyle();
         _drawSpline(interpolator);
         context().popStyle();
@@ -1111,7 +1111,7 @@ public class Scene extends Graph {
   }
 
   @Override
-  public void _displayFrontHint(Node node) {
+  protected void _displayFrontHint(Node node) {
     PGraphics pg = context();
     if (node.isHintEnabled(Node.SHAPE)) {
       pg.pushStyle();
@@ -1166,7 +1166,7 @@ public class Scene extends Graph {
     }
   }
 
-  public void _displayAnimationHint(Node node) {
+  protected void _displayAnimationHint(Node node) {
     PGraphics pg = context();
     if (Graph._isHintEnabled(_keyframesMask(node), Node.SHAPE)) {
       pg.pushStyle();

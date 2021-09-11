@@ -533,7 +533,6 @@ public class Node {
   protected void _setHint(Node node, int hint) {
     setShape(node);
     setHUD(node);
-    _updateHUD();
     _mask = hint;
     _torusFaces = node._torusFaces;
     _torusColor = node._torusColor;
@@ -841,6 +840,13 @@ public class Node {
       List<Node> branch = Graph.branch(node);
       for (Node descendant : branch) {
         descendant._registerTasks();
+        // restore interpolators and hud sets
+        if (descendant.isHintEnabled(Node.HUD)) {
+          Graph._hudSet.add(descendant);
+        }
+        if (descendant.isHintEnabled(Node.KEYFRAMES)) {
+          Graph._interpolators.add(descendant);
+        }
       }
     }
     else {
@@ -866,7 +872,8 @@ public class Node {
       for (Node descendant : branch) {
         descendant._unregisterTasks();
         // remove also possible references to graph interpolators and hud sets
-        descendant._mask &= ~(Node.KEYFRAMES | Node.HUD);
+        Graph._hudSet.remove(this);
+        Graph._interpolators.remove(this);
       }
       if (reference() != null) {
         reference()._removeChild(this);
@@ -3011,7 +3018,6 @@ public class Node {
     _rmrHUD = null;
     _imrHUD = null;
     disableHint(HUD);
-    _updateHUD();
   }
 
   /**
@@ -3023,7 +3029,6 @@ public class Node {
     _rmrHUD = null;
     if (_imrHUD == null)
       disableHint(HUD);
-    _updateHUD();
   }
 
   /**
@@ -3035,7 +3040,6 @@ public class Node {
     _imrHUD = null;
     if (_rmrHUD == null)
       disableHint(HUD);
-    _updateHUD();
   }
 
   /**
@@ -3066,7 +3070,6 @@ public class Node {
     else {
       _rmrHUD = shape;
       enableHint(HUD);
-      _updateHUD();
     }
   }
 
@@ -3090,7 +3093,6 @@ public class Node {
     else {
       _imrHUD = callback;
       enableHint(HUD);
-      _updateHUD();
     }
   }
 
@@ -3536,12 +3538,8 @@ public class Node {
       if (keyFrame._handled) {
         if (isHintEnabled(Node.KEYFRAMES)) {
           keyFrame._node.attach();
-          if (keyFrame._hud) {
-            keyFrame._node.enableHint(Node.HUD);
-          }
         }
         else {
-          keyFrame._hud = keyFrame._node.isHintEnabled(Node.HUD);
           keyFrame._node.detach();
         }
       }
