@@ -569,7 +569,7 @@ class Interpolator {
    * Adds a {@link #node()} copy as a keyframe at {@code time} and a mask {@code hint}.
    */
   public void addKeyFrame(int hint, float time) {
-    addKeyFrame(node()._copy(hint, true), time, true);
+    _addKeyFrame(node()._copy(hint, true), time, true);
   }
 
   /**
@@ -600,10 +600,10 @@ class Interpolator {
    * @see #addKeyFrame()
    */
   public void addKeyFrame(Node node, float time) {
-    addKeyFrame(node, time, false);
+    _addKeyFrame(node, time, false);
   }
 
-  protected void addKeyFrame(Node node, float time, boolean handled) {
+  protected void _addKeyFrame(Node node, float time, boolean handled) {
     if (_list.size() == 0) {
       if (time < 0)
         return;
