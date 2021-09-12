@@ -798,7 +798,7 @@ class Interpolator {
       if (!_valuesAreValid)
         _updateModifiedKeyFrames();
       if (_list.get(0) == _list.get(_list.size() - 1)) {
-        _path.add(new Node(null, _list.get(0)._node.worldPosition(), _list.get(0)._node.worldOrientation(), _list.get(0)._node.worldMagnitude(), false));
+        _path.add(new Node(_list.get(0)._node.worldPosition(), _list.get(0)._node.worldOrientation(), _list.get(0)._node.worldMagnitude(), false));
       }
       else {
         KeyFrame[] keyFrames = new KeyFrame[4];
@@ -816,7 +816,7 @@ class Interpolator {
           pvec2 = Vector.add(pvec2, keyFrames[2]._tangentVector());
           for (int step = 0; step < Node.maxSteps; ++step) {
             float alpha = step / (float) Node.maxSteps;
-            Node node = new Node(null,
+            Node node = new Node(
                     Vector.add(keyFrames[1]._node.worldPosition(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
                     Quaternion.squad(keyFrames[1]._node.worldOrientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.worldOrientation(), alpha),
                     Vector.lerp(keyFrames[1]._node.worldMagnitude(), keyFrames[2]._node.worldMagnitude(), alpha), false);
@@ -831,7 +831,7 @@ class Interpolator {
           keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         }
         // Add last KeyFrame
-        _path.add(new Node(null, keyFrames[1]._node.worldPosition(), keyFrames[1]._node.worldOrientation(), keyFrames[1]._node.worldMagnitude(),false));
+        _path.add(new Node(keyFrames[1]._node.worldPosition(), keyFrames[1]._node.worldOrientation(), keyFrames[1]._node.worldMagnitude(),false));
       }
       _pathIsValid = true;
     }
