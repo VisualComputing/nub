@@ -68,12 +68,12 @@ public class BasicUse extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.updateMouseTag();
+    scene.updateTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.spin();
     else if (mouseButton == RIGHT) {
       //Vector v = new Vector(scene.mouseDX(), 0, 0);
       //child.translate(v);
@@ -98,7 +98,7 @@ public class BasicUse extends PApplet {
       // */
     }
     else
-      scene.mouseShift();
+      scene.shift();
       //scene.scale(mouseX - pmouseX);
   }
 

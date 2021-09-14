@@ -106,15 +106,15 @@ public class Luxo extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.tag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.spin();
     else if (mouseButton == RIGHT) {
       if (scene.node() == base || scene.node() == null)
-        scene.mouseShift();
+        scene.shift();
     }
     else
       scene.zoom(mouseX - pmouseX);

@@ -41,7 +41,7 @@ public class ViewingVolume extends PApplet {
 
   @Override
   public void draw() {
-    focus = scene1.hasMouseFocus() ? scene1 : scene2;
+    focus = scene1.hasFocus() ? scene1 : scene2;
     scene1.openContext();
     scene1.context().background(125);
     scene1.drawAxes();
@@ -82,9 +82,9 @@ public class ViewingVolume extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.mouseSpin();
+      focus.spin();
     else if (mouseButton == RIGHT)
-      focus.mouseShift();
+      focus.shift();
     else
       //focus.zoom(mouseX - pmouseX);
       focus.zoom(mouseX - pmouseX);

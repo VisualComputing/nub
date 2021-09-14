@@ -81,21 +81,21 @@ void mouseMoved(MouseEvent event) {
     if (scene.isTagValid("light")) {
       scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
     }
-    // no calling mouseTag since we need to immediately update the tagged node
-    scene.updateMouseTag("light");
+    // no calling tag since we need to immediately update the tagged node
+    scene.updateTag("light");
     if (scene.isTagValid("light")) {
       shadowMapScene.setEye(scene.node("light"));
       scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
     }
   } else
-    scene.mouseTag();
+    scene.tag();
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.mouseSpin();
+    scene.spin();
   else if (mouseButton == RIGHT)
-    scene.mouseShift();
+    scene.shift();
   else
     scene.moveForward(mouseX - pmouseX);
 }

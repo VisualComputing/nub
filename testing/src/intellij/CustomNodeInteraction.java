@@ -54,11 +54,11 @@ public class CustomNodeInteraction extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.spin();
     else if (mouseButton == CENTER)
       scene.zoom(scene.mouseDX());
     else
-      scene.mouseShift();
+      scene.shift();
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -69,7 +69,7 @@ public class CustomNodeInteraction extends PApplet {
     if (event.getCount() == 1)
       scene.interact();
     if (event.getCount() == 2)
-      scene.mouseTag();
+      scene.tag();
   }
 
   public class Torus {

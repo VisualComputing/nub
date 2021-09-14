@@ -44,14 +44,14 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.tag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.spin();
     else if (mouseButton == RIGHT)
-      scene.mouseShift();
+      scene.shift();
     else
       scene.zoom(mouseX - pmouseX);
   }

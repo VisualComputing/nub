@@ -102,7 +102,7 @@ public class Flock extends PApplet {
   public void mouseClicked() {
     // two options to update the boid avatar:
     // 1. Synchronously
-    updateAvatar(scene.updateMouseTag("mouseClicked"));
+    updateAvatar(scene.updateTag("mouseClicked"));
     // which is the same as these two lines:
     // scene.updateMouseTag("mouseClicked");
     // updateAvatar(scene.node("mouseClicked"));
@@ -116,10 +116,10 @@ public class Flock extends PApplet {
     if (scene.eye().reference() == null)
       if (mouseButton == LEFT)
         // same as: scene.spin(scene.eye());
-        scene.mouseSpin();
+        scene.spin();
       else if (mouseButton == RIGHT)
         // same as: scene.translate(scene.eye());
-        scene.mouseShift();
+        scene.shift();
       else
         scene.moveForward(mouseX - pmouseX);
   }
@@ -127,12 +127,12 @@ public class Flock extends PApplet {
   // highlighting and 'third-person' interaction
   public void mouseMoved(MouseEvent event) {
     // 1. highlighting
-    scene.mouseTag("mouseMoved");
+    scene.tag("mouseMoved");
     // 2. third-person interaction
     if (scene.eye().reference() != null) {
       // press shift to move the mouse without looking around
       if (!event.isShiftDown())
-        scene.mouseLookAround();
+        scene.lookAround();
     }
   }
 

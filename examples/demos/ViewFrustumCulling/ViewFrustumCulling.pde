@@ -97,7 +97,7 @@ public void cull(Node node) {
 }
 
 void draw() {
-  focus = mainScene.hasMouseFocus() ? mainScene : secondaryScene;
+  focus = mainScene.hasFocus() ? mainScene : secondaryScene;
   // culling condition should be retested every frame
   root.cull = false;
   mainScene.display(color(75, 205, 65));
@@ -106,9 +106,9 @@ void draw() {
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    focus.mouseSpin();
+    focus.spin();
   else if (mouseButton == RIGHT)
-    focus.mouseShift();
+    focus.shift();
   else
     focus.zoom(mouseX - pmouseX);
 }

@@ -5,7 +5,6 @@ import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PConstants;
-import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
@@ -65,9 +64,9 @@ public class PointUnderPixel extends PApplet {
 
   public void mouseClicked(MouseEvent event) {
     if (event.getButton() == RIGHT) {
-      pup = scene.mouseLocation();
+      pup = scene.location();
       if (pup != null) {
-        scene.mouseToLine(orig, dir);
+        scene.pixelToLine(orig, dir);
         end = Vector.add(orig, Vector.multiply(dir, 4000.0f));
       }
     } else {
@@ -86,15 +85,15 @@ public class PointUnderPixel extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.tag();
   }
 
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.spin();
     else if (mouseButton == RIGHT)
-      scene.mouseShift();
+      scene.shift();
     else
       scene.moveForward(scene.mouseDX());
   }

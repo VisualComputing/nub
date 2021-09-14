@@ -67,16 +67,16 @@ public class DebugCam extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.tag();
   }
 
   public void mouseDragged(MouseEvent event) {
     switch (mouseButton) {
       case LEFT:
-          scene.mouseSpin(inertia);
+          scene.spin(inertia);
         break;
       case RIGHT:
-          scene.mouseShift(inertia);
+          scene.shift(inertia);
         break;
       case CENTER:
         if (event.isShiftDown()) {
@@ -86,9 +86,9 @@ public class DebugCam extends PApplet {
             scene.interact(scene.mouseRADX());
           } else {
             if (cad)
-              scene.mouseCAD(inertia);
+              scene.cad(inertia);
             else
-              scene.mouseLookAround(inertia);
+              scene.lookAround(inertia);
           }
         }
         break;

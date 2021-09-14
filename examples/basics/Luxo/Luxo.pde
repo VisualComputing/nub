@@ -104,15 +104,15 @@ void draw() {
 }
 
 void mouseMoved() {
-  scene.mouseTag();
+  scene.tag();
 }
 
 void mouseDragged() {
  if (mouseButton == LEFT)
-   scene.mouseSpin();
+   scene.spin();
  else if (mouseButton == RIGHT) {
    if (scene.node() == base || scene.node() == null)
-     scene.mouseShift();
+     scene.shift();
  }
  else
    scene.zoom(mouseX - pmouseX);

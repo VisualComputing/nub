@@ -132,7 +132,7 @@ public class Superliminal extends PApplet {
   public void mouseMoved() {
     if (focus == null)
       return;
-    focus.mouseTag();
+    focus.tag();
   }
 
   @Override
@@ -140,9 +140,9 @@ public class Superliminal extends PApplet {
     if (focus == null)
       return;
     if (mouseButton == LEFT)
-      focus.mouseSpin();
+      focus.spin();
     else if (mouseButton == RIGHT)
-      focus.mouseShift();
+      focus.shift();
     else {
       focus.zoom(mouseX - pmouseX);
     }
@@ -184,7 +184,7 @@ public class Superliminal extends PApplet {
   }
 
   public void draw() {
-    focus = lateralView.hasMouseFocus() ? lateralView : scene;
+    focus = lateralView.hasFocus() ? lateralView : scene;
     scene.openContext();
     scene.context().background(75, 25, 15);
     scene.render();

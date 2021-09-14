@@ -92,7 +92,7 @@ public class AuxViewers extends PApplet {
   public void mouseMoved() {
     if (focus == null)
       return;
-    focus.mouseTag();
+    focus.tag();
   }
 
   @Override
@@ -100,9 +100,9 @@ public class AuxViewers extends PApplet {
     if (focus == null)
       return;
     if (mouseButton == LEFT)
-      focus.mouseSpin();
+      focus.spin();
     else if (mouseButton == RIGHT)
-      focus.mouseShift();
+      focus.shift();
     else
       focus.moveForward(focus.mouseDX());
   }
@@ -126,7 +126,7 @@ public class AuxViewers extends PApplet {
   }
 
   public void draw() {
-    focus = scene2.hasMouseFocus() ? scene2 : scene3.hasMouseFocus() ? scene3 : scene1.hasMouseFocus() ? scene1 : null;
+    focus = scene2.hasFocus() ? scene2 : scene3.hasFocus() ? scene3 : scene1.hasFocus() ? scene1 : null;
     // /*
     scene1.openContext();
     scene1.context().background(75, 25, 15);

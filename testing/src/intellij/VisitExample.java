@@ -46,7 +46,7 @@ public class VisitExample extends PApplet {
   @Override
   public void draw(){
     for(int i = 0; i < n; i++){
-      focus = scenes[i].hasMouseFocus() ? scenes[i] : focus;
+      focus = scenes[i].hasFocus() ? scenes[i] : focus;
       scenes[i].openContext();
       scenes[i].context().background(125);
       scenes[i].render();
@@ -116,15 +116,15 @@ public class VisitExample extends PApplet {
 
   @Override
   public void mouseMoved(){
-    focus.mouseTag();
+    focus.tag();
   }
 
   @Override
   public void mouseDragged(){
     if(mouseButton == LEFT)
-      focus.mouseSpin();
+      focus.spin();
     else if(mouseButton == RIGHT)
-      focus.mouseShift();
+      focus.shift();
     else
       focus.zoom(focus.mouseDX());
   }

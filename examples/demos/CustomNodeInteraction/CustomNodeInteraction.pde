@@ -67,14 +67,14 @@ void keyPressed() {
 void mouseDragged() {
   if (scene.node("key") != null) {
     if (mouseButton == LEFT)
-      scene.mouseSpin("key");
+      scene.spin("key");
     else if (mouseButton == CENTER)
       scene.zoom("key", scene.mouseDX());
     else
-      scene.mouseShift("key");
+      scene.shift("key");
   }
   else {
-    scene.mouseSpin();
+    scene.spin();
   }
 }
 
@@ -86,5 +86,5 @@ void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1)
     scene.interact("key");
   if (event.getCount() == 2)
-    scene.mouseTag("key");
+    scene.tag("key");
 }

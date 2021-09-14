@@ -80,14 +80,14 @@ void keyPressed() {
 
 void mouseMoved() {
   if (!interactiveEye || focus == scene)
-    focus.mouseTag();
+    focus.tag();
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    focus.mouseSpin();
+    focus.spin();
   else if (mouseButton == RIGHT)
-    focus.mouseShift();
+    focus.shift();
   else
     focus.zoom(focus.mouseDX());
 }
@@ -108,7 +108,7 @@ void mouseClicked(MouseEvent event) {
 }
 
 void draw() {
-  focus = minimap.hasMouseFocus() ? minimap : scene;
+  focus = minimap.hasFocus() ? minimap : scene;
   scene.display(color(75, 25, 15));
   if (displayMinimap) {
     minimap.display(color(125, 80, 90), width / 2, height / 2);

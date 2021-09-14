@@ -49,7 +49,7 @@ void draw() {
 }
 
 void mouseMoved() {
-  scene.mouseTag();
+  scene.tag();
   updateFilters();
 }
 
@@ -60,14 +60,14 @@ void mouseClicked() {
 void mouseDragged() {
   if (mouseButton == LEFT) {
     if (scene.node("key") != null)
-      scene.mouseSpin("key");
+      scene.spin("key");
     else
-      scene.mouseSpin();
+      scene.spin();
   } else if (mouseButton == RIGHT) {
     if (scene.node("key") != null)
-      scene.mouseShift("key");
+      scene.shift("key");
     else
-      scene.mouseShift();
+      scene.shift();
   } else
     scene.zoom(mouseX - pmouseX);
 }

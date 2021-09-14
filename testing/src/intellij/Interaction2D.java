@@ -93,7 +93,7 @@ public class Interaction2D extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.updateMouseTag();
+    scene.updateTag();
   }
 
   public void mousePressed() {
@@ -108,12 +108,12 @@ public class Interaction2D extends PApplet {
     // Mouse methods that don't take a node parameter (such as mouseCAD)
     // are only available to the scene.eye().
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.spin();
       //scene.mouseCAD();
       //scene.lookAround(upVector);
       //scene.mouseCAD();
     else if (mouseButton == RIGHT)
-      scene.mouseShift();
+      scene.shift();
       //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);

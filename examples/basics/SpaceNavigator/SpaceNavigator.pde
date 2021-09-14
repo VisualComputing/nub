@@ -80,14 +80,14 @@ void spaceNavigatorInteraction() {
 }
 
 void mouseMoved() {
-  scene.mouseTag();
+  scene.tag();
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.mouseSpin();
+    scene.spin();
   else if (mouseButton == RIGHT)
-    scene.mouseShift();
+    scene.shift();
   else
     scene.zoom(scene.mouseDX());
 }

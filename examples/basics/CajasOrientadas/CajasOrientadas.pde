@@ -71,18 +71,18 @@ void mouseClicked() {
 }
 
 void mouseMoved() {
-  scene.mouseTag();
+  scene.tag();
 }
 
 void mouseDragged() {
   if (scene.node("keyboard") != null) {
-    scene.mouseShift("keyboard");
+    scene.shift("keyboard");
   }
   else {
   if (mouseButton == LEFT)
-    scene.mouseSpin();
+    scene.spin();
   else if (mouseButton == RIGHT)
-    scene.mouseShift();
+    scene.shift();
   else
     scene.zoom(mouseX - pmouseX);
   }

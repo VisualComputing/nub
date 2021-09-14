@@ -73,16 +73,16 @@ public class DebugEye extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.mouseTag();
+    scene.tag();
   }
 
   public void mouseDragged(MouseEvent event) {
     switch (mouseButton) {
       case LEFT:
-        scene.mouseSpin();
+        scene.spin();
         break;
       case RIGHT:
-        scene.mouseShift();
+        scene.shift();
         break;
       case CENTER:
         if (event.isShiftDown()) {
@@ -93,9 +93,9 @@ public class DebugEye extends PApplet {
           }
           else {
             if (cad)
-              scene.mouseCAD();
+              scene.cad();
             else
-              scene.mouseLookAround();
+              scene.lookAround();
           }
         }
         break;

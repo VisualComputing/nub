@@ -35,7 +35,7 @@ public class PUP extends PApplet {
   }
 
   public void draw() {
-    focus = pup != null ? visualHint.hasMouseFocus() ? visualHint : scene : scene;
+    focus = pup != null ? visualHint.hasFocus() ? visualHint : scene : scene;
     background(0);
     drawRay();
     scene.drawAxes();
@@ -81,7 +81,7 @@ public class PUP extends PApplet {
   @Override
   public void mouseMoved(MouseEvent event) {
     if (event.isControlDown()) {
-      pup = scene.mouseLocation();
+      pup = scene.location();
       if (pup != null) {
         visualHint.setBounds(pup, 300);
         visualHint.eye().setWorldPosition(pup);
@@ -92,20 +92,20 @@ public class PUP extends PApplet {
         atX = mouseX - w / 2;
         atY = mouseY - h;
         // debug
-        scene.mouseToLine(orig, dir);
+        scene.pixelToLine(orig, dir);
         end = Vector.add(orig, Vector.multiply(dir, 4000.0f));
       }
     } else {
-      focus.mouseTag();
+      focus.tag();
     }
   }
 
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.mouseSpin();
+      focus.spin();
     else if (mouseButton == RIGHT)
-      focus.mouseShift();
+      focus.shift();
     else
       focus.moveForward(focus.mouseDX());
   }
