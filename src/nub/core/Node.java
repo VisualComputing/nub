@@ -813,7 +813,7 @@ public class Node {
    * <p>
    * {@link #detach()} performs the inverse operation.
    *
-   * @see Graph#clearNodes()
+   * @see Graph#clearTree()
    * @see #detach()
    * @see #isAttached()
    */
@@ -862,7 +862,7 @@ public class Node {
    * <p>
    * {@link #attach()} performs the inverse operation.
    *
-   * @see Graph#clearNodes()
+   * @see Graph#clearTree()
    * @see #attach()
    * @see #isAttached()
    */

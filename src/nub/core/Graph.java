@@ -38,7 +38,7 @@ import java.util.function.Consumer;
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * Nub provides other useful routines to handle the hierarchy, such as {@link Node#setReference(Node)},
- * {@link Node#detach()}, {@link Node#attach()}, {@link #branch(Node)}, and {@link #clearNodes()}.
+ * {@link Node#detach()}, {@link Node#attach()}, {@link #branch(Node)}, and {@link #clearTree()}.
  * <h2>The eye</h2>
  * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
  * (see {@link #setEye(Node)}). Several functions handle the eye, such as
@@ -788,7 +788,7 @@ public class Graph {
    *
    * @see Node#detach()
    */
-  public static void clearNodes() {
+  public static void clearTree() {
     for (Node node : _leadingNodes()) {
       node.detach();
     }
