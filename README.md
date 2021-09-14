@@ -258,16 +258,14 @@ Another scene's eye (different than this one) can be drawn with `drawFrustum(Sce
 
 To directly interact with a given `node` (or the _eye_ when no `node` param is given), call any of the following screen space scene methods:
 
-| Action | Generic input device                                          | Mouse                           |
-|--------|---------------------------------------------------------------|---------------------------------|
-| Align  | `align([node])`                                               | n.a.                            |
-| Focus  | `focus([node])`                                               | n.a.                            |
-| Shift  | `shift([node], dx, dy, dz, [inertia])`                        | `mouseShift([node], [inertia])` |
-| Turn   | `turn([node], roll, pitch, yaw, [inertia])`                   | n.a.                            |
-| Zoom   | `zoom([node], delta, [inertia])`                              | n.a.                            |
-| Spin   | `spin([node], pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])` | `mouseSpin([node], [inertia])`  |
-
-**n.a.** doesn't mean the mouse action isn't available, but that it can be implemented in several ways (see the code snippets below). The provided mouse actions got _non-ambiguously_ implemented by simply passing the *Processing* `pmouseX`, `pmouseY`,  `mouseX` and `mouseY` variables as parameters to their relative generic input device method counterparts (e.g., `mouseTranslateNode([node])` is the same as `translateNode([node], pmouseX - mouseX, pmouseY - mouseY, 0)`), and hence their simpler signatures.
+| Scene screen space method                                             |
+|-----------------------------------------------------------------------|
+| `align([node])`                                                       |
+| `focus([node])`                                                       |
+| `shift([node], [dx], [dy], [dz], [inertia])`                          |
+| `turn([node], roll, pitch, yaw, [inertia])`                           |
+| `zoom([node], delta, [inertia])`                                      |
+| `spin([node], [pixel1X], [pixel1Y], [pixel2X], [pixel2Y], [inertia])` |
 
 Customize node behaviors by registering a user gesture data parser `function_object` with the node `setInteraction(function_object)` method, and then send gesture data to the node by calling one of the scene custom interaction invoking methods: `interact(gesture)`, `interact(tag, gesture)` or `interact(node, gesture)`, where gesture type is `Object....`. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
 
@@ -277,9 +275,9 @@ Customize node behaviors by registering a user gesture data parser `function_obj
 // define a mouse-dragged eye interaction
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.mouseSpin();
+    scene.spin();
   else if (mouseButton == RIGHT)
-    scene.mouseShift();
+    scene.shift();
   else
     scene.zoom(scene.mouseDX());
 }
@@ -291,7 +289,7 @@ void mouseMoved(MouseEvent event) {
   if (event.isShiftDown())
     scene.turn(scene.mouseRADY(), scene.mouseRADX(), 0);
   else
-    scene.mouseLookAround();
+    scene.lookAround();
 }
 ```
 
@@ -331,10 +329,10 @@ The [SpaceNavigator](https://github.com/VisualComputing/nub/tree/master/examples
 void mouseDragged() {
   // spin n1
   if (mouseButton == LEFT)
-    scene.mouseSpin(n1);
+    scene.spin(n1);
   // shift n3
   else if (mouseButton == RIGHT)
-    scene.mouseShift(n3);
+    scene.shift(n3);
   // zoom n1
   else
     scene.zoom(n1, scene.mouseDX());
@@ -359,51 +357,49 @@ Picking a node (which should be different than the scene eye) to interact with i
 
 1. Tag the `node` using an arbitrary `tag` either with `tag(tag, node)` or ray-casting:
    
-   | Ray casting | Synchronously :small_blue_diamond: | Asynchronously :small_orange_diamond: |
-   |-------------|------------------------------------|---------------------------------------|
-   | Generic     | `updateTag(tag, pixelX, pixelY)`   | `tag(tag, pixelX, pixelY)`            |
-   | Mouse       | `updateMouseTag(tag)`              | `mouseTag(tag)`                       |
+   | Synchronously :small_blue_diamond:     | Asynchronously :small_orange_diamond:|
+   |----------------------------------------|--------------------------------------|
+   | `updateTag([tag], [pixelX], [pixelY])` | `tag([tag], [pixelX], [pixelY])`     |
    
    :small_blue_diamond: The tagged node is returned immediately
    :small_orange_diamond: The tagged node is returned during the next call to the `render()` algorithm
    
 2. Interact with your _tagged_ nodes by calling any `scene` method implementing the `interact(tag, gesture...)` which resolves the node param in the [methods above](#node-interaction-methods) (using the scene `node(tag)` method):
 
-   | Action | Generic input device                                       | Mouse                        |
-   |--------|------------------------------------------------------------|------------------------------|
-   | Align  | `align(tag)`                                               | n.a.                         |
-   | Focus  | `focus(tag)`                                               | n.a.                         |
-   | Shift  | `shift(tag, dx, dy, dz, [inertia])`                        | `mouseShift(tag, [inertia])` |
-   | Turn   | `turn(tag, roll, pitch, yaw, [inertia])`                   | n.a.                         |
-   | Zoom   | `zoom(tag, delta, [inertia])`                              | n.a.                         |
-   | Spin   | `spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, [inertia])` | `mouseSpin(tag, [inertia])`  |
+   | Scene screen space method                                            |
+   |----------------------------------------------------------------------|
+   | `align([tag])`                                                       |
+   | `focus([tag])`                                                       |
+   | `shift([tag], [dx], [dy], [dz], [inertia])`                          |
+   | `turn([tag], roll, pitch, yaw, [inertia])`                           |
+   | `zoom([tag], delta, [inertia])`                                      |
+   | `spin([tag], [pixel1X], [pixel1Y], [pixel2X], [pixel2Y], [inertia])` |
 
 Observations:
 
-1. A node can have multiple tags but a given tag cannot be assigned to more than one node, and since the null tag is allowed, signatures of all the above methods lacking the tag parameter are provided for convenience, e.g., `mouseTag()` is equivalent to calling `mouseTag(null)` which in turn is equivalent to `tag(null, mouseX, mouseY)` (and `tag(mouseX, mouseY)`).
+1. A node can have multiple tags but a given tag cannot be assigned to more than one node, and since the null tag is allowed, signatures of all the above methods lacking the tag parameter are provided for convenience.
 2. Refer to the [picking()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#picking--) and [enablePicking(int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#enablePicking-int-) for the different ray-casting node picking modes.
-3. To check if a given node would be picked with a ray cast at a given screen position, call `tracks(node, pixelX, pixelY)` or `mouseTracks(node)`.
-4. To tag the nodes in a given array with ray casting use `updateTag(tag, pixelX, pixelY, Node[])` and `updateMouseTag(tag, Node[])`.
-5. In the case of `mouseTranslateTag(tag, [lag])` and `mouseTranslate(tag, [lag])` a `lag` is used (instead of `inertia`), `0` responds immediately and `1` no response at all.
-6. Set `Scene.inertia` in  [0..1] (`0` no inertia & `1` no friction) to change the default `inertia` value globally. It is initially set to `0.8` and it also affects the `lag` in `mouseTranslateTag(tag, [lag])` and `mouseTranslate(tag, [lag])`. See the [CajasOrientadas](https://github.com/VisualComputing/nub/tree/master/examples/basics/CajasOrientadas) example.
-7. Invoke custom node behaviors by either calling the scene `interact(node, gesture)`, `interact(gesture)` or `interact(tag, gesture)` methods. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
+3. To check if a given node would be picked with a ray cast at a given screen position, call `tracks(node, [pixelX], [pixelY])`.
+4. To tag the nodes in a given array with ray casting use `updateTag([tag], [pixelX], [pixelY], Node[])`.
+5. Set `Scene.inertia` in  [0..1] (`0` no inertia & `1` no friction) to change the default `inertia` value globally. It is initially set to `0.8`. See the [CajasOrientadas](https://github.com/VisualComputing/nub/tree/master/examples/basics/CajasOrientadas) example.
+6. Invoke custom node behaviors by either calling the scene `interact(node, gesture)`, `interact(gesture)` or `interact(tag, gesture)` methods. See the [CustomNodeInteraction](https://github.com/VisualComputing/nub/blob/master/examples/demos/CustomNodeInteraction/CustomNodeInteraction.pde) example.
 
 ### Mouse and keyboard code snippets
 
 ```processing
 // pick with mouse-moved
 void mouseMoved() {
-  scene.mouseTag();
+  scene.tag();
 }
 
 // interact with mouse-dragged
 void mouseDragged() {
   if (mouseButton == LEFT)
     // spin the picked node or the eye if no node has been picked
-    scene.mouseSpin();
+    scene.spin();
   else if (mouseButton == RIGHT)
     // shift the picked node or the eye if no node has been picked
-    scene.mouseShift();
+    scene.shift();
   else
     // zoom the picked node or the eye if no node has been picked
     scene.zoom(mouseX - pmouseX);
@@ -415,16 +411,16 @@ void mouseDragged() {
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1)
     // use the null tag to manipulate the picked node with mouse-moved
-    scene.mouseTag();
+    scene.tag();
   if (event.getCount() == 2)
     // use the "key" tag to manipulate the picked node with key-pressed
-    scene.mouseTag("key");
+    scene.tag("key");
 }
 
 // interact with mouse-moved
 void mouseMoved() {
   // spin the node picked with one click
-  scene.mouseSpin();
+  scene.spin();
 }
 
 // interact with key-pressed
