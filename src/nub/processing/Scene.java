@@ -3168,7 +3168,7 @@ public class Scene extends Graph {
   }
 
   /**
-   * Same as {@code mouseSpin((String)null)}.
+   * Same as {@code spin((String)null)}.
    *
    * @see #spin(String)
    */
