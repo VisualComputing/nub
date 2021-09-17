@@ -2234,6 +2234,13 @@ public class Node {
    * {@link #reference()}). Use {@link #worldMatrix()} to get the full Node
    * transformation matrix (i.e., from the world to the Node coordinate system). These
    * two match when the {@link #reference()} is {@code null}.
+   * <p>
+   * Use this method to manually traverse the node tree hierarchy:
+   * <p>
+   * {@code pushMatrix();} <br>
+   * {@code applyMatrix(node.matrix());} <br>
+   * {@code // You are in the local node coordinate system.} <br>
+   * {@code popMatrix();} <br>
    *
    * @see #set(Node)
    * @see #worldMatrix()
@@ -2325,24 +2332,6 @@ public class Node {
   /**
    * Sets the node from a {@link #matrix()} representation: orientation and magnitude in the upper
    * left 3x3 matrix and position on the last column.
-   * <p>
-   * Hence, if your openGL code fragment looks like:
-   * <p>
-   * {@code float [] m = new float [16]; m[0]=...;} <br>
-   * {@code gl.glMultMatrixf(m);} <br>
-   * <p>
-   * It is equivalent to write:
-   * <p>
-   * {@code Node node = new Node();} <br>
-   * {@code node.fromMatrix(m);} <br>
-   * {@code pushMatrix();} <br>
-   * {@code graph.applyTransformation(node);} <br>
-   * {@code // You are in the local node coordinate system.} <br>
-   * {@code popMatrix();} <br>
-   * <p>
-   * Which allows to apply local transformations to the {@code node} while using geometry
-   * data from other node instances when necessary (see {@link #location(Vector, Node)} and
-   * {@link #displacement(Vector, Node)}).
    *
    * @see #fromWorldMatrix(Matrix)
    * @see #matrix()

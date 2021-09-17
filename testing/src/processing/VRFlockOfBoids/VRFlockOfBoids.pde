@@ -45,7 +45,7 @@ Node avatar;
 void setup() {
   fullScreen(VR);
   scene = new Scene(this);
-  scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
+  scene.setBounds(new Vector(0, 0, 0), (new Vector(flockWidth, flockHeight, flockDepth)).magnitude());
   scene.fit();
   // create and fill the list of boids
   flock = new ArrayList();
@@ -137,7 +137,7 @@ void mouseDragged() {
 // highlighting and 'third-person' interaction
 void mouseMoved(MouseEvent event) {
   // 1. highlighting
-  scene.cast("mouseMoved", mouseX, mouseY);
+  scene.tag("mouseMoved", mouseX, mouseY);
   // 2. third-person interaction
   if (scene.eye().reference() != null)
     // press shift to move the mouse without looking around
