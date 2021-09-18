@@ -816,7 +816,7 @@ public class Node {
   }
 
   /**
-   * Tells whether or not was the node rendered in the last frame.
+   * Tells whether was the node rendered in the last frame.
    */
   protected boolean _rendered(Graph graph) {
     return _lastRenderedSet.contains(graph) && _lastRendered == TimingHandler.frameCount;
