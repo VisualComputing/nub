@@ -2784,7 +2784,7 @@ public class Graph {
       functor.accept(this, node);
     if (!node.cull) {
       if (node._bypass != TimingHandler.frameCount) {
-        node._lastRendered = TimingHandler.frameCount;
+        node._cacheRendered(this);
         _trackFrontBuffer(node);
         if (isOffscreen())
           _trackBackBuffer(node);
@@ -4050,7 +4050,7 @@ public class Graph {
     return node._boundsWeight;
   }
 
-  protected long _lastRendered(Node node) { return node._lastRendered; }
+  protected boolean _rendered(Node node) { return node._rendered(this); }
 
   // Interpolator
 

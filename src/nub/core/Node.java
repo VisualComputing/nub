@@ -18,10 +18,7 @@ import nub.timing.Task;
 import nub.timing.TimingHandler;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -197,7 +194,9 @@ public class Node {
   // Retained mode rendering
   // PShape is only available in Java
   protected processing.core.PShape _rmrShape;
-  protected long _bypass = -1, _lastRendered = -1;
+  protected long _bypass = -1;
+  protected static long _lastRendered = -1;
+  protected HashSet<Graph> _lastRenderedSet;
 
   //Object... gesture
   protected BiConsumer<Node, Object[]> _interact;
@@ -376,6 +375,7 @@ public class Node {
     _steps = 3;
     _children = new ArrayList<Node>();
     _frustumGraphs = new HashSet<Graph>();
+    _lastRenderedSet = new HashSet<Graph>();
     _keyframesMask = Node.AXES;
     setInteraction(this::interact);
     // hack
@@ -802,6 +802,24 @@ public class Node {
       this.setWorldMagnitude(magnitude);
       // note that restoring the cache always call _modified()
     }
+  }
+
+  /**
+   * Used by the last time {@link #_rendered(Graph)} condition.
+   */
+  protected void _cacheRendered(Graph graph) {
+    if (_lastRendered != TimingHandler.frameCount) {
+      _lastRenderedSet.clear();
+    }
+    _lastRendered = TimingHandler.frameCount;
+    _lastRenderedSet.add(graph);
+  }
+
+  /**
+   * Tells whether or not was the node rendered in the last frame.
+   */
+  protected boolean _rendered(Graph graph) {
+    return _lastRenderedSet.contains(graph) && _lastRendered == TimingHandler.frameCount;
   }
 
   // In JS attach / detach should be made just an attach property

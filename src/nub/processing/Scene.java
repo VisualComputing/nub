@@ -1010,7 +1010,7 @@ public class Scene extends Graph {
     if (!_hudSet.isEmpty()) {
       _bbMatrixHandler.beginHUD(width(), height());
       for (Node node : _hudSet) {
-        if (_lastRendered(node) == TimingHandler.frameCount) {
+        if (_rendered(node)) {
           if (node.isPickingEnabled(Node.HUD)) {
             _emitBackBufferUniforms(node);
             _backBuffer().pushMatrix();
@@ -1076,7 +1076,7 @@ public class Scene extends Graph {
       beginHUD();
       if (!_hudSet.isEmpty()) {
         for (Node node : _hudSet) {
-          if (_lastRendered(node) == TimingHandler.frameCount && node.isHintEnabled(Node.HUD)) {
+          if (_rendered(node) && node.isHintEnabled(Node.HUD)) {
             context().pushMatrix();
             Vector location = screenLocation(node);
             if (location != null) {
@@ -1101,7 +1101,7 @@ public class Scene extends Graph {
   protected void _displayPaths() {
     context().pushStyle();
     for (Node interpolator : _interpolators) {
-      if (_lastRendered(interpolator) == TimingHandler.frameCount && interpolator.isHintEnabled(Node.KEYFRAMES)) {
+      if (_rendered(interpolator) && interpolator.isHintEnabled(Node.KEYFRAMES)) {
         context().pushStyle();
         _drawSpline(interpolator);
         context().popStyle();
