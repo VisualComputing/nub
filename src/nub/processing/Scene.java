@@ -493,9 +493,13 @@ public class Scene extends Graph {
    * @see #isOffscreen()
    */
   public void pre() {
-    if (_seededGraph)
+    if (_seededGraph) {
       TimingHandler.handle();
+    }
     _resize();
+    if (!isOffscreen()) {
+      openContext();
+    }
   }
 
   /**
@@ -510,8 +514,13 @@ public class Scene extends Graph {
    * @see #isOffscreen()
    */
   public void draw() {
-    if (!isOffscreen() && _lastRendered == TimingHandler.frameCount) {
-      _renderBackBuffer();
+    if (!isOffscreen()) {
+      // WARNING: for picking to work processing require
+      // this call to be issued before closing the context
+      if (_lastRendered == TimingHandler.frameCount) {
+        _renderBackBuffer();
+      }
+      closeContext();
     }
   }
 
