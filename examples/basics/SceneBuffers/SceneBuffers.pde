@@ -32,7 +32,6 @@ void setup() {
     shapes[i] = new Node(caja());
     scene.randomize(shapes[i]);
   }
-  scene.fit(1);
 }
 
 void draw() {

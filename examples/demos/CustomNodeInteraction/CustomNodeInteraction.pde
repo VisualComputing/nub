@@ -34,7 +34,6 @@ void settings() {
 void setup() {
   font36 = loadFont("FreeSans-36.vlw");
   scene = new Scene(this);
-  scene.fit(1);
   shapes = new Torus[10];
   for (int i = 0; i < shapes.length; i++) {
     shapes[i] = new Torus();

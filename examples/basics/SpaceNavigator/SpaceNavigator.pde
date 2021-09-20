@@ -33,7 +33,6 @@ void setup() {
   size(1600, 800, P3D);
   openSpaceNavigator();
   scene = new Scene(this, 1500);
-  scene.fit(1);
   Node[] shapes = new Node[50];
   for (int i = 0; i < shapes.length; i++) {
     tint(random(0,255), random(0,255), random(0,255), random(150,255));

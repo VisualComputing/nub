@@ -35,11 +35,9 @@ void setup() {
   mainScene = new Scene(createGraphics(w, h / 2, P3D));
   mainScene.eye().enableHint(Node.BOUNDS);
   mainScene.togglePerspective();
-  mainScene.fit(1);
   // secondary scene
   secondaryScene = new Scene(createGraphics(w, h / 2, P3D), 200);
   secondaryScene.togglePerspective();
-  secondaryScene.fit();
   // declare and build the octree hierarchy
   root = node(null, new Vector());
   buildOctree(root);

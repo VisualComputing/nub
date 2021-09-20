@@ -52,10 +52,8 @@ void setup() {
 }
 
 void draw() {
-  scene.openContext();
   background(0);
   scene.render();
-  scene.closeContext();
   fill(200);
   noStroke();
   textureMode(IMAGE);
@@ -91,7 +89,7 @@ void keyPressed(KeyEvent event) {
       scene.eye().rotate(Quaternion.from(a, 0, 0));
     } else {
       scene.lookAt(Vector.zero);
-      scene.fit(1);
+      scene.fit(1000);
     }
   }
   if (keyMode) {

@@ -23,7 +23,7 @@
  * Press 'p' to print the current node rate.
  * Press 'm' to change the boid visual mode.
  * Press 'v' to toggle boids' wall skipping.
- * Press 's' to call scene.fit(1).
+ * Press 's' to call scene.fit(1000).
  */
 
 import nub.primitives.*;
@@ -44,7 +44,6 @@ Node avatar;
 void setup() {
   size(1000, 700, P3D);
   scene = new Scene(this, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), 800);
-  scene.fit();
   // create and fill the list of boids
   flock = new ArrayList();
   for (int i = 0; i < initBoidNum; i++)
@@ -52,13 +51,11 @@ void setup() {
 }
 
 void draw() {
-  scene.openContext();
   background(10, 50, 25);
   ambientLight(128, 128, 128);
   directionalLight(255, 255, 255, 0, 1, -100);
   walls();
   scene.render();
-  scene.closeContext();
   // uncomment to asynchronously update boid avatar. See mouseClicked()
   // updateAvatar(scene.node("mouseClicked"));
 }
@@ -96,7 +93,7 @@ void updateAvatar(Node node) {
 void thirdPerson() {
   scene.eye().setReference(avatar);
   avatar.setWorldMagnitude(scene.eye());
-  scene.fit(avatar, 1);
+  scene.fit(avatar, 1000);
 }
 
 // Resets the eye
@@ -105,7 +102,7 @@ void resetEye() {
   scene.lookAt(scene.center());
   if (avatar != null)
     avatar.setMagnitude(1);
-  scene.fit(1);
+  scene.fit(1000);
 }
 
 // picks up a boid avatar, may be null
@@ -174,7 +171,7 @@ void keyPressed() {
     break;
   case 's':
     if (scene.eye().reference() == null)
-      scene.fit(1);
+      scene.fit(1000);
     break;
   case 'p':
     println("Frame rate: " + frameRate);

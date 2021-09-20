@@ -29,7 +29,6 @@ void setup() {
   Scene.inertia = 0.85;
   scene = new Scene(this, 200);
   scene.togglePerspective();
-  scene.fit();
   esfera = new Node(esfera(10));
   esfera.setPosition(new Vector(0, 1.4, 0));
   cajas = new Node[15];
@@ -43,7 +42,6 @@ void setup() {
     });
     scene.randomize(cajas[i]);
   }
-  scene.fit();
   scene.tag("keyboard", esfera);
 }
 
@@ -123,7 +121,7 @@ void keyPressed() {
     scene.togglePerspective();
   }
   if (key == 's') {
-    scene.fit(1);
+    scene.fit(2000);
   }
   if (key == 'S') {
     scene.fit();

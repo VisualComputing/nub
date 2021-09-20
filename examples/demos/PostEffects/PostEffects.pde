@@ -38,7 +38,6 @@ public void setup() {
     models[i] = new Node(shape());
     scene.randomize(models[i]);
   }
-  scene.fit(1);
   // edge
   edgeShader = loadShader("edge.glsl");
   edgeGraphics = createGraphics(width, height, P3D);

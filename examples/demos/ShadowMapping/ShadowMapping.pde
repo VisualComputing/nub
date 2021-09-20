@@ -44,7 +44,6 @@ void settings() {
 void setup() {
   scene = new Scene(this, max(w, h) / 3);
   scene.togglePerspective();
-  scene.fit(1);
   Node floor = new Node((PGraphics pg) -> {
     pg.pushStyle();
     pg.noStroke();
