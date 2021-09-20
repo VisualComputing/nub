@@ -21,9 +21,9 @@ public class MultiRender extends PApplet {
   Node node, child, sibling;
   PShader tShader, lShader, pShader;
   PGraphics fb, bb;
-  int fbColor, bbColor;
+  int fbID, bbID;
 
-  boolean onscreen = true;
+  boolean onscreen = false;
   //Choose P3D for a 3D scene, or P2D for a 2D one
   String renderer = P2D;
 
@@ -34,26 +34,32 @@ public class MultiRender extends PApplet {
   public void setup() {
     //scene = new Scene(this, 150);
     fb = createGraphics(400, 400, P2D);
-    fbColor = Node.colorID((int) random(0, 16777216));
+    fbID = (int) random(0, 16777216);
     bb = createGraphics(400, 400, P2D);
-    bbColor = Node.colorID((int) random(0, 16777216));
-    bb.strokeWeight(6);
-    bb.stroke(255);
+    bb.noSmooth();
+    bbID = (int) random(0, 16777216);
     // stroke params should go in draw in all cases
-    /*
     tShader = loadShader("Picking.frag");
     lShader = loadShader("Picking.frag", "LinePicking.vert");
     pShader = loadShader("Picking.frag", "PointPicking.vert");
     bb.shader(tShader);
     bb.shader(lShader, PApplet.LINES);
     bb.shader(pShader, PApplet.POINTS);
-    //  */
+    //emit();
   }
 
-  public void emit() {
-    float r = (float) (node.id() & 255) / 255.f;
-    float g = (float) ((node.id() >> 8) & 255) / 255.f;
-    float b = (float) ((node.id() >> 16) & 255) / 255.f;
+  /*
+  public int emit() {
+    int id = (int) random(0, 16777216);
+    emit(id);
+    return id;
+  }
+  // */
+
+  public void emit(int id) {
+    float r = Node.redID(id);
+    float g = Node.greenID(id);
+    float b = Node.blueID(id);
     tShader.set("id", new PVector(r, g, b));
     lShader.set("id", new PVector(r, g, b));
     pShader.set("id", new PVector(r, g, b));
@@ -62,7 +68,7 @@ public class MultiRender extends PApplet {
   public void draw() {
     background(125);
     if (onscreen) {
-      fill(fbColor);
+      fill(Node.colorID(fbID));
       strokeWeight(6);
       stroke(255);
       rect(20, 20, 100, 100);
@@ -71,7 +77,7 @@ public class MultiRender extends PApplet {
       //scene.render();
       fb.beginDraw();
       fb.background(255, 0, 255);
-      fb.fill(fbColor);
+      fb.fill(Node.colorID(fbID));
       fb.strokeWeight(6);
       fb.stroke(255);
       fb.rect(20, 20, 100, 100);
@@ -81,23 +87,25 @@ public class MultiRender extends PApplet {
 
     bb.beginDraw();
     bb.background(0, 255, 255);
-    bb.fill(bbColor);
-    bb.strokeWeight(6);
-    bb.stroke(255);
+    //bb.fill(bbColor);
+    //bb.strokeWeight(6);
+    //bb.stroke(255);
+    emit(fbID);
     bb.rect(20, 20, 100, 100);
     bb.endDraw();
     image(bb, 570,570);
 
     if (onscreen) {
       strokeWeight(6);
+      fill(Node.colorID(bbID));
+      strokeWeight(6);
       stroke(0, 255, 0);
-      fill(fbColor);
       rect(140, 140, 100, 100);
     }
     else {
       fb.beginDraw();
       //fb.background(255, 0, 255);
-      fb.fill(fbColor);
+      fb.fill(Node.colorID(bbID));
       fb.strokeWeight(6);
       fb.stroke(0,255, 0);
       fb.rect(140, 140, 100, 100);
@@ -107,9 +115,10 @@ public class MultiRender extends PApplet {
 
     bb.beginDraw();
     //bb.background(0, 255, 255);
-    bb.fill(bbColor);
-    bb.strokeWeight(6);
-    bb.stroke(0,255, 0);
+    //bb.fill(bbColor);
+    //bb.strokeWeight(6);
+    //bb.stroke(0,255, 0);
+    emit(bbID);
     bb.rect(140, 140, 100, 100);
     bb.endDraw();
     image(bb, 570,570);
@@ -135,11 +144,18 @@ public class MultiRender extends PApplet {
     else
       scene.zoom(event.getCount() * 20);
   }
+  // */
 
   public void keyPressed() {
-
+   if (key == '1') {
+     fbID = (int) random(0, 16777216);
+     emit(fbID);
+   }
+    if (key == '2') {
+      bbID = (int) random(0, 16777216);
+      emit(bbID);
+    }
   }
-   */
 
   public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.MultiRender"});
