@@ -24,7 +24,7 @@ public class MultiRender extends PApplet {
   int fbID, bbID;
   boolean io;
 
-  boolean onscreen = true;
+  boolean onscreen = false;
   //Choose P3D for a 3D scene, or P2D for a 2D one
   String renderer = P2D;
 
@@ -46,16 +46,7 @@ public class MultiRender extends PApplet {
     bb.shader(tShader);
     bb.shader(lShader, PApplet.LINES);
     bb.shader(pShader, PApplet.POINTS);
-    //emit();
   }
-
-  /*
-  public int emit() {
-    int id = (int) random(0, 16777216);
-    emit(id);
-    return id;
-  }
-  // */
 
   public void emit(int id) {
     float r = Node.redID(id);
@@ -121,10 +112,14 @@ public class MultiRender extends PApplet {
     //bb.stroke(0,255, 0);
     emit(bbID);
     bb.rect(140, 140, 100, 100);
+    if (io) {
+      bbIO();
+      //image(bb, 700,700);
+    }
     bb.endDraw();
     image(bb, 370,370);
     if (io) {
-      bbIO();
+      //bbIO();
       image(bb, 700,700);
     }
   }
