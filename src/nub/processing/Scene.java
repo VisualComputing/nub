@@ -1069,9 +1069,10 @@ public class Scene extends Graph {
     // Seems related to: PassiveTransformations
     // funny, only safe way. Otherwise break things horribly when setting node shapes
     // and there are more than one node holding a shape
-    float r = (float) (node.id() & 255) / 255.f;
-    float g = (float) ((node.id() >> 8) & 255) / 255.f;
-    float b = (float) ((node.id() >> 16) & 255) / 255.f;
+    int id = node.id();
+    float r = Node.redID(id);
+    float g = Node.greenID(id);
+    float b = Node.blueID(id);
     _backBuffer().shader(_triangleShader);
     _backBuffer().shader(_lineShader, PApplet.LINES);
     _backBuffer().shader(_pointShader, PApplet.POINTS);

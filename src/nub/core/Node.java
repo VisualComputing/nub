@@ -600,7 +600,37 @@ public class Node {
   }
 
   /**
-   * Convert int to color.
+   * Convert int {@code id} to red. Use it in conjunction with
+   * {@link #greenID(int)} and {@link #blueID(int)}.
+   * 
+   * @see #colorID(int) 
+   */
+  public static float redID(int id) {
+    return (float) (id & 255) / 255.f;
+  }
+
+  /**
+   * Convert int {@code id} to green. Use it in conjunction with
+   * {@link #redID(int)} and {@link #blueID(int)}.
+   *
+   * @see #colorID(int)
+   */
+  public static float greenID(int id) {
+    return (float) ((id >> 8) & 255) / 255.f;
+  }
+
+  /**
+   * Convert int {@code id} to blue. Use it in conjunction with
+   * {@link #redID(int)} and {@link #greenID(int)}.
+   *
+   * @see #colorID(int)
+   */
+  public static float blueID(int id) {
+    return (float) ((id >> 16) & 255) / 255.f;
+  }
+
+  /**
+   * Convert int {@code id} to color.
    * See: http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
    */
   public static int colorID(int id) {
