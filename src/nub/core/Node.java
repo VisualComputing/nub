@@ -596,7 +596,15 @@ public class Node {
    * See: http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
    */
   public int colorID() {
-    return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
+    return colorID(_id);
+  }
+
+  /**
+   * Convert int to color.
+   * See: http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
+   */
+  public static int colorID(int id) {
+    return (255 << 24) | ((id & 255) << 16) | (((id >> 8) & 255) << 8) | (id >> 16) & 255;
   }
 
   // MODIFIED
