@@ -22,8 +22,9 @@ public class MultiRender extends PApplet {
   PShader tShader, lShader, pShader;
   PGraphics fb, bb;
   int fbID, bbID;
+  boolean io;
 
-  boolean onscreen = false;
+  boolean onscreen = true;
   //Choose P3D for a 3D scene, or P2D for a 2D one
   String renderer = P2D;
 
@@ -33,9 +34,9 @@ public class MultiRender extends PApplet {
 
   public void setup() {
     //scene = new Scene(this, 150);
-    fb = createGraphics(400, 400, P2D);
+    fb = createGraphics(300, 300, P2D);
     fbID = (int) random(0, 16777216);
-    bb = createGraphics(400, 400, P2D);
+    bb = createGraphics(300, 300, P2D);
     bb.noSmooth();
     bbID = (int) random(0, 16777216);
     // stroke params should go in draw in all cases
@@ -76,24 +77,24 @@ public class MultiRender extends PApplet {
     else {
       //scene.render();
       fb.beginDraw();
-      fb.background(255, 0, 255);
+      fb.background(255, 0, 255, 125);
       fb.fill(Node.colorID(fbID));
       fb.strokeWeight(6);
       fb.stroke(255);
       fb.rect(20, 20, 100, 100);
       fb.endDraw();
-      image(fb, 50, 50);
+      //image(fb, 50, 50);
     }
 
     bb.beginDraw();
-    bb.background(0, 255, 255);
+    bb.background(0, 255, 255, 125);
     //bb.fill(bbColor);
     //bb.strokeWeight(6);
     //bb.stroke(255);
     emit(fbID);
     bb.rect(20, 20, 100, 100);
     bb.endDraw();
-    image(bb, 570,570);
+    //image(bb, 370,370);
 
     if (onscreen) {
       strokeWeight(6);
@@ -104,7 +105,7 @@ public class MultiRender extends PApplet {
     }
     else {
       fb.beginDraw();
-      //fb.background(255, 0, 255);
+      //fb.background(255, 0, 255, 125);
       fb.fill(Node.colorID(bbID));
       fb.strokeWeight(6);
       fb.stroke(0,255, 0);
@@ -114,14 +115,27 @@ public class MultiRender extends PApplet {
     }
 
     bb.beginDraw();
-    //bb.background(0, 255, 255);
+    //bb.background(0, 255, 255, 125);
     //bb.fill(bbColor);
     //bb.strokeWeight(6);
     //bb.stroke(0,255, 0);
     emit(bbID);
     bb.rect(140, 140, 100, 100);
     bb.endDraw();
-    image(bb, 570,570);
+    image(bb, 370,370);
+    if (io) {
+      bbIO();
+      image(bb, 700,700);
+    }
+  }
+
+  public void bbIO() {
+    int halfImage = bb.width*bb.height/2;
+    bb.loadPixels();
+    for (int i = 0; i < halfImage; i++) {
+      bb.pixels[i+halfImage] = bb.pixels[i];
+    }
+    bb.updatePixels();
   }
 
   /*
@@ -147,13 +161,16 @@ public class MultiRender extends PApplet {
   // */
 
   public void keyPressed() {
-   if (key == '1') {
-     fbID = (int) random(0, 16777216);
-     emit(fbID);
-   }
+    if (key == '1') {
+      fbID = (int) random(0, 16777216);
+      emit(fbID);
+    }
     if (key == '2') {
       bbID = (int) random(0, 16777216);
       emit(bbID);
+    }
+    if (key == '3') {
+      io = !io;
     }
   }
 
