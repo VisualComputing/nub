@@ -737,7 +737,9 @@ public class Scene extends Graph {
    * @param cornerY
    */
   public void display(Object background, boolean axes, Integer grid, Node subtree, Callback worldCallback, int cornerX, int cornerY) {
-    openContext();
+    if (isOffscreen()) {
+      openContext();
+    }
     if (background instanceof PImage) {
       context().background((PImage)background);
     }
@@ -757,8 +759,8 @@ public class Scene extends Graph {
     if (worldCallback != null) {
       worldCallback.execute();
     }
-    closeContext();
     if (isOffscreen()) {
+      closeContext();
       image(cornerX, cornerY);
     }
   }
