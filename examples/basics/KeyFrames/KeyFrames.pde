@@ -97,5 +97,5 @@ void keyPressed() {
   if (key == 'b')
     scene.eye().removeKeyFrames();
   if (key == 'f')
-    scene.fit(2000);
+    scene.fit(2);
 }

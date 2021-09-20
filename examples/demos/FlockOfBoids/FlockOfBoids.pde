@@ -23,7 +23,7 @@
  * Press 'p' to print the current node rate.
  * Press 'm' to change the boid visual mode.
  * Press 'v' to toggle boids' wall skipping.
- * Press 's' to call scene.fit(1000).
+ * Press 's' to call scene.fit(1).
  */
 
 import nub.primitives.*;
@@ -93,7 +93,7 @@ void updateAvatar(Node node) {
 void thirdPerson() {
   scene.eye().setReference(avatar);
   avatar.setWorldMagnitude(scene.eye());
-  scene.fit(avatar, 1000);
+  scene.fit(avatar, 1);
 }
 
 // Resets the eye
@@ -102,7 +102,7 @@ void resetEye() {
   scene.lookAt(scene.center());
   if (avatar != null)
     avatar.setMagnitude(1);
-  scene.fit(1000);
+  scene.fit(1);
 }
 
 // picks up a boid avatar, may be null
@@ -171,7 +171,7 @@ void keyPressed() {
     break;
   case 's':
     if (scene.eye().reference() == null)
-      scene.fit(1000);
+      scene.fit(1);
     break;
   case 'p':
     println("Frame rate: " + frameRate);

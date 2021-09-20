@@ -89,7 +89,7 @@ void keyPressed(KeyEvent event) {
       scene.eye().rotate(Quaternion.from(a, 0, 0));
     } else {
       scene.lookAt(Vector.zero);
-      scene.fit(1000);
+      scene.fit(1);
     }
   }
   if (keyMode) {

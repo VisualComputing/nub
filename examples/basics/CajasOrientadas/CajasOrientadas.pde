@@ -121,7 +121,7 @@ void keyPressed() {
     scene.togglePerspective();
   }
   if (key == 's') {
-    scene.fit(2000);
+    scene.fit(2);
   }
   if (key == 'S') {
     scene.fit();
