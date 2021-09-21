@@ -515,8 +515,8 @@ public class Scene extends Graph {
    */
   public void draw() {
     if (!isOffscreen()) {
-      // WARNING: for picking to work processing requires
-      // this call to be issued before closing the context
+      // WARNING: since rays are cleared by closeContext()
+      // picking requires this call to be issued first
       if (_lastRendered == TimingHandler.frameCount) {
         _renderBackBuffer();
       }
