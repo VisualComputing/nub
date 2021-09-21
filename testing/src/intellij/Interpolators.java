@@ -38,6 +38,7 @@ public class Interpolators extends PApplet {
     }
     pshape.setFill(color(0, 255, 255/*, 125*/));
     shape = new Node(pshape);
+    shape.setMinMaxScalingFilter(0.8f, 1.2f);
     shape.setHUD(this::hud);
     shape.setAnimationRecurrence(true);
     shape.enableHint(Node.AXES);

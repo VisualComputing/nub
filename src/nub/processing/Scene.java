@@ -1012,11 +1012,14 @@ public class Scene extends Graph {
   @Override
   protected void _initBackBuffer() {
     _backBuffer().beginDraw();
-    _backBuffer().pushStyle();
-    // TODO restore background
-    //_backBuffer().background(0);
-    // debugging multirender
-    _backBuffer().background(255);
+    //_backBuffer().pushStyle();
+    if (_lastInitBackBuffer != TimingHandler.frameCount) {
+      // TODO restore background
+      //_backBuffer().background(0);
+      // debugging multirender
+      _backBuffer().background(255);
+      _lastInitBackBuffer = TimingHandler.frameCount;
+    }
   }
 
   @Override
@@ -1044,7 +1047,7 @@ public class Scene extends Graph {
       }
       _bbMatrixHandler.endHUD();
     }
-    _backBuffer().popStyle();
+    //_backBuffer().popStyle();
     _backBuffer().endDraw();
     _backBuffer().loadPixels();
   }

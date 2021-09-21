@@ -2,14 +2,13 @@ package intellij;
 
 import nub.core.Node;
 import nub.processing.Scene;
-import nub.timing.TimingHandler;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
 public class SceneBuffers extends PApplet {
   Scene scene;
-  Node root, root1, root2;
+  Node root, cajas, bolas;
   Node[] shapes;
 
   //Choose one of P3D for a 3D scene or P2D for a 2D one.
@@ -25,11 +24,16 @@ public class SceneBuffers extends PApplet {
     rectMode(CENTER);
     scene = new Scene(createGraphics(w, h / 2, renderer), max(w, h));
     //scene = new Scene(this);
-    root1 = new Node();
-    root2 = new Node();
+    cajas = new Node();
+    bolas = new Node();
     shapes = new Node[10];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Node(i%2==0?root1:root2, caja());
+      if (i%2==0) {
+        shapes[i] = new Node(cajas, caja());
+      }
+      else {
+        shapes[i] = new Node(bolas, bola());
+      }
       scene.randomize(shapes[i]);
       //shapes[i].enableHint(Node.CAMERA);
       shapes[i].enableHint(Node.AXES);
@@ -43,11 +47,22 @@ public class SceneBuffers extends PApplet {
     scene.openContext();
     scene.context().background(125);
     scene.drawAxes();
-    scene.render(root1);
-    scene.render(root2);
+    scene.render(cajas);
+    scene.render(bolas);
     scene.closeContext();
     scene.image();
     // */
+
+    /*
+    scene.openContext();
+    //scene.context().background(125);
+    scene.drawAxes();
+    //scene.render(cajas);
+    scene.render(bolas);
+    scene.closeContext();
+    scene.image();
+    // */
+
     //scene.display(125, root);
     // 2. Display back buffer
     scene.displayBackBuffer(0, h / 2);
@@ -77,9 +92,9 @@ public class SceneBuffers extends PApplet {
     if (key == '0')
       root = null;
     if (key == '1')
-      root = root1;
+      root = cajas;
     if (key == '2')
-      root = root2;
+      root = bolas;
   }
 
   PShape caja() {
@@ -88,6 +103,14 @@ public class SceneBuffers extends PApplet {
     caja.setStroke(color(random(0, 255), random(0, 255), random(0, 255)));
     caja.setFill(color(random(0, 255), random(0, 255), random(0, 255), random(0, 255)));
     return caja;
+  }
+
+  PShape bola() {
+    PShape bola = scene.is3D() ? createShape(SPHERE, random(60, 100)) : createShape(ELLIPSE, 0, 0, random(60, 100), random(60, 100));
+    //bola.noStroke();
+    bola.setStroke(color(random(0, 255), random(0, 255), random(0, 255)));
+    bola.setFill(color(random(0, 255), random(0, 255), random(0, 255), random(0, 255)));
+    return bola;
   }
 
   public static void main(String args[]) {

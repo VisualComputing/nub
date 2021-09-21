@@ -37,6 +37,7 @@ void setup() {
   }
   pshape.setFill(color(0, 255, 255, 125));
   shape = new Node(pshape);
+  shape.setMinMaxScalingFilter(0.8, 1.2);
   shape.enableHint(Node.AXES);
   shape.enableHint(Node.BULLSEYE);
   shape.configHint(Node.BULLSEYE, color(255, 0, 0));
@@ -46,7 +47,7 @@ void setup() {
   // Create an initial shape interpolator path
   for (int i = 0; i < random(4, 10); i++) {
     scene.randomize(shape);
-    shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1000 : 4000);
+    shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1 : 4);
   }
   shape.animate();
   scene.eye().enableHint(Node.KEYFRAMES);
@@ -91,7 +92,7 @@ void keyPressed() {
     shape.animate(speed);
   }
   if (key == '1')
-    scene.eye().addKeyFrame(Node.CAMERA | Node.BULLSEYE, 1000);
+    scene.eye().addKeyFrame(Node.CAMERA | Node.BULLSEYE, 1);
   if (key == 'a')
     scene.eye().toggleAnimation();
   if (key == 'b')

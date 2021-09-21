@@ -112,16 +112,20 @@ public class MultiRender extends PApplet {
     //bb.stroke(0,255, 0);
     emit(bbID);
     bb.rect(140, 140, 100, 100);
+    /*
     if (io) {
       bbIO();
-      //image(bb, 700,700);
-    }
-    bb.endDraw();
-    image(bb, 370,370);
-    if (io) {
-      //bbIO();
       image(bb, 700,700);
     }
+    // */
+    bb.endDraw();
+    image(bb, 370,370);
+    // /*
+    if (io) {
+      bbIO();
+      image(bb, 700,700);
+    }
+    // */
   }
 
   public void bbIO() {

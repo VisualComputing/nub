@@ -127,7 +127,7 @@ public class Graph {
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
-  protected long _lastDisplayed, _lastRendered;
+  protected long _lastDisplayed, _lastRendered, _lastInitBackBuffer;
   protected boolean _offscreen;
 
   // 0. Contexts
@@ -160,7 +160,6 @@ public class Graph {
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
   // _bb : picking buffer
   public boolean picking;
-  protected long _bbNeed, _bbCount;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected long _cacheProjectionViewInverse;
 
@@ -2606,7 +2605,7 @@ public class Graph {
   public void openContext() {
     _renderCount++;
     if (_renderCount != 1) {
-      throw new RuntimeException("Error: render() should be nested within a single openContext() / closeContext() call!");
+      throw new RuntimeException(isOffscreen() ? "Error: render() should be nested within a single openContext() / closeContext() call!" : "openContext() / closeContext is only available for off-screen scenes");
     }
     else {
       if (isOffscreen()) {
@@ -2784,8 +2783,6 @@ public class Graph {
         _trackFrontBuffer(node);
         if (isOffscreen())
           _trackBackBuffer(node);
-        if (_backPicking(node))
-          _bbNeed = TimingHandler.frameCount;
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
           _matrixHandler.pushMatrix();
           float scl = 1 + node._highlight;
@@ -2811,7 +2808,7 @@ public class Graph {
    * Use it as a {@code _postDraw()}.
    */
   protected void _renderBackBuffer() {
-    if (picking && _bb != null && _bbCount < _bbNeed) {
+    if (picking && _bb != null) {
       _initBackBuffer();
       _bbMatrixHandler.bind(projection(), view());
       if (_subtree == null) {
@@ -2827,11 +2824,7 @@ public class Graph {
           _bbMatrixHandler.popMatrix();
         }
       }
-      if (isOffscreen()) {
-        _rays.clear();
-      }
       _endBackBuffer();
-      _bbCount = _bbNeed;
     }
   }
 
@@ -2841,14 +2834,14 @@ public class Graph {
   protected void _renderBackBuffer(Node node) {
     _bbMatrixHandler.pushMatrix();
     _bbMatrixHandler.applyTransformation(node);
-    if (!node.cull) {
-      if (node._bypass != TimingHandler.frameCount) {
-        if (_backPicking(node)) {
-          _displayBackHint(node);
-        }
-        if (!isOffscreen())
-          _trackBackBuffer(node);
+    if (node._rendered(this)) {
+      if (_backPicking(node)) {
+        _displayBackHint(node);
       }
+      if (!isOffscreen())
+        _trackBackBuffer(node);
+    }
+    if (!node.cull) {
       for (Node child : node.children())
         _renderBackBuffer(child);
     }
