@@ -2681,10 +2681,6 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
-    if (_lastRendered == TimingHandler.frameCount) {
-      System.out.println("Warning: render() already called. Nothing done!");
-      return;
-    }
     _lastRendered = TimingHandler.frameCount;
     boolean handled = false;
     if (_renderCount == 0) {

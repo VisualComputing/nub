@@ -195,7 +195,7 @@ public class Node {
   // PShape is only available in Java
   protected processing.core.PShape _rmrShape;
   protected long _bypass = -1;
-  protected static long _lastRendered = -1;
+  protected long _lastRendered = -1;
   protected HashSet<Graph> _lastRenderedSet;
 
   //Object... gesture
@@ -846,6 +846,9 @@ public class Node {
    * Used by the last time {@link #_rendered(Graph)} condition.
    */
   protected void _cacheRendered(Graph graph) {
+    if (_rendered(graph)) {
+      throw new RuntimeException("Node already rendered. Exiting now!");
+    }
     if (_lastRendered != TimingHandler.frameCount) {
       _lastRenderedSet.clear();
     }

@@ -1013,7 +1013,10 @@ public class Scene extends Graph {
   protected void _initBackBuffer() {
     _backBuffer().beginDraw();
     _backBuffer().pushStyle();
-    _backBuffer().background(0);
+    // TODO restore background
+    //_backBuffer().background(0);
+    // debugging multirender
+    _backBuffer().background(255);
   }
 
   @Override

@@ -2,18 +2,20 @@ package intellij;
 
 import nub.core.Node;
 import nub.processing.Scene;
+import nub.timing.TimingHandler;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
 public class SceneBuffers extends PApplet {
   Scene scene;
+  Node root, root1, root2;
   Node[] shapes;
 
   //Choose one of P3D for a 3D scene or P2D for a 2D one.
   String renderer = P3D;
-  int w = 700;
-  int h = 700;
+  int w = 1200;
+  int h = 1200;
 
   public void settings() {
     size(w, h, renderer);
@@ -23,10 +25,11 @@ public class SceneBuffers extends PApplet {
     rectMode(CENTER);
     scene = new Scene(createGraphics(w, h / 2, renderer), max(w, h));
     //scene = new Scene(this);
-
-    shapes = new Node[100];
+    root1 = new Node();
+    root2 = new Node();
+    shapes = new Node[10];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Node(caja());
+      shapes[i] = new Node(i%2==0?root1:root2, caja());
       scene.randomize(shapes[i]);
       //shapes[i].enableHint(Node.CAMERA);
       shapes[i].enableHint(Node.AXES);
@@ -36,12 +39,16 @@ public class SceneBuffers extends PApplet {
 
   public void draw() {
     // 1. Fill in and display front-buffer
+    // /*
     scene.openContext();
     scene.context().background(125);
     scene.drawAxes();
-    scene.render();
+    scene.render(root1);
+    scene.render(root2);
     scene.closeContext();
     scene.image();
+    // */
+    //scene.display(125, root);
     // 2. Display back buffer
     scene.displayBackBuffer(0, h / 2);
   }
@@ -64,6 +71,15 @@ public class SceneBuffers extends PApplet {
       scene.moveForward(event.getCount() * 20);
     else
       scene.zoom(event.getCount() * 20);
+  }
+
+  public void keyPressed() {
+    if (key == '0')
+      root = null;
+    if (key == '1')
+      root = root1;
+    if (key == '2')
+      root = root2;
   }
 
   PShape caja() {
