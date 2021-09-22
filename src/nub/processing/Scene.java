@@ -498,6 +498,7 @@ public class Scene extends Graph {
     if (_seededGraph) {
       TimingHandler.handle();
     }
+    _bbNeed = false;
     _resize();
     if (!isOffscreen()) {
       openContext();
@@ -519,9 +520,7 @@ public class Scene extends Graph {
     if (!isOffscreen()) {
       closeContext();
     }
-    if (_lastRendered == TimingHandler.frameCount) {
-      _renderBackBuffer();
-    }
+    _renderBackBuffer();
   }
 
   /**

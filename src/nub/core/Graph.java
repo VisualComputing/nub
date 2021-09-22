@@ -132,6 +132,7 @@ public class Graph {
 
   // 0. Contexts
   protected Object _bb, _fb;
+  protected boolean _bbNeed;
   // 1. Eye
   protected Node _eye;
   protected long _lastEqUpdate;
@@ -2765,28 +2766,30 @@ public class Graph {
     _matrixHandler.pushMatrix();
     _matrixHandler.applyTransformation(node);
     BiConsumer<Graph, Node> functor = _functors.get(node.id());
-    if (functor != null)
+    if (functor != null) {
       functor.accept(this, node);
+    }
     if (!node.cull) {
       if (node._bypass != TimingHandler.frameCount) {
+        if (_backPicking(node)) {
+          _bbNeed = true;
+        }
         node._cacheRendered(this);
         _trackFrontBuffer(node);
         _trackBackBuffer(node);
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
           _matrixHandler.pushMatrix();
           float scl = 1 + node._highlight;
-          if (is2D())
-            _matrixHandler.scale(scl, scl);
-          else
-            _matrixHandler.scale(scl, scl, scl);
+          _matrixHandler.scale(scl, scl, is2D() ? 1 : scl);
           _displayFrontHint(node);
           _matrixHandler.popMatrix();
         } else {
           _displayFrontHint(node);
         }
       }
-      for (Node child : node.children())
+      for (Node child : node.children()) {
         _render(child);
+      }
     }
     _matrixHandler.popMatrix();
   }
@@ -2797,15 +2800,17 @@ public class Graph {
    * Use it as a {@code _postDraw()}.
    */
   protected void _renderBackBuffer() {
-    if (picking && _bb != null) {
-      _initBackBuffer();
-      _bbMatrixHandler.bind(projection(), view());
-      for (Node node : _leadingNodes()) {
-        _renderBackBuffer(node);
+    if (_lastRendered == TimingHandler.frameCount && _bbNeed) {
+      if (picking && _bb != null) {
+        _initBackBuffer();
+        _bbMatrixHandler.bind(projection(), view());
+        for (Node node : _leadingNodes()) {
+          _renderBackBuffer(node);
+        }
+        _endBackBuffer();
       }
-      _endBackBuffer();
     }
-    _rays = new ArrayList<Ray>(_cacheRays);
+    _rays = _cacheRays.size() > 1 ? new ArrayList<Ray>(_cacheRays) : null;
     _cacheRays.clear();
   }
 

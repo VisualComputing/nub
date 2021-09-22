@@ -23,8 +23,8 @@ public class SceneBuffers extends PApplet {
   public void setup() {
     rectMode(CENTER);
     //scene = new Scene(createGraphics(w, h / 2, renderer), max(w, h));
-    //scene = new Scene(createGraphics(w, h, renderer), max(w, h));
-    scene = new Scene(this, 1200);
+    scene = new Scene(createGraphics(w, h, renderer), max(w, h));
+    //scene = new Scene(this, 1200);
     cajas = new Node();
     bolas = new Node();
     shapes = new Node[10];
@@ -44,13 +44,16 @@ public class SceneBuffers extends PApplet {
 
   public void draw() {
     // 1. Fill in and display front-buffer
-    // /*
+    /*
     background(0);
     scene.render(bolas);
     scene.render(cajas);
     // */
-    //scene.display(color(0), bolas);
     /*
+    scene.display(color(0), bolas);
+    scene.display(null, cajas);
+    // */
+    // /*
     scene.openContext();
     scene.context().background(125);
     scene.drawAxes();
@@ -60,7 +63,7 @@ public class SceneBuffers extends PApplet {
     //scene.image();
     // */
 
-    /*
+    // /*
     scene.openContext();
     //scene.context().background(125);
     //scene.drawAxes();
@@ -72,7 +75,7 @@ public class SceneBuffers extends PApplet {
 
     //scene.display(125, root);
     // 2. Display back buffer
-    scene.displayBackBuffer(0, h / 2);
+    //scene.displayBackBuffer(0, h / 2);
   }
 
   public void mouseMoved() {
