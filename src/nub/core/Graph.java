@@ -2633,6 +2633,13 @@ public class Graph {
     else {
       if (_lastRendered == TimingHandler.frameCount) {
         _rays.clear();
+        // rays may also be cleared separately, here for offscreen scenes
+        // and in draw() for onscreen ones
+        /*
+        if (isOffscreen()) {
+          _rays.clear();
+        }
+        // */
         _displayPaths();
         _displayHUD();
       }

@@ -127,7 +127,7 @@ public class AuxViewers extends PApplet {
 
   public void draw() {
     focus = scene2.hasFocus() ? scene2 : scene3.hasFocus() ? scene3 : scene1.hasFocus() ? scene1 : null;
-    // /*
+    /*
     scene1.openContext();
     scene1.context().background(75, 25, 15);
     scene1.context().stroke(0, 225, 15);
@@ -137,6 +137,7 @@ public class AuxViewers extends PApplet {
     //scene1.render();// if offscreen, render should be forbidden after close context!
     scene1.image();
     // */
+    scene1.display(color(75,25,15), false, color(0, 225, 15));
 
     /*
     // works

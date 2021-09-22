@@ -283,6 +283,8 @@ public class Scene extends Graph {
     if (!_offscreen && _onscreenGraph == null)
       _onscreenGraph = this;
     // 2. Back buffer
+    // TODO check if noSmooth is really needed,
+    // since it seems to be absorbed by the line shader
     if (_backBuffer() != null) _backBuffer().noSmooth();
     _triangleShader = pApplet.loadShader("Picking.frag");
     _lineShader = pApplet.loadShader("Picking.frag", "LinePicking.vert");
@@ -515,12 +517,19 @@ public class Scene extends Graph {
    */
   public void draw() {
     if (!isOffscreen()) {
-      // WARNING: since rays are cleared by closeContext()
+      // WARNING: since rays are cleared in closeContext()
       // picking requires this call to be issued first
       if (_lastRendered == TimingHandler.frameCount) {
         _renderBackBuffer();
       }
       closeContext();
+      // rays may also be cleared separately, here for onscreen scenes
+      // and in closeContext() for offscreen ones
+      /*
+      if (_lastRendered == TimingHandler.frameCount) {
+        _rays.clear();
+      }
+      // */
     }
   }
 
@@ -1012,6 +1021,7 @@ public class Scene extends Graph {
   @Override
   protected void _initBackBuffer() {
     _backBuffer().beginDraw();
+    // TODO seems style is not require since it should be absorbed by the shader
     //_backBuffer().pushStyle();
     if (_lastInitBackBuffer != TimingHandler.frameCount) {
       // TODO restore background
@@ -1047,6 +1057,7 @@ public class Scene extends Graph {
       }
       _bbMatrixHandler.endHUD();
     }
+    // TODO seems style is not require since it should be absorbed by the shader
     //_backBuffer().popStyle();
     _backBuffer().endDraw();
     _backBuffer().loadPixels();
