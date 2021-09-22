@@ -283,9 +283,9 @@ public class Scene extends Graph {
     if (!_offscreen && _onscreenGraph == null)
       _onscreenGraph = this;
     // 2. Back buffer
-    // TODO check if noSmooth is really needed,
-    // since it seems to be absorbed by the line shader
-    if (_backBuffer() != null) _backBuffer().noSmooth();
+    // is noSmooth absorbed by the line shader
+    // looks safer to call it though
+    _backBuffer().noSmooth();
     _triangleShader = pApplet.loadShader("Picking.frag");
     _lineShader = pApplet.loadShader("Picking.frag", "LinePicking.vert");
     _pointShader = pApplet.loadShader("Picking.frag", "PointPicking.vert");

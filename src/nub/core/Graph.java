@@ -2862,15 +2862,17 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (_frontPicking(node) && !_cacheRays.isEmpty()) {
-      Vector projection = screenLocation(node.worldPosition());
-      Iterator<Ray> it = _cacheRays.iterator();
-      while (it.hasNext()) {
-        Ray ray = it.next();
-        removeTag(ray._tag);
-        if (_tracks(node, ray._pixelX, ray._pixelY, projection)) {
-          tag(ray._tag, node);
-          it.remove();
+    if (_frontPicking(node) && _rays!= null) {
+      if (!_rays.isEmpty()) {
+        Vector projection = screenLocation(node.worldPosition());
+        Iterator<Ray> it = _rays.iterator();
+        while (it.hasNext()) {
+          Ray ray = it.next();
+          removeTag(ray._tag);
+          if (_tracks(node, ray._pixelX, ray._pixelY, projection)) {
+            tag(ray._tag, node);
+            it.remove();
+          }
         }
       }
     }
