@@ -1014,10 +1014,7 @@ public class Scene extends Graph {
     _backBuffer().beginDraw();
     // TODO seems style is not require since it should be absorbed by the shader
     //_backBuffer().pushStyle();
-    // TODO restore background
-    //_backBuffer().background(0);
-    // debugging multirender
-    _backBuffer().background(255);
+    _backBuffer().background(0);
   }
 
   @Override
