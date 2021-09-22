@@ -3,6 +3,7 @@ package intellij;
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
@@ -38,8 +39,19 @@ public class SceneBuffers extends PApplet {
       scene.randomize(shapes[i]);
       //shapes[i].enableHint(Node.CAMERA);
       shapes[i].enableHint(Node.AXES);
+      shapes[i].setHUD(this::hud);
     }
     scene.fit(1);
+  }
+
+  public void hud(PGraphics pg) {
+    pg.pushStyle();
+    pg.rectMode(CENTER);
+    pg.fill(255, 0, 255, 125);
+    pg.stroke(0,0,255);
+    pg.strokeWeight(3);
+    pg.rect(0, 0, 80, 50);
+    pg.popStyle();
   }
 
   public void draw() {
@@ -58,12 +70,12 @@ public class SceneBuffers extends PApplet {
     scene.context().background(125);
     scene.drawAxes();
     scene.render(cajas);
-    //scene.render(bolas);
+    scene.render(bolas);
     scene.closeContext();
-    //scene.image();
+    scene.image();
     // */
 
-    // /*
+    /*
     scene.openContext();
     //scene.context().background(125);
     //scene.drawAxes();
