@@ -22,8 +22,9 @@ public class SceneBuffers extends PApplet {
 
   public void setup() {
     rectMode(CENTER);
-    scene = new Scene(createGraphics(w, h / 2, renderer), max(w, h));
-    //scene = new Scene(this, 1200);
+    //scene = new Scene(createGraphics(w, h / 2, renderer), max(w, h));
+    //scene = new Scene(createGraphics(w, h, renderer), max(w, h));
+    scene = new Scene(this, 1200);
     cajas = new Node();
     bolas = new Node();
     shapes = new Node[10];
@@ -43,15 +44,20 @@ public class SceneBuffers extends PApplet {
 
   public void draw() {
     // 1. Fill in and display front-buffer
-    //scene.display(color(0), bolas);
     // /*
+    background(0);
+    scene.render(bolas);
+    scene.render(cajas);
+    // */
+    //scene.display(color(0), bolas);
+    /*
     scene.openContext();
     scene.context().background(125);
     scene.drawAxes();
     scene.render(cajas);
-    scene.render(bolas);
+    //scene.render(bolas);
     scene.closeContext();
-    scene.image();
+    //scene.image();
     // */
 
     /*

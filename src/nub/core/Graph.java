@@ -127,7 +127,7 @@ public class Graph {
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
-  protected long _lastDisplayed, _lastRendered, _lastInitBackBuffer;
+  protected long _lastDisplayed, _lastRendered;
   protected boolean _offscreen;
 
   // 0. Contexts
@@ -224,7 +224,7 @@ public class Graph {
   public static boolean _seeded;
   protected boolean _seededGraph;
   protected HashMap<String, Node> _tags;
-  protected ArrayList<Ray> _rays;
+  protected ArrayList<Ray> _cacheRays, _rays;
 
   // 4. Graph
   protected static List<Node> _seeds = new ArrayList<Node>();
@@ -234,12 +234,7 @@ public class Graph {
   Vector _upVector;
   protected long _lookAroundCount;
 
-  // 6. subtree rendering
-  // this variable is only needed to keep track of the subtree
-  // that's to be rendered in the back buffer
-  protected Node _subtree;
-
-  // 7. Visibility
+  // 6. Visibility
 
   /**
    * Enumerates the different visibility states an object may have respect to the bounding volume.
@@ -248,7 +243,7 @@ public class Graph {
     VISIBLE, SEMIVISIBLE, INVISIBLE
   }
 
-  // 8. Projection stuff
+  // 7. Projection stuff
 
   protected Type _type;
 
@@ -434,10 +429,11 @@ public class Graph {
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
-    _rays = new ArrayList<Ray>();
+    _cacheRays = new ArrayList<Ray>();
     _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
-    if (eye == null)
+    if (eye == null) {
       throw new RuntimeException("Error eye shouldn't be null");
+    }
     setEye(eye);
     _translationTask = new InertialTask() {
       @Override
@@ -2472,7 +2468,7 @@ public class Graph {
    * @see #tag(int, int)
    */
   public void tag(String tag, int pixelX, int pixelY) {
-    _rays.add(new Ray(tag, pixelX, pixelY));
+    _cacheRays.add(new Ray(tag, pixelX, pixelY));
   }
 
   // Off-screen
@@ -2632,14 +2628,6 @@ public class Graph {
     }
     else {
       if (_lastRendered == TimingHandler.frameCount) {
-        _rays.clear();
-        // rays may also be cleared separately, here for offscreen scenes
-        // and in draw() for onscreen ones
-        /*
-        if (isOffscreen()) {
-          _rays.clear();
-        }
-        // */
         _displayPaths();
         _displayHUD();
       }
@@ -2687,16 +2675,14 @@ public class Graph {
    * @see Node#setShape(processing.core.PShape)
    */
   public void render(Node subtree) {
-    _lastRendered = TimingHandler.frameCount;
-    boolean handled = false;
-    if (_renderCount == 0) {
-      openContext();
-      handled = true;
+    if (_renderCount != 1) {
+      throw new RuntimeException("Error: context should be open (once and only once) before render!");
     }
-    _subtree = subtree;
+    _lastRendered = TimingHandler.frameCount;
     if (subtree == null) {
-      for (Node node : _leadingNodes())
+      for (Node node : _leadingNodes()) {
         _render(node);
+      }
     } else if (subtree.isAttached()) {
       if (subtree.reference() != null) {
         _matrixHandler.pushMatrix();
@@ -2706,9 +2692,6 @@ public class Graph {
       if (subtree.reference() != null) {
         _matrixHandler.popMatrix();
       }
-    }
-    if (handled) {
-      closeContext();
     }
   }
 
@@ -2788,8 +2771,7 @@ public class Graph {
       if (node._bypass != TimingHandler.frameCount) {
         node._cacheRendered(this);
         _trackFrontBuffer(node);
-        if (isOffscreen())
-          _trackBackBuffer(node);
+        _trackBackBuffer(node);
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
           _matrixHandler.pushMatrix();
           float scl = 1 + node._highlight;
@@ -2818,21 +2800,13 @@ public class Graph {
     if (picking && _bb != null) {
       _initBackBuffer();
       _bbMatrixHandler.bind(projection(), view());
-      if (_subtree == null) {
-        for (Node node : _leadingNodes())
-          _renderBackBuffer(node);
-      } else {
-        if (_subtree.reference() != null) {
-          _bbMatrixHandler.pushMatrix();
-          _bbMatrixHandler.applyWorldTransformation(_subtree.reference());
-        }
-        _renderBackBuffer(_subtree);
-        if (_subtree.reference() != null) {
-          _bbMatrixHandler.popMatrix();
-        }
+      for (Node node : _leadingNodes()) {
+        _renderBackBuffer(node);
       }
       _endBackBuffer();
     }
+    _rays = new ArrayList<Ray>(_cacheRays);
+    _cacheRays.clear();
   }
 
   /**
@@ -2841,12 +2815,8 @@ public class Graph {
   protected void _renderBackBuffer(Node node) {
     _bbMatrixHandler.pushMatrix();
     _bbMatrixHandler.applyTransformation(node);
-    if (node._rendered(this)) {
-      if (_backPicking(node)) {
-        _displayBackHint(node);
-      }
-      if (!isOffscreen())
-        _trackBackBuffer(node);
+    if (node._rendered(this) && _backPicking(node)) {
+      _displayBackHint(node);
     }
     if (!node.cull) {
       for (Node child : node.children())
@@ -2892,9 +2862,9 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (_frontPicking(node) && !_rays.isEmpty()) {
+    if (_frontPicking(node) && !_cacheRays.isEmpty()) {
       Vector projection = screenLocation(node.worldPosition());
-      Iterator<Ray> it = _rays.iterator();
+      Iterator<Ray> it = _cacheRays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
         removeTag(ray._tag);
@@ -2910,14 +2880,16 @@ public class Graph {
    * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
-    if (_backPicking(node) && !_rays.isEmpty()) {
-      Iterator<Ray> it = _rays.iterator();
-      while (it.hasNext()) {
-        Ray ray = it.next();
-        removeTag(ray._tag);
-        if (_tracks(node, ray._pixelX, ray._pixelY)) {
-          tag(ray._tag, node);
-          it.remove();
+    if (_backPicking(node) && _rays!= null) {
+      if (!_rays.isEmpty()) {
+        Iterator<Ray> it = _rays.iterator();
+        while (it.hasNext()) {
+          Ray ray = it.next();
+          removeTag(ray._tag);
+          if (_tracks(node, ray._pixelX, ray._pixelY)) {
+            tag(ray._tag, node);
+            it.remove();
+          }
         }
       }
     }

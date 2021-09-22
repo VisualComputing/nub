@@ -517,19 +517,10 @@ public class Scene extends Graph {
    */
   public void draw() {
     if (!isOffscreen()) {
-      // WARNING: since rays are cleared in closeContext()
-      // picking requires this call to be issued first
-      if (_lastRendered == TimingHandler.frameCount) {
-        _renderBackBuffer();
-      }
       closeContext();
-      // rays may also be cleared separately, here for onscreen scenes
-      // and in closeContext() for offscreen ones
-      /*
-      if (_lastRendered == TimingHandler.frameCount) {
-        _rays.clear();
-      }
-      // */
+    }
+    if (_lastRendered == TimingHandler.frameCount) {
+      _renderBackBuffer();
     }
   }
 
@@ -1023,13 +1014,10 @@ public class Scene extends Graph {
     _backBuffer().beginDraw();
     // TODO seems style is not require since it should be absorbed by the shader
     //_backBuffer().pushStyle();
-    if (_lastInitBackBuffer != TimingHandler.frameCount) {
-      // TODO restore background
-      //_backBuffer().background(0);
-      // debugging multirender
-      _backBuffer().background(255);
-      _lastInitBackBuffer = TimingHandler.frameCount;
-    }
+    // TODO restore background
+    //_backBuffer().background(0);
+    // debugging multirender
+    _backBuffer().background(255);
   }
 
   @Override
@@ -1074,9 +1062,6 @@ public class Scene extends Graph {
   protected void _endFrontBuffer() {
     if (isOffscreen()) {
       context().endDraw();
-      if (_lastRendered == TimingHandler.frameCount) {
-        _renderBackBuffer();
-      }
     }
   }
 

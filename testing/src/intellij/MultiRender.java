@@ -1,16 +1,13 @@
 package intellij;
 
 import nub.core.Node;
-import nub.primitives.Quaternion;
-import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;
-import processing.event.MouseEvent;
-import processing.opengl.PGraphics2D;
 import processing.opengl.PShader;
+
+import java.util.ArrayList;
 
 /**
  * This example introduces the three different interpolations offered
@@ -23,6 +20,8 @@ public class MultiRender extends PApplet {
   PGraphics fb, bb;
   int fbID, bbID;
   boolean io;
+  Handler handler;
+  ArrayList<Rayo> rayos, cacheRayos;
 
   boolean onscreen = false;
   //Choose P3D for a 3D scene, or P2D for a 2D one
@@ -34,6 +33,9 @@ public class MultiRender extends PApplet {
 
   public void setup() {
     //scene = new Scene(this, 150);
+    cacheRayos = new ArrayList<Rayo>();
+    handler = new Handler();
+    registerMethod("draw", handler);
     fb = createGraphics(300, 300, P2D);
     fbID = (int) random(0, 16777216);
     bb = createGraphics(300, 300, P2D);
@@ -137,6 +139,10 @@ public class MultiRender extends PApplet {
     bb.updatePixels();
   }
 
+  public void mouseMoved() {
+    cacheRayos.add(new Rayo("mouse", mouseX, mouseY));
+  }
+
   /*
   public void mouseMoved() {
     scene.tag();
@@ -170,6 +176,25 @@ public class MultiRender extends PApplet {
     }
     if (key == '3') {
       io = !io;
+    }
+  }
+
+  protected class Handler {
+    public void draw() {
+      rayos = new ArrayList<Rayo>(cacheRayos);
+      cacheRayos.clear();
+      println(rayos.size() + " " + cacheRayos.size());
+    }
+  }
+
+  protected class Rayo {
+    public String _tag;
+    public int _pixelX, _pixelY;
+
+    Rayo(String tag, int pixelX, int pixelY) {
+      _tag = tag;
+      _pixelX = pixelX;
+      _pixelY = pixelY;
     }
   }
 
