@@ -9,9 +9,12 @@
  * right mouse button. Use also the arrow keys to select and move the sphere.
  * See how the boxes will always remain oriented towards the sphere.
  *
- * Press ' ' the change the picking policy.
+ * Press ' ' to change the picking policy.
  * Press 'c' to change the bullseye space.
  * Press 'd' to change the bullseye shape.
+ * Press 's' to animate to fit scene.
+ * Press 'S' to fit scene.
+ * Press 'u' to toggle interaction between the sphere and the boxes.
  */
 
 import nub.primitives.*;
@@ -34,7 +37,7 @@ void setup() {
   cajas = new Node[15];
   for (int i = 0; i < cajas.length; i++) {
     cajas[i] = new Node(caja(random(10, 40), random(10, 40), random(10, 40)));
-    cajas[i].togglePicking(Node.SHAPE);
+    cajas[i].togglePicking(Node.SHAPE | Node.AXES);
     cajas[i].enableHint(Node.AXES | Node.BULLSEYE);
     scene.setVisit(cajas[i], (Node node) -> {
       Vector to = Vector.subtract(esfera.position(), node.position());
@@ -92,8 +95,10 @@ void mouseWheel(MouseEvent event) {
 
 void keyPressed() {
   if (key == ' ') {
-    for (Node caja : cajas)
-      caja.togglePicking(Node.BULLSEYE | Node.SHAPE);
+    for (Node caja : cajas) {
+      caja.togglePicking(Node.BULLSEYE | Node.SHAPE | Node.AXES);
+      caja.toggleHint(Node.BULLSEYE);
+    }
   }
   if (key == 'c') {
     for (Node caja : cajas)
@@ -108,14 +113,6 @@ void keyPressed() {
       caja.configHint(Node.BULLSEYE, circle ?
         Node.BullsEyeShape.CIRCLE :
         Node.BullsEyeShape.SQUARE);
-  }
-  if (key == 'a') {
-    for (Node caja : cajas)
-      caja.toggleHint(Node.AXES);
-  }
-  if (key == 'p') {
-    for (Node caja : cajas)
-      caja.toggleHint(Node.BULLSEYE);
   }
   if (key == 'e') {
     scene.togglePerspective();

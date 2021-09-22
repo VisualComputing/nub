@@ -48,6 +48,7 @@ void setup() {
       pg.box(80);
       pg.popStyle();
     });
+    shapes[i].setHighlight(0);
     scene.randomize(shapes[i]);
   }
   // light
