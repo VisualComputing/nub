@@ -15,6 +15,7 @@
 package nub.processing;
 
 import nub.core.Graph;
+import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
@@ -109,7 +110,10 @@ public class Scene extends Graph {
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   public static PApplet pApplet;
 
-  // _bb : picking buffer
+  protected PGraphics _ibb, _obb, _bb1, _bb2;
+  protected MatrixHandler _bb1MatrixHandler, _bb2MatrixHandler;
+
+  // picking buffer
   protected PShader _triangleShader, _lineShader, _pointShader;
 
   // mouse speed
@@ -280,14 +284,17 @@ public class Scene extends Graph {
       _matrixHandler = new GLMatrixHandler((PGraphicsOpenGL) pGraphics);
     else
       throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
-    _bb = pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D);
-    _bbMatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb);
+    _bb1 = pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D);
+    _bb1MatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb1);
+    _bb2 = pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D);
+    _bb2MatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb2);
     if (!_offscreen && _onscreenGraph == null)
       _onscreenGraph = this;
     // 2. Back buffer
     // is noSmooth absorbed by the line shader
     // looks safer to call it though
-    _backBuffer().noSmooth();
+    _bb1.noSmooth();
+    _bb2.noSmooth();
     _triangleShader = pApplet.loadShader("Picking.frag");
     _lineShader = pApplet.loadShader("Picking.frag", "LinePicking.vert");
     _pointShader = pApplet.loadShader("Picking.frag", "PointPicking.vert");
@@ -525,6 +532,10 @@ public class Scene extends Graph {
     if (!isOffscreen()) {
       closeContext();
     }
+    // swap back buffers
+    _ibb = _ibb == _bb1 ? _bb2 : _bb1;
+    _obb = _ibb == _bb1 ? _bb2 : _bb1;
+    _bbMatrixHandler = _ibb == _bb1 ? _bb1MatrixHandler : _bb2MatrixHandler;
     _renderBackBuffer();
   }
 
@@ -841,15 +852,15 @@ public class Scene extends Graph {
   }
 
   /**
-   * Display the {@link #_backBuffer()} used for picking at screen coordinates
+   * Display the back buffer used for picking at screen coordinates
    * on top of the main sketch canvas at the upper left corner:
    * {@code (pixelX, pixelY)}. Mainly for debugging.
    */
   protected void _imageBackBuffer(int pixelX, int pixelY) {
-    if (_backBuffer() != null) {
+    if (_obb != null) {
       pApplet.pushStyle();
       pApplet.imageMode(PApplet.CORNER);
-      pApplet.image(_backBuffer(), pixelX, pixelY);
+      pApplet.image(_obb, pixelX, pixelY);
       pApplet.popStyle();
     }
   }
@@ -1002,23 +1013,18 @@ public class Scene extends Graph {
     if (!node.tagging)
       return false;
     int index = pixelY * width() + pixelX;
-    if (_backBuffer().pixels != null)
-      if ((0 <= index) && (index < _backBuffer().pixels.length))
-        return _backBuffer().pixels[index] == node.colorID();
+    if (_obb.pixels != null)
+      if ((0 <= index) && (index < _obb.pixels.length))
+        return _obb.pixels[index] == node.colorID();
     return false;
   }
 
   @Override
-  protected PGraphics _backBuffer() {
-    return (PGraphics) _bb;
-  }
-
-  @Override
   protected void _initBackBuffer() {
-    _backBuffer().beginDraw();
+    _ibb.beginDraw();
     // TODO seems style is not require since it should be absorbed by the shader
     //_backBuffer().pushStyle();
-    _backBuffer().background(0);
+    _ibb.background(0);
   }
 
   @Override
@@ -1029,18 +1035,18 @@ public class Scene extends Graph {
         if (_rendered(node)) {
           if (node.isPickingEnabled(Node.HUD)) {
             _emitBackBufferUniforms(node);
-            _backBuffer().pushMatrix();
+            _ibb.pushMatrix();
             Vector location = screenLocation(node);
             if (location != null) {
-              _backBuffer().translate(location.x(), location.y());
+              _ibb.translate(location.x(), location.y());
               if (_imrHUD(node) != null) {
-                _imrHUD(node).accept(_backBuffer());
+                _imrHUD(node).accept(_ibb);
               }
               if (_rmrHUD(node) != null) {
-                _backBuffer().shape(_rmrHUD(node));
+                _ibb.shape(_rmrHUD(node));
               }
             }
-            _backBuffer().popMatrix();
+            _ibb.popMatrix();
           }
         }
       }
@@ -1048,8 +1054,8 @@ public class Scene extends Graph {
     }
     // TODO seems style is not require since it should be absorbed by the shader
     //_backBuffer().popStyle();
-    _backBuffer().endDraw();
-    _backBuffer().loadPixels();
+    _ibb.endDraw();
+    _ibb.loadPixels();
   }
 
   @Override
@@ -1076,9 +1082,9 @@ public class Scene extends Graph {
     float r = Node.redID(id);
     float g = Node.greenID(id);
     float b = Node.blueID(id);
-    _backBuffer().shader(_triangleShader);
-    _backBuffer().shader(_lineShader, PApplet.LINES);
-    _backBuffer().shader(_pointShader, PApplet.POINTS);
+    _ibb.shader(_triangleShader);
+    _ibb.shader(_lineShader, PApplet.LINES);
+    _ibb.shader(_pointShader, PApplet.POINTS);
     _triangleShader.set("id", new PVector(r, g, b));
     _lineShader.set("id", new PVector(r, g, b));
     _pointShader.set("id", new PVector(r, g, b));
@@ -1227,34 +1233,33 @@ public class Scene extends Graph {
   @Override
   protected void _displayBackHint(Node node) {
     _emitBackBufferUniforms(node);
-    PGraphics pg = _backBuffer();
     if (node.isHintEnabled(Node.SHAPE) && node.isPickingEnabled(Node.SHAPE)) {
       if (_rmrShape(node) != null) {
-        pg.shapeMode(pg.shapeMode);
-        pg.shape(_rmrShape(node));
+        _ibb.shapeMode(_ibb.shapeMode);
+        _ibb.shape(_rmrShape(node));
       }
       if (_imrShape(node) != null) {
-        _imrShape(node).accept(pg);
+        _imrShape(node).accept(_ibb);
       }
     }
     if (node.isHintEnabled(Node.TORUS) && node.isPickingEnabled(Node.TORUS)) {
-      drawTorusSolenoid(pg, _torusFaces(node), 5);
+      drawTorusSolenoid(_ibb, _torusFaces(node), 5);
     }
     if (node.isHintEnabled(Node.BOUNDS) && node.isPickingEnabled(Node.BOUNDS)) {
       for (Graph graph : _frustumGraphs(node)) {
         if (graph != this) {
-          drawFrustum(pg, graph);
+          drawFrustum(_ibb, graph);
         }
       }
     }
     if (node.isHintEnabled(Node.AXES) && node.isPickingEnabled(Node.AXES)) {
-      pg.pushStyle();
-      pg.strokeWeight(6);
-      drawAxes(pg, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
-      pg.popStyle();
+      _ibb.pushStyle();
+      _ibb.strokeWeight(6);
+      drawAxes(_ibb, _axesLength(node) == 0 ? _radius / 5 : _axesLength(node));
+      _ibb.popStyle();
     }
     if (node.isHintEnabled(Node.CAMERA) && node.isPickingEnabled(Node.CAMERA)) {
-      _drawEye(pg, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
+      _drawEye(_ibb, _cameraLength(node) == 0 ? _radius : _cameraLength(node));
     }
   }
 

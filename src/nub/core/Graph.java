@@ -132,7 +132,7 @@ public class Graph {
   protected boolean _offscreen;
 
   // 0. Contexts
-  protected Object _bb, _fb;
+  protected Object _fb;
   protected ArrayList<Node> _subtrees;
   protected boolean _bbNeed;
   // 1. Eye
@@ -161,7 +161,7 @@ public class Graph {
   protected int _renderCount;
   protected int _width, _height;
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
-  // _bb : picking buffer
+  // picking buffer
   public boolean picking;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected long _cacheProjectionViewInverse;
@@ -227,7 +227,7 @@ public class Graph {
   public static boolean _seeded;
   protected boolean _seededGraph;
   protected HashMap<String, Node> _tags;
-  protected ArrayList<Ray> _cacheRays, _rays;
+  protected ArrayList<Ray> _rays;
 
   // 4. Graph
   protected static List<Node> _seeds = new ArrayList<Node>();
@@ -428,12 +428,11 @@ public class Graph {
     }
     _fb = context;
     _matrixHandler = new MatrixHandler();
-    _bbMatrixHandler = new MatrixHandler();
     _subtrees = new ArrayList<Node>();
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
-    _cacheRays = new ArrayList<Ray>();
+    _rays = new ArrayList<Ray>();
     _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
     if (eye == null) {
       throw new RuntimeException("Error eye shouldn't be null");
@@ -2364,7 +2363,7 @@ public class Graph {
    * Condition for the node back picking.
    */
   protected boolean _backPicking(Node node) {
-    return picking && node.tagging == true && !isEye(node) && _bb != null && (
+    return picking && node.tagging == true && !isEye(node) && (
         (node.isPickingEnabled(Node.CAMERA) && node.isHintEnabled(Node.CAMERA)) ||
             (node.isPickingEnabled(Node.AXES) && node.isHintEnabled(Node.AXES)) ||
             (node.isPickingEnabled(Node.HUD) && node.isHintEnabled(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
@@ -2472,7 +2471,7 @@ public class Graph {
    * @see #tag(int, int)
    */
   public void tag(String tag, int pixelX, int pixelY) {
-    _cacheRays.add(new Ray(tag, pixelX, pixelY));
+    _rays.add(new Ray(tag, pixelX, pixelY));
   }
 
   // Off-screen
@@ -2506,14 +2505,6 @@ public class Graph {
    */
   public Object context() {
     return _fb;
-  }
-
-  /**
-   * Returns the back buffer, used for
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>. Maybe {@code null}
-   */
-  protected Object _backBuffer() {
-    return _bb;
   }
 
   protected void _initBackBuffer() {}
@@ -2688,7 +2679,7 @@ public class Graph {
         _render(node);
       }
     } else if (subtree.isAttached()) {
-      if (picking && _bb != null) {
+      if (picking) {
         _subtrees.add(subtree);
       }
       if (subtree.reference() != null) {
@@ -2781,8 +2772,6 @@ public class Graph {
           _bbNeed = true;
         }
         node._cacheRendered(this);
-        _trackFrontBuffer(node);
-        _trackBackBuffer(node);
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
           _matrixHandler.pushMatrix();
           float scl = 1 + node._highlight;
@@ -2802,12 +2791,12 @@ public class Graph {
 
   /**
    * Internal use. Traverse the scene {@link #nodes()}) into the
-   * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
+   * back-buffer to perform picking on the scene {@link #nodes()}.
    * Use it as a {@code _postDraw()}.
    */
   protected void _renderBackBuffer() {
     if (_lastRendered == TimingHandler.frameCount && _bbNeed) {
-      if (picking && _bb != null) {
+      if (picking) {
         _initBackBuffer();
         _bbMatrixHandler.bind(projection(), view());
         if (_subtrees.isEmpty()) {
@@ -2833,8 +2822,7 @@ public class Graph {
         _endBackBuffer();
       }
     }
-    _rays = _cacheRays.size() > 1 ? new ArrayList<Ray>(_cacheRays) : null;
-    _cacheRays.clear();
+    _rays.clear();
   }
 
   /**
@@ -2843,8 +2831,12 @@ public class Graph {
   protected void _renderBackBuffer(Node node) {
     _bbMatrixHandler.pushMatrix();
     _bbMatrixHandler.applyTransformation(node);
-    if (node._rendered(this) && _backPicking(node)) {
-      _displayBackHint(node);
+    if (node._rendered(this)) {
+      _trackFrontBuffer(node);
+      if (_backPicking(node)) {
+        _displayBackHint(node);
+        _trackBackBuffer(node);
+      }
     }
     if (!node.cull) {
       for (Node child : node.children())
@@ -2890,7 +2882,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (_frontPicking(node) && _rays!= null) {
+    if (_frontPicking(node) && _rays != null) {
       if (!_rays.isEmpty()) {
         Vector projection = screenLocation(node.worldPosition());
         Iterator<Ray> it = _rays.iterator();
@@ -2910,7 +2902,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
-    if (_backPicking(node) && _rays!= null) {
+    if (_backPicking(node) && _rays != null) {
       if (!_rays.isEmpty()) {
         Iterator<Ray> it = _rays.iterator();
         while (it.hasNext()) {
