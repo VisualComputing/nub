@@ -227,7 +227,7 @@ public class Graph {
   public static boolean _seeded;
   protected boolean _seededGraph;
   protected HashMap<String, Node> _tags;
-  protected ArrayList<Ray> _cacheRays, _rays;
+  protected ArrayList<Ray> _i1rays, _i2rays, _irays, _orays;
 
   // 4. Graph
   protected static List<Node> _seeds = new ArrayList<Node>();
@@ -433,7 +433,11 @@ public class Graph {
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
-    _cacheRays = new ArrayList<Ray>();
+    _i1rays = new ArrayList<Ray>();
+    _i2rays = new ArrayList<Ray>();
+    _irays = _i1rays;
+    // dummy
+    _orays = _i2rays;
     _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
     if (eye == null) {
       throw new RuntimeException("Error eye shouldn't be null");
@@ -2472,7 +2476,7 @@ public class Graph {
    * @see #tag(int, int)
    */
   public void tag(String tag, int pixelX, int pixelY) {
-    _cacheRays.add(new Ray(tag, pixelX, pixelY));
+    _irays.add(new Ray(tag, pixelX, pixelY));
   }
 
   // Off-screen
@@ -2806,6 +2810,10 @@ public class Graph {
    * Use it as a {@code _postDraw()}.
    */
   protected void _renderBackBuffer() {
+    // swap rays
+    _orays.clear();
+    _orays = _irays;
+    _irays = _irays == _i1rays ? _i2rays : _i1rays;
     if (_lastRendered == TimingHandler.frameCount && _bbNeed) {
       if (picking && _bb != null) {
         _initBackBuffer();
@@ -2833,8 +2841,6 @@ public class Graph {
         _endBackBuffer();
       }
     }
-    _rays = _cacheRays.size() > 1 ? new ArrayList<Ray>(_cacheRays) : null;
-    _cacheRays.clear();
   }
 
   /**
@@ -2890,10 +2896,10 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (_frontPicking(node) && _rays!= null) {
-      if (!_rays.isEmpty()) {
+    if (_frontPicking(node) && _orays != null) {
+      if (!_orays.isEmpty()) {
         Vector projection = screenLocation(node.worldPosition());
-        Iterator<Ray> it = _rays.iterator();
+        Iterator<Ray> it = _orays.iterator();
         while (it.hasNext()) {
           Ray ray = it.next();
           removeTag(ray._tag);
@@ -2907,12 +2913,12 @@ public class Graph {
   }
 
   /**
-   * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
+   * Internally used by {@link #_render(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
-    if (_backPicking(node) && _rays!= null) {
-      if (!_rays.isEmpty()) {
-        Iterator<Ray> it = _rays.iterator();
+    if (_backPicking(node) && _orays != null) {
+      if (!_orays.isEmpty()) {
+        Iterator<Ray> it = _orays.iterator();
         while (it.hasNext()) {
           Ray ray = it.next();
           removeTag(ray._tag);
