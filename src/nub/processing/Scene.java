@@ -27,6 +27,8 @@ import processing.opengl.*;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -501,6 +503,7 @@ public class Scene extends Graph {
     // safer
     _subtrees.clear();
     _bbNeed = false;
+    _cacheHUDs = new HashSet<Node>(_huds);
     _resize();
     if (!isOffscreen()) {
       openContext();
@@ -1020,9 +1023,9 @@ public class Scene extends Graph {
 
   @Override
   protected void _endBackBuffer() {
-    if (!_hudSet.isEmpty()) {
+    if (!_huds.isEmpty()) {
       _bbMatrixHandler.beginHUD(width(), height());
-      for (Node node : _hudSet) {
+      for (Node node : _huds) {
         if (_rendered(node)) {
           if (node.isPickingEnabled(Node.HUD)) {
             _emitBackBufferUniforms(node);
@@ -1083,25 +1086,26 @@ public class Scene extends Graph {
 
   @Override
   protected void _displayHUD() {
-    if (!_hudSet.isEmpty()) {
+    if (!_cacheHUDs.isEmpty()) {
       context().pushStyle();
       beginHUD();
-      if (!_hudSet.isEmpty()) {
-        for (Node node : _hudSet) {
-          if (_rendered(node) && node.isHintEnabled(Node.HUD)) {
-            context().pushMatrix();
-            Vector location = screenLocation(node);
-            if (location != null) {
-              context().translate(location.x(), location.y());
-              if (_imrHUD(node) != null) {
-                _imrHUD(node).accept(context());
-              }
-              if (_rmrHUD(node) != null) {
-                context().shape(_rmrHUD(node));
-              }
+      Iterator<Node> iterator = _cacheHUDs.iterator();
+      while(iterator.hasNext()) {
+        Node node = iterator.next();
+        if (_rendered(node) && node.isHintEnabled(Node.HUD)) {
+          context().pushMatrix();
+          Vector location = screenLocation(node);
+          if (location != null) {
+            context().translate(location.x(), location.y());
+            if (_imrHUD(node) != null) {
+              _imrHUD(node).accept(context());
             }
-            context().popMatrix();
+            if (_rmrHUD(node) != null) {
+              context().shape(_rmrHUD(node));
+            }
           }
+          context().popMatrix();
+          iterator.remove();
         }
       }
       endHUD();

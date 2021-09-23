@@ -901,7 +901,7 @@ public class Node {
         descendant._registerTasks();
         // restore interpolators and hud sets
         if (descendant.isHintEnabled(Node.HUD)) {
-          Graph._hudSet.add(descendant);
+          Graph._huds.add(descendant);
         }
         if (descendant.isHintEnabled(Node.KEYFRAMES)) {
           Graph._interpolators.add(descendant);
@@ -931,7 +931,7 @@ public class Node {
       for (Node descendant : branch) {
         descendant._unregisterTasks();
         // remove also possible references to graph interpolators and hud sets
-        Graph._hudSet.remove(this);
+        Graph._huds.remove(this);
         Graph._interpolators.remove(this);
       }
       if (reference() != null) {
@@ -3053,9 +3053,9 @@ public class Node {
 
   protected void _updateHUD() {
     if ((_rmrHUD == null && _imrHUD == null) || !isHintEnabled(HUD)) {
-      Graph._hudSet.remove(this);
+      Graph._huds.remove(this);
     } else {
-      Graph._hudSet.add(this);
+      Graph._huds.add(this);
     }
   }
 

@@ -119,7 +119,8 @@ import java.util.function.Consumer;
 public class Graph {
   protected static Graph _onscreenGraph;
   public static Random random = new Random();
-  protected static HashSet<Node> _hudSet = new HashSet<Node>();
+  protected static HashSet<Node> _huds = new HashSet<Node>();
+  protected HashSet<Node> _cacheHUDs;
   protected static HashSet<Node> _interpolators = new HashSet<Node>();
 
   // Custom render
