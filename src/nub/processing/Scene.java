@@ -498,6 +498,8 @@ public class Scene extends Graph {
     if (_seededGraph) {
       TimingHandler.handle();
     }
+    // safer
+    _subtrees.clear();
     _bbNeed = false;
     _resize();
     if (!isOffscreen()) {

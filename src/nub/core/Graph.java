@@ -132,6 +132,7 @@ public class Graph {
 
   // 0. Contexts
   protected Object _bb, _fb;
+  protected ArrayList<Node> _subtrees;
   protected boolean _bbNeed;
   // 1. Eye
   protected Node _eye;
@@ -427,6 +428,7 @@ public class Graph {
     _fb = context;
     _matrixHandler = new MatrixHandler();
     _bbMatrixHandler = new MatrixHandler();
+    _subtrees = new ArrayList<Node>();
     setWidth(width);
     setHeight(height);
     _tags = new HashMap<String, Node>();
@@ -2677,7 +2679,7 @@ public class Graph {
    */
   public void render(Node subtree) {
     if (_renderCount != 1) {
-      throw new RuntimeException("Error: context should be open (once and only once) before render!");
+      throw new RuntimeException("Error: context should be open before render offscreen scenes!");
     }
     _lastRendered = TimingHandler.frameCount;
     if (subtree == null) {
@@ -2685,6 +2687,9 @@ public class Graph {
         _render(node);
       }
     } else if (subtree.isAttached()) {
+      if (picking && _bb != null) {
+        _subtrees.add(subtree);
+      }
       if (subtree.reference() != null) {
         _matrixHandler.pushMatrix();
         _matrixHandler.applyWorldTransformation(subtree.reference());
@@ -2804,8 +2809,25 @@ public class Graph {
       if (picking && _bb != null) {
         _initBackBuffer();
         _bbMatrixHandler.bind(projection(), view());
-        for (Node node : _leadingNodes()) {
-          _renderBackBuffer(node);
+        if (_subtrees.isEmpty()) {
+          for (Node node : _leadingNodes()) {
+            _renderBackBuffer(node);
+          }
+        }
+        else {
+          Iterator<Node> iterator = _subtrees.iterator();
+          while (iterator.hasNext()) {
+            Node subtree = iterator.next();
+            if (subtree.reference() != null) {
+              _bbMatrixHandler.pushMatrix();
+              _bbMatrixHandler.applyWorldTransformation(subtree.reference());
+            }
+            _renderBackBuffer(subtree);
+            if (subtree.reference() != null) {
+              _bbMatrixHandler.popMatrix();
+            }
+            iterator.remove();
+          }
         }
         _endBackBuffer();
       }

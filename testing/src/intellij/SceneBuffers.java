@@ -28,6 +28,8 @@ public class SceneBuffers extends PApplet {
     //scene = new Scene(this, 1200);
     cajas = new Node();
     bolas = new Node();
+    scene.randomize(cajas);
+    scene.randomize(bolas);
     shapes = new Node[10];
     for (int i = 0; i < shapes.length; i++) {
       if (i%2==0) {
@@ -70,12 +72,12 @@ public class SceneBuffers extends PApplet {
     scene.context().background(125);
     scene.drawAxes();
     scene.render(cajas);
-    scene.render(bolas);
+    //scene.render(bolas);
     scene.closeContext();
-    scene.image();
+    //scene.image();
     // */
 
-    /*
+    // /*
     scene.openContext();
     //scene.context().background(125);
     //scene.drawAxes();
