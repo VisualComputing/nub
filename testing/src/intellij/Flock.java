@@ -41,12 +41,10 @@ public class Flock extends PApplet {
   }
 
   public void draw() {
-    scene.openContext();
     background(10, 50, 25);
     ambientLight(128, 128, 128);
     directionalLight(255, 255, 255, 0, 1, -100);
     walls();
-    scene.closeContext();
     scene.render();
     // uncomment to asynchronously update boid avatar. See mouseClicked()
     // updateAvatar(scene.node("mouseClicked"));
