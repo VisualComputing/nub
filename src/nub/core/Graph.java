@@ -2520,6 +2520,53 @@ public class Graph {
     return _bb;
   }
 
+  /**
+   * Paint method which is called just before your main event loop starts.
+   * Handles timing tasks (see {@link TimingHandler#handle()}), resize events, prepares
+   * caches, and opens the context if the scene is onscreen.
+   * <p>
+   * This method should be registered at the PApplet (which requires it to be public and named
+   * as pre) and hence you don't need to call it.
+   *
+   * @see TimingHandler#handle()
+   * @see #draw()
+   * @see #render()
+   * @see #isOffscreen()
+   */
+  public void pre() {
+    if (_seededGraph) {
+      TimingHandler.handle();
+    }
+    // safer to always free subtrees cache
+    _subtrees.clear();
+    _bbNeed = false;
+    _cacheHUDs = new HashSet<Node>(_huds);
+    _resize();
+    if (!isOffscreen()) {
+      openContext();
+    }
+  }
+
+  /**
+   * Paint method which is called just after your main event loop. Closes the context if the scene
+   * is oncreen and renders when needed the back buffer (useful for picking).
+   * <p>
+   * This method should be registered at the PApplet (which requires it to be pubic and be named
+   * as draw) and hence you don't need to call it.
+   *
+   * @see #pre()
+   * @see #render()
+   * @see #isOffscreen()
+   */
+  public void draw() {
+    if (!isOffscreen()) {
+      closeContext();
+    }
+    _renderBackBuffer();
+  }
+
+  protected void _resize() {}
+
   protected void _initBackBuffer() {}
 
   protected void _endBackBuffer() {}

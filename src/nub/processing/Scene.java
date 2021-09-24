@@ -487,50 +487,9 @@ public class Scene extends Graph {
   //protected abstract void drawPointUnderPixelHint();
 
   /**
-   * Paint method which is called just before your {@code PApplet.draw()} method.
-   * Handles timing tasks (see {@link TimingHandler#handle()}) and resize events.
-   * This method is registered at the PApplet and hence you don't need to call it.
-   *
-   * @see TimingHandler#handle()
-   * @see #draw()
-   * @see #render()
-   * @see #isOffscreen()
-   */
-  public void pre() {
-    if (_seededGraph) {
-      TimingHandler.handle();
-    }
-    // safer
-    _subtrees.clear();
-    _bbNeed = false;
-    _cacheHUDs = new HashSet<Node>(_huds);
-    _resize();
-    if (!isOffscreen()) {
-      openContext();
-    }
-  }
-
-  /**
-   * Paint method which is called just after your {@code PApplet.draw()} method. Simply
-   * render the back buffer (useful for picking). This method is registered at the PApplet
-   * and hence you don't need to call it. Only meaningful if the graph is on-screen
-   * <p>
-   * If {@link #isOffscreen()} does nothing.
-   *
-   * @see #pre()
-   * @see #render()
-   * @see #isOffscreen()
-   */
-  public void draw() {
-    if (!isOffscreen()) {
-      closeContext();
-    }
-    _renderBackBuffer();
-  }
-
-  /**
    * Handles resizes events to update the scene {@link #width()} and {@link #height()}.
    */
+  @Override
   protected void _resize() {
     if (isOffscreen())
       return;
