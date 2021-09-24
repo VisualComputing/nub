@@ -2855,7 +2855,6 @@ public class Graph {
   /**
    * Internal use. Traverse the scene {@link #nodes()}) into the
    * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
-   * Use it as a {@code _postDraw()}.
    */
   protected void _renderBackBuffer() {
     // swap rays
