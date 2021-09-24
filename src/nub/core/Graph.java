@@ -2668,7 +2668,8 @@ public class Graph {
   /**
    * Calls {@link #openContext()}, then renders the node {@code subtree} (or the whole tree
    * when {@code subtree} is {@code null}) onto the {@link #context()} from the {@link #eye()}
-   * viewpoint, and calls {@link #closeContext()}. After issuing a render command you'll be left out
+   * viewpoint, and calls {@link #closeContext()}. All rendered nodes are marked as such
+   * ({@link Node#rendered(Graph)}). After issuing a render command you'll be left out
    * at the world coordinate system. If the scene is offscreen this method should be called
    * within {@link #openContext()} and {@link #closeContext()}.
    *
@@ -2849,7 +2850,7 @@ public class Graph {
   protected void _renderBackBuffer(Node node) {
     _bbMatrixHandler.pushMatrix();
     _bbMatrixHandler.applyTransformation(node);
-    if (node._rendered(this) && _backPicking(node)) {
+    if (node.rendered(this) && _backPicking(node)) {
       _displayBackHint(node);
     }
     if (!node.cull) {
@@ -4054,7 +4055,7 @@ public class Graph {
     return node._boundsWeight;
   }
 
-  protected boolean _rendered(Node node) { return node._rendered(this); }
+  protected boolean _rendered(Node node) { return node.rendered(this); }
 
   // Interpolator
 

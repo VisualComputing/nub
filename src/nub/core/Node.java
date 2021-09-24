@@ -843,10 +843,10 @@ public class Node {
   }
 
   /**
-   * Used by the last time {@link #_rendered(Graph)} condition.
+   * Used by the last time {@link #rendered(Graph)} condition.
    */
   protected void _cacheRendered(Graph graph) {
-    if (_rendered(graph)) {
+    if (rendered(graph)) {
       throw new RuntimeException("Node already rendered. Exiting now!");
     }
     if (_lastRendered != TimingHandler.frameCount) {
@@ -857,9 +857,11 @@ public class Node {
   }
 
   /**
-   * Tells whether was the node rendered in the last frame.
+   * Tells whether the node was rendered in the last frame from {@code graph} after
+   * a call to {@link Graph#render(Node)} is issued. Ths method should be called from
+   * within the main event loop (after {@link Graph#render(Node)}).
    */
-  protected boolean _rendered(Graph graph) {
+  public boolean rendered(Graph graph) {
     return _lastRenderedSet.contains(graph) && _lastRendered == TimingHandler.frameCount;
   }
 

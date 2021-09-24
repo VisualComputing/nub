@@ -84,7 +84,7 @@ void mouseWheel(MouseEvent event) {
 
 void keyPressed() {
   if (key == 'a') {
-    for (int i = 0; i < shapes.length; i++) 
+    for (int i = 0; i < shapes.length; i++)
       shapes[i].toggleHint(Node.AXES);
   }
 }
