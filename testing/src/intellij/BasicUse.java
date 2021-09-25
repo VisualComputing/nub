@@ -26,7 +26,7 @@ public class BasicUse extends PApplet {
 
   public void setup() {
     scene = new Scene(this, 150);
-    scene.fit(1);
+    scene.fit(1000);
     //node = new Node();
     node = new Node((pg) -> {
       pg.pushStyle();
@@ -137,7 +137,7 @@ public class BasicUse extends PApplet {
       node.toggleHint(Node.BONE);
 
     if (key == 's')
-      scene.fit(1);
+      scene.fit(1000);
     if (key == 'f')
       scene.fit();
 

@@ -62,7 +62,7 @@ public class NodeAPI2 extends PApplet {
     scene = new Scene(this, 200);
     mode = Mode.m1;
 
-    scene.fit(1);
+    scene.fit(1000);
 
     f1 = new InteractiveNode(scene, f1Color);
     f1.translate(-50, -20, 30);

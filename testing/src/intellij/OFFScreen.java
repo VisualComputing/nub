@@ -24,7 +24,7 @@ public class OFFScreen extends PApplet {
     //scene = new Scene(this, createGraphics(1300, 900, renderer));
     scene = new Scene(createGraphics(800, 600, P3D), 300);
     scene.setFOV(PI / 3);
-    scene.fit(1);
+    scene.fit(1000);
 
     shape1 = new Node((PGraphics pGraphics) -> {
       Scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -88,7 +88,7 @@ public class OFFScreen extends PApplet {
     if (key == 'f')
       Scene.leftHanded = !Scene.leftHanded;
     if (key == 's')
-      scene.fit(1);
+      scene.fit(1000);
     if (key == 'f')
       scene.fit();
   }

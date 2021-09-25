@@ -43,7 +43,7 @@ public class SceneBuffers extends PApplet {
       shapes[i].enableHint(Node.AXES);
       shapes[i].setHUD(this::hud);
     }
-    scene.fit(1);
+    scene.fit(1000);
   }
 
   public void hud(PGraphics pg) {

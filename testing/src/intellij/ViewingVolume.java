@@ -112,7 +112,7 @@ public class ViewingVolume extends PApplet {
       Scene.leftHanded = !Scene.leftHanded;
     }
     if (key == 's')
-      scene1.fit(1);
+      scene1.fit(1000);
     if (key == '1')
       scene1.fitFOV(1);
     if (key == '2')

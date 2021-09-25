@@ -48,7 +48,7 @@ void setup() {
   // Create an initial shape interpolator path
   for (int i = 0; i < random(4, 10); i++) {
     scene.randomize(shape);
-    shape.addKeyFrame(Node.AXES | Node.SHAPE | Node.HUD, i % 2 == 1 ? 1 : 4);
+    shape.addKeyFrame(Node.AXES | Node.SHAPE | Node.HUD, i % 2 == 1 ? 1000 : 4000);
   }
   shape.animate();
   scene.eye().enableHint(Node.KEYFRAMES);
@@ -103,11 +103,11 @@ void keyPressed() {
     shape.animate(speed);
   }
   if (key == '1')
-    scene.eye().addKeyFrame(Node.CAMERA | Node.BULLSEYE, 1);
+    scene.eye().addKeyFrame(Node.CAMERA | Node.BULLSEYE, 1000);
   if (key == 'a')
     scene.eye().toggleAnimation();
   if (key == 'b')
     scene.eye().removeKeyFrames();
   if (key == 'f')
-    scene.fit(2);
+    scene.fit(1000);
 }

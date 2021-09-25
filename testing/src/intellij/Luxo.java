@@ -19,7 +19,7 @@ public class Luxo extends PApplet {
   public void setup() {
     scene = new Scene(this);
     //scene.setShape(this::floor);
-    scene.fit(1);
+    scene.fit(1000);
     base = new Node(this::base);
     base.setTranslationFilter(Node.translationPlaneFilter, new Object[] { Vector.plusK });
     base.setRotationFilter(Node.rotationAxisFilter, new Object[] { Vector.plusK });

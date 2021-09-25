@@ -32,7 +32,7 @@ public class NoHint extends PApplet {
     }
     //scene.enableHint(Scene.AXES);
     //scene.enableHint(Scene.BACKGROUND, color(0));
-    //scene.fit(1);
+    //scene.fit(1000);
   }
 
   public void shape() {

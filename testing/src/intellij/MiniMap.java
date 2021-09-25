@@ -31,7 +31,7 @@ public class MiniMap extends PApplet {
     rectMode(CENTER);
     scene = onScreen ? new Scene(this, 1000) : new Scene(createGraphics(w, h, renderer), 1000);
     scene.eye().enableHint(Node.BOUNDS);
-    //scene.fit(1);
+    //scene.fit(1000);
     scene.eye().setBullsEyeSize(50);
     scene.eye().setHighlight(0);
     //scene.eye().enableHint(Node.BULLSEYE);
@@ -52,7 +52,7 @@ public class MiniMap extends PApplet {
     minimap = new Scene(createGraphics(w / 2, h / 2, renderer), 2000);
     if (renderer == P3D)
       minimap.togglePerspective();
-    minimap.fit(1);
+    minimap.fit(1000);
   }
 
   PShape shape() {
@@ -73,7 +73,7 @@ public class MiniMap extends PApplet {
         minimap.untag(scene.eye());
     }
     if (key == 'f')
-      focus.fit(1);
+      focus.fit(1000);
     if (key == 't')
       focus.togglePerspective();
   }

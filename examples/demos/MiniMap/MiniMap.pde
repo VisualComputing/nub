@@ -71,7 +71,7 @@ void keyPressed() {
       minimap.untag(scene.eye());
   }
   if (key == 'f')
-    focus.fit(1);
+    focus.fit(1000);
   if (key == 't')
     focus.togglePerspective();
   if (key == 'p')

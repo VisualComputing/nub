@@ -24,7 +24,7 @@ public class Orbit extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this, 1000);
-    scene.fit(1);
+    scene.fit(1000);
 
     shape1 = new Node((PGraphics pGraphics) -> {
       Scene.drawAxes(pGraphics, scene.radius() / 3);

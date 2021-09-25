@@ -29,7 +29,7 @@ public class PointUnderPixel extends PApplet {
 
   public void setup() {
     scene = offScreen ? new Scene(createGraphics(width, height, P3D), 1000) : new Scene(this, 1000);
-    scene.fit(1);
+    scene.fit(1000);
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
       models[i] = new Node(boxShape());

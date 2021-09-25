@@ -36,7 +36,7 @@ public class CustomEyeInteraction extends PApplet {
     texmap = loadImage("/home/pierre/IdeaProjects/nub/testing/data/globe/world32k.jpg");
     initializeSphere(sDetail);
     scene = new Scene(this, globeRadius * 1.2f);
-    scene.fit(1);
+    scene.fit(1000);
   }
 
   public void draw() {
@@ -93,7 +93,7 @@ public class CustomEyeInteraction extends PApplet {
         node.setPosition(t);
         //node.setYAxis(Vector.subtract(node.position(), scene.anchor()));
         //node.rotate(new Quaternion(a, 0, 0));
-        scene.fit(node, 1);
+        scene.fit(node, 1000);
         // */
         // /*
         Vector t = new Vector(0, 0, 0.7f * globeRadius);
@@ -105,7 +105,7 @@ public class CustomEyeInteraction extends PApplet {
         scene.eye().rotate(new Quaternion(a, 0, 0));
         // */
       } else {
-        scene.fit(1);
+        scene.fit(1000);
         scene.lookAt(scene.center());
       }
     }

@@ -49,15 +49,15 @@ public class Interpolators extends PApplet {
     int count = (int) random(4, 10);
     count = 5;
     for (int i = 0; i < count; i++) {
-      //shape.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+      //shape.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1000 : 4000);
       /*
       Node node = scene.randomNode();
       node.enableHint(Node.BULLSEYE);
-      shape.addKeyFrame(node, i % 2 == 1 ? 1 : 4);
+      shape.addKeyFrame(node, i % 2 == 1 ? 1000 : 4000);
       // */
       // /*
       scene.randomize(shape);
-      shape.addKeyFrame(Node.AXES | Node.SHAPE | Node.HUD, i % 2 == 1 ? 1 : 4);
+      shape.addKeyFrame(Node.AXES | Node.SHAPE | Node.HUD, i % 2 == 1 ? 1000 : 4000);
       // */
     }
     shape.animate();
@@ -167,7 +167,7 @@ public class Interpolators extends PApplet {
     }
 
     if (key == '1') {
-      scene.eye().addKeyFrame(Node.CAMERA | Node.BULLSEYE, 1);
+      scene.eye().addKeyFrame(Node.CAMERA | Node.BULLSEYE, 1000);
     }
     if (key == 'a')
       scene.eye().toggleAnimation();
@@ -175,7 +175,7 @@ public class Interpolators extends PApplet {
       scene.eye().removeKeyFrames();
 
     if (key == 's')
-      scene.fit(1);
+      scene.fit(1000);
     if (key == 'f')
       scene.fit();
     if (key == 'e')

@@ -290,8 +290,8 @@ class Interpolator {
     if ((_speed < 0.0) && (time() <= _list.get(0)._time))
       setTime(_list.get(_list.size() - 1)._time);
     interpolate(time());
-    _t += _speed * _task.period() / 1000.0f;
-    if (time() > _list.get(_list.size() - 1)._time) {
+    _t += _speed * _task.period();
+    if (time() >= _list.get(_list.size() - 1)._time) {
       if (isRecurrent())
         setTime(_list.get(0)._time + _t - _list.get(_list.size() - 1)._time);
       else {
@@ -299,7 +299,7 @@ class Interpolator {
         interpolate(_list.get(_list.size() - 1)._time);
         _task.stop();
       }
-    } else if (time() < _list.get(0)._time) {
+    } else if (time() <= _list.get(0)._time) {
       if (isRecurrent())
         setTime(_list.get(_list.size() - 1)._time - _list.get(0)._time + _t);
       else {
@@ -411,7 +411,7 @@ class Interpolator {
   }
 
   /**
-   * Returns the current interpolation time (in seconds) along the interpolator
+   * Returns the current interpolation time (in milliseconds) along the interpolator
    * path.
    * <p>
    * This time is regularly updated when {@link Task#isActive()}. Can be set
@@ -422,7 +422,7 @@ class Interpolator {
   }
 
   /**
-   * Returns the duration of the interpolator path, expressed in seconds.
+   * Returns the duration of the interpolator path, expressed in milliseconds.
    * <p>
    * Simply corresponds to {@link #lastTime()} - {@link #firstTime()}. Returns 0 if the
    * path has less than 2 keyframes.
@@ -432,7 +432,7 @@ class Interpolator {
   }
 
   /**
-   * Returns the time corresponding to the first keyframe, expressed in seconds.
+   * Returns the time corresponding to the first keyframe, expressed in milliseconds.
    * <p>
    * Returns 0 if the path is empty.
    *
@@ -445,7 +445,7 @@ class Interpolator {
   }
 
   /**
-   * Returns the time corresponding to the last keyframe, expressed in seconds.
+   * Returns the time corresponding to the last keyframe, expressed in milliseconds.
    *
    * @see #firstTime()
    * @see #duration()
@@ -542,7 +542,7 @@ class Interpolator {
   }
 
   /**
-   * Same as {@code addKeyFrame(1)}.
+   * Same as {@code addKeyFrame(1000)}.
    *
    * @see #addKeyFrame(Node, float)
    * @see #addKeyFrame(int, float)
@@ -550,7 +550,7 @@ class Interpolator {
    * @see #addKeyFrame(Node)
    */
   public void addKeyFrame() {
-    addKeyFrame(1);
+    addKeyFrame(1000);
   }
 
   /**
@@ -573,7 +573,7 @@ class Interpolator {
   }
 
   /**
-   * Same as {@code addKeyFrame(node, _list.isEmpty() ? 0.0f : 1.0f)}.
+   * Same as {@code addKeyFrame(node, _list.isEmpty() ? 0.0f : 1000.0f)}.
    *
    * @see #addKeyFrame(Node, float)
    * @see #addKeyFrame(int, float)
@@ -581,11 +581,11 @@ class Interpolator {
    * @see #addKeyFrame()
    */
   public void addKeyFrame(Node node) {
-    addKeyFrame(node, _list.isEmpty() ? 0.0f : 1.0f);
+    addKeyFrame(node, _list.isEmpty() ? 0.0f : 1000.0f);
   }
 
   /**
-   * Appends a new keyframe {@code time} seconds after the previously added one.
+   * Appends a new keyframe {@code time} milliseconds after the previously added one.
    * <p>
    * Note that when {@code node} is modified, the interpolator path is updated accordingly.
    * This allows for dynamic paths, where keyframes can be edited, even during the
@@ -694,7 +694,7 @@ class Interpolator {
   }
 
   /**
-   * Interpolate {@link #node()} at time {@code time} (expressed in seconds).
+   * Interpolate {@link #node()} at time {@code time} (expressed in milliseconds).
    * {@link #time()} is set to {@code time} and {@link #node()} is set accordingly.
    * <p>
    * If you simply want to change {@link #time()} but not the

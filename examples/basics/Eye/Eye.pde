@@ -2,7 +2,7 @@
  * Eye.
  * by Jean Pierre Charalambos.
  *
- * This example illustrates how to setup and use an scene as an eye.
+ * This example illustrates how to setup and use an scene eye.
  *
  * Press '1' to add keyframes to the eye.
  * Press '2' to animate the eye along the keyframes.
@@ -58,7 +58,7 @@ void keyPressed() {
   if (key == '2') {
     scene.eye().animate();
   }
-  if (key == '2') {
+  if (key == '3') {
     scene.eye().removeKeyFrames();
   }
 }

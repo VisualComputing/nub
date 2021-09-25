@@ -1779,8 +1779,8 @@ public class Graph {
   }
 
   /**
-   * Moves the eye during {@code duration} seconds so that the ball defined by {@code center}
-   * and {@code radius} is visible and fits the window.
+   * Moves the eye during {@code duration} milliseconds so that the ball defined by
+   * {@code center} and {@code radius} is visible and fits the window.
    * <p>
    * In 3D the eye is simply translated along its {@link #viewDirection()} so that the
    * ball fits the screen. Its {@link Node#worldOrientation()} and its
@@ -1866,8 +1866,8 @@ public class Graph {
   }
 
   /**
-   * Rescales the {@link #fov()} {@code duration} seconds so that the ball defined by {@code center}
-   * and {@code radius} is visible and fits the window.
+   * Rescales the {@link #fov()} {@code duration} milliseconds so that the ball defined
+   * by {@code center} and {@code radius} is visible and fits the window.
    * <p>
    * The eye position and orientation are not modified and you first have to orientate
    * the eye in order to actually see the scene (see {@link #lookAt(Vector)},
@@ -1957,7 +1957,7 @@ public class Graph {
   }
 
   /**
-   * Smoothly moves the eye during {@code duration} seconds so that the world axis aligned
+   * Smoothly moves the eye during {@code duration} milliseconds so that the world axis aligned
    * box defined by {@code corner1} and {@code corner2} is entirely visible.
    * <p>
    * Note that this is not available when bounds are fixed. Use {@link #setBounds(Vector, float)} instead.
@@ -2025,9 +2025,9 @@ public class Graph {
   }
 
   /**
-   * Smoothly moves the eye during {@code duration} seconds so that the rectangular
-   * screen region defined by {@code rectangle} (pixel units, with origin in the
-   * upper left corner) fits the screen.
+   * Smoothly moves the eye during {@code duration} milliseconds so that the
+   * rectangular screen region defined by {@code rectangle} (pixel units, with
+   * origin in the upper left corner) fits the screen.
    * <p>
    * The eye is translated (its {@link Node#worldOrientation()} is unchanged) so that
    * {@code rectangle} is entirely visible. Since the pixel coordinates only define

@@ -33,7 +33,7 @@ public class ShadowMap extends PApplet {
     depthShader.set("far", zFar);
     shadowMap.shader(depthShader);
     scene = new Scene(this, max(w, h));
-    scene.fit(1);
+    scene.fit(1000);
     shapes = new Node[20];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(this::cube);

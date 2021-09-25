@@ -29,7 +29,7 @@ public class PassiveTransformations extends PApplet {
     });
      */
     graph.setFOV(PI / 3);
-    graph.fit(1);
+    graph.fit(1000);
     nodes = new Node[50];
     for (int i = 0; i < nodes.length; i++) {
       nodes[i] = new Node() {

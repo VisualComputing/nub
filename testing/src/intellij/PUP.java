@@ -25,7 +25,7 @@ public class PUP extends PApplet {
 
   public void setup() {
     scene = new Scene(this, 1000);
-    scene.fit(1);
+    scene.fit(1000);
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
       models[i] = new Node(boxShape());

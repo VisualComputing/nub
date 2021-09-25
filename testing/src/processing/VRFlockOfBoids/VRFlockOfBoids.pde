@@ -23,7 +23,7 @@
  * Press 'p' to print the current node rate.
  * Press 'm' to change the boid visual mode.
  * Press 'v' to toggle boids' wall skipping.
- * Press 's' to call scene.fit(1).
+ * Press 's' to call scene.fit(1000).
  */
 
 import processing.vr.*;
@@ -105,7 +105,7 @@ void thirdPerson() {
 void resetEye() {
   scene.eye().resetReference();
   scene.lookAt(scene.center());
-  scene.fit(1);
+  scene.fit(1000);
 }
 
 // picks up a boid avatar, may be null
@@ -174,7 +174,7 @@ void keyPressed() {
     break;
   case 's':
     if (scene.eye().reference() == null)
-      scene.fit(1);
+      scene.fit(1000);
     break;
   case 'p':
     println("Node rate: " + frameRate);

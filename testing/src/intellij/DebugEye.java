@@ -125,7 +125,7 @@ public class DebugEye extends PApplet {
     if (key == 'o')
       orbit = !orbit;
     if (key == 's')
-      scene.fit(1);
+      scene.fit(1000);
     if (key == 'S')
       scene.fit();
     if (key == '0')

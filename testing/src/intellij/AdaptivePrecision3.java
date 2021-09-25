@@ -20,7 +20,7 @@ public class AdaptivePrecision3 extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    scene.fit(1);
+    scene.fit(1000);
     shapes = new Node[25];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node();
@@ -38,7 +38,7 @@ public class AdaptivePrecision3 extends PApplet {
 
   public void keyPressed() {
     if (key == 's')
-      scene.fit(1);
+      scene.fit(1000);
   }
 
   public void mouseDragged() {

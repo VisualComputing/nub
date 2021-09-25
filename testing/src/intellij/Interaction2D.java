@@ -27,7 +27,7 @@ public class Interaction2D extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this, 1000);
     //scene.eye().setScaling(1);
-    scene.fit(1);
+    scene.fit(1000);
 
     shape1 = new Node((PGraphics pGraphics) -> {
       Scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -73,7 +73,7 @@ public class Interaction2D extends PApplet {
     if (key == 'f')
       Scene.leftHanded = !Scene.leftHanded;
     if (key == 's')
-      scene.fit(1);
+      scene.fit(1000);
     if (key == 'f')
       scene.fit();
     if (key == 'r')

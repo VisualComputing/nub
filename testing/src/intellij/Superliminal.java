@@ -27,7 +27,7 @@ public class Superliminal extends PApplet {
     scene.eye().enableHint(Node.BOUNDS);
     scene.eye().tagging = false;
     scene.setBounds(1000);
-    scene.fit(1);
+    scene.fit(1000);
     cubes = new Node[15];
     for (int i = 0; i < cubes.length; i++) {
       cubes[i] = new CustomNode();
@@ -120,7 +120,7 @@ public class Superliminal extends PApplet {
     if (key == ' ')
       displayLateralView = !displayLateralView;
     if (key == 'f')
-      focus.fit(1);
+      focus.fit(1000);
     if (key == 't') {
       if (focus == null)
         return;

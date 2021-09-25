@@ -27,7 +27,7 @@ public class ViewFrustumCulling extends PApplet {
     mainScene = new Scene(createGraphics(w, h / 2, P3D));
     mainScene.eye().enableHint(Node.BOUNDS);
     mainScene.togglePerspective();
-    mainScene.fit(1);
+    mainScene.fit(1000);
     // secondary scene
     secondaryScene = new Scene(createGraphics(w, h / 2, P3D), 200);
     secondaryScene.togglePerspective();

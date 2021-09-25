@@ -3666,14 +3666,14 @@ public class Node {
   }
 
   /**
-   * Returns the current interpolation time (in seconds) along the keyframes path.
+   * Returns the current interpolation time (in milliseconds) along the keyframes path.
    */
   public float animationTime() {
     return _interpolator.time();
   }
 
   /**
-   * Sets the animation time used for the next {@link #animate()} call.
+   * Sets the animation time (in milliseconds) used for the next {@link #animate()} call.
    */
   public void setAnimationTime(float time) {
     _interpolator.setTime(time);
@@ -3704,8 +3704,13 @@ public class Node {
   }
   // */
 
+  // TODO debug
+  public Task task() {
+    return _interpolator.task();
+  }
+
   /**
-   * Adds a node copy as a keyframe at {@code time} and a mask {@code hint}.
+   * Adds a node copy as a keyframe at {@code time} (in milliseconds) and a mask {@code hint}.
    */
   public void addKeyFrame(int hint, float time) {
     _interpolator.addKeyFrame(hint, time);
@@ -3719,14 +3724,14 @@ public class Node {
   }
 
   /**
-   * Adds {@code node} (as is) as a keyframe at the given {@code time}.
+   * Adds {@code node} (as is) as a keyframe at the given {@code time} (in milliseconds).
    */
   public void addKeyFrame(Node node, float time) {
     _interpolator.addKeyFrame(node, time);
   }
 
   /**
-   * Remove the closest keyframe to {@code time} and returns it.
+   * Remove the closest keyframe to {@code time} (in milliseconds) and returns it.
    * May return {@code null} if the interpolator is empty.
    */
   public Node removeKeyFrame(float time) {
@@ -3741,7 +3746,7 @@ public class Node {
   }
 
   /**
-   * Interpolate the node at the given time along the keyframes path.
+   * Interpolate the node at the given time (in milliseconds) along the keyframes path.
    */
   public void interpolate(float time) {
     _interpolator.interpolate(time);

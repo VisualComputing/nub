@@ -5,6 +5,8 @@ import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
+import nub.timing.Task;
+import nub.timing.TimingHandler;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -23,14 +25,13 @@ public class CajasOrientadas extends PApplet {
     // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
     scene = new Scene(this, 200);
     scene.togglePerspective();
-    scene.fit();
+    //scene.fit();
     esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);
     esfera.setWorldPosition(new Vector(0, 1.4f, 0));
     cajas = new Box[15];
     for (int i = 0; i < cajas.length; i++)
       cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)),
           random(10, 40), random(10, 40), random(10, 40));
-    scene.fit();
     scene.tag("keyboard", esfera);
   }
 
@@ -66,6 +67,17 @@ public class CajasOrientadas extends PApplet {
         caja.toggleHint(Node.BULLSEYE);
         caja.togglePicking(Node.SHAPE);
       }
+    if (key == 'x') {
+      for (Task task : TimingHandler.tasks()) {
+        task.enableConcurrence(true);
+      }
+    }
+    if (key == 'y') {
+      for (Task task : TimingHandler.tasks()) {
+        if (task.isRecurrent())
+          println("recurrent");
+      }
+    }
     if (key == 'c') {
       for (Box caja : cajas)
         if (caja.bullsEyeSize() < 1)
@@ -87,7 +99,7 @@ public class CajasOrientadas extends PApplet {
     if (key == 'e')
       scene.togglePerspective();
     if (key == 's')
-      scene.fit(1);
+      scene.fit(1000);
     if (key == 'S')
       scene.fit();
     if (key == 'u')

@@ -23,7 +23,7 @@ public class CustomNodeInteraction extends PApplet {
   public void setup() {
     font36 = loadFont("FreeSans-36.vlw");
     scene = new Scene(this);
-    scene.fit(1);
+    scene.fit(1000);
     shapes = new Torus[10];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Torus();

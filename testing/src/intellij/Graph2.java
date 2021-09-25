@@ -25,7 +25,7 @@ public class Graph2 extends PApplet {
     GLSLMatrixHandler mh = new GLSLMatrixHandler();
     // TODO how to handle this
     //graph._setMatrixHandler(mh);
-    graph.fit(1);
+    graph.fit(1000);
     nodes = new Node[50];
     for (int i = 0; i < nodes.length; i++) {
       nodes[i] = new Node() {

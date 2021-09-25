@@ -22,7 +22,7 @@ public class MouseMoveInteraction extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this, 1000);
-    scene.fit(1);
+    scene.fit(1000);
 
     Node shape1 = new Node((PGraphics pGraphics) -> {
       pGraphics.pushStyle();
@@ -53,7 +53,7 @@ public class MouseMoveInteraction extends PApplet {
     if (key == 'p')
       Scene.leftHanded = !Scene.leftHanded;
     if (key == 's')
-      scene.fit(1);
+      scene.fit(1000);
     if (key == 'f')
       scene.fit();
     if (key == 'l')

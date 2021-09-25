@@ -31,7 +31,7 @@ public class Lambda extends PApplet {
     scene = new Scene(this, 150);
 
     // interpolation 1. Default eye interpolations
-    scene.fit(1);
+    scene.fit(1000);
 
     // interpolation 3. Custom (arbitrary) node interpolations
 
@@ -49,7 +49,7 @@ public class Lambda extends PApplet {
     shape.setAnimationRecurrence(true);
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
-      shape.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
+      shape.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1000 : 4000);
     shape.animate();
 
     // key lines:
@@ -111,7 +111,7 @@ public class Lambda extends PApplet {
     }
 
     if (key == 's')
-      scene.fit(1);
+      scene.fit(1000);
     if (key == 'f')
       scene.fit();
 

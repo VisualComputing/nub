@@ -29,7 +29,7 @@ public class MouseDragInteraction extends PApplet {
 
     scene = new Scene(this, 1500);
     //scene.togglePerspective();
-    //scene.fit(1);
+    //scene.fit(1000);
 
     shape1 = new Node((PGraphics pGraphics) -> {
       Scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -121,7 +121,7 @@ public class MouseDragInteraction extends PApplet {
     if (key == 's')
       scene.fit();
     if (key == 'f')
-      scene.fit(1);
+      scene.fit(1000);
     if (key == 'c') {
       cad = !cad;
       if (cad) {

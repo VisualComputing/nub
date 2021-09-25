@@ -33,7 +33,7 @@ public class PickingMode extends PApplet {
       scene.randomize(shapes[i]);
       shapes[i].enableHint(Node.AXES);
     }
-    //scene.fit(1);
+    //scene.fit(1000);
   }
 
   public void draw() {

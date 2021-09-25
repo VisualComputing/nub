@@ -27,7 +27,7 @@ public class DOF extends PApplet {
   @Override
   public void setup() {
     scene = new Scene(createGraphics(width, height, P3D), 1000);
-    scene.fit(1);
+    scene.fit(1000);
     models = new Node[100];
     for (int i = 0; i < models.length; i++) {
       models[i] = new Node(boxShape());
@@ -102,7 +102,7 @@ public class DOF extends PApplet {
     if (key == 't')
       scene.togglePerspective();
     if (key == 'f')
-      scene.fit(1);
+      scene.fit(1000);
     if (key == 'F')
       scene.fit();
   }
