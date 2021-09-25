@@ -2549,7 +2549,7 @@ public class Graph {
 
   /**
    * Paint method which is called just after your main event loop. Closes the context if the scene
-   * is oncreen and renders when needed the back buffer (useful for picking).
+   * is onscreen and renders when needed the back buffer (useful for picking).
    * <p>
    * This method should be registered at the PApplet (which requires it to be pubic and be named
    * as draw) and hence you don't need to call it.
