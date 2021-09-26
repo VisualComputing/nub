@@ -2562,6 +2562,10 @@ public class Graph {
     if (!isOffscreen()) {
       closeContext();
     }
+    // swap rays
+    _orays.clear();
+    _orays = _irays;
+    _irays = _irays == _i1rays ? _i2rays : _i1rays;
     _renderBackBuffer();
   }
 
@@ -2857,10 +2861,6 @@ public class Graph {
    * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
    */
   protected void _renderBackBuffer() {
-    // swap rays
-    _orays.clear();
-    _orays = _irays;
-    _irays = _irays == _i1rays ? _i2rays : _i1rays;
     if (_lastRendered == TimingHandler.frameCount && _bbNeed) {
       if (picking && _bb != null) {
         _initBackBuffer();
