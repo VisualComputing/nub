@@ -14,7 +14,7 @@ public class AuxViewers extends PApplet {
   boolean displayAuxiliarViewers = true;
   // whilst scene1 is either on-screen or not; scene2 and scene3 are off-screen
   // test both cases here
-  boolean onScreen = false;
+  boolean onScreen = true;
 
   int w = 1920;
   int h = 1080;

@@ -1007,8 +1007,8 @@ public class Scene extends Graph {
     }
     // TODO seems style is not require since it should be absorbed by the shader
     //_backBuffer().popStyle();
-    _backBuffer().endDraw();
     _backBuffer().loadPixels();
+    _backBuffer().endDraw();
   }
 
   @Override
