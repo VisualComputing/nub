@@ -60,6 +60,7 @@ public class Interpolators extends PApplet {
       shape.addKeyFrame(Node.AXES | Node.SHAPE | Node.HUD, i % 2 == 1 ? 1000 : 4000);
       // */
     }
+    shape.resetScalingFilter();
     shape.animate();
     frameRate(1000);
   }

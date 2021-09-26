@@ -50,6 +50,7 @@ void setup() {
     scene.randomize(shape);
     shape.addKeyFrame(Node.AXES | Node.SHAPE | Node.HUD, i % 2 == 1 ? 1000 : 4000);
   }
+  shape.resetScalingFilter();
   shape.animate();
   scene.eye().enableHint(Node.KEYFRAMES);
 }
