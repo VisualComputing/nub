@@ -51,6 +51,9 @@ void draw() {
   // 1a. Display both cajas and bolas
   //scene.display(color(10, 50, 25));
   // 1b. Display either cajas or bolas, or both
+  //scene.display(color(0), bolas);
+  //scene.display(cajas);
+  // 1c. Display either cajas or bolas, or both
   scene.openContext();
   scene.context().background(color(10, 50, 25));
   scene.drawAxes();

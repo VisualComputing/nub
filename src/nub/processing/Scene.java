@@ -500,12 +500,30 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code display(null, false, false, null, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display() {
+    display(null, false, null, null, null, 0, 0);
+  }
+
+  /**
    * Same as {@code display(background, false, false, null, null, 0, 0)}.
    *
    * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background) {
     display(background, false, null, null, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, false, false, null, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(int x, int y) {
+    display(null, false, null, null, null, x, y);
   }
 
   /**
@@ -518,6 +536,15 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code display(null, false, false, null, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(Callback worldCallback) {
+    display(null, false, null, null, worldCallback, 0, 0);
+  }
+
+  /**
    * Same as {@code display(background, false, false, null, worldCallback, 0, 0)}.
    *
    * @see #display(Object, boolean, Integer, Node, Callback, int, int)
@@ -527,12 +554,30 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code display(null, false, false, null, worldCallback, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(Callback worldCallback, int x, int y) {
+    display(null, false, null, null, worldCallback, x, y);
+  }
+
+  /**
    * Same as {@code display(background, false, false, null, worldCallback, x, y)}.
    *
    * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, Callback worldCallback, int x, int y) {
     display(background, false, null, null, worldCallback, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, axes, grid, null, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid, Callback worldCallback) {
+    display(null, axes, grid, null, worldCallback, 0, 0);
   }
 
   /**
@@ -549,8 +594,26 @@ public class Scene extends Graph {
    *
    * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
+  public void display(boolean axes, Integer grid, Callback worldCallback, int x, int y) {
+    display(null, axes, grid, null, worldCallback, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, null, worldCallback, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
   public void display(Object background, boolean axes, Integer grid, Callback worldCallback, int x, int y) {
     display(background, axes, grid, null, worldCallback, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, false, null, subtree, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(Node subtree) {
+    display(null, false, null, subtree, null, 0, 0);
   }
 
   /**
@@ -563,12 +626,30 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code display(null, false, null, null, subtree, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(Node subtree, int x, int y) {
+    display(null, false, null, subtree, null, x, y);
+  }
+
+  /**
    * Same as {@code display(background, false, null, null, subtree, x, y)}.
    *
    * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, Node subtree, int x, int y) {
     display(background, false, null, subtree, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, axes, null, subtree, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes, Node subtree) {
+    display(null, axes, null, subtree, null, 0, 0);
   }
 
   /**
@@ -581,12 +662,30 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code display(axes, grid, subtree, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid, Node subtree) {
+    display(null, axes, grid, subtree, null, 0, 0);
+  }
+
+  /**
    * Same as {@code display(background, axes, grid, subtree, null, 0, 0)}.
    *
    * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, Integer grid, Node subtree) {
     display(background, axes, grid, subtree, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, axes, null, subtree, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes, Node subtree, int x, int y) {
+    display(null, axes, null, subtree, null, x, y);
   }
 
   /**
@@ -599,12 +698,30 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code display(null, axes, grid, subtree, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid, Node subtree, int x, int y) {
+    display(null, axes, grid, subtree, null, x, y);
+  }
+
+  /**
    * Same as {@code display(background, axes, grid, subtree, null, x, y)}.
    *
    * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, Integer grid, Node subtree, int x, int y) {
     display(background, axes, grid, subtree, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, false, null, subtree, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(Node subtree, Callback worldCallback) {
+    display(null, false, null, subtree, worldCallback, 0, 0);
   }
 
   /**
@@ -617,12 +734,30 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code display(null, false, null, subtree, worldCallback, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(Node subtree, Callback worldCallback, int x, int y) {
+    display(null, false, null, subtree, worldCallback, x, y);
+  }
+
+  /**
    * Same as {@code display(background, false, null, subtree, worldCallback, x, y)}.
    *
    * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, Node subtree, Callback worldCallback, int x, int y) {
     display(background,false,null, subtree, worldCallback, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, axes, null, null, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes) {
+    display(null, axes, null, null, null, 0, 0);
   }
 
   /**
@@ -635,12 +770,30 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code display(null, axes, grid, null, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid) {
+    display(null, axes, grid, null, null, 0, 0);
+  }
+
+  /**
    * Same as {@code display(background, axes, grid, null, null, 0, 0)}.
    *
    * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, Integer grid) {
     display(background, axes, grid, null, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, axes, null, null, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes, int x, int y) {
+    display(null, axes, null, null, null, x, y);
   }
 
   /**
@@ -653,12 +806,30 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code display(null, axes, grid, null, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid, int x, int y) {
+    display(null, axes, grid, null, null, x, y);
+  }
+
+  /**
    * Same as {@code display(background, axes, grid, null, null, x, y)}.
    *
    * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, Integer grid, int x, int y) {
     display(background, axes, grid, null, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, axes, null, subtree, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes, Node subtree, Callback worldCallback) {
+    display(null, axes, null, subtree, worldCallback, 0, 0);
   }
 
   /**
@@ -671,12 +842,30 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code display(null, axes, grid, subtree, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid, Node subtree, Callback worldCallback) {
+    display(null, axes, grid, subtree, worldCallback, 0, 0);
+  }
+
+  /**
    * Same as {@code display(background, axes, grid, subtree, worldCallback, 0, 0)}.
    *
    * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, Integer grid, Node subtree, Callback worldCallback) {
     display(background, axes, grid, subtree, worldCallback, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, axes, subtree, worldCallback, cornerX, cornerY)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
+   */
+  public void display(boolean axes, Node subtree, Callback worldCallback, int cornerX, int cornerY) {
+    display(null, axes, subtree, worldCallback, cornerX, cornerY);
   }
 
   /**

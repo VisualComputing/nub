@@ -63,11 +63,11 @@ public class SceneBuffers extends PApplet {
     scene.render(bolas);
     scene.render(cajas);
     // */
-    /*
-    scene.display(color(0), bolas);
-    scene.display(null, cajas);
-    // */
     // /*
+    scene.display(color(0), bolas);
+    scene.display(cajas);
+    // */
+    /*
     scene.openContext();
     scene.context().background(125);
     scene.drawAxes();
@@ -77,7 +77,7 @@ public class SceneBuffers extends PApplet {
     //scene.image();
     // */
 
-    // /*
+    /*
     scene.openContext();
     //scene.context().background(125);
     //scene.drawAxes();
