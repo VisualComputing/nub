@@ -28,6 +28,7 @@ import processing.opengl.*;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -114,6 +115,9 @@ public class Scene extends Graph {
 
   // mouse speed
   long _timestamp;
+
+  // Prettify bb display if required
+  protected HashMap<Integer, Integer> _idToColor = new HashMap<>();
 
   // CONSTRUCTORS
 
@@ -993,11 +997,36 @@ public class Scene extends Graph {
    * on top of the main sketch canvas at the upper left corner:
    * {@code (pixelX, pixelY)}. Mainly for debugging.
    */
+  protected int _idToColor(int id){
+    if(_idToColor.containsKey(id)) return _idToColor.get(id);
+    boolean isDifferent = false;
+    int color = 0;
+    while(!isDifferent){
+      color = pApplet.color(pApplet.random(255),pApplet.random(255), pApplet.random(255));
+      isDifferent = true;
+      for(int c : _idToColor.values()) isDifferent &= c != color;
+    }
+    _idToColor.put(id, color);
+    return color;
+  }
+
+
   protected void _imageBackBuffer(int pixelX, int pixelY) {
     if (_backBuffer() != null) {
       pApplet.pushStyle();
       pApplet.imageMode(PApplet.CORNER);
-      pApplet.image(_backBuffer(), pixelX, pixelY);
+      PImage img = _backBuffer().get();
+      img.loadPixels();
+      //Simple LookUp Table to discriminate bb shapes
+      for (int i = 0; i < img.pixels.length; i++) {
+        if(img.pixels[i] == -16777216){
+          img.pixels[i] = 0xFFFFFFFF;
+          continue;
+        }
+        img.pixels[i] = _idToColor(img.pixels[i]);
+      }
+      img.updatePixels();
+      pApplet.image(img, pixelX, pixelY);
       pApplet.popStyle();
     }
   }
