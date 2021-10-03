@@ -972,23 +972,43 @@ public class Scene extends Graph {
   /**
    * Same as {@code displayBackBuffer(0, 0)}.
    *
-   * @see #displayBackBuffer(int, int)
+   * @see #displayBackBuffer(int, int, int)
    */
   public void displayBackBuffer() {
-    displayBackBuffer(0, 0);
+    displayBackBuffer(/* 0xFFFFFFFF */-16777216);
+  }
+
+  /**
+   * Same as {@code displayBackBuffer(background, 0, 0)}.
+   *
+   * @see #displayBackBuffer(int, int, int)
+   */
+  public void displayBackBuffer(int background) {
+    displayBackBuffer(background, 0, 0);
   }
 
   /**
    * Displays the buffer nub use for picking at the given pixel coordinates.
+   * Used for debugging.
+   *
+   * @see #displayBackBuffer(int, int, int)
    */
   public void displayBackBuffer(int pixelX, int pixelY) {
+    displayBackBuffer(/* 0xFFFFFFFF */-16777216, pixelX, pixelY);
+  }
+
+  /**
+   * Displays the buffer nub use for picking at the given pixel coordinates,
+   * with {@code background} color. Used for debugging.
+   */
+  public void displayBackBuffer(int background, int pixelX, int pixelY) {
     if (_onscreenGraph != null) {
       _onscreenGraph.beginHUD();
-      _imageBackBuffer(pixelX, pixelY);
+      _imageBackBuffer(background, pixelX, pixelY);
       _onscreenGraph.endHUD();
     }
     else {
-      _imageBackBuffer(pixelX, pixelY);
+      _imageBackBuffer(background, pixelX, pixelY);
     }
   }
 
@@ -997,7 +1017,7 @@ public class Scene extends Graph {
    * on top of the main sketch canvas at the upper left corner:
    * {@code (pixelX, pixelY)}. Mainly for debugging.
    */
-  protected int _idToColor(int id){
+  protected int _idToColor(int id) {
     if(_idToColor.containsKey(id)) return _idToColor.get(id);
     boolean isDifferent = false;
     int color = 0;
@@ -1010,17 +1030,21 @@ public class Scene extends Graph {
     return color;
   }
 
-
-  protected void _imageBackBuffer(int pixelX, int pixelY) {
+  /**
+   * Display the {@link #_backBuffer()} used for picking at screen coordinates
+   * on top of the main sketch canvas at the upper left corner:
+   * {@code (pixelX, pixelY)}. Mainly for debugging.
+   */
+  protected void _imageBackBuffer(int background, int pixelX, int pixelY) {
     if (_backBuffer() != null) {
       pApplet.pushStyle();
       pApplet.imageMode(PApplet.CORNER);
       PImage img = _backBuffer().get();
       img.loadPixels();
-      //Simple LookUp Table to discriminate bb shapes
+      // simple lookup table to discriminate bb shapes
       for (int i = 0; i < img.pixels.length; i++) {
-        if(img.pixels[i] == -16777216){
-          img.pixels[i] = 0xFFFFFFFF;
+        if (img.pixels[i] == -16777216) {
+          img.pixels[i] = background;
           continue;
         }
         img.pixels[i] = _idToColor(img.pixels[i]);
