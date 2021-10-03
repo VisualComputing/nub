@@ -1149,9 +1149,10 @@ public class Scene extends Graph {
       return false;
     if (!node.tagging)
       return false;
+    if(!(0 <= pixelX && pixelX < width() && 0 <= pixelY && pixelY < height())) //Check if pixel is out of bounds
+      return false;
     int index = pixelY * width() + pixelX;
     if (_backBuffer().pixels != null)
-      if ((0 <= index) && (index < _backBuffer().pixels.length))
         return _backBuffer().pixels[index] == node.colorID();
     return false;
   }
