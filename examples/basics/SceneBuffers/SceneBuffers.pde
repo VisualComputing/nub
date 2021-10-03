@@ -4,8 +4,9 @@
  *
  * This example displays the scene front and back buffers.
  *
- * The front buffer is filled with some scene objects.
- * The back buffer is used to pick them.
+ * The front buffer is filled with some scene objects. The
+ * back buffer is used to pick them. Calling displayBackBuffer
+ * is useful for debugging.
  *
  * Press 'a' to toggle the node axes hint.
  */

@@ -2842,7 +2842,12 @@ public class Graph {
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
           _matrixHandler.pushMatrix();
           float scl = 1 + node._highlight;
-          _matrixHandler.scale(scl, scl, is2D() ? 1 : scl);
+          if (is2D()) {
+            _matrixHandler.scale(scl, scl);
+          }
+          else {
+            _matrixHandler.scale(scl, scl, scl);
+          }
           _displayFrontHint(node);
           _matrixHandler.popMatrix();
         } else {
