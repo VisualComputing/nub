@@ -23,6 +23,7 @@ import processing.opengl.PGraphicsOpenGL;
  */
 class GLMatrixHandler extends MatrixHandler {
   PGraphicsOpenGL _pggl;
+  protected float[][] _matrixStackInv = new float[STACK_DEPTH][16];
 
   public GLMatrixHandler(PGraphicsOpenGL pggl) {
     _pggl = pggl;
@@ -131,11 +132,11 @@ class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public void pushMatrix() {
-
     if (_matrixStackDepth == STACK_DEPTH) {
       throw new RuntimeException(ERROR_PUSHMATRIX_OVERFLOW);
     }
     _pggl.modelview.get(_matrixStack[_matrixStackDepth]);
+    _pggl.modelviewInv.get(_matrixStackInv[_matrixStackDepth]);
     _matrixStackDepth++;
   }
 
@@ -147,6 +148,7 @@ class GLMatrixHandler extends MatrixHandler {
     }
     _matrixStackDepth--;
     _pggl.modelview.set(_matrixStack[_matrixStackDepth]);
+    _pggl.modelviewInv.set(_matrixStackInv[_matrixStackDepth]);
     _pggl.updateProjmodelview();
   }
 
