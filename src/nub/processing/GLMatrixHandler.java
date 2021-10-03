@@ -131,12 +131,23 @@ class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public void pushMatrix() {
-    _pggl.pushMatrix();
+
+    if (_matrixStackDepth == STACK_DEPTH) {
+      throw new RuntimeException(ERROR_PUSHMATRIX_OVERFLOW);
+    }
+    _pggl.modelview.get(_matrixStack[_matrixStackDepth]);
+    _matrixStackDepth++;
   }
+
 
   @Override
   public void popMatrix() {
-    _pggl.popMatrix();
+    if (_matrixStackDepth == 0) {
+      throw new RuntimeException(ERROR_PUSHMATRIX_UNDERFLOW);
+    }
+    _matrixStackDepth--;
+    _pggl.modelview.set(_matrixStack[_matrixStackDepth]);
+    _pggl.updateProjmodelview();
   }
 
   @Override
