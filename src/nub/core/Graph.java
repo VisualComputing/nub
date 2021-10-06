@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  * A 2D or 3D scene-graph providing eye, input and timing handling to a raster or ray-tracing
  * renderer.
  * <h1>1. Types and dimensions</h1>
- * To set the viewing volume use {@link #setBounds(Vector, float)} or {@link #setBounds(float, float)}.
+ * To set the viewing volume use {@link #setBounds(Vector, float)}.
  * <p>
  * The way the projection matrix is computed (see
  * {@link #projection()}), defines the type of the
@@ -140,7 +140,6 @@ public class Graph {
   protected long _lastEqUpdate;
   protected Vector _center;
   protected float _radius;
-  protected boolean _fixed;
   protected float _zNear, _zFar;
   // Inertial stuff
   public static float inertia = 0.8f;
@@ -259,9 +258,6 @@ public class Graph {
     PERSPECTIVE, ORTHOGRAPHIC, TWO_D, CUSTOM
   }
 
-  private float _zNearCoefficient;
-  private float _zClippingCoefficient;
-
   /**
    * Same as {@code this(context, width, height, eye, Type.PERSPECTIVE)}.
    *
@@ -301,23 +297,26 @@ public class Graph {
   /**
    * Defines a right-handed graph with the specified {@code width} and {@code height}
    * screen window dimensions. Creates and {@link #eye()} node, sets its {@link #fov()} to
-   * {@code PI/3}. Calls {@link #setBounds(float, float)} on {@code zNear} and
+   * {@code PI/3}. Calls {@code setBounds(new Vector(), (zFar - zNear) / 2)} on {@code zNear} and
    * {@code zFar} to set up the scene frustum.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
    * {@link #TimingHandler}.
    *
-   * @see #setBounds(float, float)
+   * @see #setBounds(Vector, float)
    * @see #Graph(Object, int, int, Type, Vector, float)
    * @see #TimingHandler
    * @see MatrixHandler
    */
   protected Graph(Object context, int width, int height, Type type, float zNear, float zFar) {
     _init(context, width, height, new Node(), type);
-    if (is3D())
+    setBounds(new Vector(), (zFar - zNear) / 2);
+    setZNear(zNear);
+    setZFar(zFar);
+    if (is3D()) {
       setFOV((float) Math.PI / 3);
-    setBounds(zNear, zFar);
+    }
   }
 
   /**
@@ -340,16 +339,17 @@ public class Graph {
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
    * {@link #TimingHandler}.
    *
-   * @see #setBounds(float, float)
    * @see #Graph(Object, int, int, Type, float, float)
    * @see #TimingHandler
    * @see MatrixHandler
    */
   protected Graph(Object context, int width, int height, Type type, Vector center, float radius) {
     _init(context, width, height, new Node(), type);
+    setBounds(center, radius);
+    setZNear(0.1f * radius);
+    setZFar(10 * radius + zNear());
     if (is3D())
       setFOV((float) Math.PI / 3);
-    setBounds(center, radius);
     fit();
   }
 
@@ -379,6 +379,8 @@ public class Graph {
   protected Graph(Object context, int width, int height, Node eye, Type type, Vector center, float radius) {
     _init(context, width, height, eye, type);
     setBounds(center, radius);
+    setZNear(0.1f * radius);
+    setZFar(10 * radius + zNear());
   }
 
   /**
@@ -392,7 +394,7 @@ public class Graph {
 
   /**
    * Defines a right-handed graph with the specified {@code width} and {@code height}
-   * screen window dimensions. Calls {@link #setBounds(float, float)}
+   * screen window dimensions. Calls {@code setBounds(new Vector(), (zFar - zNear) / 2)}
    * on {@code zNear} and {@code zFar} to set up the scene frustum.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and
@@ -406,7 +408,9 @@ public class Graph {
    */
   protected Graph(Object context, int width, int height, Node eye, Type type, float zNear, float zFar) {
     _init(context, width, height, eye, type);
-    setBounds(zNear, zFar);
+    setBounds(new Vector(), (zFar - zNear) / 2);
+    setZNear(zNear);
+    setZFar(zFar);
   }
 
   /**
@@ -674,6 +678,44 @@ public class Graph {
   }
 
   /**
+   * Set {@link #zNear()} and {@link #zFar()} values.
+   *
+   * @see #setBounds(Vector, float)
+   * @see #zNear()
+   * @see #zFar()
+   */
+
+  /*
+  public void setBounds(float zNear, float zFar) {
+    float near = Math.abs(zNear);
+    float far = Math.abs(zFar);
+    if (far <= near || near == 0)
+      return;
+    if (is2D()) {
+      System.out.println("Warning: setBounds(zNear, zFar) only available in 3D. Calling setBounds((zFar - zNear) / 2) instead!");
+      setBounds((far - near) / 2);
+      return;
+    }
+    _zNear = near;
+    _zFar = far;
+    _radius = (far - near) / 2;
+    _modified();
+  }
+  // */
+
+  // TODO experimental
+  public void setZNear(float zNear) {
+    _zNear = zNear;
+    _modified();
+  }
+
+  // TODO experimental
+  public void setZFar(float zFar) {
+    _zFar = zFar;
+    _modified();
+  }
+
+  /**
    * Returns the near clipping plane distance used to compute the {@link #projection()} matrix.
    * <p>
    * The clipping planes' positions depend on the {@link #radius()} and {@link #center()}
@@ -701,22 +743,8 @@ public class Graph {
    * @see #zFar()
    */
   public float zNear() {
-    if (_fixed)
-      return _zNear;
-    float z = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis()) - _zClippingCoefficient * _radius;
-    // Prevents negative or null zNear values.
-    float zMin = _zNearCoefficient * _zClippingCoefficient * _radius;
-    if (z < zMin)
-      switch (_type) {
-        case PERSPECTIVE:
-          z = zMin;
-          break;
-        case TWO_D:
-        case ORTHOGRAPHIC:
-          z = 0.0f;
-          break;
-      }
-    return z;
+    // TODO test 2D, maybe should return 0?
+    return _zNear;
   }
 
   /**
@@ -732,7 +760,7 @@ public class Graph {
    * @see #zNear()
    */
   public float zFar() {
-    return _fixed ? _zFar: Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis()) + _zClippingCoefficient * _radius;
+    return _zFar;
   }
 
   // Graph and nodes stuff
@@ -1430,10 +1458,9 @@ public class Graph {
 
   /**
    * Returns the radius of the graph observed by the eye in world units. Set it with
-   * {@link #setBounds(Vector, float)} or {@link #setBounds(float, float)}.
+   * {@link #setBounds(Vector, float)}.
    *
    * @see #setBounds(Vector, float)
-   * @see #setBounds(float, float)
    * @see #center()
    */
   public float radius() {
@@ -1442,48 +1469,34 @@ public class Graph {
 
   /**
    * Returns the position of the graph center, defined in the world coordinate system.
-   * Set it with {@link #setBounds(Vector, float)} or {@link #setBounds(float, float)}.
+   * Set it with {@link #setBounds(Vector, float)}.
    *
    * @see #setBounds(Vector, float)
-   * @see #setBounds(float, float)
    * @see #zNear()
    * @see #zFar()
    */
   public Vector center() {
-    return _fixed ? eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / (eye().worldMagnitude() * 2) )) : _center;
+    return _center;
   }
 
   /**
    * Same as {@code setBounds(new Vector(), radius)}.
    *
-   * @see #setBounds(float, float)
-   * @see #setBounds(Vector, float, float, float)
-   * @see #setBounds(float, float)
+   * @see #setBounds(Vector, float)
    */
   public void setBounds(float radius) {
     setBounds(new Vector(), radius);
   }
 
   /**
-   * Same as {@code setBounds(center, radius, 0.005f, (float) Math.sqrt(3.0f))}.
-   *
-   * @see #setBounds(float, float)
-   * @see #setBounds(Vector, float, float, float)
-   * @see #setBounds(float)
-   */
-  public void setBounds(Vector center, float radius) {
-    setBounds(center, radius, 0.005f, (float) Math.sqrt(3.0f));
-  }
-
-  /**
    * Sets the scene bounding sphere, defined by {@code center} and {@code radius}) in the
    * world coordinate system. The {@link #zNear()} and {@link #zFar()} computation is performed
    * so that it adapts to best fit this bounding sphere. To set fixed {@link #zNear()} and
-   * {@link #zFar()} values use {@link #setBounds(float, float)} instead.
+   * {@link #zFar()} values use {@link #setZNear(float)} and {@link #setZFar(float)} instead.
    * <p>
    * The {@code zNearCoefficient} (only meaningful for perspective projections) is used to set
    * the {@link #zNear()} when the {@link #eye()} is
-   * inside the ball defined by {@code #center} and zClippingCoefficient * {@code #radius}.
+   * inside the ball defined by {@code center} and zClippingCoefficient * {@code radius}.
    * In that case, the {@link #zNear()} value is set to
    * {@code zNearCoefficient * zClippingCoefficient * radius}. Default value is 0.005, which
    * is appropriate for most applications. In case you need a high dynamic ZBuffer precision,
@@ -1500,46 +1513,12 @@ public class Graph {
    *
    * @see #setBounds(float)
    * @see #setBounds(Vector, float)
-   * @see #setBounds(float, float)
    * @see #zNear()
    * @see #zFar()
    */
-  public void setBounds(Vector center, float radius, float zNearCoefficient, float zClippingCoefficient) {
-    _fixed = false;
+  public void setBounds(Vector center, float radius) {
     _center = center;
     _radius = Math.abs(radius);
-    _zNearCoefficient = zNearCoefficient;
-    _zClippingCoefficient = zClippingCoefficient;
-    _modified();
-  }
-
-  /**
-   * Sets fixed {@link #zNear()} and {@link #zFar()} values. Use
-   * {@link #setBounds(Vector, float, float, float)} to make them fit a
-   * bounding sphere defined in the world coordinate system instead.
-   * <p>
-   * Note that the {@link #center()} is computed as
-   * {@code eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / (eye().magnitude() * 2) ))}.
-   *
-   * @see #setBounds(Vector, float, float, float)
-   * @see #setBounds(Vector, float)
-   * @see #zNear()
-   * @see #zFar()
-   */
-  public void setBounds(float zNear, float zFar) {
-    float near = Math.abs(zNear);
-    float far = Math.abs(zFar);
-    if (far <= near || near == 0)
-      return;
-    if (is2D()) {
-      System.out.println("Warning: setBounds(zNear, zFar) only available in 3D. Calling setBounds((zFar - zNear) / 2) instead!");
-      setBounds((far - near) / 2);
-      return;
-    }
-    _fixed = true;
-    _zNear = near;
-    _zFar = far;
-    _radius = (far - near) / 2;
     _modified();
   }
 
@@ -1744,10 +1723,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit() {
-    if (_fixed) {
-      System.out.println("Warning: fit() is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     fit(center(), _radius);
   }
 
@@ -1771,10 +1746,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(float duration) {
-    if (_fixed) {
-      System.out.println("Warning: fit(duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     fit(center(), _radius, duration);
   }
 
@@ -1802,10 +1773,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector center, float radius, float duration) {
-    if (_fixed) {
-      System.out.println("Warning: fit(center, radius, duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     if (duration <= 0)
       fit(center, radius);
     else {
@@ -1842,10 +1809,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector center, float radius) {
-    if (_fixed) {
-      System.out.println("Warning: fit(center, radius) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     switch (_type) {
       case TWO_D:
         lookAt(center);
@@ -1891,10 +1854,6 @@ public class Graph {
    * @see #fit(Vector, Vector, float)
    */
   public void fitFOV(float duration) {
-    if (_fixed) {
-      System.out.println("Warning: fitFOV(duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     if (duration <= 0)
       fitFOV();
     else {
@@ -1938,10 +1897,6 @@ public class Graph {
    * @see #fit(Vector, Vector, float)
    */
   public void fitFOV() {
-    if (_fixed) {
-      System.out.println("Warning: fitFOV() is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     float distance = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis());
     float magnitude = distance < (float) Math.sqrt(2) * _radius ? ((float) Math.PI / 2) : 2 * (float) Math.asin(_radius / distance);
     switch (_type) {
@@ -1975,10 +1930,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector corner1, Vector corner2, float duration) {
-    if (_fixed) {
-      System.out.println("Warning: fit(corner1, corner2, duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     if (duration <= 0)
       fit(corner1, corner2);
     else {
@@ -2015,10 +1966,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector corner1, Vector corner2) {
-    if (_fixed) {
-      System.out.println("Warning: fit(corner1, corner2) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     float diameter = Math.max(Math.abs(corner2._vector[1] - corner1._vector[1]), Math.abs(corner2._vector[0] - corner1._vector[0]));
     diameter = Math.max(Math.abs(corner2._vector[2] - corner1._vector[2]), diameter);
     fit(Vector.multiply(Vector.add(corner1, corner2), 0.5f), 0.5f * diameter);
@@ -2133,14 +2080,10 @@ public class Graph {
         distance = Math.max(distX, distY);
         break;
       case ORTHOGRAPHIC:
-        if (!_fixed) {
-          float dist = Vector.dot(Vector.subtract(newCenter, center()), vd);
-          distX = Vector.distance(pointX, newCenter) / eye().worldMagnitude() / aspectRatio();
-          distY = Vector.distance(pointY, newCenter) / eye().worldMagnitude() / 1.0f;
-          distance = dist + Math.max(distX, distY);
-        } else {
-          System.out.println("Warning: fit(x, y, width, height) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-        }
+        float dist = Vector.dot(Vector.subtract(newCenter, center()), vd);
+        distX = Vector.distance(pointX, newCenter) / eye().worldMagnitude() / aspectRatio();
+        distY = Vector.distance(pointY, newCenter) / eye().worldMagnitude() / 1.0f;
+        distance = dist + Math.max(distX, distY);
         break;
     }
     eye().setWorldPosition(Vector.subtract(newCenter, Vector.multiply(vd, distance)));
