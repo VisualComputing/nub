@@ -3691,9 +3691,6 @@ public class Graph {
       Vector vector = displacement(new Vector(dx, dy, dz), node);
       vector.multiply(-1);
       Vector translation = eye().referenceDisplacement(vector);
-      // Option 1: don't compensate orthographic, i.e., use Node.translate(vector, inertia)
-      //eye().translate(translation);
-      // Option 2: compensate orthographic, i.e., use Graph inertial translation task
       _shift(translation.x(), translation.y(), translation.z());
       _translationTask.setInertia(inertia);
       _translationTask._x += translation.x();
@@ -3708,9 +3705,15 @@ public class Graph {
     }
   }
 
-  /**
-   * Internally by the _translationTask to compensate orthographic projection eye translation.
-   */
+  /*
+  // Option 1: don't compensate orthographic, i.e., use Node.translate(vector, inertia)
+  protected void _shift(float x, float y, float z) {
+    eye().translate(x, y, z);
+  }
+  // */
+
+  // /*
+  // Option 2: compensate orthographic, i.e., use Graph inertial translation task
   protected void _shift(float x, float y, float z) {
     float d1 = 1, d2;
     if (_type == Type.ORTHOGRAPHIC)
@@ -3723,6 +3726,7 @@ public class Graph {
           eye().scale(d2 / d1);
     }
   }
+  // */
 
   // 5. Rotate
 
