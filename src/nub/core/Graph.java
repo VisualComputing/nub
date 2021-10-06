@@ -315,9 +315,13 @@ public class Graph {
    */
   protected Graph(Object context, int width, int height, Type type, float zNear, float zFar) {
     _init(context, width, height, new Node(), type);
-    if (is3D())
-      setFOV((float) Math.PI / 3);
+    setCenter(new Vector());
+    // TODO set radius in a more consistent way
+    setRadius((zFar - zNear) / 4);
     setBounds(zNear, zFar);
+    if (is3D()) {
+      setFOV((float) Math.PI / 3);
+    }
   }
 
   /**
@@ -347,9 +351,10 @@ public class Graph {
    */
   protected Graph(Object context, int width, int height, Type type, Vector center, float radius) {
     _init(context, width, height, new Node(), type);
-    if (is3D())
-      setFOV((float) Math.PI / 3);
     setBounds(center, radius);
+    if (is3D()) {
+      setFOV((float) Math.PI / 3);
+    }
     fit();
   }
 
@@ -406,6 +411,9 @@ public class Graph {
    */
   protected Graph(Object context, int width, int height, Node eye, Type type, float zNear, float zFar) {
     _init(context, width, height, eye, type);
+    setCenter(new Vector());
+    // TODO set radius in a more consistent way
+    setRadius((zFar - zNear) / 4);
     setBounds(zNear, zFar);
   }
 
@@ -678,7 +686,8 @@ public class Graph {
    * <p>
    * The clipping planes' positions depend on the {@link #radius()} and {@link #center()}
    * rather than being fixed small-enough and large-enough values. A good approximation will
-   * hence result in an optimal precision of the z-buffer.
+   * hence result in an optimal precision of the z-buffer. To return a fixed near clipping plane
+   * value call {@link #setBounds(float, float)} first.
    * <p>
    * The near clipping plane is positioned at a distance equal to
    * {@code zClippingCoefficient} * {@link #radius()} in front of the
@@ -727,7 +736,9 @@ public class Graph {
    * {@code zClippingCoefficient() * radius()} behind the {@link #center()}:
    * <p>
    * {@code zFar = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())
-   * + zClippingCoefficient() * radius()}
+   * + zClippingCoefficient() * radius()}.
+   * <p>
+   *  To return a fixed far clipping plane value call {@link #setBounds(float, float)} first.
    *
    * @see #zNear()
    */
@@ -1441,6 +1452,17 @@ public class Graph {
   }
 
   /**
+   * Sets the scene {@link #radius()}.
+   *
+   * @see #setBounds(float, float)
+   * @see #setBounds(Vector, float)
+   */
+  public void setRadius(float radius) {
+    _radius = Math.abs(radius);
+    _modified();
+  }
+
+  /**
    * Returns the position of the graph center, defined in the world coordinate system.
    * Set it with {@link #setBounds(Vector, float)} or {@link #setBounds(float, float)}.
    *
@@ -1450,7 +1472,18 @@ public class Graph {
    * @see #zFar()
    */
   public Vector center() {
-    return _fixed ? eye().worldLocation(new Vector(0, 0, -(zNear() + zFar()) / (eye().worldMagnitude() * 2) )) : _center;
+    return _center;
+  }
+
+  /**
+   * Sets the scene {@link #center()}.
+   *
+   * @see #setBounds(float, float)
+   * @see #setBounds(Vector, float)
+   */
+  public void setCenter(Vector center) {
+    _center = center;
+    _modified();
   }
 
   /**
@@ -1539,7 +1572,6 @@ public class Graph {
     _fixed = true;
     _zNear = near;
     _zFar = far;
-    _radius = (far - near) / 2;
     _modified();
   }
 
@@ -1744,10 +1776,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit() {
-    if (_fixed) {
-      System.out.println("Warning: fit() is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     fit(center(), _radius);
   }
 
@@ -1771,10 +1799,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(float duration) {
-    if (_fixed) {
-      System.out.println("Warning: fit(duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     fit(center(), _radius, duration);
   }
 
@@ -1802,10 +1826,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector center, float radius, float duration) {
-    if (_fixed) {
-      System.out.println("Warning: fit(center, radius, duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     if (duration <= 0)
       fit(center, radius);
     else {
@@ -1842,10 +1862,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector center, float radius) {
-    if (_fixed) {
-      System.out.println("Warning: fit(center, radius) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     switch (_type) {
       case TWO_D:
         lookAt(center);
@@ -1891,10 +1907,6 @@ public class Graph {
    * @see #fit(Vector, Vector, float)
    */
   public void fitFOV(float duration) {
-    if (_fixed) {
-      System.out.println("Warning: fitFOV(duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     if (duration <= 0)
       fitFOV();
     else {
@@ -1938,10 +1950,6 @@ public class Graph {
    * @see #fit(Vector, Vector, float)
    */
   public void fitFOV() {
-    if (_fixed) {
-      System.out.println("Warning: fitFOV() is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     float distance = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis());
     float magnitude = distance < (float) Math.sqrt(2) * _radius ? ((float) Math.PI / 2) : 2 * (float) Math.asin(_radius / distance);
     switch (_type) {
@@ -1975,10 +1983,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector corner1, Vector corner2, float duration) {
-    if (_fixed) {
-      System.out.println("Warning: fit(corner1, corner2, duration) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     if (duration <= 0)
       fit(corner1, corner2);
     else {
@@ -2015,10 +2019,6 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(Vector corner1, Vector corner2) {
-    if (_fixed) {
-      System.out.println("Warning: fit(corner1, corner2) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-      return;
-    }
     float diameter = Math.max(Math.abs(corner2._vector[1] - corner1._vector[1]), Math.abs(corner2._vector[0] - corner1._vector[0]));
     diameter = Math.max(Math.abs(corner2._vector[2] - corner1._vector[2]), diameter);
     fit(Vector.multiply(Vector.add(corner1, corner2), 0.5f), 0.5f * diameter);
@@ -2133,14 +2133,10 @@ public class Graph {
         distance = Math.max(distX, distY);
         break;
       case ORTHOGRAPHIC:
-        if (!_fixed) {
-          float dist = Vector.dot(Vector.subtract(newCenter, center()), vd);
-          distX = Vector.distance(pointX, newCenter) / eye().worldMagnitude() / aspectRatio();
-          distY = Vector.distance(pointY, newCenter) / eye().worldMagnitude() / 1.0f;
-          distance = dist + Math.max(distX, distY);
-        } else {
-          System.out.println("Warning: fit(x, y, width, height) is not available when bounds are fixed. Call setBounds(center, radius) first.");
-        }
+        float dist = Vector.dot(Vector.subtract(newCenter, center()), vd);
+        distX = Vector.distance(pointX, newCenter) / eye().worldMagnitude() / aspectRatio();
+        distY = Vector.distance(pointY, newCenter) / eye().worldMagnitude() / 1.0f;
+        distance = dist + Math.max(distX, distY);
         break;
     }
     eye().setWorldPosition(Vector.subtract(newCenter, Vector.multiply(vd, distance)));
