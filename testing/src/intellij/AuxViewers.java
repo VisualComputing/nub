@@ -26,7 +26,7 @@ public class AuxViewers extends PApplet {
   public void setup() {
     scene1 = onScreen ? new Scene(g) : new Scene(createGraphics(w, h, P3D));
     scene1.eye().tagging = false;
-    scene1.setBounds(1000);
+    scene1.setRadius(1000);
     scene1.fit(1000);
     shapes = new Node[15];
     for (int i = 0; i < shapes.length; i++) {
@@ -52,13 +52,13 @@ public class AuxViewers extends PApplet {
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(createGraphics(w / 2, h / 2, P3D));
     scene2.eye().tagging = false;
-    scene2.setBounds(1000);
+    scene2.setRadius(1000);
     scene2.fit(1000);
 
     // idem here
     scene3 = new Scene(createGraphics(w / 2, h / 2, P3D));
     scene3.eye().tagging = false;
-    scene3.setBounds(1000);
+    scene3.setRadius(1000);
     scene3.fit(1000);
   }
 

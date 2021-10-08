@@ -367,8 +367,6 @@ public class Scene extends Graph {
    * {@code false} if none was found (in this case no {@link #center()} is set).
    */
   public boolean setCenter(int pixelX, int pixelY) {
-    if (_fixed)
-      return false;
     Vector pup = location(pixelX, pixelY);
     if (pup != null) {
       _center = pup;
@@ -470,8 +468,6 @@ public class Scene extends Graph {
    * {@code false} if none was found (in this case no {@link #center()} is set).
    */
   public boolean setCenterFromPixel(int pixelX, int pixelY) {
-    if (_fixed)
-      return false;
     Vector pup = location(pixelX, pixelY);
     if (pup != null) {
       _center = pup;

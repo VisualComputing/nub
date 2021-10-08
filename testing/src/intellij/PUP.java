@@ -83,7 +83,8 @@ public class PUP extends PApplet {
     if (event.isControlDown()) {
       pup = scene.location();
       if (pup != null) {
-        visualHint.setBounds(pup, 300);
+        visualHint.setCenter(pup);
+        visualHint.setRadius(300);
         visualHint.eye().setWorldPosition(pup);
         //hint.setViewDirection(scene.displacement(Vector.plusJ));
         visualHint.setViewDirection(scene.displacement(new Vector(0, 1, 0)));

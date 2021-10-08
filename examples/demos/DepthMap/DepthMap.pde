@@ -104,7 +104,7 @@ void mouseDragged() {
 void mouseWheel(MouseEvent event) {
   if (event.isShiftDown() && scene.isTagValid("light")) {
     depthShader.set("far", zFar += event.getCount() * 20);
-    shadowMapScene.setBounds(zNear, zFar);
+    shadowMapScene.setZFar(() -> zFar);
   } else
     scene.zoom(event.getCount() * 20);
 }

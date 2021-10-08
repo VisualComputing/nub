@@ -188,7 +188,7 @@ public class ShadowMapping extends PApplet {
       int shift = event.getCount() * 20;
       float zNear = shadowMapScene.zNear();
       float zFar = shadowMapScene.zFar();
-      shadowMapScene.setBounds(zNear, zFar + shift);
+      shadowMapScene.setZFar(() -> zFar + shift);
     } else
       scene.zoom(event.getCount() * 20);
   }

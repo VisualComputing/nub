@@ -33,7 +33,7 @@ public class VisitExample extends PApplet {
     for(int i = 0; i < n; i++){
       final int idx = i;
       scenes[i] = new Scene(createGraphics(w / cols, h / rows, P3D));
-      scenes[i].setBounds(50);
+      scenes[i].setRadius(50);
       strokeColors[i] = color(random(255), random(255), random(255));
       fillColors[i] = color(random(255), random(255), random(255));
       scenes[i].fit();
