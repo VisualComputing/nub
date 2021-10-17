@@ -1668,7 +1668,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code fitBall(center(), radius())}.
+   * Same as {@code fit(center(), radius())}.
    *
    * @see #center()
    * @see #radius()
@@ -1689,7 +1689,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code fitBall(center(), radius(), duration)}.
+   * Same as {@code fit(center(), radius(), duration)}.
    *
    * @see #center()
    * @see #radius()
