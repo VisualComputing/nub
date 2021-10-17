@@ -328,6 +328,7 @@ public class Graph {
     if (is3D()) {
       setFOV((float) Math.PI / 3);
     }
+    fit();
   }
 
   /**
