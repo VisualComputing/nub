@@ -58,8 +58,6 @@ public class ViewingVolume extends PApplet {
     scene2.render();
     scene2.closeContext();
     scene2.image(0, h / 2);
-    println(scene1.zNear());
-    println(scene1.zFar());
   }
 
   public void draw1(PGraphics pg) {

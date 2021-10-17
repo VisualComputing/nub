@@ -21,8 +21,6 @@ Scene scene, shadowMapScene;
 Node[] shapes;
 PGraphics shadowMap;
 PShader depthShader;
-float zNear = 50;
-float zFar = 700;
 int w = 1200;
 int h = 1200;
 
@@ -57,14 +55,16 @@ void setup() {
   scene.node("light").setOrientation(Quaternion.from(Vector.plusK, scene.node("light").position()));
   // shadow map
   shadowMap = createGraphics(w / 2, h / 2, P3D);
-  depthShader = loadShader("depth.glsl");
-  depthShader.set("near", zNear);
-  depthShader.set("far", zFar);
-  shadowMap.shader(depthShader);
   // shadow map scene
-  shadowMapScene = new Scene(shadowMap, scene.node("light"), zNear, zFar);
+  shadowMapScene = new Scene(shadowMap, scene.node("light"));
+  shadowMapScene.setZNear(() -> 50f);
+  shadowMapScene.setZFar(() -> 700f);
   shadowMapScene.togglePerspective();
   shadowMapScene.picking = false;
+  depthShader = loadShader("depth.glsl");
+  depthShader.set("near", shadowMapScene.zNear());
+  depthShader.set("far", shadowMapScene.zFar());
+  shadowMap.shader(depthShader);
 }
 
 void draw() {
@@ -103,8 +103,9 @@ void mouseDragged() {
 
 void mouseWheel(MouseEvent event) {
   if (event.isShiftDown() && scene.isTagValid("light")) {
-    depthShader.set("far", zFar += event.getCount() * 20);
-    shadowMapScene.setZFar(() -> zFar);
+    float zFar = shadowMapScene.zFar();
+    shadowMapScene.setZFar(() -> zFar + event.getCount() * 20f);
+    depthShader.set("far", shadowMapScene.zFar());
   } else
     scene.zoom(event.getCount() * 20);
 }

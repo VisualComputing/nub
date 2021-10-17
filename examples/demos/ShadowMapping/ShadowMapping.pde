@@ -80,7 +80,9 @@ void setup() {
   );
   animation.run(60);
   // shadow map scene
-  shadowMapScene = new Scene(shadowMap, light, 10, 600);
+  shadowMapScene = new Scene(shadowMap, light);
+  shadowMapScene.setZNear(() -> 10f);
+  shadowMapScene.setZFar(() -> 600f);
   shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
   shadowMapScene.picking = false;
 }

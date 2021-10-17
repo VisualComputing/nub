@@ -325,7 +325,6 @@ public class Graph {
    *
    * @see #setCenter(Vector)
    * @see #setRadius(float)
-   * @see #Graph(Object, int, int, Type, float, float)
    * @see #TimingHandler
    * @see MatrixHandler
    */
@@ -363,7 +362,6 @@ public class Graph {
    *
    * @see #setCenter(Vector)
    * @see #setRadius(float)
-   * @see #Graph(Object, int, int, Node, Type, float, float)
    * @see #TimingHandler
    * @see MatrixHandler
    */
@@ -447,7 +445,7 @@ public class Graph {
    * @see Node#randomize(Vector, float, boolean)
    */
   public void randomize(Node node) {
-    node.randomize(center(), _radius, is3D());
+    node.randomize(_center, _radius, is3D());
   }
 
   // Dimensions stuff
@@ -570,7 +568,7 @@ public class Graph {
     }
     float magnitude = _type == Type.PERSPECTIVE ?
         (float) Math.tan(fov / 2) :
-        (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis())) / (float) width();
+        (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis())) / (float) width();
     if (magnitude > 0)
       eye().setWorldMagnitude(magnitude);
   }
@@ -601,7 +599,7 @@ public class Graph {
     }
     return _type == Type.PERSPECTIVE ?
         2 * (float) Math.atan(eye().worldMagnitude()) :
-        2 * (float) Math.atan(eye().worldMagnitude() * (float) width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis()))));
+        2 * (float) Math.atan(eye().worldMagnitude() * (float) width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis()))));
   }
 
   /**
@@ -636,7 +634,7 @@ public class Graph {
     }
     return _type == Type.PERSPECTIVE ?
         2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio()) :
-        2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio() * (float) width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis()))));
+        2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio() * (float) width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis()))));
   }
 
   /**
@@ -694,7 +692,7 @@ public class Graph {
    * @see #_zFar()
    */
   protected float _zNear() {
-    float z = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis()) - _zClippingCoefficient * _radius;
+    float z = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis()) - _zClippingCoefficient * _radius;
     // Prevents negative or null zNear values.
     float zMin = _zNearCoefficient * _zClippingCoefficient * _radius;
     if (z < zMin)
@@ -749,7 +747,7 @@ public class Graph {
    * @see #_zNear()
    */
   public float _zFar() {
-    return Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis()) + _zClippingCoefficient * _radius;
+    return Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis()) + _zClippingCoefficient * _radius;
   }
 
   // Graph and nodes stuff
@@ -1559,7 +1557,7 @@ public class Graph {
   public void setUpVector(Vector up, boolean noMove) {
     Quaternion q = new Quaternion(new Vector(0.0f, 1.0f, 0.0f), eye().displacement(up));
     if (!noMove)
-      eye().setWorldPosition(Vector.subtract(center(), (Quaternion.multiply(eye().worldOrientation(), q)).rotate(eye().location(center()))));
+      eye().setWorldPosition(Vector.subtract(_center, (Quaternion.multiply(eye().worldOrientation(), q)).rotate(eye().location(_center))));
     eye().rotate(q);
   }
 
@@ -1687,7 +1685,7 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit() {
-    fit(center(), _radius);
+    fit(_center, _radius);
   }
 
   /**
@@ -1708,7 +1706,7 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(float duration) {
-    fit(center(), _radius, duration);
+    fit(_center, _radius, duration);
   }
 
   /**
@@ -1773,7 +1771,7 @@ public class Graph {
         fitFOV();
         break;
       case ORTHOGRAPHIC:
-        float distance = Vector.dot(Vector.subtract(center, center()), viewDirection()) + (radius / eye().worldMagnitude());
+        float distance = Vector.dot(Vector.subtract(center, _center), viewDirection()) + (radius / eye().worldMagnitude());
         eye().setWorldPosition(Vector.subtract(center, Vector.multiply(viewDirection(), distance)));
         fitFOV();
         break;
@@ -1851,7 +1849,7 @@ public class Graph {
    * @see #fit(Vector, Vector, float)
    */
   public void fitFOV() {
-    float distance = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis());
+    float distance = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis());
     float magnitude = distance < (float) Math.sqrt(2) * _radius ? ((float) Math.PI / 2) : 2 * (float) Math.asin(_radius / distance);
     switch (_type) {
       case PERSPECTIVE:
@@ -2011,7 +2009,7 @@ public class Graph {
       return;
     }
     Vector vd = viewDirection();
-    float distToPlane = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis());
+    float distToPlane = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis());
     Vector orig = new Vector();
     Vector dir = new Vector();
     pixelToLine(centerX, centerY, orig, dir);
@@ -2030,7 +2028,7 @@ public class Graph {
         distance = Math.max(distX, distY);
         break;
       case ORTHOGRAPHIC:
-        float dist = Vector.dot(Vector.subtract(newCenter, center()), vd);
+        float dist = Vector.dot(Vector.subtract(newCenter, _center), vd);
         distX = Vector.distance(pointX, newCenter) / eye().worldMagnitude() / aspectRatio();
         distY = Vector.distance(pointY, newCenter) / eye().worldMagnitude() / 1.0f;
         distance = dist + Math.max(distX, distY);
@@ -3458,7 +3456,7 @@ public class Graph {
    */
   public void focus(Node node) {
     if (node == null || node == eye()) {
-      eye().projectOnLine(center(), viewDirection());
+      eye().projectOnLine(_center, viewDirection());
     }
     else {
       node.projectOnLine(eye().worldPosition(), eye().zAxis(false));
@@ -3584,7 +3582,7 @@ public class Graph {
   public void shift(Node node, float dx, float dy, float dz, float inertia) {
     if (node == null || node == eye()) {
       node = new Node(null, eye().worldPosition(), eye().worldOrientation(), eye().worldMagnitude(), false);
-      node.setWorldPosition(center());
+      node.setWorldPosition(_center);
       Vector vector = displacement(new Vector(dx, dy, dz), node);
       vector.multiply(-1);
       Vector translation = eye().referenceDisplacement(vector);
@@ -3614,10 +3612,10 @@ public class Graph {
   protected void _shift(float x, float y, float z) {
     float d1 = 1, d2;
     if (_type == Type.ORTHOGRAPHIC)
-      d1 = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis());
+      d1 = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis());
     eye().translate(x, y, z);
     if (_type == Type.ORTHOGRAPHIC) {
-      d2 = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), center()), eye().zAxis());
+      d2 = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis());
       if (d1 != 0)
         if (d2 / d1 > 0)
           eye().scale(d2 / d1);
@@ -3685,15 +3683,15 @@ public class Graph {
         pitch = 0;
         System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
       }
-      eye()._orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), center(), inertia);
+      eye()._orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), _center, inertia);
       // same as:
       //Quaternion q = new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw);
-      //eye().orbit(eye().worldDisplacement(q.axis()), q.angle(), center(), inertia);
+      //eye().orbit(eye().worldDisplacement(q.axis()), q.angle(), _center, inertia);
       // whereas the following doesn't work
       /*
       Quaternion q = new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw);
       q = eye().worldDisplacement(q);
-      eye().orbit(q.axis(), q.angle(), center(), inertia);
+      eye().orbit(q.axis(), q.angle(), _center, inertia);
       // */
     }
     else {
@@ -3767,7 +3765,7 @@ public class Graph {
   public void spin(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
     if (node == null || node == eye()) {
       float sensitivity = 1;
-      Vector center = screenLocation(center());
+      Vector center = screenLocation(_center);
       if (center == null)
         return;
       int centerX = (int) center.x();
@@ -3782,9 +3780,9 @@ public class Graph {
       Vector axis = p2.cross(p1);
       // 2D is an ad-hoc
       float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
-      eye()._orbit(new Quaternion(axis, angle), center(), inertia);
+      eye()._orbit(new Quaternion(axis, angle), _center, inertia);
       // same as:
-      //eye().orbit(eye().worldDisplacement(axis), angle, center(), inertia);
+      //eye().orbit(eye().worldDisplacement(axis), angle, _center, inertia);
     }
     else {
       float sensitivity = 1;
@@ -3944,7 +3942,7 @@ public class Graph {
    */
   protected void _cad() {
     Vector _up = eye().displacement(_eyeUp);
-    eye()._orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _cadRotateTask._y : -_cadRotateTask._y)), center());
+    eye()._orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _cadRotateTask._y : -_cadRotateTask._y)), _center);
   }
 
   // Hack to hide hint properties
