@@ -303,35 +303,6 @@ public class Graph {
   }
 
   /**
-   * Defines a right-handed graph with the specified {@code width} and {@code height}
-   * screen window dimensions. Creates and {@link #eye()} node, sets {@link #fov()} to
-   * {@code PI/3} and the {@code zNear} and {@code zFar} clipping planes. The scene
-   * {@link #center()} is set to {@code 0} and its {@link #radius()} to {@code (zFar - zNear) / 4}.
-   * <p>
-   * The constructor also instantiates the graph main {@link #context()} and
-   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
-   * {@link #TimingHandler}.
-   *
-   * @see #setCenter(Vector)
-   * @see #setRadius(float)
-   * @see #Graph(Object, int, int, Type, Vector, float)
-   * @see #TimingHandler
-   * @see MatrixHandler
-   */
-  protected Graph(Object context, int width, int height, Type type, float zNear, float zFar) {
-    _init(context, width, height, new Node(), type);
-    setCenter(new Vector());
-    // TODO set radius in a more consistent way
-    setRadius((zFar - zNear) / 4);
-    setZNear(() -> zNear);
-    setZFar(() -> zFar);
-    if (is3D()) {
-      setFOV((float) Math.PI / 3);
-    }
-    fit();
-  }
-
-  /**
    * Same as {@code this(context, width, height, type, new Vector(), radius)}.
    *
    * @see #Graph(Object, int, int, Type, Vector, float)
@@ -402,40 +373,6 @@ public class Graph {
     setRadius(radius);
     setZNear(this::_zNear);
     setZFar(this::_zFar);
-  }
-
-  /**
-   * Same as {@code this(context, width, height, eye, Type.PERSPECTIVE, zNear, zFar)}.
-   *
-   * @see #Graph(Object, int, int, Node, Type, float, float)
-   */
-  public Graph(Object context, int width, int height, Node eye, float zNear, float zFar) {
-    this(context, width, height, eye, Type.PERSPECTIVE, zNear, zFar);
-  }
-
-  /**
-   * Defines a right-handed graph with the specified {@code width} and {@code height}
-   * screen window dimensions and {@code zNear} and {@code zFar} clipping planes. The scene
-   * {@link #center()} center is set to {@code 0} and its {@link #radius()} to
-   * {@code (zFar - zNear) / 4}.
-   * <p>
-   * The constructor also instantiates the graph main {@link #context()} and
-   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
-   * {@link #TimingHandler}.
-   *
-   * @see #setCenter(Vector)
-   * @see #setRadius(float)
-   * @see #Graph(Object, int, int, Node, Type, Vector, float)
-   * @see #TimingHandler
-   * @see MatrixHandler
-   */
-  protected Graph(Object context, int width, int height, Node eye, Type type, float zNear, float zFar) {
-    _init(context, width, height, eye, type);
-    setCenter(new Vector());
-    // TODO set radius in a more consistent way
-    setRadius((zFar - zNear) / 4);
-    setZNear(() -> zNear);
-    setZFar(() -> zFar);
   }
 
   /**

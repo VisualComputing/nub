@@ -65,7 +65,9 @@ public class ShadowMapping extends PApplet {
     shadowMap.shader(depthShader);
     // Testing the appearance of artifacts first
     //shadowMap.noSmooth();
-    shadowMapScene = new Scene(shadowMap, light, 10, 600);
+    shadowMapScene = new Scene(shadowMap, light);
+    shadowMapScene.setZNear(() -> 10f);
+    shadowMapScene.setZFar(() -> 600f);
     shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
     shadowMapScene.picking = false;
     animation = new TimingTask(() -> {

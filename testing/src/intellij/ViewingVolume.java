@@ -22,8 +22,10 @@ public class ViewingVolume extends PApplet {
 
   @Override
   public void setup() {
-    //scene1 = new Scene(createGraphics(w, h / 2, P3D), 150);
-    scene1 = new Scene(createGraphics(w, h / 2, P3D), 50, 4000);
+    scene1 = new Scene(createGraphics(w, h / 2, P3D), 150);
+    //scene1 = new Scene(createGraphics(w, h / 2, P3D), 50, 4000);
+    scene1.setZNear(() -> 50f);
+    scene1.setZFar(() -> 4000f);
     scene1.eye().enableHint(Node.BOUNDS);
     //scene1.togglePerspective();
     //scene1.fit();
@@ -56,6 +58,8 @@ public class ViewingVolume extends PApplet {
     scene2.render();
     scene2.closeContext();
     scene2.image(0, h / 2);
+    println(scene1.zNear());
+    println(scene1.zFar());
   }
 
   public void draw1(PGraphics pg) {
