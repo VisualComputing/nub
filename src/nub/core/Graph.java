@@ -23,17 +23,27 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * A 2D or 3D scene-graph providing eye, input and timing handling to a raster or ray-tracing
- * renderer.
+ * A 2D or 3D scene-graph providing a (default) {@link #eye()} node, input and timing handling to
+ * a raster or ray-tracing renderer.
  * <h1>1. Types and dimensions</h1>
  * The way the projection matrix is computed (see {@link #projection()}), defines the type of the
  * graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC} for 3d graphs and {@link Type#TWO_D}
  * for a 2d graph.
  * <p>
- * To set up scene dimensions call {@link #setCenter(Vector)} and {@link #setRadius(float)}. The
- * resulting ball will be used to compute the {@link #zNear()} and {@link #zFar()} clipping planes
- * and interpolate the eye when calling {@link #fit(float)}. Use {@link #setZNear(Supplier)} and
- * {@link #setZFar(Supplier)} to customized the z-near and z-far computations.
+ * To set up scene dimensions call {@link #setBoundingBall(Vector, float)}. The resulting ball is
+ * then used to:
+ * <ol>
+ * <li>optimally compute the {@link #zNear()} and {@link #zFar()} clipping planes</li>;
+ * <li>implement {@link #eye()} motion interactions in methods such as
+ * {@link #turn(float, float, float)}, {@link #spin(int, int, int, int)} or
+ * {@link #shift(float, float, float)}; and,</li>
+ * <li>to interpolate the {@link #eye()} when calling {@link #fit(float)}, among others</li>
+ * </ol>
+ * Use {@link #setZNear(Supplier)} and {@link #setZFar(Supplier)} to customized the z-near and
+ * z-far computations.
+ * <p>
+ * To only affect eye motions interactions and interpolations (while leaving the current z-near
+ * and z-far computations unaffected) call {@link #setCenter(Vector)} and {@link #setRadius(float)}.
  * <h1>2. Scene-graph handling</h1>
  * A graph forms a tree of {@link Node}s whose visual representations may be
  * {@link #render()}. To render a subtree call {@link #render(Node)}.
@@ -141,8 +151,8 @@ public class Graph {
   // 1. Eye
   protected Node _eye;
   protected long _lastEqUpdate;
-  protected Vector _center;
-  protected float _radius;
+  protected Vector _ballCenter, _center;
+  protected float _ballRadius, _radius;
   Supplier<Float> _zNear, _zFar;
   //protected boolean _fixed;
   //protected float _zNear, _zFar;
@@ -330,10 +340,9 @@ public class Graph {
    */
   protected Graph(Object context, int width, int height, Type type, Vector center, float radius) {
     _init(context, width, height, new Node(), type);
-    setCenter(center);
-    setRadius(radius);
-    setZNear(this::_zNear);
-    setZFar(this::_zFar);
+    setBoundingBall(center, radius);
+    setZNear(this::ballZNear);
+    setZFar(this::ballZFar);
     if (is3D()) {
       setFOV((float) Math.PI / 3);
     }
@@ -353,7 +362,7 @@ public class Graph {
    * Defines a right-handed graph with the specified {@code width} and {@code height}
    * screen window dimensions. The {@link #zNear()} and {@link #zFar()} are dynamically
    * computed so that the ball defined by {@code center} and {@code radius} is always visible,
-   * unless the eye is looking towards a direction completely different than {@code center}.
+   * unless the eye is looking towards a direction completely different from {@code center}.
    * Call {@link #fit()} (or {@link #fit(float)}) to make the ball visible again.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and
@@ -367,10 +376,9 @@ public class Graph {
    */
   protected Graph(Object context, int width, int height, Node eye, Type type, Vector center, float radius) {
     _init(context, width, height, eye, type);
-    setCenter(center);
-    setRadius(radius);
-    setZNear(this::_zNear);
-    setZFar(this::_zFar);
+    setBoundingBall(center, radius);
+    setZNear(this::ballZNear);
+    setZFar(this::ballZFar);
   }
 
   /**
@@ -689,12 +697,12 @@ public class Graph {
    * <b>Attention:</b> The value is always positive, although the clipping plane is
    * positioned at a negative z value in the eye coordinate system.
    *
-   * @see #_zFar()
+   * @see #ballZFar()
    */
-  protected float _zNear() {
-    float z = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis()) - _zClippingCoefficient * _radius;
+  public float ballZNear() {
+    float z = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _ballCenter), eye().zAxis()) - _zClippingCoefficient * _ballRadius;
     // Prevents negative or null zNear values.
-    float zMin = _zNearCoefficient * _zClippingCoefficient * _radius;
+    float zMin = _zNearCoefficient * _zClippingCoefficient * _ballRadius;
     if (z < zMin)
       switch (_type) {
         case PERSPECTIVE:
@@ -744,10 +752,10 @@ public class Graph {
    * {@code zFar = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())
    * + zClippingCoefficient() * radius()}.
    *
-   * @see #_zNear()
+   * @see #ballZNear()
    */
-  public float _zFar() {
-    return Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis()) + _zClippingCoefficient * _radius;
+  public float ballZFar() {
+    return Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _ballCenter), eye().zAxis()) + _zClippingCoefficient * _ballRadius;
   }
 
   // Graph and nodes stuff
@@ -1444,20 +1452,44 @@ public class Graph {
   }
 
   /**
-   * Returns the radius of the graph observed by the eye in world units. Set it with
-   * {@link #setRadius(float)}.
+   * Sets the ball for {@link #zNear()} and {@link #zFar()} computations within the {@link #ballZNear()}
+   * and {@link #ballZFar()} functions. Calls {@link #setCenter(Vector)} {@link #setRadius(float)}.
+   * <p>
+   * To only affect eye motions interactions and interpolations (while leaving the current z-near
+   * and z-far computations unaffected) call {@link #setCenter(Vector)} and {@link #setRadius(float)}.
    *
+   * @see #setZNear(Supplier)
+   * @see #setZFar(Supplier)
    * @see #setCenter(Vector)
+   * @see #setRadius(float)
+   */
+  public void setBoundingBall(Vector center, float radius) {
+    _ballCenter = _center = center;
+    _ballRadius = _radius = Math.abs(radius);
+    _modified();
+  }
+
+  /**
+   * Radius of the ball (defined in world coordinates) used in eye motions interaction
+   * (e.g., {@link #shift(float, float, float)}, {@link #spin(int, int, int, int)},
+   * {@link #turn(float, float, float)}) and interpolation routines (e.g.,
+   * {@link #fit()}). This ball is different from the one used by the {@link #ballZNear()}
+   * and {@link #ballZFar()} algorithms ({see @link #setBoundingBall(Vector, float)}).
+   * <p>
+   * Set it with {@link #setRadius(float)}.
+   *
    * @see #center()
+   * @see #setBoundingBall(Vector, float)
    */
   public float radius() {
     return _radius;
   }
 
   /**
-   * Sets the scene {@link #radius()}.
+   * Sets {@link #radius()}. To be used in conjuntion with {@link #setCenter(Vector)}.
    *
    * @see #setCenter(Vector)
+   * @see #setBoundingBall(Vector, float)
    */
   public void setRadius(float radius) {
     _radius = Math.abs(radius);
@@ -1465,21 +1497,26 @@ public class Graph {
   }
 
   /**
-   * Returns the position of the graph center, defined in the world coordinate system.
+   * Center of the ball (defined in world coordinates) used in eye motions interaction
+   * (e.g., {@link #shift(float, float, float)}, {@link #spin(int, int, int, int)},
+   * {@link #turn(float, float, float)}) and interpolation routines (e.g.,
+   * {@link #fit()}). This ball is different from the one used by the {@link #ballZNear()}
+   * and {@link #ballZFar()} algorithms ({see @link #setBoundingBall(Vector, float)}).
+   * <p>
    * Set it with {@link #setCenter(Vector)}.
    *
-   * @see #setRadius(float)
-   * @see #zNear()
-   * @see #zFar()
+   * @see #radius()
+   * @see #setBoundingBall(Vector, float)
    */
   public Vector center() {
     return _center;
   }
 
   /**
-   * Sets the scene {@link #center()}.
+   * Sets {@link #center()}. To be used in conjuntion with {@link #setRadius(float)}.
    *
    * @see #setRadius(float)
+   * @see #setBoundingBall(Vector, float)
    */
   public void setCenter(Vector center) {
     _center = center;
