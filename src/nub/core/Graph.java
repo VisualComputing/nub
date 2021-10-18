@@ -1620,7 +1620,6 @@ public class Graph {
    * @see #at()
    * @see #setUpVector(Vector)
    * @see #fit()
-   * @see #_fit(Vector, float)
    * @see #fit(Vector, Vector)
    */
   public void lookAt(Vector target) {
@@ -1660,7 +1659,6 @@ public class Graph {
    * Convenience function that simply calls {@code fit(node, 0)}.
    *
    * @see #fit(Node, float)
-   * @see #_fit(Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(int, int, int, int, float)
    * @see #fit(float)
@@ -1679,7 +1677,6 @@ public class Graph {
    * The {@code duration} defines the interpolation speed.
    *
    * @see #fit(Node)
-   * @see #_fit(Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(int, int, int, int, float)
    * @see #fit(float)
@@ -1708,7 +1705,6 @@ public class Graph {
    *
    * @see #center()
    * @see #radius()
-   * @see #_fit(Vector, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
@@ -1733,7 +1729,6 @@ public class Graph {
    * before you call this method.
    *
    * @see #fit(float)
-   * @see #_fit(Vector, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
@@ -1772,9 +1767,9 @@ public class Graph {
         fitFOV();
         break;
       case ORTHOGRAPHIC:
+        fitFOV();
         float distance = Vector.dot(Vector.subtract(center, _center), viewDirection()) + (radius / eye().worldMagnitude());
         eye().setWorldPosition(Vector.subtract(center, Vector.multiply(viewDirection(), distance)));
-        fitFOV();
         break;
       case PERSPECTIVE:
         float yview = radius / (float) Math.sin(fov() / 2.0f);
@@ -1790,14 +1785,13 @@ public class Graph {
    * by {@code center} and {@code radius} is visible and fits the window.
    * <p>
    * The eye position and orientation are not modified and you first have to orientate
-   * the eye in order to actually see the scene (see {@link #lookAt(Vector)},
-   * {@link #fit()} or {@link #_fit(Vector, float)}).
+   * the eye in order to actually see the scene (see {@link #lookAt(Vector)} or
+   * {@link #fit()}).
    * <p>
    * <b>Attention:</b> The {@link #fov()} is clamped to PI/2. This happens
    * when the eye is at a distance lower than sqrt(2) * radius() from the center().
    *
    * @see #fitFOV()
-   * @see #_fit(Vector, float)
    * @see #fit(float)
    * @see #fit(Node)
    * @see #fit(Node, float)
@@ -1830,14 +1824,12 @@ public class Graph {
    * (defined by {@link #center()} and {@link #radius()}) is visible.
    * <p>
    * The eye position and orientation are not modified and you first have to orientate
-   * the eye in order to actually see the scene (see {@link #lookAt(Vector)},
-   * {@link #fit()} or {@link #_fit(Vector, float)}).
+   * the eye in order to actually see the scene (see {@link #lookAt(Vector)}).
    * <p>
    * <b>Attention:</b> The {@link #fov()} is clamped to PI/2. This happens
    * when the eye is at a distance lower than sqrt(2) * radius() from the center().
    *
    * @see #fitFOV(float)
-   * @see #_fit(Vector, float)
    * @see #fit(float)
    * @see #fit(Node)
    * @see #fit(Node, float)
@@ -1852,10 +1844,8 @@ public class Graph {
     float magnitude = distance < (float) Math.sqrt(2) * _radius ? ((float) Math.PI / 2) : 2 * (float) Math.asin(_radius / distance);
     switch (_type) {
       case PERSPECTIVE:
-        setFOV(magnitude);
-        break;
       case ORTHOGRAPHIC:
-        eye().setWorldMagnitude(distance < (float) Math.sqrt(2) * _radius ? 2 * _radius / (float) Math.min(width(), height()) : 2 * (float) Math.sin(magnitude) * distance / width());
+        setFOV(magnitude);
       case TWO_D:
         eye().setWorldMagnitude(2 * _radius / (float) Math.min(width(), height()));
         break;

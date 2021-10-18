@@ -90,6 +90,9 @@ public class ViewFrustumCulling extends PApplet {
     if (key == 'f') {
       Scene.leftHanded = !Scene.leftHanded;
     }
+    if (key == 's') {
+      focus.fit(1000);
+    }
   }
 
   class OctreeNode extends Node {
