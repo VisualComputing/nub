@@ -1620,7 +1620,7 @@ public class Graph {
    * @see #at()
    * @see #setUpVector(Vector)
    * @see #fit()
-   * @see #fit(Vector, float)
+   * @see #_fit(Vector, float)
    * @see #fit(Vector, Vector)
    */
   public void lookAt(Vector target) {
@@ -1660,13 +1660,12 @@ public class Graph {
    * Convenience function that simply calls {@code fit(node, 0)}.
    *
    * @see #fit(Node, float)
-   * @see #fit(Vector, float)
+   * @see #_fit(Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(int, int, int, int, float)
    * @see #fit(float)
    * @see #fit(int, int, int, int)
    * @see #fit()
-   * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -1680,13 +1679,12 @@ public class Graph {
    * The {@code duration} defines the interpolation speed.
    *
    * @see #fit(Node)
-   * @see #fit(Vector, float)
+   * @see #_fit(Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(int, int, int, int, float)
    * @see #fit(float)
    * @see #fit(int, int, int, int)
    * @see #fit()
-   * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -1705,33 +1703,37 @@ public class Graph {
   }
 
   /**
-   * Same as {@code fit(center(), radius())}.
+   * Moves the eye so that the ball defined by {@link #center()} and {@link #radius()} is
+   * visible and fits the window.
    *
    * @see #center()
    * @see #radius()
-   * @see #fit(Vector, float)
+   * @see #_fit(Vector, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
    * @see #fit(int, int, int, int, float)
    * @see #fit(float)
    * @see #fit(int, int, int, int)
-   * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
    */
   public void fit() {
-    fit(_center, _radius);
+    _fit(_center, _radius);
   }
 
   /**
-   * Same as {@code fit(center(), radius(), duration)}.
+   * Moves the eye during {@code duration} milliseconds so that the ball defined by
+   * {@link #center()} and {@link #radius()} is visible and fits the window.
+   * <p>
+   * In 3D the eye is simply translated along its {@link #viewDirection()} so that the
+   * ball fits the screen. Its {@link Node#worldOrientation()} and its
+   * {@link #fov()} are unchanged. You should therefore orientate the eye
+   * before you call this method.
    *
-   * @see #center()
-   * @see #radius()
-   * @see #fit(Vector, float, float)
-   * @see #fit(Vector, float)
+   * @see #fit(float)
+   * @see #_fit(Vector, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
@@ -1743,33 +1745,8 @@ public class Graph {
    * @see #fitFOV(float)
    */
   public void fit(float duration) {
-    fit(_center, _radius, duration);
-  }
-
-  /**
-   * Moves the eye during {@code duration} milliseconds so that the ball defined by
-   * {@code center} and {@code radius} is visible and fits the window.
-   * <p>
-   * In 3D the eye is simply translated along its {@link #viewDirection()} so that the
-   * ball fits the screen. Its {@link Node#worldOrientation()} and its
-   * {@link #fov()} are unchanged. You should therefore orientate the eye
-   * before you call this method.
-   *
-   * @see #fit(float)
-   * @see #fit(Vector, float)
-   * @see #fit(Node)
-   * @see #fit(Node, float)
-   * @see #fit(Vector, Vector)
-   * @see #fit(int, int, int, int, float)
-   * @see #fit()
-   * @see #fit(int, int, int, int)
-   * @see #fit(Vector, Vector, float)
-   * @see #fitFOV()
-   * @see #fitFOV(float)
-   */
-  public void fit(Vector center, float radius, float duration) {
     if (duration <= 0)
-      fit(center, radius);
+      _fit(_center, _radius);
     else {
       _eye._interpolator._task.stop();
       _interpolator.reset();
@@ -1778,7 +1755,7 @@ public class Graph {
       Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
       setEye(tempEye);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
-      fit(center, radius);
+      _fit(_center, _radius);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
       _interpolator.run();
       setEye(cacheEye);
@@ -1786,22 +1763,9 @@ public class Graph {
   }
 
   /**
-   * Moves the eye so that the ball defined by {@code center} and {@code radius} is
-   * visible and fits the window.
-   *
-   * @see #fit(float)
-   * @see #fit(Vector, float, float)
-   * @see #fit(Node)
-   * @see #fit(Node, float)
-   * @see #fit(Vector, Vector)
-   * @see #fit(int, int, int, int, float)
-   * @see #fit()
-   * @see #fit(int, int, int, int)
-   * @see #fit(Vector, Vector, float)
-   * @see #fitFOV()
-   * @see #fitFOV(float)
+   * Internally used by both {@link #fit()} and {@link #fit(Vector, Vector)}.
    */
-  public void fit(Vector center, float radius) {
+  protected void _fit(Vector center, float radius) {
     switch (_type) {
       case TWO_D:
         lookAt(center);
@@ -1827,15 +1791,14 @@ public class Graph {
    * <p>
    * The eye position and orientation are not modified and you first have to orientate
    * the eye in order to actually see the scene (see {@link #lookAt(Vector)},
-   * {@link #fit()} or {@link #fit(Vector, float)}).
+   * {@link #fit()} or {@link #_fit(Vector, float)}).
    * <p>
    * <b>Attention:</b> The {@link #fov()} is clamped to PI/2. This happens
    * when the eye is at a distance lower than sqrt(2) * radius() from the center().
    *
    * @see #fitFOV()
-   * @see #fit(Vector, float)
+   * @see #_fit(Vector, float)
    * @see #fit(float)
-   * @see #fit(Vector, float, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
@@ -1868,15 +1831,14 @@ public class Graph {
    * <p>
    * The eye position and orientation are not modified and you first have to orientate
    * the eye in order to actually see the scene (see {@link #lookAt(Vector)},
-   * {@link #fit()} or {@link #fit(Vector, float)}).
+   * {@link #fit()} or {@link #_fit(Vector, float)}).
    * <p>
    * <b>Attention:</b> The {@link #fov()} is clamped to PI/2. This happens
    * when the eye is at a distance lower than sqrt(2) * radius() from the center().
    *
    * @see #fitFOV(float)
-   * @see #fit(Vector, float)
+   * @see #_fit(Vector, float)
    * @see #fit(float)
-   * @see #fit(Vector, float, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
@@ -1906,13 +1868,11 @@ public class Graph {
    *
    * @see #fit(Vector, Vector)
    * @see #fit(float)
-   * @see #fit(Vector, float, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(int, int, int, int, float)
    * @see #fit()
    * @see #fit(int, int, int, int)
-   * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
    */
@@ -1940,20 +1900,18 @@ public class Graph {
    *
    * @see #fit(Vector, Vector, float)
    * @see #fit(float)
-   * @see #fit(Vector, float, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(int, int, int, int, float)
    * @see #fit()
    * @see #fit(int, int, int, int)
-   * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
    */
   public void fit(Vector corner1, Vector corner2) {
     float diameter = Math.max(Math.abs(corner2._vector[1] - corner1._vector[1]), Math.abs(corner2._vector[0] - corner1._vector[0]));
     diameter = Math.max(Math.abs(corner2._vector[2] - corner1._vector[2]), diameter);
-    fit(Vector.multiply(Vector.add(corner1, corner2), 0.5f), 0.5f * diameter);
+    _fit(Vector.multiply(Vector.add(corner1, corner2), 0.5f), 0.5f * diameter);
   }
 
   /**
@@ -1972,11 +1930,9 @@ public class Graph {
    * @see #fit(Vector, Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(float)
-   * @see #fit(Vector, float, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit()
-   * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
    */
@@ -2013,11 +1969,9 @@ public class Graph {
    * @see #fit(Vector, Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(float)
-   * @see #fit(Vector, float, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit()
-   * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
    * @param x coordinate of the rectangle
@@ -3487,6 +3441,8 @@ public class Graph {
 
   /**
    * Focuses the node (use null for the world) with the {@link #eye()}.
+   * <p>
+   * Note that the ball {@link #center()} is used as reference point when focusing the eye.
    *
    * @see #focus()
    * @see #focus(String tag)
@@ -3615,6 +3571,8 @@ public class Graph {
    * Translates the {@code node} (use null for the world) according to {@code (dx, dy, dz)}
    * defined in screen-space ((a box of {@link #width()} * {@link #height()} * 1 dimensions),
    * and {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
+   * <p>
+   * Note that the ball {@link #center()} is used as reference point when shifting the eye.
    */
   public void shift(Node node, float dx, float dy, float dz, float inertia) {
     if (node == null || node == eye()) {
@@ -3712,6 +3670,8 @@ public class Graph {
    * Rotates the {@code node} (use null for the world) around the x-y-z screen axes according to
    * {@code roll}, {@code pitch} and {@code yaw} radians, resp., and according to {@code inertia}
    * which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
+   * <p>
+   * Note that the ball {@link #center()} is used as reference point when turning the eye.
    */
   public void turn(Node node, float roll, float pitch, float yaw, float inertia) {
     if (node == null || node == eye()) {
@@ -3798,6 +3758,8 @@ public class Graph {
    * <p>
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
    * three-dimensional orientation using a mouse.
+   * <p>
+   * Note that the ball {@link #center()} is used as pivot when spinning the eye.
    */
   public void spin(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
     if (node == null || node == eye()) {
@@ -3957,6 +3919,8 @@ public class Graph {
    * <p>
    * This method requires calling {@code scene.eye().setYAxis(upVector)} (see
    * {@link Node#setYAxis(Vector)}) and {@link #fit()} first.
+   * <p>
+   * Note that the ball {@link #center()} is used as reference point when rotating the eye.
    *
    * @see #cad(float, float)
    */
