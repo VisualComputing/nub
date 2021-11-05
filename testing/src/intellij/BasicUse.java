@@ -141,12 +141,6 @@ public class BasicUse extends PApplet {
     if (key == 'f')
       scene.fit();
 
-    if (key == 'x')
-      for (Task task : Scene.TimingHandler.tasks())
-        task.enableConcurrence();
-    if (key == 'y')
-      for (Task task : Scene.TimingHandler.tasks())
-        task.disableConcurrence();
     if (key == 'p') {
       println(Scene.nodes().size());
       println("node hint: " + node.hint());

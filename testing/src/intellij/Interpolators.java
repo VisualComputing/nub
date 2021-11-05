@@ -179,12 +179,6 @@ public class Interpolators extends PApplet {
       scene.fit(1000);
     if (key == 'f')
       scene.fit();
-    if (key == 'e')
-      for (Task task : Scene.TimingHandler.tasks())
-        task.enableConcurrence();
-    if (key == 'f')
-      for (Task task : Scene.TimingHandler.tasks())
-        task.disableConcurrence();
   }
 
   public static void main(String[] args) {

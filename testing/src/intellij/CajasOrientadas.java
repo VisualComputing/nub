@@ -67,11 +67,6 @@ public class CajasOrientadas extends PApplet {
         caja.toggleHint(Node.BULLSEYE);
         caja.togglePicking(Node.SHAPE);
       }
-    if (key == 'x') {
-      for (Task task : TimingHandler.tasks()) {
-        task.enableConcurrence(true);
-      }
-    }
     if (key == 'y') {
       for (Task task : TimingHandler.tasks()) {
         if (task.isRecurrent())

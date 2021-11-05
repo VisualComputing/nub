@@ -190,7 +190,6 @@ class Interpolator {
     if (Graph.TimingHandler.isTaskRegistered(other._task)) {
       this._task = new Task(() -> Interpolator.this._execute());
       this._task.setPeriod(other._task.period());
-      this._task.enableConcurrence(other._task.isConcurrent());
     }
     this._recurrent = other._recurrent;
     this._pathIsValid = false;

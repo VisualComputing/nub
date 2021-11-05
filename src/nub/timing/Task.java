@@ -14,13 +14,8 @@ package nub.timing;
 import nub.core.Graph;
 
 /**
- * Tasks are (non)recurrent, (non)concurrent (see {@link #isRecurrent()}
- * and {@link #isConcurrent()} resp.) callbacks defined by overridden
- * {@link #execute()}.
- * <p>
- * Note that concurrence of the task execution (which requires a separate
- * execution thread) should be implemented by derived classes, i.e., this
- * class just implements the task sequential api.
+ * Tasks are (non)recurrent (see {@link #isRecurrent()}) callbacks
+ * defined by overridden {@link #execute()}.
  * <p>
  * A task runs (see {@link #run(long)}) at a certain {@link #period()}
  * which define the interval duration between two consecutive executions
@@ -38,7 +33,6 @@ public class Task {
   protected Callback _callback;
   protected boolean _active;
   protected boolean _recurrence;
-  protected boolean _concurrence;
   protected long _counter;
   protected long _period;
   protected long _startTime;
@@ -255,7 +249,6 @@ public class Task {
    * @see #disableRecurrence()
    * @see #enableRecurrence(boolean)
    * @see #isRecurrent()
-   * @see #enableConcurrence(boolean)
    */
   public void enableRecurrence() {
     enableRecurrence(true);
@@ -267,7 +260,6 @@ public class Task {
    * @see #enableRecurrence()
    * @see #enableRecurrence(boolean)
    * @see #isRecurrent()
-   * @see #enableConcurrence(boolean)
    */
   public void disableRecurrence() {
     enableRecurrence(false);
@@ -280,7 +272,6 @@ public class Task {
    * @see #isRecurrent()
    * @see #enableRecurrence()
    * @see #disableRecurrence()
-   * @see #enableConcurrence(boolean)
    */
   public void enableRecurrence(boolean enable) {
     boolean isActive = isActive();
@@ -300,60 +291,8 @@ public class Task {
    * Tasks are recurrent by default, see {@link #Task()}.
    *
    * @see #enableRecurrence(boolean)
-   * @see #isConcurrent()
    */
   public boolean isRecurrent() {
     return _recurrence;
-  }
-
-  /**
-   * Same as {@code enableConcurrence(true)}.
-   *
-   * @see #disableConcurrence()
-   * @see #enableConcurrence(boolean)
-   * @see #isConcurrent()
-   * @see #enableRecurrence(boolean)
-   */
-  public void enableConcurrence() {
-    enableConcurrence(true);
-  }
-
-  /**
-   * Same as {@code enableConcurrence(false)}.
-   *
-   * @see #enableConcurrence()
-   * @see #enableConcurrence(boolean)
-   * @see #isConcurrent()
-   * @see #enableRecurrence(boolean)
-   */
-  public void disableConcurrence() {
-    enableConcurrence(false);
-  }
-
-  /**
-   * Enables or (disables) the task concurrence according to {@code enable}.
-   * Task concurrence should be implemented by derived classes.
-   *
-   * @see #isConcurrent()
-   * @see #enableConcurrence()
-   * @see #disableConcurrence()
-   * @see #enableRecurrence(boolean)
-   */
-  public void enableConcurrence(boolean enable) {
-    if (enable)
-      System.out.println("Task can't be made concurrent. Concurrence should be implemented by derived classes.");
-  }
-
-  /**
-   * Returns {@code true} if the task is concurrent, i.e., if it runs in parallel, and
-   * {@code false} otherwise.
-   * <p>
-   * Task concurrence should be implemented by derived classes.
-   *
-   * @see #enableConcurrence(boolean)
-   * @see #isRecurrent()
-   */
-  public boolean isConcurrent() {
-    return _concurrence;
   }
 }

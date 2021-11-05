@@ -388,15 +388,6 @@ public class Graph {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
-      // only Java disable concurrence
-      boolean message = false;
-      for (Task task : TimingHandler.tasks()) {
-        if (task.isConcurrent())
-          message = true;
-        task.disableConcurrence();
-      }
-      if (message)
-        System.out.println("Warning: all timing-tasks made non-concurrent");
     }
     _fb = context;
     _matrixHandler = new MatrixHandler();
@@ -2441,8 +2432,7 @@ public class Graph {
   public static void handle() {
     _updateFrameRate();
     for (Task task : nub.timing.TimingHandler._tasks)
-      if (!task.isConcurrent())
-        task._execute();
+      task._execute();
   }
 
   /**

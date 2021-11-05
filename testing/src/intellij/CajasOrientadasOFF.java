@@ -77,11 +77,6 @@ public class CajasOrientadasOFF extends PApplet {
     if (key == 'f') {
       scene1.fitFOV(1000);
     }
-    if (key == 'x') {
-      for (Task task : TimingHandler.tasks()) {
-        task.enableConcurrence(true);
-      }
-    }
     if (key == 'y') {
       for (Task task : TimingHandler.tasks()) {
         if (task.isRecurrent())

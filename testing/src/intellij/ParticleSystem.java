@@ -62,10 +62,6 @@ public class ParticleSystem extends PApplet {
         particle.incrementPeriod();
       if (key == ' ')
         particle.toggle();
-      if (key == 'e')
-        particle.enableConcurrence(true);
-      if (key == 'd')
-        particle.enableConcurrence(false);
     }
   }
 
@@ -103,14 +99,6 @@ public class ParticleSystem extends PApplet {
 
     void toggle() {
       task.toggle();
-    }
-
-    void enableConcurrence(boolean enable) {
-      task.enableConcurrence(enable);
-    }
-
-    boolean isConcurrent() {
-      return task.isConcurrent();
     }
 
     public void graphics(PGraphics pg) {
