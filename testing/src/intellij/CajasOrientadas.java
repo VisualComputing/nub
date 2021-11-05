@@ -5,8 +5,6 @@ import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.core.Task;
-import nub.timing.TimingHandler;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -67,12 +65,6 @@ public class CajasOrientadas extends PApplet {
         caja.toggleHint(Node.BULLSEYE);
         caja.togglePicking(Node.SHAPE);
       }
-    if (key == 'y') {
-      for (Task task : TimingHandler.tasks()) {
-        if (task.isRecurrent())
-          println("recurrent");
-      }
-    }
     if (key == 'c') {
       for (Box caja : cajas)
         if (caja.bullsEyeSize() < 1)

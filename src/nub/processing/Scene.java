@@ -266,7 +266,7 @@ public class Scene extends Graph {
       frameCount = pApplet.frameCount;
       frameRate =  pApplet.frameRate;
     }
-    _inertias();
+    _timing();
   }
 
   // P5 STUFF

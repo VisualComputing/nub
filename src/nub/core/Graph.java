@@ -403,19 +403,19 @@ public class Graph {
     setEye(eye);
     _translationInertia = new Inertia() {
       @Override
-      public void action() {
+      void _action() {
         _shift(_x, _y, _z);
       }
     };
     _lookAroundInertia = new Inertia() {
       @Override
-      public void action() {
+      void _action() {
         _lookAround();
       }
     };
     _cadRotateInertia = new Inertia() {
       @Override
-      public void action() {
+      void _action() {
         _cad();
       }
     };
@@ -915,7 +915,6 @@ public class Graph {
     _eye._frustumGraphs.add(this);
     if (_interpolator == null) {
       _interpolator = new Interpolator(_eye);
-      _interpolator._task = new Task(() -> _interpolator._execute());
     }
     else {
       _interpolator.setNode(_eye);
@@ -1650,12 +1649,12 @@ public class Graph {
     if (duration <= 0) {
       _eye.set(node);
     } else {
-      _eye._interpolator._task.stop();
+      _eye._interpolator._active = false;
       _interpolator.reset();
       _interpolator.clear();
       _interpolator.addKeyFrame(new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false));
       _interpolator.addKeyFrame(node, duration);
-      _interpolator.run();
+      _interpolator._active = true;
     }
   }
 
@@ -1703,7 +1702,7 @@ public class Graph {
     if (duration <= 0)
       _fit(_center, _radius);
     else {
-      _eye._interpolator._task.stop();
+      _eye._interpolator._active = false;
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
@@ -1712,7 +1711,7 @@ public class Graph {
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       _fit(_center, _radius);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
-      _interpolator.run();
+      _interpolator._active = true;
       setEye(cacheEye);
     }
   }
@@ -1765,7 +1764,7 @@ public class Graph {
     if (duration <= 0)
       fitFOV();
     else {
-      _eye._interpolator._task.stop();
+      _eye._interpolator._active = false;
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
@@ -1774,7 +1773,7 @@ public class Graph {
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       fitFOV();
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
-      _interpolator.run();
+      _interpolator._active = true;
       setEye(cacheEye);
     }
   }
@@ -1830,7 +1829,7 @@ public class Graph {
     if (duration <= 0)
       fit(corner1, corner2);
     else {
-      _eye._interpolator._task.stop();
+      _eye._interpolator._active = false;
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
@@ -1839,7 +1838,7 @@ public class Graph {
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       fit(corner1, corner2);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
-      _interpolator.run();
+      _interpolator._active = true;
       setEye(cacheEye);
     }
   }
@@ -1890,7 +1889,7 @@ public class Graph {
     if (duration <= 0)
       fit(x, y, width, height);
     else {
-      _eye._interpolator._task.stop();
+      _eye._interpolator._active = false;
       _interpolator.reset();
       _interpolator.clear();
       Node cacheEye = _eye;
@@ -1899,7 +1898,7 @@ public class Graph {
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       fit(x, y, width, height);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
-      _interpolator.run();
+      _interpolator._active = true;
       setEye(cacheEye);
     }
   }
@@ -2395,14 +2394,15 @@ public class Graph {
       _frameRateLastNanos = now;
       frameCount++;
     }
-    _inertias();
+    _timing();
     // */
   }
 
-  protected void _inertias() {
-    this._translationInertia.execute();
-    this._lookAroundInertia.execute();
-    this._lookAroundInertia.execute();
+  protected void _timing() {
+    this._translationInertia._execute();
+    this._lookAroundInertia._execute();
+    this._lookAroundInertia._execute();
+    this._interpolator._execute();
   }
 
   /**

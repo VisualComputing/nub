@@ -140,7 +140,7 @@ class Interpolator {
   protected Node _node;
 
   // Beat
-  protected Task _task;
+  boolean _active;
   protected float _t;
   protected float _speed;
 
@@ -156,7 +156,7 @@ class Interpolator {
 
   /**
    * Creates an interpolator for the given {@code node}. Note that
-   * {@link #time()}, {@link #speed()} are set to their default values.
+   * {@code t}, {@link #speed()} are set to their default values.
    * <p>
    * Note that the interpolator {@link Task} is decoupled from this class
    * and thus should be handled i.e., (un)register, outside this class.
@@ -186,8 +186,6 @@ class Interpolator {
     this.setNode(other.node());
     this._t = other._t;
     this._speed = other._speed;
-    this._task = new Task(() -> Interpolator.this._execute());
-    this._task.setPeriod(other._task.period());
     this._recurrent = other._recurrent;
     this._pathIsValid = false;
     this._valuesAreValid = false;
@@ -228,12 +226,6 @@ class Interpolator {
 
   /**
    * Returns the node that is to be interpolated by the interpolator.
-   * <p>
-   * When {@link Task#isActive()}, this node's position, orientation and
-   * magnitude will regularly be updated by a task, so that they follow the
-   * interpolator path.
-   * <p>
-   * Set using {@link #setNode(Node)} or with the interpolator constructor.
    */
   public Node node() {
     return _node;
@@ -248,17 +240,7 @@ class Interpolator {
   }
 
   /**
-   * Returns the low-level timing task. Prefer the high-level-api instead:
-   * {@link #run()}, {@link #reset()}, {@link #time()} ({@link #setTime(float)})
-   * and {@link #toggle()}. Useful if you need to customize the low-level
-   * timing-task, e.g., to enable concurrency on it.
-   */
-  public Task task() {
-    return _task;
-  }
-
-  /**
-   * Updates the {@link #node()} state at the current {@link #time()} and
+   * Updates the {@link #node()} state at the current {@code t} and
    * then increments it by {@link Task#period()} * {@link #speed()} ms.
    * This method is called by an interpolator task (see {@link Task}) when
    * the interpolation is running.
@@ -267,129 +249,53 @@ class Interpolator {
    * constant and equal to the total path {@link #duration()} divided by the
    * {@link Task#period()} * {@link #speed()} which is is especially useful
    * for benchmarking or movie creation (constant number of snapshots). Note
-   * that if {@code speed = 1} then {@link #time()} will be matched
+   * that if {@code speed = 1} then {@code t} will be matched
    * during the interpolation (provided that your main loop is fast enough).
    * <p>
-   * Note that {@link Task#stop()} is called when {@link #time()} reaches
+   * Note that {@link Task#stop()} is called when {@code t} reaches
    * {@link #firstTime()} or {@link #lastTime()}, unless {@link #isRecurrent()}
    * is {@code true}.
-   *
-   * @see #time()
    */
-  protected void _execute() {
-    if ((_list.isEmpty()) || (node() == null))
-      return;
-    if ((_speed > 0.0) && (time() >= _list.get(_list.size() - 1)._time))
-      setTime(_list.get(0)._time);
-    if ((_speed < 0.0) && (time() <= _list.get(0)._time))
-      setTime(_list.get(_list.size() - 1)._time);
-    interpolate(time());
-    _t += _speed * _task.period();
-    if (time() >= _list.get(_list.size() - 1)._time) {
-      if (isRecurrent())
-        setTime(_list.get(0)._time + _t - _list.get(_list.size() - 1)._time);
-      else {
-        // Make sure last KeyFrame is reached and displayed
-        interpolate(_list.get(_list.size() - 1)._time);
-        _task.stop();
-      }
-    } else if (time() <= _list.get(0)._time) {
-      if (isRecurrent())
-        setTime(_list.get(_list.size() - 1)._time - _list.get(0)._time + _t);
-      else {
-        // Make sure first KeyFrame is reached and displayed
-        interpolate(_list.get(0)._time);
-        _task.stop();
+  void _execute() {
+    if (_active) {
+      if ((_list.isEmpty()) || (node() == null))
+        return;
+      if ((_speed > 0.0) && (_t >= _list.get(_list.size() - 1)._time))
+        _t = _list.get(0)._time;
+      if ((_speed < 0.0) && (_t <= _list.get(0)._time))
+        _t = _list.get(_list.size() - 1)._time;
+      interpolate(_t);
+      // TODO Pierre target is next line
+      // _t += _speed * _task.period();
+      if (_t >= _list.get(_list.size() - 1)._time) {
+        if (isRecurrent())
+          _t = _list.get(0)._time + _t - _list.get(_list.size() - 1)._time;
+        else {
+          // Make sure last KeyFrame is reached and displayed
+          interpolate(_list.get(_list.size() - 1)._time);
+          _active = false;
+        }
+      } else if (_t <= _list.get(0)._time) {
+        if (isRecurrent())
+          _t = _list.get(_list.size() - 1)._time - _list.get(0)._time + _t;
+        else {
+          // Make sure first KeyFrame is reached and displayed
+          interpolate(_list.get(0)._time);
+          _active = false;
+        }
       }
     }
   }
-
+  
   /**
-   * Same as {@code task().toggle()}.
-   *
-   * @see Task#toggle()
-   */
-  public void toggle() {
-    _task.toggle();
-  }
-
-  /**
-   * Same as {@code task().run()}.
-   *
-   * @see Task#run()
-   * @see #run(float)
-   */
-  public void run() {
-    _task.run();
-  }
-
-  /**
-   * Starts the interpolation process.
-   * <p>
-   * A task is started at {@code time } (see {@link #setTime(float)}) which
-   * will update the {@link #node()}'s position, orientation and magnitude
-   * at the current {@link #time()}.
-   * <p>
-   * If {@link #time()} is larger than {@link #lastTime()},
-   * {@link #time()} is reset to {@link #firstTime()} before interpolation
-   * starts (and conversely for negative {@code speed}.
-   * <p>
-   * Use {@link #setTime(float)} before calling this method to change the
-   * starting {@link #time()}.
-   * <p>
-   * Note that {@link Task#isActive()} will return {@code true} until
-   * {@link Task#stop()} is called.
-   * <p>
-   * <b>Attention:</b> The keyframes must be defined (see
-   * {@link #addKeyFrame(Node, float)}) before you start(), or else
-   * the interpolation will naturally immediately stop.
-   *
-   * @see #run()
-   * @see #run(float)
-   */
-
-  /**
-   * Sets the time (see {@link #setTime(float)}) and then call {@code task().run()}.
-   *
-   * @see #run()
-   */
-  public void run(float time) {
-    setTime(time);
-    run();
-  }
-
-  /**
-   * Stops the interpolation and resets {@link #time()} to the {@link #firstTime()}.
+   * Stops the interpolation and resets {@code t} to the {@link #firstTime()}.
    * <p>
    * If desired, call {@link #interpolate(float)} after this method to actually move
    * the {@link #node()} to {@link #firstTime()}.
    */
   public void reset() {
-    _task.stop();
-    setTime(firstTime());
-  }
-
-  /**
-   * Sets the {@link #time()}.
-   *
-   * <b>Attention:</b> The {@link #node()} state is not affected by this method. Use this
-   * function to define the starting time of a future interpolation (see
-   * {@link #run()}). Use {@link #interpolate(float)} to actually
-   * interpolate at a given time.
-   */
-  public void setTime(float time) {
-    _t = time;
-  }
-
-  /**
-   * Returns the current interpolation time (in milliseconds) along the interpolator
-   * path.
-   * <p>
-   * This time is regularly updated when {@link Task#isActive()}. Can be set
-   * directly with {@link #setTime(float)} or {@link #interpolate(float)}.
-   */
-  public float time() {
-    return _t;
+    _active = false;
+    _t = firstTime();
   }
 
   /**
@@ -409,7 +315,6 @@ class Interpolator {
    *
    * @see #lastTime()
    * @see #duration()
-   * @see #time()
    */
   public float firstTime() {
     return _list.isEmpty() ? 0.0f : _list.get(0)._time;
@@ -420,7 +325,6 @@ class Interpolator {
    *
    * @see #firstTime()
    * @see #duration()
-   * @see #time()
    */
   public float lastTime() {
     return _list.isEmpty() ? 0.0f : _list.get(_list.size() - 1)._time;
@@ -451,14 +355,12 @@ class Interpolator {
    * Returns {@code true} when the interpolation is played in an infinite loop.
    * <p>
    * When {@code false} (default), the interpolation stops when
-   * {@link #time()} reaches {@link #firstTime()} (with negative
-   * {@code speed} which is set with {@link #run(float)}) or
-   * {@link #lastTime()}.
+   * {@code t} reaches {@link #firstTime()} (with negative
+   * {@code speed}.
    * <p>
-   * {@link #time()} is otherwise reset to {@link #firstTime()} (+
-   * {@link #time()} - {@link #lastTime()}) (and inversely for negative
-   * {@code speed} which is set with {@link #run(float)}) and
-   * interpolation continues.
+   * {@code t} is otherwise reset to {@link #firstTime()} (+
+   * {@code t} - {@link #lastTime()}) (and inversely for negative
+   * {@code speed} and interpolation continues.
    */
   public boolean isRecurrent() {
     return _recurrent;
@@ -467,13 +369,12 @@ class Interpolator {
   /**
    * Returns the current interpolation speed.
    * <p>
-   * Default value is 1, which means {@link #time()} will be matched during
+   * Default value is 1, which means {@code t} will be matched during
    * the interpolation (provided that your main loop is fast enough).
    * <p>
    * A negative value will result in a reverse interpolation of the keyframes.
    *
    * @see #setSpeed(float)
-   * @see Task#period()
    */
   public float speed() {
     return _speed;
@@ -484,7 +385,6 @@ class Interpolator {
    *
    * @see #speed()
    * @see #setSpeed(float)
-   * @see Task#increasePeriod(long)
    */
   public void increaseSpeed(float delta) {
     setSpeed(speed() + delta);
@@ -495,7 +395,6 @@ class Interpolator {
    *
    * @see #speed()
    * @see #increaseSpeed(float)
-   * @see Task#period()
    */
   public void setSpeed(float speed) {
     _speed = speed;
@@ -623,14 +522,14 @@ class Interpolator {
     _pathIsValid = false;
     _currentKeyFrameValid = false;
     boolean rerun = false;
-    if (_task.isActive()) {
-      _task.stop();
+    if (_active) {
+      _active = false;
     }
     _list.remove(index);
-    setTime(firstTime());
+    _t = firstTime();
     if (rerun) {
       if (_list.size() > 1)
-        _task.run();
+        _active = true;
       else
         interpolate(0);
     }
@@ -646,7 +545,7 @@ class Interpolator {
    * @see Node#detach()
    */
   public void clear() {
-    _task.stop();
+    _active = false;
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
@@ -663,14 +562,11 @@ class Interpolator {
 
   /**
    * Interpolate {@link #node()} at time {@code time} (expressed in milliseconds).
-   * {@link #time()} is set to {@code time} and {@link #node()} is set accordingly.
-   * <p>
-   * If you simply want to change {@link #time()} but not the
-   * {@link #node()} state, use {@link #setTime(float)} instead.
+   * {@code t} is set to {@code time} and {@link #node()} is set accordingly.
    */
   public void interpolate(float time) {
     this._checkValidity();
-    setTime(time);
+    _t = time;
     if ((_list.isEmpty()) || (node() == null))
       return;
     if (!_valuesAreValid)

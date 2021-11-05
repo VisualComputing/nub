@@ -392,31 +392,30 @@ public class Node {
     }
     _translationInertia = new Inertia() {
       @Override
-      public void action() {
+      void _action() {
         translate(_x, _y, _z);
       }
     };
 
     _rotationInertia = new Inertia() {
       @Override
-      public void action() {
+      void _action() {
         rotate(new Quaternion(_x, _y, _z));
       }
     };
     _orbitInertia = new Inertia() {
       @Override
-      public void action() {
+      void _action() {
         _orbit(new Quaternion(_x, _y, _z), _center);
       }
     };
     _scalingInertia = new Inertia() {
       @Override
-      public void action() {
+      void _action() {
         float factor = 1 + Math.abs(_x) / _scalingFactor;
         scale(_x >= 0 ? factor : 1 / factor);
       }
     };
-    _interpolator._task = new Task(() -> _interpolator._execute());
     if (attach) {
       attach();
     }
@@ -848,10 +847,11 @@ public class Node {
     if (_lastRendered != Graph.frameCount) {
       _lastRenderedSet.clear();
       // update timing stuff
-      this._translationInertia.execute();
-      this._rotationInertia.execute();
-      this._scalingInertia.execute();
-      this._orbitInertia.execute();
+      this._translationInertia._execute();
+      this._rotationInertia._execute();
+      this._scalingInertia._execute();
+      this._orbitInertia._execute();
+      this._interpolator._execute();
     }
     _lastRendered = Graph.frameCount;
     _lastRenderedSet.add(graph);
@@ -3566,14 +3566,21 @@ public class Node {
    * Run the animation defined by the node keyframes.
    */
   public void animate() {
-    _interpolator.run();
+    _interpolator._active = true;
+  }
+  /**
+   * Run the animation with the given {@code speed} defined by the node keyframes.
+   */
+  public void animate(float speed) {
+    _interpolator._speed = speed;
+    _interpolator._active = true;
   }
 
   /**
    * Toggles the node animation.
    */
   public void toggleAnimation() {
-    _interpolator.toggle();
+    _interpolator._active = !_interpolator._active;
   }
 
   /**
@@ -3587,14 +3594,14 @@ public class Node {
    * Returns the current interpolation time (in milliseconds) along the keyframes path.
    */
   public float animationTime() {
-    return _interpolator.time();
+    return _interpolator._t;
   }
 
   /**
    * Sets the animation time (in milliseconds) used for the next {@link #animate()} call.
    */
   public void setAnimationTime(float time) {
-    _interpolator.setTime(time);
+    _interpolator._t = time;
   }
 
   /**
@@ -3621,11 +3628,6 @@ public class Node {
     addKeyFrame(hint, 1);
   }
   // */
-
-  // TODO debug
-  public Task task() {
-    return _interpolator.task();
-  }
 
   /**
    * Adds a node copy as a keyframe at {@code time} (in milliseconds) and a mask {@code hint}.

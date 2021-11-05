@@ -5,8 +5,6 @@ import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.core.Task;
-import nub.timing.TimingHandler;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -76,12 +74,6 @@ public class CajasOrientadasOFF extends PApplet {
     }
     if (key == 'f') {
       scene1.fitFOV(1000);
-    }
-    if (key == 'y') {
-      for (Task task : TimingHandler.tasks()) {
-        if (task.isRecurrent())
-          println("recurrent");
-      }
     }
     if (key == 'c') {
       for (Box caja : cajas)

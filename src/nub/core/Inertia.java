@@ -22,9 +22,9 @@ import nub.primitives.Vector;
 abstract class Inertia {
   boolean _active;
   // orbit center:
-  protected Vector _center = new Vector();
-  protected float _inertia;
-  protected float _x, _y, _z;
+  Vector _center = new Vector();
+  float _inertia;
+  float _x, _y, _z;
 
   /**
    * Sets inertia in [0..1].
@@ -38,7 +38,7 @@ abstract class Inertia {
     _inertia = val;
   }
 
-  public void execute() {
+  void _execute() {
     if (_active) {
       _x *= _inertia;
       if (Math.abs(_x) < .001)
@@ -52,12 +52,12 @@ abstract class Inertia {
       if (_x == 0 && _y == 0 && _z == 0)
         _active = false;
       else
-        action();
+        _action();
     }
   }
 
   /**
    * Callback method for translate, orbit & rotate damped actions.
    */
-  abstract void action();
+  abstract void _action();
 }
