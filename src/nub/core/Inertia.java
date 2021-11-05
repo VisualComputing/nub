@@ -19,7 +19,8 @@ import nub.primitives.Vector;
  * in turn based on a "damned clever and aesthetic idea by David Bollinger".
  */
 // JS should go:
-abstract class InertialTask extends Task {
+abstract class Inertia {
+  boolean _active;
   // orbit center:
   protected Vector _center = new Vector();
   protected float _inertia;
@@ -37,21 +38,22 @@ abstract class InertialTask extends Task {
     _inertia = val;
   }
 
-  @Override
   public void execute() {
-    _x *= _inertia;
-    if (Math.abs(_x) < .001)
-      _x = 0;
-    _y *= _inertia;
-    if (Math.abs(_y) < .001)
-      _y = 0;
-    _z *= _inertia;
-    if (Math.abs(_z) < .001)
-      _z = 0;
-    if (_x == 0 && _y == 0 && _z == 0)
-      stop();
-    else
-      action();
+    if (_active) {
+      _x *= _inertia;
+      if (Math.abs(_x) < .001)
+        _x = 0;
+      _y *= _inertia;
+      if (Math.abs(_y) < .001)
+        _y = 0;
+      _z *= _inertia;
+      if (Math.abs(_z) < .001)
+        _z = 0;
+      if (_x == 0 && _y == 0 && _z == 0)
+        _active = false;
+      else
+        action();
+    }
   }
 
   /**

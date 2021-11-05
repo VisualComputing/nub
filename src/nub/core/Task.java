@@ -11,8 +11,6 @@
 
 package nub.core;
 
-import nub.timing.TimingHandler;
-
 /**
  * Tasks are (non)recurrent (see {@link #isRecurrent()}) callbacks
  * defined by overridden {@link #execute()}.
@@ -21,10 +19,8 @@ import nub.timing.TimingHandler;
  * which define the interval duration between two consecutive executions
  * (see also {@link #frequency()}). Do not use the task for drawing
  * since it will not necessarily run every frame.
- * <p>
- * Call {@link TimingHandler#unregisterTask(Task)} to cancel the task.
  */
-public class Task {
+class Task {
   @FunctionalInterface
   public interface Callback {
     void execute();
@@ -43,7 +39,6 @@ public class Task {
    * (i.e., a {@link #frequency()} of 25 Hz).
    */
   public Task(Callback callback) {
-    TimingHandler.registerTask(this);
     _recurrence = true;
     _period = 40;
     setCallback(callback);
@@ -55,7 +50,6 @@ public class Task {
    * set as its {@link #callback()} method.
    */
   public Task() {
-    TimingHandler.registerTask(this);
     _recurrence = true;
     _period = 40;
     setCallback(this::execute);

@@ -14,7 +14,6 @@ package nub.core;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.timing.TimingHandler;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -105,18 +104,10 @@ import java.util.function.Supplier;
  * {@link #interact(String, Object...)} or {@link #interact(Node, Object...)}.
  * </li>
  * </ol>
- * <h1>4. Timing handling</h1>
- * The graph performs timing handling through a {@link #TimingHandler}. Several
- * {@link TimingHandler} wrapper functions, such as {@link TimingHandler#registerTask(Task)}
- * are provided for convenience.
- * <p>
- * Several animations may be performed to make the {@link #eye()} reach a target, such as
- * {@link #fit(float)},{@link #fit(int, int, int, int)}, {@link #fit(Node)} and
- * {@link #fit(Node, float)}.
- * <h1>5. Visibility and culling techniques</h1>
+ * <h1>4. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
  * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}.
- * <h1>6. Matrix handling</h1>
+ * <h1>5. Matrix handling</h1>
  * The graph performs matrix handling through a matrix-handler. Refer to the {@link MatrixHandler}
  * documentation for details.
  * <p>
@@ -125,7 +116,6 @@ import java.util.function.Supplier;
  * {@link #endHUD()}. These methods are {@link MatrixHandler} wrapper functions
  * with the same signatures provided for convenience.
  *
- * @see TimingHandler
  * @see MatrixHandler
  */
 public class Graph {
@@ -168,9 +158,9 @@ public class Graph {
   //protected float _zNear, _zFar;
   // Inertial stuff
   public static float inertia = 0.8f;
-  protected InertialTask _translationTask;
-  protected InertialTask _lookAroundTask;
-  protected InertialTask _cadRotateTask;
+  protected Inertia _translationInertia;
+  protected Inertia _lookAroundInertia;
+  protected Inertia _cadRotateInertia;
   protected Vector _eyeUp;
   // Interpolator
   protected Interpolator _interpolator;
@@ -247,7 +237,6 @@ public class Graph {
     }
   }
 
-  public static TimingHandler TimingHandler;
   public static boolean _seeded;
   protected boolean _seededGraph;
   protected HashMap<String, Node> _tags;
@@ -340,12 +329,10 @@ public class Graph {
    * {@link #fit()} (or {@link #fit(float)}) to make the ball visible again.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and
-   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
-   * {@link #TimingHandler}.
+   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}).
    *
    * @see #setCenter(Vector)
    * @see #setRadius(float)
-   * @see #TimingHandler
    * @see MatrixHandler
    */
   protected Graph(Object context, int width, int height, Type type, Vector center, float radius) {
@@ -376,12 +363,10 @@ public class Graph {
    * Call {@link #fit()} (or {@link #fit(float)}) to make the ball visible again.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and
-   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}) and
-   * {@link #TimingHandler}.
+   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}).
    *
    * @see #setCenter(Vector)
    * @see #setRadius(float)
-   * @see #TimingHandler
    * @see MatrixHandler
    */
   protected Graph(Object context, int width, int height, Node eye, Type type, Vector center, float radius) {
@@ -416,19 +401,19 @@ public class Graph {
       throw new RuntimeException("Error eye shouldn't be null");
     }
     setEye(eye);
-    _translationTask = new InertialTask() {
+    _translationInertia = new Inertia() {
       @Override
       public void action() {
         _shift(_x, _y, _z);
       }
     };
-    _lookAroundTask = new InertialTask() {
+    _lookAroundInertia = new Inertia() {
       @Override
       public void action() {
         _lookAround();
       }
     };
-    _cadRotateTask = new InertialTask() {
+    _cadRotateInertia = new Inertia() {
       @Override
       public void action() {
         _cad();
@@ -855,32 +840,6 @@ public class Graph {
     list.add(node);
     for (Node child : node.children())
       _collect(list, child);
-  }
-
-  // Timing stuff
-
-  /**
-   * Returns the translation inertial task.
-   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
-   */
-  public Task translationInertialTask() {
-    return _translationTask;
-  }
-
-  /**
-   * Returns the look-around inertial task.
-   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
-   */
-  public Task lookAroundInertialTask() {
-    return _lookAroundTask;
-  }
-
-  /**
-   * Returns the cad-rotate inertial task.
-   * Useful if you need to customize the timing task, e.g., to enable concurrency on it.
-   */
-  public Task cadRotateInertialTask() {
-    return _cadRotateTask;
   }
 
   // Matrix and transformations stuff
@@ -2436,7 +2395,14 @@ public class Graph {
       _frameRateLastNanos = now;
       frameCount++;
     }
+    _inertias();
     // */
+  }
+
+  protected void _inertias() {
+    this._translationInertia.execute();
+    this._lookAroundInertia.execute();
+    this._lookAroundInertia.execute();
   }
 
   /**
@@ -3592,12 +3558,12 @@ public class Graph {
       vector.multiply(-1);
       Vector translation = eye().referenceDisplacement(vector);
       _shift(translation.x(), translation.y(), translation.z());
-      _translationTask.setInertia(inertia);
-      _translationTask._x += translation.x();
-      _translationTask._y += translation.y();
-      _translationTask._z += translation.z();
-      if (!_translationTask.isActive()) {
-        _translationTask.run();
+      _translationInertia.setInertia(inertia);
+      _translationInertia._x += translation.x();
+      _translationInertia._y += translation.y();
+      _translationInertia._z += translation.z();
+      if (!_translationInertia._active) {
+        _translationInertia._active = true;
       }
     }
     else {
@@ -3876,12 +3842,12 @@ public class Graph {
     if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
     } else {
-      _lookAroundTask.setInertia(inertia);
-      _lookAroundTask._x += deltaX / 5;
-      _lookAroundTask._y += deltaY / 5;
+      _lookAroundInertia.setInertia(inertia);
+      _lookAroundInertia._x += deltaX / 5;
+      _lookAroundInertia._y += deltaY / 5;
       _lookAround();
-      if (!_lookAroundTask.isActive())
-        _lookAroundTask.run();
+      if (!_lookAroundInertia._active)
+        _lookAroundInertia._active = true;
     }
   }
 
@@ -3894,8 +3860,8 @@ public class Graph {
       _lookAroundCount = frameCount;
     }
     _lookAroundCount++;
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _lookAroundTask._y : -_lookAroundTask._y);
-    Quaternion rotY = new Quaternion(eye().displacement(_upVector), -_lookAroundTask._x);
+    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _lookAroundInertia._y : -_lookAroundInertia._y);
+    Quaternion rotY = new Quaternion(eye().displacement(_upVector), -_lookAroundInertia._x);
     Quaternion quaternion = Quaternion.multiply(rotY, rotX);
     eye().rotate(quaternion);
   }
@@ -3940,11 +3906,11 @@ public class Graph {
     } else {
       _eyeUp = upVector;
       _cad();
-      _cadRotateTask.setInertia(inertia);
-      _cadRotateTask._x += roll;
-      _cadRotateTask._y += pitch;
-      if (!_cadRotateTask.isActive())
-        _cadRotateTask.run();
+      _cadRotateInertia.setInertia(inertia);
+      _cadRotateInertia._x += roll;
+      _cadRotateInertia._y += pitch;
+      if (!_cadRotateInertia._active)
+        _cadRotateInertia._active = true;
     }
   }
 
@@ -3953,7 +3919,7 @@ public class Graph {
    */
   protected void _cad() {
     Vector _up = eye().displacement(_eyeUp);
-    eye()._orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateTask._x : -_cadRotateTask._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _cadRotateTask._y : -_cadRotateTask._y)), _center);
+    eye()._orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateInertia._x : -_cadRotateInertia._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _cadRotateInertia._y : -_cadRotateInertia._y)), _center);
   }
 
   // Hack to hide hint properties

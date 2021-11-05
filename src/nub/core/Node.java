@@ -14,7 +14,6 @@ package nub.core;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.timing.TimingHandler;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -204,7 +203,8 @@ public class Node {
   protected BiConsumer<Node, Object[]> _interact;
 
   // Tasks
-  protected InertialTask _translationTask, _rotationTask, _orbitTask, _scalingTask;
+  protected boolean _attach;
+  protected Inertia _translationInertia, _rotationInertia, _orbitInertia, _scalingInertia;
   protected final float _scalingFactor = 800;
 
   /**
@@ -390,6 +390,33 @@ public class Node {
     if (!method.getDeclaringClass().equals(Node.class)) {
       setShape(this::graphics);
     }
+    _translationInertia = new Inertia() {
+      @Override
+      public void action() {
+        translate(_x, _y, _z);
+      }
+    };
+
+    _rotationInertia = new Inertia() {
+      @Override
+      public void action() {
+        rotate(new Quaternion(_x, _y, _z));
+      }
+    };
+    _orbitInertia = new Inertia() {
+      @Override
+      public void action() {
+        _orbit(new Quaternion(_x, _y, _z), _center);
+      }
+    };
+    _scalingInertia = new Inertia() {
+      @Override
+      public void action() {
+        float factor = 1 + Math.abs(_x) / _scalingFactor;
+        scale(_x >= 0 ? factor : 1 / factor);
+      }
+    };
+    _interpolator._task = new Task(() -> _interpolator._execute());
     if (attach) {
       attach();
     }
@@ -452,39 +479,6 @@ public class Node {
     this(reference, position, orientation, magnitude);
     setShape(shape);
     _keyframesMask = Node.SHAPE;
-  }
-
-  /**
-   * Returns the translation inertial task.
-   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
-   */
-  public Task translationInertialTask() {
-    return _translationTask;
-  }
-
-  /**
-   * Returns the rotation inertial task.
-   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
-   */
-  public Task rotationInertialTask() {
-    return _rotationTask;
-  }
-
-  /**
-   * Returns the orbit inertial task.
-   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
-   */
-  public Task orbitInertialTask() {
-    return _orbitTask;
-  }
-
-  /**
-   * Returns the scaling inertial task.
-   * Useful if you need to customize the timing-task, e.g., to enable concurrency on it.
-
-   */
-  public Task scalingInertialTask() {
-    return _scalingTask;
   }
 
   /**
@@ -853,6 +847,11 @@ public class Node {
     }
     if (_lastRendered != Graph.frameCount) {
       _lastRenderedSet.clear();
+      // update timing stuff
+      this._translationInertia.execute();
+      this._rotationInertia.execute();
+      this._scalingInertia.execute();
+      this._orbitInertia.execute();
     }
     _lastRendered = Graph.frameCount;
     _lastRenderedSet.add(graph);
@@ -902,7 +901,7 @@ public class Node {
     if (reach) {
       List<Node> branch = Graph.branch(node);
       for (Node descendant : branch) {
-        descendant._registerTasks();
+        descendant._attach = true;
         // restore interpolators and hud sets
         if (descendant.isHintEnabled(Node.HUD)) {
           Graph._huds.add(descendant);
@@ -933,10 +932,11 @@ public class Node {
     if (isAttached()) {
       List<Node> branch = Graph.branch(this);
       for (Node descendant : branch) {
-        descendant._unregisterTasks();
+        descendant._attach = false;
         // remove also possible references to graph interpolators and hud sets
-        Graph._huds.remove(this);
-        Graph._interpolators.remove(this);
+        // TODO experimental prev it was this instead of descendant looked like a bug
+        Graph._huds.remove(descendant);
+        Graph._interpolators.remove(descendant);
       }
       if (reference() != null) {
         reference()._removeChild(this);
@@ -960,54 +960,7 @@ public class Node {
    * @see #setReference(Node)
    */
   public boolean isAttached() {
-    return Graph.TimingHandler.isTaskRegistered(_translationTask);
-  }
-  
-  protected void _registerTasks() {
-    if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
-      _translationTask = new InertialTask() {
-        @Override
-        public void action() {
-          translate(_x, _y, _z);
-        }
-      };
-    }
-    if (!Graph.TimingHandler.isTaskRegistered(_rotationTask)) {
-      _rotationTask = new InertialTask() {
-        @Override
-        public void action() {
-          rotate(new Quaternion(_x, _y, _z));
-        }
-      };
-    }
-    if (!Graph.TimingHandler.isTaskRegistered(_orbitTask)) {
-      _orbitTask = new InertialTask() {
-        @Override
-        public void action() {
-          _orbit(new Quaternion(_x, _y, _z), _center);
-        }
-      };
-    }
-    if (!Graph.TimingHandler.isTaskRegistered(_scalingTask)) {
-      _scalingTask = new InertialTask() {
-        @Override
-        public void action() {
-          float factor = 1 + Math.abs(_x) / _scalingFactor;
-          scale(_x >= 0 ? factor : 1 / factor);
-        }
-      };
-    }
-    if (!Graph.TimingHandler.isTaskRegistered(_interpolator._task)) {
-      _interpolator._task = new Task(() -> _interpolator._execute());
-    }
-  }
-
-  protected void _unregisterTasks() {
-    TimingHandler.unregisterTask(_translationTask);
-    TimingHandler.unregisterTask(_rotationTask);
-    TimingHandler.unregisterTask(_orbitTask);
-    TimingHandler.unregisterTask(_scalingTask);
-    TimingHandler.unregisterTask(_interpolator._task);
+    return _attach;
   }
 
   /**
@@ -1260,16 +1213,12 @@ public class Node {
    */
   public void translate(Vector vector, float inertia) {
     translate(vector);
-    if (!Graph.TimingHandler.isTaskRegistered(_translationTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use translate(vector) instead");
-      return;
-    }
-    _translationTask.setInertia(inertia);
-    _translationTask._x += vector.x();
-    _translationTask._y += vector.y();
-    _translationTask._z += vector.z();
-    if (!_translationTask.isActive()) {
-      _translationTask.run();
+    _translationInertia.setInertia(inertia);
+    _translationInertia._x += vector.x();
+    _translationInertia._y += vector.y();
+    _translationInertia._z += vector.z();
+    if (!_translationInertia._active) {
+      _translationInertia._active = true;
     }
   }
 
@@ -1536,17 +1485,13 @@ public class Node {
    */
   public void rotate(Quaternion quaternion, float inertia) {
     rotate(quaternion);
-    if (!Graph.TimingHandler.isTaskRegistered(_rotationTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use rotate(quaternion) instead");
-      return;
-    }
-    _rotationTask.setInertia(inertia);
+    _rotationInertia.setInertia(inertia);
     Vector e = quaternion.eulerAngles();
-    _rotationTask._x += e.x();
-    _rotationTask._y += e.y();
-    _rotationTask._z += e.z();
-    if (!_rotationTask.isActive())
-      _rotationTask.run();
+    _rotationInertia._x += e.x();
+    _rotationInertia._y += e.y();
+    _rotationInertia._z += e.z();
+    if (!_rotationInertia._active)
+      _rotationInertia._active = true;
   }
 
   /**
@@ -1655,18 +1600,14 @@ public class Node {
    */
   protected void _orbit(Quaternion quaternion, Vector center, float inertia) {
     _orbit(quaternion, center);
-    if (!Graph.TimingHandler.isTaskRegistered(_orbitTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use orbit(quaternion, center) instead");
-      return;
-    }
-    _orbitTask.setInertia(inertia);
-    _orbitTask._center = center;
+    _orbitInertia.setInertia(inertia);
+    _orbitInertia._center = center;
     Vector e = quaternion.eulerAngles();
-    _orbitTask._x += e.x();
-    _orbitTask._y += e.y();
-    _orbitTask._z += e.z();
-    if (!_orbitTask.isActive())
-      _orbitTask.run();
+    _orbitInertia._x += e.x();
+    _orbitInertia._y += e.y();
+    _orbitInertia._z += e.z();
+    if (!_orbitInertia._active)
+      _orbitInertia._active = true;
   }
 
   /**
@@ -1836,14 +1777,10 @@ public class Node {
    */
   public void scale(float scaling, float inertia) {
     scale(scaling);
-    if (!Graph.TimingHandler.isTaskRegistered(_scalingTask)) {
-      System.out.println("Warning: inertia is disabled. Perhaps your node is detached. Use scale(scaling) instead");
-      return;
-    }
-    _scalingTask._inertia = inertia;
-    _scalingTask._x += scaling > 1 ? _scalingFactor * (scaling - 1) : _scalingFactor * (scaling - 1) / scaling;
-    if (!_scalingTask.isActive()) {
-      _scalingTask.run();
+    _scalingInertia._inertia = inertia;
+    _scalingInertia._x += scaling > 1 ? _scalingFactor * (scaling - 1) : _scalingFactor * (scaling - 1) / scaling;
+    if (!_scalingInertia._active) {
+      _scalingInertia._active = true;
     }
   }
 
@@ -3630,27 +3567,6 @@ public class Node {
    */
   public void animate() {
     _interpolator.run();
-  }
-
-  /**
-   * Run the animation with the given {@code speed} defined by the node keyframes.
-   */
-  public void animate(float speed) {
-    _interpolator.run(speed, _interpolator._task.period());
-  }
-
-  /**
-   * Run the animation with the given {@code period} defined by the node keyframes.
-   */
-  public void animate(long period) {
-    _interpolator.run(_interpolator._speed, period);
-  }
-
-  /**
-   * Run the animation with the given {@code speed} and {@code period} defined by the node keyframes.
-   */
-  public void animate(float speed, long period) {
-    _interpolator.run(speed, period);
   }
 
   /**

@@ -186,10 +186,8 @@ class Interpolator {
     this.setNode(other.node());
     this._t = other._t;
     this._speed = other._speed;
-    if (Graph.TimingHandler.isTaskRegistered(other._task)) {
-      this._task = new Task(() -> Interpolator.this._execute());
-      this._task.setPeriod(other._task.period());
-    }
+    this._task = new Task(() -> Interpolator.this._execute());
+    this._task.setPeriod(other._task.period());
     this._recurrent = other._recurrent;
     this._pathIsValid = false;
     this._valuesAreValid = false;
@@ -276,7 +274,6 @@ class Interpolator {
    * {@link #firstTime()} or {@link #lastTime()}, unless {@link #isRecurrent()}
    * is {@code true}.
    *
-   * @see #run(float, long)
    * @see #time()
    */
   protected void _execute() {
@@ -313,43 +310,17 @@ class Interpolator {
    * @see Task#toggle()
    */
   public void toggle() {
-    if (Graph.TimingHandler.isTaskRegistered(_task))
-      _task.toggle();
+    _task.toggle();
   }
 
   /**
    * Same as {@code task().run()}.
    *
    * @see Task#run()
-   * @see #run(float, long)
    * @see #run(float)
    */
   public void run() {
-    if (Graph.TimingHandler.isTaskRegistered(_task))
-      _task.run();
-  }
-
-  /**
-   * Sets the time (see {@link #setTime(float)}) and then call {@code task().run()}.
-   *
-   * @see #run()
-   * @see #run(float, long)
-   */
-  public void run(float time) {
-    setTime(time);
-    run();
-  }
-
-  /**
-   * Sets the speed (see {@link #setSpeed(float)}) and then call {@code task().run(period)}.
-   *
-   * @see #run()
-   * @see #run(float, long)
-   */
-  public void run(float speed, long period) {
-    setSpeed(speed);
-    if (Graph.TimingHandler.isTaskRegistered(_task))
-      _task.run(period);
+    _task.run();
   }
 
   /**
@@ -376,11 +347,15 @@ class Interpolator {
    * @see #run()
    * @see #run(float)
    */
-  public void run(float time, float speed, int period) {
+
+  /**
+   * Sets the time (see {@link #setTime(float)}) and then call {@code task().run()}.
+   *
+   * @see #run()
+   */
+  public void run(float time) {
     setTime(time);
-    setSpeed(speed);
-    if (Graph.TimingHandler.isTaskRegistered(_task))
-      _task.run(period);
+    run();
   }
 
   /**
@@ -390,8 +365,7 @@ class Interpolator {
    * the {@link #node()} to {@link #firstTime()}.
    */
   public void reset() {
-    if (Graph.TimingHandler.isTaskRegistered(_task))
-      _task.stop();
+    _task.stop();
     setTime(firstTime());
   }
 
@@ -478,12 +452,12 @@ class Interpolator {
    * <p>
    * When {@code false} (default), the interpolation stops when
    * {@link #time()} reaches {@link #firstTime()} (with negative
-   * {@code speed} which is set with {@link #run(float, long)}) or
+   * {@code speed} which is set with {@link #run(float)}) or
    * {@link #lastTime()}.
    * <p>
    * {@link #time()} is otherwise reset to {@link #firstTime()} (+
    * {@link #time()} - {@link #lastTime()}) (and inversely for negative
-   * {@code speed} which is set with {@link #run(float, long)}) and
+   * {@code speed} which is set with {@link #run(float)}) and
    * interpolation continues.
    */
   public boolean isRecurrent() {
@@ -649,9 +623,7 @@ class Interpolator {
     _pathIsValid = false;
     _currentKeyFrameValid = false;
     boolean rerun = false;
-    if (Graph.TimingHandler.isTaskRegistered(_task))
-      rerun = _task.isActive();
-    if (rerun) {
+    if (_task.isActive()) {
       _task.stop();
     }
     _list.remove(index);
@@ -674,8 +646,7 @@ class Interpolator {
    * @see Node#detach()
    */
   public void clear() {
-    if (Graph.TimingHandler.isTaskRegistered(_task))
-      _task.stop();
+    _task.stop();
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();

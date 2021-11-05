@@ -19,7 +19,6 @@ import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.core.Task;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -95,7 +94,6 @@ import java.util.function.Consumer;
  *
  * @see Graph
  * @see Node
- * @see TimingTask
  */
 public class Scene extends Graph {
   @FunctionalInterface
@@ -267,10 +265,8 @@ public class Scene extends Graph {
     if (_seededGraph) {
       frameCount = pApplet.frameCount;
       frameRate =  pApplet.frameRate;
-      // TODO move to the node
-      for (Task task : nub.timing.TimingHandler._tasks)
-        task._execute();
     }
+    _inertias();
   }
 
   // P5 STUFF
