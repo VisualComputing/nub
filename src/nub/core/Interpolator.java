@@ -188,7 +188,7 @@ class Interpolator {
     this._t = other._t;
     this._speed = other._speed;
     if (Graph.TimingHandler.isTaskRegistered(other._task)) {
-      this._task = new nub.processing.TimingTask(() -> Interpolator.this._execute());
+      this._task = new Task(() -> Interpolator.this._execute());
       this._task.setPeriod(other._task.period());
       this._task.enableConcurrence(other._task.isConcurrent());
     }

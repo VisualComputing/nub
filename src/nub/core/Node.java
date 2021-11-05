@@ -996,7 +996,7 @@ public class Node {
       };
     }
     if (!Graph.TimingHandler.isTaskRegistered(_interpolator._task)) {
-      _interpolator._task = new nub.processing.TimingTask(() -> _interpolator._execute());
+      _interpolator._task = new Task(() -> _interpolator._execute());
     }
   }
 

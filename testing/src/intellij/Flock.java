@@ -4,7 +4,7 @@ import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.processing.TimingTask;
+import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -190,7 +190,7 @@ public class Flock extends PApplet {
     // Node
     Node node;
     // timing task
-    TimingTask task;
+    Task task;
     // fields
     Vector position, velocity, acceleration, alignment, cohesion, separation; // position, velocity, and acceleration in
     // a vector datatype
@@ -209,7 +209,7 @@ public class Flock extends PApplet {
       velocity = Vector.random();
       acceleration = new Vector();
       neighborhoodRadius = 100;
-      task = new TimingTask(this::behavior);
+      task = new Task(this::behavior);
       task.run();
     }
 

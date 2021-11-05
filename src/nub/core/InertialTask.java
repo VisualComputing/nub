@@ -12,6 +12,7 @@
 package nub.core;
 
 import nub.primitives.Vector;
+import nub.timing.Task;
 
 /**
  * Translate, Orbit & Rotate (Euler angles) damped task based on PeasyCam, see
@@ -19,8 +20,7 @@ import nub.primitives.Vector;
  * in turn based on a "damned clever and aesthetic idea by David Bollinger".
  */
 // JS should go:
-//class InertialTask extends Task {
-abstract class InertialTask extends nub.processing.TimingTask {
+abstract class InertialTask extends Task {
   // orbit center:
   protected Vector _center = new Vector();
   protected float _inertia;

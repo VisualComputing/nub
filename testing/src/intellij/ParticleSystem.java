@@ -2,7 +2,7 @@ package intellij;
 
 import nub.core.Node;
 import nub.processing.Scene;
-import nub.processing.TimingTask;
+import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;
@@ -67,7 +67,6 @@ public class ParticleSystem extends PApplet {
       if (key == 'd')
         particle.enableConcurrence(false);
     }
-    println((!particles[0].task.isConcurrent() ? "Non-concurrent " : "Concurrent ") + "system. Particle period: " + particles[0].period());
   }
 
   public static void main(String[] args) {
@@ -75,8 +74,7 @@ public class ParticleSystem extends PApplet {
   }
 
   class Particle extends Node {
-    //Task task;
-    TimingTask task;
+    Task task;
     PVector speed;
     PVector pos;
     int age;
@@ -86,7 +84,7 @@ public class ParticleSystem extends PApplet {
       speed = new PVector();
       pos = new PVector();
       init();
-      task = new TimingTask(this::run);
+      task = new Task(this::run);
       task.run();
       setShape(this::graphics);
     }

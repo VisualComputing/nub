@@ -955,7 +955,7 @@ public class Graph {
     _eye._frustumGraphs.add(this);
     if (_interpolator == null) {
       _interpolator = new Interpolator(_eye);
-      _interpolator._task = new nub.processing.TimingTask(() -> _interpolator._execute());
+      _interpolator._task = new Task(() -> _interpolator._execute());
     }
     else {
       _interpolator.setNode(_eye);

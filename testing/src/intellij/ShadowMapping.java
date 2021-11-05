@@ -5,7 +5,7 @@ import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.processing.TimingTask;
+import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -17,7 +17,7 @@ public class ShadowMapping extends PApplet {
   Scene scene;
   Scene shadowMapScene;
   Node n1, n2, n3, light;
-  TimingTask animation;
+  Task animation;
   PShader depthShader;
   PShader shadowShader;
   PGraphics shadowMap;
@@ -70,7 +70,7 @@ public class ShadowMapping extends PApplet {
     shadowMapScene.setZFar(() -> 600f);
     shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
     shadowMapScene.picking = false;
-    animation = new TimingTask(() -> {
+    animation = new Task(() -> {
       if (!scene.isTagged(light)) {
         float lightAngle = frameCount * 0.002f;
         light.setWorldPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
