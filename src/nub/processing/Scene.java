@@ -101,8 +101,8 @@ public class Scene extends Graph {
     void execute();
   }
 
-  public static String prettyVersion = "0.9.96";
-  public static String version = "10";
+  public static String prettyVersion = "0.9.97";
+  public static String version = "11";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   public static PApplet pApplet;
