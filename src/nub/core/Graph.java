@@ -130,6 +130,17 @@ import java.util.function.Supplier;
  * @see MatrixHandler
  */
 public class Graph {
+  /**
+   * Returns the number of frames displayed since this timing handler was instantiated.
+   */
+  static public long frameCount;
+
+  /**
+   * Returns the approximate frame rate of the software as it executes. The initial value
+   * is 10 fps and is updated with each frame. The value is averaged (integrated) over
+   * several frames. As such, this value won't be valid until after 5-10 frames.
+   */
+  static public float frameRate = 60;
   protected static Graph _onscreenGraph;
   public static Random random = new Random();
   protected static HashSet<Node> _huds = new HashSet<Node>();
@@ -2385,21 +2396,19 @@ public class Graph {
 
   /**
    * Paint method which is called just before your main event loop starts.
-   * Handles timing tasks (see {@link Graph#handle()}), resize events, prepares
+   * Handles timing tasks (see {@link Graph#_update()}), resize events, prepares
    * caches, and opens the context if the scene is onscreen.
    * <p>
    * This method should be registered at the PApplet (which requires it to be public and named
    * as pre) and hence you don't need to call it.
    *
-   * @see Graph#handle()
+   * @see Graph#_update()
    * @see #draw()
    * @see #render()
    * @see #isOffscreen()
    */
   public void pre() {
-    if (_seededGraph) {
-      handle();
-    }
+    _update();
     // safer to always free subtrees cache
     _subtrees.clear();
     _bbNeed = false;
@@ -2410,38 +2419,25 @@ public class Graph {
     }
   }
 
-  /**
-   * Returns the number of frames displayed since this timing handler was instantiated.
-   */
-  static public long frameCount;
+  // public long _frameRateLastNanos;
 
   /**
-   * Returns the approximate frame rate of the software as it executes. The initial value
-   * is 10 fps and is updated with each frame. The value is averaged (integrated) over
-   * several frames. As such, this value won't be valid until after 5-10 frames.
+   * Update frameRate and frameCount
    */
-  static public float frameRate = 60;
-
-  public static long _frameRateLastNanos;
-
-  /**
-   * Handler's main method. It should be called from within your main event loop.
-   * It recomputes the frame rate, and executes all non-concurrent tasks found in
-   * the {@link #tasks()}.
-   */
-  public static void handle() {
-    long now = System.nanoTime();
-    if (frameCount > 0) {
-      float frameTimeSecs = (now - _frameRateLastNanos) / 1e9f;
-      float avgFrameTimeSecs = 1.0f / frameRate;
-      avgFrameTimeSecs = 0.95f * avgFrameTimeSecs + 0.05f * frameTimeSecs;
-      frameRate = 1.0f / avgFrameTimeSecs;
+  protected void _update() {
+    /*
+    if (_seededGraph) {
+      long now = System.nanoTime();
+      if (frameCount > 0) {
+        float frameTimeSecs = (now - _frameRateLastNanos) / 1e9f;
+        float avgFrameTimeSecs = 1.0f / frameRate;
+        avgFrameTimeSecs = 0.95f * avgFrameTimeSecs + 0.05f * frameTimeSecs;
+        frameRate = 1.0f / avgFrameTimeSecs;
+      }
+      _frameRateLastNanos = now;
+      frameCount++;
     }
-    _frameRateLastNanos = now;
-    frameCount++;
-    // TODO move to the node
-    for (Task task : nub.timing.TimingHandler._tasks)
-      task._execute();
+    // */
   }
 
   /**

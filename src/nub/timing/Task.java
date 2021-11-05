@@ -102,7 +102,7 @@ public class Task {
    * Executes the callback method defined by the {@link #execute()}.
    *
    * <b>Note:</b> This method is called by the timing handler
-   * (see {@link Graph#handle()}).
+   * (see {@link Graph#_update()}).
    */
   public boolean _execute() {
     boolean result = false;

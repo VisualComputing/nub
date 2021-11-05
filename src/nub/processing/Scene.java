@@ -19,6 +19,7 @@ import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.timing.Task;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -259,6 +260,17 @@ public class Scene extends Graph {
     pApplet.registerMethod("dispose", this);
     // 4. Handed
     leftHanded = true;
+  }
+
+  @Override
+  protected void _update() {
+    if (_seededGraph) {
+      frameCount = pApplet.frameCount;
+      frameRate =  pApplet.frameRate;
+      // TODO move to the node
+      for (Task task : nub.timing.TimingHandler._tasks)
+        task._execute();
+    }
   }
 
   // P5 STUFF
