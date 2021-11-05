@@ -19,7 +19,6 @@ import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.timing.TimingHandler;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -27,7 +26,6 @@ import processing.opengl.*;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -896,8 +894,8 @@ public class Scene extends Graph {
    */
   public void image(int pixelX, int pixelY) {
     if (isOffscreen()) {
-      if (_lastRendered != TimingHandler.frameCount) {
-        System.out.println("Warning: image() not updated since render wasn't called @" + TimingHandler.frameCount);
+      if (_lastRendered != Graph.frameCount) {
+        System.out.println("Warning: image() not updated since render wasn't called @" + Graph.frameCount);
       }
       if (_renderCount != 0) {
         throw new RuntimeException("Error: offscreen scenes should call image() after openContext() / closeContext()");
@@ -908,7 +906,7 @@ public class Scene extends Graph {
         }
         pApplet.pushStyle();
         _setUpperLeftCorner(pixelX, pixelY);
-        _lastDisplayed = TimingHandler.frameCount;
+        _lastDisplayed = Graph.frameCount;
         pApplet.imageMode(PApplet.CORNER);
         pApplet.image(context(), pixelX, pixelY);
         pApplet.popStyle();

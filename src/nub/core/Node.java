@@ -651,7 +651,7 @@ public class Node {
    * Internal use. Automatically call by all methods which change the node state.
    */
   protected void _modified() {
-    _lastUpdate = TimingHandler.frameCount;
+    _lastUpdate = Graph.frameCount;
     if (_children != null)
       for (Node child : _children)
         child._modified();
@@ -849,10 +849,10 @@ public class Node {
     if (rendered(graph)) {
       throw new RuntimeException("Node already rendered. Exiting now!");
     }
-    if (_lastRendered != TimingHandler.frameCount) {
+    if (_lastRendered != Graph.frameCount) {
       _lastRenderedSet.clear();
     }
-    _lastRendered = TimingHandler.frameCount;
+    _lastRendered = Graph.frameCount;
     _lastRenderedSet.add(graph);
   }
 
@@ -862,7 +862,7 @@ public class Node {
    * within the main event loop (after {@link Graph#render(Node)}).
    */
   public boolean rendered(Graph graph) {
-    return _lastRenderedSet.contains(graph) && _lastRendered == TimingHandler.frameCount;
+    return _lastRenderedSet.contains(graph) && _lastRendered == Graph.frameCount;
   }
 
   // In JS attach / detach should be made just an attach property
@@ -2912,7 +2912,7 @@ public class Node {
    * or any rendering algorithm. Note that the node nor its children get culled.
    */
   public void bypass() {
-    _bypass = TimingHandler.frameCount;
+    _bypass = Graph.frameCount;
   }
 
   // js go:

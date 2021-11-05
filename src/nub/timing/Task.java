@@ -11,6 +11,8 @@
 
 package nub.timing;
 
+import nub.core.Graph;
+
 /**
  * Tasks are (non)recurrent, (non)concurrent (see {@link #isRecurrent()}
  * and {@link #isConcurrent()} resp.) callbacks defined by overridden
@@ -106,13 +108,13 @@ public class Task {
    * Executes the callback method defined by the {@link #execute()}.
    *
    * <b>Note:</b> This method is called by the timing handler
-   * (see {@link nub.timing.TimingHandler#handle()}).
+   * (see {@link Graph#handle()}).
    */
-  protected boolean _execute() {
+  public boolean _execute() {
     boolean result = false;
     if (_active) {
       long elapsedTime = System.nanoTime() - _startTime;
-      float timePerFrame = (1 / TimingHandler.frameRate) * 1e9f;
+      float timePerFrame = (1 / Graph.frameRate) * 1e9f;
       long threshold = _counter * _period * (long) 1e6;
       if (threshold >= elapsedTime) {
         long diff = elapsedTime + (long) timePerFrame - threshold;
@@ -220,10 +222,10 @@ public class Task {
     }
     _period = period;
     float target = frequency();
-    if (TimingHandler.frameRate < target) {
+    if (Graph.frameRate < target) {
       System.out.println("Warning: Your task period of " + period + " ms requires at least a " + target + " Hz frameRate, " +
-          "but currently it just achieves " + TimingHandler.frameRate + " Hz." + '\n' + "Either set a period of at least "
-          + 1000 / TimingHandler.frameRate + " ms or call enableConcurrence() to execute the task concurrently.");
+          "but currently it just achieves " + Graph.frameRate + " Hz." + '\n' + "Either set a period of at least "
+          + 1000 / Graph.frameRate + " ms or call enableConcurrence() to execute the task concurrently.");
     }
   }
 

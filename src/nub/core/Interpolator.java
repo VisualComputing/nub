@@ -14,7 +14,6 @@ package nub.core;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
-import nub.timing.TimingHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -879,7 +878,7 @@ class Interpolator {
       }
     }
     if (modified) {
-      _lastUpdate = TimingHandler.frameCount;
+      _lastUpdate = Graph.frameCount;
       _valuesAreValid = false;
       _pathIsValid = false;
       _splineCacheIsValid = false;
