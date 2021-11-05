@@ -2430,20 +2430,6 @@ public class Graph {
    * the {@link #tasks()}.
    */
   public static void handle() {
-    _updateFrameRate();
-    for (Task task : nub.timing.TimingHandler._tasks)
-      task._execute();
-  }
-
-  /**
-   * Recomputes the frame rate based upon the frequency at which {@link Graph#handle()} is
-   * called from within the application main event loop. The frame rate is needed to sync
-   * all timing operations.
-   * <p>
-   * Computation adapted from here (refer to handleDraw()):
-   * https://github.com/processing/processing/blob/master/core/src/processing/core/PApplet.java
-   */
-  public static void _updateFrameRate() {
     long now = System.nanoTime();
     if (frameCount > 0) {
       float frameTimeSecs = (now - _frameRateLastNanos) / 1e9f;
@@ -2453,6 +2439,9 @@ public class Graph {
     }
     _frameRateLastNanos = now;
     frameCount++;
+    // TODO move to the node
+    for (Task task : nub.timing.TimingHandler._tasks)
+      task._execute();
   }
 
   /**
