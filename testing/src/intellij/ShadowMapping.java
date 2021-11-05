@@ -5,7 +5,7 @@ import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.Task;
+import nub.core.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;

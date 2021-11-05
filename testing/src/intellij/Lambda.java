@@ -2,7 +2,6 @@ package intellij;
 
 import nub.core.Node;
 import nub.processing.Scene;
-import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;

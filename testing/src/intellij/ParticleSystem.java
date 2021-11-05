@@ -2,7 +2,7 @@ package intellij;
 
 import nub.core.Node;
 import nub.processing.Scene;
-import nub.timing.Task;
+import nub.core.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;

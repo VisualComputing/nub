@@ -9,9 +9,9 @@
  * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
  ***************************************************************************************/
 
-package nub.timing;
+package nub.core;
 
-import nub.core.Graph;
+import nub.timing.TimingHandler;
 
 /**
  * Tasks are (non)recurrent (see {@link #isRecurrent()}) callbacks

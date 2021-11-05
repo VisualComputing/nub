@@ -5,7 +5,7 @@ import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.Task;
+import nub.core.Task;
 import nub.timing.TimingHandler;
 import processing.core.PApplet;
 import processing.core.PGraphics;

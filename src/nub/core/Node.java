@@ -14,7 +14,6 @@ package nub.core;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.timing.Task;
 import nub.timing.TimingHandler;
 
 import java.lang.reflect.Method;

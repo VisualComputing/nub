@@ -12,7 +12,6 @@
 package nub.core;
 
 import nub.primitives.Vector;
-import nub.timing.Task;
 
 /**
  * Translate, Orbit & Rotate (Euler angles) damped task based on PeasyCam, see
