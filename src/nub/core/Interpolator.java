@@ -157,7 +157,7 @@ class Interpolator {
 
   /**
    * Creates an interpolator for the given {@code node}. Note that
-   * {@code t}, {@link #speed()} are set to their default values.
+   * {@code t}, {@code speed} are set to their default values.
    */
   public Interpolator(Node node) {
     _list = new ArrayList<KeyFrame>();
@@ -239,12 +239,12 @@ class Interpolator {
 
   /**
    * Updates the {@link #node()} state at the current {@code t} and
-   * then increments it by {@code delay} * {@link #speed()} ms.
+   * then increments it by {@code delay} * {@code speed} ms.
    * This method is called by the node when it's rendered.
    * <p>
    * Note that interpolations stops when {@code t} reaches
    * {@link #firstTime()} or {@link #lastTime()}, unless
-   * {@link #isRecurrent()} is {@code true}.
+   * it is recurrent.
    */
   void _execute() {
     if (_active) {
@@ -263,7 +263,7 @@ class Interpolator {
       }
       _timestamp = now;
       if (_t >= _list.get(_list.size() - 1)._time) {
-        if (isRecurrent())
+        if (_recurrent)
           _t = _list.get(0)._time + _t - _list.get(_list.size() - 1)._time;
         else {
           // Make sure last KeyFrame is reached and displayed
@@ -271,7 +271,7 @@ class Interpolator {
           _active = false;
         }
       } else if (_t <= _list.get(0)._time) {
-        if (isRecurrent())
+        if (_recurrent)
           _t = _list.get(_list.size() - 1)._time - _list.get(0)._time + _t;
         else {
           // Make sure first KeyFrame is reached and displayed
@@ -339,73 +339,10 @@ class Interpolator {
   }
 
   /**
-   * Convenience function that simply calls {@code enableRecurrence(false)}.
-   */
-  public void disableRecurrence() {
-    enableRecurrence(false);
-  }
-
-  /**
-   * Convenience function that simply calls {@code enableRecurrence(true)}.
-   */
-  public void enableRecurrence() {
-    enableRecurrence(true);
-  }
-
-  /**
-   * Sets the {@link #isRecurrent()} value.
-   */
-  public void enableRecurrence(boolean enable) {
-    _recurrent = enable;
-  }
-
-  /**
-   * Returns {@code true} when the interpolation is played in an infinite loop.
-   * <p>
-   * When {@code false} (default), the interpolation stops when
-   * {@code t} reaches {@link #firstTime()} (with negative
-   * {@code speed}.
-   * <p>
-   * {@code t} is otherwise reset to {@link #firstTime()} (+
-   * {@code t} - {@link #lastTime()}) (and inversely for negative
-   * {@code speed} and interpolation continues.
-   */
-  public boolean isRecurrent() {
-    return _recurrent;
-  }
-
-  /**
-   * Returns the current interpolation speed.
-   * <p>
-   * Default value is 1, which means {@code t} will be matched during
-   * the interpolation (provided that your main loop is fast enough).
-   * <p>
-   * A negative value will result in a reverse interpolation of the keyframes.
-   *
-   * @see #setSpeed(float)
-   */
-  public float speed() {
-    return _speed;
-  }
-
-  /**
-   * Same as {@code setSpeed(speed() + delta)}.
-   *
-   * @see #speed()
-   * @see #setSpeed(float)
+   * Increase the speed about {@code delta}.
    */
   public void increaseSpeed(float delta) {
-    setSpeed(speed() + delta);
-  }
-
-  /**
-   * Sets the {@link #speed()}. Negative values are allowed.
-   *
-   * @see #speed()
-   * @see #increaseSpeed(float)
-   */
-  public void setSpeed(float speed) {
-    _speed = speed;
+    _speed += delta;
   }
 
   /**

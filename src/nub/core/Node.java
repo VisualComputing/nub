@@ -3587,7 +3587,7 @@ public class Node {
    * Run the animation with the given {@code speed} defined by the node keyframes.
    */
   public void animate(float speed) {
-    _interpolator.setSpeed(speed);
+    _interpolator._speed = speed;
     _interpolator.animate();
   }
 
@@ -3673,17 +3673,19 @@ public class Node {
     _interpolator.interpolate(time);
   }
 
+  // next one should be a recurrence in p5.js
+
   /**
    * Tells whether or not the keyframes animation is recurrent or not.
    */
   public boolean animationRecurrence() {
-    return _interpolator.isRecurrent();
+    return _interpolator._recurrent;
   }
 
   /**
    * Enables (or disables) the recurrence of the keyframes animation.
    */
   public void setAnimationRecurrence(boolean enable) {
-    _interpolator.enableRecurrence(enable);
+    _interpolator._recurrent = enable;
   }
 }

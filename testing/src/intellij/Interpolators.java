@@ -161,9 +161,7 @@ public class Interpolators extends PApplet {
       shape.toggleAnimation();
     }
     if (key == '-' || key == '+') {
-      speed += key == '+' ? 0.25f : -0.25f;
-      shape.animate(speed);
-      //shapeInterpolator.increaseSpeed(key == '+' ? 0.25f : -0.25f);
+      shape.animate(speed += key == '+' ? 0.25f : -0.25f);
     }
 
     if (key == '1') {
