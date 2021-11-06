@@ -60,7 +60,7 @@ public class Interpolators extends PApplet {
       // */
     }
     shape.resetScalingFilter();
-    shape.animate();
+    //shape.animate();
     frameRate(1000);
   }
 
@@ -120,7 +120,7 @@ public class Interpolators extends PApplet {
     else if (mouseButton == RIGHT)
       scene.shift();
     else
-      scene.zoom(mouseX - pmouseX);
+      scene.moveForward((mouseX - pmouseX)/5);
   }
 
   public void mouseWheel(MouseEvent event) {
