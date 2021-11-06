@@ -646,7 +646,7 @@ public class Node {
    * Internal use. Automatically call by all methods which change the node state.
    */
   protected void _modified() {
-    _lastUpdate = Graph.frameCount;
+    _lastUpdate = Graph._frameCount;
     if (_children != null)
       for (Node child : _children)
         child._modified();
@@ -838,23 +838,38 @@ public class Node {
   }
 
   /**
-   * Used by the last time {@link #rendered(Graph)} condition.
+   * Updates timing stuff and the cache of graphs rendering the node in the current frame
+   * which is used by the last time {@link #rendered(Graph)} condition.
    */
-  protected void _cacheRendered(Graph graph) {
+  protected void _update(Graph graph) {
     if (rendered(graph)) {
       throw new RuntimeException("Node already rendered. Exiting now!");
     }
-    if (_lastRendered != Graph.frameCount) {
+    if (_lastRendered != Graph._frameCount) {
       _lastRenderedSet.clear();
       // update timing stuff
-      this._translationInertia._execute();
-      this._rotationInertia._execute();
-      this._scalingInertia._execute();
-      this._orbitInertia._execute();
-      this._interpolator._execute();
+      if (this._interpolator._active) {
+        this._interpolator._execute();
+      }
+      else {
+        this._translationInertia._execute();
+        this._rotationInertia._execute();
+        this._scalingInertia._execute();
+        this._orbitInertia._execute();
+      }
     }
-    _lastRendered = Graph.frameCount;
+    _lastRendered = Graph._frameCount;
     _lastRenderedSet.add(graph);
+  }
+
+  /**
+   * Stops all node inertias.
+   */
+  public void resetInertia() {
+    this._translationInertia._active = false;
+    this._rotationInertia._active = false;
+    this._scalingInertia._active = false;
+    this._orbitInertia._active = false;
   }
 
   /**
@@ -863,7 +878,7 @@ public class Node {
    * within the main event loop (after {@link Graph#render(Node)}).
    */
   public boolean rendered(Graph graph) {
-    return _lastRenderedSet.contains(graph) && _lastRendered == Graph.frameCount;
+    return _lastRenderedSet.contains(graph) && _lastRendered == Graph._frameCount;
   }
 
   // In JS attach / detach should be made just an attach property
@@ -2851,7 +2866,7 @@ public class Node {
    * or any rendering algorithm. Note that the node nor its children get culled.
    */
   public void bypass() {
-    _bypass = Graph.frameCount;
+    _bypass = Graph._frameCount;
   }
 
   // js go:

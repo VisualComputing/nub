@@ -119,17 +119,9 @@ import java.util.function.Supplier;
  * @see MatrixHandler
  */
 public class Graph {
-  /**
-   * Returns the number of frames displayed since this timing handler was instantiated.
-   */
-  static public long frameCount;
+  // number of frames displayed since this timing handler was instantiated.
+  static protected long _frameCount;
 
-  /**
-   * Returns the approximate frame rate of the software as it executes. The initial value
-   * is 10 fps and is updated with each frame. The value is averaged (integrated) over
-   * several frames. As such, this value won't be valid until after 5-10 frames.
-   */
-  static public float frameRate = 60;
   protected static Graph _onscreenGraph;
   public static Random random = new Random();
   protected static HashSet<Node> _huds = new HashSet<Node>();
@@ -944,7 +936,7 @@ public class Graph {
   public boolean isPointVisible(Vector point) {
     if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
       _updateBounds();
-      _lastEqUpdate = frameCount;
+      _lastEqUpdate = _frameCount;
     }
     for (int i = 0; i < (is3D() ? 6 : 4); ++i)
       if (distanceToBound(i, point) > 0)
@@ -966,7 +958,7 @@ public class Graph {
   public Visibility ballVisibility(Vector center, float radius) {
     if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
       _updateBounds();
-      _lastEqUpdate = frameCount;
+      _lastEqUpdate = _frameCount;
     }
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
@@ -996,7 +988,7 @@ public class Graph {
   public Visibility boxVisibility(Vector corner1, Vector corner2) {
     if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
       _updateBounds();
-      _lastEqUpdate = frameCount;
+      _lastEqUpdate = _frameCount;
     }
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
@@ -1188,7 +1180,7 @@ public class Graph {
   public float[][] bounds() {
     if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
       _updateBounds();
-      _lastEqUpdate = frameCount;
+      _lastEqUpdate = _frameCount;
     }
     return _coefficients;
   }
@@ -1212,7 +1204,7 @@ public class Graph {
   public float distanceToBound(int index, Vector position) {
     if (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0) {
       _updateBounds();
-      _lastEqUpdate = frameCount;
+      _lastEqUpdate = _frameCount;
     }
     Vector myVector = new Vector(_coefficients[index][0], _coefficients[index][1], _coefficients[index][2]);
     if (is3D())
@@ -2026,7 +2018,7 @@ public class Graph {
   }
 
   protected void _modified() {
-    _lastNonEyeUpdate = frameCount;
+    _lastNonEyeUpdate = _frameCount;
   }
 
   /**
@@ -2185,7 +2177,7 @@ public class Graph {
    * Use internally by {@link #updateTag(String, int, int)}.
    */
   protected void _track(String tag, Node node, int pixelX, int pixelY) {
-    if (node(tag) == null && node.tagging == true && (node._bypass != frameCount))
+    if (node(tag) == null && node.tagging == true && (node._bypass != _frameCount))
       if (tracks(node, pixelX, pixelY)) {
         tag(tag, node);
         return;
@@ -2316,7 +2308,7 @@ public class Graph {
    * Returns whether or not the scene has focus or not under the given pixel.
    */
   public boolean hasFocus(int pixelX, int pixelY) {
-    return _lastDisplayed + 1 >= frameCount
+    return _lastDisplayed + 1 >= _frameCount
         && _upperLeftCornerX <= pixelX && pixelX < _upperLeftCornerX + width()
         && _upperLeftCornerY <= pixelY && pixelY < _upperLeftCornerY + height();
   }
@@ -2353,19 +2345,28 @@ public class Graph {
 
   /**
    * Paint method which is called just before your main event loop starts.
-   * Handles timing tasks (see {@link Graph#_update()}), resize events, prepares
-   * caches, and opens the context if the scene is onscreen.
+   * Handles timing tasks, resize events, prepares caches, and opens the
+   * context if the scene is onscreen.
    * <p>
    * This method should be registered at the PApplet (which requires it to be public and named
    * as pre) and hence you don't need to call it.
    *
-   * @see Graph#_update()
    * @see #draw()
    * @see #render()
    * @see #isOffscreen()
    */
   public void pre() {
-    _update();
+    if (_seededGraph) {
+      _frameCount++;
+    }
+    if (this._interpolator._active) {
+      this._interpolator._execute();
+    }
+    else {
+      this._translationInertia._execute();
+      this._lookAroundInertia._execute();
+      this._lookAroundInertia._execute();
+    }
     // safer to always free subtrees cache
     _subtrees.clear();
     _bbNeed = false;
@@ -2376,33 +2377,24 @@ public class Graph {
     }
   }
 
-  // public long _frameRateLastNanos;
-
-  /**
-   * Update frameRate and frameCount
-   */
-  protected void _update() {
-    /*
-    if (_seededGraph) {
-      long now = System.nanoTime();
-      if (frameCount > 0) {
-        float frameTimeSecs = (now - _frameRateLastNanos) / 1e9f;
-        float avgFrameTimeSecs = 1.0f / frameRate;
-        avgFrameTimeSecs = 0.95f * avgFrameTimeSecs + 0.05f * frameTimeSecs;
-        frameRate = 1.0f / avgFrameTimeSecs;
-      }
-      _frameRateLastNanos = now;
-      frameCount++;
+  protected void _timing() {
+    if (this._interpolator._active) {
+      this._interpolator._execute();
     }
-    _timing();
-    // */
+    else {
+      this._translationInertia._execute();
+      this._lookAroundInertia._execute();
+      this._lookAroundInertia._execute();
+    }
   }
 
-  protected void _timing() {
-    this._translationInertia._execute();
-    this._lookAroundInertia._execute();
-    this._lookAroundInertia._execute();
-    this._interpolator._execute();
+  /**
+   * Stops all eye inertias.
+   */
+  public void resetInertia() {
+    this._translationInertia._active = false;
+    this._lookAroundInertia._active = false;
+    this._lookAroundInertia._active = false;
   }
 
   /**
@@ -2464,9 +2456,9 @@ public class Graph {
    * Returns the projection times view inverse matrix.
    */
   public Matrix projectionViewInverse() {
-    if (_cacheProjectionViewInverse < frameCount) {
+    if (_cacheProjectionViewInverse < _frameCount) {
       _projectionViewInverse = Matrix.inverse(_projectionView);
-      _cacheProjectionViewInverse = frameCount;
+      _cacheProjectionViewInverse = _frameCount;
     }
     return _projectionViewInverse;
   }
@@ -2544,7 +2536,7 @@ public class Graph {
       throw new RuntimeException("Error: render() should be nested within a single openContext() / closeContext() call!");
     }
     else {
-      if (_lastRendered == frameCount) {
+      if (_lastRendered == _frameCount) {
         _displayPaths();
         _displayHUD();
       }
@@ -2553,7 +2545,7 @@ public class Graph {
         _endFrontBuffer();
       }
       else {
-        _lastDisplayed = frameCount;
+        _lastDisplayed = _frameCount;
       }
     }
   }
@@ -2596,7 +2588,7 @@ public class Graph {
     if (_renderCount != 1) {
       throw new RuntimeException("Error: context should be open before render offscreen scenes!");
     }
-    _lastRendered = frameCount;
+    _lastRendered = _frameCount;
     if (subtree == null) {
       for (Node node : _leadingNodes()) {
         _render(node);
@@ -2690,11 +2682,11 @@ public class Graph {
       functor.accept(this, node);
     }
     if (!node.cull) {
-      if (node._bypass != frameCount) {
+      if (node._bypass != _frameCount) {
         if (_backPicking(node)) {
           _bbNeed = true;
         }
-        node._cacheRendered(this);
+        node._update(this);
         _trackFrontBuffer(node);
         _trackBackBuffer(node);
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
@@ -2724,7 +2716,7 @@ public class Graph {
    * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
    */
   protected void _renderBackBuffer() {
-    if (_lastRendered == frameCount && _bbNeed) {
+    if (_lastRendered == _frameCount && _bbNeed) {
       if (picking && _bb != null) {
         _initBackBuffer();
         _bbMatrixHandler.bind(projection(), view());
@@ -3855,9 +3847,9 @@ public class Graph {
    * {@link #lookAround(float, float)}  procedure}.
    */
   protected void _lookAround() {
-    if (frameCount > _lookAroundCount) {
+    if (_frameCount > _lookAroundCount) {
       _upVector = eye().yAxis();
-      _lookAroundCount = frameCount;
+      _lookAroundCount = _frameCount;
     }
     _lookAroundCount++;
     Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _lookAroundInertia._y : -_lookAroundInertia._y);

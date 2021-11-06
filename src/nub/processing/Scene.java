@@ -260,15 +260,6 @@ public class Scene extends Graph {
     leftHanded = true;
   }
 
-  @Override
-  protected void _update() {
-    if (_seededGraph) {
-      frameCount = pApplet.frameCount;
-      frameRate =  pApplet.frameRate;
-    }
-    _timing();
-  }
-
   // P5 STUFF
 
   /**
@@ -902,8 +893,8 @@ public class Scene extends Graph {
    */
   public void image(int pixelX, int pixelY) {
     if (isOffscreen()) {
-      if (_lastRendered != Graph.frameCount) {
-        System.out.println("Warning: image() not updated since render wasn't called @" + Graph.frameCount);
+      if (_lastRendered != Graph._frameCount) {
+        System.out.println("Warning: image() not updated since render wasn't called @" + Graph._frameCount);
       }
       if (_renderCount != 0) {
         throw new RuntimeException("Error: offscreen scenes should call image() after openContext() / closeContext()");
@@ -914,7 +905,7 @@ public class Scene extends Graph {
         }
         pApplet.pushStyle();
         _setUpperLeftCorner(pixelX, pixelY);
-        _lastDisplayed = Graph.frameCount;
+        _lastDisplayed = Graph._frameCount;
         pApplet.imageMode(PApplet.CORNER);
         pApplet.image(context(), pixelX, pixelY);
         pApplet.popStyle();

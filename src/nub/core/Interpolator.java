@@ -146,6 +146,7 @@ class Interpolator {
 
   // Misc
   protected boolean _recurrent;
+  protected long _timestamp;
 
   // Cached values and flags
   protected boolean _pathIsValid;
@@ -157,9 +158,6 @@ class Interpolator {
   /**
    * Creates an interpolator for the given {@code node}. Note that
    * {@code t}, {@link #speed()} are set to their default values.
-   * <p>
-   * Note that the interpolator {@link Task} is decoupled from this class
-   * and thus should be handled i.e., (un)register, outside this class.
    */
   public Interpolator(Node node) {
     _list = new ArrayList<KeyFrame>();
@@ -241,20 +239,12 @@ class Interpolator {
 
   /**
    * Updates the {@link #node()} state at the current {@code t} and
-   * then increments it by {@link Task#period()} * {@link #speed()} ms.
-   * This method is called by an interpolator task (see {@link Task}) when
-   * the interpolation is running.
+   * then increments it by {@code delay} * {@link #speed()} ms.
+   * This method is called by the node when it's rendered.
    * <p>
-   * The above mechanism ensures that the number of interpolation steps is
-   * constant and equal to the total path {@link #duration()} divided by the
-   * {@link Task#period()} * {@link #speed()} which is is especially useful
-   * for benchmarking or movie creation (constant number of snapshots). Note
-   * that if {@code speed = 1} then {@code t} will be matched
-   * during the interpolation (provided that your main loop is fast enough).
-   * <p>
-   * Note that {@link Task#stop()} is called when {@code t} reaches
-   * {@link #firstTime()} or {@link #lastTime()}, unless {@link #isRecurrent()}
-   * is {@code true}.
+   * Note that interpolations stops when {@code t} reaches
+   * {@link #firstTime()} or {@link #lastTime()}, unless
+   * {@link #isRecurrent()} is {@code true}.
    */
   void _execute() {
     if (_active) {
@@ -265,8 +255,13 @@ class Interpolator {
       if ((_speed < 0.0) && (_t <= _list.get(0)._time))
         _t = _list.get(_list.size() - 1)._time;
       interpolate(_t);
-      // TODO Pierre target is next line
-      // _t += _speed * _task.period();
+      // update _t according to current framerate
+      long now = System.currentTimeMillis();
+      if (_timestamp != 0) {
+        long delay = now - _timestamp;
+        _t += _speed * delay;
+      }
+      _timestamp = now;
       if (_t >= _list.get(_list.size() - 1)._time) {
         if (isRecurrent())
           _t = _list.get(0)._time + _t - _list.get(_list.size() - 1)._time;
@@ -743,7 +738,7 @@ class Interpolator {
       }
     }
     if (modified) {
-      _lastUpdate = Graph.frameCount;
+      _lastUpdate = Graph._frameCount;
       _valuesAreValid = false;
       _pathIsValid = false;
       _splineCacheIsValid = false;
