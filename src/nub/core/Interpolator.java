@@ -282,11 +282,17 @@ class Interpolator {
     }
   }
 
+  /**
+   * resets timestamp and actives the animation.
+   */
   public void animate() {
     _timestamp = 0;
     _active = true;
   }
 
+  /**
+   * (de)activates the animation and resets timestamp if animation results inactive.
+   */
   public void toggle() {
     _active = !_active;
     if (!_active) {
@@ -295,7 +301,8 @@ class Interpolator {
   }
 
   /**
-   * Stops the interpolation and resets {@code t} to the {@link #firstTime()}.
+   * Stops the interpolation and resets timestamp and {@code t} (i.e., it is set
+   * to the {@link #firstTime()}).
    * <p>
    * If desired, call {@link #interpolate(float)} after this method to actually move
    * the {@link #node()} to {@link #firstTime()}.

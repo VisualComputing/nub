@@ -133,6 +133,9 @@ public class Interpolators extends PApplet {
   float speed = 1;
 
   public void keyPressed() {
+    if (key == 'q') {
+      shape.resetAnimation();
+    }
     if (key == 'y') {
       if (shape.isAttached())
         shape.detach();
