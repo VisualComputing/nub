@@ -480,6 +480,12 @@ public class Node {
     _keyframesMask = Node.SHAPE;
   }
 
+  protected void _interpolator(Interpolator interpolator) {
+    if (interpolator._node == this) {
+
+    }
+  }
+
   /**
    * Return this node components as a String.
    */

@@ -50,7 +50,7 @@ class Interpolator {
      * @param keyFrame other keyFrame
      */
     public boolean matches(KeyFrame keyFrame) {
-      return node().matches(keyFrame._node) && _time == keyFrame._time;
+      return _node.matches(keyFrame._node) && _time == keyFrame._time;
     }
 
     protected Quaternion _tangentQuaternion;
@@ -84,47 +84,47 @@ class Interpolator {
      * Returns the cache {@code _tangentVector} world-view. Good for drawing. See {@link #_updatePath()}.
      */
     protected Vector _tangentVector() {
-      return node().reference() == null ? _tangentVector : node().reference().worldDisplacement(_tangentVector);
+      return _node.reference() == null ? _tangentVector : _node.reference().worldDisplacement(_tangentVector);
     }
 
     /**
      * Returns the cache {@code _tangentQuaternion} world-view. Good for drawing. See {@link #_updatePath()}.
      */
     protected Quaternion _tangentQuaternion() {
-      return node().reference() == null ? _tangentQuaternion : node().reference().worldDisplacement(_tangentQuaternion);
+      return _node.reference() == null ? _tangentQuaternion : _node.reference().worldDisplacement(_tangentQuaternion);
     }
 
     /**
-     * Returns the key-frame translation respect to the {@link #node()} {@link Node#reference()} space.
-     * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
+     * Returns the key-frame translation respect to the {@code node} {@link Node#reference()} space.
+     * Optimally computed when the node's key-frame reference is the same as the {@code node} {@link Node#reference()}.
      */
     protected Vector _translation() {
-      return node().reference() == _node.reference() ? _node.position() :
-          node().reference() == null ? _node.worldPosition() : node().reference().location(_node.worldPosition());
+      return _node.reference() == _node.reference() ? _node.position() :
+          _node.reference() == null ? _node.worldPosition() : _node.reference().location(_node.worldPosition());
       // perhaps less efficient but simpler equivalent form:
-      // return node().reference() == null ? _node.position() : node().reference().location(_node.position());
+      // return _node.reference() == null ? _node.position() : _node.reference().location(_node.position());
     }
 
     /**
-     * Returns the key-frame rotation respect to the {@link #node()} {@link Node#reference()} space.
-     * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
+     * Returns the key-frame rotation respect to the {@code node} {@link Node#reference()} space.
+     * Optimally computed when the node's key-frame reference is the same as the {@code node} {@link Node#reference()}.
      */
     protected Quaternion _rotation() {
-      return node().reference() == _node.reference() ? _node.orientation() :
-          node().reference() == null ? _node.worldOrientation() : node().reference().displacement(_node.worldOrientation());
+      return _node.reference() == _node.reference() ? _node.orientation() :
+          _node.reference() == null ? _node.worldOrientation() : _node.reference().displacement(_node.worldOrientation());
       // perhaps less efficient but simpler equivalent form:
-      // return node().reference() == null ? _node.orientation() : node().reference().displacement(_node.orientation());
+      // return _node.reference() == null ? _node.orientation() : _node.reference().displacement(_node.orientation());
     }
 
     /**
-     * Returns the key-frame scaling respect to the {@link #node()} {@link Node#reference()} space.
-     * Optimally computed when the node's key-frame reference is the same as the {@link #node()} {@link Node#reference()}.
+     * Returns the key-frame scaling respect to the {@link #_node} {@link Node#reference()} space.
+     * Optimally computed when the node's key-frame reference is the same as the {@link #_node} {@link Node#reference()}.
      */
     protected float _scaling() {
-      return node().reference() == _node.reference() ? _node.magnitude() :
-          node().reference() == null ? _node.worldMagnitude() : node().reference().displacement(_node.worldMagnitude());
+      return _node.reference() == _node.reference() ? _node.magnitude() :
+          _node.reference() == null ? _node.worldMagnitude() : _node.reference().displacement(_node.worldMagnitude());
       // perhaps less efficient but simpler equivalent form:
-      // return node().reference() == null ? _node.magnitude() : node().reference().displacement(_node.magnitude());
+      // return _node.reference() == null ? _node.magnitude() : _node.reference().displacement(_node.magnitude());
     }
   }
 
@@ -137,7 +137,7 @@ class Interpolator {
   protected List<Node> _path;
 
   // Main node
-  protected Node _node;
+  Node _node;
 
   // Beat
   boolean _active;
@@ -181,7 +181,7 @@ class Interpolator {
       this._list.add(keyFrame);
     }
     this._path = new ArrayList<Node>();
-    this.setNode(other.node());
+    this.setNode(other._node);
     this._t = other._t;
     this._speed = other._speed;
     this._recurrent = other._recurrent;
@@ -210,7 +210,7 @@ class Interpolator {
   }
 
   /**
-   * Sets the interpolator {@link #node()}.
+   * Sets the interpolator {@code node}.
    */
   public void setNode(Node node) {
     if (node == null) {
@@ -223,13 +223,6 @@ class Interpolator {
   }
 
   /**
-   * Returns the node that is to be interpolated by the interpolator.
-   */
-  public Node node() {
-    return _node;
-  }
-
-  /**
    * Returns the number of keyframes used by the interpolation. Use
    * {@link #addKeyFrame(Node)} to add new keyframes.
    */
@@ -238,7 +231,7 @@ class Interpolator {
   }
 
   /**
-   * Updates the {@link #node()} state at the current {@code t} and
+   * Updates the {@code node} state at the current {@code t} and
    * then increments it by {@code delay} * {@code speed} ms.
    * This method is called by the node when it's rendered.
    * <p>
@@ -248,7 +241,7 @@ class Interpolator {
    */
   void _execute() {
     if (_active) {
-      if ((_list.isEmpty()) || (node() == null))
+      if ((_list.isEmpty()) || (_node == null))
         return;
       if ((_speed > 0.0) && (_t >= _list.get(_list.size() - 1)._time))
         _t = _list.get(0)._time;
@@ -305,7 +298,7 @@ class Interpolator {
    * to the {@link #firstTime()}).
    * <p>
    * If desired, call {@link #interpolate(float)} after this method to actually move
-   * the {@link #node()} to {@link #firstTime()}.
+   * the {@code node} to {@link #firstTime()}.
    */
   public void reset() {
     _timestamp = 0;
@@ -376,7 +369,7 @@ class Interpolator {
   }
 
   /**
-   * Same as {@code addKeyFrame(node().hint(), time)}.
+   * Same as {@code addKeyFrame(_node.hint(), time)}.
    *
    * @see #addKeyFrame(int, float)
    * @see #addKeyFrame(float)
@@ -384,14 +377,14 @@ class Interpolator {
    * @see #addKeyFrame(Node)
    */
   public void addKeyFrame(float time) {
-    addKeyFrame(node().hint(), time);
+    addKeyFrame(_node.hint(), time);
   }
 
   /**
-   * Adds a {@link #node()} copy as a keyframe at {@code time} and a mask {@code hint}.
+   * Adds a {@code node} copy as a keyframe at {@code time} and a mask {@code hint}.
    */
   public void addKeyFrame(int hint, float time) {
-    _addKeyFrame(node()._copy(hint, true), time, true);
+    _addKeyFrame(_node._copy(hint, true), time, true);
   }
 
   /**
@@ -435,7 +428,7 @@ class Interpolator {
       return;
     _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time, handled));
     if (handled) {
-      node.tagging = node().isHintEnabled(Node.KEYFRAMES);
+      node.tagging = _node.isHintEnabled(Node.KEYFRAMES);
       node.cull = !node.tagging;
     }
     _valuesAreValid = false;
@@ -513,13 +506,13 @@ class Interpolator {
   }
 
   /**
-   * Interpolate {@link #node()} at time {@code time} (expressed in milliseconds).
-   * {@code t} is set to {@code time} and {@link #node()} is set accordingly.
+   * Interpolate {@code node} at time {@code time} (expressed in milliseconds).
+   * {@code t} is set to {@code time} and {@code node} is set accordingly.
    */
   public void interpolate(float time) {
     this._checkValidity();
     _t = time;
-    if ((_list.isEmpty()) || (node() == null))
+    if ((_list.isEmpty()) || (_node == null))
       return;
     if (!_valuesAreValid)
       _updateModifiedKeyFrames();
@@ -541,9 +534,9 @@ class Interpolator {
         _list.get(_backwards.nextIndex())._tangentQuaternion,
         _list.get(_forwards.nextIndex())._tangentQuaternion,
         _list.get(_forwards.nextIndex())._rotation(), alpha);
-    node().setPosition(pos);
-    node().setOrientation(q);
-    node().setMagnitude(mag);
+    _node.setPosition(pos);
+    _node.setOrientation(q);
+    _node.setMagnitude(mag);
   }
 
   /**
@@ -636,7 +629,7 @@ class Interpolator {
                     Vector.add(keyFrames[1]._node.worldPosition(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
                     Quaternion.squad(keyFrames[1]._node.worldOrientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.worldOrientation(), alpha),
                     Vector.lerp(keyFrames[1]._node.worldMagnitude(), keyFrames[2]._node.worldMagnitude(), alpha), false);
-            node._setHint(node(), node()._keyframesMask);
+            node._setHint(_node, _node._keyframesMask);
             _path.add(node);
           }
           // Shift
