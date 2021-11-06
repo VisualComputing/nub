@@ -2359,32 +2359,21 @@ public class Graph {
     if (_seededGraph) {
       _frameCount++;
     }
-    if (this._interpolator._active) {
-      this._interpolator._execute();
-    }
-    else {
-      this._translationInertia._execute();
-      this._lookAroundInertia._execute();
-      this._lookAroundInertia._execute();
-    }
+    _resize();
     // safer to always free subtrees cache
     _subtrees.clear();
     _bbNeed = false;
     _cacheHUDs = new HashSet<Node>(_huds);
-    _resize();
     if (!isOffscreen()) {
       openContext();
     }
-  }
-
-  protected void _timing() {
     if (this._interpolator._active) {
       this._interpolator._execute();
     }
     else {
       this._translationInertia._execute();
       this._lookAroundInertia._execute();
-      this._lookAroundInertia._execute();
+      this._cadRotateInertia._execute();
     }
   }
 
@@ -2394,7 +2383,7 @@ public class Graph {
   public void resetInertia() {
     this._translationInertia._active = false;
     this._lookAroundInertia._active = false;
-    this._lookAroundInertia._active = false;
+    this._cadRotateInertia._active = false;
   }
 
   /**
