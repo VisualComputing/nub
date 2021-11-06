@@ -461,7 +461,7 @@ class Interpolator {
     _t = firstTime();
     if (rerun) {
       if (_list.size() > 1)
-        _active = true;
+        animate();
       else
         interpolate(0);
     }
