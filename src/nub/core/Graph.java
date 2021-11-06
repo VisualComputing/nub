@@ -2660,6 +2660,7 @@ public class Graph {
    */
   protected void _render(Node node) {
     _matrixHandler.pushMatrix();
+    node._execute();
     _matrixHandler.applyTransformation(node);
     BiConsumer<Graph, Node> functor = _functors.get(node.id());
     if (functor != null) {

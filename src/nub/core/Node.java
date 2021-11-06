@@ -847,19 +847,22 @@ public class Node {
     }
     if (_lastRendered != Graph._frameCount) {
       _lastRenderedSet.clear();
-      // update timing stuff
-      if (this._interpolator._active) {
-        this._interpolator._execute();
-      }
-      else {
-        this._translationInertia._execute();
-        this._rotationInertia._execute();
-        this._scalingInertia._execute();
-        this._orbitInertia._execute();
-      }
     }
     _lastRendered = Graph._frameCount;
     _lastRenderedSet.add(graph);
+  }
+
+  protected void _execute() {
+    // update timing stuff
+    if (this._interpolator._active) {
+      this._interpolator._execute();
+    }
+    else {
+      this._translationInertia._execute();
+      this._rotationInertia._execute();
+      this._scalingInertia._execute();
+      this._orbitInertia._execute();
+    }
   }
 
   /**

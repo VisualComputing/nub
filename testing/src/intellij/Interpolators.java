@@ -78,7 +78,7 @@ public class Interpolators extends PApplet {
     // */
     // /*
     // Works for both onscreen and offscreen scenes!!!
-    scene.display(color(125), false, color(0, 255, 0)/*, this::sceneHUD*/);
+    scene.display(color(125), true, color(0, 255, 0)/*, this::sceneHUD*/);
     //scene.display(color(125), true, true, this::customBox);
     // */
   }
