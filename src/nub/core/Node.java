@@ -3581,21 +3581,21 @@ public class Node {
    * Run the animation defined by the node keyframes.
    */
   public void animate() {
-    _interpolator._active = true;
+    _interpolator.animate();
   }
   /**
    * Run the animation with the given {@code speed} defined by the node keyframes.
    */
   public void animate(float speed) {
-    _interpolator._speed = speed;
-    _interpolator._active = true;
+    _interpolator.setSpeed(speed);
+    _interpolator.animate();
   }
 
   /**
    * Toggles the node animation.
    */
   public void toggleAnimation() {
-    _interpolator._active = !_interpolator._active;
+    _interpolator.toggle();
   }
 
   /**
@@ -3629,20 +3629,6 @@ public class Node {
   public void addKeyFrame() {
     _interpolator.addKeyFrame();
   }
-
-  // TODO: decide these two
-
-  /*
-  public void addKeyFrame(float time) {
-    _interpolator.addKeyFrame(time);
-  }
-  //  */
-
-  /*
-  public void addKeyFrame(int hint) {
-    addKeyFrame(hint, 1);
-  }
-  // */
 
   /**
    * Adds a node copy as a keyframe at {@code time} (in milliseconds) and a mask {@code hint}.

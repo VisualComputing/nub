@@ -281,7 +281,19 @@ class Interpolator {
       }
     }
   }
-  
+
+  public void animate() {
+    _timestamp = 0;
+    _active = true;
+  }
+
+  public void toggle() {
+    _active = !_active;
+    if (!_active) {
+      _timestamp = 0;
+    }
+  }
+
   /**
    * Stops the interpolation and resets {@code t} to the {@link #firstTime()}.
    * <p>
@@ -289,6 +301,7 @@ class Interpolator {
    * the {@link #node()} to {@link #firstTime()}.
    */
   public void reset() {
+    _timestamp = 0;
     _active = false;
     _t = firstTime();
   }
