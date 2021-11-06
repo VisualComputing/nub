@@ -18,7 +18,6 @@ import nub.primitives.Vector;
  * <a href="https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java">DampedAction</a.
  * in turn based on a "damned clever and aesthetic idea by David Bollinger".
  */
-// JS should go:
 abstract class Inertia {
   boolean _active;
   // orbit center:
