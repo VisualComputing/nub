@@ -15,6 +15,7 @@ import processing.event.MouseEvent;
 public class Interpolators extends PApplet {
   Scene scene;
   Node shape;
+  boolean recurrent;
 
   //Choose P3D or P2D
   String renderer = P3D;
@@ -39,7 +40,6 @@ public class Interpolators extends PApplet {
     shape = new Node(pshape);
     shape.setMinMaxScalingFilter(0.8f, 1.2f);
     shape.setHUD(this::hud);
-    shape.setAnimationRecurrence(true);
     shape.enableHint(Node.AXES);
     shape.enableHint(Node.BULLSEYE);
     shape.enableHint(Node.KEYFRAMES, Node.AXES | Node.BULLSEYE, 2, color(0, 255, 0), 10);
@@ -78,7 +78,7 @@ public class Interpolators extends PApplet {
     // */
     // /*
     // Works for both onscreen and offscreen scenes!!!
-    scene.display(color(125), false, color(0, 255, 0), this::sceneHUD);
+    scene.display(color(125), false, color(0, 255, 0)/*, this::sceneHUD*/);
     //scene.display(color(125), true, true, this::customBox);
     // */
   }
@@ -133,6 +133,13 @@ public class Interpolators extends PApplet {
   float speed = 1;
 
   public void keyPressed() {
+    if (key == 'm') {
+      shape.animate(-1);
+    }
+    if (key == 'n') {
+      recurrent = !recurrent;
+      shape.setAnimationRecurrence(recurrent);
+    }
     if (key == 'q') {
       shape.resetAnimation();
     }

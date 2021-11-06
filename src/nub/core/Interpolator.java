@@ -227,14 +227,7 @@ class Interpolator {
    * it is recurrent.
    */
   void _execute() {
-    if (_active) {
-      if ((_list.isEmpty()) || (_node == null))
-        return;
-      if ((_speed > 0.0) && (_t >= _list.get(_list.size() - 1)._time))
-        _t = _list.get(0)._time;
-      if ((_speed < 0.0) && (_t <= _list.get(0)._time))
-        _t = _list.get(_list.size() - 1)._time;
-      interpolate(_t);
+    if (_active && !_list.isEmpty()) {
       // update _t according to current framerate
       long now = System.currentTimeMillis();
       if (_timestamp != 0) {
@@ -242,23 +235,26 @@ class Interpolator {
         _t += _speed * delay;
       }
       _timestamp = now;
-      if (_t >= _list.get(_list.size() - 1)._time) {
-        if (_recurrent)
-          _t = _list.get(0)._time + _t - _list.get(_list.size() - 1)._time;
-        else {
-          // Make sure last KeyFrame is reached and displayed
-          interpolate(_list.get(_list.size() - 1)._time);
-          _active = false;
+      // interpolate
+      if ((_speed > 0.0) && (_t >= _list.get(_list.size() - 1)._time)) {
+        if (_recurrent) {
+          _t = _list.get(0)._time;
         }
-      } else if (_t <= _list.get(0)._time) {
-        if (_recurrent)
-          _t = _list.get(_list.size() - 1)._time - _list.get(0)._time + _t;
         else {
-          // Make sure first KeyFrame is reached and displayed
-          interpolate(_list.get(0)._time);
+          _t = _list.get(_list.size() - 1)._time;
           _active = false;
         }
       }
+      if ((_speed < 0.0) && (_t <= _list.get(0)._time)) {
+        if (_recurrent) {
+          _t = _list.get(_list.size() - 1)._time;
+        }
+        else {
+          _t = _list.get(0)._time;
+          _active = false;
+        }
+      }
+      interpolate(_t);
     }
   }
 
@@ -268,15 +264,25 @@ class Interpolator {
   public void animate() {
     _timestamp = 0;
     _active = true;
+    if(!_recurrent) {
+      if ((_speed > 0.0) && (_t >= _list.get(_list.size() - 1)._time)) {
+        _t = _list.get(0)._time;
+      }
+      if ((_speed < 0.0) && (_t <= _list.get(0)._time)) {
+        _t = _list.get(_list.size() - 1)._time;
+      }
+    }
   }
 
   /**
    * (de)activates the animation and resets timestamp if animation results inactive.
    */
   public void toggle() {
-    _active = !_active;
     if (!_active) {
-      _timestamp = 0;
+      animate();
+    }
+    else {
+      _active = false;
     }
   }
 
@@ -453,7 +459,7 @@ class Interpolator {
     _valuesAreValid = false;
     _pathIsValid = false;
     _currentKeyFrameValid = false;
-    boolean rerun = false;
+    boolean rerun = _active;
     if (_active) {
       _active = false;
     }
