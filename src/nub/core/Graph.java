@@ -905,7 +905,9 @@ public class Graph {
     }
     _eye = eye;
     _eye._frustumGraphs.add(this);
-    _interpolator = new Interpolator(_eye);
+    if (_interpolator != null) {
+      _interpolator._node = eye;
+    }
     _eye._keyframesMask = Node.CAMERA;
     _modified();
   }
@@ -1632,13 +1634,13 @@ public class Graph {
    * @see #fitFOV()
    * @see #fitFOV(float)
    */
+  //TODO needs testing with flock
   public void fit(Node node, float duration) {
     if (duration <= 0) {
       _eye.set(node);
     } else {
       _eye._interpolator._active = false;
-      _interpolator.reset();
-      _interpolator.clear();
+      _interpolator = new Interpolator(_eye);
       _interpolator.addKeyFrame(new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false));
       _interpolator.addKeyFrame(node, duration);
       _interpolator._active = true;
@@ -1690,11 +1692,10 @@ public class Graph {
       _fit(_center, _radius);
     else {
       _eye._interpolator._active = false;
-      _interpolator.reset();
-      _interpolator.clear();
       Node cacheEye = _eye;
       Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
       setEye(tempEye);
+      _interpolator = new Interpolator(tempEye);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       _fit(_center, _radius);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
@@ -1752,11 +1753,10 @@ public class Graph {
       fitFOV();
     else {
       _eye._interpolator._active = false;
-      _interpolator.reset();
-      _interpolator.clear();
       Node cacheEye = _eye;
       Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
       setEye(tempEye);
+      _interpolator = new Interpolator(tempEye);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       fitFOV();
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
@@ -1817,11 +1817,10 @@ public class Graph {
       fit(corner1, corner2);
     else {
       _eye._interpolator._active = false;
-      _interpolator.reset();
-      _interpolator.clear();
       Node cacheEye = _eye;
       Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
       setEye(tempEye);
+      _interpolator = new Interpolator(tempEye);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       fit(corner1, corner2);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
@@ -1877,11 +1876,10 @@ public class Graph {
       fit(x, y, width, height);
     else {
       _eye._interpolator._active = false;
-      _interpolator.reset();
-      _interpolator.clear();
       Node cacheEye = _eye;
       Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
       setEye(tempEye);
+      _interpolator = new Interpolator(tempEye);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
       fit(x, y, width, height);
       _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
@@ -2362,14 +2360,15 @@ public class Graph {
     if (!isOffscreen()) {
       openContext();
     }
-    if (this._interpolator._active) {
-      this._interpolator._execute();
+    if (this._interpolator != null) {
+      if (this._interpolator._active) {
+        this._interpolator._execute();
+        return;
+      }
     }
-    else {
-      this._translationInertia._execute();
-      this._lookAroundInertia._execute();
-      this._cadRotateInertia._execute();
-    }
+    this._translationInertia._execute();
+    this._lookAroundInertia._execute();
+    this._cadRotateInertia._execute();
   }
 
   /**
