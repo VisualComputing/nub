@@ -162,7 +162,7 @@ class Interpolator {
   public Interpolator(Node node) {
     _list = new ArrayList<KeyFrame>();
     _path = new ArrayList<Node>();
-    setNode(node);
+    _node = node;
     _t = 0.0f;
     _speed = 1.0f;
     _recurrent = false;
@@ -181,7 +181,7 @@ class Interpolator {
       this._list.add(keyFrame);
     }
     this._path = new ArrayList<Node>();
-    this.setNode(other._node);
+    this._node = other._node;
     this._t = other._t;
     this._speed = other._speed;
     this._recurrent = other._recurrent;
@@ -207,19 +207,6 @@ class Interpolator {
    */
   protected long _lastUpdate() {
     return _lastUpdate;
-  }
-
-  /**
-   * Sets the interpolator {@code node}.
-   */
-  public void setNode(Node node) {
-    if (node == null) {
-      throw new RuntimeException("Interpolator node should be non-null!");
-    }
-    if (_node != node) {
-      _node = node;
-      _pathIsValid = false;
-    }
   }
 
   /**

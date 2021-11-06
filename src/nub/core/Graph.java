@@ -905,12 +905,7 @@ public class Graph {
     }
     _eye = eye;
     _eye._frustumGraphs.add(this);
-    if (_interpolator == null) {
-      _interpolator = new Interpolator(_eye);
-    }
-    else {
-      _interpolator.setNode(_eye);
-    }
+    _interpolator = new Interpolator(_eye);
     _eye._keyframesMask = Node.CAMERA;
     _modified();
   }
