@@ -332,13 +332,6 @@ class Interpolator {
   }
 
   /**
-   * Increase the speed about {@code delta}.
-   */
-  public void increaseSpeed(float delta) {
-    _speed += delta;
-  }
-
-  /**
    * Returns the collection of keyframes represented as a map of
    * time to node pairings.
    */

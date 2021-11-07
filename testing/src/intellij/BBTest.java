@@ -1,9 +1,7 @@
 package intellij;
 
 import nub.core.*;
-import nub.primitives.*;
 import nub.processing.*;
-import nub.timing.*;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.event.MouseEvent;

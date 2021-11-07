@@ -149,7 +149,7 @@ public class Graph {
   //protected boolean _fixed;
   //protected float _zNear, _zFar;
   // Inertial stuff
-  public static float inertia = 0.8f;
+  public static float inertia = 0.85f;
   protected Inertia _translationInertia;
   protected Inertia _lookAroundInertia;
   protected Inertia _cadRotateInertia;
