@@ -262,14 +262,16 @@ class Interpolator {
    * resets timestamp and actives the animation.
    */
   public void animate() {
-    _timestamp = 0;
-    _active = true;
-    if(!_recurrent) {
-      if ((_speed > 0.0) && (_t >= _list.get(_list.size() - 1)._time)) {
-        _t = _list.get(0)._time;
-      }
-      if ((_speed < 0.0) && (_t <= _list.get(0)._time)) {
-        _t = _list.get(_list.size() - 1)._time;
+    if (!_list.isEmpty()) {
+      _timestamp = 0;
+      _active = true;
+      if (!_recurrent) {
+        if ((_speed > 0.0) && (_t >= _list.get(_list.size() - 1)._time)) {
+          _t = _list.get(0)._time;
+        }
+        if ((_speed < 0.0) && (_t <= _list.get(0)._time)) {
+          _t = _list.get(_list.size() - 1)._time;
+        }
       }
     }
   }
