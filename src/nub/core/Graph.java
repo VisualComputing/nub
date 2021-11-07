@@ -2658,15 +2658,16 @@ public class Graph {
    * Used by the {@link #render(Node)} algorithm.
    */
   protected void _render(Node node) {
+    _matrixHandler.pushMatrix();
+    node._execute();
+    _matrixHandler.applyTransformation(node);
+    BiConsumer<Graph, Node> functor = _functors.get(node.id());
+    if (functor != null) {
+      functor.accept(this, node);
+    }
     if (!node.cull) {
-      _matrixHandler.pushMatrix();
       if (node._bypass != _frameCount) {
         node._update(this);
-        _matrixHandler.applyTransformation(node);
-        BiConsumer<Graph, Node> functor = _functors.get(node.id());
-        if (functor != null) {
-          functor.accept(this, node);
-        }
         if (_backPicking(node)) {
           _bbNeed = true;
         }
@@ -2690,8 +2691,8 @@ public class Graph {
       for (Node child : node.children()) {
         _render(child);
       }
-      _matrixHandler.popMatrix();
     }
+    _matrixHandler.popMatrix();
   }
 
   /**

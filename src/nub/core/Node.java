@@ -197,6 +197,7 @@ public class Node {
   protected processing.core.PShape _rmrShape;
   protected long _bypass = -1;
   protected long _lastRendered = -1;
+  protected long _lastExecuted = -1;
   protected HashSet<Graph> _lastRenderedSet;
 
   //Object... gesture
@@ -838,8 +839,8 @@ public class Node {
   }
 
   /**
-   * Updates timing stuff and the cache of graphs rendering the node in the current frame
-   * which is used by the last time {@link #rendered(Graph)} condition.
+   * Updates the cache of graphs rendering the node in the current frame
+   * which is then used by the last time {@link #rendered(Graph)} condition.
    */
   protected void _update(Graph graph) {
     if (rendered(graph)) {
@@ -847,6 +848,16 @@ public class Node {
     }
     if (_lastRendered != Graph._frameCount) {
       _lastRenderedSet.clear();
+    }
+    _lastRendered = Graph._frameCount;
+    _lastRenderedSet.add(graph);
+  }
+
+  /**
+   * Updates the node timing stuff.
+   */
+  protected void _execute() {
+    if (_lastExecuted != Graph._frameCount) {
       // update timing stuff
       if (this._interpolator._active) {
         this._interpolator._execute();
@@ -858,8 +869,7 @@ public class Node {
         this._orbitInertia._execute();
       }
     }
-    _lastRendered = Graph._frameCount;
-    _lastRenderedSet.add(graph);
+    _lastExecuted = Graph._frameCount;
   }
 
   /**
