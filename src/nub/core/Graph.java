@@ -2360,19 +2360,10 @@ public class Graph {
     if (!isOffscreen()) {
       openContext();
     }
-    if (this._interpolator != null) {
-      if (this._interpolator._active) {
-        this._interpolator._execute();
-        return;
-      }
-    }
-    this._translationInertia._execute();
-    this._lookAroundInertia._execute();
-    this._cadRotateInertia._execute();
   }
 
   /**
-   * Stops all eye inertias.
+   * Stops all eye inertia's.
    */
   public void resetInertia() {
     this._translationInertia._active = false;
@@ -2524,6 +2515,8 @@ public class Graph {
         _displayHUD();
       }
       _matrixHandler.popMatrix();
+      // make sure eye is updated
+      _eye._execute(this);
       if (isOffscreen()) {
         _endFrontBuffer();
       }
@@ -2659,8 +2652,9 @@ public class Graph {
    */
   protected void _render(Node node) {
     _matrixHandler.pushMatrix();
-    node._execute();
+    node._execute(this);
     _matrixHandler.applyTransformation(node);
+    // TODO should go before pushMatrix ???
     BiConsumer<Graph, Node> functor = _functors.get(node.id());
     if (functor != null) {
       functor.accept(this, node);
@@ -2895,6 +2889,9 @@ public class Graph {
     return _tags.containsKey(tag);
   }
 
+  /**
+   * Returns {@code true} if the node is currently being tagged and {@code false} otherwise.
+   */
   public boolean isTagged(Node node) {
     return _tags.containsValue(node);
   }

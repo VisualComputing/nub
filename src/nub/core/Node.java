@@ -856,24 +856,40 @@ public class Node {
   /**
    * Updates the node timing stuff.
    */
-  protected void _execute() {
+  protected void _execute(Graph graph) {
     if (_lastExecuted != Graph._frameCount) {
-      // update timing stuff
+      boolean eye = graph.isEye(this);
+      if (eye && graph._interpolator != null) {
+        if (graph._interpolator._active) {
+          this.resetInertia();
+          graph.resetInertia();
+          graph._interpolator._execute();
+          return;
+        }
+      }
       if (this._interpolator._active) {
+        this.resetInertia();
+        if (eye) {
+          graph.resetInertia();
+        }
         this._interpolator._execute();
+        return;
       }
-      else {
-        this._translationInertia._execute();
-        this._rotationInertia._execute();
-        this._scalingInertia._execute();
-        this._orbitInertia._execute();
+      if (eye) {
+        graph._translationInertia._execute();
+        graph._lookAroundInertia._execute();
+        graph._cadRotateInertia._execute();
       }
+      this._translationInertia._execute();
+      this._rotationInertia._execute();
+      this._scalingInertia._execute();
+      this._orbitInertia._execute();
+      _lastExecuted = Graph._frameCount;
     }
-    _lastExecuted = Graph._frameCount;
   }
 
   /**
-   * Stops all node inertias.
+   * Stops all node inertia's.
    */
   public void resetInertia() {
     this._translationInertia._active = false;
