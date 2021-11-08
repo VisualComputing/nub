@@ -372,7 +372,7 @@ class Interpolator {
    * Adds a {@code node} copy as a keyframe at {@code time} and a mask {@code hint}.
    */
   public void addKeyFrame(int hint, float time) {
-    _addKeyFrame(_node._copy(hint, true), time, true);
+    _addKeyFrame(_node._copy(hint, _node.isHintEnabled(Node.KEYFRAMES)), time, true);
   }
 
   /**
@@ -415,10 +415,6 @@ class Interpolator {
     if (node == null)
       return;
     _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time, handled));
-    if (handled) {
-      node.tagging = _node.isHintEnabled(Node.KEYFRAMES);
-      node.cull = !node.tagging;
-    }
     _valuesAreValid = false;
     _pathIsValid = false;
     _currentKeyFrameValid = false;

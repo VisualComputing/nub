@@ -3551,10 +3551,14 @@ public class Node {
     for (Interpolator.KeyFrame keyFrame : _interpolator._list) {
       if (keyFrame._handled) {
         if (isHintEnabled(Node.KEYFRAMES)) {
-          keyFrame._node.attach();
+          if (!keyFrame._node.isAttached()) {
+            keyFrame._node.attach();
+          }
         }
         else {
-          keyFrame._node.detach();
+          if (keyFrame._node.isAttached()) {
+            keyFrame._node.detach();
+          }
         }
       }
     }
