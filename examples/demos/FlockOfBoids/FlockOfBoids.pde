@@ -150,24 +150,8 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   switch (key) {
   case 'a':
-    for (Boid boid : flock)
-      boid.task.toggle();
-    break;
-  case '+':
-    for (Boid boid : flock)
-      boid.task.increasePeriod(-2);
-    break;
-  case '-':
-    for (Boid boid : flock)
-      boid.task.increasePeriod(2);
-    break;
-  case 'e':
-    for (Boid boid : flock)
-      boid.task.enableConcurrence(true);
-    break;
-  case 'd':
-    for (Boid boid : flock)
-      boid.task.enableConcurrence(false);
+    //for (Boid boid : flock)
+      //boid.task.toggle();
     break;
   case 's':
     if (scene.eye().reference() == null)

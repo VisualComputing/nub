@@ -19,7 +19,6 @@ import nub.processing.*;
 
 Scene scene, shadowMapScene;
 Node landscape1, landscape2, landscape3, light;
-TimingTask animation;
 PShader depthShader;
 PShader shadowShader;
 PGraphics shadowMap;
@@ -69,16 +68,6 @@ void setup() {
   // light node
   light = new Node();
   light.enableHint(Node.BULLSEYE | Node.AXES | Node.CAMERA);
-  animation = new TimingTask(() -> {
-    if (!scene.isTagged(light)) {
-      float lightAngle = frameCount * 0.002;
-      light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
-    }
-    light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), Vector.plusJ));
-    light.setZAxis(light.position());
-  }
-  );
-  animation.run(60);
   // shadow map scene
   shadowMapScene = new Scene(shadowMap, light);
   shadowMapScene.setZNear(() -> 10f);
@@ -135,6 +124,8 @@ void landscape3(PGraphics pg) {
 }
 
 void draw() {
+  // 0. animate
+  animate();
   // 1. Render the shadowmap
   shadowMapScene.openContext();
   shadowMapScene.context().background(0xffffffff);
@@ -150,6 +141,15 @@ void draw() {
   }
   background(0);
   scene.render();
+}
+
+void animate() {
+  if (!scene.isTagged(light)) {
+    float lightAngle = frameCount * 0.002;
+    light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
+  }
+  light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), Vector.plusJ));
+  light.setZAxis(light.position());
 }
 
 void keyPressed() {

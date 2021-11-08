@@ -1,8 +1,6 @@
 class Boid {
   // Node
   Node node;
-  // timing task
-  TimingTask task;
   // fields
   Vector position, velocity, acceleration, alignment, cohesion, separation; // position, velocity, and acceleration in
   // a vector datatype
@@ -15,14 +13,13 @@ class Boid {
 
   Boid(Vector inPos) {
     node = new Node(this::display);
+    node.setVisit(scene, this::behavior);
     position = new Vector();
     position.set(inPos);
     node.setPosition(new Vector(position.x(), position.y(), position.z()));
     velocity = Vector.random();
     acceleration = new Vector();
     neighborhoodRadius = 100;
-    task = new TimingTask(this::behavior);
-    task.run();
   }
 
   public void display(PGraphics pg) {
@@ -69,7 +66,7 @@ class Boid {
 
   //-----------behaviors---------------
 
-  void behavior() {
+  void behavior(Graph graph) {
     t += 0.1;
     flap = 10 * sin(t);
     // acceleration.add(steer(new Vector(mouseX,mouseY,300),true));
