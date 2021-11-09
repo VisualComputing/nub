@@ -198,6 +198,7 @@ public class Node {
   protected long _bypass = -1;
   protected long _lastRendered = -1;
   protected long _lastExecuted = -1;
+  protected long _lastExecutedAsEye = -1;
   protected HashSet<Graph> _lastRenderedSet;
 
   //Object... gesture
@@ -857,28 +858,47 @@ public class Node {
    * Updates the node timing stuff.
    */
   protected void _execute(Graph graph) {
-    if (_lastExecuted != Graph._frameCount) {
-      boolean eye = graph.isEye(this);
-      if (eye && graph._interpolator != null) {
-        if (graph._interpolator._active) {
-          this.resetInertia();
-          graph.resetInertia();
-          graph._interpolator._execute();
-          return;
+    if (graph.isEye(this)) {
+      if (_lastExecutedAsEye != Graph._frameCount) {
+        boolean asNode = _lastExecuted != Graph._frameCount;
+        if (graph._interpolator != null) {
+          if (graph._interpolator._active) {
+            this._interpolator._active = false;
+            this.resetInertia();
+            graph.resetInertia();
+            graph._interpolator._execute();
+          }
         }
-      }
-      if (this._interpolator._active) {
-        this.resetInertia();
-        if (eye) {
+        if (this._interpolator._active) {
           graph.resetInertia();
+          if (asNode) {
+            this.resetInertia();
+            this._interpolator._execute();
+          }
         }
-        this._interpolator._execute();
-        return;
-      }
-      if (eye) {
         graph._translationInertia._execute();
         graph._lookAroundInertia._execute();
         graph._cadRotateInertia._execute();
+        if (asNode) {
+          this._translationInertia._execute();
+          this._rotationInertia._execute();
+          this._scalingInertia._execute();
+          this._orbitInertia._execute();
+          _lastExecuted = Graph._frameCount;
+        }
+        _lastExecutedAsEye = Graph._frameCount;
+      }
+    }
+    else {
+      _execute();
+    }
+  }
+
+  protected void _execute() {
+    if (_lastExecuted != Graph._frameCount) {
+      if (this._interpolator._active) {
+        this.resetInertia();
+        this._interpolator._execute();
       }
       this._translationInertia._execute();
       this._rotationInertia._execute();
