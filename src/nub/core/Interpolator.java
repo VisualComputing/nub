@@ -45,7 +45,7 @@ class Interpolator {
    */
   protected class KeyFrame {
     /**
-     * Returns whether or not this keyframe matches the {@code other}.
+     * Returns whether this keyframe matches the {@code other}.
      *
      * @param keyFrame other keyFrame
      */

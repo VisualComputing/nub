@@ -110,15 +110,16 @@ import java.util.function.Function;
  */
 public class Node {
   /**
-   * Returns whether or not this node matches other taking into account the {@link #position()},
-   * {@link #orientation()} and {@link #magnitude()} node parameters, but not its {@link #reference()}.
+   * Returns whether this node matches other taking into account the {@link #worldPosition()},
+   * {@link #worldOrientation()} and {@link #worldMagnitude()} node parameters.
    *
    * @param node node
    */
   public boolean matches(Node node) {
-    if (node == null)
+    if (node == null) {
       node = new Node(null, new Vector(), new Quaternion(), 1, false);
-    return position().matches(node.position()) && orientation().matches(node.orientation()) && magnitude() == node.magnitude();
+    }
+    return worldPosition().matches(node.worldPosition()) && worldOrientation().matches(node.worldOrientation()) && worldMagnitude() == node.worldMagnitude();
   }
 
   protected Vector _position;
