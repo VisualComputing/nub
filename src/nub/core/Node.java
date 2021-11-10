@@ -198,7 +198,6 @@ public class Node {
   protected long _bypass = -1;
   protected long _lastRendered = -1;
   protected long _lastExecuted = -1;
-  protected long _lastExecutedAsEye = -1;
   protected HashSet<Graph> _lastRenderedSet;
 
   //Object... gesture
@@ -206,7 +205,10 @@ public class Node {
 
   // Tasks
   protected boolean _attach;
+  // node
   protected Inertia _translationInertia, _rotationInertia, _orbitInertia, _scalingInertia;
+  // eye
+  protected Inertia _shiftInertia, _lookAroundInertia, _cadRotateInertia;
   protected final float _scalingFactor = 800;
 
   /**
@@ -858,9 +860,8 @@ public class Node {
    * Updates the node timing stuff.
    */
   protected void _execute(Graph graph) {
-    if (graph.isEye(this)) {
-      if (_lastExecutedAsEye != Graph._frameCount) {
-        boolean asNode = _lastExecuted != Graph._frameCount;
+    if (_lastExecuted != Graph._frameCount) {
+      if (graph != null) {
         if (graph._interpolator != null) {
           if (graph._interpolator._active) {
             this._interpolator._active = false;
@@ -869,36 +870,22 @@ public class Node {
             graph._interpolator._execute();
           }
         }
-        if (this._interpolator._active) {
-          graph.resetInertia();
-          if (asNode) {
-            this.resetInertia();
-            this._interpolator._execute();
-          }
-        }
-        graph._translationInertia._execute();
-        graph._lookAroundInertia._execute();
-        graph._cadRotateInertia._execute();
-        if (asNode) {
-          this._translationInertia._execute();
-          this._rotationInertia._execute();
-          this._scalingInertia._execute();
-          this._orbitInertia._execute();
-          _lastExecuted = Graph._frameCount;
-        }
-        _lastExecutedAsEye = Graph._frameCount;
       }
-    }
-    else {
-      _execute();
-    }
-  }
-
-  protected void _execute() {
-    if (_lastExecuted != Graph._frameCount) {
       if (this._interpolator._active) {
+        if (graph != null) {
+          graph.resetInertia();
+        }
         this.resetInertia();
         this._interpolator._execute();
+      }
+      if (this._shiftInertia !=  null) {
+        this._shiftInertia._execute();
+      }
+      if (this._lookAroundInertia !=  null) {
+        this._lookAroundInertia._execute();
+      }
+      if (this._cadRotateInertia !=  null) {
+        this._cadRotateInertia._execute();
       }
       this._translationInertia._execute();
       this._rotationInertia._execute();

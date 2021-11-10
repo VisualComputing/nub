@@ -150,9 +150,6 @@ public class Graph {
   //protected float _zNear, _zFar;
   // Inertial stuff
   public static float inertia = 0.85f;
-  protected Inertia _translationInertia;
-  protected Inertia _lookAroundInertia;
-  protected Inertia _cadRotateInertia;
   protected Vector _eyeUp;
   // Interpolator
   protected Interpolator _interpolator;
@@ -393,24 +390,6 @@ public class Graph {
       throw new RuntimeException("Error eye shouldn't be null");
     }
     setEye(eye);
-    _translationInertia = new Inertia() {
-      @Override
-      void _action() {
-        _shift(_x, _y, _z);
-      }
-    };
-    _lookAroundInertia = new Inertia() {
-      @Override
-      void _action() {
-        _lookAround();
-      }
-    };
-    _cadRotateInertia = new Inertia() {
-      @Override
-      void _action() {
-        _cad();
-      }
-    };
     setType(type);
     picking = true;
   }
@@ -900,10 +879,31 @@ public class Graph {
       System.out.println("Warning: node was untagged since it was set as the eye");
     }
     if (_eye != null) {
+      _eye._shiftInertia = null;
+      _eye._lookAroundInertia = null;
+      _eye._cadRotateInertia = null;
       _eye._frustumGraphs.remove(this);
       _eye._keyframesMask = Node.AXES;
     }
     _eye = eye;
+    _eye._shiftInertia = new Inertia() {
+      @Override
+      void _action() {
+        _shift(_x, _y, _z);
+      }
+    };
+    _eye._lookAroundInertia = new Inertia() {
+      @Override
+      void _action() {
+        _lookAround();
+      }
+    };
+    _eye._cadRotateInertia = new Inertia() {
+      @Override
+      void _action() {
+        _cad();
+      }
+    };
     _eye._frustumGraphs.add(this);
     if (_interpolator != null) {
       _interpolator._node = eye;
@@ -2366,9 +2366,9 @@ public class Graph {
    * Stops all eye inertia's.
    */
   public void resetInertia() {
-    this._translationInertia._active = false;
-    this._lookAroundInertia._active = false;
-    this._cadRotateInertia._active = false;
+    _eye._shiftInertia._active = false;
+    _eye._lookAroundInertia._active = false;
+    _eye._cadRotateInertia._active = false;
   }
 
   /**
@@ -2652,7 +2652,7 @@ public class Graph {
    */
   protected void _render(Node node) {
     _matrixHandler.pushMatrix();
-    node._execute(this);
+    node._execute(isEye(node) ? this : null);
     _matrixHandler.applyTransformation(node);
     // TODO should go before pushMatrix ???
     BiConsumer<Graph, Node> functor = _functors.get(node.id());
@@ -3531,12 +3531,12 @@ public class Graph {
       vector.multiply(-1);
       Vector translation = eye().referenceDisplacement(vector);
       _shift(translation.x(), translation.y(), translation.z());
-      _translationInertia.setInertia(inertia);
-      _translationInertia._x += translation.x();
-      _translationInertia._y += translation.y();
-      _translationInertia._z += translation.z();
-      if (!_translationInertia._active) {
-        _translationInertia._active = true;
+      _eye._shiftInertia.setInertia(inertia);
+      _eye._shiftInertia._x += translation.x();
+      _eye._shiftInertia._y += translation.y();
+      _eye._shiftInertia._z += translation.z();
+      if (!_eye._shiftInertia._active) {
+        _eye._shiftInertia._active = true;
       }
     }
     else {
@@ -3815,12 +3815,12 @@ public class Graph {
     if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
     } else {
-      _lookAroundInertia.setInertia(inertia);
-      _lookAroundInertia._x += deltaX / 5;
-      _lookAroundInertia._y += deltaY / 5;
+      _eye._lookAroundInertia.setInertia(inertia);
+      _eye._lookAroundInertia._x += deltaX / 5;
+      _eye._lookAroundInertia._y += deltaY / 5;
       _lookAround();
-      if (!_lookAroundInertia._active)
-        _lookAroundInertia._active = true;
+      if (!_eye._lookAroundInertia._active)
+        _eye._lookAroundInertia._active = true;
     }
   }
 
@@ -3833,8 +3833,8 @@ public class Graph {
       _lookAroundCount = _frameCount;
     }
     _lookAroundCount++;
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _lookAroundInertia._y : -_lookAroundInertia._y);
-    Quaternion rotY = new Quaternion(eye().displacement(_upVector), -_lookAroundInertia._x);
+    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _eye._lookAroundInertia._y : -_eye._lookAroundInertia._y);
+    Quaternion rotY = new Quaternion(eye().displacement(_upVector), -_eye._lookAroundInertia._x);
     Quaternion quaternion = Quaternion.multiply(rotY, rotX);
     eye().rotate(quaternion);
   }
@@ -3879,11 +3879,11 @@ public class Graph {
     } else {
       _eyeUp = upVector;
       _cad();
-      _cadRotateInertia.setInertia(inertia);
-      _cadRotateInertia._x += roll;
-      _cadRotateInertia._y += pitch;
-      if (!_cadRotateInertia._active)
-        _cadRotateInertia._active = true;
+      _eye._cadRotateInertia.setInertia(inertia);
+      _eye._cadRotateInertia._x += roll;
+      _eye._cadRotateInertia._y += pitch;
+      if (!_eye._cadRotateInertia._active)
+        _eye._cadRotateInertia._active = true;
     }
   }
 
@@ -3892,7 +3892,7 @@ public class Graph {
    */
   protected void _cad() {
     Vector _up = eye().displacement(_eyeUp);
-    eye()._orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _cadRotateInertia._x : -_cadRotateInertia._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _cadRotateInertia._y : -_cadRotateInertia._y)), _center);
+    eye()._orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _eye._cadRotateInertia._x : -_eye._cadRotateInertia._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _eye._cadRotateInertia._y : -_eye._cadRotateInertia._y)), _center);
   }
 
   // Hack to hide hint properties
