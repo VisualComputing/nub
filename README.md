@@ -2,7 +2,6 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 - [Description](#description)
-- [Timing tasks](#timing-tasks)
 - [Scene](#scene)
 - [Nodes](#nodes)
   - [Localization](#localization)
@@ -30,28 +29,6 @@ _nub_ is meant to be coupled with third party real and non-real time [renderers]
 If looking for the API docs, check them [here](https://visualcomputing.github.io/nub-javadocs/).
 
 Readers unfamiliar with geometry transformations may first check the great [Processing 2D transformations tutorial](https://processing.org/tutorials/transform2d/) by _J David Eisenberg_ and the [affine transformations](http://visualcomputing.github.io/Transformations) and [scene-graphs](http://visualcomputing.github.io/SceneGraphs) presentations that discuss some related formal foundations.
-
-# Timing tasks
-
-_Timing tasks_ are (non)recurrent, (non)concurrent callbacks which (behind the scenes) use the Processing main event loop to run. For example:
-
-```processing
-// import all nub classes
-import nub.primitives.*;
-import nub.core.*;
-import nub.processing.*;
-
-void setup() {
-  // ...
-  task = new TimingTask(() -> {
-    // code defining the (non)recurrent,
-    // (non)concurrent callback goes here
-  });
-  task.run();
-}
-```
-
-will run the timing-task at 25Hz (which is its default `frequency()`). See the [ParticleSystem](https://github.com/VisualComputing/nub/tree/master/examples/basics/ParticleSystem) example.
 
 # Scene
 
@@ -148,7 +125,7 @@ A node `position`, `orientation` and `magnitude` may be set with the following m
 |Locally          |`setPosition(vector)`         |`setOrientation(quaternion)`      |`setMagnitude(scalar)`      |
 |Incrementally    |`translate(vector, [inertia])`|`rotate(quaternion, [inertia])`,  |`scale(scalar, [inertia])`  |
 
-Note that the optional `inertia` parameter should be a value in [0..1], `0` no inertia (which is the default value) & `1` no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java) and done in terms of `TimingTasks`.
+Note that the optional `inertia` parameter should be a value in [0..1], `0` no inertia (which is the default value) & `1` no friction. Its implementation was inspired by the great [PeasyCam damped actions](https://github.com/jdf/peasycam/blob/master/src/peasy/DampedAction.java).
 
 ## Motion filters
 
@@ -187,7 +164,7 @@ Note that `point` is a `Vector` instance and `element` is either a `float` (scal
 
 ## Keyframes
 
-[Keyframes](https://en.wikipedia.org/wiki/Key_frame) are [timing-tasks](#timing-tasks) that allow to define the position, orientation and magnitude a node (including the eye) should have at a particular moment in time. The node may then be animated through a [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) spline, matching in space-time the key-frames which defines it. Use code such as the following:
+[Keyframes](https://en.wikipedia.org/wiki/Key_frame) allow to define the position, orientation and magnitude a node (including the eye) should have at a particular moment in time. The node may then be animated through a [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) spline, matching in space-time the key-frames which defines it. Use code such as the following:
 
 ```processing
 Scene scene;
