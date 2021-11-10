@@ -861,7 +861,8 @@ public class Node {
    */
   protected void _execute(Graph graph) {
     if (_lastExecuted != Graph._frameCount) {
-      if (graph != null) {
+      boolean asEye = graph == null ? false : graph.isEye(this);
+      if (asEye) {
         if (graph._interpolator != null) {
           if (graph._interpolator._active) {
             this._interpolator._active = false;
@@ -872,19 +873,15 @@ public class Node {
         }
       }
       if (this._interpolator._active) {
-        if (graph != null) {
+        if (asEye) {
           graph.resetInertia();
         }
         this.resetInertia();
         this._interpolator._execute();
       }
-      if (this._shiftInertia !=  null) {
+      if (asEye && _shiftInertia != null && _lookAroundInertia != null && _cadRotateInertia != null) {
         this._shiftInertia._execute();
-      }
-      if (this._lookAroundInertia !=  null) {
         this._lookAroundInertia._execute();
-      }
-      if (this._cadRotateInertia !=  null) {
         this._cadRotateInertia._execute();
       }
       this._translationInertia._execute();

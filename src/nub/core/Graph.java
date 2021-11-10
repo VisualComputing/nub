@@ -2353,6 +2353,7 @@ public class Graph {
       _frameCount++;
     }
     _resize();
+    _eye._execute(this);
     // safer to always free subtrees cache
     _subtrees.clear();
     _bbNeed = false;
@@ -2515,8 +2516,6 @@ public class Graph {
         _displayHUD();
       }
       _matrixHandler.popMatrix();
-      // make sure eye is updated
-      _eye._execute(this);
       if (isOffscreen()) {
         _endFrontBuffer();
       }
@@ -2652,7 +2651,7 @@ public class Graph {
    */
   protected void _render(Node node) {
     _matrixHandler.pushMatrix();
-    node._execute(isEye(node) ? this : null);
+    node._execute(this);
     _matrixHandler.applyTransformation(node);
     // TODO should go before pushMatrix ???
     BiConsumer<Graph, Node> functor = _functors.get(node.id());
