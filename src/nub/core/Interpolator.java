@@ -463,7 +463,9 @@ class Interpolator {
         interpolate(0);
     }
     if (keyFrame._handled) {
-      keyFrame._node.detach();
+      if (keyFrame._node.isAttached()) {
+        keyFrame._node.detach();
+      }
     }
     return keyFrame._node;
   }
