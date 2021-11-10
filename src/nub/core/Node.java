@@ -867,15 +867,11 @@ public class Node {
           if (graph._interpolator._active) {
             this._interpolator._active = false;
             this.resetInertia();
-            graph.resetInertia();
             graph._interpolator._execute();
           }
         }
       }
       if (this._interpolator._active) {
-        if (asEye) {
-          graph.resetInertia();
-        }
         this.resetInertia();
         this._interpolator._execute();
       }
@@ -896,6 +892,11 @@ public class Node {
    * Stops all node inertia's.
    */
   public void resetInertia() {
+    if (_shiftInertia != null && _lookAroundInertia != null && _cadRotateInertia != null) {
+      this._shiftInertia._active = false;
+      this._lookAroundInertia._active = false;
+      this._cadRotateInertia._active = false;
+    }
     this._translationInertia._active = false;
     this._rotationInertia._active = false;
     this._scalingInertia._active = false;

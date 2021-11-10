@@ -2364,15 +2364,6 @@ public class Graph {
   }
 
   /**
-   * Stops all eye inertia's.
-   */
-  public void resetInertia() {
-    _eye._shiftInertia._active = false;
-    _eye._lookAroundInertia._active = false;
-    _eye._cadRotateInertia._active = false;
-  }
-
-  /**
    * Paint method which is called just after your main event loop. Closes the context if the scene
    * is onscreen and renders when needed the back buffer (useful for picking).
    * <p>
