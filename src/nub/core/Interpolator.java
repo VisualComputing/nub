@@ -479,7 +479,9 @@ class Interpolator {
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
       if (keyFrame._handled) {
-        keyFrame._node.detach();
+        if (keyFrame._node.isAttached()) {
+          keyFrame._node.detach();
+        }
       }
     }
     _list.clear();
