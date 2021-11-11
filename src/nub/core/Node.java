@@ -490,7 +490,7 @@ public class Node {
    */
   @Override
   public String toString() {
-    return "Position: " + worldPosition().toString() + " Orientation: " + worldOrientation().toString() + " Magnitude: " + Float.toString(worldMagnitude());
+    return "worldPosition: " + worldPosition().toString() + " worldOrientation: " + worldOrientation().toString() + " worldMagnitude: " + Float.toString(worldMagnitude());
   }
 
   /**
@@ -3573,13 +3573,13 @@ public class Node {
     for (Interpolator.KeyFrame keyFrame : _interpolator._list) {
       if (keyFrame._handled) {
         if (isHintEnabled(Node.KEYFRAMES)) {
-          if (!keyFrame._node.isAttached()) {
-            keyFrame._node.attach();
+          if (!keyFrame._keyFrame.isAttached()) {
+            keyFrame._keyFrame.attach();
           }
         }
         else {
-          if (keyFrame._node.isAttached()) {
-            keyFrame._node.detach();
+          if (keyFrame._keyFrame.isAttached()) {
+            keyFrame._keyFrame.detach();
           }
         }
       }

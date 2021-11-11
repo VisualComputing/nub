@@ -69,9 +69,10 @@ public class FitNode extends PApplet {
     scene.render(bolas);
     scene.render(cajas);
     // */
+    scene.display(color(125));
     // /*
-    scene.display(color(125), bolas);
-    scene.display(cajas);
+    //scene.display(color(125), bolas);
+    //scene.display(cajas);
     // */
     /*
     scene.openContext();
@@ -130,6 +131,19 @@ public class FitNode extends PApplet {
         println(shapes[3].toString());
       }
     }
+    if (key == 'F') {
+      scene.fit(shapes[8], 1000);
+    }
+    if (key == 'T') {
+      if (scene.eye().matches(shapes[8])) {
+        println("win match 8");
+      }
+      else {
+        println(scene.eye().toString());
+        println(shapes[8].toString());
+      }
+    }
+    //
     if (key == 'p') {
       if (scene.eye().position().matches(shapes[3].position())) {
         println("win position match 3");
@@ -146,18 +160,6 @@ public class FitNode extends PApplet {
       }
       else {
         println(scene.eye().magnitude() - shapes[3].magnitude());
-      }
-    }
-    if (key == 'F') {
-      scene.fit(shapes[8], 1000);
-    }
-    if (key == 'T') {
-      if (scene.eye().matches(shapes[8])) {
-        println("win match 8");
-      }
-      else {
-        println(scene.eye().toString());
-        println(shapes[8].toString());
       }
     }
   }

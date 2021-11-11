@@ -50,27 +50,29 @@ class Interpolator {
      * @param keyFrame other keyFrame
      */
     public boolean matches(KeyFrame keyFrame) {
-      return _node.matches(keyFrame._node) && _time == keyFrame._time;
+      return _keyFrame.matches(keyFrame._keyFrame) && _time == keyFrame._time;
     }
 
     protected Quaternion _tangentQuaternion;
     protected Vector _tangentVector;
     protected float _time;
     protected boolean _handled;
-    protected Node _node;
+    protected Node _keyFrame;
 
     KeyFrame(Node node, float time, boolean handled) {
-      _node = node;
+      _keyFrame = node;
       _time = time;
       _handled = handled;
     }
 
+    // TODO copying is experimental and requires testing. First and foremost
+    // to define possible use cases. Otherwise, it should be discarded
     protected KeyFrame(KeyFrame other) {
       if (other._handled) {
-        this._node = other._node.copy(false);
+        this._keyFrame = other._keyFrame.copy(_node.isHintEnabled(Node.KEYFRAMES));
       }
       else {
-        this._node = other._node;
+        this._keyFrame = other._keyFrame;
       }
       this._time = other._time;
       this._handled = other._handled;
@@ -99,10 +101,10 @@ class Interpolator {
      * Optimally computed when the node's key-frame reference is the same as the {@code node} {@link Node#reference()}.
      */
     protected Vector _translation() {
-      return _node.reference() == _node.reference() ? _node.position() :
-          _node.reference() == null ? _node.worldPosition() : _node.reference().location(_node.worldPosition());
+      return _node.reference() == _keyFrame.reference() ? _keyFrame.position() :
+          _node.reference() == null ? _keyFrame.worldPosition() : _node.reference().location(_keyFrame.worldPosition());
       // perhaps less efficient but simpler equivalent form:
-      // return _node.reference() == null ? _node.position() : _node.reference().location(_node.position());
+      // return _node.reference() == null ? _keyFrame.position() : _node.reference().location(_keyFrame.position());
     }
 
     /**
@@ -110,21 +112,21 @@ class Interpolator {
      * Optimally computed when the node's key-frame reference is the same as the {@code node} {@link Node#reference()}.
      */
     protected Quaternion _rotation() {
-      return _node.reference() == _node.reference() ? _node.orientation() :
-          _node.reference() == null ? _node.worldOrientation() : _node.reference().displacement(_node.worldOrientation());
+      return _node.reference() == _keyFrame.reference() ? _keyFrame.orientation() :
+          _node.reference() == null ? _keyFrame.worldOrientation() : _node.reference().displacement(_keyFrame.worldOrientation());
       // perhaps less efficient but simpler equivalent form:
-      // return _node.reference() == null ? _node.orientation() : _node.reference().displacement(_node.orientation());
+      // return _node.reference() == null ? _keyFrame.orientation() : _node.reference().displacement(_keyFrame.orientation());
     }
 
     /**
-     * Returns the key-frame scaling respect to the {@link #_node} {@link Node#reference()} space.
-     * Optimally computed when the node's key-frame reference is the same as the {@link #_node} {@link Node#reference()}.
+     * Returns the key-frame scaling respect to the {@link #_keyFrame} {@link Node#reference()} space.
+     * Optimally computed when the node's key-frame reference is the same as the {@link #_keyFrame} {@link Node#reference()}.
      */
     protected float _scaling() {
-      return _node.reference() == _node.reference() ? _node.magnitude() :
-          _node.reference() == null ? _node.worldMagnitude() : _node.reference().displacement(_node.worldMagnitude());
+      return _node.reference() == _keyFrame.reference() ? _keyFrame.magnitude() :
+          _node.reference() == null ? _keyFrame.worldMagnitude() : _node.reference().displacement(_keyFrame.worldMagnitude());
       // perhaps less efficient but simpler equivalent form:
-      // return _node.reference() == null ? _node.magnitude() : _node.reference().displacement(_node.magnitude());
+      // return _node.reference() == null ? _keyFrame.magnitude() : _node.reference().displacement(_keyFrame.magnitude());
     }
   }
 
@@ -340,7 +342,7 @@ class Interpolator {
   public HashMap<Float, Node> keyFrames() {
     HashMap map = new HashMap<Float, Node>();
     for (KeyFrame keyFrame : _list)
-      map.put(keyFrame._time, keyFrame._node);
+      map.put(keyFrame._time, keyFrame._keyFrame);
     return map;
   }
 
@@ -463,11 +465,11 @@ class Interpolator {
         interpolate(0);
     }
     if (keyFrame._handled) {
-      if (keyFrame._node.isAttached()) {
-        keyFrame._node.detach();
+      if (keyFrame._keyFrame.isAttached()) {
+        keyFrame._keyFrame.detach();
       }
     }
-    return keyFrame._node;
+    return keyFrame._keyFrame;
   }
 
   /**
@@ -481,8 +483,8 @@ class Interpolator {
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
       if (keyFrame._handled) {
-        if (keyFrame._node.isAttached()) {
-          keyFrame._node.detach();
+        if (keyFrame._keyFrame.isAttached()) {
+          keyFrame._keyFrame.detach();
         }
       }
     }
@@ -595,7 +597,7 @@ class Interpolator {
       if (!_valuesAreValid)
         _updateModifiedKeyFrames();
       if (_list.get(0) == _list.get(_list.size() - 1)) {
-        _path.add(new Node(_list.get(0)._node.worldPosition(), _list.get(0)._node.worldOrientation(), _list.get(0)._node.worldMagnitude(), false));
+        _path.add(new Node(_list.get(0)._keyFrame.worldPosition(), _list.get(0)._keyFrame.worldOrientation(), _list.get(0)._keyFrame.worldMagnitude(), false));
       }
       else {
         KeyFrame[] keyFrames = new KeyFrame[4];
@@ -606,7 +608,7 @@ class Interpolator {
         index++;
         keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         while (keyFrames[2] != null) {
-          Vector pdiff = Vector.subtract(keyFrames[2]._node.worldPosition(), keyFrames[1]._node.worldPosition());
+          Vector pdiff = Vector.subtract(keyFrames[2]._keyFrame.worldPosition(), keyFrames[1]._keyFrame.worldPosition());
           Vector pvec1 = Vector.add(Vector.multiply(pdiff, 3.0f), Vector.multiply(keyFrames[1]._tangentVector(), (-2.0f)));
           pvec1 = Vector.subtract(pvec1, keyFrames[2]._tangentVector());
           Vector pvec2 = Vector.add(Vector.multiply(pdiff, (-2.0f)), keyFrames[1]._tangentVector());
@@ -614,9 +616,9 @@ class Interpolator {
           for (int step = 0; step < Node.maxSteps; ++step) {
             float alpha = step / (float) Node.maxSteps;
             Node node = new Node(
-                    Vector.add(keyFrames[1]._node.worldPosition(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
-                    Quaternion.squad(keyFrames[1]._node.worldOrientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._node.worldOrientation(), alpha),
-                    Vector.lerp(keyFrames[1]._node.worldMagnitude(), keyFrames[2]._node.worldMagnitude(), alpha), false);
+                    Vector.add(keyFrames[1]._keyFrame.worldPosition(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
+                    Quaternion.squad(keyFrames[1]._keyFrame.worldOrientation(), keyFrames[1]._tangentQuaternion(), keyFrames[2]._tangentQuaternion(), keyFrames[2]._keyFrame.worldOrientation(), alpha),
+                    Vector.lerp(keyFrames[1]._keyFrame.worldMagnitude(), keyFrames[2]._keyFrame.worldMagnitude(), alpha), false);
             node._setHint(_node, _node._keyframesMask);
             _path.add(node);
           }
@@ -628,7 +630,7 @@ class Interpolator {
           keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         }
         // Add last KeyFrame
-        _path.add(new Node(keyFrames[1]._node.worldPosition(), keyFrames[1]._node.worldOrientation(), keyFrames[1]._node.worldMagnitude(),false));
+        _path.add(new Node(keyFrames[1]._keyFrame.worldPosition(), keyFrames[1]._keyFrame.worldOrientation(), keyFrames[1]._keyFrame.worldMagnitude(),false));
       }
       _pathIsValid = true;
     }
@@ -648,9 +650,9 @@ class Interpolator {
       if (next != null) {
         // Interpolate using the shortest path between two quaternions
         // See: https://stackoverflow.com/questions/2886606/flipping-issue-when-interpolating-rotations-using-quaternions
-        if (Quaternion.dot(next._node.orientation(), keyFrame._node.orientation()) < 0) {
+        if (Quaternion.dot(next._keyFrame.orientation(), keyFrame._keyFrame.orientation()) < 0) {
           // change sign
-          next._node.orientation().negate();
+          next._keyFrame.orientation().negate();
         }
         keyFrame._tangentVector = Vector.multiply(Vector.subtract(next._translation(), prev._translation()), 0.5f);
         keyFrame._tangentQuaternion = Quaternion.squadTangent(prev._rotation(), keyFrame._rotation(), next._rotation());
@@ -670,7 +672,7 @@ class Interpolator {
   protected void _checkValidity() {
     boolean modified = false;
     for (KeyFrame keyFrame : _list) {
-      if (keyFrame._node.lastUpdate() > _lastUpdate()) {
+      if (keyFrame._keyFrame.lastUpdate() > _lastUpdate()) {
         modified = true;
         break;
       }
