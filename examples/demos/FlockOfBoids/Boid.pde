@@ -13,7 +13,7 @@ class Boid {
 
   Boid(Vector inPos) {
     node = new Node(this::display);
-    node.setVisit(scene, this::behavior);
+    startAnimation();
     position = new Vector();
     position.set(inPos);
     node.setPosition(new Vector(position.x(), position.y(), position.z()));
@@ -22,7 +22,15 @@ class Boid {
     neighborhoodRadius = 100;
   }
 
-  public void display(PGraphics pg) {
+  void startAnimation() {
+    node.setBehavior(scene, this::behavior);
+  }
+
+  void stopAnimation() {
+    scene.resetBehavior(node);
+  }
+
+  void display(PGraphics pg) {
     pg.pushStyle();
     // uncomment to draw boid axes
     //Scene.drawAxes(pg, 10);

@@ -1,6 +1,6 @@
 /**
  * Post Effects.
- * by Ivan Castellanos and Jean Pierre Charalambos.
+ * by Ivan Castellanos & Jean Pierre Charalambos.
  *
  * This example is an adaption of Neil Mendoza great openFrameworks
  * ofxPostProcessing addon (http://www.neilmendoza.com/ofxpostprocessing/)

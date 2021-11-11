@@ -36,6 +36,7 @@ int flockWidth = 1280;
 int flockHeight = 720;
 int flockDepth = 600;
 boolean avoidWalls = true;
+boolean animate = true;
 
 int initBoidNum = 400; // amount of boids to start the program with
 ArrayList<Boid> flock;
@@ -150,8 +151,15 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   switch (key) {
   case 'a':
-    //for (Boid boid : flock)
-      //boid.task.toggle();
+    animate = !animate;
+    for (Boid boid : flock) {
+      if (animate) {
+        boid.startAnimation();
+      }
+      else {
+        boid.stopAnimation();
+      }
+    }
     break;
   case 's':
     if (scene.eye().reference() == null)

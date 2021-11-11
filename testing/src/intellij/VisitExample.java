@@ -85,7 +85,7 @@ public class VisitExample extends PApplet {
       //without modifying Node class
       //for(Scene scene : scenes) setVisit(scene, (g , n) -> setupAttributesByGraph(g));
       //modifying the node class
-      for (Scene scene : scenes) setVisit(scene, this::setupAttributesByGraph);
+      for (Scene scene : scenes) setBehavior(scene, this::setupAttributesByGraph);
       setShape(pg -> {
         pg.pushStyle();
         pg.stroke(strokeCol);

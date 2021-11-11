@@ -1,6 +1,6 @@
 /**
  * Scene Buffers.
- * by Jean Pierre Charalambos.
+ * by Sebastian Chaparro & Jean Pierre Charalambos.
  *
  * This example displays the scene front and back buffers.
  *

@@ -75,7 +75,7 @@ import java.util.function.Function;
  * Hierarchical traversals of the node hierarchy which automatically apply the local
  * node transformations described above may be achieved with {@link Graph#render()} and
  * {@link Graph#render(Node)}. Customize the rendering traversal with
- * {@link Graph#setVisit(Node, BiConsumer)} (see also {@link #cull} and {@link #bypass()}).
+ * {@link Graph#addBehavior(Node, BiConsumer)} (see also {@link #cull} and {@link #bypass()}).
  * <h2>Motion filters</h2>
  * One interesting feature of a node is that its displacements can be filtered.
  * Setting a node filter allows to refine the input of {@link #translate(Vector)},
@@ -99,8 +99,11 @@ import java.util.function.Function;
  * <h2>Ray casting</h2>
  * Set the node picking ray-casting mode with {@link #enablePicking(int)} (see also
  * {@link #picking()}).
- * <h2>Custom behavior</h2>
- * Implementing a custom behavior for node is a two step process:
+ * <h2>Custom behaviors</h2>
+ * A custom node behavior to be executed during rendering {@link Graph#render()} may be set with
+ * {@link #setBehavior(Graph, Consumer)}. See {@link Graph#addBehavior(Node, BiConsumer)}.
+ * <h2>Custom user interactions</h2>
+ * Implementing a custom user interaction for node is a two step process:
  * <ul>
  * <li>Register a user gesture data parser, see {@link #setInteraction(BiConsumer)}
  * and {@link #setInteraction(Consumer)}.</li>
@@ -157,6 +160,11 @@ public class Node {
   protected BiFunction<Node, Object[], Float> _scalingFilter;
   public Object[] cacheScalingParams;
   public float cacheTargetMagnitude, cacheTargetScaling;
+  // previous state cache
+  // only read js properties
+  public Vector cachePosition;
+  public Quaternion cacheOrientation;
+  public float cacheMagnitude;
 
   // Visual hints
   protected int _picking;
@@ -1214,6 +1222,7 @@ public class Node {
       translate(Vector.subtract(position, this.position()));
     }
     else {
+      this.cachePosition = _position;
       _position = position;
       _modified();
     }
@@ -1287,6 +1296,7 @@ public class Node {
         cacheTargetPosition = Vector.add(position(), vector);
       }
     }
+    this.cachePosition = _position;
     _position.add(filter ? this._translationFilter.apply(this, cacheTranslationParams) : vector);
     cacheTargetTranslation = null;
     cacheTargetPosition = null;
@@ -1480,6 +1490,7 @@ public class Node {
       rotate(Quaternion.compose(orientation().inverse(), orientation));
     }
     else {
+      this.cacheOrientation = _orientation;
       _orientation = orientation;
       _modified();
     }
@@ -1558,6 +1569,7 @@ public class Node {
         cacheTargetOrientation = Quaternion.compose(orientation(), quaternion);
       }
     }
+    this.cacheOrientation = _orientation;
     _orientation.compose(filter ? this._rotationFilter.apply(this, cacheRotationParams) : quaternion);
     _orientation.normalize(); // Prevents numerical drift
     cacheTargetRotation = null;
@@ -1808,6 +1820,7 @@ public class Node {
       scale(magnitude / _magnitude);
     }
     else {
+      this.cacheMagnitude = _magnitude;
       _magnitude = magnitude;
       _modified();
     }
@@ -1857,6 +1870,7 @@ public class Node {
       System.out.println("Warning. Scaling should be positive. Nothing done");
       return;
     }
+    this.cacheMagnitude = _magnitude;
     _magnitude = _magnitude * value;
     _modified();
   }
@@ -2858,40 +2872,37 @@ public class Node {
   }
 
   /**
-   * Same as {@code graph.setVisit(this, functor)}.
+   * Same as {@code graph.addBehavior(this, behavior)}.
    *
-   * @see #setVisit(Graph, Consumer)
-   * @see Graph#setVisit(Node, BiConsumer)
-   * @see Graph#setVisit(Node, Consumer)
+   * @see #setBehavior(Graph, Consumer)
+   * @see Graph#addBehavior(Node, BiConsumer)
+   * @see Graph#addBehavior(Node, Consumer)
    */
-  public void setVisit(Graph graph, BiConsumer<Graph, Node> functor) {
-    graph.setVisit(this, functor);
+  // TODO in JS this should be done in terms of setInterval
+  // i.e., adding execution period and term to the behavior...
+  public void setBehavior(Graph graph, BiConsumer<Graph, Node> behavior) {
+    graph.addBehavior(this, behavior);
   }
 
   /**
-   * Same as {@code graph.setVisit(this, (g, n) -> functor.accept(g))}.
+   * Same as {@code graph.addBehavior(this, (g, n) -> behavior.accept(g))}.
    *
-   * @see #setVisit(Graph, BiConsumer)
-   * @see Graph#setVisit(Node, BiConsumer)
-   * @see Graph#setVisit(Node, Consumer)
+   * @see #setBehavior(Graph, BiConsumer)
+   * @see Graph#addBehavior(Node, BiConsumer)
+   * @see Graph#addBehavior(Node, Consumer)
    */
-  public void setVisit(Graph graph, Consumer<Graph> functor) {
-    graph.setVisit(this, (g, n) -> functor.accept(g));
+  public void setBehavior(Graph graph, Consumer<Graph> behavior) {
+    graph.addBehavior(this, (g, n) -> behavior.accept(g));
   }
 
   /**
-   * This together with {@link #visit(Graph)} is a workaround for
-   * {@link #setVisit(Graph, BiConsumer)} which is not available in Processing 3.x.
+   * Same as {@code graph.resetBehavior(this)}.
+   * 
+   * @see Graph#resetBehavior(Node) 
    */
-  public void setVisit(Graph graph) {
-    setVisit(graph, this::visit);
+  public void resetBehavior(Graph graph) {
+    graph.resetBehavior(this);
   }
-
-  /**
-   * This together with {@link #setVisit(Graph)} is a workaround for
-   * {@link #setVisit(Graph, BiConsumer)} which is not available in Processing 3.x.
-   */
-  public void visit(Graph graph) {}
 
   /**
    * Bypass rendering the node for the current frame. Set it before calling {@link Graph#render()}

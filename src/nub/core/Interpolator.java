@@ -104,7 +104,7 @@ class Interpolator {
       return _node.reference() == _keyFrame.reference() ? _keyFrame.position() :
           _node.reference() == null ? _keyFrame.worldPosition() : _node.reference().location(_keyFrame.worldPosition());
       // perhaps less efficient but simpler equivalent form:
-      // return _node.reference() == null ? _keyFrame.position() : _node.reference().location(_keyFrame.position());
+      // return _node.reference() == null ? _keyFrame.worldPosition() : _node.reference().location(_keyFrame.worldPosition());
     }
 
     /**
@@ -115,7 +115,7 @@ class Interpolator {
       return _node.reference() == _keyFrame.reference() ? _keyFrame.orientation() :
           _node.reference() == null ? _keyFrame.worldOrientation() : _node.reference().displacement(_keyFrame.worldOrientation());
       // perhaps less efficient but simpler equivalent form:
-      // return _node.reference() == null ? _keyFrame.orientation() : _node.reference().displacement(_keyFrame.orientation());
+      // return _node.reference() == null ? _keyFrame.worldOrientation() : _node.reference().displacement(_keyFrame.worldOrientation());
     }
 
     /**
@@ -126,7 +126,7 @@ class Interpolator {
       return _node.reference() == _keyFrame.reference() ? _keyFrame.magnitude() :
           _node.reference() == null ? _keyFrame.worldMagnitude() : _node.reference().displacement(_keyFrame.worldMagnitude());
       // perhaps less efficient but simpler equivalent form:
-      // return _node.reference() == null ? _keyFrame.magnitude() : _node.reference().displacement(_keyFrame.magnitude());
+      // return _node.reference() == null ? _keyFrame.worldMagnitude() : _node.reference().displacement(_keyFrame.worldMagnitude());
     }
   }
 

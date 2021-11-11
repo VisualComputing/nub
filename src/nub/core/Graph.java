@@ -129,7 +129,7 @@ public class Graph {
   protected static HashSet<Node> _interpolators = new HashSet<Node>();
 
   // Custom render
-  protected HashMap<Integer, BiConsumer<Graph, Node>> _functors;
+  protected HashMap<Integer, BiConsumer<Graph, Node>> _behaviors;
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
@@ -385,7 +385,7 @@ public class Graph {
     _irays = _i1rays;
     // dummy
     _orays = _i2rays;
-    _functors = new HashMap<Integer, BiConsumer<Graph, Node>>();
+    _behaviors = new HashMap<Integer, BiConsumer<Graph, Node>>();
     if (eye == null) {
       throw new RuntimeException("Error eye shouldn't be null");
     }
@@ -1634,7 +1634,6 @@ public class Graph {
    * @see #fitFOV()
    * @see #fitFOV(float)
    */
-  //TODO needs testing with flock
   public void fit(Node node, float duration) {
     if (duration <= 0) {
       _eye.set(node);
@@ -2518,11 +2517,11 @@ public class Graph {
 
   /**
    * Renders the node tree onto the {@link #context()} from the {@link #eye()} viewpoint.
-   * Calls {@link #setVisit(Node, BiConsumer)} on each visited node (refer to the {@link Node} documentation).
+   * Calls {@link #addBehavior(Node, BiConsumer)} on each visited node (refer to the {@link Node} documentation).
    * Same as {@code render(null)}.
    *
    * @see #render(Node)
-   * @see #setVisit(Node, BiConsumer)
+   * @see #addBehavior(Node, BiConsumer)
    * @see Node#cull
    * @see Node#bypass()
    * @see Node#setShape(Consumer)
@@ -2541,10 +2540,11 @@ public class Graph {
    * within {@link #openContext()} and {@link #closeContext()}.
    *
    * <p>
-   * Note that the rendering algorithm calls {@link #setVisit(Node, BiConsumer)} on each visited node
+   * Note that the rendering algorithm executes the custom behavior (set with
+   * {@link #addBehavior(Node, BiConsumer)}) on each rendered node.
    * (refer to the {@link Node} documentation).
    *
-   * @see #setVisit(Node, BiConsumer)
+   * @see #addBehavior(Node, BiConsumer)
    * @see Node#cull
    * @see Node#bypass()
    * @see Node#setShape(Consumer)
@@ -2575,7 +2575,8 @@ public class Graph {
   }
 
   /**
-   * Sets a custom node visit for the {@link #render()} algorithm.
+   * Adds a custom node behavior to be executed for this scene
+   * {@link #render()} algorithm.
    * <p>
    * Bypassing the node rendering and/or performing hierarchical culling, i.e.,
    * culling of the node and its children, should be done here.
@@ -2584,7 +2585,7 @@ public class Graph {
    * {@code
    * Graph scene = new Graph(context, width, height);
    * Node space = new Node();
-   * public void visit(Graph graph, Node node) {
+   * public void behavior(Graph graph, Node node) {
    *   if (graph.cullingCondition) {
    *     node.cull = true;
    *   }
@@ -2592,49 +2593,49 @@ public class Graph {
    *     node.bypass();
    *   }
    * }
-   * scene.setVisit(space, visit);
+   * scene.addBehavior(space, behavior);
    * }
    * </pre>
    * Note that the graph culling condition may be set from
    * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}.
    *
-   * @see #setVisit(Node, Consumer)
-   * @see #resetVisit(Node)
+   * @see #addBehavior(Node, Consumer)
+   * @see #resetBehavior(Node)
    * @see #render(Node)
-   * @see Node#setVisit(Graph, BiConsumer)
-   * @see Node#setVisit(Graph, Consumer)
+   * @see Node#setBehavior(Graph, BiConsumer)
+   * @see Node#setBehavior(Graph, Consumer)
    * @see Node#bypass()
    * @see Node#cull
    */
-  public void setVisit(Node node, BiConsumer<Graph, Node> functor) {
-    _functors.put(node.id(), functor);
+  public void addBehavior(Node node, BiConsumer<Graph, Node> behavior) {
+    _behaviors.put(node.id(), behavior);
   }
 
   /**
-   * Same as {@code setVisit(node, (g, n) -> functor.accept(n))}.
+   * Same as {@code setBehavior(node, (g, n) -> behavior.accept(n))}.
    *
-   * @see #setVisit(Node, BiConsumer)
-   * @see #resetVisit(Node)
+   * @see #addBehavior(Node, BiConsumer)
+   * @see #resetBehavior(Node)
    * @see #render(Node)
-   * @see Node#setVisit(Graph, BiConsumer)
-   * @see Node#setVisit(Graph, Consumer)
+   * @see Node#setBehavior(Graph, BiConsumer)
+   * @see Node#setBehavior(Graph, Consumer)
    * @see Node#bypass()
    * @see Node#cull
    */
-  public void setVisit(Node node, Consumer<Node> functor) {
-    setVisit(node, (g, n) -> functor.accept(n));
+  public void addBehavior(Node node, Consumer<Node> behavior) {
+    addBehavior(node, (g, n) -> behavior.accept(n));
   }
 
   /**
-   * Resets the node custom visit set with {@link #setVisit(Node, BiConsumer)}.
+   * Resets the node custom behavior which is set with {@link #addBehavior(Node, BiConsumer)}.
    *
-   * @see #setVisit(Node, BiConsumer)
+   * @see #addBehavior(Node, BiConsumer)
    * @see #render(Node)
    * @see Node#bypass()
    * @see Node#cull
    */
-  public void resetVisit(Node node) {
-    _functors.remove(node.id());
+  public void resetBehavior(Node node) {
+    _behaviors.remove(node.id());
   }
 
   /**
@@ -2644,10 +2645,16 @@ public class Graph {
     _matrixHandler.pushMatrix();
     node._execute(this);
     _matrixHandler.applyTransformation(node);
-    // TODO should go before pushMatrix ???
-    BiConsumer<Graph, Node> functor = _functors.get(node.id());
-    if (functor != null) {
-      functor.accept(this, node);
+    // TODO ordering of operations is a bit experimental.
+    // For instance should the visits go before pushMatrix?
+    // I believe it belongs here, i.e., current node culling
+    // condition may require local geometry operations.
+    // On the oder hand, timing stuff (node_execute) may only
+    // be executed once it's known for sure the node is not
+    // culled :-/
+    BiConsumer<Graph, Node> behavior = _behaviors.get(node.id());
+    if (behavior != null) {
+      behavior.accept(this, node);
     }
     if (!node.cull) {
       if (node._bypass != _frameCount) {

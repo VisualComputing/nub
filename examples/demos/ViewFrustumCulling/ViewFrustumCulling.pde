@@ -5,10 +5,10 @@
  * This example illustrates a basic view frustum culling implementation which
  * is performed by analytically solving the frustum plane equations.
  *
- * A customized traversal rendering algorithm is implemented by overriding the
- * node visit() method to clip an octree against the camera's viewing frustum.
- * A second viewer displays an external view of the main frustum scene (using
- * the main scene eye BOUNDS hint) and the clipped octree.
+ * A customized traversal rendering algorithm is implemented by adding a custom
+ * node behavior for the main scene to clip an octree against the camera's viewing
+ * frustum. A second viewer displays an external view of the main frustum scene
+ * (using the main scene eye BOUNDS hint) and the clipped octree.
  *
  * Press the space-bar to change the scene type: PERSPECTIVE or ORTHOGRAPHIC.
  */
@@ -67,7 +67,7 @@ Node node(Node parent, Vector vector) {
     pg.box(a, b, c);
   });
   // register the culling method only at the main scene
-  mainScene.setVisit(node, this::cull);
+  mainScene.addBehavior(node, this::cull);
   return node;
 }
 

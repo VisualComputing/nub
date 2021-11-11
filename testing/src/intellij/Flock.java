@@ -83,8 +83,7 @@ public class Flock extends PApplet {
   void thirdPerson() {
     scene.eye().setReference(avatar);
     avatar.setWorldMagnitude(scene.eye());
-    //scene.fit(avatar, 1000);
-    scene.fit(avatar);
+    scene.fit(avatar, 1000);
   }
 
   // Resets the eye
@@ -192,11 +191,11 @@ public class Flock extends PApplet {
     }
 
     public void startAnimation() {
-      node.setVisit(scene, this::behavior);
+      node.setBehavior(scene, this::behavior);
     }
 
     public void stopAnimation() {
-      scene.resetVisit(node);
+      scene.resetBehavior(node);
     }
 
     public void display(PGraphics pg) {

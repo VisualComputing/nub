@@ -111,7 +111,7 @@ public class CajasOrientadas extends PApplet {
 
     public Box(int tint, float w, float h, float d) {
       setShape(this::caja);
-      setVisit(scene, this::visit);
+      setBehavior(scene, this::behavior);
       _color = tint;
       _w = w;
       _h = h;
@@ -130,7 +130,7 @@ public class CajasOrientadas extends PApplet {
       pg.popStyle();
     }
 
-    public void visit(Graph graph) {
+    public void behavior(Graph graph) {
       Vector to = Vector.subtract(esfera.worldPosition(), worldPosition());
       setWorldOrientation(Quaternion.from(Vector.plusJ, to));
     }

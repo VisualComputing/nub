@@ -99,7 +99,7 @@ public class ViewFrustumCulling extends PApplet {
     OctreeNode() {
       tagging = false;
       setShape(this::draw);
-      setVisit(mainScene, this::culling);
+      setBehavior(mainScene, this::culling);
     }
 
     OctreeNode(OctreeNode node, Vector vector) {
@@ -108,7 +108,7 @@ public class ViewFrustumCulling extends PApplet {
       translate(Vector.multiply(vector, magnitude() / 2));
       tagging = false;
       setShape(this::draw);
-      setVisit(mainScene, this::culling);
+      setBehavior(mainScene, this::culling);
     }
 
     float level() {

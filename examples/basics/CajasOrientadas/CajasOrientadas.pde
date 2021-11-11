@@ -39,7 +39,7 @@ void setup() {
     cajas[i] = new Node(caja(random(10, 40), random(10, 40), random(10, 40)));
     cajas[i].togglePicking(Node.SHAPE | Node.AXES);
     cajas[i].enableHint(Node.AXES | Node.BULLSEYE);
-    scene.setVisit(cajas[i], (Node node) -> {
+    scene.addBehavior(cajas[i], (Node node) -> {
       Vector to = Vector.subtract(esfera.position(), node.position());
       node.setOrientation(Quaternion.from(Vector.plusJ, to));
     });
