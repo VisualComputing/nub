@@ -1,10 +1,8 @@
 package intellij;
 
 import nub.core.Node;
-import nub.primitives.Quaternion;
 import nub.processing.Scene;
 import processing.core.PApplet;
-import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
@@ -22,7 +20,7 @@ public class FitNode extends PApplet {
   int h = 1200;
 
   public void settings() {
-    size(w, h, renderer);
+    size(1200, 1200, renderer);
   }
 
   public void setup() {
@@ -30,6 +28,7 @@ public class FitNode extends PApplet {
     //scene = new Scene(createGraphics(w, h / 2, renderer), max(w, h));
     //scene = new Scene(createGraphics(w, h, renderer), max(w, h));
     scene = new Scene(this, 1200);
+    scene.enableHint(Scene.BACKGROUND, color(0));
     cajas = new Node();
     cajas.enableHint(Node.BULLSEYE, color(0, 255, 0));
     bolas = new Node();
@@ -40,78 +39,38 @@ public class FitNode extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       if (i%2==0) {
         shapes[i] = new Node(cajas, caja());
-      }
-      else {
+      } else {
         shapes[i] = new Node(bolas, bola());
       }
       scene.randomize(shapes[i]);
       //shapes[i].enableHint(Node.CAMERA);
       shapes[i].enableHint(Node.AXES);
-      shapes[i].setHUD(this::hud);
     }
-    scene.fit(1000);
-  }
-
-  public void hud(PGraphics pg) {
-    pg.pushStyle();
-    pg.rectMode(CENTER);
-    pg.fill(255, 0, 255, 125);
-    pg.stroke(0,0,255);
-    pg.strokeWeight(3);
-    pg.rect(0, 0, 80, 50);
-    pg.popStyle();
+    scene.fit(1);
   }
 
   public void draw() {
-    // 1. Fill in and display front-buffer
-    /*
-    background(0);
-    scene.render(bolas);
-    scene.render(cajas);
-    // */
-    // /*
-    scene.display(color(125), bolas);
-    scene.display(cajas);
-    // */
-    /*
-    scene.openContext();
-    scene.context().background(125);
-    scene.drawAxes();
-    scene.render(cajas);
-    //scene.render(bolas);
-    scene.closeContext();
-    //scene.image();
-    // */
-
-    /*
-    scene.openContext();
-    //scene.context().background(125);
-    //scene.drawAxes();
-    //scene.render(cajas);
-    scene.render(bolas);
-    scene.closeContext();
-    scene.image();
-    // */
+    scene.render();
   }
 
   public void mouseMoved() {
-    scene.tag();
+    scene.mouseTag();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
-      scene.shift();
+      scene.mouseTranslate();
     else
-      scene.zoom(mouseX - pmouseX);
+      scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
     if (scene.is3D())
-      scene.moveForward(event.getCount() * 20);
+      scene.moveForward(event.getCount() * 30);
     else
-      scene.zoom(event.getCount() * 20);
+      scene.scaleEye(event.getCount() * 20);
   }
 
   public void keyPressed() {
@@ -119,13 +78,12 @@ public class FitNode extends PApplet {
       scene.fit();
     }
     if (key == 'f') {
-      scene.fit(shapes[3], 1000);
+      scene.fit(shapes[3], 1);
     }
     if (key == 't') {
       if (scene.eye().matches(shapes[3])) {
         println("win match 3");
-      }
-      else {
+      } else {
         println(scene.eye().toString());
         println(shapes[3].toString());
       }
@@ -143,19 +101,17 @@ public class FitNode extends PApplet {
     if (key == 'm') {
       if (scene.eye().magnitude() == shapes[3].magnitude()) {
         println("win magnitude match 3");
-      }
-      else {
+      } else {
         println(scene.eye().magnitude() - shapes[3].magnitude());
       }
     }
     if (key == 'F') {
-      scene.fit(shapes[8], 1000);
+      scene.fit(shapes[8], 1);
     }
     if (key == 'T') {
       if (scene.eye().matches(shapes[8])) {
         println("win match 8");
-      }
-      else {
+      } else {
         println(scene.eye().toString());
         println(shapes[8].toString());
       }
