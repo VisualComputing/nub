@@ -393,16 +393,6 @@ public class Node {
     _lastRenderedSet = new HashSet<Graph>();
     _keyframesMask = Node.AXES;
     setInteraction(this::interact);
-    // hack
-    Method method = null;
-    try {
-      method = this.getClass().getMethod("graphics", processing.core.PGraphics.class);
-    } catch(NoSuchMethodException e) {
-      System.out.println(e); //print exception object
-    }
-    if (!method.getDeclaringClass().equals(Node.class)) {
-      setShape(this::graphics);
-    }
     _translationInertia = new Inertia() {
       @Override
       void _action() {
@@ -3039,15 +3029,6 @@ public class Node {
    */
   public void interact(Object[] gesture) {
     System.out.println("Warning: Node.interact() missed implementation");
-  }
-
-  /**
-   * Override this method to set an immediate mode graphics procedure on the Processing
-   * {@code PGraphics} or use {@link #setShape(Consumer)} instead.
-   *
-   * @see #setShape(Consumer)
-   */
-  public void graphics(processing.core.PGraphics pGraphics) {
   }
 
   protected void _updateHUD() {
