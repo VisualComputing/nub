@@ -177,8 +177,8 @@ void setup() {
   for (int i = 0; i < random(4, 10); i++) {
     scene.randomize(shape);
     // addKeyFrame(hint, elapsedTime) where elapsedTime is defined respect
-    // to the previously added key-frame and expressed in seconds.
-    shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1 : 4);
+    // to the previously added key-frame and expressed in milliseconds.
+    shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1000 : 4000);
   }
   shape.animate();
 }
