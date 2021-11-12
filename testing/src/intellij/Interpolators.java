@@ -15,7 +15,7 @@ import processing.event.MouseEvent;
 public class Interpolators extends PApplet {
   Scene scene;
   Node shape;
-  boolean recurrent;
+  boolean recurrent = true;
 
   //Choose P3D or P2D
   String renderer = P3D;
@@ -38,6 +38,7 @@ public class Interpolators extends PApplet {
     }
     pshape.setFill(color(0, 255, 255/*, 125*/));
     shape = new Node(pshape);
+    shape.setAnimationRecurrence(recurrent);
     shape.setMinMaxScalingFilter(0.8f, 1.2f);
     shape.setHUD(this::hud);
     shape.enableHint(Node.AXES);
@@ -46,7 +47,7 @@ public class Interpolators extends PApplet {
     shape.configHint(Node.BULLSEYE, color(255, 0, 0));
     shape.setBullsEyeSize(50);
     int count = (int) random(4, 10);
-    count = 5;
+    count = 10;
     for (int i = 0; i < count; i++) {
       //shape.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1000 : 4000);
       /*
@@ -56,7 +57,7 @@ public class Interpolators extends PApplet {
       // */
       // /*
       scene.randomize(shape);
-      shape.addKeyFrame(Node.AXES | Node.SHAPE | Node.HUD, i % 2 == 1 ? 1000 : 4000);
+      shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1000 : 4000);
       // */
     }
     shape.resetScalingFilter();
@@ -155,6 +156,9 @@ public class Interpolators extends PApplet {
       println(Graph.nodes().size());
       shape.removeKeyFrame(1);
       println(Graph.nodes().size());
+    }
+    if (key == 't') {
+      shape.setAnimationTime(23250);
     }
     if (key == 'z') {
       println(scene.fov());

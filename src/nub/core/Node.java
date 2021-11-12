@@ -52,10 +52,10 @@ import java.util.function.Function;
  * along the (1,1,1)} direction<br>
  * {@code Node node = new Node(new Vector(0.5,0,0), new Quaternion(new Vector(0,1,0),
  * new Vector(1,1,1)));} <br>
- * {@code pushMatrix();} <br>
+ * {@code push();} <br>
  * {@code applyMatrix(node.matrix());} <br>
  * {@code // Draw your object here, in the local node coordinate system.} <br>
- * {@code popMatrix();} <br>
+ * {@code pop();} <br>
  * <p>
  * Use {@link #view()} when rendering the scene from the node point-of-view. Note that
  * this method is automatically called by the graph, see {@link Graph#render(Node)}.
@@ -99,6 +99,31 @@ import java.util.function.Function;
  * <h2>Ray casting</h2>
  * Set the node picking ray-casting mode with {@link #enablePicking(int)} (see also
  * {@link #picking()}).
+ * <h2>Keyframe's based interpolated animations</h2>
+ * Keyframes allow to define the position, orientation and magnitude a node (including the eye)
+ * should have at a particular moment in time. The node may then be animated through a
+ * Catmull-Rom spline, matching in space-time the key-frames which defines it. To define the
+ * keyframes comprising the path to be interpolated use code such as the following:
+ * <pre>
+ * {@code
+ * Node shape = new Node(pshape);
+ * for (int i = 0; i < random(4, 10); i++) {
+ *   scene.randomize(shape);
+ *   // addKeyFrame(hint, elapsedTime) where elapsedTime is defined respect
+ *   // to the previously added key-frame and expressed in milliseconds.
+ *   shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1000 : 4000);
+ * }
+ * }
+ * </pre>
+ * refer to {@link #addKeyFrame()}, {@link #addKeyFrame(int, float)}, and
+ * {@link #addKeyFrame(Node, float)} for the details.
+ * <p>
+ * To then interpolate the path at a given {@code time} (expressed in milliseconds) call
+ * {@link #interpolate(float)}. To play the path starting at that {@code time}, call
+ * {@link #animate()} (see also {@link #toggleAnimation()} and {@link #resetAnimation()}).
+ * To disable/enable {@link #animationRecurrence()} use {@link #setAnimationRecurrence(boolean)}
+ * (it is disabled by default). Note that the {@link #animationTime()} may set with
+ * {@link #setAnimationTime(float)}.
  * <h2>Custom behaviors</h2>
  * A custom node behavior to be executed during rendering {@link Graph#render()} may be set with
  * {@link #setBehavior(Graph, Consumer)}. See {@link Graph#addBehavior(Node, BiConsumer)}.
@@ -2288,10 +2313,10 @@ public class Node {
    * <p>
    * Use this method to manually traverse the node tree hierarchy:
    * <p>
-   * {@code pushMatrix();} <br>
+   * {@code push();} <br>
    * {@code applyMatrix(node.matrix());} <br>
    * {@code // You are in the local node coordinate system.} <br>
-   * {@code popMatrix();} <br>
+   * {@code pop();} <br>
    *
    * @see #set(Node)
    * @see #worldMatrix()
@@ -3648,7 +3673,9 @@ public class Node {
   }
 
   /**
-   * Same as {@code addKeyFrame(1)}.
+   * Adds a node copy as keyframe at {@code 0} time if there are no currently keyframes
+   * in the path. Otherwise the keyframe is added 1000 milliseconds after the previously
+   * added one.
    *
    * @see #addKeyFrame(Node, float)
    * @see #addKeyFrame(int, float)

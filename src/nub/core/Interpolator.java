@@ -347,7 +347,7 @@ class Interpolator {
   }
 
   /**
-   * Same as {@code addKeyFrame(1000)}.
+   * Same as {@code addKeyFrame(size() == 0 ? 0 : 1000)}.
    *
    * @see #addKeyFrame(Node, float)
    * @see #addKeyFrame(int, float)
@@ -355,7 +355,7 @@ class Interpolator {
    * @see #addKeyFrame(Node)
    */
   public void addKeyFrame() {
-    addKeyFrame(1000);
+    addKeyFrame(size() == 0 ? 0 : 1000);
   }
 
   /**

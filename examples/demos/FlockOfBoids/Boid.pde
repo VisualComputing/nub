@@ -60,13 +60,6 @@ class Boid {
     pg.popStyle();
   }
 
-  Vector avoid(Vector target) {
-    Vector steer = new Vector(); // creates vector for steering
-    steer.set(Vector.subtract(node.position(), target)); // steering vector points away from
-    steer.multiply(1 / sq(Vector.distance(node.position(), target)));
-    return steer;
-  }
-
   //-----------behaviors---------------
 
   void behavior(Graph graph) {
@@ -126,6 +119,13 @@ class Boid {
     acceleration.add(Vector.multiply(separation, 1));
     move();
     checkBounds();
+  }
+
+  Vector avoid(Vector target) {
+    Vector steer = new Vector(); // creates vector for steering
+    steer.set(Vector.subtract(node.position(), target)); // steering vector points away from
+    steer.multiply(1 / sq(Vector.distance(node.position(), target)));
+    return steer;
   }
 
   void move() {
