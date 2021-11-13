@@ -1369,9 +1369,8 @@ public class Node {
    * @see #rotationAxisFilter
    * @see #minMaxScalingFilter
    */
-  public static BiFunction<Node, Object[], Vector> translationAxisFilter = (node, params)-> {
-    return Vector.projectVectorOnAxis(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
-  };
+  public static BiFunction<Node, Object[], Vector> translationAxisFilter = (node, params)->
+          Vector.projectVectorOnAxis(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
 
   /**
    * Same as {@code setTranslationFilter(forbidTranslationFilter, new Object[] {})}.
@@ -1412,9 +1411,8 @@ public class Node {
    * @see #rotationAxisFilter
    * @see #minMaxScalingFilter
    */
-  public static BiFunction<Node, Object[], Vector> translationPlaneFilter = (node, params)-> {
-    return Vector.projectVectorOnPlane(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
-  };
+  public static BiFunction<Node, Object[], Vector> translationPlaneFilter = (node, params)->
+          Vector.projectVectorOnPlane(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
 
   // POSITION
 
@@ -1639,9 +1637,9 @@ public class Node {
    * @see #translationPlaneFilter
    * @see #minMaxScalingFilter
    */
-  public static BiFunction<Node, Object[], Quaternion> rotationAxisFilter = (node, params)-> {
-    return new Quaternion(Vector.projectVectorOnAxis(node.cacheTargetRotation.axis(), (Vector)params[0]), node.cacheTargetRotation.angle());
-  };
+  public static BiFunction<Node, Object[], Quaternion> rotationAxisFilter = (node, params)->
+          new Quaternion(Vector.projectVectorOnAxis(node.cacheTargetRotation.axis(),
+                        (Vector)params[0]), node.cacheTargetRotation.angle());
 
   /**
    * Same as {@code setRotationFilter(forbidRotationFilter, new Object[] {})}.
@@ -1935,7 +1933,6 @@ public class Node {
    * @see #rotationAxisFilter
    * @see #setMinMaxScalingFilter(float, float)
    */
-  // TODO needs testing
   public static BiFunction<Node, Object[], Float> minMaxScalingFilter = (node, params)-> {
     float min = (float) params[0];
     float max = (float) params[1];
@@ -1959,9 +1956,7 @@ public class Node {
    *
    * @see #setForbidScalingFilter()
    */
-  public static BiFunction<Node, Object[], Float> forbidScalingFilter = (node, params)-> {
-    return 1.0f;
-  };
+  public static BiFunction<Node, Object[], Float> forbidScalingFilter = (node, params)-> 1.0f;
 
   // MAGNITUDE
 
