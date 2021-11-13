@@ -73,7 +73,7 @@ Node node(Node parent, Vector vector) {
 
 
 // The culling method is called before the node is rendered
-public void cull(Node node) {
+void cull(Node node) {
   switch (mainScene.boxVisibility(node.worldLocation(new Vector(-a / 2, -b / 2, -c / 2)),
     node.worldLocation(new Vector(a / 2, b / 2, c / 2)))) {
   case VISIBLE:

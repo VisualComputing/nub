@@ -9,6 +9,7 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
   - [Shapes](#shapes)
   - [Space transformations](#space-transformations)
   - [Keyframes](#keyframes)
+  - [Behaviors](#behaviors)
 - [Rendering](#rendering)
   - [Drawing functionality](#drawing-functionality)
 - [Interactivity](#interactivity)
@@ -185,6 +186,27 @@ void setup() {
 ```
 
 which will create a `shape` interpolator containing [4..10] random key-frames. See the [KeyFrames](https://github.com/VisualComputing/nub/tree/master/examples/basics/KeyFrames) example.
+
+## Behaviors
+
+Custom `node` behaviors to be executed every iteration of the `scene` `render()` algorithm may be added with code such as the following:
+
+```processing
+Scene scene;
+Node node;
+
+void setup() {
+  Scene scene = new Scene();
+  Node node = new Node();
+  scene.addBehavior(node, this::behavior);
+}
+
+void behavior(Scene scene, Node node) {
+  // Custom node behavior for the scene.render() algorithm
+}
+```
+
+See the [CajasOrientadas](https://github.com/VisualComputing/nub/tree/master/examples/basics/CajasOrientadas) and the the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) examples.
 
 # Rendering
 

@@ -2887,8 +2887,6 @@ public class Node {
    * @see Graph#addBehavior(Node, BiConsumer)
    * @see Graph#addBehavior(Node, Consumer)
    */
-  // TODO in JS this should be done in terms of setInterval
-  // i.e., adding execution period and term to the behavior...
   public void setBehavior(Graph graph, BiConsumer<Graph, Node> behavior) {
     graph.addBehavior(this, behavior);
   }
