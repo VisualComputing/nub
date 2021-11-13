@@ -1004,7 +1004,6 @@ public class Node {
       for (Node descendant : branch) {
         descendant._attach = false;
         // remove also possible references to graph interpolators and hud sets
-        // TODO experimental prev it was this instead of descendant looked like a bug
         Graph._huds.remove(descendant);
         Graph._interpolators.remove(descendant);
       }
