@@ -296,16 +296,12 @@ public class CevaSonia2 extends PApplet {
     int c;
     Ceva(int _c, float x, float y, float z) {
       c = _c;
-      // TODO pending
-      //reperes = new Node(new Vector(x, y, z));
-      node = new Node();
+      node = new Node(new Vector(x, y, z));
       node.setShape(this::display);
       node.enableHint(Node.BULLSEYE, Node.BullsEyeShape.CIRCLE);
-      //cevas[i].reperes.setBullsEyeSize(0.2f);
       Vector translationAxis = node.displacement(Vector.plusK);
       node.setTranslationPlaneFilter(translationAxis);
-      node.setPosition(x, y, z);
-    }//fin constructeur
+    }
 
     public void display(PGraphics pg) {
       pg.pushStyle();
