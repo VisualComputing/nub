@@ -16,7 +16,7 @@ import processing.event.MouseEvent;
 public class CevaSonia2 extends PApplet {
   Scene scene;
   int nb = 4;
-  Ceva[] reperes;
+  Node[] reperes;
   PImage abeille;
   Homothetie h12, h31, h23;
   PVector intersection12, intersection23, intersection13;
@@ -30,11 +30,33 @@ public class CevaSonia2 extends PApplet {
     scene = new Scene(this, 800);
     scene.eye().setPosition(new Vector(0, 0, 800));
 
-    reperes = new Ceva[nb];
-    reperes[0] = new Ceva(color(0, 255, 0), -10, 40, 0);
-    reperes[1] = new Ceva(color(0, 0, 255), -80, 150, 0);
-    reperes[2] = new Ceva(color(0, 0, 255), 100, 90, 0);
-    reperes[3] = new Ceva(color(0, 0, 255), -20, -100, 0);
+    reperes = new Node[nb];
+    reperes[0] = new Node(pg -> {
+      pg.pushStyle();
+      pg.noStroke();
+      pg.fill(0, 255, 0);
+      pg.sphere(15);
+      pg.popStyle();
+    });
+    reperes[1] = new Node(pg -> {
+      pg.pushStyle();
+      pg.noStroke();
+      pg.fill(color(0, 0, 255));
+      pg.sphere(15);
+      pg.popStyle();
+    });
+    reperes[2] = reperes[1].copy();
+    reperes[3] = reperes[1].copy();
+
+    reperes[0].setPosition(-10, 40, 0);
+    reperes[1].setPosition(-80, 150, 0);
+    reperes[2].setPosition(100, 90, 0);
+    reperes[3].setPosition(-20, -100, 0);
+
+    for (int i=0; i<nb; i++) {
+      Vector translationAxis = reperes[i].displacement(Vector.plusK);
+      reperes[i].setTranslationPlaneFilter(translationAxis);
+    }
 
     abeille = loadImage("/home/pierre/IdeaProjects/nub/testing/data/ceva/sonia.gif");
   }
@@ -64,8 +86,8 @@ public class CevaSonia2 extends PApplet {
     stroke(0);
     for (int i = 1; i < nb; i++) {
       for (int j = i + 1; j < nb; j++) {
-        line(reperes[i].node.position().x(), reperes[i].node.position().y(), reperes[i].node.position().z(),
-                reperes[j].node.position().x(), reperes[j].node.position().y(), reperes[j].node.position().z());
+        line(reperes[i].position().x(), reperes[i].position().y(), reperes[i].position().z(),
+                reperes[j].position().x(), reperes[j].position().y(), reperes[j].position().z());
       }
     }
     calculerIntersections();
@@ -83,11 +105,11 @@ public class CevaSonia2 extends PApplet {
   }
 
   PVector intersection(int i, int j, int k) {
-    PVector f1 = Scene.toPVector(reperes[i].node.position());
-    PVector f2 = Scene.toPVector(reperes[j].node.position());
-    PVector f3 = Scene.toPVector(reperes[k].node.position());
+    PVector f1 = Scene.toPVector(reperes[i].position());
+    PVector f2 = Scene.toPVector(reperes[j].position());
+    PVector f3 = Scene.toPVector(reperes[k].position());
     PVector f1f2 = PVector.sub(f2, f1);
-    PVector f0f3 = PVector.sub(f3, Scene.toPVector(reperes[0].node.position()));
+    PVector f0f3 = PVector.sub(f3, Scene.toPVector(reperes[0].position()));
     f1f2.normalize();
     f0f3.normalize();
 
@@ -119,10 +141,10 @@ public class CevaSonia2 extends PApplet {
     noStroke();
     sphere(2);
     popMatrix();
-    PVector f0 = Scene.toPVector(reperes[0].node.position());
-    PVector f1 = Scene.toPVector(reperes[1].node.position());
-    PVector f2 = Scene.toPVector(reperes[2].node.position());
-    PVector f3 = Scene.toPVector(reperes[3].node.position());
+    PVector f0 = Scene.toPVector(reperes[0].position());
+    PVector f1 = Scene.toPVector(reperes[1].position());
+    PVector f2 = Scene.toPVector(reperes[2].position());
+    PVector f3 = Scene.toPVector(reperes[3].position());
     triangleCeva(f1, f2, f3);
     stroke(0, 0, 255);
     line(intersection12.x, intersection12.y, intersection12.z, f3.x, f3.y, f3.z);
@@ -289,27 +311,6 @@ public class CevaSonia2 extends PApplet {
       return imageVecteur(PVector.sub(p, centre));
     }
 
-  }
-
-  class Ceva {
-    Node node;
-    int c;
-    Ceva(int _c, float x, float y, float z) {
-      c = _c;
-      node = new Node(new Vector(x, y, z));
-      node.setShape(this::display);
-      node.enableHint(Node.BULLSEYE, Node.BullsEyeShape.CIRCLE);
-      Vector translationAxis = node.displacement(Vector.plusK);
-      node.setTranslationPlaneFilter(translationAxis);
-    }
-
-    public void display(PGraphics pg) {
-      pg.pushStyle();
-      pg.noStroke();
-      pg.fill(c);
-      pg.sphere(15);
-      pg.popStyle();
-    }
   }
 
   public static void main(String[] args) {
