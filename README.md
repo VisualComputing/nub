@@ -134,7 +134,7 @@ Calling `setTranslationFilter(filter params)`, `setRotationFilter(filter, params
 
 ## Visual hints
 
-The node space visual representation may be configured using the following hints:
+The node visual representation may be configured using the following hints:
 
 * `SHAPE` which displays the node shape set with `setShape(shape)` which shape is either an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure or a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html).
 * `HUD` which displays the node _Heads-Up-Display_ set with `setHUD(shape)`.
@@ -149,7 +149,7 @@ Observations:
 
 1. The actual node visual `hint()` is bitwise-or mask of a subset of the above hints enabled at a given time, and so it does methods to enable, e.g., `node.enableHint(Node. SHAPE | Node.KEYFRAMES)` enables altogether the `SHAPE` and `KEYFRAMES` node hints, disable or toggle them.
 2. To configure hints call `configHint(hint, params)`, e.g.,  `node.configHint(Node.BULLSEYE, color(255, 0, 0))` colors red the `BULLSEYE` hint.
-3. Displaying the hint requires first to enabling it (`enableHint(mask)`) and then calling a scene rendering algorithm.
+3. Displaying the hint requires first to enabling it (`enableHint(mask)`) and then calling a scene [rendering algorithm](#rendering).
 4. Those enabled visual hints are used to pick the node with ray casting (see [picking](#picking)). Fine tune the mask picking hint with `enablePicking(mask)`, `disablePicking(mask)` and `togglePicking(mask)`, where `mask` is also a bitwise-or of the above hints.
 
 ## Space transformations
@@ -234,7 +234,7 @@ void draw() {
   // drawing commands here take place at the world coordinate system
   // use scene.context() to access the scene Processing PGraphics instance,
   // e.g., reset the background with:
-  scene.context().background(0);
+  scene.context().background(100);
   scene.render(subtree); // the subtree param is optional
   // drawing commands here also take place at the world coordinate system
   scene.closeContext();
@@ -246,10 +246,26 @@ Onscreen scenes may just call `render(subtree)`, e.g.,
 
 ```processing
 void draw() {
-  background(0);
+  background(125);
   scene.render(subtree); // the subtree param is optional
   // drawing commands here take place at the world coordinate system
   scene.drawAxes();
+}
+```
+
+Or use the higher level `display()` algorithm to achive the same results for both of the above onscreen and offscreen scenes:
+
+```processing
+void draw() {
+  // the offscreen scene subtree is rendered at (cornerX, cornerY)
+  scene.display(color(100), subtree, cornerX, cornerY);
+}
+```
+
+```processing
+void draw() {
+  // the onscreen scene subtree is rendered with the world axes
+  scene.display(color(125), true, subtree);
 }
 ```
 
