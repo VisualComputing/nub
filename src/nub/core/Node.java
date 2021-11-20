@@ -3293,6 +3293,8 @@ public class Node {
    * single visual hints available for the node:
    * <p>
    * <ol>
+   * <li>{@link #KEYFRAMES} which displays the Catmull Rom spline defining the current
+   * node animation path.</li>
    * <li>{@link #CAMERA} which displays a camera hint centered at the node screen
    * projection.</li>
    * <li>{@link #AXES} which displays an axes hint centered at the node

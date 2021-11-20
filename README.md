@@ -6,7 +6,7 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
 - [Nodes](#nodes)
   - [Localization](#localization)
   - [Motion filters](#motion-filters)
-  - [Shapes](#shapes)
+  - [Visual hints](#visual-hints)
   - [Space transformations](#space-transformations)
   - [Keyframes](#keyframes)
   - [Behaviors](#behaviors)
@@ -132,9 +132,25 @@ Note that the optional `inertia` parameter should be a value in [0..1], `0` no i
 
 Calling `setTranslationFilter(filter params)`, `setRotationFilter(filter, params)` and/or `setScalingFilter(filter, params)` will apply a `filter` which is a function used to limit the node motion when calling any of the methods found in the previous section. The node provides the following default filters: `translationalAxisFilter`, `translationalPlaneFilter` and `rotationalAxisFilter` (see the [NodeFilters](https://github.com/VisualComputing/nub/tree/master/examples/basics/NodeFilters/NodeFilters.pde) and the [Luxo](https://github.com/VisualComputing/nub/tree/master/examples/basics/Luxo/Luxo.pde) examples).
 
-## Shapes
+## Visual hints
 
-Node shapes can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see [shape(PShape)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#shape-processing.core.PShape-)). Shapes can be picked precisely using their projection onto the screen. Note that even the _eye_ can have a shape which may be useful to depict the viewer in first person camera style.
+The node space visual representation may be configured using the following hints:
+
+* `SHAPE` which displays the node shape set with `setShape(shape)` which shape is either an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure or a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html).
+* `HUD` which displays the node _Heads-Up-Display_ set with `setHUD(shape)`.
+* `BOUNDS` which displays the bounding volume of each scene for which this node is the eye. Only meaningful if there's a second scene perspective to look at this eye node from.
+* `KEYFRAMES` which displays the [Catmull Rom spline](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) defining the current node animation path.
+* `AXES` which displays an axes hint centered at the node `worldPosition()` an oriented according to the node `worldOrientation()`.
+* `BULLSEYE` which displays a bullseye centered at the node `worldPosition()` screen projection. Call `setBullsEyeSize(value)` to set the size of the hint.
+* `TORUS` which displays a torus solenoid.
+* `CAMERA` which displays a camera hint centered at the node screen projection.
+
+Observations:
+
+1. The actual node visual `hint()` is bitwise-or mask of a subset of the above hints enabled at a given time, and so it does methods to enable, e.g., `node.enableHint(Node. SHAPE | Node.KEYFRAMES)` enables altogether the `SHAPE` and `KEYFRAMES` node hints, disable or toggle them.
+2. To configure hints call `configHint(hint, params)`, e.g.,  `node.configHint(Node.BULLSEYE, color(255, 0, 0))` colors red the `BULLSEYE` hint.
+3. Displaying the hint requires first to enabling it (`enableHint(mask)`) and then calling a scene rendering algorithm.
+4. Those enabled visual hints are used to pick the node with ray casting (see [picking](#picking)). Fine tune the mask picking hint with `enablePicking(mask)`, `disablePicking(mask)` and `togglePicking(mask)`, where `mask` is also a bitwise-or of the above hints.
 
 ## Space transformations
 
