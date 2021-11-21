@@ -147,10 +147,22 @@ The node visual representation may be configured using the following hints:
 
 Observations:
 
-1. The actual node visual `hint()` is bitwise-or mask of a subset of the above hints enabled at a given time, and so it does methods to enable, e.g., `node.enableHint(Node. SHAPE | Node.KEYFRAMES)` enables altogether the `SHAPE` and `KEYFRAMES` node hints, disable or toggle them.
-2. To configure hints call `configHint(hint, params)`, e.g.,  `node.configHint(Node.BULLSEYE, color(255, 0, 0))` colors red the `BULLSEYE` hint.
-3. Displaying the hint requires first to enabling it (`enableHint(mask)`) and then calling a scene [rendering algorithm](#rendering).
-4. Those enabled visual hints are used to pick the node with ray casting (see [picking](#picking)). Fine tune the mask picking hint with `enablePicking(mask)`, `disablePicking(mask)` and `togglePicking(mask)`, where `mask` is also a bitwise-or of the above hints.
+1. The actual node visual `hint()` is a bitwise-or mask of a subset of the above hints enabled at a given time, and so it does methods to enable, e.g., `node.enableHint(Node. SHAPE | Node.KEYFRAMES)` enables altogether the `SHAPE` and `KEYFRAMES` node hints, disable or toggle them.
+2. Displaying the hint requires first to enabling it (`enableHint(mask)`) and then calling a scene [rendering algorithm](#rendering).
+3. Those enabled visual hints are used to pick the node with ray casting (see [picking](#picking)). Fine tune the mask picking hint with `enablePicking(mask)`, `disablePicking(mask)` and `togglePicking(mask)`, where `mask` is also a bitwise-or of the above hints.
+
+### Hints configuration
+
+The node `configHint(hint, params)` configures `hint` using [varargs](https://en.wikipedia.org/wiki/Variadic_function) params as follows:
+
+* `BOUNDS`: `configHint(Node.BOUNDS, boundsWeight)`.
+* `KEYFRAMES`: `configHint(Node.KEYFRAMES, keyframesMask)` or `configHint(Node.KEYFRAMES, keyframesMask, steps)` or `configHint(Node.KEYFRAMES, keyframesMask, steps, splineStroke)`, or `configHint(Node.KEYFRAMES, keyframesMask, steps, splineStroke, splineWeight)`.
+* `AXES`: `configHint(Node.AXES, axesLength)`.
+* `BULLSEYE`: `configHint(Node.BULLSEYE, bullseyeStroke)`, `configHint(Node.BULLSEYE, bullseyeShape)`, or `configHint(Node.BULLSEYE, bullseyeStroke, bullseyeShape)`.
+* `TORUS`: `configHint(Node.TORUS, torusStroke)`, or `configHint(Node.TORUS, torusStroke, torusFaces)`.
+* `CAMERA`: `configHint(Node.CAMERA, cameraStroke)` or `configHint(Node.CAMERA, cameraStroke, cameraLength)`.
+
+e.g., `node.configHint(Node.BULLSEYE, color(255, 0, 0))` colors red the `BULLSEYE` hint.
 
 ## Space transformations
 
