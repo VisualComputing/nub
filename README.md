@@ -136,7 +136,7 @@ Calling `setTranslationFilter(filter params)`, `setRotationFilter(filter, params
 
 The node visual representation may be configured using the following hints:
 
-* `SHAPE` which displays the node shape set with `setShape(shape)` which shape is either an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure or a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html).
+* `SHAPE` which displays the node shape set with `setShape(shape)` which is either an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure or a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html).
 * `HUD` which displays the node _Heads-Up-Display_ set with `setHUD(shape)`.
 * `BOUNDS` which displays the bounding volume of each scene for which this node is the eye. Only meaningful if there's a second scene perspective to look at this eye node from.
 * `KEYFRAMES` which displays the [Catmull Rom spline](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) defining the current node animation path.
