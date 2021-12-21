@@ -1,6 +1,7 @@
 package intellij;
 
 import nub.core.Node;
+import nub.primitives.Matrix;
 import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -66,6 +67,24 @@ public class GraphAPI extends PApplet {
     // grey
     detached2 = new Node(false);
     detached2.setShape(shape(color(125, 125)));
+
+    float dx = -10;
+    float dy = 15;
+    float dz = 5;
+    Matrix t = new Matrix(1, 0, 0, 0,
+                          0, 1, 0, 0,
+                          0, 0, 1, 0,
+                          dx, dy, dz, 0);
+    float b = QUARTER_PI;
+    Matrix r = new Matrix(cos(b), sin(b), 0, 0,
+                          -sin(b), cos(b), 0, 0,
+                          0, 0, 1, 0,
+                          0, 0, 0, 1);
+    println(t.toString());
+    println(r.toString());
+    println(Matrix.multiply(t, r).toString());
+    t.rotateZ(b);
+    println(t.toString());
   }
 
   PShape shape(int c) {

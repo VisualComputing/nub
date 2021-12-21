@@ -97,17 +97,15 @@ void setup() {
   // Create a top-level node (i.e., a node whose reference is null) with:
   n1 = new Node();
   // whereas for the remaining nodes we pass any constructor taking a
-  // reference node parameter, such as Node(Node referenceNode)
-  n2 = new Node(n1) {
-    // immediate mode rendering procedure
-    // defines n2 visual representation
-    @Override
-    public void graphics(PGraphics pg) {
-      Scene.drawTorusSolenoid(pg);
-    }
-  };
-  // retained-mode rendering PShape
-  // defines n3 visual representation
+  // reference node parameter, such as Node(Node referenceNode), or
+  // Node(Node referenceNode, shape). Here the shape parameter defines
+  // an immediate mode rendering procedure node visual representation
+  n2 = new Node(n1, (PGraphics pg) -> {
+    pg.fill(255, 0, 255);
+    pg.box(20, 10, 30);
+  });
+  // here the shape paramenter defines a retained mode rendering
+  // procedure node visual representation
   n3 = new Node(n1, createShape(BOX, 30));
   // translate the node to make it visible
   n3.translate(50, 50, 50);
@@ -284,7 +282,7 @@ void draw() {
 Observations:
 
 1. Enclose 2D screen space with `scene.beginHUD()` and `scene.endHUD()` stuff (such as gui elements and text) with to render it on top of a 3D scene.
-2. Customize the rendering traversal algorithm by overriding the node `visit(graph)` method, see the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
+2. Customize the rendering traversal algorithm by setting a node custom behavior with `scene.addBehavior(node, behavior)`, see the [ViewFrustumCulling](https://github.com/VisualComputing/nub/tree/master/examples/demos/ViewFrustumCulling) example.
 
 ## Drawing functionality
 
