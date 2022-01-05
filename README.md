@@ -145,7 +145,7 @@ The node visual representation may be configured using the following hints:
 
 Observations:
 
-1. The actual node visual `hint()` is a bitwise-or mask of a subset of the above hints enabled at a given time, and so it does the hint parameter in methods to enable (`node.enableHint(hint)`), disable (`node.disableHint(hint)`) or toggle (`node.toggleHint(hint)`) them, e.g., `node.enableHint(Node. SHAPE | Node.KEYFRAMES)` enables altogether the `SHAPE` and `KEYFRAMES` node hints.
+1. The actual node visual `hint()` is a bitwise-or mask of a subset of the above hints enabled at a given time, and so it does the hint parameter in methods to enable (`node.enableHint(hint)`), disable (`node.disableHint(hint)`) or toggle (`node.toggleHint(hint)`) them, e.g., `node.enableHint(Node.SHAPE | Node.KEYFRAMES)` enables altogether the `SHAPE` and `KEYFRAMES` node hints.
 2. Displaying the hint requires first to enabling it (`enableHint(mask)`) and then calling a scene [rendering algorithm](#rendering).
 3. Those enabled visual hints are used to pick the node with ray casting (see [picking](#picking)). Fine tune the mask picking hint with `enablePicking(mask)`, `disablePicking(mask)` and `togglePicking(mask)`, where `mask` is also a bitwise-or of the above hints.
 
