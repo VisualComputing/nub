@@ -3975,16 +3975,4 @@ public class Graph {
   protected static boolean _isHintEnabled(int mask, int hint) {
     return ~(mask | ~hint) == 0;
   }
-
-  protected static void _disableHint(int mask, int hint) {
-    mask &= ~hint;
-  }
-
-  protected void _enableHint(int mask, int hint) {
-    mask |= hint;
-  }
-
-  protected void _toggleHint(int mask, int hint) {
-    mask ^= hint;
-  }
 }
