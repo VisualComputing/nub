@@ -36,6 +36,13 @@ class GLMatrixHandler extends MatrixHandler {
     _bindMatrix(view);
   }
 
+  @Override
+  public Node slot() {
+    Node node = new Node(false);
+    node.fromWorldMatrix(Matrix.inverse(Scene.toMatrix(_pggl.modelview)));
+    return node;
+  }
+
   /**
    * Same as {@code beginHUD(_pggl.width, _pggl.height)}.
    */

@@ -2452,6 +2452,15 @@ public class Graph {
   }
 
   /**
+   * Same as {@code _eye.set(_matrixHandler.slot())}.
+   *
+   * @see MatrixHandler#slot()
+   */
+  protected void _slot() {
+    _eye.set(_matrixHandler.slot());
+  }
+
+  /**
    * Begins the rendering process (see {@link #render(Node)}). Use it always before
    * {@link #closeContext()}. Binds the matrices to the renderer.
    * <p>

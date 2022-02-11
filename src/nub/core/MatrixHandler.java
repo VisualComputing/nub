@@ -66,6 +66,15 @@ public class MatrixHandler {
   }
 
   /**
+   * Computes and returns an eye node from {@link #view()}.
+   */
+  public Node slot() {
+    Node node = new Node(false);
+    node.fromWorldMatrix(Matrix.inverse(view()));
+    return node;
+  }
+
+  /**
    * Emits the {@link #transform()} to the vertex shader whenever the {@link #projection()}
    * or {@link #model()} matrices change. Default implementation is empty.
    */
