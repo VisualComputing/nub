@@ -10,7 +10,7 @@ import processing.core.PGraphics;
 import processing.event.MouseEvent;
 import peasy.*;
 
-public class PeasyCajasOrientadas extends PApplet {
+public class CajasOrientadas extends PApplet {
   PeasyCam cam;
   Scene scene;
   Box[] cajas;
@@ -160,6 +160,6 @@ public class PeasyCajasOrientadas extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"female.PeasyCajasOrientadas"});
+    PApplet.main(new String[]{"female.CajasOrientadas"});
   }
 }
