@@ -68,10 +68,31 @@ public class MatrixHandler {
   /**
    * Computes and returns an eye node from {@link #view()}.
    */
-  public Node slot() {
+  public Node eye() {
     Node node = new Node(false);
     node.fromWorldMatrix(Matrix.inverse(view()));
     return node;
+  }
+
+  /**
+   * Computes and returns the perspective field-of-view from {@link #projection()}.
+   */
+  public float fov() {
+    return Math.abs(2 * (float) Math.atan(_projection.m11()));
+  }
+
+  /**
+   * Computes and returns the near clipping plane from {@link #projection()}.
+   */
+  public float near() {
+    return _projection.m33() == 0 ? _projection.m23() / (_projection.m22() - 1) : 0;
+  }
+
+  /**
+   * Computes and returns the far clipping plane from {@link #projection()}.
+   */
+  public float far() {
+    return _projection.m33() == 0 ? _projection.m23() / (_projection.m22() + 1) : 0;
   }
 
   /**

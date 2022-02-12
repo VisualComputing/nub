@@ -37,10 +37,25 @@ class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public Node slot() {
+  public Node eye() {
     Node node = new Node(false);
     node.fromWorldMatrix(Matrix.inverse(Scene.toMatrix(_pggl.modelview)));
     return node;
+  }
+
+  @Override
+  public float fov() {
+    return Math.abs(2 * (float) Math.atan(1 / _pggl.projection.m11));
+  }
+
+  @Override
+  public float near() {
+    return _pggl.projection.m33 == 0 ? _pggl.projection.m23 / (_pggl.projection.m22 - 1) : (1 + _pggl.projection.m23) / _pggl.projection.m22;
+  }
+
+  @Override
+  public float far() {
+    return _pggl.projection.m33 == 0 ? _pggl.projection.m23 / (_pggl.projection.m22 + 1) : - (1 - _pggl.projection.m23) / _pggl.projection.m22;
   }
 
   /**

@@ -2452,12 +2452,19 @@ public class Graph {
   }
 
   /**
-   * Same as {@code _eye.set(_matrixHandler.slot())}.
+   * Sets {@link #eye()}, {@link #fov()}, {@link #zNear()} and {@link #zFar()}
+   * from modelview and projection matrices.
    *
-   * @see MatrixHandler#slot()
+   * @see MatrixHandler#eye()
    */
   protected void _slot() {
-    _eye.set(_matrixHandler.slot());
+    _projection = _matrixHandler.projection();
+    _eye.set(_matrixHandler.eye());
+    _view = eye().view();
+    _projectionView = Matrix.multiply(_projection, _view);
+    setFOV(_matrixHandler.fov());
+    setZNear(() -> _matrixHandler.near());
+    setZFar(() -> _matrixHandler.far());
   }
 
   /**
