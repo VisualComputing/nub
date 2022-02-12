@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="p5-4x" level="project" />
     <orderEntry type="module" module-name="nub" />
+    <orderEntry type="library" name="peasy" level="application" />
   </component>
 </module>

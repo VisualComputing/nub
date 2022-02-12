@@ -2443,6 +2443,7 @@ public class Graph {
    * @see #fov()
    * @see Node#view()
    */
+  /*
   protected void _bind() {
     _projection = _type == Graph.Type.PERSPECTIVE ? Matrix.perspective(leftHanded ? -eye().worldMagnitude() : eye().worldMagnitude(), aspectRatio(), zNear(), zFar())
             : Matrix.orthographic(width() * eye().worldMagnitude(), (leftHanded ? -height() : height()) * eye().worldMagnitude(), zNear(), zFar());
@@ -2450,6 +2451,7 @@ public class Graph {
     _projectionView = Matrix.multiply(_projection, _view);
     _matrixHandler.bind(_projection, _view);
   }
+  // */
 
   /**
    * Sets {@link #eye()}, {@link #fov()}, {@link #zNear()} and {@link #zFar()}
@@ -2497,7 +2499,8 @@ public class Graph {
       if (isOffscreen()) {
         _initFrontBuffer();
       }
-      _bind();
+      //_bind();
+      _slot();
       _matrixHandler.pushMatrix();
     }
   }
