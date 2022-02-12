@@ -44,8 +44,51 @@ class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
+  public float left() {
+    if (_pggl.projection.m33 != 1) {
+      throw new RuntimeException("Error: left only works for an orthographic projection");
+    }
+    return -(1 + _pggl.projection.m03 ) / _pggl.projection.m00;
+  }
+
+  @Override
+  public float right() {
+    if (_pggl.projection.m33 != 1) {
+      throw new RuntimeException("Error: right only works for an orthographic projection");
+    }
+    return (1 - _pggl.projection.m03) / _pggl.projection.m00;
+  }
+
+  @Override
+  public float top() {
+    if (_pggl.projection.m33 != 1) {
+      throw new RuntimeException("Error: top only works for an orthographic projection");
+    }
+    return -(1 + _pggl.projection.m13) / _pggl.projection.m11;
+  }
+
+  @Override
+  public float bottom() {
+    if (_pggl.projection.m33 != 1) {
+      throw new RuntimeException("Error: bottom only works for an orthographic projection");
+    }
+    return (1 - _pggl.projection.m13) / _pggl.projection.m11;
+  }
+
+  @Override
   public float fov() {
+    if (_pggl.projection.m33 != 0) {
+      throw new RuntimeException("Error: fov only works for a perspective projection");
+    }
     return Math.abs(2 * (float) Math.atan(1 / _pggl.projection.m11));
+  }
+
+  @Override
+  public float hfov() {
+    if (_pggl.projection.m33 != 0) {
+      throw new RuntimeException("Error: hfov only works for a perspective projection");
+    }
+    return Math.abs(2 * (float) Math.atan(1 / _pggl.projection.m00));
   }
 
   @Override

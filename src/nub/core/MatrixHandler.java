@@ -75,24 +75,77 @@ public class MatrixHandler {
   }
 
   /**
+   * Computes and returns the left clipping plane from {@link #projection()}.
+   */
+  public float left() {
+    if (_projection.m33() != 1) {
+      throw new RuntimeException("Error: left only works for an orthographic projection");
+    }
+    return -(1 + _projection.m03() ) / _projection.m00();
+  }
+
+  /**
+   * Computes and returns the right clipping plane from {@link #projection()}.
+   */
+  public float right() {
+    if (_projection.m33() != 1) {
+      throw new RuntimeException("Error: right only works for an orthographic projection");
+    }
+    return (1 - _projection.m03()) / _projection.m00();
+  }
+
+  /**
+   * Computes and returns the top clipping plane from {@link #projection()}.
+   */
+  public float top() {
+    if (_projection.m33() != 1) {
+      throw new RuntimeException("Error: top only works for an orthographic projection");
+    }
+    return -(1 + _projection.m13()) / _projection.m11();
+  }
+
+  /**
+   * Computes and returns the bottom clipping plane from {@link #projection()}.
+   */
+  public float bottom() {
+    if (_projection.m33() != 1) {
+      throw new RuntimeException("Error: bottom only works for an orthographic projection");
+    }
+    return (1 - _projection.m13()) / _projection.m11();
+  }
+
+  /**
    * Computes and returns the perspective field-of-view from {@link #projection()}.
    */
   public float fov() {
+    if (_projection.m33() != 0) {
+      throw new RuntimeException("Error: fov only works for a perspective projection");
+    }
     return Math.abs(2 * (float) Math.atan(_projection.m11()));
+  }
+
+  /**
+   * Computes and returns the perspective hfov from {@link #projection()}.
+   */
+  public float hfov() {
+    if (_projection.m33() != 0) {
+      throw new RuntimeException("Error: hfov only works for a perspective projection");
+    }
+    return Math.abs(2 * (float) Math.atan(1 / _projection.m00()));
   }
 
   /**
    * Computes and returns the near clipping plane from {@link #projection()}.
    */
   public float near() {
-    return _projection.m33() == 0 ? _projection.m23() / (_projection.m22() - 1) : 0;
+    return _projection.m33() == 0 ? _projection.m23() / (_projection.m22() - 1) : (1 + _projection.m23()) / _projection.m22();
   }
 
   /**
    * Computes and returns the far clipping plane from {@link #projection()}.
    */
   public float far() {
-    return _projection.m33() == 0 ? _projection.m23() / (_projection.m22() + 1) : 0;
+    return _projection.m33() == 0 ? _projection.m23() / (_projection.m22() + 1) : - (1 - _projection.m23()) / _projection.m22();
   }
 
   /**

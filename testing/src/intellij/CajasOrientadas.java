@@ -16,12 +16,14 @@ public class CajasOrientadas extends PApplet {
   boolean circle;
 
   public void settings() {
-    size(700, 700, P3D);
+    size(1200, 800, P3D);
   }
 
   public void setup() {
     // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
     scene = new Scene(this, 200);
+    // original is true
+    Scene.leftHanded = true;
     scene.togglePerspective();
     //scene.fit();
     esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);
