@@ -1065,8 +1065,7 @@ public class Graph {
     float posViewDir = Vector.dot(pos, viewDir);
     switch (_type) {
       case PERSPECTIVE: {
-        // horizontal fov: radians(eye().magnitude() * aspectRatio())
-        float hhfov = 2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio()) / 2.0f;
+        float hhfov = _matrixHandler.hfov() / 2.0f;
         float chhfov = (float) Math.cos(hhfov);
         float shhfov = (float) Math.sin(hhfov);
         _normal[0] = Vector.multiply(viewDir, -shhfov);
@@ -1105,8 +1104,8 @@ public class Graph {
         _normal[1] = right;
         _normal[4] = up;
         _normal[5] = Vector.multiply(up, -1);
-        float wh0 = eye().worldMagnitude() * (float) width() / 2;
-        float wh1 = eye().worldMagnitude() * (float) height() / 2;
+        float wh0 = Math.abs(_matrixHandler.right() - _matrixHandler.left()) / 2;
+        float wh1 = Math.abs(_matrixHandler.top() - _matrixHandler.bottom()) / 2;
         _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
         _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
         _distance[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[4]);
@@ -1135,8 +1134,8 @@ public class Graph {
     _normal[1] = right;
     _normal[2] = up;
     _normal[3] = Vector.multiply(up, -1);
-    float wh0 = eye().worldMagnitude() * (float) width() / 2;
-    float wh1 = eye().worldMagnitude() * (float) height() / 2;
+    float wh0 = Math.abs(_matrixHandler.right() - _matrixHandler.left()) / 2;
+    float wh1 = Math.abs(_matrixHandler.top() - _matrixHandler.bottom()) / 2;
     _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
     _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
     _distance[2] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[2]);
@@ -1244,10 +1243,12 @@ public class Graph {
   public float sceneToPixelRatio(Vector position) {
     switch (_type) {
       case PERSPECTIVE:
-        return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().worldMagnitude()) * (float) Math.tan(fov() / 2.0f) / (float) height();
+        // TODO: QGLViewer
+        //return 2.0 * fabs((frame()->coordinatesOf(position)).z) * tan(fieldOfView() / 2.0) / screenHeight();
+        return 2.0f * Math.abs((eye().location(position))._vector[2]) * (float) Math.tan(_matrixHandler.fov() / 2) / (float) height();
       case TWO_D:
       case ORTHOGRAPHIC:
-        return eye().worldMagnitude();
+        return Math.abs(_matrixHandler.top() - _matrixHandler.bottom()) / (float) height();
     }
     return 1.0f;
   }
@@ -1975,12 +1976,19 @@ public class Graph {
     switch (_type) {
       case PERSPECTIVE:
         // left-handed coordinate system correction
-        if (leftHanded)
+        if (leftHanded) {
           pixelY = height() - pixelY;
+        }
         origin.set(eye().worldPosition());
-        direction.set(new Vector(((2.0f * pixelX / (float) width()) - 1.0f) * eye().worldMagnitude() * aspectRatio(),
-            ((2.0f * (height() - pixelY) / (float) height()) - 1.0f) * eye().worldMagnitude(),
-            -1.0f));
+        /*
+        // TODO: QGLViewer
+        dir = Vec(((2.0 * pixel.x() / screenWidth()) - 1.0) * tan(fieldOfView() / 2.0) * aspectRatio(),
+                  ((2.0 * (screenHeight() - pixel.y()) / screenHeight()) - 1.0) * tan(fieldOfView() / 2.0),
+                   -1.0);
+        */
+        direction.set(new Vector(((2.0f * pixelX / (float) width()) - 1.0f) * (float) Math.tan(_matrixHandler.fov() / 2.0f) * aspectRatio(),
+                                 ((2.0f * (height() - pixelY) / (float) height()) - 1.0f) * (float) Math.tan(_matrixHandler.fov() / 2.0f),
+                                 -1.0f));
         direction.set(Vector.subtract(eye().worldLocation(direction), origin));
         direction.normalize();
         break;
@@ -1998,6 +2006,7 @@ public class Graph {
   /**
    * @return true if the graph is 2D.
    */
+  // TODO fix
   public boolean is2D() {
     return _type == Type.TWO_D;
   }
@@ -2464,6 +2473,13 @@ public class Graph {
     _eye.set(_matrixHandler.eye());
     _view = eye().view();
     _projectionView = Matrix.multiply(_projection, _view);
+    // TODO pending
+    if (_projection.m33() == 0) {
+      setType(Type.PERSPECTIVE);
+    }
+    else {
+      setType(Type.ORTHOGRAPHIC);
+    }
     setFOV(_matrixHandler.fov());
     setZNear(() -> _matrixHandler.near());
     setZFar(() -> _matrixHandler.far());
@@ -2499,8 +2515,8 @@ public class Graph {
       if (isOffscreen()) {
         _initFrontBuffer();
       }
-      _bind();
-      //_slot();
+      //_bind();
+      _slot();
       _matrixHandler.pushMatrix();
     }
   }
@@ -3240,22 +3256,23 @@ public class Graph {
    * @see #shift(Node, float, float, float)
    * @see #shift(float, float, float)
    */
+  // TODO needs testing
   public Vector displacement(Vector vector, Node node) {
     float dx = vector.x();
     float dy = leftHanded ? vector.y() : -vector.y();
     // Scale to fit the screen relative vector displacement
     if (_type == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.worldPosition();
-      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().worldMagnitude());
-      dx *= 2.0 * k / ((float) height() * eye().worldMagnitude());
-      dy *= 2.0 * k / ((float) height() * eye().worldMagnitude());
+      float k = Math.abs(eye().location(position)._vector[2] * (float) Math.tan(_matrixHandler.fov() / 2.0f));
+      dx *= 2.0 * k / ((float) height());
+      dy *= 2.0 * k / ((float) height());
     }
     float dz = vector.z();
     if (is2D() && dz != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
     } else {
-      dz *= (zNear() - zFar()) / eye().worldMagnitude();
+      dz *= (zNear() - zFar()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(_matrixHandler.fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
     }
     Vector eyeVector = new Vector(dx, dy, dz);
     return node == null ? eye().worldDisplacement(eyeVector) : node.displacement(eyeVector, eye());
@@ -3279,13 +3296,14 @@ public class Graph {
    * @see #displacement(Vector, Node)
    * @see #screenLocation(Vector, Node)
    */
+  // TODO needs testing
   public Vector screenDisplacement(Vector vector, Node node) {
     Vector eyeVector = eye().displacement(vector, node);
     float dx = eyeVector.x();
     float dy = leftHanded ? eyeVector.y() : -eyeVector.y();
     if (_type == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.worldPosition();
-      float k = (float) Math.tan(fov() / 2.0f) * Math.abs(eye().location(position)._vector[2] * eye().worldMagnitude());
+      float k = Math.abs(eye().location(position)._vector[2] * (float) Math.tan(_matrixHandler.fov() / 2.0f));
       dx /= 2.0 * k / ((float) height() * eye().worldMagnitude());
       dy /= 2.0 * k / ((float) height() * eye().worldMagnitude());
     }
@@ -3295,7 +3313,7 @@ public class Graph {
       dz = 0;
     } else {
       // sign is inverted
-      dz /= (zNear() - zFar()) / eye().worldMagnitude();
+      dz /= (zNear() - zFar()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(_matrixHandler.fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
     }
     return new Vector(dx, dy, dz);
   }
