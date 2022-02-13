@@ -25,7 +25,6 @@ public class CajasOrientadas extends PApplet {
     cam = new PeasyCam(this, 400);
     scene = new Scene(this, 200);
     // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
-    scene.togglePerspective();
     //scene.fit();
     esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);
     esfera.setWorldPosition(new Vector(0, 1.4f, 0));
@@ -89,12 +88,6 @@ public class CajasOrientadas extends PApplet {
     if (key == 'p')
       for (Box caja : cajas)
         caja.toggleHint(Node.BULLSEYE);
-    if (key == 'e')
-      scene.togglePerspective();
-    if (key == 's')
-      scene.fit(1000);
-    if (key == 'S')
-      scene.fit();
     if (key == 'u')
       if (scene.isTagValid("keyboard"))
         scene.removeTag("keyboard");

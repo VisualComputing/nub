@@ -31,11 +31,10 @@ import java.util.function.Supplier;
  * To set up scene dimensions call {@link #setBoundingBall(Vector, float)}. The resulting ball is
  * then used to:
  * <ol>
- * <li>optimally compute the {@link #zNear()} and {@link #zFar()} clipping planes</li>;
+ * <li>optimally compute the {@link #zNear()} and {@link #zFar()} clipping planes; and,</li>;
  * <li>implement {@link #eye()} motion interactions in methods such as
  * {@link #turn(float, float, float)}, {@link #spin(int, int, int, int)} or
- * {@link #shift(float, float, float)}; and,</li>
- * <li>to interpolate the {@link #eye()} when calling {@link #fit(float)}, among others</li>
+ * {@link #shift(float, float, float)}</li>
  * </ol>
  * Use {@link #setZNear(Supplier)} and {@link #setZFar(Supplier)} to customized the z-near and
  * z-far computations.
@@ -50,14 +49,7 @@ import java.util.function.Supplier;
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * Nub provides other useful routines to handle the hierarchy, such as {@link Node#setReference(Node)},
  * {@link Node#detach()}, {@link Node#attach()}, {@link #branch(Node)}, and {@link #clearTree()}.
- * <h2>The eye</h2>
- * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
- * (see {@link #setEye(Node)}). Several functions handle the eye, such as
- * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
- * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFOV()},
- * {@link #fov()}, {@link #fit()}, {@link #lookAround(float, float)},
- * {@link #cad(float, float)}, and {@link #moveForward(float)}.
- * <h2>2.1. Transformations</h2>
+ * <h2>Transformations</h2>
  * The graph acts as interface between screen space (a box of {@link #width()} * {@link #height()} * 1
  * dimensions), from where user gesture data is gathered, and the {@code nodes}. To transform points
  * from/to screen space to/from node space use {@link #location(Vector, Node)} and
@@ -314,8 +306,7 @@ public class Graph {
    * screen window dimensions. Creates and {@link #eye()} node, sets its {@link #fov()} to
    * {@code PI/3}. The {@link #zNear()} and {@link #zFar()} are dynamically computed so that
    * the ball defined by {@code center} and {@code radius} is always visible, unless the eye
-   * is looking towards a direction completely different than {@code center}. Call
-   * {@link #fit()} (or {@link #fit(float)}) to make the ball visible again.
+   * is looking towards a direction completely different than {@code center}.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}).
@@ -329,10 +320,6 @@ public class Graph {
     setBoundingBall(center, radius);
     setZNear(this::ballZNear);
     setZFar(this::ballZFar);
-    if (is3D()) {
-      setFOV((float) Math.PI / 3);
-    }
-    fit();
   }
 
   /**
@@ -349,7 +336,6 @@ public class Graph {
    * screen window dimensions. The {@link #zNear()} and {@link #zFar()} are dynamically
    * computed so that the ball defined by {@code center} and {@code radius} is always visible,
    * unless the eye is looking towards a direction completely different from {@code center}.
-   * Call {@link #fit()} (or {@link #fit(float)}) to make the ball visible again.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}).
@@ -390,7 +376,6 @@ public class Graph {
       throw new RuntimeException("Error eye shouldn't be null");
     }
     setEye(eye);
-    setType(type);
     picking = true;
   }
 
@@ -459,128 +444,23 @@ public class Graph {
   // Type handling stuff
 
   /**
-   * Returns the graph type. Set by {@link #setType(Type)}.
-   *
-   * @see #setType(Type)
+   * Returns the graph type.
    */
   public Type type() {
     return _type;
   }
 
   /**
-   * Defines the graph {@link #_type} according to the projection of the scene.
-   * Either {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}, {@link Type#TWO_D}
-   * or {@link Type#CUSTOM}.
-   * <p>
-   * {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} use the classical projection
-   * matrices and the node {@link Node#worldMagnitude()}. Both use {@link #zNear()} and
-   * {@link #zFar()} (to define their clipping planes) and {@link #width()} and {@link #height()}
-   * for frustum shape.
-   * <p>
-   * A {@link Type#TWO_D} behaves like {@link Type#ORTHOGRAPHIC}, but instantiated graph
-   * nodes will be constrained so that they will remain at the x-y plane.
-   *
-   * @see Node#worldMagnitude()
-   */
-  public void setType(Type type) {
-    if (_type == Type.TWO_D) {
-      return;
-    }
-    if (type != _type && type != null) {
-      _modified();
-      this._type = type;
-    }
-  }
-
-  /**
-   * Shifts the graph {@link #_type} between {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} while trying
-   * to keep the {@link #fov()}. Only meaningful if graph {@link #is3D()}.
-   *
-   * @see #setType(Type)
-   * @see #setFOV(float)
-   * @see #fov()
-   * @see #hfov()
-   * @see #setHFOV(float)
-   */
-  public void togglePerspective() {
-    if (is3D()) {
-      float fov = fov();
-      setType(_type == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
-      setFOV(fov);
-    }
-  }
-
-  /**
-   * Sets the {@link #eye()} {@link Node#worldMagnitude()}, according to {@code fov} (field-of-view)
-   * which is expressed in radians. Meaningless if the graph {@link #is2D()}.
-   * If the graph {@link #_type} is {@link Type#ORTHOGRAPHIC} it will match the perspective
-   * projection obtained using {@code fov} of an image centered at the world XY plane from
-   * the eye current position.
-   * <p>
-   * Computed as as {@code Math.tan(fov/2)} if the graph type is {@link Type#PERSPECTIVE} and as
-   * {@code Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / width()}
-   * if the graph {@link #_type} is {@link Type#ORTHOGRAPHIC}.
-   *
-   * @see #fov()
-   * @see #hfov()
-   * @see #setHFOV(float)
-   * @see #setType(Type)
-   */
-  public void setFOV(float fov) {
-    if (is2D()) {
-      System.out.println("Warning: setFOV() is meaningless in 2D. Use eye().setMagnitude() instead");
-      return;
-    }
-    float magnitude = _type == Type.PERSPECTIVE ?
-        (float) Math.tan(fov / 2) :
-        (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis())) / (float) width();
-    if (magnitude > 0)
-      eye().setWorldMagnitude(magnitude);
-  }
-
-  /**
    * Retrieves the scene field-of-view in radians. Meaningless if the scene {@link #is2D()}.
-   * See {@link #setFOV(float)} for details. The value is related to the {@link #eye()}
-   * {@link Node#worldMagnitude()} as follows:
-   * <p>
-   * <ol>
-   * <li>It returns {@code 2 * Math.atan(eye().magnitude())}, when the
-   * graph {@link #type()} is {@link Type#PERSPECTIVE}.</li>
-   * <li>It returns {@code 2 * Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))))},
-   * if the graph {@link #_type} is {@link Type#ORTHOGRAPHIC}.</li>
-   * </ol>
-   * Set this value with {@link #setFOV(float)} or {@link #setHFOV(float)}.
    *
    * @see Node#worldMagnitude()
-   * @see #setType(Type)
-   * @see #setHFOV(float)
    * @see #hfov()
-   * @see #setFOV(float)
    */
   public float fov() {
     if (is2D()) {
-      System.out.println("Warning: fov() is meaningless in 2D. Use eye().magnitude() instead");
-      return 1;
+      throw new RuntimeException("Error: fov only works for a perspective projection");
     }
-    return _type == Type.PERSPECTIVE ?
-        2 * (float) Math.atan(eye().worldMagnitude()) :
-        2 * (float) Math.atan(eye().worldMagnitude() * (float) width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis()))));
-  }
-
-  /**
-   * Sets the {@link #hfov()} of the {@link #eye()} (in radians).
-   * <p>
-   * {@link #hfov()} and {@link #fov()} are linked by the {@link Graph#aspectRatio()}. This method actually
-   * calls: {@code setFOV(2.0f * (float) Math.atan((float) Math.tan(hfov / 2.0f) / aspectRatio()))} so that a
-   * call to {@link #hfov()} returns the expected value.
-   *
-   * @see #setFOV(float)
-   * @see #fov()
-   * @see #hfov()
-   * @see #setFOV(float)
-   */
-  public void setHFOV(float hfov) {
-    setFOV(2.0f * (float) Math.atan((float) Math.tan(hfov / 2.0f) / aspectRatio()));
+    return _matrixHandler.fov();
   }
 
   /**
@@ -589,17 +469,12 @@ public class Graph {
    * Returns the {@link #eye()} horizontal field-of-view in radians.
    *
    * @see #fov()
-   * @see #setHFOV(float)
-   * @see #setFOV(float)
    */
   public float hfov() {
     if (is2D()) {
-      System.out.println("Warning: hfov() is meaningless in 2D. Use eye().magnitude() instead");
-      return 1;
+      throw new RuntimeException("Error: hfov only works for an orthographic projection");
     }
-    return _type == Type.PERSPECTIVE ?
-        2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio()) :
-        2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio() * (float) width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis()))));
+    return _matrixHandler.hfov();
   }
 
   /**
@@ -1073,7 +948,7 @@ public class Graph {
         _normal[0] = Vector.add(_normal[0], Vector.multiply(right, -chhfov));
         _normal[2] = Vector.multiply(viewDir, -1);
         _normal[3] = viewDir;
-        float hfov = fov() / 2.0f;
+        float hfov = _matrixHandler.fov() / 2.0f;
         float chfov = (float) Math.cos(hfov);
         float shfov = (float) Math.sin(hfov);
         _normal[4] = Vector.multiply(viewDir, -shfov);
@@ -1421,9 +1296,9 @@ public class Graph {
   /**
    * Radius of the ball (defined in world coordinates) used in eye motions interaction
    * (e.g., {@link #shift(float, float, float)}, {@link #spin(int, int, int, int)},
-   * {@link #turn(float, float, float)}) and interpolation routines (e.g.,
-   * {@link #fit()}). This ball is different from the one used by the {@link #ballZNear()}
-   * and {@link #ballZFar()} algorithms ({see @link #setBoundingBall(Vector, float)}).
+   * {@link #turn(float, float, float)}) and interpolation routines. This ball is different
+   * from the one used by the {@link #ballZNear()} and {@link #ballZFar()} algorithms
+   * ({see @link #setBoundingBall(Vector, float)}).
    * <p>
    * Set it with {@link #setRadius(float)}.
    *
@@ -1448,9 +1323,9 @@ public class Graph {
   /**
    * Center of the ball (defined in world coordinates) used in eye motions interaction
    * (e.g., {@link #shift(float, float, float)}, {@link #spin(int, int, int, int)},
-   * {@link #turn(float, float, float)}) and interpolation routines (e.g.,
-   * {@link #fit()}). This ball is different from the one used by the {@link #ballZNear()}
-   * and {@link #ballZFar()} algorithms ({see @link #setBoundingBall(Vector, float)}).
+   * {@link #turn(float, float, float)}) and interpolation routines. This ball is
+   * different from the one used by the {@link #ballZNear()} and {@link #ballZFar()}
+   * algorithms ({see @link #setBoundingBall(Vector, float)}).
    * <p>
    * Set it with {@link #setCenter(Vector)}.
    *
@@ -1476,10 +1351,7 @@ public class Graph {
    * Returns the normalized view direction of the eye, defined in the world coordinate
    * system. This corresponds to the negative Z axis of the {@link #eye()}
    * ({@code node().worldDisplacement(new Vector(0.0f, 0.0f, -1.0f))}). In 2D
-   * it always is (0,0,-1).
-   * <p>
-   * Change this value using {@link #setViewDirection(Vector)}, {@link #lookAt(Vector)} or
-   * {@link Node#setWorldOrientation(Quaternion)}. It is orthogonal to {@link #upVector()} and to
+   * it always is (0,0,-1). It is orthogonal to {@link #upVector()} and to
    * {@link #rightVector()}.
    */
   public Vector viewDirection() {
@@ -1487,71 +1359,7 @@ public class Graph {
   }
 
   /**
-   * Rotates the eye so that its {@link #viewDirection()} is {@code direction} (defined
-   * in the world coordinate system).
-   * <p>
-   * The eye {@link Node#worldPosition()} is not modified. The eye is rotated so that the
-   * horizon (defined by its {@link #upVector()}) is preserved.
-   *
-   * @see #lookAt(Vector)
-   * @see #setUpVector(Vector)
-   */
-  public void setViewDirection(Vector direction) {
-    if (direction.squaredNorm() == 0)
-      return;
-
-    Vector xAxis = direction.cross(upVector());
-    if (xAxis.squaredNorm() == 0) {
-      // target is aligned with upVector, this means a rotation around X axis
-      // X axis is then unchanged, let's keep it !
-      xAxis = eye().xAxis();
-    }
-
-    Quaternion q = new Quaternion();
-    q.fromRotatedBasis(xAxis, xAxis.cross(direction), Vector.multiply(direction, -1));
-    eye().setWorldOrientation(q);
-  }
-
-  /**
-   * Convenience function that simply calls {@code setUpVector(up, true)}.
-   *
-   * @see #setUpVector(Vector, boolean)
-   */
-  public void setUpVector(Vector up) {
-    setUpVector(up, true);
-  }
-
-  /**
-   * Rotates the eye so that its {@link #upVector()} becomes {@code up} (defined in the
-   * world coordinate system).
-   * <p>
-   * The eye is rotated around an axis orthogonal to {@code up} and to the current
-   * {@link #upVector()} direction.
-   * <p>
-   * Use this method in order to define the eye horizontal plane.
-   * <p>
-   * When {@code noMove} is set to {@code false}, the orientation modification is
-   * compensated by a translation, so that the {@link #center()} stays projected at the
-   * same position on screen. This is especially useful when the eye is an observer of the
-   * graph.
-   * <p>
-   * When {@code noMove} is true, the Eye {@link Node#worldPosition()} is left unchanged, which is
-   * an intuitive behavior when the Eye is in first person mode.
-   *
-   * @see #lookAt(Vector)
-   */
-  public void setUpVector(Vector up, boolean noMove) {
-    Quaternion q = new Quaternion(new Vector(0.0f, 1.0f, 0.0f), eye().displacement(up));
-    if (!noMove)
-      eye().setWorldPosition(Vector.subtract(_center, (Quaternion.multiply(eye().worldOrientation(), q)).rotate(eye().location(_center))));
-    eye().rotate(q);
-  }
-
-  /**
    * Returns the normalized up vector of the eye, defined in the world coordinate system.
-   * <p>
-   * Set using {@link #setUpVector(Vector)} or {@link Node#setWorldOrientation(Quaternion)}. It is
-   * orthogonal to {@link #viewDirection()} and to {@link #rightVector()}.
    * <p>
    * It corresponds to the Y axis of the associated {@link #eye()} (actually returns
    * {@code node().yAxis()}
@@ -1561,30 +1369,11 @@ public class Graph {
   }
 
   /**
-   * 2D eyes simply call {@code node().setPosition(target.x(), target.y())}. 3D
-   * eyes set {@link Node#worldOrientation()}, so that it looks at point {@code target} defined
-   * in the world coordinate system (The eye {@link Node#worldPosition()} is not modified.
-   * Simply {@link #setViewDirection(Vector)}).
-   *
-   * @see #at()
-   * @see #setUpVector(Vector)
-   * @see #fit()
-   * @see #fit(Vector, Vector)
-   */
-  public void lookAt(Vector target) {
-    if (is2D())
-      eye().setWorldPosition(target.x(), target.y());
-    else
-      setViewDirection(Vector.subtract(target, eye().worldPosition()));
-  }
-
-  /**
    * Returns the normalized right vector of the eye, defined in the world coordinate
    * system.
    * <p>
    * This vector lies in the eye horizontal plane, directed along the X axis (orthogonal
-   * to {@link #upVector()} and to {@link #viewDirection()}. Set using
-   * {@link #setUpVector(Vector)}, {@link #lookAt(Vector)} or {@link Node#setWorldOrientation(Quaternion)}.
+   * to {@link #upVector()} and to {@link #viewDirection()}.
    * <p>
    * Simply returns {@code node().xAxis()}.
    */
@@ -1597,369 +1386,9 @@ public class Graph {
    * coordinate system where the eyes is pointing at (just in front of
    * {@link #viewDirection()}). Useful for setting the Processing camera() which uses a
    * similar approach of that found in gluLookAt.
-   *
-   * @see #lookAt(Vector)
    */
   public Vector at() {
     return Vector.add(eye().worldPosition(), viewDirection());
-  }
-
-  /**
-   * Convenience function that simply calls {@code fit(node, 0)}.
-   *
-   * @see #fit(Node, float)
-   * @see #fit(Vector, Vector)
-   * @see #fit(int, int, int, int, float)
-   * @see #fit(float)
-   * @see #fit(int, int, int, int)
-   * @see #fit()
-   * @see #fit(Vector, Vector, float)
-   * @see #fitFOV()
-   * @see #fitFOV(float)
-   */
-  public void fit(Node node) {
-    fit(node, 0);
-  }
-
-  /**
-   * Smoothly interpolates the eye on a interpolator path so that it goes to {@code node}.
-   * The {@code duration} defines the interpolation speed.
-   *
-   * @see #fit(Node)
-   * @see #fit(Vector, Vector)
-   * @see #fit(int, int, int, int, float)
-   * @see #fit(float)
-   * @see #fit(int, int, int, int)
-   * @see #fit()
-   * @see #fit(Vector, Vector, float)
-   * @see #fitFOV()
-   * @see #fitFOV(float)
-   */
-  public void fit(Node node, float duration) {
-    if (duration <= 0) {
-      _eye.set(node);
-    } else {
-      _eye._interpolator._active = false;
-      _interpolator = new Interpolator(_eye);
-      _interpolator.addKeyFrame(new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false));
-      _interpolator.addKeyFrame(node, duration);
-      _interpolator._active = true;
-    }
-  }
-
-  /**
-   * Moves the eye so that the ball defined by {@link #center()} and {@link #radius()} is
-   * visible and fits the window.
-   *
-   * @see #center()
-   * @see #radius()
-   * @see #fit(Node)
-   * @see #fit(Node, float)
-   * @see #fit(Vector, Vector)
-   * @see #fit(int, int, int, int, float)
-   * @see #fit(float)
-   * @see #fit(int, int, int, int)
-   * @see #fit(Vector, Vector, float)
-   * @see #fitFOV()
-   * @see #fitFOV(float)
-   */
-  public void fit() {
-    _fit(_center, _radius);
-  }
-
-  /**
-   * Moves the eye during {@code duration} milliseconds so that the ball defined by
-   * {@link #center()} and {@link #radius()} is visible and fits the window.
-   * <p>
-   * In 3D the eye is simply translated along its {@link #viewDirection()} so that the
-   * ball fits the screen. Its {@link Node#worldOrientation()} and its
-   * {@link #fov()} are unchanged. You should therefore orientate the eye
-   * before you call this method.
-   *
-   * @see #fit(float)
-   * @see #fit(Node)
-   * @see #fit(Node, float)
-   * @see #fit(Vector, Vector)
-   * @see #fit(int, int, int, int, float)
-   * @see #fit()
-   * @see #fit(int, int, int, int)
-   * @see #fit(Vector, Vector, float)
-   * @see #fitFOV()
-   * @see #fitFOV(float)
-   */
-  public void fit(float duration) {
-    if (duration <= 0)
-      _fit(_center, _radius);
-    else {
-      _eye._interpolator._active = false;
-      Node cacheEye = _eye;
-      Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
-      setEye(tempEye);
-      _interpolator = new Interpolator(tempEye);
-      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
-      _fit(_center, _radius);
-      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
-      _interpolator._active = true;
-      setEye(cacheEye);
-    }
-  }
-
-  /**
-   * Internally used by both {@link #fit()} and {@link #fit(Vector, Vector)}.
-   */
-  protected void _fit(Vector center, float radius) {
-    switch (_type) {
-      case TWO_D:
-        lookAt(center);
-        fitFOV();
-        break;
-      case ORTHOGRAPHIC:
-        fitFOV();
-        float distance = Vector.dot(Vector.subtract(center, _center), viewDirection()) + (radius / eye().worldMagnitude());
-        eye().setWorldPosition(Vector.subtract(center, Vector.multiply(viewDirection(), distance)));
-        break;
-      case PERSPECTIVE:
-        float yview = radius / (float) Math.sin(fov() / 2.0f);
-        // horizontal fov: radians(eye().magnitude() * aspectRatio())
-        float xview = radius / (float) Math.sin(2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio()) / 2.0f);
-        eye().setWorldPosition(Vector.subtract(center, Vector.multiply(viewDirection(), Math.max(xview, yview))));
-        break;
-    }
-  }
-
-  /**
-   * Rescales the {@link #fov()} {@code duration} milliseconds so that the ball defined
-   * by {@code center} and {@code radius} is visible and fits the window.
-   * <p>
-   * The eye position and orientation are not modified and you first have to orientate
-   * the eye in order to actually see the scene (see {@link #lookAt(Vector)} or
-   * {@link #fit()}).
-   * <p>
-   * <b>Attention:</b> The {@link #fov()} is clamped to PI/2. This happens
-   * when the eye is at a distance lower than sqrt(2) * radius() from the center().
-   *
-   * @see #fitFOV()
-   * @see #fit(float)
-   * @see #fit(Node)
-   * @see #fit(Node, float)
-   * @see #fit(Vector, Vector)
-   * @see #fit(int, int, int, int, float)
-   * @see #fit()
-   * @see #fit(int, int, int, int)
-   * @see #fit(Vector, Vector, float)
-   */
-  public void fitFOV(float duration) {
-    if (duration <= 0)
-      fitFOV();
-    else {
-      _eye._interpolator._active = false;
-      Node cacheEye = _eye;
-      Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
-      setEye(tempEye);
-      _interpolator = new Interpolator(tempEye);
-      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
-      fitFOV();
-      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
-      _interpolator._active = true;
-      setEye(cacheEye);
-    }
-  }
-
-  /**
-   * Changes the {@link #eye()} {@link #fov()} so that the entire scene
-   * (defined by {@link #center()} and {@link #radius()}) is visible.
-   * <p>
-   * The eye position and orientation are not modified and you first have to orientate
-   * the eye in order to actually see the scene (see {@link #lookAt(Vector)}).
-   * <p>
-   * <b>Attention:</b> The {@link #fov()} is clamped to PI/2. This happens
-   * when the eye is at a distance lower than sqrt(2) * radius() from the center().
-   *
-   * @see #fitFOV(float)
-   * @see #fit(float)
-   * @see #fit(Node)
-   * @see #fit(Node, float)
-   * @see #fit(Vector, Vector)
-   * @see #fit(int, int, int, int, float)
-   * @see #fit()
-   * @see #fit(int, int, int, int)
-   * @see #fit(Vector, Vector, float)
-   */
-  public void fitFOV() {
-    float distance = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis());
-    float magnitude = distance < (float) Math.sqrt(2) * _radius ? ((float) Math.PI / 2) : 2 * (float) Math.asin(_radius / distance);
-    switch (_type) {
-      case PERSPECTIVE:
-      case ORTHOGRAPHIC:
-        setFOV(magnitude);
-      case TWO_D:
-        eye().setWorldMagnitude(2 * _radius / (float) Math.min(width(), height()));
-        break;
-    }
-  }
-
-  /**
-   * Smoothly moves the eye during {@code duration} milliseconds so that the world axis aligned
-   * box defined by {@code corner1} and {@code corner2} is entirely visible.
-   *
-   * @see #fit(Vector, Vector)
-   * @see #fit(float)
-   * @see #fit(Node)
-   * @see #fit(Node, float)
-   * @see #fit(int, int, int, int, float)
-   * @see #fit()
-   * @see #fit(int, int, int, int)
-   * @see #fitFOV()
-   * @see #fitFOV(float)
-   */
-  public void fit(Vector corner1, Vector corner2, float duration) {
-    if (duration <= 0)
-      fit(corner1, corner2);
-    else {
-      _eye._interpolator._active = false;
-      Node cacheEye = _eye;
-      Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
-      setEye(tempEye);
-      _interpolator = new Interpolator(tempEye);
-      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
-      fit(corner1, corner2);
-      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
-      _interpolator._active = true;
-      setEye(cacheEye);
-    }
-  }
-
-  /**
-   * Moves the eye so that the world axis aligned box defined by {@code corner1}
-   * and {@code corner2} is entirely visible.
-   *
-   * @see #fit(Vector, Vector, float)
-   * @see #fit(float)
-   * @see #fit(Node)
-   * @see #fit(Node, float)
-   * @see #fit(int, int, int, int, float)
-   * @see #fit()
-   * @see #fit(int, int, int, int)
-   * @see #fitFOV()
-   * @see #fitFOV(float)
-   */
-  public void fit(Vector corner1, Vector corner2) {
-    float diameter = Math.max(Math.abs(corner2._vector[1] - corner1._vector[1]), Math.abs(corner2._vector[0] - corner1._vector[0]));
-    diameter = Math.max(Math.abs(corner2._vector[2] - corner1._vector[2]), diameter);
-    _fit(Vector.multiply(Vector.add(corner1, corner2), 0.5f), 0.5f * diameter);
-  }
-
-  /**
-   * Smoothly moves the eye during {@code duration} milliseconds so that the
-   * rectangular screen region defined by {@code rectangle} (pixel units, with
-   * origin in the upper left corner) fits the screen.
-   * <p>
-   * The eye is translated (its {@link Node#worldOrientation()} is unchanged) so that
-   * {@code rectangle} is entirely visible. Since the pixel coordinates only define
-   * <i>bounds</i> in 3D, it's the intersection of this bounds with a plane
-   * (orthogonal to the {@link #viewDirection()} and passing through the
-   * {@link #center()}) that is used to define the 3D rectangle that is eventually
-   * fitted.
-   *
-   * @see #fit(int, int, int, int)
-   * @see #fit(Vector, Vector, float)
-   * @see #fit(Vector, Vector)
-   * @see #fit(float)
-   * @see #fit(Node)
-   * @see #fit(Node, float)
-   * @see #fit()
-   * @see #fitFOV()
-   * @see #fitFOV(float)
-   */
-  public void fit(int x, int y, int width, int height, float duration) {
-    if (duration <= 0)
-      fit(x, y, width, height);
-    else {
-      _eye._interpolator._active = false;
-      Node cacheEye = _eye;
-      Node tempEye = new Node(_eye.reference(), _eye.position(), _eye.orientation(), _eye.magnitude(), false);
-      setEye(tempEye);
-      _interpolator = new Interpolator(tempEye);
-      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false));
-      fit(x, y, width, height);
-      _interpolator.addKeyFrame(new Node(tempEye.reference(), tempEye.position(), tempEye.orientation(), tempEye.magnitude(), false), duration);
-      _interpolator._active = true;
-      setEye(cacheEye);
-    }
-  }
-
-  /**
-   * Moves the eye so that the rectangular screen region defined by
-   * {@code x, y, width, height} (pixel units, with origin in the upper left corner)
-   * fits the screen.
-   * <p>
-   * In 3D the eye is translated (its {@link Node#worldOrientation()} is unchanged) so that
-   * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
-   * <i>frustum</i> in 3D, it's the intersection of this frustum with a plane (orthogonal
-   * to the {@link #viewDirection()} and passing through the {@link #center()}) that
-   * is used to define the 3D rectangle that is eventually fitted.
-   *
-   * @see #fit(int, int, int, int, float)
-   * @see #fit(Vector, Vector, float)
-   * @see #fit(Vector, Vector)
-   * @see #fit(float)
-   * @see #fit(Node)
-   * @see #fit(Node, float)
-   * @see #fit()
-   * @see #fitFOV()
-   * @see #fitFOV(float)
-   * @param x coordinate of the rectangle
-   * @param y coordinate of the rectangle
-   * @param width width of the rectangle
-   * @param height height of the rectangle
-   */
-  public void fit(int x, int y, int width, int height) {
-    int centerX = (int) ((float) x + (float) width / 2);
-    int centerY = (int) ((float) y + (float) height / 2);
-    //ad-hoc
-    if (is2D()) {
-      float rectRatio = (float) width / (float) height;
-      if (aspectRatio() < 1.0f) {
-        if (aspectRatio() < rectRatio)
-          eye().setWorldMagnitude(eye().worldMagnitude() * (float) width / (float) width());
-        else
-          eye().setWorldMagnitude(eye().worldMagnitude() * (float) height / (float) height());
-      } else {
-        if (aspectRatio() < rectRatio)
-          eye().setWorldMagnitude(eye().worldMagnitude() * (float) width / (float) width());
-        else
-          eye().setWorldMagnitude(eye().worldMagnitude() * (float) height / (float) height());
-      }
-      lookAt(location(new Vector(centerX, centerY, 0)));
-      return;
-    }
-    Vector vd = viewDirection();
-    float distToPlane = Vector.scalarProjection(Vector.subtract(eye().worldPosition(), _center), eye().zAxis());
-    Vector orig = new Vector();
-    Vector dir = new Vector();
-    pixelToLine(centerX, centerY, orig, dir);
-    Vector newCenter = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    pixelToLine(x, centerY, orig, dir);
-    Vector pointX = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    pixelToLine(centerX, y, orig, dir);
-    Vector pointY = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    float distance = 0.0f;
-    float distX, distY;
-    switch (_type) {
-      case PERSPECTIVE:
-        //horizontal fov: radians(eye().magnitude() * aspectRatio())
-        distX = Vector.distance(pointX, newCenter) / (float) Math.sin(2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio()) / 2.0f);
-        distY = Vector.distance(pointY, newCenter) / (float) Math.sin(fov() / 2.0f);
-        distance = Math.max(distX, distY);
-        break;
-      case ORTHOGRAPHIC:
-        float dist = Vector.dot(Vector.subtract(newCenter, _center), vd);
-        distX = Vector.distance(pointX, newCenter) / eye().worldMagnitude() / aspectRatio();
-        distY = Vector.distance(pointY, newCenter) / eye().worldMagnitude() / 1.0f;
-        distance = dist + Math.max(distX, distY);
-        break;
-    }
-    eye().setWorldPosition(Vector.subtract(newCenter, Vector.multiply(vd, distance)));
   }
 
   /**
@@ -2452,12 +1881,11 @@ public class Graph {
     _projectionView = Matrix.multiply(_projection, _view);
     // TODO pending
     if (_projection.m33() == 0) {
-      setType(Type.PERSPECTIVE);
+      _type = Type.PERSPECTIVE;
     }
     else {
-      setType(Type.ORTHOGRAPHIC);
+      _type = Type.ORTHOGRAPHIC;
     }
-    setFOV(_matrixHandler.fov());
     setZNear(() -> _matrixHandler.near());
     setZFar(() -> _matrixHandler.far());
   }
@@ -3877,7 +3305,7 @@ public class Graph {
    * controlled with {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * <p>
    * This method requires calling {@code scene.eye().setYAxis(upVector)} (see
-   * {@link Node#setYAxis(Vector)}) and {@link #fit()} first.
+   * {@link Node#setYAxis(Vector)}) first.
    * <p>
    * Note that the ball {@link #center()} is used as reference point when rotating the eye.
    *
