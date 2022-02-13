@@ -60,10 +60,6 @@ public class CajasOrientadas extends PApplet {
       scene.zoom(mouseX - pmouseX);
   }
 
-  public void mouseWheel(MouseEvent event) {
-    scene.moveForward(event.getCount() * 20);
-  }
-
   public void keyPressed() {
     if (key == ' ')
       for (Box caja : cajas) {

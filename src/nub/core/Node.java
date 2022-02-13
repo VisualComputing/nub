@@ -15,7 +15,6 @@ import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -241,8 +240,6 @@ public class Node {
   protected boolean _attach;
   // node
   protected Inertia _translationInertia, _rotationInertia, _orbitInertia, _scalingInertia;
-  // eye
-  protected Inertia _shiftInertia, _lookAroundInertia, _cadRotateInertia;
   protected final float _scalingFactor = 800;
 
   /**
@@ -885,24 +882,9 @@ public class Node {
    */
   protected void _execute(Graph graph) {
     if (_lastExecuted != Graph._frameCount) {
-      boolean asEye = graph == null ? false : graph.isEye(this);
-      if (asEye) {
-        if (graph._interpolator != null) {
-          if (graph._interpolator._active) {
-            this._interpolator._active = false;
-            this.resetInertia();
-            graph._interpolator._execute();
-          }
-        }
-      }
       if (this._interpolator._active) {
         this.resetInertia();
         this._interpolator._execute();
-      }
-      if (asEye && _shiftInertia != null && _lookAroundInertia != null && _cadRotateInertia != null) {
-        this._shiftInertia._execute();
-        this._lookAroundInertia._execute();
-        this._cadRotateInertia._execute();
       }
       this._translationInertia._execute();
       this._rotationInertia._execute();
@@ -916,11 +898,6 @@ public class Node {
    * Stops all node inertia's.
    */
   public void resetInertia() {
-    if (_shiftInertia != null && _lookAroundInertia != null && _cadRotateInertia != null) {
-      this._shiftInertia._active = false;
-      this._lookAroundInertia._active = false;
-      this._cadRotateInertia._active = false;
-    }
     this._translationInertia._active = false;
     this._rotationInertia._active = false;
     this._scalingInertia._active = false;

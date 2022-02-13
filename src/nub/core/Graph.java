@@ -143,8 +143,6 @@ public class Graph {
   // Inertial stuff
   public static float inertia = 0.85f;
   protected Vector _eyeUp;
-  // Interpolator
-  protected Interpolator _interpolator;
   //bounds eqns
   protected float[][] _coefficients;
   protected Vector[] _normal;
@@ -375,7 +373,6 @@ public class Graph {
     if (eye == null) {
       throw new RuntimeException("Error eye shouldn't be null");
     }
-    setEye(eye);
     picking = true;
   }
 
@@ -732,59 +729,10 @@ public class Graph {
   }
 
   /**
-   * Returns the associated eye. Never null.
-   *
-   * @see #setEye(Node)
+   * Returns the associated eye.
    */
   public Node eye() {
     return _eye;
-  }
-
-  /**
-   * Replaces the current {@link #eye()} with {@code eye}.
-   *
-   * @see #eye()
-   */
-  public void setEye(Node eye) {
-    if (eye == null || _eye == eye) {
-      return;
-    }
-    if (isTagged(eye)) {
-      untag(eye);
-      System.out.println("Warning: node was untagged since it was set as the eye");
-    }
-    if (_eye != null) {
-      _eye._shiftInertia = null;
-      _eye._lookAroundInertia = null;
-      _eye._cadRotateInertia = null;
-      _eye._frustumGraphs.remove(this);
-      _eye._keyframesMask = Node.AXES;
-    }
-    _eye = eye;
-    _eye._shiftInertia = new Inertia() {
-      @Override
-      void _action() {
-        _shift(_x, _y, _z);
-      }
-    };
-    _eye._lookAroundInertia = new Inertia() {
-      @Override
-      void _action() {
-        _lookAround();
-      }
-    };
-    _eye._cadRotateInertia = new Inertia() {
-      @Override
-      void _action() {
-        _cad();
-      }
-    };
-    _eye._frustumGraphs.add(this);
-    if (_interpolator != null) {
-      _interpolator._node = eye;
-    }
-    _eye._keyframesMask = Node.CAMERA;
-    _modified();
   }
 
   /**
@@ -1790,7 +1738,8 @@ public class Graph {
       _frameCount++;
     }
     _resize();
-    _eye._execute(this);
+    // TODO restore eye
+    //_eye._execute(this);
     // safer to always free subtrees cache
     _subtrees.clear();
     _bbNeed = false;
@@ -1876,7 +1825,7 @@ public class Graph {
    */
   protected void _bind() {
     _projection = _matrixHandler.projection();
-    _eye.set(_matrixHandler.eye());
+    _eye = _matrixHandler.eye();
     _view = eye().view();
     _projectionView = Matrix.multiply(_projection, _view);
     // TODO pending
@@ -2969,6 +2918,8 @@ public class Graph {
       vector.multiply(-1);
       Vector translation = eye().referenceDisplacement(vector);
       _shift(translation.x(), translation.y(), translation.z());
+      // TODO eye pending
+      /*
       _eye._shiftInertia.setInertia(inertia);
       _eye._shiftInertia._x += translation.x();
       _eye._shiftInertia._y += translation.y();
@@ -2976,6 +2927,7 @@ public class Graph {
       if (!_eye._shiftInertia._active) {
         _eye._shiftInertia._active = true;
       }
+      */
     }
     else {
       node.translate(node.referenceDisplacement(displacement(new Vector(dx, dy, dz), node)), inertia);
@@ -3207,130 +3159,6 @@ public class Graph {
     float size_limit = size2 * 0.5f;
     float d = x * x + y * y;
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
-  }
-
-  // only 3d eye
-
-  // 7. move forward
-
-  /**
-   * Same as {@code moveForward(delta, Graph.inertia)}.
-   *
-   * @see #moveForward(float, float)
-   */
-  public void moveForward(float delta) {
-    moveForward(delta, Graph.inertia);
-  }
-
-  /**
-   * Same as {@code translateEye(0, 0, delta / (zNear() - zFar()))}. The gesture strength is controlled
-   * with {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction. Also rescales
-   * the {@link #eye()} if the graph type is {@link Type#ORTHOGRAPHIC} so that nearby objects
-   * appear bigger when moving towards them.
-   *
-   * @see #shift(float, float, float)
-   */
-  public void moveForward(float delta, float inertia) {
-    // we negate z which targets the Processing mouse wheel
-    shift(eye(),0, 0, delta / (zNear() - zFar()), inertia);
-  }
-
-  // 8. lookAround
-
-  /**
-   * Same as {@code lookAround(deltaX, deltaY, Graph.inertia)}.
-   */
-  public void lookAround(float deltaX, float deltaY) {
-    lookAround(deltaX, deltaY, Graph.inertia);
-  }
-
-  /**
-   * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
-   * expressed in radians. The gesture strength is controlled with {@code inertia} which should be in {@code [0..1]},
-   * 0 no inertia & 1 no friction.
-   */
-  public void lookAround(float deltaX, float deltaY, float inertia) {
-    if (is2D()) {
-      System.out.println("Warning: lookAround is only available in 3D");
-    } else {
-      _eye._lookAroundInertia.setInertia(inertia);
-      _eye._lookAroundInertia._x += deltaX / 5;
-      _eye._lookAroundInertia._y += deltaY / 5;
-      _lookAround();
-      if (!_eye._lookAroundInertia._active)
-        _eye._lookAroundInertia._active = true;
-    }
-  }
-
-  /**
-   * {@link #lookAround(float, float)}  procedure}.
-   */
-  protected void _lookAround() {
-    if (_frameCount > _lookAroundCount) {
-      _upVector = eye().yAxis();
-      _lookAroundCount = _frameCount;
-    }
-    _lookAroundCount++;
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _eye._lookAroundInertia._y : -_eye._lookAroundInertia._y);
-    Quaternion rotY = new Quaternion(eye().displacement(_upVector), -_eye._lookAroundInertia._x);
-    Quaternion quaternion = Quaternion.multiply(rotY, rotX);
-    eye().rotate(quaternion);
-  }
-
-  // 9. rotate CAD
-
-  /**
-   * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0), Graph.inertia)}.
-   *
-   * @see #cad(float, float, Vector, float)
-   */
-  public void cad(float roll, float pitch) {
-    cad(roll, pitch, new Vector(0, 1, 0), Graph.inertia);
-  }
-
-  /**
-   * Same as {@code rotateCAD(roll, pitch, upVector, Graph.inertia)}.
-   *
-   * @see #cad(float, float, Vector, float)
-   */
-  public void cad(float roll, float pitch, Vector upVector) {
-    cad(roll, pitch, upVector, Graph.inertia);
-  }
-
-  /**
-   * Defines an axis which the eye rotates around. The eye can rotate left or right around
-   * this axis. It can also be moved up or down to show the 'top' and 'bottom' views of the scene.
-   * As a result, the {@code upVector} will always appear vertical in the scene, and the horizon
-   * is preserved and stays projected along the eye's horizontal axis. The gesture strength is
-   * controlled with {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
-   * <p>
-   * This method requires calling {@code scene.eye().setYAxis(upVector)} (see
-   * {@link Node#setYAxis(Vector)}) first.
-   * <p>
-   * Note that the ball {@link #center()} is used as reference point when rotating the eye.
-   *
-   * @see #cad(float, float)
-   */
-  public void cad(float roll, float pitch, Vector upVector, float inertia) {
-    if (is2D()) {
-      System.out.println("Warning: rotateCAD is only available in 3D");
-    } else {
-      _eyeUp = upVector;
-      _cad();
-      _eye._cadRotateInertia.setInertia(inertia);
-      _eye._cadRotateInertia._x += roll;
-      _eye._cadRotateInertia._y += pitch;
-      if (!_eye._cadRotateInertia._active)
-        _eye._cadRotateInertia._active = true;
-    }
-  }
-
-  /**
-   * {@link #cad(float, float, Vector, float) procedure}.
-   */
-  protected void _cad() {
-    Vector _up = eye().displacement(_eyeUp);
-    eye()._orbit(Quaternion.multiply(new Quaternion(_up, _up.y() < 0.0f ? _eye._cadRotateInertia._x : -_eye._cadRotateInertia._x), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), leftHanded ? _eye._cadRotateInertia._y : -_eye._cadRotateInertia._y)), _center);
   }
 
   // Hack to hide hint properties
