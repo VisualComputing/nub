@@ -1,0 +1,19 @@
+// 1. ortho
+println(width() * eye().worldMagnitude() + " " + 2 * _matrixHandler.left() + " " + 2 * _matrixHandler.right());
+println(height() * eye().worldMagnitude() + " " + 2 * _matrixHandler.top() + " " + 2 * _matrixHandler.bottom());
+
+eye().worldMagnitude() * (float) width() / 2  -> Math.abs(_matrixHandler.right() - _matrixHandler.left()) / 2
+eye().worldMagnitude() * (float) height() / 2 -> Math.abs(_matrixHandler.top() - _matrixHandler.bottom()) / 2
+
+eye().worldMagnitude() * (float) width()  -> Math.abs(_matrixHandler.right() - _matrixHandler.left())
+eye().worldMagnitude() * (float) height() -> Math.abs(_matrixHandler.top() - _matrixHandler.bottom())
+
+eye().worldMagnitude()  -> Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width()
+eye().worldMagnitude()  -> Math.abs(_matrixHandler.top() - _matrixHandler.bottom()) / (float) height()
+
+// 2. persp
+fov:  2 * (float) Math.atan(eye().worldMagnitude())
+hfov: 2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio())
+      2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio())
+      
+eye().worldMagnitude() -> (float) Math.tan(_matrixHandler.fov() / 2.0f)
