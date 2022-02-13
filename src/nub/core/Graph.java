@@ -2440,35 +2440,12 @@ public class Graph {
   // cache setters for projection times view and its inverse
 
   /**
-   * Called by {@link #render(Node)} and performs the following:
-   * <ol>
-   * <li>Updates the projection matrix using
-   * {@link Matrix#perspective(float, float, float, float)} or
-   * {@link Matrix#orthographic(float, float, float, float)}.</li>
-   * <li>Updates the view matrix by calling {@code eye().view()}.</li>
-   * <li>Updates the {@link #projectionView()} matrix.</li>
-   * </ol>
-   *
-   * @see #fov()
-   * @see Node#view()
-   */
-  protected void _bind() {
-    _projection = _type == Graph.Type.PERSPECTIVE ? Matrix.perspective(leftHanded ? -eye().worldMagnitude() : eye().worldMagnitude(), aspectRatio(), zNear(), zFar())
-            : Matrix.orthographic(width() * eye().worldMagnitude(), (leftHanded ? -height() : height()) * eye().worldMagnitude(), zNear(), zFar());
-    _view = eye().view();
-    _projectionView = Matrix.multiply(_projection, _view);
-    _matrixHandler.bind(_projection, _view);
-    //System.out.println(width() * eye().worldMagnitude() + " " + 2 * _matrixHandler.left() + " " + 2 * _matrixHandler.right());
-    //System.out.println(height() * eye().worldMagnitude() + " " + 2 * _matrixHandler.top() + " " + 2 * _matrixHandler.bottom());
-  }
-
-  /**
    * Sets {@link #eye()}, {@link #fov()}, {@link #zNear()} and {@link #zFar()}
    * from modelview and projection matrices.
    *
    * @see MatrixHandler#eye()
    */
-  protected void _slot() {
+  protected void _bind() {
     _projection = _matrixHandler.projection();
     _eye.set(_matrixHandler.eye());
     _view = eye().view();
@@ -2515,8 +2492,7 @@ public class Graph {
       if (isOffscreen()) {
         _initFrontBuffer();
       }
-      //_bind();
-      _slot();
+      _bind();
       _matrixHandler.pushMatrix();
     }
   }
