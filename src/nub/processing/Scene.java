@@ -89,8 +89,7 @@ import java.util.function.Consumer;
  * the method signatures provide by the {@link Graph} counterparts. See: {@link #tag(String)}
  * and {@link #tag()} for node tagging; {@link #shift(Node, float)} and {@link #shift(String, float)}
  * for translation; {@link #spin(Node, float)} and {@link #spin(String, float)} for
- * spinning; {@link #lookAround(float)} and {@link #cad(float)} for eye look-around
- * and rotate-cad, to name a few.
+ * spinning, to name a few.
  *
  * @see Graph
  * @see Node
@@ -119,42 +118,12 @@ public class Scene extends Graph {
   // CONSTRUCTORS
 
   /**
-   * Same as {@code this(pApplet.g, eye)}.
-   *
-   * @see #Scene(PGraphics, Node)
-   */
-  public Scene(PApplet pApplet, Node eye) {
-    this(pApplet.g, eye);
-  }
-
-  /**
-   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, eye)}.
-   *
-   * @see Graph#Graph(Object, int, int, Node)
-   * @see #Scene(PApplet, Node)
-   */
-  public Scene(PGraphics pGraphics, Node eye) {
-    super(pGraphics, pGraphics.width, pGraphics.height, eye);
-    _init(pGraphics);
-  }
-
-  /**
    * Same as {@code this(pApplet.g)}.
    *
    * @see #Scene(PGraphics)
    */
   public Scene(PApplet pApplet) {
     this(pApplet.g);
-  }
-
-  /**
-   * Same as {@code this(pGraphics, new Vector(), 100)}.
-   *
-   * @see #Scene(PApplet, Vector, float)
-   */
-  public Scene(PGraphics pGraphics) {
-    //super(pGraphics, pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics2D ? Type.TWO_D : Type.PERSPECTIVE);
-    this(pGraphics, new Vector(), 100);
   }
 
   /**
@@ -176,6 +145,17 @@ public class Scene extends Graph {
   }
 
   /**
+   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, eye)}.
+   *
+   * @see Graph#Graph(Object, int, int)
+   * @see #Scene(PApplet)
+   */
+  public Scene(PGraphics pGraphics) {
+    super(pGraphics, pGraphics.width, pGraphics.height);
+    _init(pGraphics);
+  }
+
+  /**
    * Same as {@code this(pGraphics, new Vector(), radius)}.
    *
    * @see #Scene(PGraphics, Vector, float)
@@ -188,48 +168,10 @@ public class Scene extends Graph {
    * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics2D ? Type.TWO_D : Type.PERSPECTIVE, center, radius)},
    * and then sets {@link #leftHanded} to {@code true}.
    *
-   * @see Graph#Graph(Object, int, int, Type, Vector, float)
+   * @see Graph#Graph(Object, int, int, Vector, float)
    */
   public Scene(PGraphics pGraphics, Vector center, float radius) {
-    super(pGraphics, pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics2D ? Type.TWO_D : Type.PERSPECTIVE, center, radius);
-    _init(pGraphics);
-  }
-
-  /**
-   * Same as {@code this(pApplet, eye, new Vector(), radius)}.
-   *
-   * @see Scene#Scene(PApplet, Node, Vector, float)
-   */
-  public Scene(PApplet pApplet, Node eye, float radius) {
-    this(pApplet, eye, new Vector(), radius);
-  }
-
-  /**
-   * Same as {@code this(pApplet.g, eye, center, rdius)}.
-   *
-   * @see #Scene(PGraphics, Node, Vector, float)
-   */
-  public Scene(PApplet pApplet, Node eye, Vector center, float radius) {
-    this(pApplet.g, eye, center, radius);
-  }
-
-  /**
-   * Same as {@code this(pGraphics, eye, new Vector(), radius)}.
-   *
-   * @see #Scene(PGraphics, Node, Vector, float)
-   */
-  public Scene(PGraphics pGraphics, Node eye, float radius) {
-    this(pGraphics, eye, new Vector(), radius);
-  }
-
-  /**
-   * Same as {@code super(pGraphics, pGraphics.width, pGraphics.height, eye, type, center, radius)},
-   * and then sets {@link #leftHanded} to {@code true}.
-   *
-   * @see Graph#Graph(Object, int, int, Node, Type, Vector, float)
-   */
-  public Scene(PGraphics pGraphics, Node eye, Vector center, float radius) {
-    super(pGraphics, pGraphics.width, pGraphics.height, eye, pGraphics instanceof PGraphics2D ? Type.TWO_D : Type.PERSPECTIVE, center, radius);
+    super(pGraphics, pGraphics.width, pGraphics.height, center, radius);
     _init(pGraphics);
   }
 

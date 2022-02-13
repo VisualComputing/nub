@@ -255,78 +255,21 @@ public class Graph {
   private float _zClippingCoefficient = (float) Math.sqrt(3.0f);
 
   /**
-   * Same as {@code this(context, width, height, eye, Type.PERSPECTIVE)}.
-   *
-   * @see #Graph(Object, int, int, Node, Type)
-   */
-  public Graph(Object context, int width, int height, Node eye) {
-    this(context, width, height, eye, Type.PERSPECTIVE);
-  }
-
-  /**
-   * Same as {@code this(context, width, height, eye, type, new Vector(), 100)}.
-   *
-   * @see #Graph(Object, int, int, Node, Type, Vector, float)
-   */
-  protected Graph(Object context, int width, int height, Node eye, Type type) {
-    this(context, width, height, eye, type, new Vector(), 100);
-  }
-
-  /**
-   * Same as {@code this(context, width, height, Type.PERSPECTIVE)}.
-   *
-   * @see #Graph(Object, int, int, Type)
-   */
-  public Graph(Object context, int width, int height) {
-    this(context, width, height, Type.PERSPECTIVE);
-  }
-
-  /**
    * Same as {@code this(context, width, height, type, new Vector(), 100)}.
    *
-   * @see #Graph(Object, int, int, Type, Vector, float)
+   * @see #Graph(Object, int, int, Vector, float)
    */
-  protected Graph(Object context, int width, int height, Type type) {
-    this(context, width, height, type, new Vector(), 100);
+  public Graph(Object context, int width, int height) {
+    this(context, width, height, new Vector(), 100);
   }
 
   /**
    * Same as {@code this(context, width, height, type, new Vector(), radius)}.
    *
-   * @see #Graph(Object, int, int, Type, Vector, float)
+   * @see #Graph(Object, int, int, Vector, float)
    */
-  protected Graph(Object context, int width, int height, Type type, float radius) {
-    this(context, width, height, type, new Vector(), radius);
-  }
-
-  /**
-   * Defines a right-handed graph with the specified {@code width} and {@code height}
-   * screen window dimensions. Creates and {@link #eye()} node, sets its {@link #fov()} to
-   * {@code PI/3}. The {@link #zNear()} and {@link #zFar()} are dynamically computed so that
-   * the ball defined by {@code center} and {@code radius} is always visible, unless the eye
-   * is looking towards a direction completely different than {@code center}.
-   * <p>
-   * The constructor also instantiates the graph main {@link #context()} and
-   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}).
-   *
-   * @see #setCenter(Vector)
-   * @see #setRadius(float)
-   * @see MatrixHandler
-   */
-  protected Graph(Object context, int width, int height, Type type, Vector center, float radius) {
-    _init(context, width, height, new Node(), type);
-    setBoundingBall(center, radius);
-    setZNear(this::ballZNear);
-    setZFar(this::ballZFar);
-  }
-
-  /**
-   * Same as {@code this(context, width, height, eye, type, new Vector(), radius)}.
-   *
-   * @see #Graph(Object, int, int, Node, Type, Vector, float)
-   */
-  protected Graph(Object context, int width, int height, Node eye, Type type, float radius) {
-    this(context, width, height, eye, type, new Vector(), radius);
+  protected Graph(Object context, int width, int height, float radius) {
+    this(context, width, height, new Vector(), radius);
   }
 
   /**
@@ -342,8 +285,8 @@ public class Graph {
    * @see #setRadius(float)
    * @see MatrixHandler
    */
-  protected Graph(Object context, int width, int height, Node eye, Type type, Vector center, float radius) {
-    _init(context, width, height, eye, type);
+  protected Graph(Object context, int width, int height, Vector center, float radius) {
+    _init(context, width, height);
     setBoundingBall(center, radius);
     setZNear(this::ballZNear);
     setZFar(this::ballZFar);
@@ -352,7 +295,7 @@ public class Graph {
   /**
    * Used internally by several constructors.
    */
-  protected void _init(Object context, int width, int height, Node eye, Type type) {
+  protected void _init(Object context, int width, int height) {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
@@ -370,9 +313,6 @@ public class Graph {
     // dummy
     _orays = _i2rays;
     _behaviors = new HashMap<Integer, BiConsumer<Graph, Node>>();
-    if (eye == null) {
-      throw new RuntimeException("Error eye shouldn't be null");
-    }
     picking = true;
   }
 
