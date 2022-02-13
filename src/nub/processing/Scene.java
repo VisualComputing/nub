@@ -1148,7 +1148,8 @@ public class Scene extends Graph {
 
   @Override
   protected boolean _tracks(Node node, int pixelX, int pixelY) {
-    if (node == null || isEye(node))
+    // TODO restore eye
+    if (node == null /* || isEye(node) */)
       return false;
     if (!node.tagging)
       return false;

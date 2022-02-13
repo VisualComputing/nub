@@ -654,8 +654,6 @@ public class Graph {
    * algorithm.
    * <p>
    * Note that node collections should be kept at user space for efficiency.
-   *
-   * @see #isEye(Node)
    */
   public static List<Node> nodes() {
     ArrayList<Node> list = new ArrayList<Node>();
@@ -720,13 +718,6 @@ public class Graph {
   }
 
   // Eye stuff
-
-  /**
-   * Checks whether or not the given node is the {@link #eye()}.
-   */
-  public boolean isEye(Node node) {
-    return _eye == node;
-  }
 
   /**
    * Returns the associated eye.
@@ -1569,7 +1560,8 @@ public class Graph {
    * Condition for the node back picking.
    */
   protected boolean _backPicking(Node node) {
-    return picking && node.tagging == true && !isEye(node) && _bb != null && (
+    // TODO restore eye
+    return picking && node.tagging == true /* && !isEye(node) */ && _bb != null && (
         (node.isPickingEnabled(Node.CAMERA) && node.isHintEnabled(Node.CAMERA)) ||
             (node.isPickingEnabled(Node.AXES) && node.isHintEnabled(Node.AXES)) ||
             (node.isPickingEnabled(Node.HUD) && node.isHintEnabled(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
@@ -1585,7 +1577,8 @@ public class Graph {
    * Condition for the node front picking.
    */
   protected boolean _frontPicking(Node node) {
-    return picking && node.tagging == true && !isEye(node) && node.isPickingEnabled(Node.BULLSEYE) && node.isHintEnabled(Node.BULLSEYE);
+    // TODO restore eye
+    return picking && node.tagging == true /* && !isEye(node) */ && node.isPickingEnabled(Node.BULLSEYE) && node.isHintEnabled(Node.BULLSEYE);
   }
 
   /**
@@ -1632,7 +1625,8 @@ public class Graph {
    * Cached version of {@link #tracks(Node, int, int)}.
    */
   protected boolean _tracks(Node node, int pixelX, int pixelY, Vector projection) {
-    if (node == null || isEye(node) || projection == null)
+    // TODO restore eye
+    if (node == null /* || isEye(node) */ || projection == null)
       return false;
     if (!node.tagging)
       return false;
