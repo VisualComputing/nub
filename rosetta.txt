@@ -1,4 +1,5 @@
-// 1. ortho
+1. ortho
+
 println(width() * eye().worldMagnitude() + " " + 2 * _matrixHandler.left() + " " + 2 * _matrixHandler.right());
 println(height() * eye().worldMagnitude() + " " + 2 * _matrixHandler.top() + " " + 2 * _matrixHandler.bottom());
 
@@ -11,9 +12,19 @@ eye().worldMagnitude() * (float) height() -> Math.abs(_matrixHandler.top() - _ma
 eye().worldMagnitude()  -> Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width()
 eye().worldMagnitude()  -> Math.abs(_matrixHandler.top() - _matrixHandler.bottom()) / (float) height()
 
-// 2. persp
+2. persp
+
 fov:  2 * (float) Math.atan(eye().worldMagnitude())
 hfov: 2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio())
       2 * (float) Math.atan(eye().worldMagnitude() * aspectRatio())
       
 eye().worldMagnitude() -> (float) Math.tan(_matrixHandler.fov() / 2.0f)
+
+3. Testing pending
+
+_updateBoundaryEquations3
+_updateBoundaryEquations2
+sceneToPixelRatio
+pixelToLine
+displacement
+screenDisplacement
