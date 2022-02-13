@@ -76,7 +76,7 @@ import java.util.function.Consumer;
  * among others, can be used to set a {@link Node#setShape(PShape)} (see
  * also {@link Node#setShape(Consumer)}).
  * <p>
- * Another scene's eye (different than the graph {@link Graph#eye()}) can be drawn with
+ * Another scene's eye (different than the graph eye) can be drawn with
  * {@link #drawFrustum(Graph)}. Typical usage include interactive minimaps and
  * visibility culling visualization and debugging.
  * <h1>Picking and interaction</h1>
@@ -983,7 +983,7 @@ public class Scene extends Graph {
   }
 
   /**
-   * Saves the {@link #eye()}, the {@link #radius()} and the {@link #_type} into {@code fileName}.
+   * Saves the eye, the {@link #radius()} and the {@link #_type} into {@code fileName}.
    *
    * @see #saveConfig()
    * @see #loadConfig()
@@ -992,7 +992,6 @@ public class Scene extends Graph {
   public void saveConfig(String fileName) {
     JSONObject json = new JSONObject();
     json.setFloat("radius", _radius);
-    json.setJSONObject("eye", _toJSONObject(eye()));
     // TODO: handle nodes (hint, ... restore keyframes)
     pApplet.saveJSONObject(json, fileName);
   }
@@ -1014,7 +1013,7 @@ public class Scene extends Graph {
   }
 
   /**
-   * Loads the {@link #eye()}, the {@link #radius()} and the {@link #_type} from {@code fileName}.
+   * Loads the eye, the {@link #radius()} and the {@link #_type} from {@code fileName}.
    *
    * @see #saveConfig()
    * @see #saveConfig(String)
@@ -1029,7 +1028,6 @@ public class Scene extends Graph {
     }
     if (json != null) {
       _radius = json.getFloat("radius");
-      eye().set(_toNode(json.getJSONObject("eye")));
       // TODO: handle nodes (hint, ... restore keyframes)
     }
   }
@@ -2270,7 +2268,7 @@ public class Scene extends Graph {
    */
   public void drawFrustum(Graph graph) {
     _matrixHandler.pushMatrix();
-    _matrixHandler.applyTransformation(graph.eye());
+    _matrixHandler.applyTransformation(graph._eye);
     drawFrustum(context(), graph);
     _matrixHandler.popMatrix();
   }
@@ -2292,10 +2290,10 @@ public class Scene extends Graph {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene && graph.isOffscreen();
     switch (graph._type) {
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph.eye().worldMagnitude(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.zNear(), graph.zFar());
+        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph._eye.worldMagnitude(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.zNear(), graph.zFar());
         break;
       case PERSPECTIVE:
-        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph.eye().worldMagnitude(), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar());
+        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph._eye.worldMagnitude(), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar());
         break;
     }
   }
@@ -2424,7 +2422,7 @@ public class Scene extends Graph {
 
     points[0].setZ(zNear / magnitude);
     points[1].setZ(zFar / magnitude);
-    //(2 * (float) Math.atan(eye().magnitude()))
+    //(2 * (float) Math.atan(_eye.magnitude()))
     //points[0].setY(points[0].z() * PApplet.tan(((2 * (float) Math.atan(eye().magnitude())) / 2.0f)));
     points[0].setY(points[0].z() * magnitude);
     points[0].setX(points[0].y() * aspectRatio);
@@ -2553,22 +2551,22 @@ public class Scene extends Graph {
     Vector o = new Vector();
     if (_type == Graph.Type.ORTHOGRAPHIC) {
       context().pushMatrix();
-      _matrixHandler.applyTransformation(graph.eye());
+      _matrixHandler.applyTransformation(graph._eye);
     }
     // in PERSPECTIVE cache the transformed origin
     else
-      o = graph.eye().worldLocation(new Vector());
+      o = graph._eye.worldLocation(new Vector());
     context().beginShape(PApplet.LINES);
     for (Vector s : points) {
       if (_type == Graph.Type.ORTHOGRAPHIC) {
-        Vector v = graph.eye().location(s);
+        Vector v = graph._eye.location(s);
         Scene.vertex(context(), v.x(), v.y(), v.z());
         // Key here is to represent the eye zNear param (which is given in world units)
         // in eye units.
         // Hence it should be multiplied by: 1 / eye.eye().magnitude()
         // The neg sign is because the zNear is positive but the eye view direction is
         // the negative Z-axis
-        Scene.vertex(context(), v.x(), v.y(), -(graph.zNear() * 1 / graph.eye().worldMagnitude()));
+        Scene.vertex(context(), v.x(), v.y(), -(graph.zNear() * 1 / graph._eye.worldMagnitude()));
       } else {
         Scene.vertex(context(), s.x(), s.y(), s.z());
         Scene.vertex(context(), o.x(), o.y(), o.z());
@@ -2606,7 +2604,7 @@ public class Scene extends Graph {
    * @see #drawCross(float, float, float)
    */
   public void drawCross(Node node, float length) {
-    if (eye() == node) {
+    if (_eye == node) {
       return;
     }
     Vector center = screenLocation(node);
@@ -2670,7 +2668,7 @@ public class Scene extends Graph {
    * @see #_drawBullsEye(Node)
    */
   protected void _drawSquaredBullsEye(Node node) {
-    if (eye() == node) {
+    if (_eye == node) {
       return;
     }
     context().pushStyle();
@@ -2744,7 +2742,7 @@ public class Scene extends Graph {
    * @see #_drawBullsEye(Node)
    */
   protected void _drawCircledBullsEye(Node node) {
-    if (eye() == node) {
+    if (_eye == node) {
       return;
     }
     context().pushStyle();
