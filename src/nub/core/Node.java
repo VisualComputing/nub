@@ -1074,7 +1074,7 @@ public class Node {
    * @see Vector#randomize()
    * @see Quaternion#randomize()
    * @see #random(Graph)
-   * @see #random(Vector, float, boolean)
+   * @see #random(Vector, float)
    */
   public void randomize(Vector center, float radius) {
     Vector displacement;
@@ -1093,10 +1093,10 @@ public class Node {
    * (see {@link Vector#random()}). The {@link #worldOrientation()} is set by {@link Quaternion#random()}. The
    * {@link #worldMagnitude()} is a random in [0,5...2].
    *
-   * @see #random(Vector, float, boolean)
+   * @see #random(Vector, float)
    * @see Vector#random()
    * @see Quaternion#random()
-   * @see #randomize(Vector, float, boolean)
+   * @see #randomize(Vector, float)
    */
   public static Node random(Graph graph) {
     Node node = new Node();
@@ -1113,7 +1113,7 @@ public class Node {
    * @see #random(Graph)
    * @see Vector#random()
    * @see Quaternion#random()
-   * @see #randomize(Vector, float, boolean)
+   * @see #randomize(Vector, float)
    */
   public static Node random(Vector center, float radius) {
     Node node = new Node();
@@ -3575,14 +3575,14 @@ public class Node {
   }
 
   /**
-   * Returns whether or not this node is some graph {@link Graph#eye()}.
+   * Returns whether or not this node is some graph eye.
    */
   public boolean isEye() {
     return !_frustumGraphs.isEmpty();
   }
 
   /**
-   * Returns whether or not this node is the given {@code graph} {@link Graph#eye()}.
+   * Returns whether or not this node is the given {@code graph} eye.
    */
   public boolean isEye(Graph graph) {
     return _frustumGraphs.contains(graph);
