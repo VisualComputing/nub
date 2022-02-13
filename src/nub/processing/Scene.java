@@ -1377,10 +1377,7 @@ public class Scene extends Graph {
    * @see #vertex(PGraphics, float, float, float)
    */
   public void vertex(float x, float y, float z) {
-    if (is2D())
-      vertex(context(), x, y);
-    else
-      vertex(context(), x, y, z);
+    vertex(context(), x, y, z);
   }
 
   /**
@@ -1401,10 +1398,7 @@ public class Scene extends Graph {
    * @see #vertex(PGraphics, float, float, float, float, float)
    */
   public void vertex(float x, float y, float z, float u, float v) {
-    if (is2D())
-      vertex(context(), x, y, u, v);
-    else
-      vertex(context(), x, y, z, u, v);
+    vertex(context(), x, y, z, u, v);
   }
 
   /**
@@ -1456,10 +1450,7 @@ public class Scene extends Graph {
    * @see #line(PGraphics, float, float, float, float, float, float)
    */
   public void line(float x1, float y1, float z1, float x2, float y2, float z2) {
-    if (is2D())
-      line(context(), x1, y1, x2, y2);
-    else
-      line(context(), x1, y1, z1, x2, y2, z2);
+    line(context(), x1, y1, z1, x2, y2, z2);
   }
 
   /**
@@ -1578,7 +1569,7 @@ public class Scene extends Graph {
    */
   protected void _drawEye(PGraphics pg, float scale) {
     pg.pushStyle();
-    float halfHeight = scale * (is2D() ? 1.2f : 0.07f);
+    float halfHeight = scale * 0.07f;
     float halfWidth = halfHeight * 1.3f;
     float dist = halfHeight / (float) Math.tan(PApplet.PI / 8.0f);
 
@@ -2299,8 +2290,7 @@ public class Scene extends Graph {
     // texturing requires graph.isOffscreen() (third condition) otherwise got
     // "The pixels array is null" message and the frustum near plane texture and contour are missed
     boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene && graph.isOffscreen();
-    switch (graph.type()) {
-      case TWO_D:
+    switch (graph._type) {
       case ORTHOGRAPHIC:
         _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph.eye().worldMagnitude(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.zNear(), graph.zFar());
         break;
@@ -2321,7 +2311,6 @@ public class Scene extends Graph {
    */
   public static void drawFrustum(PGraphics pGraphics, PGraphics eyeBuffer, Node eye, Type type, float zNear, float zFar) {
     switch (type) {
-      case TWO_D:
       case ORTHOGRAPHIC:
         _drawOrthographicFrustum(pGraphics, eyeBuffer, eye.worldMagnitude(), eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, zNear, zFar);
         break;
@@ -2559,41 +2548,35 @@ public class Scene extends Graph {
       return;
     }
     context().pushStyle();
-    if (is2D()) {
-      context().beginShape(PApplet.POINTS);
-      for (Vector s : points)
-        Scene.vertex(context(), s.x(), s.y());
-      context().endShape();
-    } else {
-      // if ORTHOGRAPHIC: do it in the eye coordinate system
-      // if PERSPECTIVE: do it in the world coordinate system
-      Vector o = new Vector();
-      if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
-        context().pushMatrix();
-        _matrixHandler.applyTransformation(graph.eye());
+    // if ORTHOGRAPHIC: do it in the eye coordinate system
+    // if PERSPECTIVE: do it in the world coordinate system
+    Vector o = new Vector();
+    if (_type == Graph.Type.ORTHOGRAPHIC) {
+      context().pushMatrix();
+      _matrixHandler.applyTransformation(graph.eye());
+    }
+    // in PERSPECTIVE cache the transformed origin
+    else
+      o = graph.eye().worldLocation(new Vector());
+    context().beginShape(PApplet.LINES);
+    for (Vector s : points) {
+      if (_type == Graph.Type.ORTHOGRAPHIC) {
+        Vector v = graph.eye().location(s);
+        Scene.vertex(context(), v.x(), v.y(), v.z());
+        // Key here is to represent the eye zNear param (which is given in world units)
+        // in eye units.
+        // Hence it should be multiplied by: 1 / eye.eye().magnitude()
+        // The neg sign is because the zNear is positive but the eye view direction is
+        // the negative Z-axis
+        Scene.vertex(context(), v.x(), v.y(), -(graph.zNear() * 1 / graph.eye().worldMagnitude()));
+      } else {
+        Scene.vertex(context(), s.x(), s.y(), s.z());
+        Scene.vertex(context(), o.x(), o.y(), o.z());
       }
-      // in PERSPECTIVE cache the transformed origin
-      else
-        o = graph.eye().worldLocation(new Vector());
-      context().beginShape(PApplet.LINES);
-      for (Vector s : points) {
-        if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
-          Vector v = graph.eye().location(s);
-          Scene.vertex(context(), v.x(), v.y(), v.z());
-          // Key here is to represent the eye zNear param (which is given in world units)
-          // in eye units.
-          // Hence it should be multiplied by: 1 / eye.eye().magnitude()
-          // The neg sign is because the zNear is positive but the eye view direction is
-          // the negative Z-axis
-          Scene.vertex(context(), v.x(), v.y(), -(graph.zNear() * 1 / graph.eye().worldMagnitude()));
-        } else {
-          Scene.vertex(context(), s.x(), s.y(), s.z());
-          Scene.vertex(context(), o.x(), o.y(), o.z());
-        }
-      }
-      context().endShape();
-      if (graph.type() == Graph.Type.ORTHOGRAPHIC)
-        context().popMatrix();
+    }
+    context().endShape();
+    if (_type == Graph.Type.ORTHOGRAPHIC) {
+      context().popMatrix();
     }
     context().popStyle();
   }

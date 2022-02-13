@@ -1076,17 +1076,11 @@ public class Node {
    * @see #random(Graph)
    * @see #random(Vector, float, boolean)
    */
-  public void randomize(Vector center, float radius, boolean is3D) {
+  public void randomize(Vector center, float radius) {
     Vector displacement;
     Quaternion quaternion;
-    if (is3D) {
-      displacement = Vector.random();
-      quaternion = Quaternion.random();
-    } else {
-      displacement = new Vector(_random(-1, 1), _random(-1, 1));
-      displacement.normalize();
-      quaternion = new Quaternion(new Vector(0, 0, 1), _random(0, 2 * (float) Math.PI));
-    }
+    displacement = Vector.random();
+    quaternion = Quaternion.random();
     displacement.setMagnitude(_random(radius * 0.1f, radius * 0.9f));
     setWorldPosition(Vector.add(center, displacement));
     setWorldOrientation(quaternion);
@@ -1106,7 +1100,7 @@ public class Node {
    */
   public static Node random(Graph graph) {
     Node node = new Node();
-    node.randomize(graph.center(), graph.radius(), graph.is3D());
+    node.randomize(graph.center(), graph.radius());
     return node;
   }
 
@@ -1121,9 +1115,9 @@ public class Node {
    * @see Quaternion#random()
    * @see #randomize(Vector, float, boolean)
    */
-  public static Node random(Vector center, float radius, boolean is3D) {
+  public static Node random(Vector center, float radius) {
     Node node = new Node();
-    node.randomize(center, radius, is3D);
+    node.randomize(center, radius);
     return node;
   }
 

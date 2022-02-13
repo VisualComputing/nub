@@ -25,8 +25,7 @@ import java.util.function.Supplier;
  * a raster or ray-tracing renderer.
  * <h1>1. Types and dimensions</h1>
  * The way the projection matrix is computed (see {@link #projection()}), defines the type of the
- * graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC} for 3d graphs and {@link Type#TWO_D}
- * for a 2d graph.
+ * graph as: {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC}.
  * <p>
  * To set up scene dimensions call {@link #setBoundingBall(Vector, float)}. The resulting ball is
  * then used to:
@@ -240,7 +239,8 @@ public class Graph {
 
   // 7. Projection stuff
 
-  protected Type _type;
+  // TODO make protected
+  public Type _type;
 
   /**
    * Enumerates the graph types.
@@ -248,7 +248,7 @@ public class Graph {
    * The type mainly defines the way the projection matrix is computed.
    */
   public enum Type {
-    PERSPECTIVE, ORTHOGRAPHIC, TWO_D, CUSTOM
+    PERSPECTIVE, ORTHOGRAPHIC
   }
 
   private float _zNearCoefficient = 0.005f;
@@ -327,12 +327,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code node.randomize(center(), radius(), is3D())}.
+   * Same as {@code node.randomize(center(), radius())}.
    *
-   * @see Node#randomize(Vector, float, boolean)
+   * @see Node#randomize(Vector, float)
    */
   public void randomize(Node node) {
-    node.randomize(_center, _radius, is3D());
+    node.randomize(_center, _radius);
   }
 
   // Dimensions stuff
@@ -378,25 +378,13 @@ public class Graph {
     }
   }
 
-  // Type handling stuff
-
   /**
-   * Returns the graph type.
-   */
-  public Type type() {
-    return _type;
-  }
-
-  /**
-   * Retrieves the scene field-of-view in radians. Meaningless if the scene {@link #is2D()}.
+   * Retrieves the scene field-of-view in radians.
    *
    * @see Node#worldMagnitude()
    * @see #hfov()
    */
   public float fov() {
-    if (is2D()) {
-      throw new RuntimeException("Error: fov only works for a perspective projection");
-    }
     return _matrixHandler.fov();
   }
 
@@ -408,9 +396,6 @@ public class Graph {
    * @see #fov()
    */
   public float hfov() {
-    if (is2D()) {
-      throw new RuntimeException("Error: hfov only works for an orthographic projection");
-    }
     return _matrixHandler.hfov();
   }
 
@@ -477,7 +462,6 @@ public class Graph {
         case PERSPECTIVE:
           z = zMin;
           break;
-        case TWO_D:
         case ORTHOGRAPHIC:
           z = 0.0f;
           break;
@@ -689,7 +673,7 @@ public class Graph {
       _updateBounds();
       _lastEqUpdate = _frameCount;
     }
-    for (int i = 0; i < (is3D() ? 6 : 4); ++i)
+    for (int i = 0; i < 6; ++i)
       if (distanceToBound(i, point) > 0)
         return false;
     return true;
@@ -712,7 +696,7 @@ public class Graph {
       _lastEqUpdate = _frameCount;
     }
     boolean allInForAllPlanes = true;
-    for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
+    for (int i = 0; i < 6; ++i) {
       float d = distanceToBound(i, center);
       if (d > radius)
         return Visibility.INVISIBLE;
@@ -742,7 +726,7 @@ public class Graph {
       _lastEqUpdate = _frameCount;
     }
     boolean allInForAllPlanes = true;
-    for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
+    for (int i = 0; i < 6; ++i) {
       boolean allOut = true;
       for (int c = 0; c < 8; ++c) {
         Vector pos = new Vector(((c & 4) != 0) ? corner1._vector[0] : corner2._vector[0], ((c & 2) != 0) ? corner1._vector[1] : corner2._vector[1],
@@ -783,14 +767,11 @@ public class Graph {
    */
   protected void _updateBounds() {
     _initCoefficients();
-    if (is3D())
-      _updateBoundaryEquations3();
-    else
-      _updateBoundaryEquations2();
+    _updateBoundaryEquations3();
   }
 
   protected void _initCoefficients() {
-    int rows = is3D() ? 6 : 4, cols = is3D() ? 4 : 3;
+    int rows = 6, cols = 4;
     if (_coefficients == null)
       _coefficients = new float[rows][cols];
     else if (_coefficients.length != rows)
@@ -879,29 +860,6 @@ public class Graph {
     }
   }
 
-  protected void _updateBoundaryEquations2() {
-    // Computed once and for all
-    Vector pos = eye().worldPosition();
-    Vector up = upVector();
-    Vector right = rightVector();
-    _normal[0] = Vector.multiply(right, -1);
-    _normal[1] = right;
-    _normal[2] = up;
-    _normal[3] = Vector.multiply(up, -1);
-    float wh0 = Math.abs(_matrixHandler.right() - _matrixHandler.left()) / 2;
-    float wh1 = Math.abs(_matrixHandler.top() - _matrixHandler.bottom()) / 2;
-    _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
-    _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
-    _distance[2] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[2]);
-    _distance[3] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh1)), _normal[3]);
-    for (int i = 0; i < 4; ++i) {
-      _coefficients[i][0] = _normal[i]._vector[0];
-      _coefficients[i][1] = _normal[i]._vector[1];
-      // Change respect to Camera occurs here:
-      _coefficients[i][2] = -_distance[i];
-    }
-  }
-
   /**
    * Returns the bounds plane equations.
    * <p>
@@ -957,12 +915,7 @@ public class Graph {
       _lastEqUpdate = _frameCount;
     }
     Vector myVector = new Vector(_coefficients[index][0], _coefficients[index][1], _coefficients[index][2]);
-    if (is3D())
-      return Vector.dot(position, myVector) - _coefficients[index][3];
-    else
-      return (_coefficients[index][0] * position.x() + _coefficients[index][1] * position.y() + _coefficients[index][2])
-          / (float) Math
-          .sqrt(_coefficients[index][0] * _coefficients[index][0] + _coefficients[index][1] * _coefficients[index][1]);
+    return Vector.dot(position, myVector) - _coefficients[index][3];
   }
 
   /**
@@ -1000,7 +953,6 @@ public class Graph {
         // TODO: QGLViewer
         //return 2.0 * fabs((frame()->coordinatesOf(position)).z) * tan(fieldOfView() / 2.0) / screenHeight();
         return 2.0f * Math.abs((eye().location(position))._vector[2]) * (float) Math.tan(_matrixHandler.fov() / 2) / (float) height();
-      case TWO_D:
       case ORTHOGRAPHIC:
         return Math.abs(_matrixHandler.top() - _matrixHandler.bottom()) / (float) height();
     }
@@ -1300,30 +1252,12 @@ public class Graph {
         direction.set(Vector.subtract(eye().worldLocation(direction), origin));
         direction.normalize();
         break;
-      case TWO_D:
       case ORTHOGRAPHIC: {
         origin.set(location(new Vector(pixelX, pixelY, 0)));
         direction.set(viewDirection());
         break;
       }
     }
-  }
-
-  // Other stuff
-
-  /**
-   * @return true if the graph is 2D.
-   */
-  // TODO fix
-  public boolean is2D() {
-    return _type == Type.TWO_D;
-  }
-
-  /**
-   * @return true if the graph is 3D.
-   */
-  public boolean is3D() {
-    return !is2D();
   }
 
   protected void _modified() {
@@ -1762,13 +1696,7 @@ public class Graph {
     _eye = _matrixHandler.eye();
     _view = eye().view();
     _projectionView = Matrix.multiply(_projection, _view);
-    // TODO pending
-    if (_projection.m33() == 0) {
-      _type = Type.PERSPECTIVE;
-    }
-    else {
-      _type = Type.ORTHOGRAPHIC;
-    }
+    _type = _projection.m33() == 0 ? Type.PERSPECTIVE : Type.ORTHOGRAPHIC;
     setZNear(() -> _matrixHandler.near());
     setZFar(() -> _matrixHandler.far());
   }
@@ -1989,12 +1917,7 @@ public class Graph {
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
           _matrixHandler.pushMatrix();
           float scl = 1 + node._highlight;
-          if (is2D()) {
-            _matrixHandler.scale(scl, scl);
-          }
-          else {
-            _matrixHandler.scale(scl, scl, scl);
-          }
+          _matrixHandler.scale(scl, scl, scl);
           _displayFrontHint(node);
           _matrixHandler.popMatrix();
         } else {
@@ -2555,12 +2478,7 @@ public class Graph {
       dy *= 2.0 * k / ((float) height());
     }
     float dz = vector.z();
-    if (is2D() && dz != 0) {
-      System.out.println("Warning: graph is 2D. Z-translation reset");
-      dz = 0;
-    } else {
-      dz *= (zNear() - zFar()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(_matrixHandler.fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
-    }
+    dz *= (zNear() - zFar()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(_matrixHandler.fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
     Vector eyeVector = new Vector(dx, dy, dz);
     return node == null ? eye().worldDisplacement(eyeVector) : node.displacement(eyeVector, eye());
   }
@@ -2595,13 +2513,8 @@ public class Graph {
       dy /= 2.0 * k / ((float) height() * eye().worldMagnitude());
     }
     float dz = eyeVector.z();
-    if (is2D() && dz != 0) {
-      System.out.println("Warning: graph is 2D. Z-translation reset");
-      dz = 0;
-    } else {
-      // sign is inverted
-      dz /= (zNear() - zFar()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(_matrixHandler.fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
-    }
+    // sign is inverted
+    dz /= (zNear() - zFar()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(_matrixHandler.fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
     return new Vector(dx, dy, dz);
   }
 
@@ -2948,11 +2861,6 @@ public class Graph {
    */
   public void turn(Node node, float roll, float pitch, float yaw, float inertia) {
     if (node == null || node == eye()) {
-      if (is2D() && (roll != 0 || pitch != 0)) {
-        roll = 0;
-        pitch = 0;
-        System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
-      }
       eye()._orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), _center, inertia);
       // same as:
       //Quaternion q = new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw);
@@ -2965,11 +2873,6 @@ public class Graph {
       // */
     }
     else {
-      if (is2D() && (roll != 0 || pitch != 0)) {
-        roll = 0;
-        pitch = 0;
-        System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
-      }
       Quaternion quaternion = new Quaternion(leftHanded ? roll : -roll, -pitch, leftHanded ? yaw : -yaw);
       node.rotate(new Quaternion(node.displacement(quaternion.axis(), eye()), quaternion.angle()), inertia);
     }
@@ -3051,7 +2954,7 @@ public class Graph {
       // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
       Vector axis = p2.cross(p1);
       // 2D is an ad-hoc
-      float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
+      float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
       eye()._orbit(new Quaternion(axis, angle), _center, inertia);
       // same as:
       //eye().orbit(eye().worldDisplacement(axis), angle, _center, inertia);
@@ -3072,7 +2975,7 @@ public class Graph {
       // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
       Vector axis = p2.cross(p1);
       // 2D is an ad-hoc
-      float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
+      float angle = sensitivity * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
       Quaternion quaternion = new Quaternion(axis, -angle);
       node.rotate(new Quaternion(node.displacement(quaternion.axis(), eye()), quaternion.angle()), inertia);
     }
@@ -3085,8 +2988,6 @@ public class Graph {
    * ball, the function is continuous.
    */
   protected float _projectOnBall(float x, float y) {
-    if (is2D())
-      return 0;
     // If you change the size value, change angle computation in deformedBallQuaternion().
     float size = 1.0f;
     float size2 = size * size;
