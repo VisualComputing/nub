@@ -25,15 +25,14 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.nio.FloatBuffer;
 
-
 /**
  * A 2D or 3D scene.
- * <h1>1. Graph handling</h1>
+ * <h1>1. Scene handling</h1>
  * A scene forms a tree of {@link Node}s whose visual representations may be
  * {@link #render()}. To render a subtree call {@link #render(Node)}.
  * Note that rendering routines should be called within your main-event loop.
  * <p>
- * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
+ * The node collection belonging to the scene may be retrieved with {@link #nodes()}.
  * Nub provides other useful routines to handle the hierarchy, such as {@link Node#setReference(Node)},
  * {@link Node#detach()}, {@link Node#attach()}, {@link #branch(Node)}, and {@link #clearTree()}.
  * <h2>Transformations</h2>
@@ -76,7 +75,7 @@ import java.nio.FloatBuffer;
  * call any of the following methods: {@link #align(Node)}, {@link #focus(String)},
  * {@link #shift(String, float, float, float, float)}, {@link #turn(String, float, float, float, float)},
  * {@link #zoom(String, float, float)} and {@link #spin(String, int, int, int, int, float)}.</li>
- * <li>Set {@code Graph.inertia} in  [0..1] (0 no inertia & 1 no friction) to change the default inertia
+ * <li>Set {@code Scene.inertia} in  [0..1] (0 no inertia & 1 no friction) to change the default inertia
  * value globally, instead of setting it on a per method call basis. Note that it is initially set to 0.8.</li>
  * <li>Customize node behaviors by overridden {@link Node#interact(Object...)}
  * and then invoke them by either calling: {@link #interact(Object...)},
@@ -102,21 +101,21 @@ import java.nio.FloatBuffer;
  * also {@link Node#setShape(Consumer)}).
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
- * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
+ * on top of a 3d scene) issue your drawing code between {@link #beginHUD()} and
  * {@link #endHUD()}.
  */
-public class Graph {
+public class Scene {
   // number of frames displayed since this timing handler was instantiated.
   static protected long _frameCount;
 
-  protected static Graph _onscreenGraph;
+  protected static Scene _onscreenScene;
   public static Random random = new Random();
   protected static HashSet<Node> _huds = new HashSet<Node>();
   protected HashSet<Node> _cacheHUDs;
   protected static HashSet<Node> _interpolators = new HashSet<Node>();
 
   // Custom render
-  protected HashMap<Integer, BiConsumer<Graph, Node>> _behaviors;
+  protected HashMap<Integer, BiConsumer<Scene, Node>> _behaviors;
 
   // offscreen
   protected int _upperLeftCornerX, _upperLeftCornerY;
@@ -230,7 +229,7 @@ public class Graph {
    */
   public static void setUniform(PShader shader, String name, Matrix matrix) {
     PMatrix3D pmatrix = new PMatrix3D();
-    //pmatrix.set(Graph.toPMatrix(matrix));
+    //pmatrix.set(Scene.toPMatrix(matrix));
     //pmatrix.transpose();
     // same as:
     pmatrix.set(matrix.get(new float[16]));
@@ -262,7 +261,7 @@ public class Graph {
   protected HashMap<String, Node> _tags;
   protected ArrayList<Ray> _i1rays, _i2rays, _irays, _orays;
 
-  // 4. Graph
+  // 4. Scene
   protected static List<Node> _seeds = new ArrayList<Node>();
   protected long _lastNonEyeUpdate = 0;
 
@@ -284,7 +283,7 @@ public class Graph {
   protected Type _type;
 
   /**
-   * Enumerates the graph types.
+   * Enumerates the scene types.
    * <p>
    * The type mainly defines the way the projection matrix is computed.
    */
@@ -316,33 +315,33 @@ public class Graph {
   /**
    * Same as {@code this(context, width, height, type, new Vector(), 100)}.
    *
-   * @see #Graph(PGraphics, int, int, Vector, float)
+   * @see #Scene(PGraphics, int, int, Vector, float)
    */
-  public Graph(PGraphics context, int width, int height) {
+  public Scene(PGraphics context, int width, int height) {
     this(context, width, height, new Vector(), 100);
   }
 
   /**
    * Same as {@code this(context, width, height, type, new Vector(), radius)}.
    *
-   * @see #Graph(PGraphics, int, int, Vector, float)
+   * @see #Scene(PGraphics, int, int, Vector, float)
    */
-  protected Graph(PGraphics context, int width, int height, float radius) {
+  protected Scene(PGraphics context, int width, int height, float radius) {
     this(context, width, height, new Vector(), radius);
   }
 
   /**
-   * Defines a right-handed graph with the specified {@code width} and {@code height}
+   * Defines a right-handed scene with the specified {@code width} and {@code height}
    * screen window dimensions.
    * <p>
-   * The constructor also instantiates the graph main {@link #context()} and
+   * The constructor also instantiates the scene main {@link #context()} and
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}).
    *
    * @see #setCenter(Vector)
    * @see #setRadius(float)
    * @see MatrixHandler
    */
-  protected Graph(PGraphics context, int width, int height, Vector center, float radius) {
+  protected Scene(PGraphics context, int width, int height, Vector center, float radius) {
     _init(context, width, height);
     setCenter(center);
     setRadius(radius);
@@ -353,37 +352,37 @@ public class Graph {
   /**
    * Same as {@code this(pApplet.g)}.
    *
-   * @see #Graph(PGraphics)
+   * @see #Scene(PGraphics)
    */
-  public Graph(PApplet pApplet) {
+  public Scene(PApplet pApplet) {
     this(pApplet.g);
   }
 
   /**
    * Same as {this(pApplet.g, new Vector(), radius)}.
    *
-   * @see #Graph(PGraphics, Vector, float)
+   * @see #Scene(PGraphics, Vector, float)
    */
-  public Graph(PApplet pApplet, float radius) {
+  public Scene(PApplet pApplet, float radius) {
     this(pApplet.g, new Vector(), radius);
   }
 
   /**
    * Same as {@code this(pApplet.g, center, radius)}.
    *
-   * @see #Graph(PGraphics, Vector, float)
+   * @see #Scene(PGraphics, Vector, float)
    */
-  public Graph(PApplet pApplet, Vector center, float radius) {
+  public Scene(PApplet pApplet, Vector center, float radius) {
     this(pApplet.g, center, radius);
   }
 
   /**
    * Same as {@code this(pGraphics, pGraphics.width, pGraphics.height, eye)}.
    *
-   * @see #Graph(PGraphics, int, int)
-   * @see #Graph(PApplet)
+   * @see #Scene(PGraphics, int, int)
+   * @see #Scene(PApplet)
    */
-  public Graph(PGraphics pGraphics) {
+  public Scene(PGraphics pGraphics) {
     this(pGraphics, pGraphics.width, pGraphics.height);
     _initScene(pGraphics);
   }
@@ -391,9 +390,9 @@ public class Graph {
   /**
    * Same as {@code this(pGraphics, new Vector(), radius)}.
    *
-   * @see #Graph(PGraphics, Vector, float)
+   * @see #Scene(PGraphics, Vector, float)
    */
-  public Graph(PGraphics pGraphics, float radius) {
+  public Scene(PGraphics pGraphics, float radius) {
     this(pGraphics, new Vector(), radius);
   }
 
@@ -401,9 +400,9 @@ public class Graph {
    * Same as {@code this(pGraphics, pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics2D ? Type.TWO_D : Type.PERSPECTIVE, center, radius)},
    * and then sets {@link #leftHanded} to {@code true}.
    *
-   * @see #Graph(PGraphics, int, int, Vector, float)
+   * @see #Scene(PGraphics, int, int, Vector, float)
    */
-  public Graph(PGraphics pGraphics, Vector center, float radius) {
+  public Scene(PGraphics pGraphics, Vector center, float radius) {
     this(pGraphics, pGraphics.width, pGraphics.height, center, radius);
     _initScene(pGraphics);
   }
@@ -428,7 +427,7 @@ public class Graph {
     _irays = _i1rays;
     // dummy
     _orays = _i2rays;
-    _behaviors = new HashMap<Integer, BiConsumer<Graph, Node>>();
+    _behaviors = new HashMap<Integer, BiConsumer<Scene, Node>>();
     picking = true;
   }
 
@@ -442,8 +441,8 @@ public class Graph {
       throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
     _bb = pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D);
     _bbMatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb);
-    if (!_offscreen && _onscreenGraph == null)
-      _onscreenGraph = this;
+    if (!_offscreen && _onscreenScene == null)
+      _onscreenScene = this;
     // 2. Back buffer
     // is noSmooth absorbed by the line shader
     // looks safer to call it though
@@ -488,7 +487,7 @@ public class Graph {
    */
   public void saveConfig() {
     if (this.isOffscreen())
-      System.out.println("Warning: no config saved! Off-screen graph config requires saveConfig(String fileName) to be called");
+      System.out.println("Warning: no config saved! Off-screen scene config requires saveConfig(String fileName) to be called");
     else
       saveConfig("data/config.json");
   }
@@ -518,7 +517,7 @@ public class Graph {
    */
   public void loadConfig() {
     if (this.isOffscreen())
-      System.out.println("Warning: no config loaded! Off-screen graph config requires loadConfig(String fileName) to be called");
+      System.out.println("Warning: no config loaded! Off-screen scene config requires loadConfig(String fileName) to be called");
     else
       loadConfig("config.json");
   }
@@ -702,7 +701,7 @@ public class Graph {
   /**
    * Same as {@code return Node.random(this)}. Creates a random node.
    *
-   * @see Node#random(Graph)
+   * @see Node#random(Scene)
    * @see #randomize(Node)
    */
   public Node randomNode() {
@@ -742,7 +741,7 @@ public class Graph {
   }
 
   /**
-   * Sets the graph {@link #width()} in pixels.
+   * Sets the scene {@link #width()} in pixels.
    */
   public void setWidth(int width) {
     if (width != width() && width > 0) {
@@ -752,7 +751,7 @@ public class Graph {
   }
 
   /**
-   * Sets the graph {@link #height()} in pixels.
+   * Sets the scene {@link #height()} in pixels.
    */
   public void setHeight(int height) {
     if (height != height() && height > 0) {
@@ -821,7 +820,7 @@ public class Graph {
     return _matrixHandler.hfov();
   }
 
-  // Graph and nodes stuff
+  // Scene and nodes stuff
 
   /**
    * Returns the top-level nodes (those which reference is null).
@@ -924,7 +923,7 @@ public class Graph {
    * <p>
    * All screen drawing should be enclosed between {@link #beginHUD()} and
    * {@link #endHUD()}. Then you can just begin drawing your screen shapes.
-   * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d graph
+   * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d scene
    * then draw first all your 3d before doing any call to a {@link #beginHUD()}
    * and {@link #endHUD()} pair.
    * <p>
@@ -1235,7 +1234,7 @@ public class Graph {
   /**
    * Returns the ratio of scene (units) to pixel at {@code position}.
    * <p>
-   * A line of {@code n * sceneToPixelRatio()} graph units, located at {@code position} in
+   * A line of {@code n * sceneToPixelRatio()} scene units, located at {@code position} in
    * the world coordinate system, will be projected with a length of {@code n} pixels on
    * screen.
    * <p>
@@ -1275,8 +1274,8 @@ public class Graph {
    * Returns {@code true} if the given face is back-facing the eye. Otherwise returns
    * {@code false}.
    * <p>
-   * Vertices must given in clockwise order if graph is not {@link Graph#leftHanded}
-   * or in counter-clockwise order if {@link Graph#leftHanded}.
+   * Vertices must given in clockwise order if scene is not {@link Scene#leftHanded}
+   * or in counter-clockwise order if {@link Scene#leftHanded}.
    *
    * @param a first face vertex
    * @param b second face vertex
@@ -1603,7 +1602,7 @@ public class Graph {
   /**
    * Same as {@code return this.track(mouse(), nodeArray)}.
    *
-   * @see Graph#updateTag(int, int, Node[])
+   * @see Scene#updateTag(int, int, Node[])
    */
   public Node updateTag(Node[] nodeArray) {
     return this.updateTag(mouseX(), mouseY(), nodeArray);
@@ -1661,7 +1660,7 @@ public class Graph {
   /**
    * Same as {@code return this.updateTag(mouseX(), mouseY(), nodeList)}.
    *
-   * @see Graph#updateTag(int, int, List< Node >)
+   * @see Scene#updateTag(int, int, List< Node >)
    * @see #mouseX()
    * @see #mouseY()
    */
@@ -1835,7 +1834,7 @@ public class Graph {
         (node.isPickingEnabled(Node.CAMERA) && node.isHintEnabled(Node.CAMERA)) ||
             (node.isPickingEnabled(Node.AXES) && node.isHintEnabled(Node.AXES)) ||
             (node.isPickingEnabled(Node.HUD) && node.isHintEnabled(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
-            (node._frustumGraphs != null && node.isPickingEnabled(Node.BOUNDS) && node.isHintEnabled(Node.BOUNDS)) ||
+            (node._frustumScenes != null && node.isPickingEnabled(Node.BOUNDS) && node.isHintEnabled(Node.BOUNDS)) ||
             (node.isPickingEnabled(Node.SHAPE) && node.isHintEnabled(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
             (node.isPickingEnabled(Node.TORUS) && node.isHintEnabled(Node.TORUS)) ||
             (node.isPickingEnabled(Node.FILTER) && node.isHintEnabled(Node.FILTER)) ||
@@ -2272,7 +2271,7 @@ public class Graph {
    * Calls {@link #openContext()}, then renders the node {@code subtree} (or the whole tree
    * when {@code subtree} is {@code null}) onto the {@link #context()} from the eye
    * viewpoint, and calls {@link #closeContext()}. All rendered nodes are marked as such
-   * ({@link Node#rendered(Graph)}). After issuing a render command you'll be left out
+   * ({@link Node#rendered(Scene)}). After issuing a render command you'll be left out
    * at the world coordinate system. If the scene is offscreen this method should be called
    * within {@link #openContext()} and {@link #closeContext()}.
    *
@@ -2320,10 +2319,10 @@ public class Graph {
    *
    * <pre>
    * {@code
-   * Graph scene = new Graph(context, width, height);
+   * Scene scene = new Scene(context, width, height);
    * Node space = new Node();
-   * public void behavior(Graph graph, Node node) {
-   *   if (graph.cullingCondition) {
+   * public void behavior(Scene scene, Node node) {
+   *   if (scene.cullingCondition) {
    *     node.cull = true;
    *   }
    *   else if (bypassCondition) {
@@ -2333,18 +2332,18 @@ public class Graph {
    * scene.addBehavior(space, behavior);
    * }
    * </pre>
-   * Note that the graph culling condition may be set from
+   * Note that the scene culling condition may be set from
    * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}.
    *
    * @see #addBehavior(Node, Consumer)
    * @see #resetBehavior(Node)
    * @see #render(Node)
-   * @see Node#setBehavior(Graph, BiConsumer)
-   * @see Node#setBehavior(Graph, Consumer)
+   * @see Node#setBehavior(Scene, BiConsumer)
+   * @see Node#setBehavior(Scene, Consumer)
    * @see Node#bypass()
    * @see Node#cull
    */
-  public void addBehavior(Node node, BiConsumer<Graph, Node> behavior) {
+  public void addBehavior(Node node, BiConsumer<Scene, Node> behavior) {
     _behaviors.put(node.id(), behavior);
   }
 
@@ -2354,8 +2353,8 @@ public class Graph {
    * @see #addBehavior(Node, BiConsumer)
    * @see #resetBehavior(Node)
    * @see #render(Node)
-   * @see Node#setBehavior(Graph, BiConsumer)
-   * @see Node#setBehavior(Graph, Consumer)
+   * @see Node#setBehavior(Scene, BiConsumer)
+   * @see Node#setBehavior(Scene, Consumer)
    * @see Node#bypass()
    * @see Node#cull
    */
@@ -2389,7 +2388,7 @@ public class Graph {
     // On the oder hand, timing stuff (node_execute) may only
     // be executed once it's known for sure the node is not
     // culled :-/
-    BiConsumer<Graph, Node> behavior = _behaviors.get(node.id());
+    BiConsumer<Scene, Node> behavior = _behaviors.get(node.id());
     if (behavior != null) {
       behavior.accept(this, node);
     }
@@ -2905,24 +2904,24 @@ public class Graph {
    */
   public void image(int pixelX, int pixelY) {
     if (isOffscreen()) {
-      if (_lastRendered != Graph._frameCount) {
-        System.out.println("Warning: image() not updated since render wasn't called @" + Graph._frameCount);
+      if (_lastRendered != Scene._frameCount) {
+        System.out.println("Warning: image() not updated since render wasn't called @" + Scene._frameCount);
       }
       if (_renderCount != 0) {
         throw new RuntimeException("Error: offscreen scenes should call image() after openContext() / closeContext()");
       }
       else {
-        if (_onscreenGraph != null) {
-          _onscreenGraph.beginHUD();
+        if (_onscreenScene != null) {
+          _onscreenScene.beginHUD();
         }
         pApplet.pushStyle();
         _setUpperLeftCorner(pixelX, pixelY);
-        _lastDisplayed = Graph._frameCount;
+        _lastDisplayed = Scene._frameCount;
         pApplet.imageMode(PApplet.CORNER);
         pApplet.image(context(), pixelX, pixelY);
         pApplet.popStyle();
-        if (_onscreenGraph != null) {
-          _onscreenGraph.endHUD();
+        if (_onscreenScene != null) {
+          _onscreenScene.endHUD();
         }
       }
     }
@@ -2967,10 +2966,10 @@ public class Graph {
    * with {@code background} color. Used for debugging.
    */
   public void displayBackBuffer(int background, int pixelX, int pixelY) {
-    if (_onscreenGraph != null) {
-      _onscreenGraph.beginHUD();
+    if (_onscreenScene != null) {
+      _onscreenScene.beginHUD();
       _imageBackBuffer(background, pixelX, pixelY);
-      _onscreenGraph.endHUD();
+      _onscreenScene.endHUD();
     }
     else {
       _imageBackBuffer(background, pixelX, pixelY);
@@ -3038,7 +3037,7 @@ public class Graph {
   }
 
   /**
-   * Displays the graph and nodes hud hint.
+   * Displays the scene and nodes hud hint.
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
@@ -3112,14 +3111,14 @@ public class Graph {
       pg.popStyle();
     }
     if (node.isHintEnabled(Node.BOUNDS)) {
-      for (Graph graph : node._frustumGraphs) {
-        if (graph != this) {
+      for (Scene scene : node._frustumScenes) {
+        if (scene != this) {
           pg.pushStyle();
           pg.colorMode(PApplet.RGB, 255);
           pg.strokeWeight(node._boundsWeight);
-          pg.stroke(((PGraphics)graph.context()).backgroundColor);
-          pg.fill(((PGraphics)graph.context()).backgroundColor);
-          drawFrustum(pg, graph);
+          pg.stroke(((PGraphics) scene.context()).backgroundColor);
+          pg.fill(((PGraphics) scene.context()).backgroundColor);
+          drawFrustum(pg, scene);
           pg.popStyle();
         }
       }
@@ -3167,9 +3166,9 @@ public class Graph {
       drawTorusSolenoid(pg, node._torusFaces, 5);
     }
     if (node.isHintEnabled(Node.BOUNDS) && node.isPickingEnabled(Node.BOUNDS)) {
-      for (Graph graph : node._frustumGraphs) {
-        if (graph != this) {
-          drawFrustum(pg, graph);
+      for (Scene scene : node._frustumScenes) {
+        if (scene != this) {
+          drawFrustum(pg, scene);
         }
       }
     }
@@ -3325,7 +3324,7 @@ public class Graph {
    * @see #updateTag(String, int, int)
    * @see #removeTag(String)
    * @see #tag(String, Node)
-   * @see Node#isTagged(Graph)
+   * @see Node#isTagged(Scene)
    */
   public boolean hasTag(String tag, Node node) {
     return node(tag) == node;
@@ -3868,12 +3867,12 @@ public class Graph {
   // 3. Scale
 
   /**
-   * Same as {@code zoom(delta, Graph.inertia)}.
+   * Same as {@code zoom(delta, Scene.inertia)}.
    *
    * @see #zoom(float, float)
    */
   public void zoom(float delta) {
-    zoom(delta, Graph.inertia);
+    zoom(delta, Scene.inertia);
   }
 
   /**
@@ -3886,12 +3885,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code zoom(tag, delta, Graph.inertia)}.
+   * Same as {@code zoom(tag, delta, Scene.inertia)}.
    *
    * @see #zoom(String, float, float)
    */
   public void zoom(String tag, float delta) {
-    zoom(tag, delta, Graph.inertia);
+    zoom(tag, delta, Scene.inertia);
   }
 
   /**
@@ -3905,12 +3904,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code zoom(node, delta, Graph.inertia)}.
+   * Same as {@code zoom(node, delta, Scene.inertia)}.
    *
    * @see #zoom(Node, float, float)
    */
   public void zoom(Node node, float delta) {
-    zoom(node, delta, Graph.inertia);
+    zoom(node, delta, Scene.inertia);
   }
 
   /**
@@ -3931,12 +3930,12 @@ public class Graph {
   // 4. Translate
 
   /**
-   * Same as {@code shift(Graph.inertia)}.
+   * Same as {@code shift(Scene.inertia)}.
    *
    * @see #shift(float)
    */
   public void shift() {
-    shift(Graph.inertia);
+    shift(Scene.inertia);
   }
 
   /**
@@ -3949,12 +3948,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code shift(tag, Graph.inertia)}.
+   * Same as {@code shift(tag, Scene.inertia)}.
    *
    * @see #shift(String, float)
    */
   public void shift(String tag) {
-    shift(tag, Graph.inertia);
+    shift(tag, Scene.inertia);
   }
 
   /**
@@ -3973,7 +3972,7 @@ public class Graph {
    * @see #shift(Node, float)
    */
   public void shift(Node node) {
-    shift(node, Graph.inertia);
+    shift(node, Scene.inertia);
   }
 
   /**
@@ -3996,12 +3995,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code shift(dx, dy, dz, Graph.inertia)}.
+   * Same as {@code shift(dx, dy, dz, Scene.inertia)}.
    *
    * @see #shift(float, float, float, float)
    */
   public void shift(float dx, float dy, float dz) {
-    shift(dx, dy, dz, Graph.inertia);
+    shift(dx, dy, dz, Scene.inertia);
   }
 
   /**
@@ -4014,12 +4013,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code shift(tag, dx, dy, dz, Graph.inertia)}.
+   * Same as {@code shift(tag, dx, dy, dz, Scene.inertia)}.
    *
    * @see #shift(String, float, float, float, float)
    */
   public void shift(String tag, float dx, float dy, float dz) {
-    shift(tag, dx, dy, dz, Graph.inertia);
+    shift(tag, dx, dy, dz, Scene.inertia);
   }
 
   /**
@@ -4033,12 +4032,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code shift(node, dx, dy, dz, Graph.inertia)}.
+   * Same as {@code shift(node, dx, dy, dz, Scene.inertia)}.
    *
    * @see #shift(Node, float, float, float, float)
    */
   public void shift(Node node, float dx, float dy, float dz) {
-    shift(node, dx, dy, dz, Graph.inertia);
+    shift(node, dx, dy, dz, Scene.inertia);
   }
 
   /**
@@ -4080,7 +4079,7 @@ public class Graph {
   // */
 
   // /*
-  // Option 2: compensate orthographic, i.e., use Graph inertial translation task
+  // Option 2: compensate orthographic, i.e., use Scene inertial translation task
   protected void _shift(float x, float y, float z) {
     float d1 = 1, d2;
     if (_type == Type.ORTHOGRAPHIC)
@@ -4098,12 +4097,12 @@ public class Graph {
   // 5. Rotate
 
   /**
-   * Same as {@code turn(roll, pitch, yaw, Graph.inertia)}.
+   * Same as {@code turn(roll, pitch, yaw, Scene.inertia)}.
    *
    * @see #turn(float, float, float, float)
    */
   public void turn(float roll, float pitch, float yaw) {
-    turn(roll, pitch, yaw, Graph.inertia);
+    turn(roll, pitch, yaw, Scene.inertia);
   }
 
   /**
@@ -4116,12 +4115,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code turn(tag, roll, pitch, yaw, Graph.inertia)}.
+   * Same as {@code turn(tag, roll, pitch, yaw, Scene.inertia)}.
    *
    * @see #turn(String, float, float, float, float)
    */
   public void turn(String tag, float roll, float pitch, float yaw) {
-    turn(tag, roll, pitch, yaw, Graph.inertia);
+    turn(tag, roll, pitch, yaw, Scene.inertia);
   }
 
   /**
@@ -4135,12 +4134,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code turn(node, roll, pitch, yaw, Graph.inertia)}.
+   * Same as {@code turn(node, roll, pitch, yaw, Scene.inertia)}.
    *
    * @see #turn(Node, float, float, float, float)
    */
   public void turn(Node node, float roll, float pitch, float yaw) {
-    turn(node, roll, pitch, yaw, Graph.inertia);
+    turn(node, roll, pitch, yaw, Scene.inertia);
   }
 
   /**
@@ -4181,12 +4180,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(tag, Graph.inertia)}.
+   * Same as {@code spin(tag, Scene.inertia)}.
    *
    * @see #spin(String, float)
    */
   public void spin(String tag) {
-    spin(tag, Graph.inertia);
+    spin(tag, Scene.inertia);
   }
 
   /**
@@ -4209,12 +4208,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(node, Graph.inertia)}.
+   * Same as {@code spin(node, Scene.inertia)}.
    *
    * @see #spin(Node, float)
    */
   public void spin(Node node) {
-    spin(node, Graph.inertia);
+    spin(node, Scene.inertia);
   }
 
   /**
@@ -4232,12 +4231,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
+   * Same as {@code spin(pixel1X, pixel1Y, pixel2X, pixel2Y, Scene.inertia)}.
    *
    * @see #spin(int, int, int, int, float)
    */
   public void spin(int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spin(pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
+    spin(pixel1X, pixel1Y, pixel2X, pixel2Y, Scene.inertia);
   }
 
   /**
@@ -4250,12 +4249,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
+   * Same as {@code spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Scene.inertia)}.
    *
    * @see #spin(String, int, int, int, int, float)
    */
   public void spin(String tag, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
+    spin(tag, pixel1X, pixel1Y, pixel2X, pixel2Y, Scene.inertia);
   }
 
   /**
@@ -4269,12 +4268,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(node, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
+   * Same as {@code spin(node, pixel1X, pixel1Y, pixel2X, pixel2Y, Scene.inertia)}.
    *
    * @see #spin(Node, int, int, int, int, float)
    */
   public void spin(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y) {
-    spin(node, pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia);
+    spin(node, pixel1X, pixel1Y, pixel2X, pixel2Y, Scene.inertia);
   }
 
   /**
@@ -4517,7 +4516,7 @@ public class Graph {
 
   protected void _displayAnimationHint(Node node) {
     PGraphics pg = context();
-    if (Graph._isHintEnabled(node._keyframesMask, Node.SHAPE)) {
+    if (Scene._isHintEnabled(node._keyframesMask, Node.SHAPE)) {
       pg.pushStyle();
       if (node._rmrShape != null) {
         pg.shapeMode(pg.shapeMode);
@@ -4528,19 +4527,19 @@ public class Graph {
       }
       pg.popStyle();
     }
-    if (Graph._isHintEnabled(node._keyframesMask, Node.TORUS)) {
+    if (Scene._isHintEnabled(node._keyframesMask, Node.TORUS)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.fill(node._torusColor);
       drawTorusSolenoid(pg, node._torusFaces, 5);
       pg.popStyle();
     }
-    if (Graph._isHintEnabled(node._keyframesMask, Node.AXES)) {
+    if (Scene._isHintEnabled(node._keyframesMask, Node.AXES)) {
       pg.pushStyle();
       drawAxes(pg, node._axesLength == 0 ? _radius / 5 : node._axesLength);
       pg.popStyle();
     }
-    if (Graph._isHintEnabled(node._keyframesMask, Node.CAMERA)) {
+    if (Scene._isHintEnabled(node._keyframesMask, Node.CAMERA)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(node._cameraStroke);
@@ -4548,7 +4547,7 @@ public class Graph {
       _drawEye(pg, node._cameraLength == 0 ? _radius : node._cameraLength);
       pg.popStyle();
     }
-    if (Graph._isHintEnabled(node._keyframesMask, Node.BULLSEYE)) {
+    if (Scene._isHintEnabled(node._keyframesMask, Node.BULLSEYE)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(node._bullsEyeStroke);
@@ -5255,38 +5254,38 @@ public class Graph {
   }
 
   /**
-   * Applies the {@code graph.eye()} transformation and then calls
-   * {@link #drawFrustum(PGraphics, Graph)} on the scene {@link #context()}.
+   * Applies the {@code scene.eye()} transformation and then calls
+   * {@link #drawFrustum(PGraphics, Scene)} on the scene {@link #context()}.
    *
-   * @see #drawFrustum(PGraphics, Graph)
+   * @see #drawFrustum(PGraphics, Scene)
    */
-  public void drawFrustum(Graph graph) {
+  public void drawFrustum(Scene scene) {
     _matrixHandler.pushMatrix();
-    _matrixHandler.applyTransformation(graph._eye);
-    drawFrustum(context(), graph);
+    _matrixHandler.applyTransformation(scene._eye);
+    drawFrustum(context(), scene);
     _matrixHandler.popMatrix();
   }
 
   /**
    * Draws a representation of the viewing frustum onto {@code pGraphics} according to
-   * {@code graph.eye()} and {@code graph._type}.
+   * {@code scene.eye()} and {@code scene._type}.
    * <p>
-   * Note that if {@code pGraphics == graph.context()} this method has not effect at all.
+   * Note that if {@code pGraphics == scene.context()} this method has not effect at all.
    *
-   * @see #drawFrustum(Graph)
+   * @see #drawFrustum(Scene)
    */
-  public static void drawFrustum(PGraphics pGraphics, Graph graph) {
-    if (pGraphics == graph.context())
+  public static void drawFrustum(PGraphics pGraphics, Scene scene) {
+    if (pGraphics == scene.context())
       return;
-    // texturing requires graph.isOffscreen() (third condition) otherwise got
+    // texturing requires scene.isOffscreen() (third condition) otherwise got
     // "The pixels array is null" message and the frustum near plane texture and contour are missed
-    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph.isOffscreen();
-    switch (graph._type) {
+    boolean texture = pGraphics instanceof PGraphicsOpenGL && scene.isOffscreen();
+    switch (scene._type) {
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, texture ? graph.context() : null, Math.abs(graph.right() - graph.left()) / (float) graph.width(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.near(), graph.far());
+        _drawOrthographicFrustum(pGraphics, texture ? scene.context() : null, Math.abs(scene.right() - scene.left()) / (float) scene.width(), scene.width(), leftHanded ? -scene.height() : scene.height(), scene.near(), scene.far());
         break;
       case PERSPECTIVE:
-        _drawPerspectiveFrustum(pGraphics, texture ? graph.context() : null, (float) Math.tan(graph.fov() / 2.0f), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.near(), graph.far());
+        _drawPerspectiveFrustum(pGraphics, texture ? scene.context() : null, (float) Math.tan(scene.fov() / 2.0f), leftHanded ? -scene.aspectRatio() : scene.aspectRatio(), scene.near(), scene.far());
         break;
     }
   }
@@ -5314,14 +5313,14 @@ public class Graph {
       points[1].setZ(zFar / magnitude);
       // Frustum lines
       pGraphics.beginShape(PApplet.LINES);
-      Graph.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
-      Graph.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
-      Graph.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
-      Graph.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+      Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+      Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+      Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+      Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
       pGraphics.endShape();
     }
 
@@ -5343,28 +5342,28 @@ public class Graph {
     }
     pGraphics.beginShape(PApplet.QUADS);
     if (lh) {
-      Graph.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
-      Graph.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
     } else {
-      Graph.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
-      Graph.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
     }
     pGraphics.endShape();
 
     // Arrow
     pGraphics.beginShape(PApplet.TRIANGLES);
     if (lh) {
-      Graph.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
-      Graph.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
-      Graph.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
     } else {
-      Graph.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
-      Graph.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
-      Graph.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
     }
     if (eyeBuffer != null)
       pGraphics.popStyle();// begin at arrow base
@@ -5405,14 +5404,14 @@ public class Graph {
 
     // Frustum lines
     pGraphics.beginShape(PApplet.LINES);
-    Graph.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-    Graph.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
-    Graph.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-    Graph.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
-    Graph.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-    Graph.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
-    Graph.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-    Graph.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
     pGraphics.endShape();
 
     // Up arrow
@@ -5433,28 +5432,28 @@ public class Graph {
     }
     pGraphics.beginShape(PApplet.QUADS);
     if (lh) {
-      Graph.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
-      Graph.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
     } else {
-      Graph.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
-      Graph.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
-      Graph.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
     }
     pGraphics.endShape();
 
     // Arrow
     pGraphics.beginShape(PApplet.TRIANGLES);
     if (lh) {
-      Graph.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
-      Graph.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
-      Graph.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
     } else {
-      Graph.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
-      Graph.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
-      Graph.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
     }
     if (eyeBuffer != null)
       pGraphics.popStyle();// begin at arrow base
@@ -5480,15 +5479,15 @@ public class Graph {
       pGraphics.textureMode(PApplet.NORMAL);
       pGraphics.tint(255, 126); // Apply transparency without changing color
       pGraphics.texture(eyeBuffer);
-      Graph.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, lh ? 1 : 0);
-      Graph.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, lh ? 1 : 0);
-      Graph.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, lh ? 0 : 1);
-      Graph.vertex(pGraphics, corner.x(), -corner.y(), -corner.z(), 1, lh ? 0 : 1);
+      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, lh ? 1 : 0);
+      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, lh ? 1 : 0);
+      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, lh ? 0 : 1);
+      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z(), 1, lh ? 0 : 1);
     } else {
-      Graph.vertex(pGraphics, corner.x(), corner.y(), -corner.z());
-      Graph.vertex(pGraphics, -corner.x(), corner.y(), -corner.z());
-      Graph.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z());
-      Graph.vertex(pGraphics, corner.x(), -corner.y(), -corner.z());
+      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z());
+      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z());
+      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z());
+      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z());
     }
     pGraphics.endShape();
     pGraphics.popStyle();
@@ -5497,24 +5496,24 @@ public class Graph {
   /**
    * Same as {@code drawProjectors(eye, Arrays.asList(point))}.
    *
-   * @see #drawProjectors(Graph, List)
+   * @see #drawProjectors(Scene, List)
    */
-  public void drawProjector(Graph eye, Vector point) {
+  public void drawProjector(Scene eye, Vector point) {
     drawProjectors(eye, Arrays.asList(point));
   }
 
   /**
    * Draws the projection of each point in {@code points} in the near plane onto {@code pGraphics}.
    * <p>
-   * This method should be used in conjunction with {@link #drawFrustum(PGraphics, Graph)}.
+   * This method should be used in conjunction with {@link #drawFrustum(PGraphics, Scene)}.
    * <p>
-   * Note that if {@code graph == this} this method has not effect at all.
+   * Note that if {@code scene == this} this method has not effect at all.
    *
-   * @see #drawProjector(Graph, Vector)
+   * @see #drawProjector(Scene, Vector)
    */
   // TODO needs testing
-  public void drawProjectors(Graph graph, List<Vector> points) {
-    if (graph == this) {
+  public void drawProjectors(Scene scene, List<Vector> points) {
+    if (scene == this) {
       System.out.println("Warning: No drawProjectors done!");
       return;
     }
@@ -5522,31 +5521,31 @@ public class Graph {
     // if ORTHOGRAPHIC: do it in the eye coordinate system
     // if PERSPECTIVE: do it in the world coordinate system
     Vector o = new Vector();
-    if (_type == Graph.Type.ORTHOGRAPHIC) {
+    if (_type == Scene.Type.ORTHOGRAPHIC) {
       context().pushMatrix();
-      _matrixHandler.applyTransformation(graph._eye);
+      _matrixHandler.applyTransformation(scene._eye);
     }
     // in PERSPECTIVE cache the transformed origin
     else
-      o = graph._eye.worldLocation(new Vector());
+      o = scene._eye.worldLocation(new Vector());
     context().beginShape(PApplet.LINES);
     for (Vector s : points) {
-      if (_type == Graph.Type.ORTHOGRAPHIC) {
-        Vector v = graph._eye.location(s);
-        Graph.vertex(context(), v.x(), v.y(), v.z());
+      if (_type == Scene.Type.ORTHOGRAPHIC) {
+        Vector v = scene._eye.location(s);
+        Scene.vertex(context(), v.x(), v.y(), v.z());
         // Key here is to represent the eye zNear param (which is given in world units)
         // in eye units.
         // Hence it should be multiplied by: 1 / eye.magnitude()
         // The neg sign is because the zNear is positive but the eye view direction is
         // the negative Z-axis
-        Graph.vertex(context(), v.x(), v.y(), -(graph.near() * 1 / Math.abs(graph.right() - graph.left()) / (float) graph.width()));
+        Scene.vertex(context(), v.x(), v.y(), -(scene.near() * 1 / Math.abs(scene.right() - scene.left()) / (float) scene.width()));
       } else {
-        Graph.vertex(context(), s.x(), s.y(), s.z());
-        Graph.vertex(context(), o.x(), o.y(), o.z());
+        Scene.vertex(context(), s.x(), s.y(), s.z());
+        Scene.vertex(context(), o.x(), o.y(), o.z());
       }
     }
     context().endShape();
-    if (_type == Graph.Type.ORTHOGRAPHIC) {
+    if (_type == Scene.Type.ORTHOGRAPHIC) {
       context().popMatrix();
     }
     context().popStyle();

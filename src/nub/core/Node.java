@@ -57,7 +57,7 @@ import java.util.function.Function;
  * {@code pop();} <br>
  * <p>
  * Use {@link #view()} when rendering the scene from the node point-of-view. Note that
- * this method is automatically called by the graph, see {@link Graph#render(Node)}.
+ * this method is automatically called by the scene, see {@link Scene#render(Node)}.
  * <p>
  * To transform a point from one node to another use {@link #location(Vector, Node)} and
  * {@link #worldLocation(Vector)}. To transform a vector (such as a normal) use
@@ -72,9 +72,9 @@ import java.util.function.Function;
  * when the inertial parameter is omitted its value is defaulted to 0.
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the node hierarchy which automatically apply the local
- * node transformations described above may be achieved with {@link Graph#render()} and
- * {@link Graph#render(Node)}. Customize the rendering traversal with
- * {@link Graph#addBehavior(Node, BiConsumer)} (see also {@link #cull} and {@link #bypass()}).
+ * node transformations described above may be achieved with {@link Scene#render()} and
+ * {@link Scene#render(Node)}. Customize the rendering traversal with
+ * {@link Scene#addBehavior(Node, BiConsumer)} (see also {@link #cull} and {@link #bypass()}).
  * <h2>Motion filters</h2>
  * One interesting feature of a node is that its displacements can be filtered.
  * Setting a node filter allows to refine the input of {@link #translate(Vector)},
@@ -124,15 +124,15 @@ import java.util.function.Function;
  * (it is disabled by default). Note that the {@link #animationTime()} may set with
  * {@link #setAnimationTime(float)}.
  * <h2>Custom behaviors</h2>
- * A custom node behavior to be executed during rendering {@link Graph#render()} may be set with
- * {@link #setBehavior(Graph, Consumer)}. See {@link Graph#addBehavior(Node, BiConsumer)}.
+ * A custom node behavior to be executed during rendering {@link Scene#render()} may be set with
+ * {@link #setBehavior(Scene, Consumer)}. See {@link Scene#addBehavior(Node, BiConsumer)}.
  * <h2>Custom user interactions</h2>
  * Implementing a custom user interaction for node is a two step process:
  * <ul>
  * <li>Register a user gesture data parser, see {@link #setInteraction(BiConsumer)}
  * and {@link #setInteraction(Consumer)}.</li>
- * <li>Send gesture data to the node by calling {@link Graph#interact(Node, Object...)},
- * {@link Graph#interact(String, Object...)} or {@link Graph#interact(Object...)}.</li>
+ * <li>Send gesture data to the node by calling {@link Scene#interact(Node, Object...)},
+ * {@link Scene#interact(String, Object...)} or {@link Scene#interact(Object...)}.</li>
  * </ul>
  */
 public class Node {
@@ -206,7 +206,7 @@ public class Node {
   protected float _highlight;
   public static int maxSteps = 30;
   // Bounds
-  protected HashSet<Graph> _frustumGraphs;
+  protected HashSet<Scene> _frustumScenes;
   protected int _boundsWeight;
   // keyframes
   protected int _keyframesMask;
@@ -231,7 +231,7 @@ public class Node {
   protected long _bypass = -1;
   protected long _lastRendered = -1;
   protected long _lastExecuted = -1;
-  protected HashSet<Graph> _lastRenderedSet;
+  protected HashSet<Scene> _lastRenderedSet;
 
   //Object... gesture
   protected BiConsumer<Node, Object[]> _interact;
@@ -254,7 +254,7 @@ public class Node {
   /**
    * Same as {this(null, new Vector(), new Quaternion(), 1, attach)}.
    *
-   * The {@code attach} var controls whether or not the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
+   * The {@code attach} var controls whether or not the node {@link #isAttached()} by the {@link Scene#render()} algorithm.
    *
    * @see #Node(Node, Vector, Quaternion, float, boolean)
    */
@@ -274,7 +274,7 @@ public class Node {
   /**
    * Same as {@code this(null, position, new Quaternion(), 1, attach)}.
    *
-   * The {@code attach} var controls whether or not the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
+   * The {@code attach} var controls whether or not the node {@link #isAttached()} by the {@link Scene#render()} algorithm.
    *
    * @see #Node(Node, Vector, Quaternion, float, boolean)
    */
@@ -294,7 +294,7 @@ public class Node {
   /**
    * Same as {@code this(null, position, orientation, 1, attach)}.
    *
-   * The {@code attach} var controls whether or not the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
+   * The {@code attach} var controls whether or not the node {@link #isAttached()} by the {@link Scene#render()} algorithm.
    *
    * @see #Node(Node, Vector, Quaternion, float, boolean)
    */
@@ -354,7 +354,7 @@ public class Node {
    * and {@link #magnitude()}, respectively. The {@link #bullsEyeSize()} is set to {@code 0.2}
    * and the {@link #highlight()} hint magnitude to {@code 0.15}.
    *
-   * The node {@link #isAttached()} by the {@link Graph#render()} algorithm iff the node
+   * The node {@link #isAttached()} by the {@link Scene#render()} algorithm iff the node
    * {@code reference} happens to be.
    *
    * @see #attach()
@@ -371,7 +371,7 @@ public class Node {
    * and {@link #magnitude()}, respectively. The {@link #bullsEyeSize()} is set to {@code 0.2}
    * and the {@link #highlight()} hint magnitude to {@code 0.15}.
    *
-   * The {@code attach} var controls whether or the node {@link #isAttached()} by the {@link Graph#render()} algorithm.
+   * The {@code attach} var controls whether or the node {@link #isAttached()} by the {@link Scene#render()} algorithm.
    *
    * @see #attach()
    * @see #detach()
@@ -393,13 +393,13 @@ public class Node {
     // hints
     _highlight = 0.15f;
     int min = 2, max = 20;
-    _torusFaces = Graph.random.nextInt(max - min + 1) + min;
+    _torusFaces = Scene.random.nextInt(max - min + 1) + min;
     min = 0;
     max = 255;
-    float r = (float) Graph.random.nextInt(max - min + 1) + min;
-    float g = (float) Graph.random.nextInt(max - min + 1) + min;
-    float b = (float) Graph.random.nextInt(max - min + 1) + min;
-    _torusColor = Graph._color(r, g, b);
+    float r = (float) Scene.random.nextInt(max - min + 1) + min;
+    float g = (float) Scene.random.nextInt(max - min + 1) + min;
+    float b = (float) Scene.random.nextInt(max - min + 1) + min;
+    _torusColor = Scene._color(r, g, b);
     // cyan (color(0, 255, 255)) encoded as a processing int rgb color
     _bullsEyeStroke = -16711681;
     // magenta (color(255, 0, 255)) encoded as a processing int rgb color
@@ -411,8 +411,8 @@ public class Node {
     _splineWeight = 3;
     _steps = 3;
     _children = new ArrayList<Node>();
-    _frustumGraphs = new HashSet<Graph>();
-    _lastRenderedSet = new HashSet<Graph>();
+    _frustumScenes = new HashSet<Scene>();
+    _lastRenderedSet = new HashSet<Scene>();
     _keyframesMask = Node.AXES;
     setInteraction(this::interact);
     _translationInertia = new Inertia() {
@@ -605,7 +605,7 @@ public class Node {
 
   /**
    * Returns the unique sequential node id assigned at instantiation time.
-   * Used by {@link #colorID()} and {@link Graph#_displayBackHint(Node)}.
+   * Used by {@link #colorID()} and {@link Scene#_displayBackHint(Node)}.
    */
   public int id() {
     return _id;
@@ -671,7 +671,7 @@ public class Node {
    * Internal use. Automatically call by all methods which change the node state.
    */
   protected void _modified() {
-    _lastUpdate = Graph._frameCount;
+    _lastUpdate = Scene._frameCount;
     if (_children != null)
       for (Node child : _children)
         child._modified();
@@ -824,7 +824,7 @@ public class Node {
     // 2a. Delete prev path
     boolean attached = isAttached();
     if (reference() == null) {
-      Graph._removeLeadingNode(this);
+      Scene._removeLeadingNode(this);
     }
     else {
       reference()._removeChild(this);
@@ -832,7 +832,7 @@ public class Node {
     // 2b. Create new path
     if (attached) {
       if (node == null) {
-        Graph._addLeadingNode(this);
+        Scene._addLeadingNode(this);
       }
       else {
         // detach the (attached) node only if new reference is detached
@@ -864,24 +864,24 @@ public class Node {
 
   /**
    * Updates the cache of graphs rendering the node in the current frame
-   * which is then used by the last time {@link #rendered(Graph)} condition.
+   * which is then used by the last time {@link #rendered(Scene)} condition.
    */
-  protected void _update(Graph graph) {
-    if (rendered(graph)) {
+  protected void _update(Scene scene) {
+    if (rendered(scene)) {
       throw new RuntimeException("Node already rendered. Exiting now!");
     }
-    if (_lastRendered != Graph._frameCount) {
+    if (_lastRendered != Scene._frameCount) {
       _lastRenderedSet.clear();
     }
-    _lastRendered = Graph._frameCount;
-    _lastRenderedSet.add(graph);
+    _lastRendered = Scene._frameCount;
+    _lastRenderedSet.add(scene);
   }
 
   /**
    * Updates the node timing stuff.
    */
-  protected void _execute(Graph graph) {
-    if (_lastExecuted != Graph._frameCount) {
+  protected void _execute(Scene scene) {
+    if (_lastExecuted != Scene._frameCount) {
       if (this._interpolator._active) {
         this.resetInertia();
         this._interpolator._execute();
@@ -890,7 +890,7 @@ public class Node {
       this._rotationInertia._execute();
       this._scalingInertia._execute();
       this._orbitInertia._execute();
-      _lastExecuted = Graph._frameCount;
+      _lastExecuted = Scene._frameCount;
     }
   }
 
@@ -905,24 +905,24 @@ public class Node {
   }
 
   /**
-   * Tells whether the node was rendered in the last frame from {@code graph} after
-   * a call to {@link Graph#render(Node)} is issued. Ths method should be called from
-   * within the main event loop (after {@link Graph#render(Node)}).
+   * Tells whether the node was rendered in the last frame from {@code scene} after
+   * a call to {@link Scene#render(Node)} is issued. Ths method should be called from
+   * within the main event loop (after {@link Scene#render(Node)}).
    */
-  public boolean rendered(Graph graph) {
-    return _lastRenderedSet.contains(graph) && _lastRendered == Graph._frameCount;
+  public boolean rendered(Scene scene) {
+    return _lastRenderedSet.contains(scene) && _lastRendered == Scene._frameCount;
   }
 
   // In JS attach / detach should be made just an attach property
 
   /**
    * Attaches the branch to which this node belongs to the tree so that this node (together with
-   * all nodes in the branch) is reached from the {@link Graph#render()} algorithm. A call to
+   * all nodes in the branch) is reached from the {@link Scene#render()} algorithm. A call to
    * {@link Node#isAttached()} will then return {@code true}.
    * <p>
    * {@link #detach()} performs the inverse operation.
    *
-   * @see Graph#clearTree()
+   * @see Scene#clearTree()
    * @see #detach()
    * @see #isAttached()
    */
@@ -937,7 +937,7 @@ public class Node {
     }
     boolean reach = false;
     if (node.reference() == null) {
-      Graph._addLeadingNode(node);
+      Scene._addLeadingNode(node);
       reach = true;
     } else {
       node.reference()._addChild(node);
@@ -946,15 +946,15 @@ public class Node {
       }
     }
     if (reach) {
-      List<Node> branch = Graph.branch(node);
+      List<Node> branch = Scene.branch(node);
       for (Node descendant : branch) {
         descendant._attach = true;
         // restore interpolators and hud sets
         if (descendant.isHintEnabled(Node.HUD)) {
-          Graph._huds.add(descendant);
+          Scene._huds.add(descendant);
         }
         if (descendant.isHintEnabled(Node.KEYFRAMES)) {
-          Graph._interpolators.add(descendant);
+          Scene._interpolators.add(descendant);
         }
       }
     }
@@ -965,30 +965,30 @@ public class Node {
   }
 
   /**
-   * Detach node from the tree so that it's not reached from the {@link Graph#render()} algorithm and make
+   * Detach node from the tree so that it's not reached from the {@link Scene#render()} algorithm and make
    * all the nodes in the {@code node} branch eligible for garbage collection. A call to
    * {@link Node#isAttached()} (including the node descendants) will then return {@code false}.
    * <p>
    * {@link #attach()} performs the inverse operation.
    *
-   * @see Graph#clearTree()
+   * @see Scene#clearTree()
    * @see #attach()
    * @see #isAttached()
    */
   public void detach() {
     if (isAttached()) {
-      List<Node> branch = Graph.branch(this);
+      List<Node> branch = Scene.branch(this);
       for (Node descendant : branch) {
         descendant._attach = false;
-        // remove also possible references to graph interpolators and hud sets
-        Graph._huds.remove(descendant);
-        Graph._interpolators.remove(descendant);
+        // remove also possible references to scene interpolators and hud sets
+        Scene._huds.remove(descendant);
+        Scene._interpolators.remove(descendant);
       }
       if (reference() != null) {
         reference()._removeChild(this);
       }
       else {
-        Graph._removeLeadingNode(this);
+        Scene._removeLeadingNode(this);
       }
     }
     else {
@@ -1073,7 +1073,7 @@ public class Node {
    *
    * @see Vector#randomize()
    * @see Quaternion#randomize()
-   * @see #random(Graph)
+   * @see #random(Scene)
    * @see #random(Vector, float)
    */
   public void randomize(Vector center, float radius) {
@@ -1088,8 +1088,8 @@ public class Node {
   }
 
   /**
-   * Returns a random node attached to {@code graph}. The node is randomly positioned inside
-   * the {@code graph} viewing volume which is defined by {@link Graph#center()} and {@link Graph#radius()}
+   * Returns a random node attached to {@code scene}. The node is randomly positioned inside
+   * the {@code scene} viewing volume which is defined by {@link Scene#center()} and {@link Scene#radius()}
    * (see {@link Vector#random()}). The {@link #worldOrientation()} is set by {@link Quaternion#random()}. The
    * {@link #worldMagnitude()} is a random in [0,5...2].
    *
@@ -1098,9 +1098,9 @@ public class Node {
    * @see Quaternion#random()
    * @see #randomize(Vector, float)
    */
-  public static Node random(Graph graph) {
+  public static Node random(Scene scene) {
     Node node = new Node();
-    node.randomize(graph.center(), graph.radius());
+    node.randomize(scene.center(), scene.radius());
     return node;
   }
 
@@ -1110,7 +1110,7 @@ public class Node {
    * circumference parallel to the x-y plane. The {@link #worldOrientation()} is set by
    * {@link Quaternion#random()}. The {@link #worldMagnitude()} is a random in [0,5...2].
    *
-   * @see #random(Graph)
+   * @see #random(Scene)
    * @see Vector#random()
    * @see Quaternion#random()
    * @see #randomize(Vector, float)
@@ -1129,7 +1129,7 @@ public class Node {
    * Picking a node is done with ray casting against a screen-space bullseye shape
    * (see {@link #configHint(int, Object...)}) whose length is defined as follows:
    * <ul>
-   * <li>A percentage of the graph diameter (see {@link Graph#radius()}). Set it
+   * <li>A percentage of the scene diameter (see {@link Scene#radius()}). Set it
    * with {@code size in [0..1]}.</li>
    * <li>A fixed numbers of pixels. Set it with {@code size > 1}.</li>
    * </ul>
@@ -1934,14 +1934,14 @@ public class Node {
   /**
    * Returns the magnitude of the node, defined in the world coordinate system.
    * <p>
-   * Note that the magnitude is used to compute the node {@link Graph#projection()}
+   * Note that the magnitude is used to compute the node {@link Scene#projection()}
    * matrix to render a scene from the node point-of-view.
    *
    * @see #worldOrientation()
    * @see #worldPosition()
    * @see #setWorldPosition(Vector)
    * @see #position()
-   * @see Graph#projection()
+   * @see Scene#projection()
    */
   public float worldMagnitude() {
     return reference() != null ? reference().worldMagnitude() * magnitude() : magnitude();
@@ -2424,7 +2424,7 @@ public class Node {
    * <p>
    * {@code Node node = new Node();} <br>
    * {@code node.fromWorldMatrix(m);} <br>
-   * {@code graph.applyWorldTransformation(node);} <br>
+   * {@code scene.applyWorldTransformation(node);} <br>
    * {@code // You are in the local node coordinate system.} <br>
    * <p>
    * Which allows to apply local transformations to the {@code node} while using geometry
@@ -2841,53 +2841,53 @@ public class Node {
   // Attached nodes
 
   /**
-   * Returns {@code true} if the {@code node} has been tagged by the {@code graph} at least once
+   * Returns {@code true} if the {@code node} has been tagged by the {@code scene} at least once
    * and {@code false} otherwise.
    *
-   * @see Graph#hasTag(String, Node)
-   * @see Graph#hasTag(Node)
+   * @see Scene#hasTag(String, Node)
+   * @see Scene#hasTag(Node)
    */
-  public boolean isTagged(Graph graph) {
-    return graph.isTagged(this);
+  public boolean isTagged(Scene scene) {
+    return scene.isTagged(this);
   }
 
   /**
-   * Same as {@code graph.addBehavior(this, behavior)}.
+   * Same as {@code scene.addBehavior(this, behavior)}.
    *
-   * @see #setBehavior(Graph, Consumer)
-   * @see Graph#addBehavior(Node, BiConsumer)
-   * @see Graph#addBehavior(Node, Consumer)
+   * @see #setBehavior(Scene, Consumer)
+   * @see Scene#addBehavior(Node, BiConsumer)
+   * @see Scene#addBehavior(Node, Consumer)
    */
-  public void setBehavior(Graph graph, BiConsumer<Graph, Node> behavior) {
-    graph.addBehavior(this, behavior);
+  public void setBehavior(Scene scene, BiConsumer<Scene, Node> behavior) {
+    scene.addBehavior(this, behavior);
   }
 
   /**
-   * Same as {@code graph.addBehavior(this, (g, n) -> behavior.accept(g))}.
+   * Same as {@code scene.addBehavior(this, (g, n) -> behavior.accept(g))}.
    *
-   * @see #setBehavior(Graph, BiConsumer)
-   * @see Graph#addBehavior(Node, BiConsumer)
-   * @see Graph#addBehavior(Node, Consumer)
+   * @see #setBehavior(Scene, BiConsumer)
+   * @see Scene#addBehavior(Node, BiConsumer)
+   * @see Scene#addBehavior(Node, Consumer)
    */
-  public void setBehavior(Graph graph, Consumer<Graph> behavior) {
-    graph.addBehavior(this, (g, n) -> behavior.accept(g));
+  public void setBehavior(Scene scene, Consumer<Scene> behavior) {
+    scene.addBehavior(this, (g, n) -> behavior.accept(g));
   }
 
   /**
-   * Same as {@code graph.resetBehavior(this)}.
+   * Same as {@code scene.resetBehavior(this)}.
    * 
-   * @see Graph#resetBehavior(Node) 
+   * @see Scene#resetBehavior(Node)
    */
-  public void resetBehavior(Graph graph) {
-    graph.resetBehavior(this);
+  public void resetBehavior(Scene scene) {
+    scene.resetBehavior(this);
   }
 
   /**
-   * Bypass rendering the node for the current frame. Set it before calling {@link Graph#render()}
+   * Bypass rendering the node for the current frame. Set it before calling {@link Scene#render()}
    * or any rendering algorithm. Note that the node nor its children get culled.
    */
   public void bypass() {
-    _bypass = Graph._frameCount;
+    _bypass = Scene._frameCount;
   }
 
   // js go:
@@ -2982,8 +2982,8 @@ public class Node {
    * no params, or a gesture encoded as an array of on Object params.
    * <p>
    * The interaction is performed either after calling the
-   * {@link Graph#interact(String, Object...)}, {@link Graph#interact(Object...)}
-   * or {@link Graph#interact(Node, Object...)} scene procedures.
+   * {@link Scene#interact(String, Object...)}, {@link Scene#interact(Object...)}
+   * or {@link Scene#interact(Node, Object...)} scene procedures.
    * <p>
    * Same as {@code setInteraction((n, o) -> callback.accept(o))}.
    *
@@ -2999,8 +2999,8 @@ public class Node {
    * an array of on Object params.
    * <p>
    * The interaction is performed either after calling the
-   * {@link Graph#interact(String, Object...)}, {@link Graph#interact(Object...)}
-   * or {@link Graph#interact(Node, Object...)} scene procedures.
+   * {@link Scene#interact(String, Object...)}, {@link Scene#interact(Object...)}
+   * or {@link Scene#interact(Node, Object...)} scene procedures.
    *
    * @see #setInteraction(Consumer)
    */
@@ -3021,9 +3021,9 @@ public class Node {
 
   protected void _updateHUD() {
     if ((_rmrHUD == null && _imrHUD == null) || !isHintEnabled(HUD)) {
-      Graph._huds.remove(this);
+      Scene._huds.remove(this);
     } else {
-      Graph._huds.add(this);
+      Scene._huds.add(this);
     }
   }
 
@@ -3070,7 +3070,7 @@ public class Node {
    * Sets the node retained mode rendering (rmr) shape {@link #HUD} hint
    * (see {@link #hint()}). The 2D {@code shape} screen coordinates are
    * interpreted relative to the node {@link #worldPosition()} screen projection
-   * when the hint is rendered ({@link Graph#render(Node)}). Use
+   * when the hint is rendered ({@link Scene#render(Node)}). Use
    * {@code enableHint(Node.HUD)}, {@code disableHint(Node.HUD)} and
    * {@code toggleHint(Node.HUD)} to (dis)enable the hint.
    *
@@ -3093,7 +3093,7 @@ public class Node {
    * Sets the node immediate mode rendering (imr) drawing procedure
    * {@link #HUD} hint (see {@link #hint()}). The 2D {@code shape} screen
    * coordinates are interpreted relative to the node {@link #worldPosition()}
-   * screen projection when the hint is rendered ({@link Graph#render(Node)}).
+   * screen projection when the hint is rendered ({@link Scene#render(Node)}).
    * Use {@code enableHint(Node.HUD)}, {@code disableHint(Node.HUD)} and
    * {@code toggleHint(Node.HUD)} to (dis)enable the hint.
    *
@@ -3272,7 +3272,7 @@ public class Node {
    * {@link #worldPosition()} an oriented according to the node {@link #worldOrientation()}.</li>
    * <li>{@link #HUD} which displays the node Heads-Up-Display set with
    * {@link #setHUD(processing.core.PShape)} or {@link #setHUD(Consumer)}.</li>
-   * <li>{@link #BOUNDS} which displays the bounding volume of each graph for which
+   * <li>{@link #BOUNDS} which displays the bounding volume of each scene for which
    * this node is the eye. Only meaningful if there's a second scene perspective
    * to look at this eye node from.</li>
    * <li>{@link #SHAPE} which displays the node shape set with
@@ -3283,7 +3283,7 @@ public class Node {
    * <li>{@link #TORUS} which displays a torus solenoid.</li>
    * </ol>
    * Displaying the hint requires first to enabling it (see {@link #enableHint(int)}) and then
-   * calling a {@link Graph} rendering algorithm.
+   * calling a {@link Scene} rendering algorithm.
    *
    * @see #enableHint(int)
    * @see #configHint(int, Object...)
@@ -3440,9 +3440,9 @@ public class Node {
    * {@code torusStroke} are color {@code int} vars; {@code cameraLength} and {@code exesLength}
    * are world magnitude numerical values; {@code highlight} is a numerical value in
    * {@code [0..1]} which represents the scale factor to be applied to the node when it gets
-   * tagged (see {@link Graph#tag(String, Node)}); {@code bullseyeShape} is either of type
-   * {@link BullsEyeShape#SQUARE} or {@link BullsEyeShape#CIRCLE}; {@code graph} is of type
-   * {@link Graph}; {@code graph} may be of type {@link processing.core.PGraphics}; and,
+   * tagged (see {@link Scene#tag(String, Node)}); {@code bullseyeShape} is either of type
+   * {@link BullsEyeShape#SQUARE} or {@link BullsEyeShape#CIRCLE}; {@code scene} is of type
+   * {@link Scene}; {@code scene} may be of type {@link processing.core.PGraphics}; and,
    * {@code boundsWeight} is an int defining the bounds stroke and {@code splineWeight} is
    * an int defining the spline stroke.
    *
@@ -3467,81 +3467,81 @@ public class Node {
           _bullsEyeShape = (BullsEyeShape) params[0];
           return;
         }
-        if (hint == BULLSEYE && Graph.isNumInstance(params[0])) {
-          _bullsEyeStroke = Graph.castToInt(params[0]);
+        if (hint == BULLSEYE && Scene.isNumInstance(params[0])) {
+          _bullsEyeStroke = Scene.castToInt(params[0]);
           return;
         }
-        if (hint == AXES && Graph.isNumInstance(params[0])) {
-          _axesLength = Graph.castToFloat(params[0]);
+        if (hint == AXES && Scene.isNumInstance(params[0])) {
+          _axesLength = Scene.castToFloat(params[0]);
           return;
         }
-        if (hint == CAMERA && Graph.isNumInstance(params[0])) {
-          _cameraStroke = Graph.castToInt(params[0]);
+        if (hint == CAMERA && Scene.isNumInstance(params[0])) {
+          _cameraStroke = Scene.castToInt(params[0]);
           return;
         }
-        if (hint == TORUS && Graph.isNumInstance(params[0])) {
-          _torusColor = Graph.castToInt(params[0]);
+        if (hint == TORUS && Scene.isNumInstance(params[0])) {
+          _torusColor = Scene.castToInt(params[0]);
           return;
         }
-        if (hint == BOUNDS && Graph.isNumInstance(params[0])) {
-          _boundsWeight = Graph.castToInt(params[0]);
+        if (hint == BOUNDS && Scene.isNumInstance(params[0])) {
+          _boundsWeight = Scene.castToInt(params[0]);
           return;
         }
-        if (hint == KEYFRAMES && Graph.isNumInstance(params[0])) {
-          _keyframesMask = Graph.castToInt(params[0]);
+        if (hint == KEYFRAMES && Scene.isNumInstance(params[0])) {
+          _keyframesMask = Scene.castToInt(params[0]);
           _interpolator._pathIsValid = false;
           return;
         }
         break;
       case 2:
-        if (hint == BULLSEYE && params[0] instanceof BullsEyeShape && Graph.isNumInstance(params[1])) {
+        if (hint == BULLSEYE && params[0] instanceof BullsEyeShape && Scene.isNumInstance(params[1])) {
           _bullsEyeShape = (BullsEyeShape) params[0];
-          _bullsEyeStroke = Graph.castToInt(params[1]);
+          _bullsEyeStroke = Scene.castToInt(params[1]);
           return;
         }
-        if (hint == BULLSEYE && Graph.isNumInstance(params[0]) && params[1] instanceof BullsEyeShape) {
-          _bullsEyeStroke = Graph.castToInt(params[0]);
+        if (hint == BULLSEYE && Scene.isNumInstance(params[0]) && params[1] instanceof BullsEyeShape) {
+          _bullsEyeStroke = Scene.castToInt(params[0]);
           _bullsEyeShape = (BullsEyeShape) params[1];
           return;
         }
         if (hint == CAMERA) {
-          if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
-            _cameraStroke = Graph.castToInt(params[0]);
-            _cameraLength = Graph.castToFloat(params[1]);
+          if (Scene.isNumInstance(params[0]) && Scene.isNumInstance(params[1])) {
+            _cameraStroke = Scene.castToInt(params[0]);
+            _cameraLength = Scene.castToFloat(params[1]);
             return;
           }
         }
         if (hint == TORUS) {
-          if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
-            _torusColor = Graph.castToInt(params[0]);
-            _torusFaces = Graph.castToInt(params[1]);
+          if (Scene.isNumInstance(params[0]) && Scene.isNumInstance(params[1])) {
+            _torusColor = Scene.castToInt(params[0]);
+            _torusFaces = Scene.castToInt(params[1]);
             return;
           }
         }
-        if (hint == KEYFRAMES && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])) {
-          _keyframesMask = Graph.castToInt(params[0]);
-          _setSteps(Graph.castToInt(params[1]));
+        if (hint == KEYFRAMES && Scene.isNumInstance(params[0]) && Scene.isNumInstance(params[1])) {
+          _keyframesMask = Scene.castToInt(params[0]);
+          _setSteps(Scene.castToInt(params[1]));
           _interpolator._pathIsValid = false;
           return;
         }
         break;
       case 3:
-        if (hint == KEYFRAMES && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])
-                && Graph.isNumInstance(params[2])) {
-          _keyframesMask = Graph.castToInt(params[0]);
-          _setSteps(Graph.castToInt(params[1]));
-          _splineStroke = Graph.castToInt(params[2]);
+        if (hint == KEYFRAMES && Scene.isNumInstance(params[0]) && Scene.isNumInstance(params[1])
+                && Scene.isNumInstance(params[2])) {
+          _keyframesMask = Scene.castToInt(params[0]);
+          _setSteps(Scene.castToInt(params[1]));
+          _splineStroke = Scene.castToInt(params[2]);
           _interpolator._pathIsValid = false;
           return;
         }
         break;
       case 4:
-        if (hint == KEYFRAMES && Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1])
-                && Graph.isNumInstance(params[2]) && Graph.isNumInstance(params[3])) {
-          _keyframesMask = Graph.castToInt(params[0]);
-          _setSteps(Graph.castToInt(params[1]));
-          _splineStroke = Graph.castToInt(params[2]);
-          _splineWeight = Graph.castToInt(params[3]);
+        if (hint == KEYFRAMES && Scene.isNumInstance(params[0]) && Scene.isNumInstance(params[1])
+                && Scene.isNumInstance(params[2]) && Scene.isNumInstance(params[3])) {
+          _keyframesMask = Scene.castToInt(params[0]);
+          _setSteps(Scene.castToInt(params[1]));
+          _splineStroke = Scene.castToInt(params[2]);
+          _splineWeight = Scene.castToInt(params[3]);
           _interpolator._pathIsValid = false;
           return;
         }
@@ -3568,24 +3568,24 @@ public class Node {
     }
     // 2. Paths
     if (isHintEnabled(KEYFRAMES)) {
-      Graph._interpolators.add(this);
+      Scene._interpolators.add(this);
     } else {
-      Graph._interpolators.remove(this);
+      Scene._interpolators.remove(this);
     }
   }
 
   /**
-   * Returns whether or not this node is some graph eye.
+   * Returns whether or not this node is some scene eye.
    */
   public boolean isEye() {
-    return !_frustumGraphs.isEmpty();
+    return !_frustumScenes.isEmpty();
   }
 
   /**
-   * Returns whether or not this node is the given {@code graph} eye.
+   * Returns whether or not this node is the given {@code scene} eye.
    */
-  public boolean isEye(Graph graph) {
-    return _frustumGraphs.contains(graph);
+  public boolean isEye(Scene scene) {
+    return _frustumScenes.contains(scene);
   }
 
   protected void _setSteps(int steps) {

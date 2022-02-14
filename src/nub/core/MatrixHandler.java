@@ -15,13 +15,13 @@ import nub.primitives.Matrix;
 
 /**
  * The matrix handler specifies (and implements) various matrix operations needed by the
- * {@link Graph} to properly perform its geometry transformations.
+ * {@link Scene} to properly perform its geometry transformations.
  * <p>
  * To emit the {@link #transform()} matrix to a shader override the {@link #_setUniforms()} signal,
  * which is fired automatically by the handler every time one of its matrices change state.
  * See also {@link #projection()}, {@link #view()} and {@link #model()}.
  * <p>
- * To bind a {@link Graph} object to a third party renderer (i.e., that renderer provides
+ * To bind a {@link Scene} object to a third party renderer (i.e., that renderer provides
  * its own matrix handling: matrix transformations, shader uniforms transfers, etc),
  * refer to the {@link #bind(Matrix, Matrix)} documentation.
  */
@@ -42,7 +42,7 @@ public class MatrixHandler {
 
   /**
    * Updates the {@link #projection()}, {@link #view()} and {@link #model()} matrices and call
-   * {@link #_setUniforms()}. This method is automatically called by {@link Graph#render()}
+   * {@link #_setUniforms()}. This method is automatically called by {@link Scene#render()}
    * right at the beginning of the main event loop.
    * <p>
    * If this matrix handler is bound to a third party renderer (i.e., that renderer provides
@@ -55,7 +55,7 @@ public class MatrixHandler {
    * {@link #applyProjection(Matrix)}, {@link #pushProjection()} and {@link #popProjection()} by
    * implementing them in terms of that renderer.
    *
-   * @see Graph#render()
+   * @see Scene#render()
    * @see Node#view()
    */
   public void bind(Matrix projection, Matrix view) {

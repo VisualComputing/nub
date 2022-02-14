@@ -678,7 +678,7 @@ class Interpolator {
       }
     }
     if (modified) {
-      _lastUpdate = Graph._frameCount;
+      _lastUpdate = Scene._frameCount;
       _valuesAreValid = false;
       _pathIsValid = false;
       _splineCacheIsValid = false;

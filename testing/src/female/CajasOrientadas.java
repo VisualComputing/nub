@@ -1,17 +1,16 @@
 package female;
 
-import nub.core.Graph;
+import nub.core.Scene;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.core.Graph;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import peasy.*;
 
 public class CajasOrientadas extends PApplet {
   PeasyCam cam;
-  Graph scene;
+  Scene scene;
   Box[] cajas;
   Sphere esfera;
   boolean circle;
@@ -22,7 +21,7 @@ public class CajasOrientadas extends PApplet {
 
   public void setup() {
     cam = new PeasyCam(this, 400);
-    scene = new Graph(this, 200);
+    scene = new Scene(this, 200);
     // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
     //scene.fit();
     esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);
@@ -124,7 +123,7 @@ public class CajasOrientadas extends PApplet {
       pg.popStyle();
     }
 
-    public void behavior(Graph graph) {
+    public void behavior(Scene scene) {
       Vector to = Vector.subtract(esfera.worldPosition(), worldPosition());
       setWorldOrientation(Quaternion.from(Vector.plusJ, to));
     }

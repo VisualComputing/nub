@@ -15,7 +15,7 @@
 
 package nub.primitives;
 
-import nub.core.Graph;
+import nub.core.Scene;
 
 /**
  * A 4 element unit quaternion represented by single precision floating point
@@ -269,12 +269,12 @@ public class Quaternion {
         if (params[0] instanceof Vector)
           if (params[1] instanceof Vector)
             return new Quaternion((Vector) params[0], (Vector) params[1]);
-          else if (Graph.isNumInstance(params[1]))
-            return new Quaternion((Vector) params[0], Graph.castToFloat(params[1]));
+          else if (Scene.isNumInstance(params[1]))
+            return new Quaternion((Vector) params[0], Scene.castToFloat(params[1]));
         break;
       case 3:
-        if (Graph.isNumInstance(params[0]) && Graph.isNumInstance(params[1]) && Graph.isNumInstance(params[2]))
-          return new Quaternion(Graph.castToFloat(params[0]), Graph.castToFloat(params[1]), Graph.castToFloat(params[2]));
+        if (Scene.isNumInstance(params[0]) && Scene.isNumInstance(params[1]) && Scene.isNumInstance(params[2]))
+          return new Quaternion(Scene.castToFloat(params[0]), Scene.castToFloat(params[1]), Scene.castToFloat(params[2]));
         else if (params[0] instanceof Vector && params[1] instanceof Vector && params[2] instanceof Vector)
           return new Quaternion((Vector) params[0], (Vector) params[1], (Vector) params[2]);
         break;

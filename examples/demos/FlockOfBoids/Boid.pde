@@ -62,7 +62,7 @@ class Boid {
 
   //-----------behaviors---------------
 
-  void behavior(Graph graph) {
+  void behavior(Graph scene) {
     // acceleration.add(steer(new Vector(mouseX,mouseY,300),true));
     // acceleration.add(new Vector(0,.05,0));
     if (avoidWalls) {
