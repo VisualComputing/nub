@@ -2172,19 +2172,79 @@ public class Scene {
     return _projectionViewInverse;
   }
 
-  // cache setters for projection times view and its inverse
+  // Warning: Male mode is for debugging purposes. It includes resetEye and setEye
+
+  protected boolean _male;
+
+  public void resetEye() {
+    setEye(null);
+  }
+
+  public void setEye(Node eye) {
+    _male = eye != null;
+    if (_male) {
+      if (isTagged(eye)) {
+        untag(eye);
+        System.out.println("Warning: node was untagged since it was set as the eye");
+      }
+      if (_eye != null) {
+        /*
+        _eye._shiftInertia = null;
+        _eye._lookAroundInertia = null;
+        _eye._cadRotateInertia = null;
+        */
+        _eye._frustumScenes.remove(this);
+        _eye._keyframesMask = Node.AXES;
+      }
+      _eye = eye;
+      /*
+      _eye._shiftInertia = new Inertia() {
+        @Override
+        void _action() {
+          _shift(_x, _y, _z);
+        }
+      };
+      _eye._lookAroundInertia = new Inertia() {
+        @Override
+        void _action() {
+          _lookAround();
+        }
+      };
+      _eye._cadRotateInertia = new Inertia() {
+        @Override
+        void _action() {
+          _cad();
+        }
+      };
+      // */
+      _eye._frustumScenes.add(this);
+      /*
+      if (_interpolator != null) {
+        _interpolator._node = eye;
+      }
+      // */
+      _eye._keyframesMask = Node.CAMERA;
+    }
+    _modified();
+  }
 
   /**
-   * Binds processing and nub matrices together.
+   * Cache matrices and binds processing and nub matrices together.
    *
    * @see MatrixHandler#eye()
    */
   protected void _bind() {
     _projection = _matrixHandler.projection();
-    _eye = _matrixHandler.eye();
+    if (!_male) {
+      _eye = _matrixHandler.eye();
+    }
     _view = _eye.view();
     _projectionView = Matrix.multiply(_projection, _view);
     _type = _projection.m33() == 0 ? Type.PERSPECTIVE : Type.ORTHOGRAPHIC;
+    // debug
+    if (_male) {
+      _matrixHandler.bind(_projection, _view);
+    }
   }
 
   /**
@@ -5268,7 +5328,7 @@ public class Scene {
 
   /**
    * Draws a representation of the viewing frustum onto {@code pGraphics} according to
-   * {@code scene.eye()} and {@code scene._type}.
+   * the eye and type.
    * <p>
    * Note that if {@code pGraphics == scene.context()} this method has not effect at all.
    *
