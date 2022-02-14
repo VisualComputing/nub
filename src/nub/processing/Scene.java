@@ -2290,10 +2290,10 @@ public class Scene extends Graph {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene && graph.isOffscreen();
     switch (graph._type) {
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph._eye.worldMagnitude(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.zNear(), graph.zFar());
+        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph._eye.worldMagnitude(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.near(), graph.far());
         break;
       case PERSPECTIVE:
-        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph._eye.worldMagnitude(), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar());
+        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph._eye.worldMagnitude(), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.near(), graph.far());
         break;
     }
   }
@@ -2566,7 +2566,7 @@ public class Scene extends Graph {
         // Hence it should be multiplied by: 1 / eye.eye().magnitude()
         // The neg sign is because the zNear is positive but the eye view direction is
         // the negative Z-axis
-        Scene.vertex(context(), v.x(), v.y(), -(graph.zNear() * 1 / graph._eye.worldMagnitude()));
+        Scene.vertex(context(), v.x(), v.y(), -(graph.near() * 1 / graph._eye.worldMagnitude()));
       } else {
         Scene.vertex(context(), s.x(), s.y(), s.z());
         Scene.vertex(context(), o.x(), o.y(), o.z());

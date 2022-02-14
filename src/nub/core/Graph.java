@@ -117,12 +117,8 @@ public class Graph {
   // TODO make protected
   public Node _eye;
   protected long _lastEqUpdate;
-  protected Vector _ballCenter, _center;
-  protected float _ballRadius, _radius;
-  Supplier<Float> _zNear, _zFar;
-  //protected boolean _fixed;
-  //protected float _zNear, _zFar;
-  // Inertial stuff
+  protected Vector _center;
+  protected float _radius;
   public static float inertia = 0.85f;
   protected Vector _eyeUp;
   //bounds eqns
@@ -234,9 +230,6 @@ public class Graph {
     PERSPECTIVE, ORTHOGRAPHIC
   }
 
-  private float _zNearCoefficient = 0.005f;
-  private float _zClippingCoefficient = (float) Math.sqrt(3.0f);
-
   /**
    * Same as {@code this(context, width, height, type, new Vector(), 100)}.
    *
@@ -257,9 +250,7 @@ public class Graph {
 
   /**
    * Defines a right-handed graph with the specified {@code width} and {@code height}
-   * screen window dimensions. The {@link #zNear()} and {@link #zFar()} are dynamically
-   * computed so that the ball defined by {@code center} and {@code radius} is always visible,
-   * unless the eye is looking towards a direction completely different from {@code center}.
+   * screen window dimensions.
    * <p>
    * The constructor also instantiates the graph main {@link #context()} and
    * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}).
@@ -270,9 +261,8 @@ public class Graph {
    */
   protected Graph(Object context, int width, int height, Vector center, float radius) {
     _init(context, width, height);
-    setBoundingBall(center, radius);
-    setZNear(this::ballZNear);
-    setZFar(this::ballZFar);
+    setCenter(center);
+    setRadius(radius);
   }
 
   /**
@@ -361,6 +351,30 @@ public class Graph {
     }
   }
 
+  public float left() {
+    return _matrixHandler.left();
+  }
+
+  public float right() {
+    return _matrixHandler.right();
+  }
+
+  public float top() {
+    return _matrixHandler.top();
+  }
+
+  public float bottom() {
+    return _matrixHandler.bottom();
+  }
+
+  public float near() {
+    return _matrixHandler.near();
+  }
+
+  public float far() {
+    return _matrixHandler.far();
+  }
+
   /**
    * Retrieves the scene field-of-view in radians.
    *
@@ -378,118 +392,6 @@ public class Graph {
    */
   public float hfov() {
     return _matrixHandler.hfov();
-  }
-
-  /**
-   * Returns the near clipping plane distance used to compute the {@link #projection()} matrix.
-   *
-   * @see #zFar()
-   */
-  public float zNear() {
-    return _zNear.get();
-  }
-
-  /**
-   * Retrieves the current {@link #zNear()} computation routine.
-   *
-   * @see #zNearSupplier()
-   */
-  public Supplier<Float> zNearSupplier() {
-    return _zNear;
-  }
-
-  /**
-   * Sets the {@link #zNear()} computation routine.
-   *
-   * @see #zNearSupplier()
-   * @see #setZFar(Supplier)
-   */
-  public void setZNear(Supplier<Float> zNear) {
-    _zNear = zNear;
-    _modified();
-  }
-
-  /**
-   * The clipping planes' positions depend on the {@link #radius()} and {@link #center()}
-   * rather than being fixed small-enough and large-enough values. A good approximation will
-   * hence result in an optimal precision of the z-buffer.
-   * <p>
-   * The near clipping plane is positioned at a distance equal to
-   * {@code zClippingCoefficient} * {@link #radius()} in front of the
-   * {@link #center()}: {@code Vector.scalarProjection(
-   * Vector.subtract(eye.position(), center()), eye.zAxis()) - zClippingCoefficient() * radius()}
-   * <p>
-   * In order to prevent negative or too small {@link #zNear()} values (which would
-   * degrade the z precision), {@code zNearCoefficient} is used when the eye is
-   * inside the {@link #radius()} ball:
-   * <p>
-   * {@code zMin = zNearCoefficient() * zClippingCoefficient() * radius();} <br>
-   * {@code zNear = zMin;}<br>
-   * {@code With an ORTHOGRAPHIC and TWO_D types, the value is simply clamped to 0}<br>
-   * <p>
-   * See also the {@link #zFar()} documentation.
-   *
-   * <b>Attention:</b> The value is always positive, although the clipping plane is
-   * positioned at a negative z value in the eye coordinate system.
-   *
-   * @see #ballZFar()
-   */
-  public float ballZNear() {
-    float z = Vector.scalarProjection(Vector.subtract(_eye.worldPosition(), _ballCenter), _eye.zAxis()) - _zClippingCoefficient * _ballRadius;
-    // Prevents negative or null zNear values.
-    float zMin = _zNearCoefficient * _zClippingCoefficient * _ballRadius;
-    if (z < zMin)
-      switch (_type) {
-        case PERSPECTIVE:
-          z = zMin;
-          break;
-        case ORTHOGRAPHIC:
-          z = 0.0f;
-          break;
-      }
-    return z;
-  }
-
-  /**
-   * Returns the far clipping plane distance used to compute the {@link #projection()} matrix.
-   *
-   * @see #zNear()
-   */
-  public float zFar() {
-    return _zFar.get();
-  }
-
-  /**
-   * Retrieves the current {@link #zFar()} computation routine.
-   *
-   * @see #zNearSupplier()
-   */
-  public Supplier<Float> zFarSupplier() {
-    return _zNear;
-  }
-
-  /**
-   * Sets the {@link #zFar()} computation routine.
-   *
-   * @see #zFarSupplier()
-   * @see #setZNear(Supplier)
-   */
-  public void setZFar(Supplier<Float> zFar) {
-    _zFar = zFar;
-    _modified();
-  }
-
-  /**
-   * The far clipping plane is positioned at a distance equal to
-   * {@code zClippingCoefficient() * radius()} behind the {@link #center()}:
-   * <p>
-   * {@code zFar = Vector.scalarProjection(Vector.subtract(eye.position(), center()), eye.zAxis())
-   * + zClippingCoefficient() * radius()}.
-   *
-   * @see #ballZNear()
-   */
-  public float ballZFar() {
-    return Vector.scalarProjection(Vector.subtract(_eye.worldPosition(), _ballCenter), _eye.zAxis()) + _zClippingCoefficient * _ballRadius;
   }
 
   // Graph and nodes stuff
@@ -774,7 +676,7 @@ public class Graph {
     float posViewDir = Vector.dot(pos, viewDir);
     switch (_type) {
       case PERSPECTIVE: {
-        float hhfov = _matrixHandler.hfov() / 2.0f;
+        float hhfov = hfov() / 2.0f;
         float chhfov = (float) Math.cos(hhfov);
         float shhfov = (float) Math.sin(hhfov);
         _normal[0] = Vector.multiply(viewDir, -shhfov);
@@ -824,8 +726,8 @@ public class Graph {
     // Front and far planes are identical for both camera types.
     _normal[2] = Vector.multiply(viewDir, -1);
     _normal[3] = viewDir;
-    _distance[2] = -posViewDir - zNear();
-    _distance[3] = posViewDir + zFar();
+    _distance[2] = -posViewDir - near();
+    _distance[3] = posViewDir + far();
     for (int i = 0; i < 6; ++i) {
       _coefficients[i][0] = _normal[i]._vector[0];
       _coefficients[i][1] = _normal[i]._vector[1];
@@ -926,7 +828,7 @@ public class Graph {
       case PERSPECTIVE:
         // TODO: QGLViewer
         //return 2.0 * fabs((frame()->coordinatesOf(position)).z) * tan(fieldOfView() / 2.0) / screenHeight();
-        return 2.0f * Math.abs((_eye.location(position))._vector[2]) * (float) Math.tan(_matrixHandler.fov() / 2) / (float) height();
+        return 2.0f * Math.abs((_eye.location(position))._vector[2]) * (float) Math.tan(fov() / 2) / (float) height();
       case ORTHOGRAPHIC:
         return Math.abs(_matrixHandler.top() - _matrixHandler.bottom()) / (float) height();
     }
@@ -1081,34 +983,13 @@ public class Graph {
   }
 
   /**
-   * Sets the ball for {@link #zNear()} and {@link #zFar()} computations within the {@link #ballZNear()}
-   * and {@link #ballZFar()} functions. Calls {@link #setCenter(Vector)} {@link #setRadius(float)}.
-   * <p>
-   * To only affect eye motions interactions and interpolations (while leaving the current z-near
-   * and z-far computations unaffected) call {@link #setCenter(Vector)} and {@link #setRadius(float)}.
-   *
-   * @see #setZNear(Supplier)
-   * @see #setZFar(Supplier)
-   * @see #setCenter(Vector)
-   * @see #setRadius(float)
-   */
-  public void setBoundingBall(Vector center, float radius) {
-    _ballCenter = _center = center;
-    _ballRadius = _radius = Math.abs(radius);
-    _modified();
-  }
-
-  /**
    * Radius of the ball (defined in world coordinates) used in eye motions interaction
    * (e.g., {@link #shift(float, float, float)}, {@link #spin(int, int, int, int)},
-   * {@link #turn(float, float, float)}) and interpolation routines. This ball is different
-   * from the one used by the {@link #ballZNear()} and {@link #ballZFar()} algorithms
-   * ({see @link #setBoundingBall(Vector, float)}).
+   * {@link #turn(float, float, float)}) and interpolation routines..
    * <p>
    * Set it with {@link #setRadius(float)}.
    *
    * @see #center()
-   * @see #setBoundingBall(Vector, float)
    */
   public float radius() {
     return _radius;
@@ -1118,7 +999,6 @@ public class Graph {
    * Sets {@link #radius()}. To be used in conjuntion with {@link #setCenter(Vector)}.
    *
    * @see #setCenter(Vector)
-   * @see #setBoundingBall(Vector, float)
    */
   public void setRadius(float radius) {
     _radius = Math.abs(radius);
@@ -1128,24 +1008,20 @@ public class Graph {
   /**
    * Center of the ball (defined in world coordinates) used in eye motions interaction
    * (e.g., {@link #shift(float, float, float)}, {@link #spin(int, int, int, int)},
-   * {@link #turn(float, float, float)}) and interpolation routines. This ball is
-   * different from the one used by the {@link #ballZNear()} and {@link #ballZFar()}
-   * algorithms ({see @link #setBoundingBall(Vector, float)}).
+   * {@link #turn(float, float, float)}) and interpolation routines.
    * <p>
    * Set it with {@link #setCenter(Vector)}.
    *
    * @see #radius()
-   * @see #setBoundingBall(Vector, float)
    */
   public Vector center() {
     return _center;
   }
 
   /**
-   * Sets {@link #center()}. To be used in conjuntion with {@link #setRadius(float)}.
+   * Sets {@link #center()}. To be used in conjunction with {@link #setRadius(float)}.
    *
    * @see #setRadius(float)
-   * @see #setBoundingBall(Vector, float)
    */
   public void setCenter(Vector center) {
     _center = center;
@@ -1220,8 +1096,8 @@ public class Graph {
                   ((2.0 * (screenHeight() - pixel.y()) / screenHeight()) - 1.0) * tan(fieldOfView() / 2.0),
                    -1.0);
         */
-        direction.set(new Vector(((2.0f * pixelX / (float) width()) - 1.0f) * (float) Math.tan(_matrixHandler.fov() / 2.0f) * aspectRatio(),
-                                 ((2.0f * (height() - pixelY) / (float) height()) - 1.0f) * (float) Math.tan(_matrixHandler.fov() / 2.0f),
+        direction.set(new Vector(((2.0f * pixelX / (float) width()) - 1.0f) * (float) Math.tan(fov() / 2.0f) * aspectRatio(),
+                                 ((2.0f * (height() - pixelY) / (float) height()) - 1.0f) * (float) Math.tan(fov() / 2.0f),
                                  -1.0f));
         direction.set(Vector.subtract(_eye.worldLocation(direction), origin));
         direction.normalize();
@@ -1660,8 +1536,7 @@ public class Graph {
   // cache setters for projection times view and its inverse
 
   /**
-   * Sets eye, {@link #fov()}, {@link #zNear()} and {@link #zFar()}
-   * from modelview and projection matrices.
+   * Binds processing and nub matrices together.
    *
    * @see MatrixHandler#eye()
    */
@@ -1671,8 +1546,6 @@ public class Graph {
     _view = _eye.view();
     _projectionView = Matrix.multiply(_projection, _view);
     _type = _projection.m33() == 0 ? Type.PERSPECTIVE : Type.ORTHOGRAPHIC;
-    setZNear(() -> _matrixHandler.near());
-    setZFar(() -> _matrixHandler.far());
   }
 
   /**
@@ -2323,8 +2196,8 @@ public class Graph {
    * <p>
    * The pixel (0,0) corresponds to the upper left corner of the window. The
    * {@code pixel.z()} is a depth value ranging in [0..1] (near and far plane respectively).
-   * In 3D note that {@code pixel.z} is not a linear interpolation between {@link #zNear()} and
-   * {@link #zFar()};
+   * In 3D note that {@code pixel.z} is not a linear interpolation between {@link #near()} and
+   * {@link #far()};
    * {@code pixel.z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z);} where {@code z}
    * is the distance from the point you project to the camera, along the {@link #viewDirection()}.
    * <p>
@@ -2447,12 +2320,12 @@ public class Graph {
     // Scale to fit the screen relative vector displacement
     if (_type == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.worldPosition();
-      float k = Math.abs(_eye.location(position)._vector[2] * (float) Math.tan(_matrixHandler.fov() / 2.0f));
+      float k = Math.abs(_eye.location(position)._vector[2] * (float) Math.tan(fov() / 2.0f));
       dx *= 2.0 * k / ((float) height());
       dy *= 2.0 * k / ((float) height());
     }
     float dz = vector.z();
-    dz *= (zNear() - zFar()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(_matrixHandler.fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
+    dz *= (near() - far()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
     Vector eyeVector = new Vector(dx, dy, dz);
     return node == null ? _eye.worldDisplacement(eyeVector) : node.displacement(eyeVector, _eye);
   }
@@ -2482,13 +2355,13 @@ public class Graph {
     float dy = leftHanded ? eyeVector.y() : -eyeVector.y();
     if (_type == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.worldPosition();
-      float k = Math.abs(_eye.location(position)._vector[2] * (float) Math.tan(_matrixHandler.fov() / 2.0f));
+      float k = Math.abs(_eye.location(position)._vector[2] * (float) Math.tan(fov() / 2.0f));
       dx /= 2.0 * k / ((float) height() * _eye.worldMagnitude());
       dy /= 2.0 * k / ((float) height() * _eye.worldMagnitude());
     }
     float dz = eyeVector.z();
     // sign is inverted
-    dz /= (zNear() - zFar()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(_matrixHandler.fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
+    dz /= (near() - far()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
     return new Vector(dx, dy, dz);
   }
 
