@@ -18,7 +18,6 @@ import nub.primitives.Vector;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * A 2D or 3D scene-graph.

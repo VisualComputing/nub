@@ -2264,7 +2264,6 @@ public class Scene extends Graph {
    * {@link #drawFrustum(PGraphics, Graph)} on the scene {@link #context()}.
    *
    * @see #drawFrustum(PGraphics, Graph)
-   * @see #drawFrustum(PGraphics, PGraphics, Node, Type, float, float)
    */
   public void drawFrustum(Graph graph) {
     _matrixHandler.pushMatrix();
@@ -2280,7 +2279,6 @@ public class Scene extends Graph {
    * Note that if {@code pGraphics == graph.context()} this method has not effect at all.
    *
    * @see #drawFrustum(Graph)
-   * @see #drawFrustum(PGraphics, PGraphics, Node, Type, float, float)
    */
   public static void drawFrustum(PGraphics pGraphics, Graph graph) {
     if (pGraphics == graph.context())
@@ -2290,30 +2288,10 @@ public class Scene extends Graph {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene && graph.isOffscreen();
     switch (graph._type) {
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph._eye.worldMagnitude(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.near(), graph.far());
+        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, Math.abs(graph.right() - graph.left()) / (float) graph.width(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.near(), graph.far());
         break;
       case PERSPECTIVE:
-        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, graph._eye.worldMagnitude(), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.near(), graph.far());
-        break;
-    }
-  }
-
-  /**
-   * Draws a representation of the {@code eyeBuffer} frustum onto {@code pGraphics} according to frustum parameters:
-   * {@code type}, eye {@link Node#worldMagnitude()}, {@code zNear} and {@code zFar}, while taking into account
-   * whether or not the scene is {@code leftHanded}.
-   *
-   * @see #drawFrustum(Graph)
-   * @see #drawFrustum(PGraphics, Graph)
-   * @see #drawFrustum(PGraphics, PGraphics, Node, Type, float, float)
-   */
-  public static void drawFrustum(PGraphics pGraphics, PGraphics eyeBuffer, Node eye, Type type, float zNear, float zFar) {
-    switch (type) {
-      case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, eyeBuffer, eye.worldMagnitude(), eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, zNear, zFar);
-        break;
-      case PERSPECTIVE:
-        _drawPerspectiveFrustum(pGraphics, eyeBuffer, eye.worldMagnitude(), leftHanded ? -eyeBuffer.width / eyeBuffer.height : eyeBuffer.width / eyeBuffer.height, zNear, zFar);
+        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, (float) Math.tan(graph.fov() / 2.0f), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.near(), graph.far());
         break;
     }
   }
@@ -2563,10 +2541,10 @@ public class Scene extends Graph {
         Scene.vertex(context(), v.x(), v.y(), v.z());
         // Key here is to represent the eye zNear param (which is given in world units)
         // in eye units.
-        // Hence it should be multiplied by: 1 / eye.eye().magnitude()
+        // Hence it should be multiplied by: 1 / eye.magnitude()
         // The neg sign is because the zNear is positive but the eye view direction is
         // the negative Z-axis
-        Scene.vertex(context(), v.x(), v.y(), -(graph.near() * 1 / graph._eye.worldMagnitude()));
+        Scene.vertex(context(), v.x(), v.y(), -(graph.near() * 1 / Math.abs(graph.right() - graph.left()) / (float) graph.width()));
       } else {
         Scene.vertex(context(), s.x(), s.y(), s.z());
         Scene.vertex(context(), o.x(), o.y(), o.z());
