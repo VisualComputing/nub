@@ -290,7 +290,7 @@ public class Scene extends Graph {
    * {@link #location(int, int)}.
    * <p>
    * The z-value ranges in [0..1] (near and far plane respectively). In 3D note that this
-   * value is not a linear interpolation between {@link #zNear()} and {@link #zFar()}:
+   * value is not a linear interpolation between {@link #near()} and {@link #far()}:
    * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z')} where {@code z'} is
    * the distance from the point you project to the eye, along the {@link #viewDirection()}.
    *

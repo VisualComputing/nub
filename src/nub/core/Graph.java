@@ -351,34 +351,51 @@ public class Graph {
     }
   }
 
+  /**
+   * Retrieves the left clipping plane. Only meaningful for orthographic projections.
+   */
   public float left() {
     return _matrixHandler.left();
   }
 
+  /**
+   * Retrieves the right clipping plane. Only meaningful for orthographic projections.
+   */
   public float right() {
     return _matrixHandler.right();
   }
 
+  /**
+   * Retrieves the top clipping plane. Only meaningful for orthographic projections.
+   */
   public float top() {
     return _matrixHandler.top();
   }
 
+  /**
+   * Retrieves the bottom clipping plane. Only meaningful for orthographic projections.
+   */
   public float bottom() {
     return _matrixHandler.bottom();
   }
 
+  /**
+   * Retrieves the near clipping plane.
+   */
   public float near() {
     return _matrixHandler.near();
   }
 
+  /**
+   * Retrieves the far clipping plane.
+   */
   public float far() {
     return _matrixHandler.far();
   }
 
   /**
-   * Retrieves the scene field-of-view in radians.
+   * Retrieves the scene field-of-view in radians. Only meaningful for perspective projections.
    *
-   * @see Node#worldMagnitude()
    * @see #hfov()
    */
   public float fov() {
@@ -386,7 +403,7 @@ public class Graph {
   }
 
   /**
-   * Returns the eye horizontal field-of-view in radians.
+   * Returns the eye horizontal field-of-view in radians. Only meaningful for perspective projections.
    *
    * @see #fov()
    */
@@ -684,7 +701,7 @@ public class Graph {
         _normal[0] = Vector.add(_normal[0], Vector.multiply(right, -chhfov));
         _normal[2] = Vector.multiply(viewDir, -1);
         _normal[3] = viewDir;
-        float hfov = _matrixHandler.fov() / 2.0f;
+        float hfov = fov() / 2.0f;
         float chfov = (float) Math.cos(hfov);
         float shfov = (float) Math.sin(hfov);
         _normal[4] = Vector.multiply(viewDir, -shfov);
@@ -715,8 +732,8 @@ public class Graph {
         _normal[1] = right;
         _normal[4] = up;
         _normal[5] = Vector.multiply(up, -1);
-        float wh0 = Math.abs(_matrixHandler.right() - _matrixHandler.left()) / 2;
-        float wh1 = Math.abs(_matrixHandler.top() - _matrixHandler.bottom()) / 2;
+        float wh0 = Math.abs(right() - left()) / 2;
+        float wh1 = Math.abs(top() - bottom()) / 2;
         _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
         _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
         _distance[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[4]);
@@ -830,7 +847,7 @@ public class Graph {
         //return 2.0 * fabs((frame()->coordinatesOf(position)).z) * tan(fieldOfView() / 2.0) / screenHeight();
         return 2.0f * Math.abs((_eye.location(position))._vector[2]) * (float) Math.tan(fov() / 2) / (float) height();
       case ORTHOGRAPHIC:
-        return Math.abs(_matrixHandler.top() - _matrixHandler.bottom()) / (float) height();
+        return Math.abs(top() - bottom()) / (float) height();
     }
     return 1.0f;
   }
@@ -2325,7 +2342,7 @@ public class Graph {
       dy *= 2.0 * k / ((float) height());
     }
     float dz = vector.z();
-    dz *= (near() - far()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
+    dz *= (near() - far()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(fov() / 2.0f) : Math.abs(right() - left()) / (float) width());
     Vector eyeVector = new Vector(dx, dy, dz);
     return node == null ? _eye.worldDisplacement(eyeVector) : node.displacement(eyeVector, _eye);
   }
@@ -2361,7 +2378,7 @@ public class Graph {
     }
     float dz = eyeVector.z();
     // sign is inverted
-    dz /= (near() - far()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(fov() / 2.0f) : Math.abs(_matrixHandler.right() - _matrixHandler.left()) / (float) width());
+    dz /= (near() - far()) / (_type == Type.PERSPECTIVE ? (float) Math.tan(fov() / 2.0f) : Math.abs(right() - left()) / (float) width());
     return new Vector(dx, dy, dz);
   }
 
