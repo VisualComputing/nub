@@ -15,14 +15,22 @@ import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
+import nub.processing.Scene;
+import processing.core.*;
+import processing.data.JSONArray;
+import processing.data.JSONObject;
+import processing.opengl.*;
+
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.nio.FloatBuffer;
+
 
 /**
- * A 2D or 3D scene-graph.
- * <h1>1. Scene-graph handling</h1>
- * A graph forms a tree of {@link Node}s whose visual representations may be
+ * A 2D or 3D scene.
+ * <h1>1. Graph handling</h1>
+ * A scene forms a tree of {@link Node}s whose visual representations may be
  * {@link #render()}. To render a subtree call {@link #render(Node)}.
  * Note that rendering routines should be called within your main-event loop.
  * <p>
@@ -30,7 +38,7 @@ import java.util.function.Consumer;
  * Nub provides other useful routines to handle the hierarchy, such as {@link Node#setReference(Node)},
  * {@link Node#detach()}, {@link Node#attach()}, {@link #branch(Node)}, and {@link #clearTree()}.
  * <h2>Transformations</h2>
- * The graph acts as interface between screen space (a box of {@link #width()} * {@link #height()} * 1
+ * The scene acts as interface between screen space (a box of {@link #width()} * {@link #height()} * 1
  * dimensions), from where user gesture data is gathered, and the {@code nodes}. To transform points
  * from/to screen space to/from node space use {@link #location(Vector, Node)} and
  * {@link #screenLocation(Vector, Node)}. To transform vectors from/to screen space to/from node space
@@ -109,12 +117,11 @@ public class Graph {
   protected boolean _offscreen;
 
   // 0. Contexts
-  protected Object _bb, _fb;
+  protected PGraphics _bb, _fb;
   protected ArrayList<Node> _subtrees;
   protected boolean _bbNeed;
   // 1. Eye
-  // TODO make protected
-  public Node _eye;
+  protected Node _eye;
   protected long _lastEqUpdate;
   protected Vector _center;
   protected float _radius;
@@ -181,6 +188,26 @@ public class Graph {
     return -16777216 | (int) v1 << 16 | (int) v2 << 8 | (int) v3;
   }
 
+  /**
+   * Sets the {@code name} {@code shader} uniform from {@code matrix}.
+   */
+  public static void setUniform(PShader shader, String name, Matrix matrix) {
+    PMatrix3D pmatrix = new PMatrix3D();
+    //pmatrix.set(Scene.toPMatrix(matrix));
+    //pmatrix.transpose();
+    // same as:
+    pmatrix.set(matrix.get(new float[16]));
+    shader.set(name, pmatrix);
+  }
+
+  /**
+   * Sets the {@code name} {@code shader} uniform from {@code vector}.
+   */
+  public static void setUniform(PShader shader, String name, Vector vector) {
+    PVector pvector = new PVector(vector.x(), vector.y(), vector.z());
+    shader.set(name, pvector);
+  }
+
   // 3. Handlers
   protected class Ray {
     public String _tag;
@@ -217,8 +244,7 @@ public class Graph {
 
   // 7. Projection stuff
 
-  // TODO make protected
-  public Type _type;
+  protected Type _type;
 
   /**
    * Enumerates the graph types.
@@ -229,21 +255,42 @@ public class Graph {
     PERSPECTIVE, ORTHOGRAPHIC
   }
 
+  // 8. Scene stuff
+  @FunctionalInterface
+  public interface Callback {
+    void execute();
+  }
+
+  public static String prettyVersion = "0.9.97";
+  public static String version = "11";
+
+  // P R O C E S S I N G A P P L E T A N D O B J E C T S
+  public static PApplet pApplet;
+
+  // _bb : picking buffer
+  protected PShader _triangleShader, _lineShader, _pointShader;
+
+  // mouse speed
+  long _timestamp;
+
+  // Prettify bb display if required
+  protected HashMap<Integer, Integer> _idToColor = new HashMap<>();
+
   /**
    * Same as {@code this(context, width, height, type, new Vector(), 100)}.
    *
-   * @see #Graph(Object, int, int, Vector, float)
+   * @see #Graph(PGraphics, int, int, Vector, float)
    */
-  public Graph(Object context, int width, int height) {
+  public Graph(PGraphics context, int width, int height) {
     this(context, width, height, new Vector(), 100);
   }
 
   /**
    * Same as {@code this(context, width, height, type, new Vector(), radius)}.
    *
-   * @see #Graph(Object, int, int, Vector, float)
+   * @see #Graph(PGraphics, int, int, Vector, float)
    */
-  protected Graph(Object context, int width, int height, float radius) {
+  protected Graph(PGraphics context, int width, int height, float radius) {
     this(context, width, height, new Vector(), radius);
   }
 
@@ -258,7 +305,7 @@ public class Graph {
    * @see #setRadius(float)
    * @see MatrixHandler
    */
-  protected Graph(Object context, int width, int height, Vector center, float radius) {
+  protected Graph(PGraphics context, int width, int height, Vector center, float radius) {
     _init(context, width, height);
     setCenter(center);
     setRadius(radius);
@@ -267,7 +314,7 @@ public class Graph {
   /**
    * Used internally by several constructors.
    */
-  protected void _init(Object context, int width, int height) {
+  protected void _init(PGraphics context, int width, int height) {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
@@ -286,6 +333,108 @@ public class Graph {
     _orays = _i2rays;
     _behaviors = new HashMap<Integer, BiConsumer<Graph, Node>>();
     picking = true;
+  }
+
+  // Mouse
+
+  /**
+   * Same as {@code return hasFocus(pApplet.mouseX, pApplet.mouseY)}.
+   *
+   * @see #hasFocus(int, int)
+   */
+  public boolean hasFocus() {
+    return hasFocus(pApplet.mouseX, pApplet.mouseY);
+  }
+
+  /**
+   * Returns the last horizontal mouse displacement.
+   */
+  public float mouseDX() {
+    return pApplet.mouseX - pApplet.pmouseX;
+  }
+
+  /**
+   * Same as {@code return mouseRADX(PI / width())}.
+   *
+   * @see #mouseRADX(float)
+   */
+  public float mouseRADX() {
+    return mouseRADX(PApplet.HALF_PI / (float) width());
+  }
+
+  /**
+   * Converts {@link #mouseDX()} into angular displacement (in radians) according to {@code sensitivity}
+   * and returns it.
+   */
+  public float mouseRADX(float sensitivity) {
+    return mouseDX() * sensitivity;
+  }
+
+  /**
+   * Returns the last vertical mouse displacement.
+   */
+  public float mouseDY() {
+    return pApplet.mouseY - pApplet.pmouseY;
+  }
+
+  /**
+   * Same as {@code return mouseRADY(PI / height())}.
+   *
+   * @see #mouseRADY(float)
+   */
+  public float mouseRADY() {
+    return mouseRADY(PApplet.HALF_PI / (float) height());
+  }
+
+  /**
+   * Converts {@link #mouseDY()} into angular displacement (in radians) according to {@code sensitivity}
+   * and returns it.
+   */
+  public float mouseRADY(float sensitivity) {
+    return mouseDY() * sensitivity;
+  }
+
+  /**
+   * Returns the current mouse x coordinate.
+   */
+  public int mouseX() {
+    return pApplet.mouseX - _upperLeftCornerX;
+  }
+
+  /**
+   * Returns the current mouse y coordinate.
+   */
+  public int mouseY() {
+    return pApplet.mouseY - _upperLeftCornerY;
+  }
+
+  /**
+   * Returns the previous mouse x coordinate.
+   */
+  public int pmouseX() {
+    return pApplet.pmouseX - _upperLeftCornerX;
+  }
+
+  /**
+   * Returns the previous mouse y coordinate.
+   */
+  public int pmouseY() {
+    return pApplet.pmouseY - _upperLeftCornerY;
+  }
+
+  /**
+   * Returns the mouse speed expressed in pixels per milliseconds.
+   */
+  public float mouseSpeed() {
+    float distance = Vector.distance(new Vector(pmouseX(), pmouseY()), new Vector(mouseX(), mouseY()));
+    long now = System.nanoTime();
+    //long now = System.currentTimeMillis();
+    long delay = now - _timestamp;
+    float speed = delay == 0 ? distance : distance / (float) delay;
+    speed *= 1e6; // only if nanos are used
+    //System.out.println(speed);
+    _timestamp = now;
+    return speed;
   }
 
   /**
@@ -1035,6 +1184,34 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return setCenter(mouseX(), mouseY())}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #setCenter(int, int)
+   */
+  public boolean setCenter() {
+    return setCenter(mouseX(), mouseY());
+  }
+
+  /**
+   * The {@link #center()} is set to the point located under {@code pixel} on screen.
+   * <p>
+   * 2D windows always returns true.
+   * <p>
+   * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
+   * {@code false} if none was found (in this case no {@link #center()} is set).
+   */
+  public boolean setCenter(int pixelX, int pixelY) {
+    Vector pup = location(pixelX, pixelY);
+    if (pup != null) {
+      _center = pup;
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Sets {@link #center()}. To be used in conjunction with {@link #setRadius(float)}.
    *
    * @see #setRadius(float)
@@ -1086,6 +1263,17 @@ public class Graph {
    */
   public Vector at() {
     return Vector.add(_eye.worldPosition(), viewDirection());
+  }
+
+  /**
+   * Same as {@code pixelToLine(mouseX(), mouseY(), origin, direction)}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #pixelToLine(int, int, Vector, Vector)
+   */
+  public void pixelToLine(Vector origin, Vector direction) {
+    pixelToLine(mouseX(), mouseY(), origin, direction);
   }
 
   /**
@@ -1151,12 +1339,32 @@ public class Graph {
   // traversal
 
   /**
+   * Same as {@code return this.track(mouse(), nodeArray)}.
+   *
+   * @see Graph#updateTag(int, int, Node[])
+   */
+  public Node updateTag(Node[] nodeArray) {
+    return this.updateTag(mouseX(), mouseY(), nodeArray);
+  }
+
+  /**
    * Same as {@code return track(null, pixelX, pixelY, nodeArray)}.
    *
    * @see #updateTag(String, int, int, Node[])
    */
   public Node updateTag(int pixelX, int pixelY, Node[] nodeArray) {
     return updateTag(null, pixelX, pixelY, nodeArray);
+  }
+
+  /**
+   * Same as {@code return this.updateTag(tag, mouseX(), mouseY(), nodes)}.
+   *
+   * @see #updateTag(int, int, Node[])
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public Node updateTag(String tag, Node[] nodes) {
+    return this.updateTag(tag, mouseX(), mouseY(), nodes);
   }
 
   /**
@@ -1189,12 +1397,34 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return this.updateTag(mouseX(), mouseY(), nodeList)}.
+   *
+   * @see Graph#updateTag(int, int, List< Node >)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public Node updateTag(List<Node> nodeList) {
+    return this.updateTag(mouseX(), mouseY(), nodeList);
+  }
+
+  /**
    * Same as {@code return track(null, pixelX, pixelY, nodeList)}.
    *
    * @see #updateTag(String, int, int, List)
    */
   public Node updateTag(int pixelX, int pixelY, List<Node> nodeList) {
     return updateTag(null, pixelX, pixelY, nodeList);
+  }
+
+  /**
+   * Same as {@code return this.track(mouse(), nodeList)}.
+   *
+   * @see #updateTag(String, int, int, List< Node >)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public Node updateTag(String tag, List<Node> nodeList) {
+    return this.updateTag(tag, mouseX(), mouseY(), nodeList);
   }
 
   /**
@@ -1219,6 +1449,24 @@ public class Graph {
    */
   public Node updateTag(int pixelX, int pixelY) {
     return updateTag(null, null, pixelX, pixelY);
+  }
+
+  /**
+   * Same as {@code return updateTag(null, tag)}.
+   *
+   * @see #updateTag(Node, String)
+   */
+  public Node updateTag(String tag) {
+    return updateTag(null, tag);
+  }
+
+  /**
+   * Same as {@code return updateTag(subtree, null)}.
+   *
+   * @see #updateTag(Node, String)
+   */
+  public Node updateTag(Node subtree) {
+    return updateTag(subtree, null);
   }
 
   /**
@@ -1250,6 +1498,26 @@ public class Graph {
    */
   public Node updateTag(String tag, int pixelX, int pixelY) {
     return updateTag(null, tag, pixelX, pixelY);
+  }
+
+  /**
+   * Same as {@code return this.updateTag(mouseX(), mouseY())}.
+   *
+   * @see #updateTag(Node, String, int, int)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public Node updateTag() {
+    return this.updateTag(null, null, mouseX(), mouseY());
+  }
+
+  /**
+   * Same as {@code return this.updateTag(subtree, tag, mouseX(), mouseY())}.
+   *
+   * @see #updateTag(Node, String, int, int)
+   */
+  public Node updateTag(Node subtree, String tag) {
+    return this.updateTag(subtree, tag, mouseX(), mouseY());
   }
 
   /**
@@ -1322,6 +1590,17 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return this.tracks(node, mouseX(), mouseY())}.
+   *
+   * @see #tracks(Node, int, int)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public boolean tracks(Node node) {
+    return this.tracks(node, mouseX(), mouseY());
+  }
+
+  /**
    * Casts a ray at pixel position {@code (pixelX, pixelY)} and returns {@code true} if the ray picks the {@code node} and
    * {@code false} otherwise. The node is picked according to the {@link Node#bullsEyeSize()}.
    *
@@ -1358,6 +1637,16 @@ public class Graph {
    * @see Node#setBullsEyeSize(float)
    */
   protected boolean _tracks(Node node, int pixelX, int pixelY) {
+    // TODO restore eye
+    if (node == null /* || isEye(node) */)
+      return false;
+    if (!node.tagging)
+      return false;
+    if(!(0 <= pixelX && pixelX < width() && 0 <= pixelY && pixelY < height())) //Check if pixel is out of bounds
+      return false;
+    int index = pixelY * width() + pixelX;
+    if (_backBuffer().pixels != null)
+      return _backBuffer().pixels[index] == node.colorID();
     return false;
   }
 
@@ -1379,12 +1668,34 @@ public class Graph {
   }
 
   /**
+   * Same as {@code this.tag(mouseX(), mouseY())}.
+   *
+   * @see #tag(int, int)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public void tag() {
+    this.tag(mouseX(), mouseY());
+  }
+
+  /**
    * Same as {@code tag(null, pixelX, pixelY)}.
    *
    * @see #tag(String, int, int)
    */
   public void tag(int pixelX, int pixelY) {
     tag(null, pixelX, pixelY);
+  }
+
+  /**
+   * Same as {@code this.tag(tag, mouseX(), mouseY())}.
+   *
+   * @see #tag(String, int, int)
+   * @see #mouseX()
+   * @see #mouseY()
+   */
+  public void tag(String tag) {
+    this.tag(tag, mouseX(), mouseY());
   }
 
   /**
@@ -1443,7 +1754,7 @@ public class Graph {
   /**
    * Returns the main renderer context.
    */
-  public Object context() {
+  public PGraphics context() {
     return _fb;
   }
 
@@ -1451,7 +1762,7 @@ public class Graph {
    * Returns the back buffer, used for
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>. Maybe {@code null}
    */
-  protected Object _backBuffer() {
+  protected PGraphics _backBuffer() {
     return _bb;
   }
 
@@ -1505,15 +1816,66 @@ public class Graph {
     _renderBackBuffer();
   }
 
-  protected void _resize() {}
+  /**
+   * Handles resizes events to update the scene {@link #width()} and {@link #height()}.
+   */
+  protected void _resize() {
+    if (isOffscreen())
+      return;
+    if ((width() != context().width))
+      setWidth(context().width);
+    if ((height() != context().height))
+      setHeight(context().height);
+  }
 
-  protected void _initBackBuffer() {}
+  protected void _initBackBuffer() {
+    _backBuffer().beginDraw();
+    // TODO seems style is not require since it should be absorbed by the shader
+    //_backBuffer().pushStyle();
+    _backBuffer().background(0);
+  }
 
-  protected void _endBackBuffer() {}
+  protected void _endBackBuffer() {
+    if (!_huds.isEmpty()) {
+      _bbMatrixHandler.beginHUD(width(), height());
+      for (Node node : _huds) {
+        if (node.rendered(this)) {
+          if (node.isPickingEnabled(Node.HUD)) {
+            _emitBackBufferUniforms(node);
+            _backBuffer().pushMatrix();
+            Vector location = screenLocation(node);
+            if (location != null) {
+              _backBuffer().translate(location.x(), location.y());
+              if (node._imrHUD != null) {
+                node._imrHUD.accept(_backBuffer());
+              }
+              if (node._rmrHUD != null) {
+                _backBuffer().shape(node._rmrHUD);
+              }
+            }
+            _backBuffer().popMatrix();
+          }
+        }
+      }
+      _bbMatrixHandler.endHUD();
+    }
+    // TODO seems style is not require since it should be absorbed by the shader
+    //_backBuffer().popStyle();
+    _backBuffer().loadPixels();
+    _backBuffer().endDraw();
+  }
 
-  protected void _initFrontBuffer() {}
+  protected void _initFrontBuffer() {
+    if (isOffscreen()) {
+      context().beginDraw();
+    }
+  }
 
-  protected void _endFrontBuffer() {}
+  protected void _endFrontBuffer() {
+    if (isOffscreen()) {
+      context().endDraw();
+    }
+  }
 
   // caches
 
@@ -1844,7 +2206,574 @@ public class Graph {
     _bbMatrixHandler.popMatrix();
   }
 
-  protected void _emitBackBufferUniforms(Node node) {}
+  /**
+   * Same as {@code display(null, false, false, null, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display() {
+    display(null, false, null, null, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, false, false, null, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background) {
+    display(background, false, null, null, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, false, false, null, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(int x, int y) {
+    display(null, false, null, null, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, false, false, null, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, int x, int y) {
+    display(background, false, null, null, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, false, false, null, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Scene.Callback worldCallback) {
+    display(null, false, null, null, worldCallback, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, false, false, null, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, Scene.Callback worldCallback) {
+    display(background, false, null, null, worldCallback, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, false, false, null, worldCallback, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Scene.Callback worldCallback, int x, int y) {
+    display(null, false, null, null, worldCallback, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, false, false, null, worldCallback, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, Scene.Callback worldCallback, int x, int y) {
+    display(background, false, null, null, worldCallback, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, axes, grid, null, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid, Scene.Callback worldCallback) {
+    display(null, axes, grid, null, worldCallback, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, null, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, Integer grid, Scene.Callback worldCallback) {
+    display(background, axes, grid, null, worldCallback, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, null, worldCallback, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid, Scene.Callback worldCallback, int x, int y) {
+    display(null, axes, grid, null, worldCallback, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, null, worldCallback, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, Integer grid, Scene.Callback worldCallback, int x, int y) {
+    display(background, axes, grid, null, worldCallback, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, false, null, subtree, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Node subtree) {
+    display(null, false, null, subtree, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, false, null, subtree, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, Node subtree) {
+    display(background, false, null, subtree, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, false, null, null, subtree, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Node subtree, int x, int y) {
+    display(null, false, null, subtree, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, false, null, null, subtree, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, Node subtree, int x, int y) {
+    display(background, false, null, subtree, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, axes, null, subtree, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, Node subtree) {
+    display(null, axes, null, subtree, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, axes, null, subtree, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, Node subtree) {
+    display(background, axes, null, subtree, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(axes, grid, subtree, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid, Node subtree) {
+    display(null, axes, grid, subtree, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, subtree, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, Integer grid, Node subtree) {
+    display(background, axes, grid, subtree, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, axes, null, subtree, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, Node subtree, int x, int y) {
+    display(null, axes, null, subtree, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, axes, null, subtree, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, Node subtree, int x, int y) {
+    display(background, axes, null, subtree, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, axes, grid, subtree, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid, Node subtree, int x, int y) {
+    display(null, axes, grid, subtree, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, subtree, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, Integer grid, Node subtree, int x, int y) {
+    display(background, axes, grid, subtree, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, false, null, subtree, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Node subtree, Scene.Callback worldCallback) {
+    display(null, false, null, subtree, worldCallback, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, false, null, subtree, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, Node subtree, Scene.Callback worldCallback) {
+    display(background, false, null, subtree, worldCallback, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, false, null, subtree, worldCallback, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Node subtree, Scene.Callback worldCallback, int x, int y) {
+    display(null, false, null, subtree, worldCallback, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, false, null, subtree, worldCallback, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, Node subtree, Scene.Callback worldCallback, int x, int y) {
+    display(background,false,null, subtree, worldCallback, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, axes, null, null, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes) {
+    display(null, axes, null, null, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, axes, null, null, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes) {
+    display(background, axes, null, null, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, axes, grid, null, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid) {
+    display(null, axes, grid, null, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, null, null, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, Integer grid) {
+    display(background, axes, grid, null, null, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, axes, null, null, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, int x, int y) {
+    display(null, axes, null, null, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, axes, null, null, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, int x, int y) {
+    display(background, axes, null, null, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, axes, grid, null, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid, int x, int y) {
+    display(null, axes, grid, null, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, null, null, x, y)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, Integer grid, int x, int y) {
+    display(background, axes, grid, null, null, x, y);
+  }
+
+  /**
+   * Same as {@code display(null, axes, null, subtree, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, Node subtree, Scene.Callback worldCallback) {
+    display(null, axes, null, subtree, worldCallback, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, axes, null, subtree, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, Node subtree, Scene.Callback worldCallback) {
+    display(background, axes, null, subtree, worldCallback, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, axes, grid, subtree, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, Integer grid, Node subtree, Scene.Callback worldCallback) {
+    display(null, axes, grid, subtree, worldCallback, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(background, axes, grid, subtree, worldCallback, 0, 0)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, Integer grid, Node subtree, Scene.Callback worldCallback) {
+    display(background, axes, grid, subtree, worldCallback, 0, 0);
+  }
+
+  /**
+   * Same as {@code display(null, axes, subtree, worldCallback, cornerX, cornerY)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(boolean axes, Node subtree, Scene.Callback worldCallback, int cornerX, int cornerY) {
+    display(null, axes, subtree, worldCallback, cornerX, cornerY);
+  }
+
+  /**
+   * Same as {@code display(background, axes, null, subtree, worldCallback, cornerX, cornerY)}.
+   *
+   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   */
+  public void display(Object background, boolean axes, Node subtree, Scene.Callback worldCallback, int cornerX, int cornerY) {
+    display(background, axes, null, subtree, worldCallback, cornerX, cornerY);
+  }
+
+  /**
+   * Display the scene tree.
+   *
+   * @param background color or image; may be null (don't refresh)
+   * @param axes
+   * @param grid color; may be null (no grid)
+   * @param subtree
+   * @param worldCallback
+   * @param cornerX
+   * @param cornerY
+   */
+  public void display(Object background, boolean axes, Integer grid, Node subtree, Scene.Callback worldCallback, int cornerX, int cornerY) {
+    if (isOffscreen()) {
+      openContext();
+    }
+    if (background instanceof PImage) {
+      context().background((PImage)background);
+    }
+    else if (isNumInstance(background)) {
+      context().background(castToInt(background));
+    }
+    if (axes) {
+      drawAxes();
+    }
+    if (grid != null) {
+      context().pushStyle();
+      context().stroke(grid);
+      drawGrid();
+      context().popStyle();
+    }
+    render(subtree);
+    if (worldCallback != null) {
+      worldCallback.execute();
+    }
+    if (isOffscreen()) {
+      closeContext();
+      image(cornerX, cornerY);
+    }
+  }
+
+  /**
+   * Same as {@code image(0, 0)}.
+   *
+   * @see #image(int, int)
+   */
+  public void image() {
+    image(0, 0);
+  }
+
+  /**
+   * Similar to {@link #pApplet} {@code image()}. Used to display the offscreen scene {@link #context()}.
+   * Does nothing if the scene is on-screen. Throws an error if there's an onscreen scene and this method
+   * is called within {@link #openContext()} and {@link #closeContext()}.
+   * <p>
+   * Call this method, instead of {@link #pApplet} {@code image()}, to make {@link #hasFocus()}
+   * work always properly.
+   */
+  public void image(int pixelX, int pixelY) {
+    if (isOffscreen()) {
+      if (_lastRendered != Graph._frameCount) {
+        System.out.println("Warning: image() not updated since render wasn't called @" + Graph._frameCount);
+      }
+      if (_renderCount != 0) {
+        throw new RuntimeException("Error: offscreen scenes should call image() after openContext() / closeContext()");
+      }
+      else {
+        if (_onscreenGraph != null) {
+          _onscreenGraph.beginHUD();
+        }
+        pApplet.pushStyle();
+        _setUpperLeftCorner(pixelX, pixelY);
+        _lastDisplayed = Graph._frameCount;
+        pApplet.imageMode(PApplet.CORNER);
+        pApplet.image(context(), pixelX, pixelY);
+        pApplet.popStyle();
+        if (_onscreenGraph != null) {
+          _onscreenGraph.endHUD();
+        }
+      }
+    }
+    /*
+    // TODO debug
+    else {
+      System.out.println("Warning: image() is only available for offscreen scenes. Nothing done!");
+    }
+    // */
+  }
+
+  /**
+   * Same as {@code displayBackBuffer(0, 0)}.
+   *
+   * @see #displayBackBuffer(int, int, int)
+   */
+  public void displayBackBuffer() {
+    displayBackBuffer(/* 0xFFFFFFFF */-16777216);
+  }
+
+  /**
+   * Same as {@code displayBackBuffer(background, 0, 0)}.
+   *
+   * @see #displayBackBuffer(int, int, int)
+   */
+  public void displayBackBuffer(int background) {
+    displayBackBuffer(background, 0, 0);
+  }
+
+  /**
+   * Displays the buffer nub use for picking at the given pixel coordinates.
+   * Used for debugging.
+   *
+   * @see #displayBackBuffer(int, int, int)
+   */
+  public void displayBackBuffer(int pixelX, int pixelY) {
+    displayBackBuffer(/* 0xFFFFFFFF */-16777216, pixelX, pixelY);
+  }
+
+  /**
+   * Displays the buffer nub use for picking at the given pixel coordinates,
+   * with {@code background} color. Used for debugging.
+   */
+  public void displayBackBuffer(int background, int pixelX, int pixelY) {
+    if (_onscreenGraph != null) {
+      _onscreenGraph.beginHUD();
+      _imageBackBuffer(background, pixelX, pixelY);
+      _onscreenGraph.endHUD();
+    }
+    else {
+      _imageBackBuffer(background, pixelX, pixelY);
+    }
+  }
+
+  /**
+   * Display the {@link #_backBuffer()} used for picking at screen coordinates
+   * on top of the main sketch canvas at the upper left corner:
+   * {@code (pixelX, pixelY)}. Mainly for debugging.
+   */
+  protected int _idToColor(int id) {
+    if(_idToColor.containsKey(id)) return _idToColor.get(id);
+    boolean isDifferent = false;
+    int color = 0;
+    while(!isDifferent){
+      color = pApplet.color(pApplet.random(255),pApplet.random(255), pApplet.random(255));
+      isDifferent = true;
+      for(int c : _idToColor.values()) isDifferent &= c != color;
+    }
+    _idToColor.put(id, color);
+    return color;
+  }
+
+  /**
+   * Display the {@link #_backBuffer()} used for picking at screen coordinates
+   * on top of the main sketch canvas at the upper left corner:
+   * {@code (pixelX, pixelY)}. Mainly for debugging.
+   */
+  protected void _imageBackBuffer(int background, int pixelX, int pixelY) {
+    if (_backBuffer() != null) {
+      pApplet.pushStyle();
+      pApplet.imageMode(PApplet.CORNER);
+      PImage img = _backBuffer().get();
+      img.loadPixels();
+      // simple lookup table to discriminate bb shapes
+      for (int i = 0; i < img.pixels.length; i++) {
+        if (img.pixels[i] == -16777216) {
+          img.pixels[i] = background;
+          continue;
+        }
+        img.pixels[i] = _idToColor(img.pixels[i]);
+      }
+      img.updatePixels();
+      pApplet.image(img, pixelX, pixelY);
+      pApplet.popStyle();
+    }
+  }
+
+  protected void _emitBackBufferUniforms(Node node) {
+    // TODO How to deal with these commands: breaks picking in Luxo when they're moved to the constructor
+    // Seems related to: PassiveTransformations
+    // funny, only safe way. Otherwise break things horribly when setting node shapes
+    // and there are more than one node holding a shape
+    int id = node.id();
+    float r = Node.redID(id);
+    float g = Node.greenID(id);
+    float b = Node.blueID(id);
+    _backBuffer().shader(_triangleShader);
+    _backBuffer().shader(_lineShader, PApplet.LINES);
+    _backBuffer().shader(_pointShader, PApplet.POINTS);
+    _triangleShader.set("id", new PVector(r, g, b));
+    _lineShader.set("id", new PVector(r, g, b));
+    _pointShader.set("id", new PVector(r, g, b));
+  }
 
   /**
    * Displays the graph and nodes hud hint.
@@ -1852,6 +2781,31 @@ public class Graph {
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
   protected void _displayHUD() {
+    if (!_cacheHUDs.isEmpty()) {
+      context().pushStyle();
+      beginHUD();
+      Iterator<Node> iterator = _cacheHUDs.iterator();
+      while(iterator.hasNext()) {
+        Node node = iterator.next();
+        if (node.rendered(this) && node.isHintEnabled(Node.HUD)) {
+          context().pushMatrix();
+          Vector location = screenLocation(node);
+          if (location != null) {
+            context().translate(location.x(), location.y());
+            if (node._imrHUD != null) {
+              node._imrHUD.accept(context());
+            }
+            if (node._rmrHUD != null) {
+              context().shape(node._rmrHUD);
+            }
+          }
+          context().popMatrix();
+          iterator.remove();
+        }
+      }
+      endHUD();
+      context().popStyle();
+    }
   }
 
   /**
@@ -1859,6 +2813,15 @@ public class Graph {
    * meant to be implemented by derived classes.
    */
   protected void _displayPaths() {
+    context().pushStyle();
+    for (Node interpolator : _interpolators) {
+      if (interpolator.rendered(this) && interpolator.isHintEnabled(Node.KEYFRAMES)) {
+        context().pushStyle();
+        _drawSpline(interpolator);
+        context().popStyle();
+      }
+    }
+    context().popStyle();
   }
 
   /**
@@ -1867,6 +2830,58 @@ public class Graph {
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
   protected void _displayFrontHint(Node node) {
+    PGraphics pg = context();
+    if (node.isHintEnabled(Node.SHAPE)) {
+      pg.pushStyle();
+      if (node._rmrShape != null) {
+        pg.shapeMode(pg.shapeMode);
+        pg.shape(node._rmrShape);
+      }
+      if (node._imrShape != null) {
+        node._imrShape.accept(pg);
+      }
+      pg.popStyle();
+    }
+    if (node.isHintEnabled(Node.TORUS)) {
+      pg.pushStyle();
+      pg.colorMode(PApplet.RGB, 255);
+      pg.fill(node._torusColor);
+      drawTorusSolenoid(pg, node._torusFaces, 5);
+      pg.popStyle();
+    }
+    if (node.isHintEnabled(Node.BOUNDS)) {
+      for (Graph graph : node._frustumGraphs) {
+        if (graph != this) {
+          pg.pushStyle();
+          pg.colorMode(PApplet.RGB, 255);
+          pg.strokeWeight(node._boundsWeight);
+          pg.stroke(((PGraphics)graph.context()).backgroundColor);
+          pg.fill(((PGraphics)graph.context()).backgroundColor);
+          drawFrustum(pg, graph);
+          pg.popStyle();
+        }
+      }
+    }
+    if (node.isHintEnabled(Node.AXES)) {
+      pg.pushStyle();
+      drawAxes(pg, node._axesLength == 0 ? _radius / 5 : node._axesLength);
+      pg.popStyle();
+    }
+    if (node.isHintEnabled(Node.CAMERA)) {
+      pg.pushStyle();
+      pg.colorMode(PApplet.RGB, 255);
+      pg.stroke(node._cameraStroke);
+      pg.fill(node._cameraStroke);
+      _drawEye(pg, node._cameraLength == 0 ? _radius : node._cameraLength);
+      pg.popStyle();
+    }
+    if (node.isHintEnabled(Node.BULLSEYE)) {
+      pg.pushStyle();
+      pg.colorMode(PApplet.RGB, 255);
+      pg.stroke(node._bullsEyeStroke);
+      _drawBullsEye(node);
+      pg.popStyle();
+    }
   }
 
   /**
@@ -1875,6 +2890,36 @@ public class Graph {
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    */
   protected void _displayBackHint(Node node) {
+    _emitBackBufferUniforms(node);
+    PGraphics pg = _backBuffer();
+    if (node.isHintEnabled(Node.SHAPE) && node.isPickingEnabled(Node.SHAPE)) {
+      if (node._rmrShape != null) {
+        pg.shapeMode(pg.shapeMode);
+        pg.shape(node._rmrShape);
+      }
+      if (node._imrShape != null) {
+        node._imrShape.accept(pg);
+      }
+    }
+    if (node.isHintEnabled(Node.TORUS) && node.isPickingEnabled(Node.TORUS)) {
+      drawTorusSolenoid(pg, node._torusFaces, 5);
+    }
+    if (node.isHintEnabled(Node.BOUNDS) && node.isPickingEnabled(Node.BOUNDS)) {
+      for (Graph graph : node._frustumGraphs) {
+        if (graph != this) {
+          drawFrustum(pg, graph);
+        }
+      }
+    }
+    if (node.isHintEnabled(Node.AXES) && node.isPickingEnabled(Node.AXES)) {
+      pg.pushStyle();
+      pg.strokeWeight(6);
+      drawAxes(pg, node._axesLength == 0 ? _radius / 5 : node._axesLength);
+      pg.popStyle();
+    }
+    if (node.isHintEnabled(Node.CAMERA) && node.isPickingEnabled(Node.CAMERA)) {
+      _drawEye(pg, node._cameraLength == 0 ? _radius : node._cameraLength);
+    }
   }
 
   /**
@@ -2196,6 +3241,62 @@ public class Graph {
     out[0] = out[0] * viewport[2] + viewport[0];
     out[1] = out[1] * viewport[3] + viewport[1];
     return new Vector(out[0], out[1], out[2]);
+  }
+
+  /**
+   * Same as {@code return pixelDepth(mouseX(), mouseY())}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #pixelDepth(int, int)
+   */
+  public float pixelDepth() {
+    return pixelDepth(mouseX(), mouseY());
+  }
+
+  /**
+   * Returns the depth (z-value) of the object under the {@code pixel}. Used by
+   * {@link #location(int, int)}.
+   * <p>
+   * The z-value ranges in [0..1] (near and far plane respectively). In 3D note that this
+   * value is not a linear interpolation between {@link #near()} and {@link #far()}:
+   * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z')} where {@code z'} is
+   * the distance from the point you project to the eye, along the {@link #viewDirection()}.
+   *
+   * @see #location(int, int)
+   */
+  public float pixelDepth(int pixelX, int pixelY) {
+    PGraphicsOpenGL pggl;
+    if (context() instanceof PGraphicsOpenGL)
+      pggl = (PGraphicsOpenGL) context();
+    else
+      throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
+    float[] depth = new float[1];
+    PGL pgl = pggl.beginPGL();
+    pgl.readPixels(pixelX, (height() - pixelY), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT, FloatBuffer.wrap(depth));
+    pggl.endPGL();
+    return depth[0];
+  }
+
+  /**
+   * Same as {@code return location(mouseX(), mouseY())}.
+   *
+   * @see #mouseX()
+   * @see #mouseY()
+   * @see #location(int, int)
+   */
+  public Vector location() {
+    return location(mouseX(), mouseY());
+  }
+
+  /**
+   * Returns the world coordinates of the 3D point located at {@code (pixelX, pixelY)} on
+   * screen. May be null if no object is under pixel.
+   */
+  public Vector location(int pixelX, int pixelY) {
+    float depth = pixelDepth(pixelX, pixelY);
+    Vector point = location(new Vector(pixelX, pixelY, depth));
+    return (depth < 1.0f) ? point : null;
   }
 
   /**
@@ -2568,6 +3669,71 @@ public class Graph {
   // 4. Translate
 
   /**
+   * Same as {@code shift(Graph.inertia)}.
+   *
+   * @see #shift(float)
+   */
+  public void shift() {
+    shift(Graph.inertia);
+  }
+
+  /**
+   * Same as {@code shift((String)null, inertia)}.
+   *
+   * @see #shift(String, float)
+   */
+  public void shift(float inertia) {
+    shift((String)null, inertia);
+  }
+
+  /**
+   * Same as {@code shift(tag, Graph.inertia)}.
+   *
+   * @see #shift(String, float)
+   */
+  public void shift(String tag) {
+    shift(tag, Graph.inertia);
+  }
+
+  /**
+   * Same as {@code if (tag == null || node(tag) != null) shift(node(tag), inertia)}.
+   *
+   * @see #shift(Node, float)
+   */
+  public void shift(String tag, float inertia) {
+    if (tag == null || node(tag) != null)
+      shift(node(tag), inertia);
+  }
+
+  /**
+   * Same as {@code }.
+   *
+   * @see #shift(Node, float)
+   */
+  public void shift(Node node) {
+    shift(node, Graph.inertia);
+  }
+
+  /**
+   * Same as {@code this.shift(node, mouseDX() * (1 - lag), mouseDY() * (1 - lag), 0, lag)}.
+   * It tries to keep the node under the mouse cursor independently of {@code lag} which should
+   * be in [0..1], 0 responds immediately and 1 no response at all.
+   *
+   * @see #mouseDX()
+   * @see #mouseDY()
+   * @see #shift(Node, float, float, float, float)
+   */
+  public void shift(Node node, float lag) {
+    float l = Math.abs(lag);
+    while (l > 1)
+      l /= 10;
+    if (l != lag)
+      System.out.println("Warning: lag should be in [0..1]. Setting it as " + l);
+    // hack: idea is to have node always under the cursor
+    this.shift(node, mouseDX() * (1 - l), mouseDY() * (1 - l), 0, l);
+  }
+
+  /**
    * Same as {@code shift(dx, dy, dz, Graph.inertia)}.
    *
    * @see #shift(float, float, float, float)
@@ -2744,6 +3910,66 @@ public class Graph {
   // 6. Spin
 
   /**
+   * Same as {@code spin((String)null)}.
+   *
+   * @see #spin(String)
+   */
+  public void spin() {
+    spin((String)null);
+  }
+
+  /**
+   * Same as {@code spin(tag, Graph.inertia)}.
+   *
+   * @see #spin(String, float)
+   */
+  public void spin(String tag) {
+    spin(tag, Graph.inertia);
+  }
+
+  /**
+   * Same as {@code spin((String)null, inertia)}.
+   *
+   * @see #spin(String, float)
+   */
+  public void spin(float inertia) {
+    spin((String)null, inertia);
+  }
+
+  /**
+   * Same as {@code if (tag == null || node(tag) != null) spin(node(tag), inertia)}.
+   *
+   * @see #spin(Node, float)
+   */
+  public void spin(String tag, float inertia) {
+    if (tag == null || node(tag) != null)
+      spin(node(tag), inertia);
+  }
+
+  /**
+   * Same as {@code spin(node, Graph.inertia)}.
+   *
+   * @see #spin(Node, float)
+   */
+  public void spin(Node node) {
+    spin(node, Graph.inertia);
+  }
+
+  /**
+   * Same as {@code this.spinNode(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia)}.
+   *
+   * @see #spin(Node, int, int, int, int, float)
+   */
+  public void spin(Node node, float inertia) {
+    if (inertia == 1) {
+      // Sensitivity is expressed in pixels per milliseconds. Default value is 30 (300 pixels per second).
+      float sensitivity = 30;
+      this.spin(node, pmouseX(), pmouseY(), mouseX(), mouseY(), mouseSpeed() > sensitivity ? 1 : 0.9f);
+    } else
+      this.spin(node, pmouseX(), pmouseY(), mouseX(), mouseY(), inertia);
+  }
+
+  /**
    * Same as {@code spin(pixel1X, pixel1Y, pixel2X, pixel2Y, Graph.inertia)}.
    *
    * @see #spin(int, int, int, int, float)
@@ -2859,87 +4085,1610 @@ public class Graph {
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
   }
 
-  // Hack to hide hint properties
+  // DRAWING
 
-  // Node
-
-  protected Consumer<processing.core.PGraphics> _imrShape(Node node) {
-    return node._imrShape;
+  /**
+   * Same as {@code vertex(context(), v)}.
+   *
+   * @see #vertex(PGraphics, float[])
+   */
+  public void vertex(float[] v) {
+    vertex(context(), v);
   }
 
-  protected processing.core.PShape _rmrShape(Node node) {
-    return node._rmrShape;
+  /**
+   * Wrapper for PGraphics.vertex(v)
+   */
+  public static void vertex(PGraphics pGraphics, float[] v) {
+    pGraphics.vertex(v);
   }
 
-  protected int _torusColor(Node node) {
-    return node._torusColor;
+  /**
+   * Same as {@code if (this.is2D()) vertex(context(), x, y); else vertex(context(), x, y, z)}.
+   *
+   * @see #vertex(PGraphics, float, float, float)
+   */
+  public void vertex(float x, float y, float z) {
+    vertex(context(), x, y, z);
   }
 
-  protected int _torusFaces(Node node) {
-    return node._torusFaces;
+  /**
+   * Wrapper for PGraphics.vertex(x,y,z)
+   */
+  public static void vertex(PGraphics pGraphics, float x, float y, float z) {
+    if (pGraphics instanceof PGraphics3D)
+      pGraphics.vertex(x, y, z);
+    else
+      pGraphics.vertex(x, y);
   }
 
-  protected HashSet<Graph> _frustumGraphs(Node node) {
-    return node._frustumGraphs;
+  /**
+   * Same as {@code if (this.is2D()) vertex(context(), x, y, u, v); else
+   * vertex(context(), x, y, z, u, v);}.
+   *
+   * @see #vertex(PGraphics, float, float, float, float)
+   * @see #vertex(PGraphics, float, float, float, float, float)
+   */
+  public void vertex(float x, float y, float z, float u, float v) {
+    vertex(context(), x, y, z, u, v);
   }
 
-  protected Node.BullsEyeShape _bullsEyeShape(Node node) {
-    return node._bullsEyeShape;
+  /**
+   * Wrapper for PGraphics.vertex(x,y,z,u,v)
+   */
+  public static void vertex(PGraphics pGraphics, float x, float y, float z, float u, float v) {
+    if (pGraphics instanceof PGraphics3D)
+      pGraphics.vertex(x, y, z, u, v);
+    else
+      pGraphics.vertex(x, y, u, v);
   }
 
-  protected int _bullsEyeStroke(Node node) {
-    return node._bullsEyeStroke;
+  /**
+   * Same as {@code vertex(context(), x, y)}.
+   *
+   * @see #vertex(PGraphics, float, float)
+   */
+  public void vertex(float x, float y) {
+    vertex(context(), x, y);
   }
 
-  protected float _axesLength(Node node) {
-    return node._axesLength;
+  /**
+   * Wrapper for PGraphics.vertex(x,y)
+   */
+  public static void vertex(PGraphics pGraphics, float x, float y) {
+    pGraphics.vertex(x, y);
   }
 
-  protected int _cameraStroke(Node node) {
-    return node._cameraStroke;
+  /**
+   * Same as {@code vertex(context(), x, y, u, v)}.
+   *
+   * @see #vertex(PGraphics, float, float, float, float)
+   */
+  public void vertex(float x, float y, float u, float v) {
+    vertex(context(), x, y, u, v);
   }
 
-  protected float _cameraLength(Node node) {
-    return node._cameraLength;
+  /**
+   * Wrapper for PGraphics.vertex(x,y,u,v)
+   */
+  public static void vertex(PGraphics pGraphics, float x, float y, float u, float v) {
+    pGraphics.vertex(x, y, u, v);
   }
 
-  protected Consumer<processing.core.PGraphics> _imrHUD(Node node) {
-    return node._imrHUD;
+  /**
+   * Same as {@code if (this.is2D()) line(context(), x1, y1, x2, y2);
+   * else line(context(), x1, y1, z1, x2, y2, z2);}.
+   *
+   * @see #line(PGraphics, float, float, float, float, float, float)
+   */
+  public void line(float x1, float y1, float z1, float x2, float y2, float z2) {
+    line(context(), x1, y1, z1, x2, y2, z2);
   }
 
-  protected processing.core.PShape _rmrHUD(Node node) {
-    return node._rmrHUD;
+  /**
+   * Wrapper for PGraphics.line(x1, y1, z1, x2, y2, z2).
+   */
+  public static void line(PGraphics pGraphics, float x1, float y1, float z1, float x2, float y2, float z2) {
+    if (pGraphics instanceof PGraphics3D)
+      pGraphics.line(x1, y1, z1, x2, y2, z2);
+    else
+      pGraphics.line(x1, y1, x2, y2);
   }
 
-  protected int _boundsWeight(Node node) {
-    return node._boundsWeight;
+  /**
+   * Same as {@code context().line(x1, y1, x2, y2)}.
+   *
+   * @see #line(PGraphics, float, float, float, float)
+   */
+  public void line(float x1, float y1, float x2, float y2) {
+    line(context(), x1, y1, x2, y2);
   }
 
-  protected boolean _rendered(Node node) { return node.rendered(this); }
-
-  // Interpolator
-
-  protected int _steps(Node interpolator) {
-    return interpolator._steps;
+  /**
+   * Wrapper for PGraphics.line(x1, y1, x2, y2).
+   */
+  public static void line(PGraphics pGraphics, float x1, float y1, float x2, float y2) {
+    pGraphics.line(x1, y1, x2, y2);
   }
 
-  protected int _keyframesMask(Node interpolator) {
-    return interpolator._keyframesMask;
-  }
-
-  protected int _splineStroke(Node interpolator) {
-    return interpolator._splineStroke;
-  }
-
-  protected int _splineWeight(Node interpolator) {
-    return interpolator._splineWeight;
-  }
-
-  protected List<Node> _path(Node interpolator) {
-    return interpolator._interpolator._path();
+  protected void _drawSpline(Node interpolator) {
+    if (interpolator.hint() != 0) {
+      List<Node> path = interpolator._interpolator._path();
+      if (interpolator._splineWeight > 0 && path.size() > 1) {
+        context().pushStyle();
+        context().noFill();
+        context().colorMode(PApplet.RGB, 255);
+        context().strokeWeight(interpolator._splineWeight);
+        context().stroke(interpolator._splineStroke);
+        context().beginShape();
+        for (Node node : path) {
+          Vector position = node.worldPosition();
+          vertex(position.x(), position.y(), position.z());
+        }
+        context().endShape();
+        context().popStyle();
+      }
+      if (interpolator._steps > 0) {
+        context().pushStyle();
+        int count = 0;
+        float goal = 0.0f;
+        for (Node node : path) {
+          if (count >= goal) {
+            goal += Node.maxSteps / ((float) interpolator._steps + 1);
+            if (count % Node.maxSteps != 0) {
+              _matrixHandler.pushMatrix();
+              _matrixHandler.applyTransformation(node);
+              _displayAnimationHint(node);
+              _matrixHandler.popMatrix();
+            }
+          }
+          count++;
+        }
+        context().popStyle();
+      }
+    }
   }
 
   protected static boolean _isHintEnabled(int mask, int hint) {
     return ~(mask | ~hint) == 0;
+  }
+
+  protected void _displayAnimationHint(Node node) {
+    PGraphics pg = context();
+    if (Graph._isHintEnabled(node._keyframesMask, Node.SHAPE)) {
+      pg.pushStyle();
+      if (node._rmrShape != null) {
+        pg.shapeMode(pg.shapeMode);
+        pg.shape(node._rmrShape);
+      }
+      if (node._imrShape != null) {
+        node._imrShape.accept(pg);
+      }
+      pg.popStyle();
+    }
+    if (Graph._isHintEnabled(node._keyframesMask, Node.TORUS)) {
+      pg.pushStyle();
+      pg.colorMode(PApplet.RGB, 255);
+      pg.fill(node._torusColor);
+      drawTorusSolenoid(pg, node._torusFaces, 5);
+      pg.popStyle();
+    }
+    if (Graph._isHintEnabled(node._keyframesMask, Node.AXES)) {
+      pg.pushStyle();
+      drawAxes(pg, node._axesLength == 0 ? _radius / 5 : node._axesLength);
+      pg.popStyle();
+    }
+    if (Graph._isHintEnabled(node._keyframesMask, Node.CAMERA)) {
+      pg.pushStyle();
+      pg.colorMode(PApplet.RGB, 255);
+      pg.stroke(node._cameraStroke);
+      pg.fill(node._cameraStroke);
+      _drawEye(pg, node._cameraLength == 0 ? _radius : node._cameraLength);
+      pg.popStyle();
+    }
+    if (Graph._isHintEnabled(node._keyframesMask, Node.BULLSEYE)) {
+      pg.pushStyle();
+      pg.colorMode(PApplet.RGB, 255);
+      pg.stroke(node._bullsEyeStroke);
+      _drawBullsEye(node);
+      pg.popStyle();
+    }
+  }
+
+  /**
+   * Internal use.
+   */
+  protected void _drawEye(PGraphics pg, float scale) {
+    pg.pushStyle();
+    float halfHeight = scale * 0.07f;
+    float halfWidth = halfHeight * 1.3f;
+    float dist = halfHeight / (float) Math.tan(PApplet.PI / 8.0f);
+
+    float arrowHeight = 1.5f * halfHeight;
+    float baseHeight = 1.2f * halfHeight;
+    float arrowHalfWidth = 0.5f * halfWidth;
+    float baseHalfWidth = 0.3f * halfWidth;
+
+    // Frustum outline
+    /*
+    if (pg == context()) {
+      pg.pushStyle();
+      pg.noFill();
+    }
+    */
+    pg.pushStyle();
+    pg.noFill();
+
+    pg.beginShape(PApplet.TRIANGLE_FAN);
+    vertex(pg, 0.0f, 0.0f, 0.0f);
+    vertex(pg, -halfWidth, -halfHeight, -dist);
+    vertex(pg, halfWidth, -halfHeight, -dist);
+    vertex(pg, halfWidth, halfHeight, -dist);
+    vertex(pg, -halfWidth, halfHeight, -dist);
+    vertex(pg, -halfWidth, -halfHeight, -dist);
+    pg.endShape(PApplet.CLOSE);
+    /*
+    if (pg == context()) {
+      pg.popStyle();
+    }
+    */
+    pg.popStyle();
+
+    // Up arrow
+    pg.noStroke();
+    // Base
+    pg.beginShape(PApplet.QUADS);
+
+    if (leftHanded) {
+      vertex(pg, baseHalfWidth, -halfHeight, -dist);
+      vertex(pg, -baseHalfWidth, -halfHeight, -dist);
+      vertex(pg, -baseHalfWidth, -baseHeight, -dist);
+      vertex(pg, baseHalfWidth, -baseHeight, -dist);
+    } else {
+      vertex(pg, -baseHalfWidth, halfHeight, -dist);
+      vertex(pg, baseHalfWidth, halfHeight, -dist);
+      vertex(pg, baseHalfWidth, baseHeight, -dist);
+      vertex(pg, -baseHalfWidth, baseHeight, -dist);
+    }
+
+    pg.endShape();
+    // Arrow
+    pg.beginShape(PApplet.TRIANGLES);
+    if (leftHanded) {
+      vertex(pg, 0.0f, -arrowHeight, -dist);
+      vertex(pg, arrowHalfWidth, -baseHeight, -dist);
+      vertex(pg, -arrowHalfWidth, -baseHeight, -dist);
+    } else {
+      vertex(pg, 0.0f, arrowHeight, -dist);
+      vertex(pg, -arrowHalfWidth, baseHeight, -dist);
+      vertex(pg, arrowHalfWidth, baseHeight, -dist);
+    }
+    pg.endShape();
+    pg.popStyle();
+  }
+
+  /**
+   * Simply calls {@code drawArrow(length, 0.05f * length)}
+   *
+   * @see #drawArrow(float, float)
+   */
+  public void drawArrow(float length) {
+    drawArrow(length, 0.05f * length);
+  }
+
+  /**
+   * Draws an arrow of {@code radius} and {@code length} along the positive Z axis.
+   * <p>
+   * Use {@link #drawArrow(Vector, Vector, float)} to place the arrow in 3D.
+   */
+  public void drawArrow(float length, float radius) {
+    float head = 2.5f * (radius / length) + 0.1f;
+    float coneRadiusCoef = 4.0f - 5.0f * head;
+
+    drawCylinder(radius, length * (1.0f - head / coneRadiusCoef));
+    _matrixHandler.translate(0.0f, 0.0f, length * (1.0f - head));
+    drawCone(coneRadiusCoef * radius, head * length);
+    _matrixHandler.translate(0.0f, 0.0f, -length * (1.0f - head));
+  }
+
+  /**
+   * Same as {@code drawArrow(vector, 0.05f * vector.magnitude())}.
+   *
+   * @see #drawArrow(Vector, float)
+   */
+  public void drawArrow(Vector vector) {
+    drawArrow(vector, 0.05f * vector.magnitude());
+  }
+
+  /**
+   * Same as {@code drawArrow(new Vector(), vector, radius)}.
+   *
+   * @see #drawArrow(Vector, Vector, float)
+   */
+  public void drawArrow(Vector vector, float radius) {
+    drawArrow(new Vector(), vector, radius);
+  }
+
+  /**
+   * Draws an arrow of {@code radius} between {@code from} and the 3D point {@code to}.
+   *
+   * @see #drawArrow(float, float)
+   */
+  public void drawArrow(Vector from, Vector to, float radius) {
+    _matrixHandler.pushMatrix();
+    _matrixHandler.translate(from.x(), from.y(), from.z());
+    _matrixHandler.applyMatrix(new Quaternion(new Vector(0, 0, 1), Vector.subtract(to, from)).matrix());
+    drawArrow(Vector.subtract(to, from).magnitude(), radius);
+    _matrixHandler.popMatrix();
+  }
+
+  /**
+   * Same as {@code drawCylinder(20, radius, height)}.
+   *
+   * @see #drawCylinder(int, float, float)
+   */
+  public void drawCylinder(float radius, float height) {
+    drawCylinder(20, radius, height);
+  }
+
+  /**
+   * Same as {@code drawCylinder(context(), detail, radius, height)}.
+   *
+   * @see #drawCylinder(PGraphics, int, float, float)
+   */
+  public void drawCylinder(int detail, float radius, float height) {
+    drawCylinder(context(), detail, radius, height);
+  }
+
+  /**
+   * Same as {@code drawCylinder(context, radius()/6, radius()/3)}.
+   *
+   * @see #drawCylinder(PGraphics, float, float)
+   */
+  public void drawCylinder(PGraphics pGraphics) {
+    drawCylinder(pGraphics, _radius / 6, _radius / 3);
+  }
+
+  /**
+   * Same as {@code drawCylinder(pGraphics, 20, radius, height)}.
+   *
+   * @see #drawCylinder(PGraphics, int, float, float)
+   */
+  public static void drawCylinder(PGraphics pGraphics, float radius, float height) {
+    drawCylinder(pGraphics, 20, radius, height);
+  }
+
+  /**
+   * Draws a cylinder of {@code radius} and {@code height} onto {@code pGraphics}.
+   */
+  public static void drawCylinder(PGraphics pGraphics, int detail, float radius, float height) {
+    if (!(pGraphics instanceof PGraphics3D))
+      return;
+    pGraphics.pushStyle();
+    float px, py;
+
+    float degrees = 360 / detail;
+
+    pGraphics.beginShape(PApplet.QUAD_STRIP);
+    for (float i = 0; i < detail + 1; i++) {
+      px = (float) Math.cos(PApplet.radians(i * degrees)) * radius;
+      py = (float) Math.sin(PApplet.radians(i * degrees)) * radius;
+      vertex(pGraphics, px, py, 0);
+      vertex(pGraphics, px, py, height);
+    }
+    pGraphics.endShape();
+
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    vertex(pGraphics, 0, 0, 0);
+    for (float i = detail; i > -1; i--) {
+      px = (float) Math.cos(PApplet.radians(i * degrees)) * radius;
+      py = (float) Math.sin(PApplet.radians(i * degrees)) * radius;
+      vertex(pGraphics, px, py, 0);
+    }
+    pGraphics.endShape();
+
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    vertex(pGraphics, 0, 0, height);
+    for (float i = 0; i < detail + 1; i++) {
+      px = (float) Math.cos(PApplet.radians(i * degrees)) * radius;
+      py = (float) Math.sin(PApplet.radians(i * degrees)) * radius;
+      vertex(pGraphics, px, py, height);
+    }
+    pGraphics.endShape();
+    pGraphics.popStyle();
+  }
+
+  /**
+   * Same as {@code drawHollowCylinder(context(), radius, height, normal1, normal2)}.
+   *
+   * @see #drawHollowCylinder(PGraphics, float, float, Vector, Vector)
+   */
+  public void drawHollowCylinder(float radius, float height, Vector normal1, Vector normal2) {
+    drawHollowCylinder(context(), radius, height, normal1, normal2);
+  }
+
+  /**
+   * Same as {@code drawHollowCylinder(context(), detail, radius, height, normal1, normal2)}.
+   *
+   * @see #drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)
+   * @see #drawCylinder(float, float)
+   */
+  public void drawHollowCylinder(int detail, float radius, float height, Vector normal1, Vector normal2) {
+    drawHollowCylinder(context(), detail, radius, height, normal1, normal2);
+  }
+
+  /**
+   * Same as {@code drawHollowCylinder(pGraphics, 30, radius, height, normal1, normal2)}.
+   *
+   * @see #drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)
+   */
+  public static void drawHollowCylinder(PGraphics pGraphics, float radius, float height, Vector normal1, Vector normal2) {
+    drawHollowCylinder(pGraphics, 30, radius, height, normal1, normal2);
+  }
+
+  /**
+   * Draws a hollow cylinder onto {@code pGraphics} whose bases are formed by two cutting
+   * planes ({@code normal1} and {@code normal2}), along the positive {@code z} axis.
+   *
+   * @param detail
+   * @param radius  radius of the hollow cylinder
+   * @param height  height of the hollow cylinder
+   * @param normal1 normal of the plane that intersects the cylinder at z=0
+   * @param normal2 normal of the plane that intersects the cylinder at z=height
+   * @see #drawCylinder(float, float)
+   */
+  public static void drawHollowCylinder(PGraphics pGraphics, int detail, float radius, float height, Vector normal1, Vector normal2) {
+    if (!(pGraphics instanceof PGraphics3D))
+      return;
+    pGraphics.pushStyle();
+    // eqs taken from: http://en.wikipedia.org/wiki/Line-plane_intersection
+    Vector pm0 = new Vector(0, 0, 0);
+    Vector pn0 = new Vector(0, 0, height);
+    Vector l0 = new Vector();
+    Vector l = new Vector(0, 0, 1);
+    Vector p = new Vector();
+    float x, y, d;
+
+    pGraphics.noStroke();
+    pGraphics.beginShape(PApplet.QUAD_STRIP);
+
+    for (float t = 0; t <= detail; t++) {
+      x = radius * PApplet.cos(t * PApplet.TWO_PI / detail);
+      y = radius * PApplet.sin(t * PApplet.TWO_PI / detail);
+      l0.set(x, y, 0);
+
+      d = (normal1.dot(Vector.subtract(pm0, l0))) / (l.dot(normal1));
+      p = Vector.add(Vector.multiply(l, d), l0);
+      vertex(pGraphics, p.x(), p.y(), p.z());
+
+      l0.setZ(height);
+      d = (normal2.dot(Vector.subtract(pn0, l0))) / (l.dot(normal2));
+      p = Vector.add(Vector.multiply(l, d), l0);
+      vertex(pGraphics, p.x(), p.y(), p.z());
+    }
+    pGraphics.endShape();
+    pGraphics.popStyle();
+  }
+
+  // Cone v1
+
+  /**
+   * Same as {@code drawCone(detail, 0, 0, radius, height)}
+   *
+   * @see #drawCone(int, float, float, float, float)
+   */
+  public void drawCone(int detail, float radius, float height) {
+    drawCone(detail, 0, 0, radius, height);
+  }
+
+  /**
+   * Same as {@code drawCone(12, 0, 0, radius, height)}
+   *
+   * @see #drawCone(int, float, float, float, float)
+   */
+  public void drawCone(float radius, float height) {
+    drawCone(12, 0, 0, radius, height);
+  }
+
+
+  /**
+   * Same as {@code drawCone(context(), detail, x, y, radius, height)}.
+   *
+   * @see #drawCone(PGraphics, int, float, float, float, float)
+   */
+  public void drawCone(int detail, float x, float y, float radius, float height) {
+    drawCone(context(), detail, x, y, radius, height);
+  }
+
+  /**
+   * Same as {@code drawCone(pGraphics, detail, 0, 0, radius, height)}.
+   *
+   * @see #drawCone(PGraphics, int, float, float, float, float)
+   */
+  public static void drawCone(PGraphics pGraphics, int detail, float radius, float height) {
+    drawCone(pGraphics, detail, 0, 0, radius, height);
+  }
+
+  /**
+   * Same as {@code drawCone(pGraphics, 12, 0, 0, radius, height)}.
+   *
+   * @see #drawCone(PGraphics, int, float, float, float, float)
+   */
+  public static void drawCone(PGraphics pGraphics, float radius, float height) {
+    drawCone(pGraphics, 12, 0, 0, radius, height);
+  }
+
+  /**
+   * Same as {@code drawCone(pGraphics, 12, 0, 0, radius()/4, sqrt(3) * radius()/4)}.
+   *
+   * @see #drawCone(PGraphics, int, float, float, float, float)
+   */
+  public void drawCone(PGraphics pGraphics) {
+    float radius = _radius / 4;
+    drawCone(pGraphics, 12, 0, 0, radius, (float) Math.sqrt((float) 3) * radius);
+  }
+
+  /**
+   * Draws a cone onto {@code pGraphics} centered at {@code (x,y)} having
+   * {@code radius} and {@code height} dimensions.
+   */
+  public static void drawCone(PGraphics pGraphics, int detail, float x, float y, float radius, float height) {
+    if (!(pGraphics instanceof PGraphics3D))
+      return;
+    pGraphics.pushStyle();
+    float[] unitConeX = new float[detail + 1];
+    float[] unitConeY = new float[detail + 1];
+
+    for (int i = 0; i <= detail; i++) {
+      float a1 = PApplet.TWO_PI * i / detail;
+      unitConeX[i] = radius * (float) Math.cos(a1);
+      unitConeY[i] = radius * (float) Math.sin(a1);
+    }
+
+    pGraphics.pushMatrix();
+    pGraphics.translate(x, y);
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    vertex(pGraphics, 0, 0, height);
+    for (int i = 0; i <= detail; i++) {
+      vertex(pGraphics, unitConeX[i], unitConeY[i], 0.0f);
+    }
+    pGraphics.endShape();
+    pGraphics.popMatrix();
+    pGraphics.popStyle();
+  }
+
+  // Cone v2
+
+  /**
+   * Same as {@code drawCone(detail, 0, 0, radius1, radius2, height)}.
+   *
+   * @see #drawCone(int, float, float, float, float, float)
+   */
+  public void drawCone(int detail, float radius1, float radius2, float height) {
+    drawCone(detail, 0, 0, radius1, radius2, height);
+  }
+
+  /**
+   * Same as {@code drawCone(18, 0, 0, radius1, radius2, height)}.
+   *
+   * @see #drawCone(int, float, float, float, float, float)
+   */
+  public void drawCone(float radius1, float radius2, float height) {
+    drawCone(18, 0, 0, radius1, radius2, height);
+  }
+
+  /**
+   * Same as {@code drawCone(pGraphics, detail, 0, 0, radius1, radius2, height)}.
+   *
+   * @see #drawCone(PGraphics, int, float, float, float, float, float)
+   */
+  public static void drawCone(PGraphics pGraphics, int detail, float radius1, float radius2, float height) {
+    drawCone(pGraphics, detail, 0, 0, radius1, radius2, height);
+  }
+
+  /**
+   * Same as {@code drawCone(pGraphics, 18, 0, 0, radius1, radius2, height)}.
+   *
+   * @see #drawCone(PGraphics, int, float, float, float, float, float)
+   */
+  public static void drawCone(PGraphics pGraphics, float radius1, float radius2, float height) {
+    drawCone(pGraphics, 18, 0, 0, radius1, radius2, height);
+  }
+
+  /**
+   * Same as {@code drawCone(context(), detail, x, y, radius1, radius2, height)}.
+   *
+   * @see #drawCone(PGraphics, int, float, float, float, float, float)
+   * @see #drawCone(int, float, float, float, float)
+   */
+  public void drawCone(int detail, float x, float y, float radius1, float radius2, float height) {
+    drawCone(context(), detail, x, y, radius1, radius2, height);
+  }
+
+  /**
+   * Draws a truncated cone onto {@code pGraphics} along the positive {@code z} axis,
+   * with its base centered at {@code (x,y)}, {@code height}, and radii {@code radius1}
+   * and {@code radius2} (basis and height respectively).
+   */
+  public static void drawCone(PGraphics pGraphics, int detail, float x, float y, float radius1, float radius2, float height) {
+    if (!(pGraphics instanceof PGraphics3D))
+      return;
+    pGraphics.pushStyle();
+    float[] firstCircleX = new float[detail + 1];
+    float[] firstCircleY = new float[detail + 1];
+    float[] secondCircleX = new float[detail + 1];
+    float[] secondCircleY = new float[detail + 1];
+
+    for (int i = 0; i <= detail; i++) {
+      float a1 = PApplet.TWO_PI * i / detail;
+      firstCircleX[i] = radius1 * (float) Math.cos(a1);
+      firstCircleY[i] = radius1 * (float) Math.sin(a1);
+      secondCircleX[i] = radius2 * (float) Math.cos(a1);
+      secondCircleY[i] = radius2 * (float) Math.sin(a1);
+    }
+
+    pGraphics.pushMatrix();
+    pGraphics.translate(x, y);
+    pGraphics.beginShape(PApplet.QUAD_STRIP);
+    for (int i = 0; i <= detail; i++) {
+      vertex(pGraphics, firstCircleX[i], firstCircleY[i], 0);
+      vertex(pGraphics, secondCircleX[i], secondCircleY[i], height);
+    }
+    pGraphics.endShape();
+    pGraphics.popMatrix();
+    pGraphics.popStyle();
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawAxes(radius())}.
+   *
+   * @see #drawAxes(float)
+   */
+  public void drawAxes() {
+    drawAxes(_radius);
+  }
+
+  /**
+   * Same as {@code drawAxes(context(), length, isLeftHanded())}.
+   *
+   * @see #drawAxes(PGraphics, float)
+   */
+  public void drawAxes(float length) {
+    drawAxes(context(), length);
+  }
+
+  /**
+   * Same as {@code drawAxes(pGraphics, radius(), isLeftHanded())}.
+   *
+   * @see #drawAxes(PGraphics, float)
+   */
+  public void drawAxes(PGraphics pGraphics) {
+    drawAxes(pGraphics, _radius);
+  }
+
+  /**
+   * Draws axes of {@code length} onto {@code pGraphics}.
+   */
+  public static void drawAxes(PGraphics pGraphics, float length) {
+    pGraphics.pushStyle();
+    pGraphics.colorMode(PApplet.RGB, 255);
+    float charWidth = length / 40.0f;
+    float charHeight = length / 30.0f;
+    float charShift = 1.04f * length;
+
+    pGraphics.pushStyle();
+    pGraphics.beginShape(PApplet.LINES);
+    pGraphics.strokeWeight(2);
+    if (pGraphics.is2D()) {
+      // The X
+      pGraphics.stroke(200, 0, 0);
+      pGraphics.vertex(charShift + charWidth, -charHeight);
+      pGraphics.vertex(charShift - charWidth, charHeight);
+      pGraphics.vertex(charShift - charWidth, -charHeight);
+      pGraphics.vertex(charShift + charWidth, charHeight);
+
+      // The Y
+      charShift *= 1.02;
+      pGraphics.stroke(0, 200, 0);
+      pGraphics.vertex(charWidth, charShift + (!leftHanded ? charHeight : -charHeight));
+      pGraphics.vertex(0.0f, charShift + 0.0f);
+      pGraphics.vertex(-charWidth, charShift + (!leftHanded ? charHeight : -charHeight));
+      pGraphics.vertex(0.0f, charShift + 0.0f);
+      pGraphics.vertex(0.0f, charShift + 0.0f);
+      pGraphics.vertex(0.0f, charShift + -(!leftHanded ? charHeight : -charHeight));
+    } else {
+      // The X
+      pGraphics.stroke(200, 0, 0);
+      pGraphics.vertex(charShift, charWidth, -charHeight);
+      pGraphics.vertex(charShift, -charWidth, charHeight);
+      pGraphics.vertex(charShift, -charWidth, -charHeight);
+      pGraphics.vertex(charShift, charWidth, charHeight);
+      // The Y
+      pGraphics.stroke(0, 200, 0);
+      pGraphics.vertex(charWidth, charShift, (leftHanded ? charHeight : -charHeight));
+      pGraphics.vertex(0.0f, charShift, 0.0f);
+      pGraphics.vertex(-charWidth, charShift, (leftHanded ? charHeight : -charHeight));
+      pGraphics.vertex(0.0f, charShift, 0.0f);
+      pGraphics.vertex(0.0f, charShift, 0.0f);
+      pGraphics.vertex(0.0f, charShift, -(leftHanded ? charHeight : -charHeight));
+      // The Z
+      pGraphics.stroke(0, 100, 200);
+      pGraphics.vertex(-charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+      pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+      pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+      pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
+      pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
+      pGraphics.vertex(charWidth, !leftHanded ? -charHeight : charHeight, charShift);
+    }
+    pGraphics.endShape();
+    pGraphics.popStyle();
+
+    // X Axis
+    pGraphics.stroke(200, 0, 0);
+    if (pGraphics.is2D())
+      pGraphics.line(0, 0, length, 0);
+    else
+      pGraphics.line(0, 0, 0, length, 0, 0);
+    // Y Axis
+    pGraphics.stroke(0, 200, 0);
+    if (pGraphics.is2D())
+      pGraphics.line(0, 0, 0, length);
+    else
+      pGraphics.line(0, 0, 0, 0, length, 0);
+
+    // Z Axis
+    if (pGraphics.is3D()) {
+      pGraphics.stroke(0, 100, 200);
+      pGraphics.line(0, 0, 0, 0, 0, length);
+    }
+    pGraphics.popStyle();
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawGrid(radius(), 10)}
+   *
+   * @see #drawGrid(float, int)
+   */
+  public void drawGrid() {
+    drawGrid(_radius, 10);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawGrid(size, 10)}
+   *
+   * @see #drawGrid(float, int)
+   */
+  public void drawGrid(float size) {
+    drawGrid(size, 10);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawGrid(radius(), subdivisions)}
+   *
+   * @see #drawGrid(float, int)
+   */
+  public void drawGrid(int subdivisions) {
+    drawGrid(_radius, subdivisions);
+  }
+
+  /**
+   * Same as {@code drawGrid(context(), size, subdivisions)}.
+   *
+   * @see #drawGrid(PGraphics, float, int)
+   * @see #drawAxes(float)
+   */
+  public void drawGrid(float size, int subdivisions) {
+    drawGrid(context(), size, subdivisions);
+  }
+
+  /**
+   * Same as {@code drawGrid(pGraphics, radius(), 10)}.
+   *
+   * @see #drawGrid(PGraphics, float, int)
+   * @see #drawAxes(float)
+   */
+  public void drawGrid(PGraphics pGraphics) {
+    drawGrid(pGraphics, _radius, 10);
+  }
+
+  /**
+   * Draws a grid of {@code size} onto {@code pGraphics} in the XY plane, centered on (0,0,0),
+   * having {@code subdivisions}.
+   */
+  public static void drawGrid(PGraphics pGraphics, float size, int subdivisions) {
+    pGraphics.pushStyle();
+    pGraphics.beginShape(PApplet.LINES);
+    for (int i = 0; i <= subdivisions; ++i) {
+      float pos = size * (2.0f * i / subdivisions - 1.0f);
+      vertex(pGraphics, pos, -size);
+      vertex(pGraphics, pos, +size);
+      vertex(pGraphics, -size, pos);
+      vertex(pGraphics, size, pos);
+    }
+    pGraphics.endShape();
+    pGraphics.popStyle();
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawDottedGrid(radius(), 10)}.
+   *
+   * @see #drawDottedGrid(float, int)
+   */
+  public void drawDottedGrid() {
+    drawDottedGrid(_radius, 10);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawDottedGrid(size, 10)}.
+   *
+   * @see #drawDottedGrid(float, int)
+   */
+  public void drawDottedGrid(float size) {
+    drawDottedGrid(size, 10);
+  }
+
+  /**
+   * Convenience function that simplt calls {@code drawDottedGrid(radius(), subdivisions)}.
+   *
+   * @see #drawDottedGrid(float, int)
+   */
+  public void drawDottedGrid(int subdivisions) {
+    drawDottedGrid(_radius, subdivisions);
+  }
+
+  /**
+   * Same as {@code drawDottedGrid(context(), size, subdivisions)}.
+   *
+   * @see #drawDottedGrid(PGraphics, float, int)
+   */
+  public void drawDottedGrid(float size, int subdivisions) {
+    drawDottedGrid(context(), size, subdivisions);
+  }
+
+  /**
+   * Same as {@code drawDottedGrid(pGraphics, radius(), 10)}.
+   *
+   * @see #drawDottedGrid(PGraphics, float, int)
+   */
+  public void drawDottedGrid(PGraphics pGraphics) {
+    drawDottedGrid(pGraphics, _radius, 10);
+  }
+
+  /**
+   * Draws a dotted-grid of {@code size} onto {@code pGraphics} in the XY plane, centered on (0,0,0),
+   * having {@code subdivisions}.
+   */
+  public static void drawDottedGrid(PGraphics pGraphics, float size, int subdivisions) {
+    pGraphics.pushStyle();
+    float posi, posj;
+    pGraphics.beginShape(PApplet.POINTS);
+    for (int i = 0; i <= subdivisions; ++i) {
+      posi = size * (2.0f * i / subdivisions - 1.0f);
+      for (int j = 0; j <= subdivisions; ++j) {
+        posj = size * (2.0f * j / subdivisions - 1.0f);
+        vertex(pGraphics, posi, posj);
+      }
+    }
+    pGraphics.endShape();
+    int internalSub = 5;
+    int subSubdivisions = subdivisions * internalSub;
+    float currentWeight = pGraphics.strokeWeight;
+    pGraphics.colorMode(PApplet.HSB, 255);
+    float hue = pGraphics.hue(pGraphics.strokeColor);
+    float saturation = pGraphics.saturation(pGraphics.strokeColor);
+    float brightness = pGraphics.brightness(pGraphics.strokeColor);
+    pGraphics.stroke(hue, saturation, brightness * 10f / 17f);
+    pGraphics.strokeWeight(currentWeight / 2);
+    pGraphics.beginShape(PApplet.POINTS);
+    for (int i = 0; i <= subSubdivisions; ++i) {
+      posi = size * (2.0f * i / subSubdivisions - 1.0f);
+      for (int j = 0; j <= subSubdivisions; ++j) {
+        posj = size * (2.0f * j / subSubdivisions - 1.0f);
+        if (((i % internalSub) != 0) || ((j % internalSub) != 0))
+          vertex(pGraphics, posi, posj);
+      }
+    }
+    pGraphics.endShape();
+    pGraphics.popStyle();
+  }
+
+  /**
+   * Applies the {@code graph.eye()} transformation and then calls
+   * {@link #drawFrustum(PGraphics, Graph)} on the scene {@link #context()}.
+   *
+   * @see #drawFrustum(PGraphics, Graph)
+   */
+  public void drawFrustum(Graph graph) {
+    _matrixHandler.pushMatrix();
+    _matrixHandler.applyTransformation(graph._eye);
+    drawFrustum(context(), graph);
+    _matrixHandler.popMatrix();
+  }
+
+  /**
+   * Draws a representation of the viewing frustum onto {@code pGraphics} according to
+   * {@code graph.eye()} and {@code graph._type}.
+   * <p>
+   * Note that if {@code pGraphics == graph.context()} this method has not effect at all.
+   *
+   * @see #drawFrustum(Graph)
+   */
+  public static void drawFrustum(PGraphics pGraphics, Graph graph) {
+    if (pGraphics == graph.context())
+      return;
+    // texturing requires graph.isOffscreen() (third condition) otherwise got
+    // "The pixels array is null" message and the frustum near plane texture and contour are missed
+    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene && graph.isOffscreen();
+    switch (graph._type) {
+      case ORTHOGRAPHIC:
+        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, Math.abs(graph.right() - graph.left()) / (float) graph.width(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.near(), graph.far());
+        break;
+      case PERSPECTIVE:
+        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, (float) Math.tan(graph.fov() / 2.0f), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.near(), graph.far());
+        break;
+    }
+  }
+
+  protected static void _drawOrthographicFrustum(PGraphics pGraphics, PGraphics eyeBuffer, float magnitude, float width, float height, float zNear, float zFar) {
+    if (pGraphics == eyeBuffer)
+      return;
+    boolean threeD = pGraphics.is3D();
+    boolean lh = height < 0;
+    height = Math.abs(height);
+
+    pGraphics.pushStyle();
+
+    // 0 is the upper left coordinates of the near corner, 1 for the far one
+    Vector[] points = new Vector[2];
+    points[0] = new Vector();
+    points[1] = new Vector();
+
+    points[0].setX(width / 2);
+    points[1].setX(width / 2);
+    points[0].setY(height / 2);
+    points[1].setY(height / 2);
+    if (threeD) {
+      points[0].setZ(zNear / magnitude);
+      points[1].setZ(zFar / magnitude);
+      // Frustum lines
+      pGraphics.beginShape(PApplet.LINES);
+      Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+      Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+      Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+      Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+      pGraphics.endShape();
+    }
+
+    // Up arrow
+    float arrowHeight = 1.5f * points[0].y();
+    float baseHeight = 1.2f * points[0].y();
+    float arrowHalfWidth = 0.5f * points[0].x();
+    float baseHalfWidth = 0.3f * points[0].x();
+
+    pGraphics.noStroke();
+    // Arrow base
+    if (eyeBuffer != null) {
+      pGraphics.pushStyle();// end at arrow
+      pGraphics.colorMode(PApplet.RGB, 255);
+      float r = pGraphics.red(pGraphics.fillColor);
+      float g = pGraphics.green(pGraphics.fillColor);
+      float b = pGraphics.blue(pGraphics.fillColor);
+      pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
+    }
+    pGraphics.beginShape(PApplet.QUADS);
+    if (lh) {
+      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
+    }
+    pGraphics.endShape();
+
+    // Arrow
+    pGraphics.beginShape(PApplet.TRIANGLES);
+    if (lh) {
+      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
+    }
+    if (eyeBuffer != null)
+      pGraphics.popStyle();// begin at arrow base
+    pGraphics.endShape();
+
+    // Planes
+    // far plane
+    if (threeD)
+      _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
+    // near plane
+    _drawPlane(pGraphics, eyeBuffer, points[0], new Vector(0, 0, 1), lh);
+
+    pGraphics.popStyle();
+  }
+
+  protected static void _drawPerspectiveFrustum(PGraphics pGraphics, PGraphics eyeBuffer, float magnitude, float aspectRatio, float zNear, float zFar) {
+    if (pGraphics == eyeBuffer)
+      return;
+    boolean lh = aspectRatio < 0;
+    aspectRatio = Math.abs(aspectRatio);
+
+    pGraphics.pushStyle();
+
+    // 0 is the upper left coordinates of the near corner, 1 for the far one
+    Vector[] points = new Vector[2];
+    points[0] = new Vector();
+    points[1] = new Vector();
+
+    points[0].setZ(zNear / magnitude);
+    points[1].setZ(zFar / magnitude);
+    //(2 * (float) Math.atan(_eye.magnitude()))
+    //points[0].setY(points[0].z() * PApplet.tan(((2 * (float) Math.atan(eye().magnitude())) / 2.0f)));
+    points[0].setY(points[0].z() * magnitude);
+    points[0].setX(points[0].y() * aspectRatio);
+    float ratio = points[1].z() / points[0].z();
+    points[1].setY(ratio * points[0].y());
+    points[1].setX(ratio * points[0].x());
+
+    // Frustum lines
+    pGraphics.beginShape(PApplet.LINES);
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+    pGraphics.endShape();
+
+    // Up arrow
+    float arrowHeight = 1.5f * points[0].y();
+    float baseHeight = 1.2f * points[0].y();
+    float arrowHalfWidth = 0.5f * points[0].x();
+    float baseHalfWidth = 0.3f * points[0].x();
+
+    pGraphics.noStroke();
+    // Arrow base
+    if (eyeBuffer != null) {
+      pGraphics.pushStyle();// end at arrow
+      pGraphics.colorMode(PApplet.RGB, 255);
+      float r = pGraphics.red(pGraphics.fillColor);
+      float g = pGraphics.green(pGraphics.fillColor);
+      float b = pGraphics.blue(pGraphics.fillColor);
+      pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
+    }
+    pGraphics.beginShape(PApplet.QUADS);
+    if (lh) {
+      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
+    }
+    pGraphics.endShape();
+
+    // Arrow
+    pGraphics.beginShape(PApplet.TRIANGLES);
+    if (lh) {
+      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
+    }
+    if (eyeBuffer != null)
+      pGraphics.popStyle();// begin at arrow base
+    pGraphics.endShape();
+
+    // Planes
+    // far plane
+    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
+    // near plane
+    _drawPlane(pGraphics, eyeBuffer, points[0], new Vector(0, 0, 1), lh);
+
+    pGraphics.popStyle();
+  }
+
+  protected static void _drawPlane(PGraphics pGraphics, PGraphics eyeBuffer, Vector corner, Vector normal, boolean lh) {
+    if (pGraphics == eyeBuffer)
+      return;
+    pGraphics.pushStyle();
+    // near plane
+    pGraphics.beginShape(PApplet.QUAD);
+    pGraphics.normal(normal.x(), normal.y(), normal.z());
+    if (eyeBuffer != null) {
+      pGraphics.textureMode(PApplet.NORMAL);
+      pGraphics.tint(255, 126); // Apply transparency without changing color
+      pGraphics.texture(eyeBuffer);
+      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, lh ? 1 : 0);
+      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, lh ? 1 : 0);
+      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, lh ? 0 : 1);
+      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z(), 1, lh ? 0 : 1);
+    } else {
+      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z());
+      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z());
+      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z());
+      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z());
+    }
+    pGraphics.endShape();
+    pGraphics.popStyle();
+  }
+
+  /**
+   * Same as {@code drawProjectors(eye, Arrays.asList(point))}.
+   *
+   * @see #drawProjectors(Graph, List)
+   */
+  public void drawProjector(Graph eye, Vector point) {
+    drawProjectors(eye, Arrays.asList(point));
+  }
+
+  /**
+   * Draws the projection of each point in {@code points} in the near plane onto {@code pGraphics}.
+   * <p>
+   * This method should be used in conjunction with {@link #drawFrustum(PGraphics, Graph)}.
+   * <p>
+   * Note that if {@code graph == this} this method has not effect at all.
+   *
+   * @see #drawProjector(Graph, Vector)
+   */
+  // TODO needs testing
+  public void drawProjectors(Graph graph, List<Vector> points) {
+    if (graph == this) {
+      System.out.println("Warning: No drawProjectors done!");
+      return;
+    }
+    context().pushStyle();
+    // if ORTHOGRAPHIC: do it in the eye coordinate system
+    // if PERSPECTIVE: do it in the world coordinate system
+    Vector o = new Vector();
+    if (_type == Graph.Type.ORTHOGRAPHIC) {
+      context().pushMatrix();
+      _matrixHandler.applyTransformation(graph._eye);
+    }
+    // in PERSPECTIVE cache the transformed origin
+    else
+      o = graph._eye.worldLocation(new Vector());
+    context().beginShape(PApplet.LINES);
+    for (Vector s : points) {
+      if (_type == Graph.Type.ORTHOGRAPHIC) {
+        Vector v = graph._eye.location(s);
+        Scene.vertex(context(), v.x(), v.y(), v.z());
+        // Key here is to represent the eye zNear param (which is given in world units)
+        // in eye units.
+        // Hence it should be multiplied by: 1 / eye.magnitude()
+        // The neg sign is because the zNear is positive but the eye view direction is
+        // the negative Z-axis
+        Scene.vertex(context(), v.x(), v.y(), -(graph.near() * 1 / Math.abs(graph.right() - graph.left()) / (float) graph.width()));
+      } else {
+        Scene.vertex(context(), s.x(), s.y(), s.z());
+        Scene.vertex(context(), o.x(), o.y(), o.z());
+      }
+    }
+    context().endShape();
+    if (_type == Graph.Type.ORTHOGRAPHIC) {
+      context().popMatrix();
+    }
+    context().popStyle();
+  }
+
+  /**
+   * {@link #drawCross(float, float, float)} centered at the projected node origin.
+   * If node is a Node instance the length of the cross is the node
+   * {@link Node#bullsEyeSize()}, otherwise it's {@link #radius()} / 5.
+   * If node a Node instance and it is {@link #hasTag(Node)} it also applies
+   * a stroke highlight.
+   *
+   * @see #drawCircledBullsEye(float, float, float)
+   * @see #drawSquaredBullsEye(float, float, float)
+   */
+  public void drawCross(Node node) {
+    context().pushStyle();
+    if (isTagged(node))
+      context().strokeWeight(2 + context().strokeWeight);
+    drawCross(node, node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.magnitude() * pixelToSceneRatio(node.worldPosition()) : node.bullsEyeSize());
+    context().popStyle();
+  }
+
+  /**
+   * {@link #drawCross(float, float, float)} centered at the projected node origin, having
+   * {@code length} pixels.
+   *
+   * @see #drawCross(float, float, float)
+   */
+  public void drawCross(Node node, float length) {
+    if (_eye == node) {
+      return;
+    }
+    Vector center = screenLocation(node);
+    if (center != null)
+      drawCross(center.x(), center.y(), length);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawCross(x, y, radius()/5)}.
+   *
+   * @see #drawCross(float, float, float)
+   */
+  public void drawCross(float x, float y) {
+    drawCross(x, y, _radius / 5);
+  }
+
+  /**
+   * Draws a cross on the screen centered under pixel {@code (x, y)}, and edge of size
+   * {@code length} onto {@link #context()}.
+   */
+  public void drawCross(float x, float y, float length) {
+    float half_size = length / 2f;
+    context().pushStyle();
+    beginHUD();
+    context().noFill();
+    context().beginShape(PApplet.LINES);
+    vertex(context(), x - half_size, y);
+    vertex(context(), x + half_size, y);
+    vertex(context(), x, y - half_size);
+    vertex(context(), x, y + half_size);
+    context().endShape();
+    endHUD();
+    context().popStyle();
+  }
+
+  /**
+   * Draws a bullseye around the node {@link Node#worldPosition()} projection.
+   * <p>
+   * The shape of the bullseye may be squared or circled depending on the node
+   * {@link Node#bullsEyeSize()} sign.
+   *
+   * @see Node#bullsEyeSize()
+   * @see Node#worldPosition()
+   * @see #_drawSquaredBullsEye(Node)
+   * @see #_drawCircledBullsEye(Node)
+   */
+  protected void _drawBullsEye(Node node) {
+    if (node._bullsEyeShape == Node.BullsEyeShape.SQUARE)
+      _drawSquaredBullsEye(node);
+    else
+      _drawCircledBullsEye(node);
+  }
+
+  /**
+   * Calls {@link #drawSquaredBullsEye(float, float, float)} centered
+   * at the projected node origin. The length of the target is the node
+   * {@link Node#bullsEyeSize()}. If node {@link #hasTag(Node)} it also
+   * applies a stroke highlight.
+   *
+   * @see #_drawCircledBullsEye(Node)
+   * @see #_drawBullsEye(Node)
+   */
+  protected void _drawSquaredBullsEye(Node node) {
+    if (_eye == node) {
+      return;
+    }
+    context().pushStyle();
+    if (isTagged(node))
+      context().strokeWeight(2 + context().strokeWeight);
+    Vector center = screenLocation(node);
+    if (center != null)
+      drawSquaredBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.magnitude() * pixelToSceneRatio(node.worldPosition()) : node.bullsEyeSize());
+    context().popStyle();
+  }
+
+  /**
+   * Same as {@code drawSquaredBullsEye(x, y, radius() / 5)}.
+   *
+   * @see #drawSquaredBullsEye(float, float, float)
+   * @see #drawCircledBullsEye(float, float, float)
+   */
+  public void drawSquaredBullsEye(float x, float y) {
+    drawSquaredBullsEye(x, y, _radius / 5);
+  }
+
+  /**
+   * Draws a squared bullseye onto {@link #context()}, centered at {@code (x, y)},
+   * having {@code length} pixels.
+   *
+   * @see #drawSquaredBullsEye(float, float, float)
+   * @see #drawCircledBullsEye(float, float, float)
+   */
+  public void drawSquaredBullsEye(float x, float y, float length) {
+    float half_length = length / 2f;
+    context().pushStyle();
+    beginHUD();
+    context().noFill();
+
+    context().beginShape();
+    vertex(context(), (x - half_length), (y - half_length) + (0.6f * half_length));
+    vertex(context(), (x - half_length), (y - half_length));
+    vertex(context(), (x - half_length) + (0.6f * half_length), (y - half_length));
+    context().endShape();
+
+    context().beginShape();
+    vertex(context(), (x + half_length) - (0.6f * half_length), (y - half_length));
+    vertex(context(), (x + half_length), (y - half_length));
+    vertex(context(), (x + half_length), ((y - half_length) + (0.6f * half_length)));
+    context().endShape();
+
+    context().beginShape();
+    vertex(context(), (x + half_length), ((y + half_length) - (0.6f * half_length)));
+    vertex(context(), (x + half_length), (y + half_length));
+    vertex(context(), ((x + half_length) - (0.6f * half_length)), (y + half_length));
+    context().endShape();
+
+    context().beginShape();
+    vertex(context(), (x - half_length) + (0.6f * half_length), (y + half_length));
+    vertex(context(), (x - half_length), (y + half_length));
+    vertex(context(), (x - half_length), ((y + half_length) - (0.6f * half_length)));
+    context().endShape();
+    endHUD();
+    drawCross(x, y, 0.6f * length);
+    context().popStyle();
+  }
+
+  /**
+   * Calls {@link #drawCircledBullsEye(float, float, float)} centered
+   * at the projected node origin. The length of the target is the node
+   * {@link Node#bullsEyeSize()}. If node {@link #hasTag(Node)} it
+   * also applies a stroke highlight.
+   *
+   * @see #_drawSquaredBullsEye(Node)
+   * @see #_drawCircledBullsEye(Node)
+   * @see #_drawBullsEye(Node)
+   */
+  protected void _drawCircledBullsEye(Node node) {
+    if (_eye == node) {
+      return;
+    }
+    context().pushStyle();
+    if (isTagged(node))
+      context().strokeWeight(2 + context().strokeWeight);
+    Vector center = screenLocation(node);
+    if (center != null)
+      drawCircledBullsEye(center.x(), center.y(), node.bullsEyeSize() < 1 ? 200 * node.bullsEyeSize() * node.magnitude() * pixelToSceneRatio(node.worldPosition()) : node.bullsEyeSize());
+    context().popStyle();
+  }
+
+  /**
+   * Same as {@code drawCircledBullsEye(x, y, radius() / 5)}.
+   *
+   * @see #drawCircledBullsEye(float, float, float)
+   * @see #drawSquaredBullsEye(float, float, float)
+   */
+  public void drawCircledBullsEye(float x, float y) {
+    drawCircledBullsEye(x, y, _radius / 5);
+  }
+
+  /**
+   * Draws a circled bullseye onto {@link #context()}, centered at {@code (x, y)},
+   * having {@code length} pixels.
+   *
+   * @see #drawSquaredBullsEye(float, float, float)
+   */
+  public void drawCircledBullsEye(float x, float y, float diameter) {
+    context().pushStyle();
+    beginHUD();
+    context().noFill();
+    context().ellipseMode(PApplet.CENTER);
+    context().circle(x, y, diameter);
+    endHUD();
+    drawCross(x, y, 0.6f * diameter);
+    context().popStyle();
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawTorusSolenoid(6)}.
+   *
+   * @see #drawTorusSolenoid(int)
+   */
+  public void drawTorusSolenoid() {
+    drawTorusSolenoid(6);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawTorusSolenoid(faces, 0.07f * radius())}.
+   *
+   * @see #drawTorusSolenoid(int, float)
+   */
+  public void drawTorusSolenoid(int faces) {
+    drawTorusSolenoid(faces, 0.07f * _radius);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawTorusSolenoid(6, insideRadius)}.
+   *
+   * @see #drawTorusSolenoid(int, float)
+   */
+  public void drawTorusSolenoid(float insideRadius) {
+    drawTorusSolenoid(6, insideRadius);
+  }
+
+  /**
+   * Convenience function that simply calls
+   * {@code drawTorusSolenoid(faces, 100, insideRadius, insideRadius * 1.3f)}.
+   *
+   * @see #drawTorusSolenoid(int, int, float, float)
+   */
+  public void drawTorusSolenoid(int faces, float insideRadius) {
+    drawTorusSolenoid(faces, 100, insideRadius, insideRadius * 1.3f);
+  }
+
+  /**
+   * Same as {@code drawTorusSolenoid(context(), faces, detail, insideRadius, outsideRadius)}.
+   *
+   * @see #drawTorusSolenoid(PGraphics, int, int, float, float)
+   */
+  public void drawTorusSolenoid(int faces, int detail, float insideRadius, float outsideRadius) {
+    drawTorusSolenoid(context(), faces, detail, insideRadius, outsideRadius);
+  }
+
+  /**
+   * Same as {@code drawTorusSolenoid(pGraphics, 6)}.
+   *
+   * @see #drawTorusSolenoid(PGraphics, float)
+   */
+  public static void drawTorusSolenoid(PGraphics pGraphics) {
+    drawTorusSolenoid(pGraphics, 6);
+  }
+
+  /**
+   * Same as {@code drawTorusSolenoid(pGraphics, 6, insideRadius)}.
+   *
+   * @see #drawTorusSolenoid(PGraphics, float)
+   */
+  public static void drawTorusSolenoid(PGraphics pGraphics, float insideRadius) {
+    drawTorusSolenoid(pGraphics, 6, insideRadius);
+  }
+
+  /**
+   * Same as {@code drawTorusSolenoid(pGraphics, faces, 100, insideRadius, insideRadius * 1.3f)}.
+   *
+   * @see #drawTorusSolenoid(PGraphics, int, int, float, float)
+   */
+  public static void drawTorusSolenoid(PGraphics pGraphics, int faces, float insideRadius) {
+    drawTorusSolenoid(pGraphics, faces, 100, insideRadius, insideRadius * 1.3f);
+  }
+
+  /**
+   * Draws a torus solenoid onto {@code pGraphics}.
+   * <p>
+   * Code contributed by Jacques Maire (http://www.alcys.com/) See also:
+   * http://www.mathcurve.com/courbes3d/solenoidtoric/solenoidtoric.shtml
+   * http://crazybiocomputing.blogspot.fr/2011/12/3d-curves-toric-solenoids.html
+   *
+   * @param faces
+   * @param detail
+   * @param insideRadius
+   * @param outsideRadius
+   */
+  public static void drawTorusSolenoid(PGraphics pGraphics, int faces, int detail, float insideRadius, float outsideRadius) {
+    pGraphics.pushStyle();
+    pGraphics.noStroke();
+    Vector v1, v2;
+    int b, ii, jj, a;
+    float eps = PApplet.TWO_PI / detail;
+    for (a = 0; a < faces; a += 2) {
+      pGraphics.beginShape(PApplet.TRIANGLE_STRIP);
+      b = (a <= (faces - 1)) ? a + 1 : 0;
+      for (int i = 0; i < (detail + 1); i++) {
+        ii = (i < detail) ? i : 0;
+        jj = ii + 1;
+        float ai = eps * jj;
+        float alpha = a * PApplet.TWO_PI / faces + ai;
+        v1 = new Vector((outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.cos(ai),
+                (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
+        alpha = b * PApplet.TWO_PI / faces + ai;
+        v2 = new Vector((outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.cos(ai),
+                (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
+        vertex(pGraphics, v1.x(), v1.y(), v1.z());
+        vertex(pGraphics, v2.x(), v2.y(), v2.z());
+      }
+      pGraphics.endShape();
+    }
+    pGraphics.popStyle();
+  }
+
+  /**
+   * Draws a cone onto {@code pGraphics} centered at {@code (0,0)} having
+   * Semi-axis {@code a} and {@code b} and  {@code height} dimensions.
+   * <p>
+   * {@code a} represents the horizontal semi-axis
+   * {@code b} represents the horizontal semi-axis
+   *
+   * @param pGraphics
+   * @param height
+   * @param a
+   * @param b
+   * @param detail
+   */
+  public void drawCone(PGraphics pGraphics, float height, float a, float b, int detail) {
+    float[] x = new float[detail + 1];
+    float[] y = new float[detail + 1];
+
+    for (int i = 0; i <= detail; i++) {
+      float theta = PApplet.TWO_PI * i / detail;
+      float r = a * b / (float) (Math.sqrt(b * b * Math.cos(theta) * Math.cos(theta) + a * a * Math.sin(theta) * Math.sin(theta)));
+      x[i] = r * (float) Math.cos(theta);
+      y[i] = r * (float) Math.sin(theta);
+    }
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    pGraphics.vertex(0, 0, 0);
+    for (int i = 0; i <= detail; i++) {
+      pGraphics.vertex(x[i], y[i], height);
+    }
+    pGraphics.endShape(PApplet.CLOSE);
+  }
+
+  /**
+   * Draws a cone onto {@code pGraphics} centered at {@code (0,0)} where
+   * {@code vertices} represents a polygon on XY Plane and with {@code height} as height.
+   *
+   * @param pGraphics
+   * @param height
+   * @param vertices
+   */
+  public void drawCone(PGraphics pGraphics, float height, List<Vector> vertices) {
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    pGraphics.vertex(0, 0, 0);
+    for (Vector v : vertices) {
+      pGraphics.vertex(v.x(), v.y(), height);
+    }
+    if (!vertices.isEmpty()) pGraphics.vertex(vertices.get(0).x(), vertices.get(0).y(), height);
+    pGraphics.endShape();
+  }
+
+  /**
+   * Draws a cone onto {@code pGraphics} centered at {@code (0,0,0)} where
+   * {@code vertices} represents the base of the Polygon and with {@code scale} as maximum height.
+   * <p>
+   * It is desirable that each point in {@code vertices} lie inside the unit Sphere
+   *
+   * @param pGraphics
+   * @param vertices
+   * @param scale
+   */
+  public void drawCone(PGraphics pGraphics, List<Vector> vertices, float scale) {
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    pGraphics.vertex(0, 0, 0);
+    for (Vector v : vertices)
+      pGraphics.vertex(scale * v.x(), scale * v.y(), scale * v.z());
+    if (!vertices.isEmpty())
+      pGraphics.vertex(scale * vertices.get(0).x(), scale * vertices.get(0).y(), scale * vertices.get(0).z());
+    pGraphics.endShape();
+  }
+
+  /**
+   * Draws an Arc onto {@code pGraphics} centered at {@code (0,0)} on the XY Plane
+   * {@code minAngle} and {@code maxAngle} represents the Arc's width.
+   *
+   * @param pGraphics
+   * @param radius
+   * @param minAngle
+   * @param maxAngle
+   * @param detail
+   */
+  public void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail) {
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    pGraphics.vertex(0, 0, 0);
+    float step = (maxAngle - minAngle) / detail;
+    for (float theta = minAngle; theta <= maxAngle; theta += step)
+      pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
+    pGraphics.endShape(PApplet.CLOSE);
   }
 }
