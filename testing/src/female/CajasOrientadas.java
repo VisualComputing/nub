@@ -4,15 +4,14 @@ import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.processing.Scene;
+import nub.core.Graph;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import processing.event.MouseEvent;
 import peasy.*;
 
 public class CajasOrientadas extends PApplet {
   PeasyCam cam;
-  Scene scene;
+  Graph scene;
   Box[] cajas;
   Sphere esfera;
   boolean circle;
@@ -23,7 +22,7 @@ public class CajasOrientadas extends PApplet {
 
   public void setup() {
     cam = new PeasyCam(this, 400);
-    scene = new Scene(this, 200);
+    scene = new Graph(this, 200);
     // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
     //scene.fit();
     esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);

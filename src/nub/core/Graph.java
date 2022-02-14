@@ -15,7 +15,6 @@ import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
-import nub.processing.Scene;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -87,16 +86,24 @@ import java.nio.FloatBuffer;
  * <h1>3. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
  * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}.
- * <h1>4. Matrix handling</h1>
- * The graph performs matrix handling through a matrix-handler. Refer to the {@link MatrixHandler}
- * documentation for details.
+ * <h1>4. Drawing functionality</h1>
+ * There are several static drawing functions that complements those already provided
+ * by Processing, such as: {@link #drawCylinder(PGraphics, int, float, float)},
+ * {@link #drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)},
+ * {@link #drawCone(PGraphics, int, float, float, float, float)},
+ * {@link #drawCone(PGraphics, int, float, float, float, float, float)} and
+ * {@link #drawTorusSolenoid(PGraphics, int, int, float, float)}.
+ * <p>
+ * Drawing functions that take a {@code PGraphics} parameter (including the above
+ * static ones), such as {@link #beginHUD()},
+ * {@link #endHUD()}, {@link #drawAxes(PGraphics, float)},
+ * {@link #drawCross(float, float, float)} and {@link #drawGrid(PGraphics)}
+ * among others, can be used to set a {@link Node#setShape(PShape)} (see
+ * also {@link Node#setShape(Consumer)}).
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
  * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
- * {@link #endHUD()}. These methods are {@link MatrixHandler} wrapper functions
- * with the same signatures provided for convenience.
- *
- * @see MatrixHandler
+ * {@link #endHUD()}.
  */
 public class Graph {
   // number of frames displayed since this timing handler was instantiated.
@@ -142,6 +149,36 @@ public class Graph {
   public boolean picking;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected long _cacheProjectionViewInverse;
+
+  /**
+   * Disables z-buffer on {@code pGraphics}.
+   */
+  public static void disableDepthTest(PGraphics pGraphics) {
+    pGraphics.hint(PApplet.DISABLE_DEPTH_TEST);
+  }
+
+  /**
+   * Enables z-buffer on {@code pGraphics}.
+   */
+  public static void enableDepthTest(PGraphics pGraphics) {
+    pGraphics.hint(PApplet.ENABLE_DEPTH_TEST);
+  }
+
+  /**
+   * Converts a {@link Matrix} to a PMatrix3D.
+   */
+  public static PMatrix3D toPMatrix(Matrix matrix) {
+    float[] a = matrix.get(new float[16], false);
+    return new PMatrix3D(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14],
+            a[15]);
+  }
+
+  /**
+   * Converts a PMatrix3D to a {@link Matrix}.
+   */
+  public static Matrix toMatrix(PMatrix3D pMatrix3D) {
+    return new Matrix(pMatrix3D.get(new float[16]), false);
+  }
 
   /**
    * Returns {@code true} if {@code o} is instance of {@link Integer}, {@link Float} or {@link Double},
@@ -193,7 +230,7 @@ public class Graph {
    */
   public static void setUniform(PShader shader, String name, Matrix matrix) {
     PMatrix3D pmatrix = new PMatrix3D();
-    //pmatrix.set(Scene.toPMatrix(matrix));
+    //pmatrix.set(Graph.toPMatrix(matrix));
     //pmatrix.transpose();
     // same as:
     pmatrix.set(matrix.get(new float[16]));
@@ -311,6 +348,66 @@ public class Graph {
     setRadius(radius);
   }
 
+  // high-level constructors
+
+  /**
+   * Same as {@code this(pApplet.g)}.
+   *
+   * @see #Graph(PGraphics)
+   */
+  public Graph(PApplet pApplet) {
+    this(pApplet.g);
+  }
+
+  /**
+   * Same as {this(pApplet.g, new Vector(), radius)}.
+   *
+   * @see #Graph(PGraphics, Vector, float)
+   */
+  public Graph(PApplet pApplet, float radius) {
+    this(pApplet.g, new Vector(), radius);
+  }
+
+  /**
+   * Same as {@code this(pApplet.g, center, radius)}.
+   *
+   * @see #Graph(PGraphics, Vector, float)
+   */
+  public Graph(PApplet pApplet, Vector center, float radius) {
+    this(pApplet.g, center, radius);
+  }
+
+  /**
+   * Same as {@code this(pGraphics, pGraphics.width, pGraphics.height, eye)}.
+   *
+   * @see #Graph(PGraphics, int, int)
+   * @see #Graph(PApplet)
+   */
+  public Graph(PGraphics pGraphics) {
+    this(pGraphics, pGraphics.width, pGraphics.height);
+    _initScene(pGraphics);
+  }
+
+  /**
+   * Same as {@code this(pGraphics, new Vector(), radius)}.
+   *
+   * @see #Graph(PGraphics, Vector, float)
+   */
+  public Graph(PGraphics pGraphics, float radius) {
+    this(pGraphics, new Vector(), radius);
+  }
+
+  /**
+   * Same as {@code this(pGraphics, pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics2D ? Type.TWO_D : Type.PERSPECTIVE, center, radius)},
+   * and then sets {@link #leftHanded} to {@code true}.
+   *
+   * @see #Graph(PGraphics, int, int, Vector, float)
+   */
+  public Graph(PGraphics pGraphics, Vector center, float radius) {
+    this(pGraphics, pGraphics.width, pGraphics.height, center, radius);
+    _initScene(pGraphics);
+  }
+
   /**
    * Used internally by several constructors.
    */
@@ -333,6 +430,171 @@ public class Graph {
     _orays = _i2rays;
     _behaviors = new HashMap<Integer, BiConsumer<Graph, Node>>();
     picking = true;
+  }
+
+  protected void _initScene(PGraphics pGraphics) {
+    // 1. P5 objects
+    if (pApplet == null) pApplet = pGraphics.parent;
+    _offscreen = pGraphics != pApplet.g;
+    if (pGraphics instanceof PGraphicsOpenGL)
+      _matrixHandler = new GLMatrixHandler((PGraphicsOpenGL) pGraphics);
+    else
+      throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
+    _bb = pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D);
+    _bbMatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb);
+    if (!_offscreen && _onscreenGraph == null)
+      _onscreenGraph = this;
+    // 2. Back buffer
+    // is noSmooth absorbed by the line shader
+    // looks safer to call it though
+    _backBuffer().noSmooth();
+    _triangleShader = pApplet.loadShader("Picking.frag");
+    _lineShader = pApplet.loadShader("Picking.frag", "LinePicking.vert");
+    _pointShader = pApplet.loadShader("Picking.frag", "PointPicking.vert");
+    // 3. Register P5 methods
+    pApplet.registerMethod("pre", this);
+    pApplet.registerMethod("draw", this);
+    pApplet.registerMethod("dispose", this);
+    // 4. Handed
+    leftHanded = true;
+  }
+
+  // JSON
+
+  /**
+   * Same as {@link #saveConfig()}.
+   * <p>
+   * Should be called automatically by P5, but it is currently broken. See:
+   * https://github.com/processing/processing/issues/4445
+   *
+   * @see #saveConfig()
+   * @see #saveConfig(String)
+   * @see #loadConfig()
+   * @see #loadConfig(String)
+   */
+  public void dispose() {
+    if (!this.isOffscreen())
+      saveConfig();
+  }
+
+  /**
+   * Same as {@code saveConfig("data/config.json")}.
+   * <p>
+   * Note that off-screen scenes require {@link #saveConfig(String)} instead.
+   *
+   * @see #saveConfig(String)
+   * @see #loadConfig()
+   * @see #loadConfig(String)
+   */
+  public void saveConfig() {
+    if (this.isOffscreen())
+      System.out.println("Warning: no config saved! Off-screen graph config requires saveConfig(String fileName) to be called");
+    else
+      saveConfig("data/config.json");
+  }
+
+  /**
+   * Saves the eye, the {@link #radius()} and the {@link #_type} into {@code fileName}.
+   *
+   * @see #saveConfig()
+   * @see #loadConfig()
+   * @see #loadConfig(String)
+   */
+  public void saveConfig(String fileName) {
+    JSONObject json = new JSONObject();
+    json.setFloat("radius", _radius);
+    // TODO: handle nodes (hint, ... restore keyframes)
+    pApplet.saveJSONObject(json, fileName);
+  }
+
+  /**
+   * Same as {@code loadConfig("data/config.json")}.
+   * <p>
+   * Note that off-screen scenes require {@link #loadConfig(String)} instead.
+   *
+   * @see #loadConfig(String)
+   * @see #saveConfig()
+   * @see #saveConfig(String)
+   */
+  public void loadConfig() {
+    if (this.isOffscreen())
+      System.out.println("Warning: no config loaded! Off-screen graph config requires loadConfig(String fileName) to be called");
+    else
+      loadConfig("config.json");
+  }
+
+  /**
+   * Loads the eye, the {@link #radius()} and the {@link #_type} from {@code fileName}.
+   *
+   * @see #saveConfig()
+   * @see #saveConfig(String)
+   * @see #loadConfig()
+   */
+  public void loadConfig(String fileName) {
+    JSONObject json = null;
+    try {
+      json = pApplet.loadJSONObject(fileName);
+    } catch (Exception e) {
+      System.out.println("No such " + fileName + " found!");
+    }
+    if (json != null) {
+      _radius = json.getFloat("radius");
+      // TODO: handle nodes (hint, ... restore keyframes)
+    }
+  }
+
+  /**
+   * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONObject into a node.
+   */
+  protected Node _toNode(JSONObject jsonNode) {
+    float x, y, z;
+    x = jsonNode.getJSONArray("position").getFloat(0);
+    y = jsonNode.getJSONArray("position").getFloat(1);
+    z = jsonNode.getJSONArray("position").getFloat(2);
+    float qx, qy, qz, qw;
+    qx = jsonNode.getJSONArray("orientation").getFloat(0);
+    qy = jsonNode.getJSONArray("orientation").getFloat(1);
+    qz = jsonNode.getJSONArray("orientation").getFloat(2);
+    qw = jsonNode.getJSONArray("orientation").getFloat(3);
+    Node node = new Node(new Vector(x, y, z), new Quaternion(qx, qy, qz, qw), jsonNode.getFloat("magnitude"), false);
+    return node;
+  }
+
+  /**
+   * Used internally by {@link #saveConfig(String)}. Converts {@code node} into a P5
+   * JSONObject.
+   */
+  protected JSONObject _toJSONObject(Node node) {
+    JSONObject jsonNode = new JSONObject();
+    jsonNode.setFloat("magnitude", node.worldMagnitude());
+    jsonNode.setJSONArray("position", _toJSONArray(node.worldPosition()));
+    jsonNode.setJSONArray("orientation", _toJSONArray(node.worldOrientation()));
+    return jsonNode;
+  }
+
+  /**
+   * Used internally by {@link #saveConfig(String)}. Converts {@code vector} into a P5
+   * JSONArray.
+   */
+  protected JSONArray _toJSONArray(Vector vector) {
+    JSONArray jsonVec = new JSONArray();
+    jsonVec.setFloat(0, vector.x());
+    jsonVec.setFloat(1, vector.y());
+    jsonVec.setFloat(2, vector.z());
+    return jsonVec;
+  }
+
+  /**
+   * Used internally by {@link #saveConfig(String)}. Converts {@code rot} into a P5
+   * JSONArray.
+   */
+  protected JSONArray _toJSONArray(Quaternion quaternion) {
+    JSONArray jsonRot = new JSONArray();
+    jsonRot.setFloat(0, quaternion.x());
+    jsonRot.setFloat(1, quaternion.y());
+    jsonRot.setFloat(2, quaternion.z());
+    jsonRot.setFloat(3, quaternion.w());
+    return jsonRot;
   }
 
   // Mouse
@@ -2209,7 +2471,7 @@ public class Graph {
   /**
    * Same as {@code display(null, false, false, null, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display() {
     display(null, false, null, null, null, 0, 0);
@@ -2218,7 +2480,7 @@ public class Graph {
   /**
    * Same as {@code display(background, false, false, null, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background) {
     display(background, false, null, null, null, 0, 0);
@@ -2227,7 +2489,7 @@ public class Graph {
   /**
    * Same as {@code display(null, false, false, null, null, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(int x, int y) {
     display(null, false, null, null, null, x, y);
@@ -2236,7 +2498,7 @@ public class Graph {
   /**
    * Same as {@code display(background, false, false, null, null, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, int x, int y) {
     display(background, false, null, null, null, x, y);
@@ -2245,79 +2507,79 @@ public class Graph {
   /**
    * Same as {@code display(null, false, false, null, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Scene.Callback worldCallback) {
+  public void display(Callback worldCallback) {
     display(null, false, null, null, worldCallback, 0, 0);
   }
 
   /**
    * Same as {@code display(background, false, false, null, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Object background, Scene.Callback worldCallback) {
+  public void display(Object background, Callback worldCallback) {
     display(background, false, null, null, worldCallback, 0, 0);
   }
 
   /**
    * Same as {@code display(null, false, false, null, worldCallback, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Scene.Callback worldCallback, int x, int y) {
+  public void display(Callback worldCallback, int x, int y) {
     display(null, false, null, null, worldCallback, x, y);
   }
 
   /**
    * Same as {@code display(background, false, false, null, worldCallback, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Object background, Scene.Callback worldCallback, int x, int y) {
+  public void display(Object background, Callback worldCallback, int x, int y) {
     display(background, false, null, null, worldCallback, x, y);
   }
 
   /**
    * Same as {@code display(null, axes, grid, null, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(boolean axes, Integer grid, Scene.Callback worldCallback) {
+  public void display(boolean axes, Integer grid, Callback worldCallback) {
     display(null, axes, grid, null, worldCallback, 0, 0);
   }
 
   /**
    * Same as {@code display(background, axes, grid, null, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Object background, boolean axes, Integer grid, Scene.Callback worldCallback) {
+  public void display(Object background, boolean axes, Integer grid, Callback worldCallback) {
     display(background, axes, grid, null, worldCallback, 0, 0);
   }
 
   /**
    * Same as {@code display(background, axes, grid, null, worldCallback, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(boolean axes, Integer grid, Scene.Callback worldCallback, int x, int y) {
+  public void display(boolean axes, Integer grid, Callback worldCallback, int x, int y) {
     display(null, axes, grid, null, worldCallback, x, y);
   }
 
   /**
    * Same as {@code display(background, axes, grid, null, worldCallback, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Object background, boolean axes, Integer grid, Scene.Callback worldCallback, int x, int y) {
+  public void display(Object background, boolean axes, Integer grid, Callback worldCallback, int x, int y) {
     display(background, axes, grid, null, worldCallback, x, y);
   }
 
   /**
    * Same as {@code display(null, false, null, subtree, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Node subtree) {
     display(null, false, null, subtree, null, 0, 0);
@@ -2326,7 +2588,7 @@ public class Graph {
   /**
    * Same as {@code display(background, false, null, subtree, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, Node subtree) {
     display(background, false, null, subtree, null, 0, 0);
@@ -2335,7 +2597,7 @@ public class Graph {
   /**
    * Same as {@code display(null, false, null, null, subtree, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Node subtree, int x, int y) {
     display(null, false, null, subtree, null, x, y);
@@ -2344,7 +2606,7 @@ public class Graph {
   /**
    * Same as {@code display(background, false, null, null, subtree, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, Node subtree, int x, int y) {
     display(background, false, null, subtree, null, x, y);
@@ -2353,7 +2615,7 @@ public class Graph {
   /**
    * Same as {@code display(null, axes, null, subtree, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(boolean axes, Node subtree) {
     display(null, axes, null, subtree, null, 0, 0);
@@ -2362,7 +2624,7 @@ public class Graph {
   /**
    * Same as {@code display(background, axes, null, subtree, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, Node subtree) {
     display(background, axes, null, subtree, null, 0, 0);
@@ -2371,7 +2633,7 @@ public class Graph {
   /**
    * Same as {@code display(axes, grid, subtree, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(boolean axes, Integer grid, Node subtree) {
     display(null, axes, grid, subtree, null, 0, 0);
@@ -2380,7 +2642,7 @@ public class Graph {
   /**
    * Same as {@code display(background, axes, grid, subtree, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, Integer grid, Node subtree) {
     display(background, axes, grid, subtree, null, 0, 0);
@@ -2389,7 +2651,7 @@ public class Graph {
   /**
    * Same as {@code display(null, axes, null, subtree, null, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(boolean axes, Node subtree, int x, int y) {
     display(null, axes, null, subtree, null, x, y);
@@ -2398,7 +2660,7 @@ public class Graph {
   /**
    * Same as {@code display(background, axes, null, subtree, null, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, Node subtree, int x, int y) {
     display(background, axes, null, subtree, null, x, y);
@@ -2407,7 +2669,7 @@ public class Graph {
   /**
    * Same as {@code display(null, axes, grid, subtree, null, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(boolean axes, Integer grid, Node subtree, int x, int y) {
     display(null, axes, grid, subtree, null, x, y);
@@ -2416,7 +2678,7 @@ public class Graph {
   /**
    * Same as {@code display(background, axes, grid, subtree, null, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, Integer grid, Node subtree, int x, int y) {
     display(background, axes, grid, subtree, null, x, y);
@@ -2425,43 +2687,43 @@ public class Graph {
   /**
    * Same as {@code display(null, false, null, subtree, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Node subtree, Scene.Callback worldCallback) {
+  public void display(Node subtree, Callback worldCallback) {
     display(null, false, null, subtree, worldCallback, 0, 0);
   }
 
   /**
    * Same as {@code display(background, false, null, subtree, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Object background, Node subtree, Scene.Callback worldCallback) {
+  public void display(Object background, Node subtree, Callback worldCallback) {
     display(background, false, null, subtree, worldCallback, 0, 0);
   }
 
   /**
    * Same as {@code display(null, false, null, subtree, worldCallback, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Node subtree, Scene.Callback worldCallback, int x, int y) {
+  public void display(Node subtree, Callback worldCallback, int x, int y) {
     display(null, false, null, subtree, worldCallback, x, y);
   }
 
   /**
    * Same as {@code display(background, false, null, subtree, worldCallback, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Object background, Node subtree, Scene.Callback worldCallback, int x, int y) {
+  public void display(Object background, Node subtree, Callback worldCallback, int x, int y) {
     display(background,false,null, subtree, worldCallback, x, y);
   }
 
   /**
    * Same as {@code display(null, axes, null, null, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(boolean axes) {
     display(null, axes, null, null, null, 0, 0);
@@ -2470,7 +2732,7 @@ public class Graph {
   /**
    * Same as {@code display(background, axes, null, null, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes) {
     display(background, axes, null, null, null, 0, 0);
@@ -2479,7 +2741,7 @@ public class Graph {
   /**
    * Same as {@code display(null, axes, grid, null, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(boolean axes, Integer grid) {
     display(null, axes, grid, null, null, 0, 0);
@@ -2488,7 +2750,7 @@ public class Graph {
   /**
    * Same as {@code display(background, axes, grid, null, null, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, Integer grid) {
     display(background, axes, grid, null, null, 0, 0);
@@ -2497,7 +2759,7 @@ public class Graph {
   /**
    * Same as {@code display(null, axes, null, null, null, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(boolean axes, int x, int y) {
     display(null, axes, null, null, null, x, y);
@@ -2506,7 +2768,7 @@ public class Graph {
   /**
    * Same as {@code display(background, axes, null, null, null, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, int x, int y) {
     display(background, axes, null, null, null, x, y);
@@ -2515,7 +2777,7 @@ public class Graph {
   /**
    * Same as {@code display(null, axes, grid, null, null, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(boolean axes, Integer grid, int x, int y) {
     display(null, axes, grid, null, null, x, y);
@@ -2524,7 +2786,7 @@ public class Graph {
   /**
    * Same as {@code display(background, axes, grid, null, null, x, y)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
   public void display(Object background, boolean axes, Integer grid, int x, int y) {
     display(background, axes, grid, null, null, x, y);
@@ -2533,54 +2795,54 @@ public class Graph {
   /**
    * Same as {@code display(null, axes, null, subtree, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(boolean axes, Node subtree, Scene.Callback worldCallback) {
+  public void display(boolean axes, Node subtree, Callback worldCallback) {
     display(null, axes, null, subtree, worldCallback, 0, 0);
   }
 
   /**
    * Same as {@code display(background, axes, null, subtree, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Object background, boolean axes, Node subtree, Scene.Callback worldCallback) {
+  public void display(Object background, boolean axes, Node subtree, Callback worldCallback) {
     display(background, axes, null, subtree, worldCallback, 0, 0);
   }
 
   /**
    * Same as {@code display(null, axes, grid, subtree, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(boolean axes, Integer grid, Node subtree, Scene.Callback worldCallback) {
+  public void display(boolean axes, Integer grid, Node subtree, Callback worldCallback) {
     display(null, axes, grid, subtree, worldCallback, 0, 0);
   }
 
   /**
    * Same as {@code display(background, axes, grid, subtree, worldCallback, 0, 0)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Object background, boolean axes, Integer grid, Node subtree, Scene.Callback worldCallback) {
+  public void display(Object background, boolean axes, Integer grid, Node subtree, Callback worldCallback) {
     display(background, axes, grid, subtree, worldCallback, 0, 0);
   }
 
   /**
    * Same as {@code display(null, axes, subtree, worldCallback, cornerX, cornerY)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(boolean axes, Node subtree, Scene.Callback worldCallback, int cornerX, int cornerY) {
+  public void display(boolean axes, Node subtree, Callback worldCallback, int cornerX, int cornerY) {
     display(null, axes, subtree, worldCallback, cornerX, cornerY);
   }
 
   /**
    * Same as {@code display(background, axes, null, subtree, worldCallback, cornerX, cornerY)}.
    *
-   * @see #display(Object, boolean, Integer, Node, Scene.Callback, int, int)
+   * @see #display(Object, boolean, Integer, Node, Callback, int, int)
    */
-  public void display(Object background, boolean axes, Node subtree, Scene.Callback worldCallback, int cornerX, int cornerY) {
+  public void display(Object background, boolean axes, Node subtree, Callback worldCallback, int cornerX, int cornerY) {
     display(background, axes, null, subtree, worldCallback, cornerX, cornerY);
   }
 
@@ -2595,7 +2857,7 @@ public class Graph {
    * @param cornerX
    * @param cornerY
    */
-  public void display(Object background, boolean axes, Integer grid, Node subtree, Scene.Callback worldCallback, int cornerX, int cornerY) {
+  public void display(Object background, boolean axes, Integer grid, Node subtree, Callback worldCallback, int cornerX, int cornerY) {
     if (isOffscreen()) {
       openContext();
     }
@@ -5018,13 +5280,13 @@ public class Graph {
       return;
     // texturing requires graph.isOffscreen() (third condition) otherwise got
     // "The pixels array is null" message and the frustum near plane texture and contour are missed
-    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene && graph.isOffscreen();
+    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph.isOffscreen();
     switch (graph._type) {
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, texture ? ((Scene) graph).context() : null, Math.abs(graph.right() - graph.left()) / (float) graph.width(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.near(), graph.far());
+        _drawOrthographicFrustum(pGraphics, texture ? graph.context() : null, Math.abs(graph.right() - graph.left()) / (float) graph.width(), graph.width(), leftHanded ? -graph.height() : graph.height(), graph.near(), graph.far());
         break;
       case PERSPECTIVE:
-        _drawPerspectiveFrustum(pGraphics, texture ? ((Scene) graph).context() : null, (float) Math.tan(graph.fov() / 2.0f), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.near(), graph.far());
+        _drawPerspectiveFrustum(pGraphics, texture ? graph.context() : null, (float) Math.tan(graph.fov() / 2.0f), leftHanded ? -graph.aspectRatio() : graph.aspectRatio(), graph.near(), graph.far());
         break;
     }
   }
@@ -5052,14 +5314,14 @@ public class Graph {
       points[1].setZ(zFar / magnitude);
       // Frustum lines
       pGraphics.beginShape(PApplet.LINES);
-      Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
-      Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
-      Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
-      Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+      Graph.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+      Graph.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+      Graph.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+      Graph.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
       pGraphics.endShape();
     }
 
@@ -5081,28 +5343,28 @@ public class Graph {
     }
     pGraphics.beginShape(PApplet.QUADS);
     if (lh) {
-      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
     } else {
-      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
     }
     pGraphics.endShape();
 
     // Arrow
     pGraphics.beginShape(PApplet.TRIANGLES);
     if (lh) {
-      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
+      Graph.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
     } else {
-      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
+      Graph.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
     }
     if (eyeBuffer != null)
       pGraphics.popStyle();// begin at arrow base
@@ -5143,14 +5405,14 @@ public class Graph {
 
     // Frustum lines
     pGraphics.beginShape(PApplet.LINES);
-    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-    Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
-    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-    Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
-    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-    Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
-    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-    Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+    Graph.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Graph.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+    Graph.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Graph.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+    Graph.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Graph.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+    Graph.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Graph.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
     pGraphics.endShape();
 
     // Up arrow
@@ -5171,28 +5433,28 @@ public class Graph {
     }
     pGraphics.beginShape(PApplet.QUADS);
     if (lh) {
-      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
     } else {
-      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
+      Graph.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
     }
     pGraphics.endShape();
 
     // Arrow
     pGraphics.beginShape(PApplet.TRIANGLES);
     if (lh) {
-      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
+      Graph.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
     } else {
-      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
+      Graph.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
+      Graph.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
     }
     if (eyeBuffer != null)
       pGraphics.popStyle();// begin at arrow base
@@ -5218,15 +5480,15 @@ public class Graph {
       pGraphics.textureMode(PApplet.NORMAL);
       pGraphics.tint(255, 126); // Apply transparency without changing color
       pGraphics.texture(eyeBuffer);
-      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, lh ? 1 : 0);
-      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, lh ? 1 : 0);
-      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, lh ? 0 : 1);
-      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z(), 1, lh ? 0 : 1);
+      Graph.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, lh ? 1 : 0);
+      Graph.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, lh ? 1 : 0);
+      Graph.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, lh ? 0 : 1);
+      Graph.vertex(pGraphics, corner.x(), -corner.y(), -corner.z(), 1, lh ? 0 : 1);
     } else {
-      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z());
-      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z());
-      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z());
-      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z());
+      Graph.vertex(pGraphics, corner.x(), corner.y(), -corner.z());
+      Graph.vertex(pGraphics, -corner.x(), corner.y(), -corner.z());
+      Graph.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z());
+      Graph.vertex(pGraphics, corner.x(), -corner.y(), -corner.z());
     }
     pGraphics.endShape();
     pGraphics.popStyle();
@@ -5271,16 +5533,16 @@ public class Graph {
     for (Vector s : points) {
       if (_type == Graph.Type.ORTHOGRAPHIC) {
         Vector v = graph._eye.location(s);
-        Scene.vertex(context(), v.x(), v.y(), v.z());
+        Graph.vertex(context(), v.x(), v.y(), v.z());
         // Key here is to represent the eye zNear param (which is given in world units)
         // in eye units.
         // Hence it should be multiplied by: 1 / eye.magnitude()
         // The neg sign is because the zNear is positive but the eye view direction is
         // the negative Z-axis
-        Scene.vertex(context(), v.x(), v.y(), -(graph.near() * 1 / Math.abs(graph.right() - graph.left()) / (float) graph.width()));
+        Graph.vertex(context(), v.x(), v.y(), -(graph.near() * 1 / Math.abs(graph.right() - graph.left()) / (float) graph.width()));
       } else {
-        Scene.vertex(context(), s.x(), s.y(), s.z());
-        Scene.vertex(context(), o.x(), o.y(), o.z());
+        Graph.vertex(context(), s.x(), s.y(), s.z());
+        Graph.vertex(context(), o.x(), o.y(), o.z());
       }
     }
     context().endShape();

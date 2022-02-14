@@ -9,11 +9,12 @@
  * Released under the terms of the GPLv3, refer to: http://www.gnu.org/licenses/gpl.html
  ***************************************************************************************/
 
-package nub.processing;
+package nub.core;
 
 import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
+import nub.core.Graph;
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
@@ -39,7 +40,7 @@ class GLMatrixHandler extends MatrixHandler {
   @Override
   public Node eye() {
     Node node = new Node(false);
-    node.fromWorldMatrix(Matrix.inverse(Scene.toMatrix(_pggl.modelview)));
+    node.fromWorldMatrix(Matrix.inverse(Graph.toMatrix(_pggl.modelview)));
     return node;
   }
 
@@ -113,14 +114,14 @@ class GLMatrixHandler extends MatrixHandler {
     // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
     if (_pggl.is3D())
       _pggl.hint(_pggl.DISABLE_OPTIMIZED_STROKE);
-    Scene.disableDepthTest(_pggl);
+    Graph.disableDepthTest(_pggl);
     super.beginHUD(width, height);
   }
 
   @Override
   public void endHUD() {
     super.endHUD();
-    Scene.enableDepthTest(_pggl);
+    Graph.enableDepthTest(_pggl);
     // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
     if (_pggl.is3D())
       _pggl.hint(_pggl.ENABLE_OPTIMIZED_STROKE);
@@ -128,22 +129,22 @@ class GLMatrixHandler extends MatrixHandler {
 
   @Override
   protected void _bindProjection(Matrix matrix) {
-    _pggl.setProjection(Scene.toPMatrix(matrix));
+    _pggl.setProjection(Graph.toPMatrix(matrix));
   }
 
   @Override
   protected void _bindMatrix(Matrix matrix) {
     if (_pggl.is3D())
-      _pggl.setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
+      _pggl.setMatrix(Graph.toPMatrix(matrix));// in P5 this caches projmodelview
     else {
-      _pggl.modelview.set(Scene.toPMatrix(matrix));
+      _pggl.modelview.set(Graph.toPMatrix(matrix));
       _pggl.projmodelview.set(Matrix.multiply(projection(), matrix).get(new float[16], false));
     }
   }
 
   @Override
   public Matrix projection() {
-    return Scene.toMatrix(_pggl.projection.get());
+    return Graph.toMatrix(_pggl.projection.get());
   }
 
   @Override
@@ -153,7 +154,7 @@ class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public Matrix modelview() {
-    return Scene.toMatrix((PMatrix3D) _pggl.getMatrix());
+    return Graph.toMatrix((PMatrix3D) _pggl.getMatrix());
   }
 
   @Override
@@ -192,7 +193,7 @@ class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public void applyProjection(Matrix matrix) {
-    _pggl.applyProjection(Scene.toPMatrix(matrix));
+    _pggl.applyProjection(Graph.toPMatrix(matrix));
   }
 
   @Override
@@ -219,7 +220,7 @@ class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public void applyMatrix(Matrix matrix) {
-    _pggl.applyMatrix(Scene.toPMatrix(matrix));
+    _pggl.applyMatrix(Graph.toPMatrix(matrix));
   }
 
   @Override
