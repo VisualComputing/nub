@@ -83,6 +83,10 @@ import processing.event.MouseEvent;
           focus.align();
     }
 
+    public void mouseWheel(MouseEvent event) {
+      focus.moveForward(event.getCount() * 20);
+    }
+
     class OctreeNode extends Node {
       OctreeNode() {
         tagging = false;

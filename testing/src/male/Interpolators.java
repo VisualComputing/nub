@@ -118,9 +118,17 @@ public class Interpolators extends PApplet {
       scene.shift();
   }
 
+  // /*
+  public void mouseWheel(MouseEvent event) {
+    scene.moveForward(event.getCount() * 20);
+  }
+  // */
+
+  /*
   public void mouseWheel(MouseEvent event) {
     scene.zoom(event.getCount() * 20);
   }
+  // */
 
   float speed = 1;
 

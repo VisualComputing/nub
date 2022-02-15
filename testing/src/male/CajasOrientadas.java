@@ -6,6 +6,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import processing.core.PApplet;
 import processing.core.PGraphics;
+import processing.event.MouseEvent;
 
 public class CajasOrientadas extends PApplet {
   Node eye;
@@ -57,6 +58,10 @@ public class CajasOrientadas extends PApplet {
       scene.shift();
     else
       scene.zoom(mouseX - pmouseX);
+  }
+
+  public void mouseWheel(MouseEvent event) {
+    scene.moveForward(event.getCount() * 20);
   }
 
   public void keyPressed() {
