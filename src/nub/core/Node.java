@@ -1089,7 +1089,7 @@ public class Node {
 
   /**
    * Returns a random node attached to {@code scene}. The node is randomly positioned inside
-   * the {@code scene} viewing volume which is defined by {@link Scene#center()} and {@link Scene#radius()}
+   * the {@code scene} viewing volume which is defined by {@link Scene#center} and {@link Scene#radius}
    * (see {@link Vector#random()}). The {@link #worldOrientation()} is set by {@link Quaternion#random()}. The
    * {@link #worldMagnitude()} is a random in [0,5...2].
    *

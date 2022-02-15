@@ -897,7 +897,7 @@ public class Scene {
   /**
    * Returns {@link Visibility#VISIBLE}, {@link Visibility#INVISIBLE}, or
    * {@link Visibility#SEMIVISIBLE}, depending whether the ball (of radius {@code radius}
-   * and center {@link center}) is visible, invisible, or semi-visible, respectively.
+   * and center {@link #center}) is visible, invisible, or semi-visible, respectively.
    *
    * @see #distanceToBound(int, Vector)
    * @see #isPointVisible(Vector)
@@ -1152,7 +1152,7 @@ public class Scene {
    * screen.
    * <p>
    * Use this method to scale objects so that they have a constant pixel size on screen.
-   * The following code will draw a 20 pixel line, starting at {@link center} and
+   * The following code will draw a 20 pixel line, starting at {@link #center} and
    * always directed along the screen vertical direction ({@link #upVector()}):
    * <p>
    * {@code beginShape(LINES);}<br>
@@ -4535,7 +4535,7 @@ public class Scene {
   }
 
   /**
-   * Draws an arrow of {@link radius} and {@code length} along the positive Z axis.
+   * Draws an arrow of {@link #radius} and {@code length} along the positive Z axis.
    * <p>
    * Use {@link #drawArrow(Vector, Vector, float)} to place the arrow in 3D.
    */
@@ -4568,7 +4568,7 @@ public class Scene {
   }
 
   /**
-   * Draws an arrow of {@link radius} between {@code from} and the 3D point {@code to}.
+   * Draws an arrow of {@link #radius} between {@code from} and the 3D point {@code to}.
    *
    * @see #drawArrow(float, float)
    */
@@ -4617,7 +4617,7 @@ public class Scene {
   }
 
   /**
-   * Draws a cylinder of {@link radius} and {@code height} onto {@code pGraphics}.
+   * Draws a cylinder of {@link #radius} and {@code height} onto {@code pGraphics}.
    */
   public static void drawCylinder(PGraphics pGraphics, int detail, float radius, float height) {
     if (!(pGraphics instanceof PGraphics3D))
@@ -4788,7 +4788,7 @@ public class Scene {
 
   /**
    * Draws a cone onto {@code pGraphics} centered at {@code (x,y)} having
-   * {@link radius} and {@code height} dimensions.
+   * {@link #radius} and {@code height} dimensions.
    */
   public static void drawCone(PGraphics pGraphics, int detail, float x, float y, float radius, float height) {
     if (!(pGraphics instanceof PGraphics3D))
