@@ -128,11 +128,13 @@ public class Scene {
   protected boolean _bbNeed;
   // 1. Eye
   protected Node _eye;
+  protected boolean _male;
   protected long _lastEqUpdate;
   public Vector center = new Vector();
   public float radius = 100;
   public static float inertia = 0.85f;
-  protected Vector _eyeUp;
+  // TODO restore cad and other only eye methods
+  //protected Vector _eyeUp;
   //bounds eqns
   protected float[][] _coefficients;
   protected Vector[] _normal;
@@ -1880,7 +1882,6 @@ public class Scene {
       _frameCount++;
     }
     _resize();
-    _eye._execute(this);
     // safer to always free subtrees cache
     _subtrees.clear();
     _bbNeed = false;
@@ -2007,10 +2008,6 @@ public class Scene {
     return _projectionViewInverse;
   }
 
-  // Warning: Male mode is for debugging purposes. It includes resetEye and setEye
-
-  protected boolean _male;
-
   public void resetEye() {
     setEye(null);
   }
@@ -2072,6 +2069,7 @@ public class Scene {
   protected void _bind() {
     _projection = _matrixHandler.projection();
     _leftHanded = _projection.m11() < 0;
+    _eye._execute(this);
     if (!_male) {
       _eye = _matrixHandler.eye();
     }
