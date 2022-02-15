@@ -4425,7 +4425,7 @@ public class Scene {
   }
 
   /**
-   * Same as {@code if (this.is2D()) vertex(context(), x, y); else vertex(context(), x, y, z)}.
+   * Same as {@code vertex(context(), x, y, z)}.
    *
    * @see #vertex(PGraphics, float, float, float)
    */
@@ -4444,8 +4444,7 @@ public class Scene {
   }
 
   /**
-   * Same as {@code if (this.is2D()) vertex(context(), x, y, u, v); else
-   * vertex(context(), x, y, z, u, v);}.
+   * Same as {@code vertex(context(), x, y, z, u, v)}.
    *
    * @see #vertex(PGraphics, float, float, float, float)
    * @see #vertex(PGraphics, float, float, float, float, float)
@@ -4497,8 +4496,7 @@ public class Scene {
   }
 
   /**
-   * Same as {@code if (this.is2D()) line(context(), x1, y1, x2, y2);
-   * else line(context(), x1, y1, z1, x2, y2, z2);}.
+   * Same as {@code line(context(), x1, y1, z1, x2, y2, z2)}.
    *
    * @see #line(PGraphics, float, float, float, float, float, float)
    */
@@ -5096,72 +5094,42 @@ public class Scene {
     float charWidth = length / 40.0f;
     float charHeight = length / 30.0f;
     float charShift = 1.04f * length;
-
     pGraphics.pushStyle();
     pGraphics.beginShape(PApplet.LINES);
     pGraphics.strokeWeight(2);
-    if (pGraphics.is2D()) {
-      // The X
-      pGraphics.stroke(200, 0, 0);
-      pGraphics.vertex(charShift + charWidth, -charHeight);
-      pGraphics.vertex(charShift - charWidth, charHeight);
-      pGraphics.vertex(charShift - charWidth, -charHeight);
-      pGraphics.vertex(charShift + charWidth, charHeight);
-
-      // The Y
-      charShift *= 1.02;
-      pGraphics.stroke(0, 200, 0);
-      pGraphics.vertex(charWidth, charShift + (!leftHanded ? charHeight : -charHeight));
-      pGraphics.vertex(0.0f, charShift + 0.0f);
-      pGraphics.vertex(-charWidth, charShift + (!leftHanded ? charHeight : -charHeight));
-      pGraphics.vertex(0.0f, charShift + 0.0f);
-      pGraphics.vertex(0.0f, charShift + 0.0f);
-      pGraphics.vertex(0.0f, charShift + -(!leftHanded ? charHeight : -charHeight));
-    } else {
-      // The X
-      pGraphics.stroke(200, 0, 0);
-      pGraphics.vertex(charShift, charWidth, -charHeight);
-      pGraphics.vertex(charShift, -charWidth, charHeight);
-      pGraphics.vertex(charShift, -charWidth, -charHeight);
-      pGraphics.vertex(charShift, charWidth, charHeight);
-      // The Y
-      pGraphics.stroke(0, 200, 0);
-      pGraphics.vertex(charWidth, charShift, (leftHanded ? charHeight : -charHeight));
-      pGraphics.vertex(0.0f, charShift, 0.0f);
-      pGraphics.vertex(-charWidth, charShift, (leftHanded ? charHeight : -charHeight));
-      pGraphics.vertex(0.0f, charShift, 0.0f);
-      pGraphics.vertex(0.0f, charShift, 0.0f);
-      pGraphics.vertex(0.0f, charShift, -(leftHanded ? charHeight : -charHeight));
-      // The Z
-      pGraphics.stroke(0, 100, 200);
-      pGraphics.vertex(-charWidth, !leftHanded ? charHeight : -charHeight, charShift);
-      pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
-      pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
-      pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
-      pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
-      pGraphics.vertex(charWidth, !leftHanded ? -charHeight : charHeight, charShift);
-    }
+    // The X
+    pGraphics.stroke(200, 0, 0);
+    pGraphics.vertex(charShift, charWidth, -charHeight);
+    pGraphics.vertex(charShift, -charWidth, charHeight);
+    pGraphics.vertex(charShift, -charWidth, -charHeight);
+    pGraphics.vertex(charShift, charWidth, charHeight);
+    // The Y
+    pGraphics.stroke(0, 200, 0);
+    pGraphics.vertex(charWidth, charShift, (leftHanded ? charHeight : -charHeight));
+    pGraphics.vertex(0.0f, charShift, 0.0f);
+    pGraphics.vertex(-charWidth, charShift, (leftHanded ? charHeight : -charHeight));
+    pGraphics.vertex(0.0f, charShift, 0.0f);
+    pGraphics.vertex(0.0f, charShift, 0.0f);
+    pGraphics.vertex(0.0f, charShift, -(leftHanded ? charHeight : -charHeight));
+    // The Z
+    pGraphics.stroke(0, 100, 200);
+    pGraphics.vertex(-charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+    pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+    pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+    pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
+    pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
+    pGraphics.vertex(charWidth, !leftHanded ? -charHeight : charHeight, charShift);
     pGraphics.endShape();
     pGraphics.popStyle();
-
     // X Axis
     pGraphics.stroke(200, 0, 0);
-    if (pGraphics.is2D())
-      pGraphics.line(0, 0, length, 0);
-    else
-      pGraphics.line(0, 0, 0, length, 0, 0);
+    pGraphics.line(0, 0, 0, length, 0, 0);
     // Y Axis
     pGraphics.stroke(0, 200, 0);
-    if (pGraphics.is2D())
-      pGraphics.line(0, 0, 0, length);
-    else
-      pGraphics.line(0, 0, 0, 0, length, 0);
-
+    pGraphics.line(0, 0, 0, 0, length, 0);
     // Z Axis
-    if (pGraphics.is3D()) {
-      pGraphics.stroke(0, 100, 200);
-      pGraphics.line(0, 0, 0, 0, 0, length);
-    }
+    pGraphics.stroke(0, 100, 200);
+    pGraphics.line(0, 0, 0, 0, 0, length);
     pGraphics.popStyle();
   }
 
@@ -5353,43 +5321,35 @@ public class Scene {
   protected static void _drawOrthographicFrustum(PGraphics pGraphics, PGraphics eyeBuffer, float magnitude, float width, float height, float zNear, float zFar) {
     if (pGraphics == eyeBuffer)
       return;
-    boolean threeD = pGraphics.is3D();
     boolean lh = height < 0;
     height = Math.abs(height);
-
     pGraphics.pushStyle();
-
     // 0 is the upper left coordinates of the near corner, 1 for the far one
     Vector[] points = new Vector[2];
     points[0] = new Vector();
     points[1] = new Vector();
-
     points[0].setX(width / 2);
     points[1].setX(width / 2);
     points[0].setY(height / 2);
     points[1].setY(height / 2);
-    if (threeD) {
-      points[0].setZ(zNear / magnitude);
-      points[1].setZ(zFar / magnitude);
-      // Frustum lines
-      pGraphics.beginShape(PApplet.LINES);
-      Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
-      Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
-      Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
-      Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
-      pGraphics.endShape();
-    }
-
+    points[0].setZ(zNear / magnitude);
+    points[1].setZ(zFar / magnitude);
+    // Frustum lines
+    pGraphics.beginShape(PApplet.LINES);
+    Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+    pGraphics.endShape();
     // Up arrow
     float arrowHeight = 1.5f * points[0].y();
     float baseHeight = 1.2f * points[0].y();
     float arrowHalfWidth = 0.5f * points[0].x();
     float baseHalfWidth = 0.3f * points[0].x();
-
     pGraphics.noStroke();
     // Arrow base
     if (eyeBuffer != null) {
@@ -5413,7 +5373,6 @@ public class Scene {
       Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
     }
     pGraphics.endShape();
-
     // Arrow
     pGraphics.beginShape(PApplet.TRIANGLES);
     if (lh) {
@@ -5428,14 +5387,11 @@ public class Scene {
     if (eyeBuffer != null)
       pGraphics.popStyle();// begin at arrow base
     pGraphics.endShape();
-
     // Planes
     // far plane
-    if (threeD)
-      _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
+    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
     // near plane
     _drawPlane(pGraphics, eyeBuffer, points[0], new Vector(0, 0, 1), lh);
-
     pGraphics.popStyle();
   }
 
