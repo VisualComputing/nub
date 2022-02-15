@@ -22,7 +22,8 @@ public class Interpolators extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this, 150);
+    scene = new Scene(this);
+    //scene.radius = 150;
     //scene = new Scene(createGraphics(1920, 1080, P3D), 150);
     eye = new Node();
     eye.setWorldPosition(0,0,300);

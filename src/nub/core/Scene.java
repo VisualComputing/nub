@@ -129,8 +129,8 @@ public class Scene {
   // 1. Eye
   protected Node _eye;
   protected long _lastEqUpdate;
-  protected Vector _center;
-  protected float _radius;
+  public Vector center = new Vector();
+  public float radius = 100;
   public static float inertia = 0.85f;
   protected Vector _eyeUp;
   //bounds eqns
@@ -312,41 +312,6 @@ public class Scene {
   // Prettify bb display if required
   protected HashMap<Integer, Integer> _idToColor = new HashMap<>();
 
-  /**
-   * Same as {@code this(context, width, height, type, new Vector(), 100)}.
-   *
-   * @see #Scene(PGraphics, int, int, Vector, float)
-   */
-  public Scene(PGraphics context, int width, int height) {
-    this(context, width, height, new Vector(), 100);
-  }
-
-  /**
-   * Same as {@code this(context, width, height, type, new Vector(), radius)}.
-   *
-   * @see #Scene(PGraphics, int, int, Vector, float)
-   */
-  protected Scene(PGraphics context, int width, int height, float radius) {
-    this(context, width, height, new Vector(), radius);
-  }
-
-  /**
-   * Defines a right-handed scene with the specified {@code width} and {@code height}
-   * screen window dimensions.
-   * <p>
-   * The constructor also instantiates the scene main {@link #context()} and
-   * {@code back-buffer} matrix-handlers (see {@link MatrixHandler}).
-   *
-   * @see #setCenter(Vector)
-   * @see #setRadius(float)
-   * @see MatrixHandler
-   */
-  protected Scene(PGraphics context, int width, int height, Vector center, float radius) {
-    _init(context, width, height);
-    setCenter(center);
-    setRadius(radius);
-  }
-
   // high-level constructors
 
   /**
@@ -359,68 +324,21 @@ public class Scene {
   }
 
   /**
-   * Same as {this(pApplet.g, new Vector(), radius)}.
-   *
-   * @see #Scene(PGraphics, Vector, float)
-   */
-  public Scene(PApplet pApplet, float radius) {
-    this(pApplet.g, new Vector(), radius);
-  }
-
-  /**
-   * Same as {@code this(pApplet.g, center, radius)}.
-   *
-   * @see #Scene(PGraphics, Vector, float)
-   */
-  public Scene(PApplet pApplet, Vector center, float radius) {
-    this(pApplet.g, center, radius);
-  }
-
-  /**
    * Same as {@code this(pGraphics, pGraphics.width, pGraphics.height, eye)}.
    *
-   * @see #Scene(PGraphics, int, int)
    * @see #Scene(PApplet)
    */
   public Scene(PGraphics pGraphics) {
-    this(pGraphics, pGraphics.width, pGraphics.height);
-    _initScene(pGraphics);
-  }
-
-  /**
-   * Same as {@code this(pGraphics, new Vector(), radius)}.
-   *
-   * @see #Scene(PGraphics, Vector, float)
-   */
-  public Scene(PGraphics pGraphics, float radius) {
-    this(pGraphics, new Vector(), radius);
-  }
-
-  /**
-   * Same as {@code this(pGraphics, pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics2D ? Type.TWO_D : Type.PERSPECTIVE, center, radius)},
-   * and then sets {@link #leftHanded} to {@code true}.
-   *
-   * @see #Scene(PGraphics, int, int, Vector, float)
-   */
-  public Scene(PGraphics pGraphics, Vector center, float radius) {
-    this(pGraphics, pGraphics.width, pGraphics.height, center, radius);
-    _initScene(pGraphics);
-  }
-
-  /**
-   * Used internally by several constructors.
-   */
-  protected void _init(PGraphics context, int width, int height) {
     if (!_seeded) {
       _seededGraph = true;
       _seeded = true;
     }
-    _fb = context;
+    _fb = pGraphics;
     _matrixHandler = new MatrixHandler();
     _bbMatrixHandler = new MatrixHandler();
     _subtrees = new ArrayList<Node>();
-    setWidth(width);
-    setHeight(height);
+    setWidth(pGraphics.width);
+    setHeight(pGraphics.height);
     _tags = new HashMap<String, Node>();
     _i1rays = new ArrayList<Ray>();
     _i2rays = new ArrayList<Ray>();
@@ -429,9 +347,6 @@ public class Scene {
     _orays = _i2rays;
     _behaviors = new HashMap<Integer, BiConsumer<Scene, Node>>();
     picking = true;
-  }
-
-  protected void _initScene(PGraphics pGraphics) {
     // 1. P5 objects
     if (pApplet == null) pApplet = pGraphics.parent;
     _offscreen = pGraphics != pApplet.g;
@@ -493,7 +408,7 @@ public class Scene {
   }
 
   /**
-   * Saves the eye, the {@link #radius()} and the {@link #_type} into {@code fileName}.
+   * Saves the eye.
    *
    * @see #saveConfig()
    * @see #loadConfig()
@@ -501,7 +416,6 @@ public class Scene {
    */
   public void saveConfig(String fileName) {
     JSONObject json = new JSONObject();
-    json.setFloat("radius", _radius);
     // TODO: handle nodes (hint, ... restore keyframes)
     pApplet.saveJSONObject(json, fileName);
   }
@@ -523,7 +437,7 @@ public class Scene {
   }
 
   /**
-   * Loads the eye, the {@link #radius()} and the {@link #_type} from {@code fileName}.
+   * Loads the eye from {@code fileName}.
    *
    * @see #saveConfig()
    * @see #saveConfig(String)
@@ -537,7 +451,6 @@ public class Scene {
       System.out.println("No such " + fileName + " found!");
     }
     if (json != null) {
-      _radius = json.getFloat("radius");
       // TODO: handle nodes (hint, ... restore keyframes)
     }
   }
@@ -714,7 +627,7 @@ public class Scene {
    * @see Node#randomize(Vector, float)
    */
   public void randomize(Node node) {
-    node.randomize(_center, _radius);
+    node.randomize(center, radius);
   }
 
   // Dimensions stuff
@@ -984,7 +897,7 @@ public class Scene {
   /**
    * Returns {@link Visibility#VISIBLE}, {@link Visibility#INVISIBLE}, or
    * {@link Visibility#SEMIVISIBLE}, depending whether the ball (of radius {@code radius}
-   * and center {@code center}) is visible, invisible, or semi-visible, respectively.
+   * and center {@link center}) is visible, invisible, or semi-visible, respectively.
    *
    * @see #distanceToBound(int, Vector)
    * @see #isPointVisible(Vector)
@@ -1239,7 +1152,7 @@ public class Scene {
    * screen.
    * <p>
    * Use this method to scale objects so that they have a constant pixel size on screen.
-   * The following code will draw a 20 pixel line, starting at {@link #center()} and
+   * The following code will draw a 20 pixel line, starting at {@link center} and
    * always directed along the screen vertical direction ({@link #upVector()}):
    * <p>
    * {@code beginShape(LINES);}<br>
@@ -1406,80 +1319,6 @@ public class Scene {
     Vector faceNormal = axis.copy();
     faceNormal.normalize();
     return Math.acos(Vector.dot(camAxis, faceNormal)) + absAngle < Math.PI / 2;
-  }
-
-  /**
-   * Radius of the ball (defined in world coordinates) used in eye motions interaction
-   * (e.g., {@link #shift(float, float, float)}, {@link #spin(int, int, int, int)},
-   * {@link #turn(float, float, float)}) and interpolation routines..
-   * <p>
-   * Set it with {@link #setRadius(float)}.
-   *
-   * @see #center()
-   */
-  public float radius() {
-    return _radius;
-  }
-
-  /**
-   * Sets {@link #radius()}. To be used in conjuntion with {@link #setCenter(Vector)}.
-   *
-   * @see #setCenter(Vector)
-   */
-  public void setRadius(float radius) {
-    _radius = Math.abs(radius);
-    _modified();
-  }
-
-  /**
-   * Center of the ball (defined in world coordinates) used in eye motions interaction
-   * (e.g., {@link #shift(float, float, float)}, {@link #spin(int, int, int, int)},
-   * {@link #turn(float, float, float)}) and interpolation routines.
-   * <p>
-   * Set it with {@link #setCenter(Vector)}.
-   *
-   * @see #radius()
-   */
-  public Vector center() {
-    return _center;
-  }
-
-  /**
-   * Same as {@code return setCenter(mouseX(), mouseY())}.
-   *
-   * @see #mouseX()
-   * @see #mouseY()
-   * @see #setCenter(int, int)
-   */
-  public boolean setCenter() {
-    return setCenter(mouseX(), mouseY());
-  }
-
-  /**
-   * The {@link #center()} is set to the point located under {@code pixel} on screen.
-   * <p>
-   * 2D windows always returns true.
-   * <p>
-   * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
-   * {@code false} if none was found (in this case no {@link #center()} is set).
-   */
-  public boolean setCenter(int pixelX, int pixelY) {
-    Vector pup = location(pixelX, pixelY);
-    if (pup != null) {
-      _center = pup;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Sets {@link #center()}. To be used in conjunction with {@link #setRadius(float)}.
-   *
-   * @see #setRadius(float)
-   */
-  public void setCenter(Vector center) {
-    _center = center;
-    _modified();
   }
 
   /**
@@ -3185,7 +3024,7 @@ public class Scene {
     }
     if (node.isHintEnabled(Node.AXES)) {
       pg.pushStyle();
-      drawAxes(pg, node._axesLength == 0 ? _radius / 5 : node._axesLength);
+      drawAxes(pg, node._axesLength == 0 ? radius / 5 : node._axesLength);
       pg.popStyle();
     }
     if (node.isHintEnabled(Node.CAMERA)) {
@@ -3193,7 +3032,7 @@ public class Scene {
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(node._cameraStroke);
       pg.fill(node._cameraStroke);
-      _drawEye(pg, node._cameraLength == 0 ? _radius : node._cameraLength);
+      _drawEye(pg, node._cameraLength == 0 ? radius : node._cameraLength);
       pg.popStyle();
     }
     if (node.isHintEnabled(Node.BULLSEYE)) {
@@ -3235,11 +3074,11 @@ public class Scene {
     if (node.isHintEnabled(Node.AXES) && node.isPickingEnabled(Node.AXES)) {
       pg.pushStyle();
       pg.strokeWeight(6);
-      drawAxes(pg, node._axesLength == 0 ? _radius / 5 : node._axesLength);
+      drawAxes(pg, node._axesLength == 0 ? radius / 5 : node._axesLength);
       pg.popStyle();
     }
     if (node.isHintEnabled(Node.CAMERA) && node.isPickingEnabled(Node.CAMERA)) {
-      _drawEye(pg, node._cameraLength == 0 ? _radius : node._cameraLength);
+      _drawEye(pg, node._cameraLength == 0 ? radius : node._cameraLength);
     }
   }
 
@@ -3910,14 +3749,14 @@ public class Scene {
   /**
    * Focuses the node (use null for the world) with the eye.
    * <p>
-   * Note that the ball {@link #center()} is used as reference point when focusing the eye.
+   * Note that the ball {@link #center} is used as reference point when focusing the eye.
    *
    * @see #focus()
    * @see #focus(String tag)
    */
   public void focus(Node node) {
     if (node == null || node == _eye) {
-      _eye.projectOnLine(_center, viewDirection());
+      _eye.projectOnLine(center, viewDirection());
     }
     else {
       node.projectOnLine(_eye.worldPosition(), _eye.zAxis(false));
@@ -4105,12 +3944,12 @@ public class Scene {
    * defined in screen-space ((a box of {@link #width()} * {@link #height()} * 1 dimensions),
    * and {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * <p>
-   * Note that the ball {@link #center()} is used as reference point when shifting the eye.
+   * Note that the ball {@link #center} is used as reference point when shifting the eye.
    */
   public void shift(Node node, float dx, float dy, float dz, float inertia) {
     if (node == null || node == _eye) {
       node = new Node(null, _eye.worldPosition(), _eye.worldOrientation(), _eye.worldMagnitude(), false);
-      node.setWorldPosition(_center);
+      node.setWorldPosition(center);
       Vector vector = displacement(new Vector(dx, dy, dz), node);
       vector.multiply(-1);
       Vector translation = _eye.referenceDisplacement(vector);
@@ -4143,10 +3982,10 @@ public class Scene {
   protected void _shift(float x, float y, float z) {
     float d1 = 1, d2;
     if (_type == Type.ORTHOGRAPHIC)
-      d1 = Vector.scalarProjection(Vector.subtract(_eye.worldPosition(), _center), _eye.zAxis());
+      d1 = Vector.scalarProjection(Vector.subtract(_eye.worldPosition(), center), _eye.zAxis());
     _eye.translate(x, y, z);
     if (_type == Type.ORTHOGRAPHIC) {
-      d2 = Vector.scalarProjection(Vector.subtract(_eye.worldPosition(), _center), _eye.zAxis());
+      d2 = Vector.scalarProjection(Vector.subtract(_eye.worldPosition(), center), _eye.zAxis());
       if (d1 != 0)
         if (d2 / d1 > 0)
           _eye.scale(d2 / d1);
@@ -4207,11 +4046,11 @@ public class Scene {
    * {@code roll}, {@code pitch} and {@code yaw} radians, resp., and according to {@code inertia}
    * which should be in {@code [0..1]}, 0 no inertia & 1 no friction.
    * <p>
-   * Note that the ball {@link #center()} is used as reference point when turning the eye.
+   * Note that the ball {@link #center} is used as reference point when turning the eye.
    */
   public void turn(Node node, float roll, float pitch, float yaw, float inertia) {
     if (node == null || node == _eye) {
-      _eye._orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), _center, inertia);
+      _eye._orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), center, inertia);
       // same as:
       //Quaternion q = new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw);
       //_eye.orbit(_eye.worldDisplacement(q.axis()), q.angle(), _center, inertia);
@@ -4345,12 +4184,12 @@ public class Scene {
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying
    * three-dimensional orientation using a mouse.
    * <p>
-   * Note that the ball {@link #center()} is used as pivot when spinning the eye.
+   * Note that the ball {@link #center} is used as pivot when spinning the eye.
    */
   public void spin(Node node, int pixel1X, int pixel1Y, int pixel2X, int pixel2Y, float inertia) {
     if (node == null || node == _eye) {
       float sensitivity = 1;
-      Vector center = screenLocation(_center);
+      Vector center = screenLocation(this.center);
       if (center == null)
         return;
       int centerX = (int) center.x();
@@ -4365,7 +4204,7 @@ public class Scene {
       Vector axis = p2.cross(p1);
       // 2D is an ad-hoc
       float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / (p1.squaredNorm() * p2.squaredNorm())));
-      _eye._orbit(new Quaternion(axis, angle), _center, inertia);
+      _eye._orbit(new Quaternion(axis, angle), this.center, inertia);
       // same as:
       //_eye.orbit(_eye.worldDisplacement(axis), angle, _center, inertia);
     }
@@ -4594,7 +4433,7 @@ public class Scene {
     }
     if (Scene._isHintEnabled(node._keyframesMask, Node.AXES)) {
       pg.pushStyle();
-      drawAxes(pg, node._axesLength == 0 ? _radius / 5 : node._axesLength);
+      drawAxes(pg, node._axesLength == 0 ? radius / 5 : node._axesLength);
       pg.popStyle();
     }
     if (Scene._isHintEnabled(node._keyframesMask, Node.CAMERA)) {
@@ -4602,7 +4441,7 @@ public class Scene {
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(node._cameraStroke);
       pg.fill(node._cameraStroke);
-      _drawEye(pg, node._cameraLength == 0 ? _radius : node._cameraLength);
+      _drawEye(pg, node._cameraLength == 0 ? radius : node._cameraLength);
       pg.popStyle();
     }
     if (Scene._isHintEnabled(node._keyframesMask, Node.BULLSEYE)) {
@@ -4696,7 +4535,7 @@ public class Scene {
   }
 
   /**
-   * Draws an arrow of {@code radius} and {@code length} along the positive Z axis.
+   * Draws an arrow of {@link radius} and {@code length} along the positive Z axis.
    * <p>
    * Use {@link #drawArrow(Vector, Vector, float)} to place the arrow in 3D.
    */
@@ -4729,7 +4568,7 @@ public class Scene {
   }
 
   /**
-   * Draws an arrow of {@code radius} between {@code from} and the 3D point {@code to}.
+   * Draws an arrow of {@link radius} between {@code from} and the 3D point {@code to}.
    *
    * @see #drawArrow(float, float)
    */
@@ -4765,7 +4604,7 @@ public class Scene {
    * @see #drawCylinder(PGraphics, float, float)
    */
   public void drawCylinder(PGraphics pGraphics) {
-    drawCylinder(pGraphics, _radius / 6, _radius / 3);
+    drawCylinder(pGraphics, radius / 6, radius / 3);
   }
 
   /**
@@ -4778,7 +4617,7 @@ public class Scene {
   }
 
   /**
-   * Draws a cylinder of {@code radius} and {@code height} onto {@code pGraphics}.
+   * Draws a cylinder of {@link radius} and {@code height} onto {@code pGraphics}.
    */
   public static void drawCylinder(PGraphics pGraphics, int detail, float radius, float height) {
     if (!(pGraphics instanceof PGraphics3D))
@@ -4943,13 +4782,13 @@ public class Scene {
    * @see #drawCone(PGraphics, int, float, float, float, float)
    */
   public void drawCone(PGraphics pGraphics) {
-    float radius = _radius / 4;
+    float radius = this.radius / 4;
     drawCone(pGraphics, 12, 0, 0, radius, (float) Math.sqrt((float) 3) * radius);
   }
 
   /**
    * Draws a cone onto {@code pGraphics} centered at {@code (x,y)} having
-   * {@code radius} and {@code height} dimensions.
+   * {@link radius} and {@code height} dimensions.
    */
   public static void drawCone(PGraphics pGraphics, int detail, float x, float y, float radius, float height) {
     if (!(pGraphics instanceof PGraphics3D))
@@ -5064,7 +4903,7 @@ public class Scene {
    * @see #drawAxes(float)
    */
   public void drawAxes() {
-    drawAxes(_radius);
+    drawAxes(radius);
   }
 
   /**
@@ -5082,7 +4921,7 @@ public class Scene {
    * @see #drawAxes(PGraphics, float)
    */
   public void drawAxes(PGraphics pGraphics) {
-    drawAxes(pGraphics, _radius);
+    drawAxes(pGraphics, radius);
   }
 
   /**
@@ -5139,7 +4978,7 @@ public class Scene {
    * @see #drawGrid(float, int)
    */
   public void drawGrid() {
-    drawGrid(_radius, 10);
+    drawGrid(radius, 10);
   }
 
   /**
@@ -5157,7 +4996,7 @@ public class Scene {
    * @see #drawGrid(float, int)
    */
   public void drawGrid(int subdivisions) {
-    drawGrid(_radius, subdivisions);
+    drawGrid(radius, subdivisions);
   }
 
   /**
@@ -5177,7 +5016,7 @@ public class Scene {
    * @see #drawAxes(float)
    */
   public void drawGrid(PGraphics pGraphics) {
-    drawGrid(pGraphics, _radius, 10);
+    drawGrid(pGraphics, radius, 10);
   }
 
   /**
@@ -5204,7 +5043,7 @@ public class Scene {
    * @see #drawDottedGrid(float, int)
    */
   public void drawDottedGrid() {
-    drawDottedGrid(_radius, 10);
+    drawDottedGrid(radius, 10);
   }
 
   /**
@@ -5222,7 +5061,7 @@ public class Scene {
    * @see #drawDottedGrid(float, int)
    */
   public void drawDottedGrid(int subdivisions) {
-    drawDottedGrid(_radius, subdivisions);
+    drawDottedGrid(radius, subdivisions);
   }
 
   /**
@@ -5240,7 +5079,7 @@ public class Scene {
    * @see #drawDottedGrid(PGraphics, float, int)
    */
   public void drawDottedGrid(PGraphics pGraphics) {
-    drawDottedGrid(pGraphics, _radius, 10);
+    drawDottedGrid(pGraphics, radius, 10);
   }
 
   /**
@@ -5570,7 +5409,7 @@ public class Scene {
   /**
    * {@link #drawCross(float, float, float)} centered at the projected node origin.
    * If node is a Node instance the length of the cross is the node
-   * {@link Node#bullsEyeSize()}, otherwise it's {@link #radius()} / 5.
+   * {@link Node#bullsEyeSize()}, otherwise it's {@link #radius} / 5.
    * If node a Node instance and it is {@link #hasTag(Node)} it also applies
    * a stroke highlight.
    *
@@ -5606,7 +5445,7 @@ public class Scene {
    * @see #drawCross(float, float, float)
    */
   public void drawCross(float x, float y) {
-    drawCross(x, y, _radius / 5);
+    drawCross(x, y, radius / 5);
   }
 
   /**
@@ -5675,7 +5514,7 @@ public class Scene {
    * @see #drawCircledBullsEye(float, float, float)
    */
   public void drawSquaredBullsEye(float x, float y) {
-    drawSquaredBullsEye(x, y, _radius / 5);
+    drawSquaredBullsEye(x, y, radius / 5);
   }
 
   /**
@@ -5749,7 +5588,7 @@ public class Scene {
    * @see #drawSquaredBullsEye(float, float, float)
    */
   public void drawCircledBullsEye(float x, float y) {
-    drawCircledBullsEye(x, y, _radius / 5);
+    drawCircledBullsEye(x, y, radius / 5);
   }
 
   /**
@@ -5784,7 +5623,7 @@ public class Scene {
    * @see #drawTorusSolenoid(int, float)
    */
   public void drawTorusSolenoid(int faces) {
-    drawTorusSolenoid(faces, 0.07f * _radius);
+    drawTorusSolenoid(faces, 0.07f * radius);
   }
 
   /**

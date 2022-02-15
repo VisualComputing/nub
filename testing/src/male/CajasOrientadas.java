@@ -19,7 +19,8 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this, 200);
+    scene = new Scene(this);
+    scene.radius = 200;
     eye = new Node();
     eye.setWorldPosition(0,0,300);
     scene.setEye(eye);
@@ -109,7 +110,7 @@ public class CajasOrientadas extends PApplet {
       _w = w;
       _h = h;
       _d = d;
-      setBullsEyeSize(max(_w, _h, _d) / scene.radius());
+      setBullsEyeSize(max(_w, _h, _d) / scene.radius);
       scene.randomize(this);
       enableHint(Node.AXES);
     }

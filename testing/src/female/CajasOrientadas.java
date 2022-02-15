@@ -21,7 +21,8 @@ public class CajasOrientadas extends PApplet {
 
   public void setup() {
     cam = new PeasyCam(this, 400);
-    scene = new Scene(this, 200);
+    scene = new Scene(this);
+    scene.radius = 200;
     // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
     //scene.fit();
     esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);
@@ -109,7 +110,7 @@ public class CajasOrientadas extends PApplet {
       _w = w;
       _h = h;
       _d = d;
-      setBullsEyeSize(max(_w, _h, _d) / scene.radius());
+      setBullsEyeSize(max(_w, _h, _d) / scene.radius);
       scene.randomize(this);
       enableHint(Node.AXES);
     }

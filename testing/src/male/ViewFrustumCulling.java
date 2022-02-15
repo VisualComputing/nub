@@ -30,7 +30,8 @@ import processing.event.MouseEvent;
       mainScene.setEye(mainEye);
       mainEye.enableHint(Node.BOUNDS);
       // secondary scene
-      secondaryScene = new Scene(createGraphics(w, h / 2, P3D), 200);
+      secondaryScene = new Scene(createGraphics(w, h / 2, P3D));
+      secondaryScene.radius = 200;
       secondaryEye = new Node();
       secondaryEye.setWorldPosition(0,0,600);
       secondaryScene.setEye(secondaryEye);

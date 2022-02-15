@@ -1100,7 +1100,7 @@ public class Node {
    */
   public static Node random(Scene scene) {
     Node node = new Node();
-    node.randomize(scene.center(), scene.radius());
+    node.randomize(scene.center, scene.radius);
     return node;
   }
 

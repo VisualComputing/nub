@@ -23,7 +23,8 @@ public class Interpolators extends PApplet {
 
   public void setup() {
     cam = new PeasyCam(this, 400);
-    scene = new Scene(this, 150);
+    scene = new Scene(this);
+    scene.radius = 150;
     //scene = new Scene(createGraphics(1920, 1080, P3D), 150);
     PShape pshape;
     pshape = createShape(BOX, 30);
