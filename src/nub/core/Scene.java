@@ -4243,6 +4243,32 @@ public class Scene {
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
   }
 
+  // only 3d eye
+
+  // 7. move forward
+
+  /**
+   * Same as {@code moveForward(delta, Scene.inertia)}.
+   *
+   * @see #moveForward(float, float)
+   */
+  public void moveForward(float delta) {
+    moveForward(delta, Scene.inertia);
+  }
+
+  /**
+   * Same as {@code translateEye(0, 0, delta / (near() - far()))}. The gesture strength is controlled
+   * with {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction. Also rescales
+   * the viewing volume if the graph type is {@link Type#ORTHOGRAPHIC} so that nearby objects appear
+   * bigger when moving towards them.
+   *
+   * @see #shift(float, float, float)
+   */
+  public void moveForward(float delta, float inertia) {
+    // we negate z which targets the Processing mouse wheel
+    shift(_eye, 0, 0, delta / (near() - far()), inertia);
+  }
+
   // DRAWING
 
   /**
