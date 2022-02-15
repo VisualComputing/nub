@@ -4907,7 +4907,7 @@ public class Scene {
   }
 
   /**
-   * Same as {@code drawAxes(context(), length, isLeftHanded())}.
+   * Same as {@code drawAxes(context(), length)}.
    *
    * @see #drawAxes(PGraphics, float)
    */
@@ -4916,7 +4916,7 @@ public class Scene {
   }
 
   /**
-   * Same as {@code drawAxes(pGraphics, radius(), isLeftHanded())}.
+   * Same as {@code drawAxes(pGraphics, radius)}.
    *
    * @see #drawAxes(PGraphics, float)
    */
