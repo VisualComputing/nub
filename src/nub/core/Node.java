@@ -1129,7 +1129,7 @@ public class Node {
    * Picking a node is done with ray casting against a screen-space bullseye shape
    * (see {@link #configHint(int, Object...)}) whose length is defined as follows:
    * <ul>
-   * <li>A percentage of the scene diameter (see {@link Scene#radius()}). Set it
+   * <li>A percentage of the scene diameter (see {@link Scene#radius}). Set it
    * with {@code size in [0..1]}.</li>
    * <li>A fixed numbers of pixels. Set it with {@code size > 1}.</li>
    * </ul>
