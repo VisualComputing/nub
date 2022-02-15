@@ -110,6 +110,7 @@ public class Scene {
 
   protected static Scene _onscreenScene;
   public static Random random = new Random();
+  protected static int _hudCalls;
   protected static HashSet<Node> _huds = new HashSet<Node>();
   protected HashSet<Node> _cacheHUDs;
   protected static HashSet<Node> _interpolators = new HashSet<Node>();
@@ -145,7 +146,6 @@ public class Scene {
   // 2. Matrix handler
   protected int _renderCount;
   protected int _width, _height;
-  protected MatrixHandler _matrixHandler, _bbMatrixHandler;
   // _bb : picking buffer
   public boolean picking;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
@@ -336,8 +336,6 @@ public class Scene {
       _seeded = true;
     }
     _fb = pGraphics;
-    _matrixHandler = new MatrixHandler();
-    _bbMatrixHandler = new MatrixHandler();
     _subtrees = new ArrayList<Node>();
     setWidth(pGraphics.width);
     setHeight(pGraphics.height);
@@ -352,12 +350,9 @@ public class Scene {
     // 1. P5 objects
     if (pApplet == null) pApplet = pGraphics.parent;
     _offscreen = pGraphics != pApplet.g;
-    if (pGraphics instanceof PGraphicsOpenGL)
-      _matrixHandler = new GLMatrixHandler((PGraphicsOpenGL) pGraphics);
-    else
+    if (!(pGraphics instanceof PGraphicsOpenGL))
       throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
     _bb = pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D);
-    _bbMatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb);
     if (!_offscreen && _onscreenScene == null)
       _onscreenScene = this;
     // 2. Back buffer
@@ -673,66 +668,6 @@ public class Scene {
     }
   }
 
-  /**
-   * Retrieves the left clipping plane. Only meaningful for orthographic projections.
-   */
-  public float left() {
-    return _matrixHandler.left();
-  }
-
-  /**
-   * Retrieves the right clipping plane. Only meaningful for orthographic projections.
-   */
-  public float right() {
-    return _matrixHandler.right();
-  }
-
-  /**
-   * Retrieves the top clipping plane. Only meaningful for orthographic projections.
-   */
-  public float top() {
-    return _matrixHandler.top();
-  }
-
-  /**
-   * Retrieves the bottom clipping plane. Only meaningful for orthographic projections.
-   */
-  public float bottom() {
-    return _matrixHandler.bottom();
-  }
-
-  /**
-   * Retrieves the near clipping plane.
-   */
-  public float near() {
-    return _matrixHandler.near();
-  }
-
-  /**
-   * Retrieves the far clipping plane.
-   */
-  public float far() {
-    return _matrixHandler.far();
-  }
-
-  /**
-   * Retrieves the scene field-of-view in radians. Only meaningful for perspective projections.
-   *
-   * @see #hfov()
-   */
-  public float fov() {
-    return _matrixHandler.fov();
-  }
-
-  /**
-   * Returns the eye horizontal field-of-view in radians. Only meaningful for perspective projections.
-   *
-   * @see #fov()
-   */
-  public float hfov() {
-    return _matrixHandler.hfov();
-  }
-
   // Scene and nodes stuff
 
   /**
@@ -827,40 +762,6 @@ public class Scene {
     list.add(node);
     for (Node child : node.children())
       _collect(list, child);
-  }
-
-  // Matrix and transformations stuff
-
-  /**
-   * Begin Heads Up Display (HUD) so that drawing can be done using 2D screen coordinates.
-   * <p>
-   * All screen drawing should be enclosed between {@link #beginHUD()} and
-   * {@link #endHUD()}. Then you can just begin drawing your screen shapes.
-   * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d scene
-   * then draw first all your 3d before doing any call to a {@link #beginHUD()}
-   * and {@link #endHUD()} pair.
-   * <p>
-   * <b>Warning:</b> Offscreen scenes should call {@link #beginHUD()} and {@link #endHUD()}
-   * before closing the context ({@link #closeContext()}).
-   *
-   * @see #endHUD()
-   * @see MatrixHandler#beginHUD(int, int)
-   */
-  public void beginHUD() {
-    _matrixHandler.beginHUD(width(), height());
-  }
-
-  /**
-   * Ends Heads Up Display (HUD). Throws an exception if
-   * {@link #beginHUD()} wasn't properly called before.
-   * <p>
-   * Wrapper for {@link MatrixHandler#endHUD()}.
-   *
-   * @see #beginHUD()
-   * @see MatrixHandler#endHUD()
-   */
-  public void endHUD() {
-    _matrixHandler.endHUD();
   }
 
   // Eye stuff
@@ -1853,16 +1754,16 @@ public class Scene {
   /**
    * Returns the main renderer context.
    */
-  public PGraphics context() {
-    return _fb;
+  public PGraphicsOpenGL context() {
+    return (PGraphicsOpenGL) _fb;
   }
 
   /**
    * Returns the back buffer, used for
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>. Maybe {@code null}
    */
-  protected PGraphics _backBuffer() {
-    return _bb;
+  protected PGraphicsOpenGL _backBuffer() {
+    return (PGraphicsOpenGL) _bb;
   }
 
   /**
@@ -1934,7 +1835,7 @@ public class Scene {
 
   protected void _endBackBuffer() {
     if (!_huds.isEmpty()) {
-      _bbMatrixHandler.beginHUD(width(), height());
+      beginHUD(_backBuffer());
       for (Node node : _huds) {
         if (node.rendered(this)) {
           if (node.isPickingEnabled(Node.HUD)) {
@@ -1954,7 +1855,7 @@ public class Scene {
           }
         }
       }
-      _bbMatrixHandler.endHUD();
+      endHUD(_backBuffer());
     }
     // TODO seems style is not require since it should be absorbed by the shader
     //_backBuffer().popStyle();
@@ -2062,23 +1963,202 @@ public class Scene {
   }
 
   /**
+   * Retrieves the left clipping plane. Only meaningful for orthographic projections.
+   */
+  public float left() {
+    if (context().projection.m33 != 1) {
+      throw new RuntimeException("Error: left only works for an orthographic projection");
+    }
+    return -(1 + context().projection.m03 ) / context().projection.m00;
+  }
+
+  /**
+   * Retrieves the right clipping plane. Only meaningful for orthographic projections.
+   */
+  public float right() {
+    if (context().projection.m33 != 1) {
+      throw new RuntimeException("Error: right only works for an orthographic projection");
+    }
+    return (1 - context().projection.m03) / context().projection.m00;
+  }
+
+  /**
+   * Retrieves the top clipping plane. Only meaningful for orthographic projections.
+   */
+  public float top() {
+    if (context().projection.m33 != 1) {
+      throw new RuntimeException("Error: top only works for an orthographic projection");
+    }
+    return -(1 + context().projection.m13) / context().projection.m11;
+  }
+
+  /**
+   * Retrieves the bottom clipping plane. Only meaningful for orthographic projections.
+   */
+  public float bottom() {
+    if (context().projection.m33 != 1) {
+      throw new RuntimeException("Error: bottom only works for an orthographic projection");
+    }
+    return (1 - context().projection.m13) / context().projection.m11;
+  }
+
+  /**
+   * Retrieves the near clipping plane.
+   */
+  public float near() {
+    return context().projection.m33 == 0 ? context().projection.m23 / (context().projection.m22 - 1) : (1 + context().projection.m23) / context().projection.m22;
+  }
+
+  /**
+   * Retrieves the far clipping plane.
+   */
+  public float far() {
+    return context().projection.m33 == 0 ? context().projection.m23 / (context().projection.m22 + 1) : - (1 - context().projection.m23) / context().projection.m22;
+  }
+
+  /**
+   * Retrieves the scene field-of-view in radians. Only meaningful for perspective projections.
+   *
+   * @see #hfov()
+   */
+  public float fov() {
+    if (context().projection.m33 != 0) {
+      throw new RuntimeException("Error: fov only works for a perspective projection");
+    }
+    return Math.abs(2 * (float) Math.atan(1 / context().projection.m11));
+  }
+
+  /**
+   * Returns the eye horizontal field-of-view in radians. Only meaningful for perspective projections.
+   *
+   * @see #fov()
+   */
+  public float hfov() {
+    if (context().projection.m33 != 0) {
+      throw new RuntimeException("Error: hfov only works for a perspective projection");
+    }
+    return Math.abs(2 * (float) Math.atan(1 / context().projection.m00));
+  }
+
+  /**
+   * Same as {@code beginHUD(context())}.
+   *
+   * @see #beginHUD(PGraphicsOpenGL)
+   * @see #context()
+   */
+  public void beginHUD() {
+    beginHUD(context());
+  }
+
+  /**
+   * Same as {@code endHUD(context())}.
+   *
+   * @see #endHUD(PGraphicsOpenGL)
+   * @see #context()
+   */
+  public void endHUD() {
+    endHUD(context());
+  }
+
+  /**
+   * Begin Heads Up Display (HUD)  on {@code pg} so that drawing can be done using 2D
+   * screen coordinates.
+   * <p>
+   * All screen drawing should be enclosed between {@link #beginHUD()} and
+   * {@link #endHUD()}. Then you can just begin drawing your screen shapes.
+   * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d scene
+   * then draw first all your 3d before doing any call to a {@link #beginHUD()}
+   * and {@link #endHUD()} pair.
+   * <p>
+   * <b>Warning:</b> Offscreen scenes should call {@link #beginHUD()} and {@link #endHUD()}
+   * before closing the context ({@link #closeContext()}).
+   *
+   * @see #endHUD()
+   */
+  public void beginHUD(PGraphicsOpenGL pg) {
+    pg.hint(pg.DISABLE_OPTIMIZED_STROKE);
+    disableDepthTest(pg);
+    if (_hudCalls < 0)
+      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
+              + "endHUD() and they cannot be nested. Check your implementation!");
+    _hudCalls++;
+    pg.pushProjection();
+    pg.setProjection(Scene.toPMatrix(Matrix.hudProjection(pg.width, pg.height)));
+    pg.pushMatrix();
+    pg.setMatrix(Scene.toPMatrix(Matrix.hudView(pg.width, pg.height)));
+  }
+
+  /**
+   * Ends Heads Up Display (HUD) on {@code pg}. Throws an exception if
+   * {@link #beginHUD()} wasn't properly called before.
+   *
+   * @see #beginHUD()
+   */
+  public void endHUD(PGraphicsOpenGL pg) {
+    _hudCalls--;
+    if (_hudCalls < 0)
+      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
+              + "endHUD() and they cannot be nested. Check your implementation!");
+    pg.popProjection();
+    pg.popMatrix();
+    enableDepthTest(pg);
+    pg.hint(pg.ENABLE_OPTIMIZED_STROKE);
+  }
+
+  /**
+   * Sets the {@code pg} {@link #projection()} and {@link #view()} matrices.
+   */
+  protected void _bind(PGraphicsOpenGL pg, Matrix projection, Matrix matrix) {
+    pg.setProjection(Scene.toPMatrix(projection));
+    pg.setMatrix(Scene.toPMatrix(matrix));
+  }
+
+  /**
+   * Similar to {@link #_applyTransformation(PGraphicsOpenGL, Node)}, but applies the global
+   * transformation defined by the {@code node}.
+   */
+  protected void _applyWorldTransformation(PGraphicsOpenGL pg, Node node) {
+    Node reference = node.reference();
+    if (reference != null) {
+      _applyWorldTransformation(pg, reference);
+      _applyTransformation(pg, node);
+    } else {
+      _applyTransformation(pg, node);
+    }
+  }
+
+  /**
+   * Apply the local transformation defined by {@code node}, i.e., respect to its
+   * {@link Node#reference()}. The {@code node} is first translated, then rotated around
+   * the new translated origin and then scaled.
+   */
+  protected void _applyTransformation(PGraphicsOpenGL pg, Node node) {
+    pg.translate(node.position()._vector[0], node.position()._vector[1], node.position()._vector[2]);
+    pg.rotate(node.orientation().angle(), (node.orientation()).axis()._vector[0], (node.orientation()).axis()._vector[1], (node.orientation()).axis()._vector[2]);
+    pg.scale(node.magnitude(), node.magnitude(), node.magnitude());
+  }
+
+  /**
    * Cache matrices and binds processing and nub matrices together.
    *
    * @see MatrixHandler#eye()
    */
   protected void _bind() {
-    _projection = _matrixHandler.projection();
+    _projection = Scene.toMatrix(context().projection.get());
     _leftHanded = _projection.m11() < 0;
-    _eye._execute(this);
-    if (!_male) {
-      _eye = _matrixHandler.eye();
+    if (_male) {
+      _eye._execute(this);
+    }
+    else {
+      _eye = new Node(false);
+      _eye.fromWorldMatrix(Matrix.inverse(Scene.toMatrix(context().modelview)));
     }
     _view = _eye.view();
     _projectionView = Matrix.multiply(_projection, _view);
     _type = _projection.m33() == 0 ? Type.PERSPECTIVE : Type.ORTHOGRAPHIC;
     // debug
     if (_male) {
-      _matrixHandler.bind(_projection, _view);
+      _bind(context(), _projection, _view);
     }
   }
 
@@ -2113,7 +2193,7 @@ public class Scene {
         _initFrontBuffer();
       }
       _bind();
-      _matrixHandler.pushMatrix();
+      context().pushMatrix();
     }
   }
 
@@ -2136,7 +2216,7 @@ public class Scene {
         _displayPaths();
         _displayHUD();
       }
-      _matrixHandler.popMatrix();
+      context().popMatrix();
       if (isOffscreen()) {
         _endFrontBuffer();
       }
@@ -2195,12 +2275,12 @@ public class Scene {
         _subtrees.add(subtree);
       }
       if (subtree.reference() != null) {
-        _matrixHandler.pushMatrix();
-        _matrixHandler.applyWorldTransformation(subtree.reference());
+        context().pushMatrix();
+        _applyWorldTransformation(context(), subtree.reference());
       }
       _render(subtree);
       if (subtree.reference() != null) {
-        _matrixHandler.popMatrix();
+        context().popMatrix();
       }
     }
   }
@@ -2273,9 +2353,9 @@ public class Scene {
    * Used by the {@link #render(Node)} algorithm.
    */
   protected void _render(Node node) {
-    _matrixHandler.pushMatrix();
+    context().pushMatrix();
     node._execute(this);
-    _matrixHandler.applyTransformation(node);
+    _applyTransformation(context(), node);
     // TODO ordering of operations is a bit experimental.
     // For instance should the visits go before pushMatrix?
     // I believe it belongs here, i.e., current node culling
@@ -2296,11 +2376,11 @@ public class Scene {
         _trackFrontBuffer(node);
         _trackBackBuffer(node);
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
-          _matrixHandler.pushMatrix();
+          context().pushMatrix();
           float scl = 1 + node._highlight;
-          _matrixHandler.scale(scl, scl, scl);
+          context().scale(scl, scl, scl);
           _displayFrontHint(node);
-          _matrixHandler.popMatrix();
+          context().popMatrix();
         } else {
           _displayFrontHint(node);
         }
@@ -2309,7 +2389,7 @@ public class Scene {
         _render(child);
       }
     }
-    _matrixHandler.popMatrix();
+    context().popMatrix();
   }
 
   /**
@@ -2320,7 +2400,7 @@ public class Scene {
     if (_lastRendered == _frameCount && _bbNeed) {
       if (picking && _bb != null) {
         _initBackBuffer();
-        _bbMatrixHandler.bind(projection(), view());
+        _bind(_backBuffer(), projection(), view());
         if (_subtrees.isEmpty()) {
           for (Node node : _leadingNodes()) {
             _renderBackBuffer(node);
@@ -2331,12 +2411,12 @@ public class Scene {
           while (iterator.hasNext()) {
             Node subtree = iterator.next();
             if (subtree.reference() != null) {
-              _bbMatrixHandler.pushMatrix();
-              _bbMatrixHandler.applyWorldTransformation(subtree.reference());
+              _backBuffer().pushMatrix();
+              _applyWorldTransformation(_backBuffer(), subtree.reference());
             }
             _renderBackBuffer(subtree);
             if (subtree.reference() != null) {
-              _bbMatrixHandler.popMatrix();
+              _backBuffer().popMatrix();
             }
             iterator.remove();
           }
@@ -2350,8 +2430,8 @@ public class Scene {
    * Used by the {@link #_renderBackBuffer()} algorithm.
    */
   protected void _renderBackBuffer(Node node) {
-    _bbMatrixHandler.pushMatrix();
-    _bbMatrixHandler.applyTransformation(node);
+    _backBuffer().pushMatrix();
+    _applyTransformation(_backBuffer(), node);
     if (node.rendered(this) && _backPicking(node)) {
       _displayBackHint(node);
     }
@@ -2359,7 +2439,7 @@ public class Scene {
       for (Node child : node.children())
         _renderBackBuffer(child);
     }
-    _bbMatrixHandler.popMatrix();
+    _backBuffer().popMatrix();
   }
 
   /**
@@ -3950,12 +4030,14 @@ public class Scene {
       vector.multiply(-1);
       Vector translation = _eye.referenceDisplacement(vector);
       _shift(translation.x(), translation.y(), translation.z());
-      _eye._shiftInertia.setInertia(inertia);
-      _eye._shiftInertia._x += translation.x();
-      _eye._shiftInertia._y += translation.y();
-      _eye._shiftInertia._z += translation.z();
-      if (!_eye._shiftInertia._active) {
-        _eye._shiftInertia._active = true;
+      if (_eye._shiftInertia != null) {
+        _eye._shiftInertia.setInertia(inertia);
+        _eye._shiftInertia._x += translation.x();
+        _eye._shiftInertia._y += translation.y();
+        _eye._shiftInertia._z += translation.z();
+        if (!_eye._shiftInertia._active) {
+          _eye._shiftInertia._active = true;
+        }
       }
     }
     else {
@@ -4413,10 +4495,10 @@ public class Scene {
           if (count >= goal) {
             goal += Node.maxSteps / ((float) interpolator._steps + 1);
             if (count % Node.maxSteps != 0) {
-              _matrixHandler.pushMatrix();
-              _matrixHandler.applyTransformation(node);
+              context().pushMatrix();
+              _applyTransformation(context(), node);
               _displayAnimationHint(node);
-              _matrixHandler.popMatrix();
+              context().popMatrix();
             }
           }
           count++;
@@ -4563,9 +4645,10 @@ public class Scene {
     float coneRadiusCoef = 4.0f - 5.0f * head;
 
     drawCylinder(radius, length * (1.0f - head / coneRadiusCoef));
-    _matrixHandler.translate(0.0f, 0.0f, length * (1.0f - head));
+
+    context().translate(0.0f, 0.0f, length * (1.0f - head));
     drawCone(coneRadiusCoef * radius, head * length);
-    _matrixHandler.translate(0.0f, 0.0f, -length * (1.0f - head));
+    context().translate(0.0f, 0.0f, -length * (1.0f - head));
   }
 
   /**
@@ -4592,11 +4675,11 @@ public class Scene {
    * @see #drawArrow(float, float)
    */
   public void drawArrow(Vector from, Vector to, float radius) {
-    _matrixHandler.pushMatrix();
-    _matrixHandler.translate(from.x(), from.y(), from.z());
-    _matrixHandler.applyMatrix(new Quaternion(new Vector(0, 0, 1), Vector.subtract(to, from)).matrix());
+    context().pushMatrix();
+    context().translate(from.x(), from.y(), from.z());
+    context().applyMatrix(Scene.toPMatrix(new Quaternion(new Vector(0, 0, 1), Vector.subtract(to, from)).matrix()));
     drawArrow(Vector.subtract(to, from).magnitude(), radius);
-    _matrixHandler.popMatrix();
+    context().popMatrix();
   }
 
   /**
@@ -5146,10 +5229,10 @@ public class Scene {
    * @see #drawFrustum(PGraphics, Scene)
    */
   public void drawFrustum(Scene scene) {
-    _matrixHandler.pushMatrix();
-    _matrixHandler.applyTransformation(scene._eye);
+    context().pushMatrix();
+    _applyTransformation(context(), scene._eye);
     drawFrustum(context(), scene);
-    _matrixHandler.popMatrix();
+    context().popMatrix();
   }
 
   /**
@@ -5397,7 +5480,7 @@ public class Scene {
     Vector o = new Vector();
     if (_type == Scene.Type.ORTHOGRAPHIC) {
       context().pushMatrix();
-      _matrixHandler.applyTransformation(scene._eye);
+      _applyTransformation(context(), scene._eye);
     }
     // in PERSPECTIVE cache the transformed origin
     else

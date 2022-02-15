@@ -103,7 +103,7 @@ public class Interpolators extends PApplet {
     pg.fill(255, 0, 255, 125);
     pg.stroke(0,0,255);
     pg.strokeWeight(3);
-    pg.rect(0, 0, 80, 50);
+    pg.rect(0, 0, 160, 100);
     pg.popStyle();
   }
 
