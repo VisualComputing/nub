@@ -240,6 +240,8 @@ public class Node {
   protected boolean _attach;
   // node
   protected Inertia _translationInertia, _rotationInertia, _orbitInertia, _scalingInertia;
+  // as eye
+  protected Inertia _shiftInertia;
   protected final float _scalingFactor = 800;
 
   /**
@@ -886,6 +888,9 @@ public class Node {
         this.resetInertia();
         this._interpolator._execute();
       }
+      if (_shiftInertia != null) {
+        this._shiftInertia._execute();
+      }
       this._translationInertia._execute();
       this._rotationInertia._execute();
       this._scalingInertia._execute();
@@ -898,6 +903,9 @@ public class Node {
    * Stops all node inertia's.
    */
   public void resetInertia() {
+    if (_shiftInertia != null) {
+      this._shiftInertia._active = false;
+    }
     this._translationInertia._active = false;
     this._rotationInertia._active = false;
     this._scalingInertia._active = false;

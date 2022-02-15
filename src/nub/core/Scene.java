@@ -1880,8 +1880,7 @@ public class Scene {
       _frameCount++;
     }
     _resize();
-    // TODO restore eye
-    //_eye._execute(this);
+    _eye._execute(this);
     // safer to always free subtrees cache
     _subtrees.clear();
     _bbNeed = false;
@@ -2024,6 +2023,7 @@ public class Scene {
         System.out.println("Warning: node was untagged since it was set as the eye");
       }
       if (_eye != null) {
+        _eye._shiftInertia = null;
         /*
         _eye._shiftInertia = null;
         _eye._lookAroundInertia = null;
@@ -2033,13 +2033,13 @@ public class Scene {
         _eye._keyframesMask = Node.AXES;
       }
       _eye = eye;
-      /*
       _eye._shiftInertia = new Inertia() {
         @Override
         void _action() {
           _shift(_x, _y, _z);
         }
       };
+      /*
       _eye._lookAroundInertia = new Inertia() {
         @Override
         void _action() {
@@ -3952,8 +3952,6 @@ public class Scene {
       vector.multiply(-1);
       Vector translation = _eye.referenceDisplacement(vector);
       _shift(translation.x(), translation.y(), translation.z());
-      // TODO eye pending
-      /*
       _eye._shiftInertia.setInertia(inertia);
       _eye._shiftInertia._x += translation.x();
       _eye._shiftInertia._y += translation.y();
@@ -3961,7 +3959,6 @@ public class Scene {
       if (!_eye._shiftInertia._active) {
         _eye._shiftInertia._active = true;
       }
-      */
     }
     else {
       node.translate(node.referenceDisplacement(displacement(new Vector(dx, dy, dz), node)), inertia);
