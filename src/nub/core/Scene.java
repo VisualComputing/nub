@@ -2140,8 +2140,6 @@ public class Scene {
 
   /**
    * Cache matrices and binds processing and nub matrices together.
-   *
-   * @see MatrixHandler#eye()
    */
   protected void _bind() {
     _projection = Scene.toMatrix(context().projection.get());
