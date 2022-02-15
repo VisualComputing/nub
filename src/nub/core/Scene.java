@@ -138,7 +138,7 @@ public class Scene {
   protected Vector[] _normal;
   protected float[] _distance;
   // handed
-  public static boolean leftHanded;
+  protected boolean _leftHanded;
 
   // 2. Matrix handler
   protected int _renderCount;
@@ -369,8 +369,6 @@ public class Scene {
     pApplet.registerMethod("pre", this);
     pApplet.registerMethod("draw", this);
     pApplet.registerMethod("dispose", this);
-    // 4. Handed
-    leftHanded = true;
   }
 
   // JSON
@@ -1187,8 +1185,7 @@ public class Scene {
    * Returns {@code true} if the given face is back-facing the eye. Otherwise returns
    * {@code false}.
    * <p>
-   * Vertices must given in clockwise order if scene is not {@link Scene#leftHanded}
-   * or in counter-clockwise order if {@link Scene#leftHanded}.
+   * Vertices must given in clockwise order if scene is right-handed or in counter-clockwise otherwise.
    *
    * @param a first face vertex
    * @param b second face vertex
@@ -1197,7 +1194,7 @@ public class Scene {
    * @see #isConeBackFacing(Vector, Vector, float)
    */
   public boolean isFaceBackFacing(Vector a, Vector b, Vector c) {
-    return isFaceBackFacing(a, leftHanded ?
+    return isFaceBackFacing(a, _leftHanded ?
         Vector.subtract(b, a).cross(Vector.subtract(c, a)) :
         Vector.subtract(c, a).cross(Vector.subtract(b, a)));
   }
@@ -1390,7 +1387,7 @@ public class Scene {
     switch (_type) {
       case PERSPECTIVE:
         // left-handed coordinate system correction
-        if (leftHanded) {
+        if (_leftHanded) {
           pixelY = height() - pixelY;
         }
         origin.set(_eye.worldPosition());
@@ -2074,6 +2071,7 @@ public class Scene {
    */
   protected void _bind() {
     _projection = _matrixHandler.projection();
+    _leftHanded = _projection.m11() < 0;
     if (!_male) {
       _eye = _matrixHandler.eye();
     }
@@ -3593,7 +3591,7 @@ public class Scene {
   // TODO needs testing
   public Vector displacement(Vector vector, Node node) {
     float dx = vector.x();
-    float dy = leftHanded ? vector.y() : -vector.y();
+    float dy = _leftHanded ? vector.y() : -vector.y();
     // Scale to fit the screen relative vector displacement
     if (_type == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.worldPosition();
@@ -3629,7 +3627,7 @@ public class Scene {
   public Vector screenDisplacement(Vector vector, Node node) {
     Vector eyeVector = _eye.displacement(vector, node);
     float dx = eyeVector.x();
-    float dy = leftHanded ? eyeVector.y() : -eyeVector.y();
+    float dy = _leftHanded ? eyeVector.y() : -eyeVector.y();
     if (_type == Type.PERSPECTIVE) {
       Vector position = node == null ? new Vector() : node.worldPosition();
       float k = Math.abs(_eye.location(position)._vector[2] * (float) Math.tan(fov() / 2.0f));
@@ -4050,7 +4048,7 @@ public class Scene {
    */
   public void turn(Node node, float roll, float pitch, float yaw, float inertia) {
     if (node == null || node == _eye) {
-      _eye._orbit(new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw), center, inertia);
+      _eye._orbit(new Quaternion(_leftHanded ? -roll : roll, pitch, _leftHanded ? -yaw : yaw), center, inertia);
       // same as:
       //Quaternion q = new Quaternion(leftHanded ? -roll : roll, pitch, leftHanded ? -yaw : yaw);
       //_eye.orbit(_eye.worldDisplacement(q.axis()), q.angle(), _center, inertia);
@@ -4062,7 +4060,7 @@ public class Scene {
       // */
     }
     else {
-      Quaternion quaternion = new Quaternion(leftHanded ? roll : -roll, -pitch, leftHanded ? yaw : -yaw);
+      Quaternion quaternion = new Quaternion(_leftHanded ? roll : -roll, -pitch, _leftHanded ? yaw : -yaw);
       node.rotate(new Quaternion(node.displacement(quaternion.axis(), _eye), quaternion.angle()), inertia);
     }
   }
@@ -4195,9 +4193,9 @@ public class Scene {
       int centerX = (int) center.x();
       int centerY = (int) center.y();
       float px = sensitivity * (pixel1X - centerX) / (float) width();
-      float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / (float) height();
+      float py = sensitivity * (_leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / (float) height();
       float dx = sensitivity * (pixel2X - centerX) / (float) width();
-      float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / (float) height();
+      float dy = sensitivity * (_leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / (float) height();
       Vector p1 = new Vector(px, py, _projectOnBall(px, py));
       Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
       // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
@@ -4216,9 +4214,9 @@ public class Scene {
       int centerX = (int) center.x();
       int centerY = (int) center.y();
       float px = sensitivity * (pixel1X - centerX) / (float) width();
-      float py = sensitivity * (leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / (float) height();
+      float py = sensitivity * (_leftHanded ? (pixel1Y - centerY) : (centerY - pixel1Y)) / (float) height();
       float dx = sensitivity * (pixel2X - centerX) / (float) width();
-      float dy = sensitivity * (leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / (float) height();
+      float dy = sensitivity * (_leftHanded ? (pixel2Y - centerY) : (centerY - pixel2Y)) / (float) height();
       Vector p1 = new Vector(px, py, _projectOnBall(px, py));
       Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
       // Approximation of rotation angle should be divided by the projectOnBall size, but it is 1.0
@@ -4497,7 +4495,7 @@ public class Scene {
     // Base
     pg.beginShape(PApplet.QUADS);
 
-    if (leftHanded) {
+    if (_leftHanded) {
       vertex(pg, baseHalfWidth, -halfHeight, -dist);
       vertex(pg, -baseHalfWidth, -halfHeight, -dist);
       vertex(pg, -baseHalfWidth, -baseHeight, -dist);
@@ -4512,7 +4510,7 @@ public class Scene {
     pg.endShape();
     // Arrow
     pg.beginShape(PApplet.TRIANGLES);
-    if (leftHanded) {
+    if (_leftHanded) {
       vertex(pg, 0.0f, -arrowHeight, -dist);
       vertex(pg, arrowHalfWidth, -baseHeight, -dist);
       vertex(pg, -arrowHalfWidth, -baseHeight, -dist);
@@ -4927,7 +4925,7 @@ public class Scene {
   /**
    * Draws axes of {@code length} onto {@code pGraphics}.
    */
-  public static void drawAxes(PGraphics pGraphics, float length) {
+  public void drawAxes(PGraphics pGraphics, float length) {
     pGraphics.pushStyle();
     pGraphics.colorMode(PApplet.RGB, 255);
     float charWidth = length / 40.0f;
@@ -4944,20 +4942,20 @@ public class Scene {
     pGraphics.vertex(charShift, charWidth, charHeight);
     // The Y
     pGraphics.stroke(0, 200, 0);
-    pGraphics.vertex(charWidth, charShift, (leftHanded ? charHeight : -charHeight));
+    pGraphics.vertex(charWidth, charShift, (_leftHanded ? charHeight : -charHeight));
     pGraphics.vertex(0.0f, charShift, 0.0f);
-    pGraphics.vertex(-charWidth, charShift, (leftHanded ? charHeight : -charHeight));
+    pGraphics.vertex(-charWidth, charShift, (_leftHanded ? charHeight : -charHeight));
     pGraphics.vertex(0.0f, charShift, 0.0f);
     pGraphics.vertex(0.0f, charShift, 0.0f);
-    pGraphics.vertex(0.0f, charShift, -(leftHanded ? charHeight : -charHeight));
+    pGraphics.vertex(0.0f, charShift, -(_leftHanded ? charHeight : -charHeight));
     // The Z
     pGraphics.stroke(0, 100, 200);
-    pGraphics.vertex(-charWidth, !leftHanded ? charHeight : -charHeight, charShift);
-    pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
-    pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
-    pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
-    pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
-    pGraphics.vertex(charWidth, !leftHanded ? -charHeight : charHeight, charShift);
+    pGraphics.vertex(-charWidth, !_leftHanded ? charHeight : -charHeight, charShift);
+    pGraphics.vertex(charWidth, !_leftHanded ? charHeight : -charHeight, charShift);
+    pGraphics.vertex(charWidth, !_leftHanded ? charHeight : -charHeight, charShift);
+    pGraphics.vertex(-charWidth, !_leftHanded ? -charHeight : charHeight, charShift);
+    pGraphics.vertex(-charWidth, !_leftHanded ? -charHeight : charHeight, charShift);
+    pGraphics.vertex(charWidth, !_leftHanded ? -charHeight : charHeight, charShift);
     pGraphics.endShape();
     pGraphics.popStyle();
     // X Axis
@@ -5149,10 +5147,10 @@ public class Scene {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && scene.isOffscreen();
     switch (scene._type) {
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, texture ? scene.context() : null, Math.abs(scene.right() - scene.left()) / (float) scene.width(), scene.width(), leftHanded ? -scene.height() : scene.height(), scene.near(), scene.far());
+        _drawOrthographicFrustum(pGraphics, texture ? scene.context() : null, Math.abs(scene.right() - scene.left()) / (float) scene.width(), scene.width(), scene._leftHanded ? -scene.height() : scene.height(), scene.near(), scene.far());
         break;
       case PERSPECTIVE:
-        _drawPerspectiveFrustum(pGraphics, texture ? scene.context() : null, (float) Math.tan(scene.fov() / 2.0f), leftHanded ? -scene.aspectRatio() : scene.aspectRatio(), scene.near(), scene.far());
+        _drawPerspectiveFrustum(pGraphics, texture ? scene.context() : null, (float) Math.tan(scene.fov() / 2.0f), scene._leftHanded ? -scene.aspectRatio() : scene.aspectRatio(), scene.near(), scene.far());
         break;
     }
   }

@@ -83,12 +83,6 @@ import processing.event.MouseEvent;
           focus.align();
     }
 
-    public void keyPressed() {
-      if (key == 'f') {
-        Scene.leftHanded = !Scene.leftHanded;
-      }
-    }
-
     class OctreeNode extends Node {
       OctreeNode() {
         tagging = false;
