@@ -2,7 +2,6 @@ package male;
 
 import nub.core.Node;
 import nub.core.Scene;
-import peasy.PeasyCam;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -120,7 +119,7 @@ public class Interpolators extends PApplet {
 
   // /*
   public void mouseWheel(MouseEvent event) {
-    scene.moveForward(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
   }
   // */
 

@@ -12,8 +12,8 @@ import processing.event.MouseEvent;
     Scene mainScene, secondaryScene, focus;
     Node mainEye, secondaryEye;
 
-    int w = 700;
-    int h = 700;
+    int w = 1200;
+    int h = 1600;
     //octree
     float a = 220, b = 100, c = 280;
     int levels = 4;
@@ -31,9 +31,9 @@ import processing.event.MouseEvent;
       mainEye.enableHint(Node.BOUNDS);
       // secondary scene
       secondaryScene = new Scene(createGraphics(w, h / 2, P3D));
-      secondaryScene.radius = 200;
+      secondaryScene.radius = 800;
       secondaryEye = new Node();
-      secondaryEye.setWorldPosition(0,0,600);
+      secondaryEye.setWorldPosition(0,0,1800);
       secondaryScene.setEye(secondaryEye);
       // declare and build the octree hierarchy
       root = new OctreeNode();
@@ -50,11 +50,20 @@ import processing.event.MouseEvent;
       focus = mainScene.hasFocus() ? mainScene : secondaryScene;
       // culling condition should be retested every frame
       root.cull = false;
+      //PGraphics pg1 = mainScene.context();
+      //pg1.ortho(-400, 400, -200, 200, 10, 500);
+      /*
+      float fov = PI/3.0f;
+      float cameraZ = (height/2.0f) / tan(fov/2.0f);
+      pg1.perspective(fov, (float)width/(float)height, cameraZ/10.0f, cameraZ*2.0f);
+      // */
       mainScene.openContext();
       mainScene.context().background(255);
       mainScene.render();
       mainScene.closeContext();
       mainScene.image();
+      //PGraphics pg2 = secondaryScene.context();
+      //pg2.ortho(-400, 400, -200, 200, 10,2000);
       secondaryScene.openContext();
       secondaryScene.context().background(185);
       secondaryScene.render();
@@ -84,7 +93,7 @@ import processing.event.MouseEvent;
     }
 
     public void mouseWheel(MouseEvent event) {
-      focus.moveForward(event.getCount() * 20);
+      focus.zoom(event.getCount() * 5);
     }
 
     class OctreeNode extends Node {

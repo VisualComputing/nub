@@ -1782,7 +1782,12 @@ public class Scene {
     if (_seededGraph) {
       _frameCount++;
     }
-    _resize();
+    if (!isOffscreen()) {
+      if ((width() != context().width))
+        setWidth(context().width);
+      if ((height() != context().height))
+        setHeight(context().height);
+    }
     // safer to always free subtrees cache
     _subtrees.clear();
     _bbNeed = false;
@@ -1812,67 +1817,6 @@ public class Scene {
     _orays = _irays;
     _irays = _irays == _i1rays ? _i2rays : _i1rays;
     _renderBackBuffer();
-  }
-
-  /**
-   * Handles resizes events to update the scene {@link #width()} and {@link #height()}.
-   */
-  protected void _resize() {
-    if (isOffscreen())
-      return;
-    if ((width() != context().width))
-      setWidth(context().width);
-    if ((height() != context().height))
-      setHeight(context().height);
-  }
-
-  protected void _initBackBuffer() {
-    _backBuffer().beginDraw();
-    // TODO seems style is not require since it should be absorbed by the shader
-    //_backBuffer().pushStyle();
-    _backBuffer().background(0);
-  }
-
-  protected void _endBackBuffer() {
-    if (!_huds.isEmpty()) {
-      beginHUD(_backBuffer());
-      for (Node node : _huds) {
-        if (node.rendered(this)) {
-          if (node.isPickingEnabled(Node.HUD)) {
-            _emitBackBufferUniforms(node);
-            _backBuffer().pushMatrix();
-            Vector location = screenLocation(node);
-            if (location != null) {
-              _backBuffer().translate(location.x(), location.y());
-              if (node._imrHUD != null) {
-                node._imrHUD.accept(_backBuffer());
-              }
-              if (node._rmrHUD != null) {
-                _backBuffer().shape(node._rmrHUD);
-              }
-            }
-            _backBuffer().popMatrix();
-          }
-        }
-      }
-      endHUD(_backBuffer());
-    }
-    // TODO seems style is not require since it should be absorbed by the shader
-    //_backBuffer().popStyle();
-    _backBuffer().loadPixels();
-    _backBuffer().endDraw();
-  }
-
-  protected void _initFrontBuffer() {
-    if (isOffscreen()) {
-      context().beginDraw();
-    }
-  }
-
-  protected void _endFrontBuffer() {
-    if (isOffscreen()) {
-      context().endDraw();
-    }
   }
 
   // caches
@@ -2106,14 +2050,6 @@ public class Scene {
   }
 
   /**
-   * Sets the {@code pg} {@link #projection()} and {@link #view()} matrices.
-   */
-  protected void _bind(PGraphicsOpenGL pg, Matrix projection, Matrix matrix) {
-    pg.setProjection(Scene.toPMatrix(projection));
-    pg.setMatrix(Scene.toPMatrix(matrix));
-  }
-
-  /**
    * Similar to {@link #_applyTransformation(PGraphicsOpenGL, Node)}, but applies the global
    * transformation defined by the {@code node}.
    */
@@ -2142,7 +2078,7 @@ public class Scene {
    * Cache matrices and binds processing and nub matrices together.
    */
   protected void _bind() {
-    _projection = Scene.toMatrix(context().projection.get());
+    _projection = Scene.toMatrix(context().projection);
     _leftHanded = _projection.m11() < 0;
     if (_male) {
       _eye._execute(this);
@@ -2156,7 +2092,7 @@ public class Scene {
     _type = _projection.m33() == 0 ? Type.PERSPECTIVE : Type.ORTHOGRAPHIC;
     // debug
     if (_male) {
-      _bind(context(), _projection, _view);
+      context().setMatrix(Scene.toPMatrix(_view));
     }
   }
 
@@ -2188,7 +2124,7 @@ public class Scene {
     }
     else {
       if (isOffscreen()) {
-        _initFrontBuffer();
+        context().beginDraw();
       }
       _bind();
       context().pushMatrix();
@@ -2216,7 +2152,7 @@ public class Scene {
       }
       context().popMatrix();
       if (isOffscreen()) {
-        _endFrontBuffer();
+        context().endDraw();
       }
       else {
         _lastDisplayed = _frameCount;
@@ -2397,8 +2333,12 @@ public class Scene {
   protected void _renderBackBuffer() {
     if (_lastRendered == _frameCount && _bbNeed) {
       if (picking && _bb != null) {
-        _initBackBuffer();
-        _bind(_backBuffer(), projection(), view());
+        _backBuffer().beginDraw();
+        // TODO seems style is not require since it should be absorbed by the shader
+        //_backBuffer().pushStyle();
+        _backBuffer().background(0);
+        _backBuffer().setProjection(Scene.toPMatrix(projection()));
+        _backBuffer().setMatrix(Scene.toPMatrix(view()));
         if (_subtrees.isEmpty()) {
           for (Node node : _leadingNodes()) {
             _renderBackBuffer(node);
@@ -2419,7 +2359,33 @@ public class Scene {
             iterator.remove();
           }
         }
-        _endBackBuffer();
+        if (!_huds.isEmpty()) {
+          beginHUD(_backBuffer());
+          for (Node node : _huds) {
+            if (node.rendered(this)) {
+              if (node.isPickingEnabled(Node.HUD)) {
+                _emitBackBufferUniforms(node);
+                _backBuffer().pushMatrix();
+                Vector location = screenLocation(node);
+                if (location != null) {
+                  _backBuffer().translate(location.x(), location.y());
+                  if (node._imrHUD != null) {
+                    node._imrHUD.accept(_backBuffer());
+                  }
+                  if (node._rmrHUD != null) {
+                    _backBuffer().shape(node._rmrHUD);
+                  }
+                }
+                _backBuffer().popMatrix();
+              }
+            }
+          }
+          endHUD(_backBuffer());
+        }
+        // TODO seems style is not require since it should be absorbed by the shader
+        //_backBuffer().popStyle();
+        _backBuffer().loadPixels();
+        _backBuffer().endDraw();
       }
     }
   }
@@ -3891,8 +3857,8 @@ public class Scene {
    */
   public void zoom(Node node, float delta, float inertia) {
     if (node == null || node == _eye) {
-      float factor = 1 + Math.abs(delta) / (float) -height();
-      _eye.scale(delta >= 0 ? factor : 1 / factor, inertia);
+      // we negate z which targets the Processing mouse wheel
+      shift(_eye, 0, 0, delta / (near() - far()), inertia);
     }
     else {
       float factor = 1 + Math.abs(delta) / (float) height();
@@ -4043,14 +4009,14 @@ public class Scene {
     }
   }
 
-  /*
+  // /*
   // Option 1: don't compensate orthographic, i.e., use Node.translate(vector, inertia)
   protected void _shift(float x, float y, float z) {
     _eye.translate(x, y, z);
   }
   // */
 
-  // /*
+  /*
   // Option 2: compensate orthographic, i.e., use Scene inertial translation task
   protected void _shift(float x, float y, float z) {
     float d1 = 1, d2;
@@ -4316,32 +4282,6 @@ public class Scene {
     float size_limit = size2 * 0.5f;
     float d = x * x + y * y;
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
-  }
-
-  // only 3d eye
-
-  // 7. move forward
-
-  /**
-   * Same as {@code moveForward(delta, Scene.inertia)}.
-   *
-   * @see #moveForward(float, float)
-   */
-  public void moveForward(float delta) {
-    moveForward(delta, Scene.inertia);
-  }
-
-  /**
-   * Same as {@code translateEye(0, 0, delta / (near() - far()))}. The gesture strength is controlled
-   * with {@code inertia} which should be in {@code [0..1]}, 0 no inertia & 1 no friction. Also rescales
-   * the viewing volume if the graph type is {@link Type#ORTHOGRAPHIC} so that nearby objects appear
-   * bigger when moving towards them.
-   *
-   * @see #shift(float, float, float)
-   */
-  public void moveForward(float delta, float inertia) {
-    // we negate z which targets the Processing mouse wheel
-    shift(_eye, 0, 0, delta / (near() - far()), inertia);
   }
 
   // DRAWING
@@ -5244,12 +5184,13 @@ public class Scene {
   public static void drawFrustum(PGraphics pGraphics, Scene scene) {
     if (pGraphics == scene.context())
       return;
+    scene._type = scene.context().projection.m33 == 0 ? Type.PERSPECTIVE : Type.ORTHOGRAPHIC;
     // texturing requires scene.isOffscreen() (third condition) otherwise got
     // "The pixels array is null" message and the frustum near plane texture and contour are missed
     boolean texture = pGraphics instanceof PGraphicsOpenGL && scene.isOffscreen();
     switch (scene._type) {
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, texture ? scene.context() : null, Math.abs(scene.right() - scene.left()) / (float) scene.width(), scene.width(), scene._leftHanded ? -scene.height() : scene.height(), scene.near(), scene.far());
+        _drawOrthographicFrustum(pGraphics, texture ? scene.context() : null, Math.abs(scene.right() - scene.left()) / (float) scene.width(), Math.abs(scene.right() - scene.left()), scene._leftHanded ? -Math.abs(scene.top() - scene.bottom()) : Math.abs(scene.top() - scene.bottom()), scene.near(), scene.far());
         break;
       case PERSPECTIVE:
         _drawPerspectiveFrustum(pGraphics, texture ? scene.context() : null, (float) Math.tan(scene.fov() / 2.0f), scene._leftHanded ? -scene.aspectRatio() : scene.aspectRatio(), scene.near(), scene.far());
@@ -5257,6 +5198,7 @@ public class Scene {
     }
   }
 
+  // TODO make it work for non-symmetrical ortho volumes.
   protected static void _drawOrthographicFrustum(PGraphics pGraphics, PGraphics eyeBuffer, float magnitude, float width, float height, float zNear, float zFar) {
     if (pGraphics == eyeBuffer)
       return;
@@ -5271,8 +5213,8 @@ public class Scene {
     points[1].setX(width / 2);
     points[0].setY(height / 2);
     points[1].setY(height / 2);
-    points[0].setZ(zNear / magnitude);
-    points[1].setZ(zFar / magnitude);
+    points[0].setZ(zNear);
+    points[1].setZ(zFar);
     // Frustum lines
     pGraphics.beginShape(PApplet.LINES);
     Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
@@ -5347,8 +5289,8 @@ public class Scene {
     points[0] = new Vector();
     points[1] = new Vector();
 
-    points[0].setZ(zNear / magnitude);
-    points[1].setZ(zFar / magnitude);
+    points[0].setZ(zNear);
+    points[1].setZ(zFar);
     //(2 * (float) Math.atan(_eye.magnitude()))
     //points[0].setY(points[0].z() * PApplet.tan(((2 * (float) Math.atan(eye().magnitude())) / 2.0f)));
     points[0].setY(points[0].z() * magnitude);
