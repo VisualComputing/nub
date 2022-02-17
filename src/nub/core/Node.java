@@ -880,7 +880,7 @@ public class Node {
   /**
    * Updates the node timing stuff.
    */
-  protected void _execute(Scene scene) {
+  protected void _execute() {
     if (_lastExecuted != Scene._frameCount) {
       if (this._interpolator._active) {
         this.resetInertia();

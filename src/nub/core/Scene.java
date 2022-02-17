@@ -2050,7 +2050,7 @@ public class Scene {
     _projection = Scene.toMatrix(context().projection);
     _leftHanded = _projection.m11() < 0;
     if (_male) {
-      _eye._execute(this);
+      _eye._execute();
     }
     else {
       _eye = new Node(false);
@@ -2257,7 +2257,7 @@ public class Scene {
    */
   protected void _render(Node node) {
     context().pushMatrix();
-    node._execute(this);
+    node._execute();
     _applyTransformation(context(), node);
     // TODO ordering of operations is a bit experimental.
     // For instance should the visits go before pushMatrix?
