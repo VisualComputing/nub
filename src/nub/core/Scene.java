@@ -1865,42 +1865,11 @@ public class Scene {
         System.out.println("Warning: node was untagged since it was set as the eye");
       }
       if (_eye != null) {
-        _eye._shiftInertia = null;
-        /*
-        _eye._shiftInertia = null;
-        _eye._lookAroundInertia = null;
-        _eye._cadRotateInertia = null;
-        */
         _eye._frustumScenes.remove(this);
         _eye._keyframesMask = Node.AXES;
       }
       _eye = eye;
-      _eye._shiftInertia = new Inertia() {
-        @Override
-        void _action() {
-          _shift(_x, _y, _z);
-        }
-      };
-      /*
-      _eye._lookAroundInertia = new Inertia() {
-        @Override
-        void _action() {
-          _lookAround();
-        }
-      };
-      _eye._cadRotateInertia = new Inertia() {
-        @Override
-        void _action() {
-          _cad();
-        }
-      };
-      // */
       _eye._frustumScenes.add(this);
-      /*
-      if (_interpolator != null) {
-        _interpolator._node = eye;
-      }
-      // */
       _eye._keyframesMask = Node.CAMERA;
     }
     _modified();
@@ -3993,44 +3962,12 @@ public class Scene {
       Vector vector = displacement(new Vector(dx, dy, dz), node);
       vector.multiply(-1);
       Vector translation = _eye.referenceDisplacement(vector);
-      _shift(translation.x(), translation.y(), translation.z());
-      if (_eye._shiftInertia != null) {
-        _eye._shiftInertia.setInertia(inertia);
-        _eye._shiftInertia._x += translation.x();
-        _eye._shiftInertia._y += translation.y();
-        _eye._shiftInertia._z += translation.z();
-        if (!_eye._shiftInertia._active) {
-          _eye._shiftInertia._active = true;
-        }
-      }
+      _eye.translate(translation.x(), translation.y(), translation.z(), inertia);
     }
     else {
       node.translate(node.referenceDisplacement(displacement(new Vector(dx, dy, dz), node)), inertia);
     }
   }
-
-  // /*
-  // Option 1: don't compensate orthographic, i.e., use Node.translate(vector, inertia)
-  protected void _shift(float x, float y, float z) {
-    _eye.translate(x, y, z);
-  }
-  // */
-
-  /*
-  // Option 2: compensate orthographic, i.e., use Scene inertial translation task
-  protected void _shift(float x, float y, float z) {
-    float d1 = 1, d2;
-    if (_type == Type.ORTHOGRAPHIC)
-      d1 = Vector.scalarProjection(Vector.subtract(_eye.worldPosition(), center), _eye.zAxis());
-    _eye.translate(x, y, z);
-    if (_type == Type.ORTHOGRAPHIC) {
-      d2 = Vector.scalarProjection(Vector.subtract(_eye.worldPosition(), center), _eye.zAxis());
-      if (d1 != 0)
-        if (d2 / d1 > 0)
-          _eye.scale(d2 / d1);
-    }
-  }
-  // */
 
   // 5. Rotate
 
