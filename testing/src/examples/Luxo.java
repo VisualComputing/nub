@@ -1,17 +1,15 @@
-package female;
+package examples;
 
 import nub.core.Node;
 import nub.core.Scene;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import peasy.PeasyCam;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 public class Luxo extends PApplet {
   Scene scene;
-  PeasyCam cam;
   Node floor, base, arm, forarm, shade;
 
   public void settings() {
@@ -19,8 +17,10 @@ public class Luxo extends PApplet {
   }
 
   public void setup() {
-    cam = new PeasyCam(this, 400);
     scene = new Scene(this);
+    Node eye = new Node();
+    eye.setWorldPosition(0,0,300);
+    scene.setEye(eye);
     base = new Node(this::base);
     base.setTranslationFilter(Node.translationPlaneFilter, new Object[] { Vector.plusK });
     base.setRotationFilter(Node.rotationAxisFilter, new Object[] { Vector.plusK });
@@ -128,6 +128,6 @@ public class Luxo extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"female.Luxo"});
+    PApplet.main(new String[]{"male.Luxo"});
   }
 }

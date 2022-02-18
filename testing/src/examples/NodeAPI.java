@@ -1,4 +1,4 @@
-package male;
+package examples;
 
 /*
 1: red; 2: green; 3: blue; 4: yellow; 5: magenta; detached1: cyan; detached2:grey
@@ -21,7 +21,6 @@ import nub.primitives.Matrix;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
-import peasy.*;
 
 public class NodeAPI extends PApplet {
   Scene scene;

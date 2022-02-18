@@ -1,15 +1,15 @@
-package female;
+package examples;
 
-import nub.core.Scene;
 import nub.core.Node;
+import nub.core.Scene;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import peasy.*;
+import processing.event.MouseEvent;
 
 public class CajasOrientadas extends PApplet {
-  PeasyCam cam;
+  Node eye;
   Scene scene;
   Box[] cajas;
   Sphere esfera;
@@ -20,9 +20,11 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void setup() {
-    cam = new PeasyCam(this, 400);
     scene = new Scene(this);
     scene.radius = 200;
+    eye = new Node();
+    eye.setWorldPosition(0,0,300);
+    scene.setEye(eye);
     // Set the inertia for all interactivity methods to 0.85. Default is 0.8.
     //scene.fit();
     esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);
@@ -50,13 +52,16 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void mouseDragged() {
-    cam.setActive(!scene.isTagValid());
     if (mouseButton == LEFT)
       scene.spin();
     else if (mouseButton == RIGHT)
       scene.shift();
     else
       scene.zoom(mouseX - pmouseX);
+  }
+
+  public void mouseWheel(MouseEvent event) {
+    scene.zoom(event.getCount() * 20);
   }
 
   public void keyPressed() {
@@ -148,6 +153,6 @@ public class CajasOrientadas extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"female.CajasOrientadas"});
+    PApplet.main(new String[]{"male.CajasOrientadas"});
   }
 }

@@ -1,4 +1,4 @@
-package male;
+package examples;
 
 import nub.core.Node;
 import nub.core.Scene;
