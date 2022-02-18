@@ -2042,6 +2042,19 @@ public class Scene {
     pg.rotate(node.orientation().angle(), (node.orientation()).axis()._vector[0], (node.orientation()).axis()._vector[1], (node.orientation()).axis()._vector[2]);
     pg.scale(node.magnitude(), node.magnitude(), node.magnitude());
   }
+  
+  protected PMatrix _modelview, _modelviewInv;
+
+  protected void _pushMatrix() {
+    _modelview = context().modelview.get();
+    _modelviewInv = context().modelviewInv.get();
+  }
+
+  public void _popMatrix() {
+    context().modelview.set(_modelview);
+    context().modelviewInv.set(_modelviewInv);
+    context().updateProjmodelview();
+  }
 
   /**
    * Cache matrices and binds processing and nub matrices together.
@@ -2096,7 +2109,7 @@ public class Scene {
         context().beginDraw();
       }
       _bind();
-      context().pushMatrix();
+      _pushMatrix();
     }
   }
 
@@ -2119,7 +2132,7 @@ public class Scene {
         _displayPaths();
         _displayHUD();
       }
-      context().popMatrix();
+      _popMatrix();
       if (isOffscreen()) {
         context().endDraw();
       }
@@ -2178,12 +2191,12 @@ public class Scene {
         _subtrees.add(subtree);
       }
       if (subtree.reference() != null) {
-        context().pushMatrix();
+        _pushMatrix();
         _applyWorldTransformation(context(), subtree.reference());
       }
       _render(subtree);
       if (subtree.reference() != null) {
-        context().popMatrix();
+        _popMatrix();
       }
     }
   }
@@ -2256,7 +2269,7 @@ public class Scene {
    * Used by the {@link #render(Node)} algorithm.
    */
   protected void _render(Node node) {
-    context().pushMatrix();
+    _pushMatrix();
     node._execute();
     _applyTransformation(context(), node);
     // TODO ordering of operations is a bit experimental.
@@ -2279,11 +2292,11 @@ public class Scene {
         _trackFrontBuffer(node);
         _trackBackBuffer(node);
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
-          context().pushMatrix();
+          _pushMatrix();
           float scl = 1 + node._highlight;
           context().scale(scl, scl, scl);
           _displayFrontHint(node);
-          context().popMatrix();
+          _popMatrix();
         } else {
           _displayFrontHint(node);
         }
@@ -2292,7 +2305,7 @@ public class Scene {
         _render(child);
       }
     }
-    context().popMatrix();
+    _popMatrix();
   }
 
   /**
@@ -2957,7 +2970,7 @@ public class Scene {
       while(iterator.hasNext()) {
         Node node = iterator.next();
         if (node.rendered(this) && node.isHintEnabled(Node.HUD)) {
-          context().pushMatrix();
+          _pushMatrix();
           Vector location = screenLocation(node);
           if (location != null) {
             context().translate(location.x(), location.y());
@@ -2968,7 +2981,7 @@ public class Scene {
               context().shape(node._rmrHUD);
             }
           }
-          context().popMatrix();
+          _popMatrix();
           iterator.remove();
         }
       }
@@ -4370,10 +4383,10 @@ public class Scene {
           if (count >= goal) {
             goal += Node.maxSteps / ((float) interpolator._steps + 1);
             if (count % Node.maxSteps != 0) {
-              context().pushMatrix();
+              _pushMatrix();
               _applyTransformation(context(), node);
               _displayAnimationHint(node);
-              context().popMatrix();
+              _popMatrix();
             }
           }
           count++;
@@ -4550,11 +4563,11 @@ public class Scene {
    * @see #drawArrow(float, float)
    */
   public void drawArrow(Vector from, Vector to, float radius) {
-    context().pushMatrix();
+    _pushMatrix();
     context().translate(from.x(), from.y(), from.z());
     context().applyMatrix(Scene.toPMatrix(new Quaternion(new Vector(0, 0, 1), Vector.subtract(to, from)).matrix()));
     drawArrow(Vector.subtract(to, from).magnitude(), radius);
-    context().popMatrix();
+    _popMatrix();
   }
 
   /**
@@ -5104,10 +5117,10 @@ public class Scene {
    * @see #drawFrustum(PGraphics, Scene)
    */
   public void drawFrustum(Scene scene) {
-    context().pushMatrix();
+    _pushMatrix();
     _applyTransformation(context(), scene._eye);
     drawFrustum(context(), scene);
-    context().popMatrix();
+    _popMatrix();
   }
 
   /**
@@ -5356,7 +5369,7 @@ public class Scene {
     // if PERSPECTIVE: do it in the world coordinate system
     Vector o = new Vector();
     if (_type == Scene.Type.ORTHOGRAPHIC) {
-      context().pushMatrix();
+      _pushMatrix();
       _applyTransformation(context(), scene._eye);
     }
     // in PERSPECTIVE cache the transformed origin
@@ -5380,7 +5393,7 @@ public class Scene {
     }
     context().endShape();
     if (_type == Scene.Type.ORTHOGRAPHIC) {
-      context().popMatrix();
+      _popMatrix();
     }
     context().popStyle();
   }
