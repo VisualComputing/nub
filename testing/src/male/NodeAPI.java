@@ -1,4 +1,4 @@
-package female;
+package male;
 
 /*
 1: red; 2: green; 3: blue; 4: yellow; 5: magenta; detached1: cyan; detached2:grey
@@ -24,7 +24,6 @@ import processing.event.MouseEvent;
 import peasy.*;
 
 public class NodeAPI extends PApplet {
-  PeasyCam cam;
   Scene scene;
   Node n1, n2, n3, n4, n5, detached1, detached2, clone;
 
@@ -36,8 +35,10 @@ public class NodeAPI extends PApplet {
   }
 
   public void setup() {
-    cam = new PeasyCam(this, 400);
     scene = new Scene(this);
+    Node eye = new Node();
+    eye.setWorldPosition(0,0,300);
+    scene.setEye(eye);
 
     // red
     n1 = new Node(shape(color(255, 0, 0, 125)));
@@ -148,7 +149,6 @@ public class NodeAPI extends PApplet {
 
   @Override
   public void mouseDragged() {
-    cam.setActive(!scene.isTagValid());
     if (mouseButton == LEFT)
       scene.spin();
     else if (mouseButton == RIGHT)
@@ -157,13 +157,11 @@ public class NodeAPI extends PApplet {
 
   @Override
   public void mouseWheel(MouseEvent event) {
-    cam.setActive(!scene.isTagValid());
     scene.zoom(event.getCount() * 20);
   }
 
   @Override
   public void mouseClicked(MouseEvent event) {
-    cam.setActive(!scene.isTagValid());
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         scene.focus();
@@ -172,6 +170,6 @@ public class NodeAPI extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"female.NodeAPI"});
+    PApplet.main(new String[]{"male.NodeAPI"});
   }
 }
