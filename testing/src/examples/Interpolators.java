@@ -52,6 +52,8 @@ public class Interpolators extends PApplet {
       // */
       // /*
       scene.randomize(shape);
+      //shape.addKeyFrame(Node.AXES | Node.BULLSEYE, i % 2 == 1 ? 1000 : 4000);
+      // TODO check why bullseye isn't activated here
       shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1000 : 4000);
       // */
     }
