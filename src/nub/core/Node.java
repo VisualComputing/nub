@@ -605,7 +605,6 @@ public class Node {
 
   /**
    * Returns the unique sequential node id assigned at instantiation time.
-   * Used by {@link #colorID()} and {@link Scene#_displayBackHint(Node)}.
    */
   public int id() {
     return _id;
