@@ -153,6 +153,6 @@ public class CajasOrientadas extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"male.CajasOrientadas"});
+    PApplet.main(new String[]{"examples.CajasOrientadas"});
   }
 }

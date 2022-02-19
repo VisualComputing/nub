@@ -149,6 +149,6 @@ import processing.event.MouseEvent;
     }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"male.ViewFrustumCulling"});
+    PApplet.main(new String[]{"examples.ViewFrustumCulling"});
   }
 }

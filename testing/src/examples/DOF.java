@@ -135,6 +135,6 @@ public class DOF extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"male.DOF"});
+    PApplet.main(new String[]{"examples.DOF"});
   }
 }

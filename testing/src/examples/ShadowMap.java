@@ -140,6 +140,6 @@ public class ShadowMap extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"male.ShadowMap"});
+    PApplet.main(new String[]{"examples.ShadowMap"});
   }
 }

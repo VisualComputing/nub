@@ -124,9 +124,7 @@ public class Scene {
   protected boolean _offscreen;
 
   // 0. Contexts
-  protected PGraphics _bb, _fb;
-  protected ArrayList<Node> _subtrees;
-  protected boolean _bbNeed;
+  protected PGraphics _fb;
   // 1. Eye
   protected Node _eye;
   protected boolean _male;
@@ -305,9 +303,6 @@ public class Scene {
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   public static PApplet pApplet;
 
-  // _bb : picking buffer
-  protected PShader _triangleShader, _lineShader, _pointShader;
-
   // mouse speed
   long _timestamp;
 
@@ -336,7 +331,6 @@ public class Scene {
       _seeded = true;
     }
     _fb = pGraphics;
-    _subtrees = new ArrayList<Node>();
     setWidth(pGraphics.width);
     setHeight(pGraphics.height);
     _tags = new HashMap<String, Node>();
@@ -352,17 +346,9 @@ public class Scene {
     _offscreen = pGraphics != pApplet.g;
     if (!(pGraphics instanceof PGraphicsOpenGL))
       throw new RuntimeException("context() is not instance of PGraphicsOpenGL");
-    _bb = pApplet.createGraphics(pGraphics.width, pGraphics.height, pGraphics instanceof PGraphics3D ? PApplet.P3D : PApplet.P2D);
     if (!_offscreen && _onscreenScene == null)
       _onscreenScene = this;
-    // 2. Back buffer
-    // is noSmooth absorbed by the line shader
-    // looks safer to call it though
-    _backBuffer().noSmooth();
-    _triangleShader = pApplet.loadShader("Picking.frag");
-    _lineShader = pApplet.loadShader("Picking.frag", "LinePicking.vert");
-    _pointShader = pApplet.loadShader("Picking.frag", "PointPicking.vert");
-    // 3. Register P5 methods
+    // 2. Register P5 methods
     pApplet.registerMethod("pre", this);
     pApplet.registerMethod("draw", this);
     pApplet.registerMethod("dispose", this);
@@ -1565,28 +1551,10 @@ public class Scene {
   }
 
   /**
-   * Condition for the node back picking.
-   */
-  protected boolean _backPicking(Node node) {
-    // TODO restore eye
-    return picking && node.tagging == true /* && !isEye(node) */ && _bb != null && (
-        (node.isPickingEnabled(Node.CAMERA) && node.isHintEnabled(Node.CAMERA)) ||
-            (node.isPickingEnabled(Node.AXES) && node.isHintEnabled(Node.AXES)) ||
-            (node.isPickingEnabled(Node.HUD) && node.isHintEnabled(Node.HUD) && (node._imrHUD != null || node._rmrHUD != null)) ||
-            (node._frustumScenes != null && node.isPickingEnabled(Node.BOUNDS) && node.isHintEnabled(Node.BOUNDS)) ||
-            (node.isPickingEnabled(Node.SHAPE) && node.isHintEnabled(Node.SHAPE) && (node._imrShape != null || node._rmrShape != null)) ||
-            (node.isPickingEnabled(Node.TORUS) && node.isHintEnabled(Node.TORUS)) ||
-            (node.isPickingEnabled(Node.FILTER) && node.isHintEnabled(Node.FILTER)) ||
-            (node.isPickingEnabled(Node.BONE) && node.isHintEnabled(Node.BONE))
-    );
-  }
-
-  /**
    * Condition for the node front picking.
    */
   protected boolean _frontPicking(Node node) {
-    // TODO restore eye
-    return picking && node.tagging == true /* && !isEye(node) */ && node.isPickingEnabled(Node.BULLSEYE) && node.isHintEnabled(Node.BULLSEYE);
+    return picking && node.tagging == true && !_isEye(node) && node.isPickingEnabled(Node.BULLSEYE) && node.isHintEnabled(Node.BULLSEYE);
   }
 
   /**
@@ -1613,40 +1581,9 @@ public class Scene {
    * @see Node#setBullsEyeSize(float)
    */
   public boolean tracks(Node node, int pixelX, int pixelY) {
-    boolean result = false;
-    if (_backPicking(node)) {
-      result = _tracks(node, pixelX, pixelY);
+    if(_frontPicking(node)) {
+      return _tracks(node, pixelX, pixelY, screenLocation(node.worldPosition()));
     }
-    if (!result) {
-      if(_frontPicking(node)) {
-        result = _tracks(node, pixelX, pixelY, screenLocation(node.worldPosition()));
-      }
-    }
-    return result;
-  }
-
-  /**
-   * A shape may be picked using
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
-   * color buffer. This method
-   * compares the color of a back-buffer at {@code (pixelX,pixelY)} against the {@link Node#id()}.
-   * Returns true if both colors are the same, and false otherwise.
-   * <p>
-   * This method should be overridden. Default implementation simply return {@code false}.
-   *
-   * @see Node#setBullsEyeSize(float)
-   */
-  protected boolean _tracks(Node node, int pixelX, int pixelY) {
-    // TODO restore eye
-    if (node == null /* || isEye(node) */)
-      return false;
-    if (!node.tagging)
-      return false;
-    if(!(0 <= pixelX && pixelX < width() && 0 <= pixelY && pixelY < height())) //Check if pixel is out of bounds
-      return false;
-    int index = pixelY * width() + pixelX;
-    if (_backBuffer().pixels != null)
-      return _backBuffer().pixels[index] == node.colorID();
     return false;
   }
 
@@ -1654,8 +1591,7 @@ public class Scene {
    * Cached version of {@link #tracks(Node, int, int)}.
    */
   protected boolean _tracks(Node node, int pixelX, int pixelY, Vector projection) {
-    // TODO restore eye
-    if (node == null /* || isEye(node) */ || projection == null)
+    if (node == null || _isEye(node) || projection == null)
       return false;
     if (!node.tagging)
       return false;
@@ -1665,6 +1601,13 @@ public class Scene {
     return node._bullsEyeShape == Node.BullsEyeShape.SQUARE ?
         ((Math.abs(pixelX - projection._vector[0]) < threshold) && (Math.abs(pixelY - projection._vector[1]) < threshold)) :
         (float) Math.sqrt((float) Math.pow((projection._vector[0] - pixelX), 2.0) + (float) Math.pow((projection._vector[1] - pixelY), 2.0)) < threshold;
+  }
+
+  /**
+   * Used by tracking to never track an eye node.
+   */
+  protected boolean _isEye(Node eye) {
+    return eye ==  null ? false : this._eye == eye;
   }
 
   /**
@@ -1759,14 +1702,6 @@ public class Scene {
   }
 
   /**
-   * Returns the back buffer, used for
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>. Maybe {@code null}
-   */
-  protected PGraphicsOpenGL _backBuffer() {
-    return (PGraphicsOpenGL) _bb;
-  }
-
-  /**
    * Paint method which is called just before your main event loop starts.
    * Handles timing tasks, resize events, prepares caches, and opens the
    * context if the scene is onscreen.
@@ -1788,9 +1723,6 @@ public class Scene {
       if ((height() != context().height))
         setHeight(context().height);
     }
-    // safer to always free subtrees cache
-    _subtrees.clear();
-    _bbNeed = false;
     _cacheHUDs = new HashSet<Node>(_huds);
     if (!isOffscreen()) {
       openContext();
@@ -1816,7 +1748,6 @@ public class Scene {
     _orays.clear();
     _orays = _irays;
     _irays = _irays == _i1rays ? _i2rays : _i1rays;
-    _renderBackBuffer();
   }
 
   // caches
@@ -1853,10 +1784,16 @@ public class Scene {
     return _projectionViewInverse;
   }
 
+  /**
+   * Resets the eye. Same as {@code setEye(null)}.
+   */
   public void resetEye() {
     setEye(null);
   }
 
+  /**
+   * Sets the eye. {@link #untag(Node)} is called iff {@link #hasTag(Node)}.
+   */
   public void setEye(Node eye) {
     _male = eye != null;
     if (_male) {
@@ -2174,9 +2111,6 @@ public class Scene {
         _render(node);
       }
     } else if (subtree.isAttached()) {
-      if (picking && _bb != null) {
-        _subtrees.add(subtree);
-      }
       if (subtree.reference() != null) {
         context().pushMatrix();
         _applyWorldTransformation(context(), subtree.reference());
@@ -2273,11 +2207,7 @@ public class Scene {
     if (!node.cull) {
       if (node._bypass != _frameCount) {
         node._update(this);
-        if (_backPicking(node)) {
-          _bbNeed = true;
-        }
         _trackFrontBuffer(node);
-        _trackBackBuffer(node);
         if (isTagged(node) && node._highlight > 0 && node._highlight <= 1) {
           context().pushMatrix();
           float scl = 1 + node._highlight;
@@ -2293,86 +2223,6 @@ public class Scene {
       }
     }
     context().popMatrix();
-  }
-
-  /**
-   * Internal use. Traverse the scene {@link #nodes()}) into the
-   * {@link #_backBuffer()} to perform picking on the scene {@link #nodes()}.
-   */
-  protected void _renderBackBuffer() {
-    if (_lastRendered == _frameCount && _bbNeed) {
-      if (picking && _bb != null) {
-        _backBuffer().beginDraw();
-        // TODO seems style is not require since it should be absorbed by the shader
-        //_backBuffer().pushStyle();
-        _backBuffer().background(0);
-        _backBuffer().setProjection(Scene.toPMatrix(projection()));
-        _backBuffer().setMatrix(Scene.toPMatrix(view()));
-        if (_subtrees.isEmpty()) {
-          for (Node node : _leadingNodes()) {
-            _renderBackBuffer(node);
-          }
-        }
-        else {
-          Iterator<Node> iterator = _subtrees.iterator();
-          while (iterator.hasNext()) {
-            Node subtree = iterator.next();
-            if (subtree.reference() != null) {
-              _backBuffer().pushMatrix();
-              _applyWorldTransformation(_backBuffer(), subtree.reference());
-            }
-            _renderBackBuffer(subtree);
-            if (subtree.reference() != null) {
-              _backBuffer().popMatrix();
-            }
-            iterator.remove();
-          }
-        }
-        if (!_huds.isEmpty()) {
-          beginHUD(_backBuffer());
-          for (Node node : _huds) {
-            if (node.rendered(this)) {
-              if (node.isPickingEnabled(Node.HUD)) {
-                _emitBackBufferUniforms(node);
-                _backBuffer().pushMatrix();
-                Vector location = screenLocation(node);
-                if (location != null) {
-                  _backBuffer().translate(location.x(), location.y());
-                  if (node._imrHUD != null) {
-                    node._imrHUD.accept(_backBuffer());
-                  }
-                  if (node._rmrHUD != null) {
-                    _backBuffer().shape(node._rmrHUD);
-                  }
-                }
-                _backBuffer().popMatrix();
-              }
-            }
-          }
-          endHUD(_backBuffer());
-        }
-        // TODO seems style is not require since it should be absorbed by the shader
-        //_backBuffer().popStyle();
-        _backBuffer().loadPixels();
-        _backBuffer().endDraw();
-      }
-    }
-  }
-
-  /**
-   * Used by the {@link #_renderBackBuffer()} algorithm.
-   */
-  protected void _renderBackBuffer(Node node) {
-    _backBuffer().pushMatrix();
-    _applyTransformation(_backBuffer(), node);
-    if (node.rendered(this) && _backPicking(node)) {
-      _displayBackHint(node);
-    }
-    if (!node.cull) {
-      for (Node child : node.children())
-        _renderBackBuffer(child);
-    }
-    _backBuffer().popMatrix();
   }
 
   /**
@@ -2842,109 +2692,6 @@ public class Scene {
   }
 
   /**
-   * Same as {@code displayBackBuffer(0, 0)}.
-   *
-   * @see #displayBackBuffer(int, int, int)
-   */
-  public void displayBackBuffer() {
-    displayBackBuffer(/* 0xFFFFFFFF */-16777216);
-  }
-
-  /**
-   * Same as {@code displayBackBuffer(background, 0, 0)}.
-   *
-   * @see #displayBackBuffer(int, int, int)
-   */
-  public void displayBackBuffer(int background) {
-    displayBackBuffer(background, 0, 0);
-  }
-
-  /**
-   * Displays the buffer nub use for picking at the given pixel coordinates.
-   * Used for debugging.
-   *
-   * @see #displayBackBuffer(int, int, int)
-   */
-  public void displayBackBuffer(int pixelX, int pixelY) {
-    displayBackBuffer(/* 0xFFFFFFFF */-16777216, pixelX, pixelY);
-  }
-
-  /**
-   * Displays the buffer nub use for picking at the given pixel coordinates,
-   * with {@code background} color. Used for debugging.
-   */
-  public void displayBackBuffer(int background, int pixelX, int pixelY) {
-    if (_onscreenScene != null) {
-      _onscreenScene.beginHUD();
-      _imageBackBuffer(background, pixelX, pixelY);
-      _onscreenScene.endHUD();
-    }
-    else {
-      _imageBackBuffer(background, pixelX, pixelY);
-    }
-  }
-
-  /**
-   * Display the {@link #_backBuffer()} used for picking at screen coordinates
-   * on top of the main sketch canvas at the upper left corner:
-   * {@code (pixelX, pixelY)}. Mainly for debugging.
-   */
-  protected int _idToColor(int id) {
-    if(_idToColor.containsKey(id)) return _idToColor.get(id);
-    boolean isDifferent = false;
-    int color = 0;
-    while(!isDifferent){
-      color = pApplet.color(pApplet.random(255),pApplet.random(255), pApplet.random(255));
-      isDifferent = true;
-      for(int c : _idToColor.values()) isDifferent &= c != color;
-    }
-    _idToColor.put(id, color);
-    return color;
-  }
-
-  /**
-   * Display the {@link #_backBuffer()} used for picking at screen coordinates
-   * on top of the main sketch canvas at the upper left corner:
-   * {@code (pixelX, pixelY)}. Mainly for debugging.
-   */
-  protected void _imageBackBuffer(int background, int pixelX, int pixelY) {
-    if (_backBuffer() != null) {
-      pApplet.pushStyle();
-      pApplet.imageMode(PApplet.CORNER);
-      PImage img = _backBuffer().get();
-      img.loadPixels();
-      // simple lookup table to discriminate bb shapes
-      for (int i = 0; i < img.pixels.length; i++) {
-        if (img.pixels[i] == -16777216) {
-          img.pixels[i] = background;
-          continue;
-        }
-        img.pixels[i] = _idToColor(img.pixels[i]);
-      }
-      img.updatePixels();
-      pApplet.image(img, pixelX, pixelY);
-      pApplet.popStyle();
-    }
-  }
-
-  protected void _emitBackBufferUniforms(Node node) {
-    // TODO How to deal with these commands: breaks picking in Luxo when they're moved to the constructor
-    // Seems related to: PassiveTransformations
-    // funny, only safe way. Otherwise break things horribly when setting node shapes
-    // and there are more than one node holding a shape
-    int id = node.id();
-    float r = Node.redID(id);
-    float g = Node.greenID(id);
-    float b = Node.blueID(id);
-    _backBuffer().shader(_triangleShader);
-    _backBuffer().shader(_lineShader, PApplet.LINES);
-    _backBuffer().shader(_pointShader, PApplet.POINTS);
-    _triangleShader.set("id", new PVector(r, g, b));
-    _lineShader.set("id", new PVector(r, g, b));
-    _pointShader.set("id", new PVector(r, g, b));
-  }
-
-  /**
    * Displays the scene and nodes hud hint.
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
@@ -3054,44 +2801,6 @@ public class Scene {
   }
 
   /**
-   * Draws the node {@link Node#hint()} into the picking buffer.
-   * <p>
-   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
-   */
-  protected void _displayBackHint(Node node) {
-    _emitBackBufferUniforms(node);
-    PGraphics pg = _backBuffer();
-    if (node.isHintEnabled(Node.SHAPE) && node.isPickingEnabled(Node.SHAPE)) {
-      if (node._rmrShape != null) {
-        pg.shapeMode(pg.shapeMode);
-        pg.shape(node._rmrShape);
-      }
-      if (node._imrShape != null) {
-        node._imrShape.accept(pg);
-      }
-    }
-    if (node.isHintEnabled(Node.TORUS) && node.isPickingEnabled(Node.TORUS)) {
-      drawTorusSolenoid(pg, node._torusFaces, 5);
-    }
-    if (node.isHintEnabled(Node.BOUNDS) && node.isPickingEnabled(Node.BOUNDS)) {
-      for (Scene scene : node._frustumScenes) {
-        if (scene != this) {
-          drawFrustum(pg, scene);
-        }
-      }
-    }
-    if (node.isHintEnabled(Node.AXES) && node.isPickingEnabled(Node.AXES)) {
-      pg.pushStyle();
-      pg.strokeWeight(6);
-      drawAxes(pg, node._axesLength == 0 ? radius / 5 : node._axesLength);
-      pg.popStyle();
-    }
-    if (node.isHintEnabled(Node.CAMERA) && node.isPickingEnabled(Node.CAMERA)) {
-      _drawEye(pg, node._cameraLength == 0 ? radius : node._cameraLength);
-    }
-  }
-
-  /**
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
@@ -3103,25 +2812,6 @@ public class Scene {
           Ray ray = it.next();
           removeTag(ray._tag);
           if (_tracks(node, ray._pixelX, ray._pixelY, projection)) {
-            tag(ray._tag, node);
-            it.remove();
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Internally used by {@link #_render(Node)}.
-   */
-  protected void _trackBackBuffer(Node node) {
-    if (_backPicking(node) && _orays != null) {
-      if (!_orays.isEmpty()) {
-        Iterator<Ray> it = _orays.iterator();
-        while (it.hasNext()) {
-          Ray ray = it.next();
-          removeTag(ray._tag);
-          if (_tracks(node, ray._pixelX, ray._pixelY)) {
             tag(ray._tag, node);
             it.remove();
           }
