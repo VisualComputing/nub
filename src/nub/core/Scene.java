@@ -144,9 +144,7 @@ public class Scene {
   // 2. Matrix handler
   protected int _renderCount;
   protected int _width, _height;
-  // 3. Picking
-  // bypass flags to allow auto (front)picking when tagging with ray-casting
-  public static boolean AUTO_PICKING_HINT = true;
+  // _bb : picking buffer
   public boolean picking;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
   protected long _cacheProjectionViewInverse;
@@ -1556,7 +1554,7 @@ public class Scene {
    * Condition for the node front picking.
    */
   protected boolean _frontPicking(Node node) {
-    return picking && node.tagging == true && !_isEye(node) && (node.isPickingEnabled(Node.BULLSEYE) || Scene.AUTO_PICKING_HINT) && (node.isHintEnabled(Node.BULLSEYE) || Scene.AUTO_PICKING_HINT);
+    return picking && node.tagging == true && !_isEye(node) && node.isPickingEnabled(Node.BULLSEYE) && node.isHintEnabled(Node.BULLSEYE);
   }
 
   /**
@@ -2793,7 +2791,7 @@ public class Scene {
       _drawEye(pg, node._cameraLength == 0 ? radius : node._cameraLength);
       pg.popStyle();
     }
-    if (node.isHintEnabled(Node.BULLSEYE) || (Scene.AUTO_PICKING_HINT && node.tagging && picking && !_orays.isEmpty())) {
+    if (node.isHintEnabled(Node.BULLSEYE)) {
       pg.pushStyle();
       pg.colorMode(PApplet.RGB, 255);
       pg.stroke(node._bullsEyeStroke);
