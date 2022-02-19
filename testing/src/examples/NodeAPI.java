@@ -169,6 +169,6 @@ public class NodeAPI extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"male.NodeAPI"});
+    PApplet.main(new String[]{"examples.NodeAPI"});
   }
 }

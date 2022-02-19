@@ -176,6 +176,6 @@ public class Interpolators extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"male.Interpolators"});
+    PApplet.main(new String[]{"examples.Interpolators"});
   }
 }
