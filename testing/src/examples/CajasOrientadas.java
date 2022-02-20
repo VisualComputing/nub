@@ -68,7 +68,6 @@ public class CajasOrientadas extends PApplet {
     if (key == ' ')
       for (Box caja : cajas) {
         caja.toggleHint(Node.BULLSEYE);
-        caja.togglePicking(Node.SHAPE);
       }
     if (key == 'c') {
       for (Box caja : cajas)

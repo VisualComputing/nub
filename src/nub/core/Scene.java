@@ -1554,7 +1554,7 @@ public class Scene {
    * Condition for the node front picking.
    */
   protected boolean _frontPicking(Node node) {
-    return picking && node.tagging == true && !_isEye(node) && node.isPickingEnabled(Node.BULLSEYE) && node.isHintEnabled(Node.BULLSEYE);
+    return picking && node.tagging == true && !_isEye(node) && node.isHintEnabled(Node.BULLSEYE);
   }
 
   /**
