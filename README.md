@@ -134,12 +134,12 @@ Calling `setTranslationFilter(filter params)`, `setRotationFilter(filter, params
 
 The node visual representation may be configured using the following hints:
 
+* `BULLSEYE` which displays a bullseye centered at the node `worldPosition()` screen projection and is used for [picking](#picking). Call `setBullsEyeSize(value)` to set the size of the hint.
 * `SHAPE` which displays the node shape set with `setShape(shape)` which is either an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure or a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html).
 * `HUD` which displays the node _Heads-Up-Display_ set with `setHUD(shape)`.
 * `BOUNDS` which displays the bounding volume of each scene for which this node is the eye. Only meaningful if there's a second scene perspective to look at this eye node from.
 * `KEYFRAMES` which displays the [Catmull Rom spline](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) defining the current node animation path.
 * `AXES` which displays an axes hint centered at the node `worldPosition()` an oriented according to the node `worldOrientation()`.
-* `BULLSEYE` which displays a bullseye centered at the node `worldPosition()` screen projection. Call `setBullsEyeSize(value)` to set the size of the hint.
 * `TORUS` which displays a torus solenoid.
 * `CAMERA` which displays a camera hint centered at the node screen projection.
 
@@ -147,7 +147,6 @@ Observations:
 
 1. The actual node visual `hint()` is a bitwise-or mask of a subset of the above hints enabled at a given time, and so it does the hint parameter in methods to enable (`node.enableHint(hint)`), disable (`node.disableHint(hint)`) or toggle (`node.toggleHint(hint)`) them, e.g., `node.enableHint(Node.SHAPE | Node.KEYFRAMES)` enables altogether the `SHAPE` and `KEYFRAMES` node hints.
 2. Displaying the hint requires first to enabling it (`enableHint(mask)`) and then calling a scene [rendering algorithm](#rendering).
-3. Those enabled visual hints are used to pick the node with ray casting (see [picking](#picking)). Fine tune the mask picking hint with `enablePicking(mask)`, `disablePicking(mask)` and `togglePicking(mask)`, where `mask` is also a bitwise-or of the above hints.
 
 ### Hints configuration
 
@@ -419,7 +418,7 @@ Picking a node (which should be different than the scene eye) to interact with i
 Observations:
 
 1. A node can have multiple tags but a given tag cannot be assigned to more than one node, and since the null tag is allowed, signatures of all the above methods lacking the tag parameter are provided for convenience.
-2. Refer to the [picking()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#picking--) and [enablePicking(int)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#enablePicking-int-) for the different ray-casting node picking modes.
+2. The `BULLSEYE` hint is used to pick the node with ray-casting. Disabling the hint will thus disable ray-casting.
 3. To check if a given node would be picked with a ray cast at a given screen position, call `tracks(node, [pixelX], [pixelY])`.
 4. To tag the nodes in a given array with ray casting use `updateTag([tag], [pixelX], [pixelY], Node[])`.
 5. Set `Scene.inertia` in  [0..1] (`0` no inertia & `1` no friction) to change the default `inertia` value globally. It is initially set to `0.8`. See the [CajasOrientadas](https://github.com/VisualComputing/nub/tree/master/examples/basics/CajasOrientadas) example.
