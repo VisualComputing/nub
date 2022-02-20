@@ -36,7 +36,6 @@ public class Interpolators extends PApplet {
     shape.setMinMaxScalingFilter(0.8f, 1.2f);
     shape.setHUD(this::hud);
     shape.enableHint(Node.AXES);
-    shape.enableHint(Node.BULLSEYE);
     shape.enableHint(Node.KEYFRAMES, Node.AXES | Node.BULLSEYE, 2, color(0, 255, 0), 10);
     shape.enableHint(Node.KEYFRAMES, Node.AXES, 2, color(0, 255, 0), 10);
     shape.configHint(Node.BULLSEYE, color(255, 0, 0));
@@ -54,7 +53,7 @@ public class Interpolators extends PApplet {
       scene.randomize(shape);
       //shape.addKeyFrame(Node.AXES | Node.BULLSEYE, i % 2 == 1 ? 1000 : 4000);
       // TODO check why bullseye isn't activated here
-      shape.addKeyFrame(Node.AXES | Node.SHAPE, i % 2 == 1 ? 1000 : 4000);
+      shape.addKeyFrame(Node.BULLSEYE | Node.SHAPE, i % 2 == 1 ? 1000 : 4000);
       // */
     }
     shape.resetScalingFilter();

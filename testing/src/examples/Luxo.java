@@ -38,6 +38,7 @@ public class Luxo extends PApplet {
     // for the lights to work the floor node should be the last to be added
     floor = new Node(this::floor);
     floor.tagging = false;
+    floor.disableHint(Node.BULLSEYE);
   }
 
   void cone(PGraphics pg, float zMin, float zMax, float r1, float r2, int nbSub) {

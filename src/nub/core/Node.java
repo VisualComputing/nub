@@ -384,6 +384,7 @@ public class Node {
     // unlikely but theoretically possible
     if (_id == 16777216)
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
+    enableHint(Node.BULLSEYE);
     _bullsEyeSize = 30;
     _bullsEyeShape = BullsEyeShape.SQUARE;
     tagging = true;
