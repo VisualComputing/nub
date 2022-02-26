@@ -1812,58 +1812,54 @@ public class Scene {
     _modified();
   }
 
+  // see: https://stackoverflow.com/questions/10830293/decompose-projection-matrix44-to-left-right-bottom-top-near-and-far-boundary/12926655
+
   /**
-   * Retrieves the left clipping plane. Only meaningful for orthographic projections.
+   * Retrieves the left clipping plane.
    */
   public float left() {
-    if (context().projection.m33 != 1) {
-      throw new RuntimeException("Error: left only works for an orthographic projection");
-    }
-    return -(1 + context().projection.m03 ) / context().projection.m00;
+    return context().projection.m33 == 1 ? -(1 + context().projection.m03 ) / context().projection.m00 :
+            near() * (context().projection.m02 - 1) / context().projection.m00;
   }
 
   /**
-   * Retrieves the right clipping plane. Only meaningful for orthographic projections.
+   * Retrieves the right clipping plane.
    */
   public float right() {
-    if (context().projection.m33 != 1) {
-      throw new RuntimeException("Error: right only works for an orthographic projection");
-    }
-    return (1 - context().projection.m03) / context().projection.m00;
+    return context().projection.m33 == 1 ? (1 - context().projection.m03) / context().projection.m00 :
+            near() * (context().projection.m02 + 1) / context().projection.m00;
   }
 
   /**
-   * Retrieves the top clipping plane. Only meaningful for orthographic projections.
+   * Retrieves the top clipping plane.
    */
   public float top() {
-    if (context().projection.m33 != 1) {
-      throw new RuntimeException("Error: top only works for an orthographic projection");
-    }
-    return -(1 + context().projection.m13) / context().projection.m11;
+    return context().projection.m33 == 1 ? -(1 + context().projection.m13) / context().projection.m11 :
+            near() * (context().projection.m12 + 1) / context().projection.m11;
   }
 
   /**
-   * Retrieves the bottom clipping plane. Only meaningful for orthographic projections.
+   * Retrieves the bottom clipping plane.
    */
   public float bottom() {
-    if (context().projection.m33 != 1) {
-      throw new RuntimeException("Error: bottom only works for an orthographic projection");
-    }
-    return (1 - context().projection.m13) / context().projection.m11;
+    return context().projection.m33 == 1 ? (1 - context().projection.m13) / context().projection.m11 :
+            near() * (context().projection.m12-1) / context().projection.m11;
   }
 
   /**
    * Retrieves the near clipping plane.
    */
   public float near() {
-    return context().projection.m33 == 0 ? context().projection.m23 / (context().projection.m22 - 1) : (1 + context().projection.m23) / context().projection.m22;
+    return context().projection.m33 == 0 ? context().projection.m23 / (context().projection.m22 - 1) :
+            (1 + context().projection.m23) / context().projection.m22;
   }
 
   /**
    * Retrieves the far clipping plane.
    */
   public float far() {
-    return context().projection.m33 == 0 ? context().projection.m23 / (context().projection.m22 + 1) : - (1 - context().projection.m23) / context().projection.m22;
+    return context().projection.m33 == 0 ? context().projection.m23 / (context().projection.m22 + 1) :
+            - (1 - context().projection.m23) / context().projection.m22;
   }
 
   /**
