@@ -54,7 +54,8 @@ import processing.event.MouseEvent;
       root.cull = false;
       PGraphics pg1 = mainScene.context();
       //pg1.ortho(-200, 600, -100, 300, 10, 500);
-      pg1.ortho();
+      pg1.ortho(-300, 300, -200, 200, 10, 500);
+      //pg1.ortho();
       /*
       float fov = PI/3.0f;
       float cameraZ = (height/2.0f) / tan(fov/2.0f);

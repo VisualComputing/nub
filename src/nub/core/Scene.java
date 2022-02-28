@@ -4814,7 +4814,7 @@ public class Scene {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && scene.isOffscreen();
     switch (scene._type) {
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, texture ? scene.context() : null, Math.abs(scene.right() - scene.left()), scene._leftHanded ? -Math.abs(scene.top() - scene.bottom()) : Math.abs(scene.top() - scene.bottom()), scene.near(), scene.far());
+        _drawOrthographicFrustum(pGraphics, texture ? scene.context() : null, scene.left(), scene.right(), scene.bottom(), scene.top(), scene.near(), scene.far());
         break;
       case PERSPECTIVE:
         _drawPerspectiveFrustum(pGraphics, texture ? scene.context() : null, (float) Math.tan(scene.fov() / 2.0f), scene._leftHanded ? -scene.aspectRatio() : scene.aspectRatio(), scene.near(), scene.far());
@@ -4823,38 +4823,44 @@ public class Scene {
   }
 
   // TODO make it work for non-symmetrical ortho volumes.
-  protected static void _drawOrthographicFrustum(PGraphics pGraphics, PGraphics eyeBuffer, float width, float height, float zNear, float zFar) {
+  protected static void _drawOrthographicFrustum(PGraphics pGraphics, PGraphics eyeBuffer, float left, float right, float bottom, float top, float zNear, float zFar) {
     if (pGraphics == eyeBuffer)
       return;
-    boolean lh = height < 0;
-    height = Math.abs(height);
+    boolean leftHanded = bottom < top;
+    //float width = Math.abs(right - left);
+    //float height = Math.abs(top - bottom);
     pGraphics.pushStyle();
     // 0 is the upper left coordinates of the near corner, 1 for the far one
+    /*
     Vector[] points = new Vector[2];
     points[0] = new Vector();
     points[1] = new Vector();
-    points[0].setX(width / 2);
-    points[1].setX(width / 2);
-    points[0].setY(height / 2);
-    points[1].setY(height / 2);
+    points[0].setX(left);
+    points[1].setX(right);
+    points[0].setY(Math.abs(bottom));
+    points[1].setY(Math.abs(top));
     points[0].setZ(zNear);
     points[1].setZ(zFar);
+    */
+    left = Math.abs(left);
+    bottom = Math.abs(bottom);
+    top = Math.abs(top);
     // Frustum lines
     pGraphics.beginShape(PApplet.LINES);
-    Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
-    Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
-    Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
-    Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
-    Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
-    Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
-    Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
-    Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, left, bottom, -zNear);
+    Scene.vertex(pGraphics, right, top, -zFar);
+    Scene.vertex(pGraphics, -left, bottom, -zNear);
+    Scene.vertex(pGraphics, -right, top, -zFar);
+    Scene.vertex(pGraphics, -left, -bottom, -zNear);
+    Scene.vertex(pGraphics, -right, -top, -zFar);
+    Scene.vertex(pGraphics, left, -bottom, -zNear);
+    Scene.vertex(pGraphics, right, -top, -zFar);
     pGraphics.endShape();
     // Up arrow
-    float arrowHeight = 1.5f * points[0].y();
-    float baseHeight = 1.2f * points[0].y();
-    float arrowHalfWidth = 0.5f * points[0].x();
-    float baseHalfWidth = 0.3f * points[0].x();
+    float arrowHeight = 1.5f * bottom;
+    float baseHeight = 1.2f * bottom;
+    float arrowHalfWidth = 0.5f * left;
+    float baseHalfWidth = 0.3f * left;
     pGraphics.noStroke();
     // Arrow base
     if (eyeBuffer != null) {
@@ -4866,37 +4872,38 @@ public class Scene {
       pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
     }
     pGraphics.beginShape(PApplet.QUADS);
-    if (lh) {
-      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
+    if (leftHanded) {
+      Scene.vertex(pGraphics, -baseHalfWidth, -bottom, -zNear);
+      Scene.vertex(pGraphics, baseHalfWidth, -bottom, -zNear);
+      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -zNear);
+      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -zNear);
     } else {
-      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, bottom, -zNear);
+      Scene.vertex(pGraphics, baseHalfWidth, bottom, -zNear);
+      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -zNear);
+      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -zNear);
     }
     pGraphics.endShape();
     // Arrow
     pGraphics.beginShape(PApplet.TRIANGLES);
-    if (lh) {
-      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
+    if (leftHanded) {
+      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -zNear);
+      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -zNear);
+      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -zNear);
     } else {
-      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, 0.0f, arrowHeight, -zNear);
+      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -zNear);
+      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -zNear);
     }
     if (eyeBuffer != null)
       pGraphics.popStyle();// begin at arrow base
     pGraphics.endShape();
     // Planes
     // far plane
-    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
+    // 0 is the upper left coordinates of the near corner, 1 for the far one
+    _drawPlane(pGraphics, null, new Vector(right, top, zFar), new Vector(0, 0, -1), leftHanded);
     // near plane
-    _drawPlane(pGraphics, eyeBuffer, points[0], new Vector(0, 0, 1), lh);
+    _drawPlane(pGraphics, eyeBuffer, new Vector(left, bottom, zNear), new Vector(0, 0, 1), leftHanded);
     pGraphics.popStyle();
   }
 
