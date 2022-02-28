@@ -26,6 +26,7 @@ import processing.event.MouseEvent;
       // main scene
       mainScene = new Scene(createGraphics(w, h / 2, P3D));
       mainEye = new Node();
+      mainEye.disableHint(Node.BULLSEYE);
       mainEye.setWorldPosition(0,0,300);
       mainScene.setEye(mainEye);
       mainEye.enableHint(Node.BOUNDS);
@@ -33,6 +34,7 @@ import processing.event.MouseEvent;
       secondaryScene = new Scene(createGraphics(w, h / 2, P3D));
       secondaryScene.radius = 800;
       secondaryEye = new Node();
+      secondaryEye.disableHint(Node.BULLSEYE);
       secondaryEye.setWorldPosition(0,0,1800);
       secondaryScene.setEye(secondaryEye);
       // declare and build the octree hierarchy
@@ -50,15 +52,16 @@ import processing.event.MouseEvent;
       focus = mainScene.hasFocus() ? mainScene : secondaryScene;
       // culling condition should be retested every frame
       root.cull = false;
-      //PGraphics pg1 = mainScene.context();
-      //pg1.ortho(-200, 600, -100, 300, 10, 500);
+      PGraphics pg1 = mainScene.context();
+      pg1.ortho(-200, 600, -100, 300, 10, 500);
+      //pg1.ortho();
       /*
       float fov = PI/3.0f;
       float cameraZ = (height/2.0f) / tan(fov/2.0f);
       pg1.perspective(fov, (float)width/(float)height, cameraZ/10.0f, cameraZ*2.0f);
       // */
       mainScene.openContext();
-      mainScene.context().background(255);
+      mainScene.context().background(115);
       mainScene.render();
       mainScene.closeContext();
       mainScene.image();
@@ -99,6 +102,7 @@ import processing.event.MouseEvent;
     class OctreeNode extends Node {
       OctreeNode() {
         tagging = false;
+        disableHint(Node.BULLSEYE);
         setShape(this::draw);
         setBehavior(mainScene, this::culling);
       }
@@ -108,6 +112,7 @@ import processing.event.MouseEvent;
         scale(0.5f);
         translate(Vector.multiply(vector, magnitude() / 2));
         tagging = false;
+        disableHint(Node.BULLSEYE);
         setShape(this::draw);
         setBehavior(mainScene, this::culling);
       }
