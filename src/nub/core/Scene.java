@@ -1834,16 +1834,16 @@ public class Scene {
    * Retrieves the top clipping plane.
    */
   public float top() {
-    return context().projection.m33 == 1 ? -(1 + context().projection.m13) / context().projection.m11 :
-            near() * (context().projection.m12 + 1) / context().projection.m11;
+    return context().projection.m33 == 1 ? (context().projection.m13 - 1) / context().projection.m11 :
+            near() * (context().projection.m12 - 1) / context().projection.m11;
   }
 
   /**
    * Retrieves the bottom clipping plane.
    */
   public float bottom() {
-    return context().projection.m33 == 1 ? (1 - context().projection.m13) / context().projection.m11 :
-            near() * (context().projection.m12-1) / context().projection.m11;
+    return context().projection.m33 == 1 ? (1 + context().projection.m13) / context().projection.m11 :
+            near() * (1 - context().projection.m12) / context().projection.m11;
   }
 
   /**
@@ -3725,6 +3725,7 @@ public class Scene {
     }
     else {
       Quaternion quaternion = new Quaternion(_leftHanded ? roll : -roll, -pitch, _leftHanded ? yaw : -yaw);
+      // TODO test node quaternion displacement here
       node.rotate(new Quaternion(node.displacement(quaternion.axis(), _eye), quaternion.angle()), inertia);
     }
   }

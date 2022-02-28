@@ -33,6 +33,25 @@ public class Transformations extends PApplet {
     eye.setWorldPosition(0,0,700);
     scene.setEye(eye);
     //ortho(-width/2, width/2, -height/2, height/2);
+
+    //frustum([left], [right], [bottom], [top], [near], [far]);
+    //frustum(-150.1f, 200.2f, -90.3f,      70.4f, 1.5f, 5000.6f);
+
+    //float eyeZ = ((float)height / 2) / tan(PI / 6);
+    //perspective(PI / 3.0f, width / height, eyeZ / 10.0f, eyeZ * 10.0f);
+    //perspective(PI / 3, (float)width / (float)height, 2.1f, 50.2f);
+
+//ortho([left], [right], [bottom], [top], [near], [far])
+    //ortho(-150.1f, 200.2f, -90.3f,      70.4f, 1.5f, 5000.6f);
+    //console.log('fov', this._renderer._fov());
+    println("near", scene.near());
+    println("far", scene.far());
+    println("left", scene.left());
+    println("right", scene.right());
+    println("bottom", scene.bottom());
+    println("top", scene.top());
+    println("fov", scene.fov());
+    println("hfov", scene.hfov());
   }
 
   public void draw() {
