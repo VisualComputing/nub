@@ -4831,36 +4831,22 @@ public class Scene {
     //float height = Math.abs(top - bottom);
     pGraphics.pushStyle();
     // 0 is the upper left coordinates of the near corner, 1 for the far one
-    /*
-    Vector[] points = new Vector[2];
-    points[0] = new Vector();
-    points[1] = new Vector();
-    points[0].setX(left);
-    points[1].setX(right);
-    points[0].setY(Math.abs(bottom));
-    points[1].setY(Math.abs(top));
-    points[0].setZ(zNear);
-    points[1].setZ(zFar);
-    */
-    left = Math.abs(left);
-    bottom = Math.abs(bottom);
-    top = Math.abs(top);
     // Frustum lines
     pGraphics.beginShape(PApplet.LINES);
-    Scene.vertex(pGraphics, left, bottom, -zNear);
+    Scene.vertex(pGraphics, right, top, -zNear);
     Scene.vertex(pGraphics, right, top, -zFar);
-    Scene.vertex(pGraphics, -left, bottom, -zNear);
-    Scene.vertex(pGraphics, -right, top, -zFar);
-    Scene.vertex(pGraphics, -left, -bottom, -zNear);
-    Scene.vertex(pGraphics, -right, -top, -zFar);
-    Scene.vertex(pGraphics, left, -bottom, -zNear);
-    Scene.vertex(pGraphics, right, -top, -zFar);
+    Scene.vertex(pGraphics, left, top, -zNear);
+    Scene.vertex(pGraphics, left, top, -zFar);
+    Scene.vertex(pGraphics, left, bottom, -zNear);
+    Scene.vertex(pGraphics, left, bottom, -zFar);
+    Scene.vertex(pGraphics, right, bottom, -zNear);
+    Scene.vertex(pGraphics, right, bottom, -zFar);
     pGraphics.endShape();
     // Up arrow
-    float arrowHeight = 1.5f * bottom;
-    float baseHeight = 1.2f * bottom;
-    float arrowHalfWidth = 0.5f * left;
-    float baseHalfWidth = 0.3f * left;
+    float arrowHeight = 1.5f * top;
+    float baseHeight = 1.2f * top;
+    float arrowHalfWidth = 0.5f * right;
+    float baseHalfWidth = 0.3f * right;
     pGraphics.noStroke();
     // Arrow base
     if (eyeBuffer != null) {
@@ -4873,13 +4859,13 @@ public class Scene {
     }
     pGraphics.beginShape(PApplet.QUADS);
     if (leftHanded) {
-      Scene.vertex(pGraphics, -baseHalfWidth, -bottom, -zNear);
-      Scene.vertex(pGraphics, baseHalfWidth, -bottom, -zNear);
+      Scene.vertex(pGraphics, -baseHalfWidth, bottom, -zNear);
+      Scene.vertex(pGraphics, baseHalfWidth, bottom, -zNear);
       Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -zNear);
       Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -zNear);
     } else {
-      Scene.vertex(pGraphics, -baseHalfWidth, bottom, -zNear);
-      Scene.vertex(pGraphics, baseHalfWidth, bottom, -zNear);
+      Scene.vertex(pGraphics, -baseHalfWidth, top, -zNear);
+      Scene.vertex(pGraphics, baseHalfWidth, top, -zNear);
       Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -zNear);
       Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -zNear);
     }
@@ -4903,7 +4889,7 @@ public class Scene {
     // 0 is the upper left coordinates of the near corner, 1 for the far one
     _drawPlane(pGraphics, null, new Vector(right, top, zFar), new Vector(0, 0, -1), leftHanded);
     // near plane
-    _drawPlane(pGraphics, eyeBuffer, new Vector(left, bottom, zNear), new Vector(0, 0, 1), leftHanded);
+    _drawPlane(pGraphics, eyeBuffer, new Vector(right, top, zNear), new Vector(0, 0, 1), leftHanded);
     pGraphics.popStyle();
   }
 
