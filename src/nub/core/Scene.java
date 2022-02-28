@@ -4843,10 +4843,10 @@ public class Scene {
     Scene.vertex(pGraphics, right, bottom, -zFar);
     pGraphics.endShape();
     // Up arrow
-    float arrowHeight = 1.5f * top;
-    float baseHeight = 1.2f * top;
-    float arrowHalfWidth = 0.5f * right;
-    float baseHalfWidth = 0.3f * right;
+    float arrowHeight = 1.5f * Math.abs(top - bottom) / 2;
+    float baseHeight = 1.2f * Math.abs(top - bottom) / 2;
+    float arrowHalfWidth = 0.5f * Math.abs(right - left) / 2;
+    float baseHalfWidth = 0.3f * Math.abs(right - left) / 2;
     pGraphics.noStroke();
     // Arrow base
     if (eyeBuffer != null) {
