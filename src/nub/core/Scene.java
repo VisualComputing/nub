@@ -4814,7 +4814,7 @@ public class Scene {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && scene.isOffscreen();
     switch (scene._type) {
       case ORTHOGRAPHIC:
-        _drawOrthographicFrustum(pGraphics, texture ? scene.context() : null, Math.abs(scene.right() - scene.left()) / (float) scene.width(), Math.abs(scene.right() - scene.left()), scene._leftHanded ? -Math.abs(scene.top() - scene.bottom()) : Math.abs(scene.top() - scene.bottom()), scene.near(), scene.far());
+        _drawOrthographicFrustum(pGraphics, texture ? scene.context() : null, Math.abs(scene.right() - scene.left()), scene._leftHanded ? -Math.abs(scene.top() - scene.bottom()) : Math.abs(scene.top() - scene.bottom()), scene.near(), scene.far());
         break;
       case PERSPECTIVE:
         _drawPerspectiveFrustum(pGraphics, texture ? scene.context() : null, (float) Math.tan(scene.fov() / 2.0f), scene._leftHanded ? -scene.aspectRatio() : scene.aspectRatio(), scene.near(), scene.far());
@@ -4823,7 +4823,7 @@ public class Scene {
   }
 
   // TODO make it work for non-symmetrical ortho volumes.
-  protected static void _drawOrthographicFrustum(PGraphics pGraphics, PGraphics eyeBuffer, float magnitude, float width, float height, float zNear, float zFar) {
+  protected static void _drawOrthographicFrustum(PGraphics pGraphics, PGraphics eyeBuffer, float width, float height, float zNear, float zFar) {
     if (pGraphics == eyeBuffer)
       return;
     boolean lh = height < 0;
