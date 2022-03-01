@@ -4827,8 +4827,6 @@ public class Scene {
     if (pGraphics == eyeBuffer)
       return;
     boolean leftHanded = bottom < top;
-    //float width = Math.abs(right - left);
-    //float height = Math.abs(top - bottom);
     pGraphics.pushStyle();
     // 0 is the upper left coordinates of the near corner, 1 for the far one
     // Frustum lines
@@ -4858,17 +4856,10 @@ public class Scene {
       pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
     }
     pGraphics.beginShape(PApplet.QUADS);
-    if (leftHanded) {
-      Scene.vertex(pGraphics, -baseHalfWidth, bottom, -zNear);
-      Scene.vertex(pGraphics, baseHalfWidth, bottom, -zNear);
-      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -zNear);
-      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -zNear);
-    } else {
-      Scene.vertex(pGraphics, -baseHalfWidth, top, -zNear);
-      Scene.vertex(pGraphics, baseHalfWidth, top, -zNear);
-      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -zNear);
-      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -zNear);
-    }
+    Scene.vertex(pGraphics, -baseHalfWidth, -top, -zNear);
+    Scene.vertex(pGraphics, baseHalfWidth, -top, -zNear);
+    Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -zNear);
+    Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -zNear);
     pGraphics.endShape();
     // Arrow
     pGraphics.beginShape(PApplet.TRIANGLES);
@@ -4885,11 +4876,18 @@ public class Scene {
       pGraphics.popStyle();// begin at arrow base
     pGraphics.endShape();
     // Planes
-    // far plane
-    // 0 is the upper left coordinates of the near corner, 1 for the far one
-    _drawPlane(pGraphics, null, new Vector(right, top, zFar), new Vector(0, 0, -1), leftHanded);
-    // near plane
-    _drawPlane(pGraphics, eyeBuffer, new Vector(right, top, zNear), new Vector(0, 0, 1), leftHanded);
+    if (leftHanded) {
+      // far
+      _drawPlane(pGraphics, null, new Vector(right, top, zFar), new Vector(0, 0, -1), true);
+      // near
+      _drawPlane(pGraphics, eyeBuffer, new Vector(right, top, zNear), new Vector(0, 0, 1), true);
+    }
+    else {
+      // near
+      _drawPlane(pGraphics, eyeBuffer, new Vector(right, -top, zFar), new Vector(0, 0, -1), false);
+      // far
+      _drawPlane(pGraphics, null, new Vector(right, -top, zNear), new Vector(0, 0, 1), false);
+    }
     pGraphics.popStyle();
   }
 
