@@ -52,9 +52,9 @@ import processing.event.MouseEvent;
       focus = mainScene.hasFocus() ? mainScene : secondaryScene;
       // culling condition should be retested every frame
       root.cull = false;
-      //PGraphics pg1 = mainScene.context();
+      PGraphics pg1 = mainScene.context();
       //pg1.ortho(-200, 600, -100, 300, 10, 500);
-      //pg1.ortho(-300, 300, -200, 200, 10, 500);
+      pg1.ortho(-300, 300, -200, 200, 10, 500);
       //pg1.ortho();
       /*
       float fov = PI/3.0f;
