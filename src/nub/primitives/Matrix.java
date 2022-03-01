@@ -839,59 +839,11 @@ public class Matrix {
   }
 
   /**
-   * Returns a perspective projection matrix from the given parameters.
-   * <p>
-   * Compute the {@code magnitude} as {@code tan(field-of-view / 2)} if you want to set the matrix from the field-of-view.
-   * <p>
-   * All parameter values should be positive, but {@code magnitude} which may be negative in case you want to invert
-   * the projected image across the eye y-axis.
-   *
-   * @see #orthographic(float, float, float, float)
-   * @see #view(Vector, Quaternion)
-   */
-  public static Matrix perspective(float magnitude, float aspectRatio, float zNear, float zFar) {
-    // same as gluPerspective( 180*fieldOfView()/PI, aspectRatio(), zNear(), zFar() );
-    Matrix projection = new Matrix();
-    // all non null coefficients were set to 0 in constructor
-    projection._matrix[0] = 1 / (Math.abs(magnitude) * aspectRatio);
-    projection._matrix[5] = 1 / magnitude;
-    projection._matrix[10] = (zNear + zFar) / (zNear - zFar);
-    projection._matrix[11] = -1;
-    projection._matrix[14] = 2 * zNear * zFar / (zNear - zFar);
-    projection._matrix[15] = 0;
-    return projection;
-  }
-
-  /**
-   * Returns an orthographic projection matrix from the given parameters.
-   * <p>
-   * All parameter values should be positive, but {@code height} which may be negative in case you want to invert
-   * the projected image across the eye y-axis.
-   *
-   * @see #perspective(float, float, float, float)
-   * @see #view(Vector, Quaternion)
-   */
-  public static Matrix orthographic(float width, float height, float zNear, float zFar) {
-    // same as glOrtho( -w, w, -h, h, zNear(), zFar() );
-    Matrix projection = new Matrix();
-    projection._matrix[0] = 2 / width;
-    projection._matrix[5] = 2 / height;
-    projection._matrix[10] = -2 / (zFar - zNear);
-    projection._matrix[11] = 0;
-    projection._matrix[14] = -(zFar + zNear) / (zFar - zNear);
-    projection._matrix[15] = 1;
-    return projection;
-  }
-
-  /**
    * Returns the inverse of the matrix associated with the eye {@code position} and
    * {@code orientation}.
    * <p>
    * The view matrix converts from the world coordinates system to the eye coordinates system,
    * so that coordinates can then be projected on screen using a projection matrix.
-   *
-   * @see #perspective(float, float, float, float)
-   * @see #orthographic(float, float, float, float)
    */
   public static Matrix view(Vector position, Quaternion orientation) {
     Matrix view = new Matrix();
