@@ -1072,7 +1072,7 @@ public class Scene {
    * Returns {@code true} if the given face is back-facing the eye. Otherwise returns
    * {@code false}.
    * <p>
-   * Vertices must given in clockwise order if scene is right-handed or in counter-clockwise otherwise.
+   * Vertices must given in counter-clockwise otherwise.
    *
    * @param a first face vertex
    * @param b second face vertex
@@ -4797,7 +4797,7 @@ public class Scene {
         _drawOrthographicFrustum(pGraphics, texture ? scene.context() : null, scene.left(), scene.right(), scene.bottom(), scene.top(), scene.near(), scene.far());
         break;
       case PERSPECTIVE:
-        _drawPerspectiveFrustum(pGraphics, texture ? scene.context() : null, (float) Math.tan(scene.fov() / 2.0f), -scene.aspectRatio(), scene.near(), scene.far());
+        _drawPerspectiveFrustum(pGraphics, texture ? scene.context() : null, (float) Math.tan(scene.fov() / 2.0f), scene.aspectRatio(), scene.near(), scene.far());
         break;
     }
   }
@@ -4850,18 +4850,15 @@ public class Scene {
     pGraphics.endShape();
     // Planes
     // far
-    _drawPlane(pGraphics, null, new Vector(right, top, zFar), new Vector(0, 0, -1), true);
+    _drawPlane(pGraphics, null, new Vector(right, top, zFar), new Vector(0, 0, -1));
     // near
-    _drawPlane(pGraphics, eyeBuffer, new Vector(right, top, zNear), new Vector(0, 0, 1), true);
+    _drawPlane(pGraphics, eyeBuffer, new Vector(right, top, zNear), new Vector(0, 0, 1));
     pGraphics.popStyle();
   }
 
   protected static void _drawPerspectiveFrustum(PGraphics pGraphics, PGraphics eyeBuffer, float magnitude, float aspectRatio, float zNear, float zFar) {
     if (pGraphics == eyeBuffer)
       return;
-    boolean lh = aspectRatio < 0;
-    aspectRatio = Math.abs(aspectRatio);
-
     pGraphics.pushStyle();
 
     // 0 is the upper left coordinates of the near corner, 1 for the far one
@@ -4908,44 +4905,31 @@ public class Scene {
       pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
     }
     pGraphics.beginShape(PApplet.QUADS);
-    if (lh) {
-      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
-    } else {
-      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
-    }
+    Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
+    Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
     pGraphics.endShape();
 
     // Arrow
     pGraphics.beginShape(PApplet.TRIANGLES);
-    if (lh) {
-      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
-    } else {
-      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
-    }
+    Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
+    Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
+    Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
     if (eyeBuffer != null)
       pGraphics.popStyle();// begin at arrow base
     pGraphics.endShape();
 
     // Planes
     // far plane
-    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
+    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1));
     // near plane
-    _drawPlane(pGraphics, eyeBuffer, points[0], new Vector(0, 0, 1), lh);
+    _drawPlane(pGraphics, eyeBuffer, points[0], new Vector(0, 0, 1));
 
     pGraphics.popStyle();
   }
 
-  protected static void _drawPlane(PGraphics pGraphics, PGraphics eyeBuffer, Vector corner, Vector normal, boolean lh) {
+  protected static void _drawPlane(PGraphics pGraphics, PGraphics eyeBuffer, Vector corner, Vector normal) {
     if (pGraphics == eyeBuffer)
       return;
     pGraphics.pushStyle();
@@ -4956,10 +4940,10 @@ public class Scene {
       pGraphics.textureMode(PApplet.NORMAL);
       pGraphics.tint(255, 126); // Apply transparency without changing color
       pGraphics.texture(eyeBuffer);
-      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, lh ? 1 : 0);
-      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, lh ? 1 : 0);
-      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, lh ? 0 : 1);
-      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z(), 1, lh ? 0 : 1);
+      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, 1);
+      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, 1);
+      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, 0);
+      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z(), 1, 0);
     } else {
       Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z());
       Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z());
