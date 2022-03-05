@@ -2,6 +2,7 @@ package examples;
 
 import nub.core.Node;
 import nub.core.Scene;
+import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import processing.core.PApplet;
@@ -12,109 +13,182 @@ import processing.opengl.PShader;
 import java.nio.file.Paths;
 
 public class ShadowMapping extends PApplet {
-  Scene scene;
-  Scene shadowMapScene;
   Node eye;
-  Node[] shapes;
-  PGraphics shadowMap;
+  Scene scene, shadowMapScene;
+  Node landscape1, landscape2, landscape3, light;
   PShader depthShader;
-  float zNear = 50;
-  float zFar = 700;
-  int w = 1400;
-  int h = 1400;
+  PShader shadowShader;
+  PGraphics shadowMap;
+  float fov = THIRD_PI;
+  Matrix biasMatrix = new Matrix(
+          0.5f, 0, 0, 0,
+          0, 0.5f, 0, 0,
+          0, 0, 0.5f, 0,
+          0.5f, 0.5f, 0.5f, 1
+  );
+  boolean debug;
+  //Scene.Type shadowMapType = Scene.Type.ORTHOGRAPHIC;
+  float zNear = 10;
+  float zFar = 600;
+  int w = 1200;
+  int h = 1200;
 
   public void settings() {
     size(w, h, P3D);
   }
 
   public void setup() {
-    shadowMap = createGraphics(w / 2, h / 2, P3D);
-    depthShader = loadShader(Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString());
-    depthShader.set("near", zNear);
-    depthShader.set("far", zFar);
-    shadowMap.shader(depthShader);
     scene = new Scene(this);
-    scene.radius = max(w, h);
+    scene.radius = max(w, h) / 3;
     eye = new Node();
-    eye.setWorldPosition(0,0,2000);
+    eye.setWorldPosition(0,0,800);
     scene.setEye(eye);
-    shapes = new Node[20];
-    for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Node(this::cube);
-      scene.randomize(shapes[i]);
-      shapes[i].setHighlight(0);
-      shapes[i].setWorldMagnitude(1);
-    }
-    scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
-    scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
-    scene.node("light").setWorldOrientation(Quaternion.from(Vector.plusK, scene.node("light").worldPosition()));
-    // scene.enablePicking(false);
+    //scene.togglePerspective();
+    Node floor = new Node((PGraphics pg) -> {
+      pg.pushStyle();
+      pg.noStroke();
+      pg.fill(0xff222222);
+      pg.box(360, 5, 360);
+      pg.popStyle();
+    });
+    floor.tagging = false;
+    landscape1 = new Node(this::landscape1);
+    landscape2 = new Node(this::landscape2);
+    landscape2.cull = true;
+    landscape3 = new Node(this::landscape3);
+    landscape3.cull = true;
+    // initShadowPass
+    depthShader = loadShader(Paths.get("testing/data/depth/depth_frag.glsl").toAbsolutePath().toString());
+
+    shadowMap = createGraphics(2048, 2048, P3D);
+    shadowMap.shader(depthShader);
+    // Testing the appearance of artifacts first
+    //shadowMap.noSmooth();
+    // initDefaultPass
+    shadowShader = loadShader(Paths.get("testing/data/shadow/shadow_frag.glsl").toAbsolutePath().toString(), Paths.get("testing/data/shadow/shadow_vert.glsl").toAbsolutePath().toString());
+    shader(shadowShader);
+    // light node
+    light = new Node();
+    light.enableHint(Node.BULLSEYE | Node.AXES | Node.CAMERA);
+    // shadow map scene
     shadowMapScene = new Scene(shadowMap);
+    shadowMapScene.setEye(light);
     /*
-    float fov = PI/3.0f;
-    float cameraZ = (shadowMap.height/2.0f) / tan(fov/2.0f);
-    shadowMap.perspective(fov, (float)shadowMap.width/(float)shadowMap.height,cameraZ/5.0f, cameraZ*5.0f);
-    */
-    shadowMapScene.setEye(scene.node("light"));
+    shadowMapScene.setZNear(() -> 10f);
+    shadowMapScene.setZFar(() -> 600f);
+    shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
+    // */
     shadowMapScene.picking = false;
-    frameRate(1000);
-    //shadowMap.ortho(-shadowMap.width/2, shadowMap.width/2, -shadowMap.height/2, shadowMap.height/2, zNear, zFar);
   }
 
-  public void cube(PGraphics pg) {
+  void landscape1(PGraphics pg) {
     pg.pushStyle();
-    if (pg == shadowMap)
-      pg.noStroke();
-    else {
-      pg.strokeWeight(3);
-      pg.stroke(0, 255, 255);
-    }
-    pg.fill(255, 0, 0);
-    pg.box(80);
+    pg.noStroke();
+    float offset = -frameCount * 0.01f;
+    pg.fill(0xffff5500);
+    for (int z = -5; z < 6; ++z)
+      for (int x = -5; x < 6; ++x) {
+        pg.pushMatrix();
+        pg.translate(x * 12, sin(offset + x) * 20 + cos(offset + z) * 20, z * 12);
+        pg.box(10, 100, 10);
+        pg.popMatrix();
+      }
     pg.popStyle();
   }
 
-  float magic = 2.0f;
+  void landscape2(PGraphics pg) {
+    pg.pushStyle();
+    pg.noStroke();
+    float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
+    pg.fill(0xffff5500);
+    for (int n = 0; n < 20; ++n, angle += rotation) {
+      pg.pushMatrix();
+      pg.translate(sin(angle) * 70, cos(angle * 4) * 10, cos(angle) * 70);
+      pg.box(10, 100, 10);
+      pg.popMatrix();
+    }
+    pg.fill(0xff0055ff);
+    pg.sphere(50);
+    pg.popStyle();
+  }
+
+  void landscape3(PGraphics pg) {
+    pg.pushStyle();
+    pg.noStroke();
+    float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
+    pg.fill(0xffff5500);
+    for (int n = 0; n < 20; ++n, angle += rotation) {
+      pg.pushMatrix();
+      pg.translate(sin(angle) * 70, cos(angle) * 70, 0);
+      pg.box(10, 10, 100);
+      pg.popMatrix();
+    }
+    pg.fill(0xff00ff55);
+    pg.sphere(50);
+    pg.popStyle();
+  }
 
   public void draw() {
-    // 1. Fill in and display front-buffer
-    background(75, 25, 15);
+    // 0. animate
+    animate();
+    // 1. Render the shadowmap
+    shadowMapScene.openContext();
+    shadowMapScene.context().background(0xffffffff);
+    shadowMapScene.render();
+    shadowMapScene.closeContext();
+    // 2. Display the scene
+    if (!debug) {
+      Matrix lightMatrix = Matrix.multiply(biasMatrix, shadowMapScene.projectionView());
+      Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, eye.viewInverse()));
+      Vector lightDirection = eye.displacement(light.zAxis(false));
+      Scene.setUniform(shadowShader, "lightDirection", lightDirection);
+      shadowShader.set("shadowMap", shadowMap);
+    }
+    background(0);
     scene.render();
-    // 2. Fill in shadow map using the light point of view
-    if (scene.isTagValid("light")) {
-      //println("1 " + ((PGraphicsOpenGL)shadowMap).projection.m33);
-      //shadowMap.ortho(-1000, 1000, -1000, 1000, zNear, zFar);
-      //shadowMap.ortho(-(float)shadowMap.width/magic, (float)shadowMap.width/magic, -(float)shadowMap.height/magic, (float)shadowMap.height/magic, zNear, zFar);
-      //shadowMap.ortho();
-      //shadowMap.perspective();
-      float fov = PI/3.0f;
-      float cameraZ = (height/2.0f) / tan(fov/2.0f);
-      //shadowMap.perspective(fov, (float)width/(float)height, cameraZ/10.0f, cameraZ*10.0f);
-      shadowMap.perspective(fov, (float)width/(float)height, 10, 600);
-      shadowMapScene.openContext();
-      // Warning: processing changes projection within pg.beginDraw
-      //println("2 " + ((PGraphicsOpenGL)shadowMap).projection.m33);
-      shadowMapScene.context().background(140, 160, 125);
-      shadowMapScene.drawAxes();
-      shadowMapScene.render();
-      shadowMapScene.closeContext();
-      shadowMapScene.image(w / 2, h / 2);
+  }
+
+  void animate() {
+    if (!scene.isTagged(light)) {
+      float lightAngle = frameCount * 0.002f;
+      light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
+    }
+    light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), Vector.plusJ));
+    light.setZAxis(light.position());
+  }
+
+  public void keyPressed() {
+    if (key == '1' || key == '2' || key == '3') {
+      landscape1.cull = key != '1';
+      landscape2.cull = key != '2';
+      landscape3.cull = key != '3';
+    }
+    /*
+    if (key == ' ') {
+      if (shadowMapScene.type() == Graph.Type.PERSPECTIVE) {
+        shadowMapScene.setType(Graph.Type.ORTHOGRAPHIC);
+        light.setMagnitude(1);
+      } else {
+        shadowMapScene.setType(Graph.Type.PERSPECTIVE);
+        light.setMagnitude(tan(fov / 2));
+      }
+    }
+    */
+    if (key == 'd') {
+      light.toggleHint(Node.BULLSEYE | Node.AXES | Node.CAMERA | Node.BOUNDS);
+      debug = !debug;
+      if (debug)
+        resetShader();
+      else
+        shader(shadowShader);
+    }
+    if (key == 'c') {
+      light.toggleHint(Node.CAMERA);
     }
   }
 
-  public void mouseMoved(MouseEvent event) {
-    if (event.isShiftDown()) {
-      if (scene.isTagValid("light")) {
-        scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
-      }
-      // no calling mouseTag since we need to immediately update the tagged node
-      scene.updateTag("light");
-      if (scene.isTagValid("light")) {
-        shadowMapScene.setEye(scene.node("light"));
-        scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
-      }
-    } else
-      scene.tag();
+  public void mouseMoved() {
+    scene.tag();
   }
 
   public void mouseDragged() {
@@ -127,20 +201,12 @@ public class ShadowMapping extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    if (event.isShiftDown() && scene.isTagValid("light")) {
-      depthShader.set("far", zFar += event.getCount() * 20);
-      //shadowMap.ortho(-shadowMap.width/2, shadowMap.width/2, -shadowMap.height/2, shadowMap.height/2, zNear, zFar);
+    if (event.isShiftDown()) {
+      int shift = event.getCount() * 20;
+      if (zFar + shift > zNear)
+        zFar += shift;
     } else
       scene.zoom(event.getCount() * 20);
-  }
-
-  public void keyPressed() {
-    if (key == '+') {
-      magic++;
-    }
-    if (key == '-' && magic > 0) {
-      magic--;
-    }
   }
 
   public static void main(String[] args) {

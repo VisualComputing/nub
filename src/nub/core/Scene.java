@@ -285,7 +285,7 @@ public class Scene {
    * <p>
    * The type mainly defines the way the projection matrix is computed.
    */
-  public enum Type {
+  protected enum Type {
     PERSPECTIVE, ORTHOGRAPHIC
   }
 
