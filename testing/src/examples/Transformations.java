@@ -26,7 +26,7 @@ public class Transformations extends PApplet {
   public void setup() {
     imgPath = Paths.get("testing/data/texture/lachoy.jpg").toAbsolutePath().toString();
     //depthPath = Paths.get("testing/data/depth/depth_nonlinear.glsl").toAbsolutePath().toString();
-    //depthPath = Paths.get("testing/data/depth/depth_frag.glsl").toAbsolutePath().toString();
+    //depthPath = Paths.get("testing/data/depth/depth_pack.glsl").toAbsolutePath().toString();
     img = loadImage(imgPath);
     scene = new Scene(this);
     eye = new Node();
@@ -151,6 +151,17 @@ public class Transformations extends PApplet {
       Vector vector = new Vector(250, 200, 0.8f);
       Vector result = scene.screenLocation(vector);
       println(result.toString());
+    }
+    if (key == 'd') {
+      Vector v = new Vector(15, -25, 70);
+      Vector pv = new Vector(15, -25, 70);
+      Vector r = eye.displacement(v);
+      Vector w2e = scene.w2eDisplacement(pv);
+      println(r.toString());
+      println(w2e.toString());
+      println(eye.worldDisplacement(r).toString());
+      Vector e2w = scene.e2wDisplacement(w2e);
+      println(e2w.toString());
     }
   }
 

@@ -42,7 +42,7 @@ public class DOF extends PApplet {
     // Test all the different versions
     depthPath = Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString();
     //depthPath = Paths.get("testing/data/depth/depth_nonlinear.glsl").toAbsolutePath().toString();
-    //depthPath = Paths.get("testing/data/depth/depth_frag.glsl").toAbsolutePath().toString();
+    //depthPath = Paths.get("testing/data/depth/depth_pack.glsl").toAbsolutePath().toString();
     depthShader = loadShader(depthPath);
     // TODO add proper constructor to share eye node
     depthScene = new Scene(createGraphics(width, height, P3D));

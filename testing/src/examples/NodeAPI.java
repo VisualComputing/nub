@@ -18,6 +18,7 @@ World
 import nub.core.Node;
 import nub.core.Scene;
 import nub.primitives.Matrix;
+import nub.primitives.Vector;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -71,6 +72,7 @@ public class NodeAPI extends PApplet {
     detached2 = new Node(false);
     detached2.setShape(shape(color(125, 125)));
 
+    /*
     float dx = -10;
     float dy = 15;
     float dz = 5;
@@ -88,6 +90,30 @@ public class NodeAPI extends PApplet {
     println(Matrix.multiply(t, r).toString());
     t.rotateZ(b);
     println(t.toString());
+    // */
+    n3.setWorldMagnitude(1);
+    n4.setWorldMagnitude(1);
+    n3.fromWorldMatrix(new Matrix(0.756289f, -0.5062419f, -0.41442266f, 0.0f,
+            -0.054126263f, 0.58285666f, -0.81077033f, 0.0f,
+            0.65199494f, 0.6356078f, 0.4134071f, 0.0f,
+            5.372316f, -7.620868f, -6.542904f, 1.0f));
+    n4.fromWorldMatrix(new Matrix(0.94123274f, 0.18576221f, -0.28208724f, 0.0f,
+            0.019796228f, 0.80339795f, 0.59511316f, 0.0f,
+            0.33717784f, -0.56572425f, 0.75250715f, 0.0f,
+            14.867519f, -4.308632f, -11.14892f, 1.0f));
+    Matrix m3 = n3.worldMatrix();
+    Matrix m4 = n4.worldMatrix();
+    Matrix tm3 = m3.copy();
+    Matrix tm4 = m4.copy();
+    tm3.transpose();
+    tm4.transpose();
+    println(tm3.toString());
+    //println(m4.toString());
+    println(tm4.toString());
+    Vector vec = new Vector(-5, 10, 15);
+    // n4 -> n3
+    println(vec.toString() + " n4 -> n3 loc: " + n3.location(vec, n4).toString());
+    println(vec.toString() + " n4 -> n3 dis: " + n3.displacement(vec, n4).toString());
   }
 
   PShape shape(int c) {

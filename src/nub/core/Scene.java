@@ -2980,6 +2980,66 @@ public class Scene {
     return start2 + (value - start1) * (stop2 - start2) / (stop1 - start1);
   }
 
+  public Vector w2eDisplacement(Vector vector) {
+    Matrix normalMatrix = Scene.toMatrix(context().modelview);
+    normalMatrix.invert();
+    normalMatrix.transpose();
+    return normalMatrix.multiply(vector, null);
+    //PVector mult(PVector source, PVector target)
+    //pointShader.set("normalMatrix", normalMatrix);
+  }
+
+  public Vector e2wDisplacement(Vector vector) {
+    Matrix normalMatrix = Scene.toMatrix(context().modelview);
+    normalMatrix.transpose();
+    return normalMatrix.multiply(vector, null);
+  }
+
+  /*
+  public PVector w2eDisplacement(PVector vector) {
+    PMatrix3D normalMatrix = context().modelview.get();
+    normalMatrix.invert();
+    normalMatrix.transpose();
+    return normalMatrix.mult(vector, null);
+    //PVector mult(PVector source, PVector target)
+    //pointShader.set("normalMatrix", normalMatrix);
+  }
+
+  public PVector e2wDisplacement(PVector vector) {
+    PMatrix3D normalMatrix = context().modelview.get();
+    normalMatrix.transpose();
+    return normalMatrix.mult(vector, null);
+  }
+  */
+
+  /**
+   * Converts {@code vector} location from the node {@link Node#reference()} to the node.
+   */
+  protected static Vector _localLocation(Node node, Vector vector) {
+    return Vector.divide(node.orientation().inverseRotate(Vector.subtract(vector, node.position())), node.magnitude());
+  }
+
+  /**
+   * Converts {@code vector} location from node to its {@link Node#reference()}.
+   */
+  protected static Vector _referenceLocation(Node node, Vector vector) {
+    return Vector.add(node.orientation().rotate(Vector.multiply(vector, node.magnitude())), node.position());
+  }
+
+  /**
+   * Converts {@code vector} displacement from the node {@link Node#reference()} to the node.
+   */
+  protected static Vector _localDisplacement(Node node, Vector vector) {
+    return Vector.divide(node.orientation().inverseRotate(vector), node.magnitude());
+  }
+
+  /**
+   * Converts {@code vector} displacement from node to its {@link Node#reference()}.
+   */
+  protected static Vector _referenceDisplacement(Node node, Vector vector) {
+    return node.orientation().rotate(Vector.multiply(vector, node.magnitude()));
+  }
+
   /**
    * Converts {@code vector} location from normalized device coordinates (NDC) to screen space.
    * {@link #screenToNDCLocation(Vector)} performs the inverse transformation.
@@ -3640,11 +3700,11 @@ public class Scene {
       node.setWorldPosition(center);
       Vector vector = displacement(new Vector(dx, dy, dz), node);
       vector.multiply(-1);
-      Vector translation = _eye.referenceDisplacement(vector);
+      Vector translation = _referenceDisplacement(_eye, vector);
       _eye.translate(translation.x(), translation.y(), translation.z(), inertia);
     }
     else {
-      node.translate(node.referenceDisplacement(displacement(new Vector(dx, dy, dz), node)), inertia);
+      node.translate(_referenceDisplacement(node, displacement(new Vector(dx, dy, dz), node)), inertia);
     }
   }
 

@@ -1338,7 +1338,7 @@ public class Node {
    * @see #minMaxScalingFilter
    */
   public static BiFunction<Node, Object[], Vector> translationAxisFilter = (node, params)->
-          Vector.projectVectorOnAxis(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
+          Vector.projectVectorOnAxis(node.cacheTargetTranslation, Scene._referenceDisplacement(node, (Vector) params[0]));
 
   /**
    * Same as {@code setTranslationFilter(forbidTranslationFilter, new Object[] {})}.
@@ -1380,7 +1380,7 @@ public class Node {
    * @see #minMaxScalingFilter
    */
   public static BiFunction<Node, Object[], Vector> translationPlaneFilter = (node, params)->
-          Vector.projectVectorOnPlane(node.cacheTargetTranslation, node.referenceDisplacement((Vector) params[0]));
+          Vector.projectVectorOnPlane(node.cacheTargetTranslation, Scene._referenceDisplacement(node, (Vector) params[0]));
 
   // POSITION
 
@@ -2649,7 +2649,6 @@ public class Node {
    * Converts {@code quaternion} displacement from {@link #reference()} to this node.
    * <p>
    * {@link #referenceDisplacement(Quaternion)} performs the inverse transformation.
-   * {@link #localLocation(Vector)} converts locations instead of displacements.
    *
    * @see #displacement(Quaternion)
    * @see #displacement(Vector)
@@ -2662,7 +2661,6 @@ public class Node {
    * Converts {@code quaternion} displacement from this node to {@link #reference()}.
    * <p>
    * {@link #localDisplacement(Quaternion)} performs the inverse transformation.
-   * {@link #referenceLocation(Vector)} converts locations instead of displacements.
    *
    * @see #worldDisplacement(Quaternion)
    * @see #worldDisplacement(Vector)
@@ -2698,7 +2696,7 @@ public class Node {
    * @see #worldDisplacement(Vector)
    */
   public Vector displacement(Vector vector, Node node) {
-    return this == node ? vector : localDisplacement(reference() != null ? reference().displacement(vector, node) : node == null ? vector : node.worldDisplacement(vector));
+    return this == node ? vector : Scene._localDisplacement(this, reference() != null ? reference().displacement(vector, node) : node == null ? vector : node.worldDisplacement(vector));
   }
 
   /**
@@ -2715,34 +2713,10 @@ public class Node {
     Node node = this;
     Vector result = vector;
     while (node != null) {
-      result = node.referenceDisplacement(result);
+      result = Scene._referenceDisplacement(node, result);
       node = node.reference();
     }
     return result;
-  }
-
-  /**
-   * Converts {@code vector} displacement from {@link #reference()} to this node.
-   * <p>
-   * {@link #referenceDisplacement(Vector)} performs the inverse transformation.
-   * {@link #localLocation(Vector)} converts locations instead of displacements.
-   *
-   * @see #displacement(Vector)
-   */
-  public Vector localDisplacement(Vector vector) {
-    return Vector.divide(orientation().inverseRotate(vector), magnitude());
-  }
-
-  /**
-   * Converts {@code vector} displacement from this node to {@link #reference()}.
-   * <p>
-   * {@link #localDisplacement(Vector)} performs the inverse transformation.
-   * {@link #referenceLocation(Vector)} converts locations instead of displacements.
-   *
-   * @see #worldDisplacement(Vector)
-   */
-  public Vector referenceDisplacement(Vector vector) {
-    return orientation().rotate(Vector.multiply(vector, magnitude()));
   }
 
   // POINT CONVERSION
@@ -2788,7 +2762,7 @@ public class Node {
    * @see #worldLocation(Vector)
    */
   public Vector location(Vector vector, Node node) {
-    return this == node ? vector : localLocation(reference() != null ? reference().location(vector, node) : node == null ? vector : node.worldLocation(vector));
+    return this == node ? vector : Scene._localLocation(this, reference() != null ? reference().location(vector, node) : node == null ? vector : node.worldLocation(vector));
   }
 
   /**
@@ -2805,34 +2779,10 @@ public class Node {
     Node node = this;
     Vector result = vector;
     while (node != null) {
-      result = node.referenceLocation(result);
+      result = Scene._referenceLocation(node, result);
       node = node.reference();
     }
     return result;
-  }
-
-  /**
-   * Converts {@code vector} location from {@link #reference()} to this node.
-   * <p>
-   * {@link #referenceLocation(Vector)} performs the inverse transformation.
-   * {@link #localDisplacement(Vector)} converts displacements instead of locations.
-   *
-   * @see #location(Vector)
-   */
-  public Vector localLocation(Vector vector) {
-    return Vector.divide(orientation().inverseRotate(Vector.subtract(vector, position())), magnitude());
-  }
-
-  /**
-   * Converts {@code vector} location from this node to {@link #reference()}.
-   * <p>
-   * {@link #localLocation(Vector)} performs the inverse transformation.
-   * {@link #referenceDisplacement(Vector)} converts displacements instead of locations.
-   *
-   * @see #worldLocation(Vector)
-   */
-  public Vector referenceLocation(Vector vector) {
-    return Vector.add(orientation().rotate(Vector.multiply(vector, magnitude())), position());
   }
 
   // Attached nodes

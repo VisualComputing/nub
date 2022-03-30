@@ -6,6 +6,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import processing.core.PApplet;
 import processing.core.PGraphics;
+import processing.core.PVector;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
 
@@ -84,13 +85,13 @@ public class ShadowMap extends PApplet {
     if (scene.isTagValid("light")) {
       //println("1 " + ((PGraphicsOpenGL)shadowMap).projection.m33);
       //shadowMap.ortho(-1000, 1000, -1000, 1000, zNear, zFar);
-      //shadowMap.ortho(-(float)shadowMap.width/magic, (float)shadowMap.width/magic, -(float)shadowMap.height/magic, (float)shadowMap.height/magic, zNear, zFar);
+      shadowMap.ortho(-(float)shadowMap.width/magic, (float)shadowMap.width/magic, -(float)shadowMap.height/magic, (float)shadowMap.height/magic, zNear, zFar);
       //shadowMap.ortho();
       //shadowMap.perspective();
-      float fov = PI/3.0f;
-      float cameraZ = (height/2.0f) / tan(fov/2.0f);
+      //float fov = PI/3.0f;
+      //float cameraZ = (height/2.0f) / tan(fov/2.0f);
       //shadowMap.perspective(fov, (float)width/(float)height, cameraZ/10.0f, cameraZ*10.0f);
-      shadowMap.perspective(fov, (float)width/(float)height, 10, 600);
+      //shadowMap.perspective(fov, (float)width/(float)height, 10, 600);
       shadowMapScene.openContext();
       // Warning: processing changes projection within pg.beginDraw
       //println("2 " + ((PGraphicsOpenGL)shadowMap).projection.m33);
@@ -140,6 +141,28 @@ public class ShadowMap extends PApplet {
     }
     if (key == '-' && magic > 0) {
       magic--;
+    }
+    if (key == 'l') {
+      Vector v = new Vector(15, -25, 70);
+      Vector pv = new Vector(15, -25, 70);
+      Vector r = eye.displacement(v);
+      Vector w2e = scene.w2eDisplacement(pv);
+      println(r.toString());
+      println(w2e.toString());
+      println(eye.worldDisplacement(r).toString());
+      Vector e2w = scene.e2wDisplacement(w2e);
+      println(e2w.toString());
+      /*
+      Vector v = new Vector(15, -25, 70);
+      PVector pv = new PVector(15, -25, 70);
+      Vector r = eye.displacement(v);
+      PVector w2e = scene.w2eDisplacement(pv);
+      println(r.toString());
+      println(w2e.x + " " + w2e.y + " " + w2e.z);
+      println(eye.worldDisplacement(r).toString());
+      PVector e2w = scene.e2wDisplacement(w2e);
+      println(e2w.x + " " + e2w.y + " " + e2w.z);
+      // */
     }
   }
 

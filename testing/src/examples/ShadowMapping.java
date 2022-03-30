@@ -58,7 +58,9 @@ public class ShadowMapping extends PApplet {
     landscape3 = new Node(this::landscape3);
     landscape3.cull = true;
     // initShadowPass
-    depthShader = loadShader(Paths.get("testing/data/depth/depth_frag.glsl").toAbsolutePath().toString());
+    //depthShader = loadShader(Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString());
+    depthShader = loadShader(Paths.get("testing/data/depth/depth_nonlinear.glsl").toAbsolutePath().toString());
+    //depthShader = loadShader(Paths.get("testing/data/depth/depth_pack.glsl").toAbsolutePath().toString());
 
     shadowMap = createGraphics(2048, 2048, P3D);
     shadowMap.shader(depthShader);
@@ -134,6 +136,13 @@ public class ShadowMapping extends PApplet {
     // 1. Render the shadowmap
     shadowMapScene.openContext();
     shadowMapScene.context().background(0xffffffff);
+    //shadowMapScene.context().ortho(-110, 110, -110, 110, 90, 400); // Setup orthogonal view matrix for the directional light
+    // /*
+    float w = (float) shadowMapScene.context().width;
+    float h = (float) shadowMapScene.context().height;
+    float eyeZ = (h / 2) / tan(PI / 6);
+    shadowMapScene.context().perspective(PI / 3, w / h, eyeZ / 30, 2 * eyeZ);
+    // */
     shadowMapScene.render();
     shadowMapScene.closeContext();
     // 2. Display the scene
