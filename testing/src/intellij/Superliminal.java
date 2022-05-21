@@ -26,7 +26,7 @@ public class Superliminal extends PApplet {
     scene = onScreen ? new Scene(g) : new Scene(createGraphics(w, h, P3D));
     scene.eye().enableHint(Node.BOUNDS);
     scene.eye().tagging = false;
-    scene.setRadius(1000);
+    scene.setRadius(200);
     scene.fit(1000);
     cubes = new Node[15];
     for (int i = 0; i < cubes.length; i++) {
@@ -43,7 +43,8 @@ public class Superliminal extends PApplet {
     lateralView = new Scene(createGraphics(w / 2, h, P3D));
     lateralView.togglePerspective();
     lateralView.eye().tagging = false;
-    lateralView.setRadius(4000);
+    lateralView.setRadius(400);
+    lateralView.fit();
 
     /*
     int si = int(vertTexCoord.s * binsize);
@@ -159,7 +160,7 @@ public class Superliminal extends PApplet {
       if (scene.type() == Graph.Type.PERSPECTIVE) {
         Vector v = Vector.subtract(node.worldPosition(), eye.worldPosition());
         v.normalize();
-        v.multiply(amount * 100);
+        v.multiply(amount * 10);
         node.translate(v, Scene.inertia);
       }
       else {
@@ -190,8 +191,8 @@ public class Superliminal extends PApplet {
     scene.render();
     scene.closeContext();
     scene.image();
-    stroke(0, 225, 15);
-    scene.drawGrid();
+    //stroke(0, 225, 15);
+    //scene.drawGrid();
     if (displayLateralView) {
       lateralView.openContext();
       lateralView.context().background(75, 25, 175);
