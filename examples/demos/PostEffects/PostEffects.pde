@@ -23,7 +23,7 @@ PFont font;
 
 public void setup() {
   size(1920, 1080, P3D);
-  font = loadFont("FreeSans-13.vlw");
+  font = loadFont("FreeSans-24.vlw");
   textFont(font);
   colorMode(HSB, 255);
   // both the main and depth scenes share the same eye
@@ -145,12 +145,12 @@ public void draw() {
 void drawText() {
   scene.beginHUD();
   text(depth ? "1. Depth (*)" : "1. Depth", 5, 20);
-  text(kaleido ? "2. Kaleidoscope (*)" : "2. Kaleidoscope", 5, 35);
-  text(noise ? "3. Noise (*)" : "3. Noise", 5, 50);
-  text(pixel ? "4. Pixelate (*)" : "4. Pixelate", 5, 65);
-  text(edge ? "5. Edge (*)" : "5. Edge", 5, 80);
-  text(horizontal ? "6. Horizontal (*)" : "6. Horizontal", 5, 95);
-  text(rays ? "7. Rays (*)" : "7. Rays", 5, 110);
+  text(kaleido ? "2. Kaleidoscope (*)" : "2. Kaleidoscope", 5, 45);
+  text(noise ? "3. Noise (*)" : "3. Noise", 5, 70);
+  text(pixel ? "4. Pixelate (*)" : "4. Pixelate", 5, 95);
+  text(edge ? "5. Edge (*)" : "5. Edge", 5, 120);
+  text(horizontal ? "6. Horizontal (*)" : "6. Horizontal", 5, 145);
+  text(rays ? "7. Rays (*)" : "7. Rays", 5, 170);
   scene.endHUD();
 }
 
