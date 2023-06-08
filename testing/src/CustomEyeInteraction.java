@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -250,6 +248,6 @@ public class CustomEyeInteraction extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.CustomEyeInteraction"});
+    PApplet.main(new String[]{"CustomEyeInteraction"});
   }
 }

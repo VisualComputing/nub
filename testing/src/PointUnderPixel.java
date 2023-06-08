@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -112,6 +110,6 @@ public class PointUnderPixel extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.PointUnderPixel"});
+    PApplet.main(new String[]{"PointUnderPixel"});
   }
 }

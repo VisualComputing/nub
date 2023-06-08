@@ -22,8 +22,6 @@
  * Press the space bar to browse the different conversion methods shown here.
  */
 
-package intellij;
-
 
 import nub.core.Node;
 import nub.primitives.Quaternion;
@@ -33,7 +31,7 @@ import processing.core.PApplet;
 import processing.core.PFont;
 import processing.event.MouseEvent;
 
-public class NodeAPI1 extends PApplet {
+public class NodeAPI2 extends PApplet {
   Scene scene;
   InteractiveNode f1, f2, f3, f4, f5;
   Vector pnt = new Vector(40, 30, 20);
@@ -283,7 +281,7 @@ public class NodeAPI1 extends PApplet {
     if (node != null) {
       pushMatrix();
       // TODO fix me!
-      // scene.applyWorldTransformation(node);
+      //scene.applyWorldTransformation(node);
       scene.drawArrow(from, to, 1);
       popMatrix();
     } else
@@ -321,9 +319,15 @@ public class NodeAPI1 extends PApplet {
   }
 
   @Override
-  public void mouseMoved() {
-    //scene.track();
-    scene.tag();
+  public void mouseMoved(MouseEvent event) {
+    if (event.isControlDown())
+      return;
+    if (event.isShiftDown())
+      scene.shift();
+    else if (scene.node() == null)
+      scene.lookAround();
+    else
+      scene.spin();
   }
 
   @Override
@@ -343,7 +347,9 @@ public class NodeAPI1 extends PApplet {
 
   @Override
   public void mouseClicked(MouseEvent event) {
-    if (event.getCount() == 2)
+    if (event.getCount() == 1)
+      scene.updateTag();
+    else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         scene.focus();
       else
@@ -373,6 +379,6 @@ public class NodeAPI1 extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.NodeAPI1"});
+    PApplet.main(new String[]{"NodeAPI2"});
   }
 }

@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Quaternion;
@@ -154,6 +152,6 @@ public class CajasOrientadas extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.CajasOrientadas"});
+    PApplet.main(new String[]{"CajasOrientadas"});
   }
 }

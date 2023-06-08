@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
@@ -170,6 +168,6 @@ public class AuxViewers extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.AuxViewers"});
+    PApplet.main(new String[]{"AuxViewers"});
   }
 }

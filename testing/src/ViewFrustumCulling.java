@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Vector;
@@ -148,6 +146,6 @@ public class ViewFrustumCulling extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.ViewFrustumCulling"});
+    PApplet.main(new String[]{"ViewFrustumCulling"});
   }
 }

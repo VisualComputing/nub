@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Vector;
@@ -151,6 +149,6 @@ public class VisitExample extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.VisitExample"});
+    PApplet.main(new String[]{"VisitExample"});
   }
 }

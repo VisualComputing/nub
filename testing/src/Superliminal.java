@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Vector;
@@ -204,6 +202,6 @@ public class Superliminal extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.Superliminal"});
+    PApplet.main(new String[]{"Superliminal"});
   }
 }

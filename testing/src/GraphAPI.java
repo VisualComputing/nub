@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.processing.Scene;
@@ -168,6 +166,6 @@ public class GraphAPI extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.GraphAPI"});
+    PApplet.main(new String[]{"GraphAPI"});
   }
 }

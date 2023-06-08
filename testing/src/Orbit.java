@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -98,6 +96,6 @@ public class Orbit extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.Orbit"});
+    PApplet.main(new String[]{"Orbit"});
   }
 }

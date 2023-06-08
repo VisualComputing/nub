@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Node;
 import nub.processing.Scene;
 import processing.core.PApplet;
@@ -138,6 +136,6 @@ public class SceneBuffers extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.SceneBuffers"});
+    PApplet.main(new String[]{"SceneBuffers"});
   }
 }

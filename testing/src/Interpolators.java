@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Graph;
 import nub.core.Node;
 import nub.processing.Scene;
@@ -192,6 +190,6 @@ public class Interpolators extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.Interpolators"});
+    PApplet.main(new String[]{"Interpolators"});
   }
 }

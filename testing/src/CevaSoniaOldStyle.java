@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -353,6 +351,6 @@ public class CevaSoniaOldStyle extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.CevaSoniaOldStyle"});
+    PApplet.main(new String[]{"CevaSoniaOldStyle"});
   }
 }

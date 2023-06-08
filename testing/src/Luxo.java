@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -125,6 +123,6 @@ public class Luxo extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.Luxo"});
+    PApplet.main(new String[]{"Luxo"});
   }
 }

@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Graph;
 import nub.core.Node;
 import nub.primitives.Quaternion;
@@ -323,6 +321,6 @@ public class Flock extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.Flock"});
+    PApplet.main(new String[]{"Flock"});
   }
 }

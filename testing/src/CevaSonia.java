@@ -1,5 +1,3 @@
-package intellij;
-
 import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -313,6 +311,6 @@ public class CevaSonia extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.CevaSonia"});
+    PApplet.main(new String[]{"CevaSonia"});
   }
 }
