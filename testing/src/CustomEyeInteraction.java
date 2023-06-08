@@ -6,6 +6,9 @@ import processing.core.PImage;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
+/**
+ * Eye interaction customization
+ */
 public class CustomEyeInteraction extends PApplet {
   // scene
   PImage texmap;

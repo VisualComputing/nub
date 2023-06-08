@@ -5,6 +5,9 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
+/**
+ * Picking buffer debugging
+ */
 public class SceneBuffers extends PApplet {
   Scene scene;
   Node root, cajas, bolas;

@@ -5,6 +5,9 @@ import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 
+/**
+ * Scene (rendering and drawing) and Node (hints) instantiation.
+ */
 public class BasicUse extends PApplet {
   Scene scene;
   Node node, child, sibling;

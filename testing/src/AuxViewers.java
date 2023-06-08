@@ -6,7 +6,7 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 /**
- * Several ways of viewers instantiation
+ * Different ways of instantiating several viewers of the same scene
  */
 public class AuxViewers extends PApplet {
   Scene scene1, scene2, scene3, focus;

@@ -10,8 +10,7 @@ import processing.event.MouseEvent;
 import java.util.ArrayList;
 
 /**
- * This example introduces the three different interpolations offered
- * by the Graph.
+ * Flock of boids (https://t.ly/d20u) implemented with custom node behavior
  */
 public class Flock extends PApplet {
   Scene scene;

@@ -7,6 +7,9 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
+/**
+ * Node picking and behavior customization
+ */
 public class CajasOrientadas extends PApplet {
   Scene scene;
   Box[] cajas;

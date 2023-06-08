@@ -22,7 +22,6 @@
  * Press the space bar to browse the different conversion methods shown here.
  */
 
-
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -31,6 +30,9 @@ import processing.core.PApplet;
 import processing.core.PFont;
 import processing.event.MouseEvent;
 
+/**
+ * Thorough node api test (1)
+ */
 public class NodeAPI1 extends PApplet {
   Scene scene;
   InteractiveNode f1, f2, f3, f4, f5;

@@ -6,6 +6,10 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
+/**
+ * View frustum culling (https://t.ly/fap6a)
+ * implemented with node visibility routines and custom behavior
+ */
 public class ViewFrustumCulling extends PApplet {
   OctreeNode root;
   Scene mainScene, secondaryScene, focus;

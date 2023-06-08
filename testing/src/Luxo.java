@@ -6,6 +6,9 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
+/**
+ * Pixar luxo (https://t.ly/9mKG6) graph with node filters
+ */
 public class Luxo extends PApplet {
   Scene scene;
   Node floor, base, arm, forarm, shade;

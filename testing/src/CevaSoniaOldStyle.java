@@ -7,7 +7,7 @@ import processing.core.PVector;
 import processing.event.MouseEvent;
 
 /**
- * Port of Jacques Maire proscene sketch (old style).
+ * Port of Jacques Maire proscene sketches (old style).
  * https://t.ly/bsgVv
  */
 public class CevaSoniaOldStyle extends PApplet {

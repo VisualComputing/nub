@@ -5,6 +5,9 @@ import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
+/**
+ * Node interaction customization
+ */
 public class CustomNodeInteraction extends PApplet {
   Scene scene;
   Torus[] shapes;

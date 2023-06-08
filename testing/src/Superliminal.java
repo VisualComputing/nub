@@ -5,6 +5,10 @@ import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 
+/**
+ * Superliminal (https://t.ly/_brt) gameplay
+ * implemented from graph sceneToPixelRatio method
+ */
 public class Superliminal extends PApplet {
   Scene scene, lateralView, focus;
   Node[] cubes;

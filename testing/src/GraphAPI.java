@@ -5,21 +5,21 @@ import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
-/*
-1: red; 2: green; 3: blue; 4: yellow; 5: magenta; detached1: cyan; detached2:grey
-World
-  ^
-  |\
-  1 eye
-  ^
-  |\
-  2 3
-  |
-  4
-  |
-  5
+/**
+ * Thorough graph api test based upon the following graph:
+ * 1: red; 2: green; 3: blue; 4: yellow; 5: magenta; detached1: cyan; detached2:grey
+ * World
+ *   ^
+ *   |\
+ *   1 eye
+ *   ^
+ *   |\
+ *   2 3
+ *   |
+ *   4
+ *   |
+ *   5
  */
-
 public class GraphAPI extends PApplet {
   Scene scene;
   Node n1, n2, n3, n4, n5, detached1, detached2, clone;

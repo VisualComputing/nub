@@ -9,6 +9,10 @@ import processing.opengl.PShader;
 
 import java.nio.file.Paths;
 
+/**
+ * Depth map shader useful for DOF and other post-processing effects
+ * https://t.ly/0Qea
+ */
 public class DepthMap extends PApplet {
   Scene scene;
   Scene depthMapScene;

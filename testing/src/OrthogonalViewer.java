@@ -6,6 +6,10 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
+/**
+ * Setting up a viewer orthogonal to the current view helps
+ * out to appreciate current objects depth within a scene
+ */
 public class OrthogonalViewer extends PApplet {
   Scene scene, visualHint, focus;
   int w = 500, h = 500, atX, atY;

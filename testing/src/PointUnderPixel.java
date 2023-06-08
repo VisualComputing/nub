@@ -6,6 +6,9 @@ import processing.core.PConstants;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
+/**
+ * Pick a point under pixel using the scene location method
+ */
 public class PointUnderPixel extends PApplet {
   Scene scene;
   Node[] models;

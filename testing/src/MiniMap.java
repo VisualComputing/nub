@@ -4,6 +4,10 @@ import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
+/**
+ * 2D and 3D minimaps
+ * https://t.ly/oDHL
+ */
 public class MiniMap extends PApplet {
   Scene scene, minimap, focus;
   Node[] models;

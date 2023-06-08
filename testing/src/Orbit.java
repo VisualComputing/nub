@@ -8,7 +8,7 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 /**
- * Created by pierre on 11/15/16.
+ * Orbit around axis
  */
 public class Orbit extends PApplet {
   Scene scene;

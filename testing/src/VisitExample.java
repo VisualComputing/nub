@@ -6,12 +6,13 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
+/**
+ * This example modifies the visual representation on a Node
+ * depending on the scene it is drawn. It demos custom scene behavior
+ *
+ * By Sebastian Chaparro
+ */
 public class VisitExample extends PApplet {
-  /**
-   * This example modifies the visual representation on a Node
-   * depending on the scene it is drawn.
-   */
-
   boolean relativeToGraph = true;
   int rows = 2, cols = 2;
   int n = rows * cols;

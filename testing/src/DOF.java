@@ -8,6 +8,10 @@ import processing.opengl.PShader;
 
 import java.nio.file.Paths;
 
+/**
+ * Depth-Of-Filed (DOF) post-processing effect
+ * https://t.ly/-ADs
+ */
 public class DOF extends PApplet {
   String depthPath;
   PShader depthShader, dofShader;

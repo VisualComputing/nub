@@ -5,6 +5,9 @@ import processing.core.PApplet;
 import processing.core.PFont;
 import processing.event.MouseEvent;
 
+/**
+ * Node filters are rules to constraint motion
+ */
 public class FilteredNode extends PApplet {
   Scene scene;
   PFont font;
