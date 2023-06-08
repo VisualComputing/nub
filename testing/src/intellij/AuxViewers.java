@@ -7,6 +7,9 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
+/**
+ * Several ways of viewers instantiation
+ */
 public class AuxViewers extends PApplet {
   Scene scene1, scene2, scene3, focus;
   Node[] shapes;

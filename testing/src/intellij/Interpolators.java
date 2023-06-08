@@ -9,8 +9,7 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 /**
- * This example introduces the three different interpolations offered
- * by the Graph.
+ * This example introduces the three different interpolations offered by the Graph.
  */
 public class Interpolators extends PApplet {
   Scene scene;
@@ -61,7 +60,7 @@ public class Interpolators extends PApplet {
       // */
     }
     shape.resetScalingFilter();
-    //shape.animate();
+    shape.animate();
     frameRate(1000);
   }
 

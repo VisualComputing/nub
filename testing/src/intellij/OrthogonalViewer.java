@@ -8,7 +8,7 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
-public class PUP extends PApplet {
+public class OrthogonalViewer extends PApplet {
   Scene scene, visualHint, focus;
   int w = 500, h = 500, atX, atY;
   Node[] models;
@@ -64,12 +64,10 @@ public class PUP extends PApplet {
   }
 
   public void mouseClicked(MouseEvent event) {
-    /*
     if (event.getCount() == 1)
       scene.focus();
     else
       scene.align();
-     */
   }
 
   PShape boxShape() {
@@ -125,6 +123,6 @@ public class PUP extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.PUP"});
+    PApplet.main(new String[]{"intellij.OrthogonalViewer"});
   }
 }

@@ -7,10 +7,6 @@ import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 
-/**
- * This example introduces the three different interpolations offered
- * by the Graph.
- */
 public class BasicUse extends PApplet {
   Scene scene;
   Node node, child, sibling;

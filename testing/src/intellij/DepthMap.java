@@ -11,11 +11,11 @@ import processing.opengl.PShader;
 
 import java.nio.file.Paths;
 
-public class ShadowMap extends PApplet {
+public class DepthMap extends PApplet {
   Scene scene;
-  Scene shadowMapScene;
+  Scene depthMapScene;
   Node[] shapes;
-  PGraphics shadowMap;
+  PGraphics depthMap;
   PShader depthShader;
   float zNear = 50;
   float zFar = 700;
@@ -27,11 +27,11 @@ public class ShadowMap extends PApplet {
   }
 
   public void setup() {
-    shadowMap = createGraphics(w / 2, h / 2, P3D);
+    depthMap = createGraphics(w / 2, h / 2, P3D);
     depthShader = loadShader(Paths.get("testing/data/depth/depth_linear.glsl").toAbsolutePath().toString());
     depthShader.set("near", zNear);
     depthShader.set("far", zFar);
-    shadowMap.shader(depthShader);
+    depthMap.shader(depthShader);
     scene = new Scene(this, max(w, h));
     scene.fit(1000);
     shapes = new Node[20];
@@ -44,17 +44,17 @@ public class ShadowMap extends PApplet {
     scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
     scene.node("light").setWorldOrientation(Quaternion.from(Vector.plusK, scene.node("light").worldPosition()));
     // scene.enablePicking(false);
-    shadowMapScene = new Scene(shadowMap, scene.node("light"));
-    shadowMapScene.setZNear(() -> zNear);
-    shadowMapScene.setZFar(() -> zFar);
-    shadowMapScene.togglePerspective();
-    shadowMapScene.picking = false;
+    depthMapScene = new Scene(depthMap, scene.node("light"));
+    depthMapScene.setZNear(() -> zNear);
+    depthMapScene.setZFar(() -> zFar);
+    depthMapScene.togglePerspective();
+    depthMapScene.picking = false;
     frameRate(1000);
   }
 
   public void cube(PGraphics pg) {
     pg.pushStyle();
-    if (pg == shadowMap)
+    if (pg == depthMap)
       pg.noStroke();
     else {
       pg.strokeWeight(3);
@@ -71,12 +71,12 @@ public class ShadowMap extends PApplet {
     scene.render();
     // 2. Fill in shadow map using the light point of view
     if (scene.isTagValid("light")) {
-      shadowMapScene.openContext();
-      shadowMapScene.context().background(140, 160, 125);
-      shadowMapScene.drawAxes();
-      shadowMapScene.render();
-      shadowMapScene.closeContext();
-      shadowMapScene.image(w / 2, h / 2);
+      depthMapScene.openContext();
+      depthMapScene.context().background(140, 160, 125);
+      depthMapScene.drawAxes();
+      depthMapScene.render();
+      depthMapScene.closeContext();
+      depthMapScene.image(w / 2, h / 2);
     }
   }
 
@@ -88,7 +88,7 @@ public class ShadowMap extends PApplet {
       // no calling mouseTag since we need to immediately update the tagged node
       scene.updateTag("light");
       if (scene.isTagValid("light")) {
-        shadowMapScene.setEye(scene.node("light"));
+        depthMapScene.setEye(scene.node("light"));
         scene.node("light").toggleHint(Node.SHAPE | Node.AXES | Node.BOUNDS);
       }
     } else
@@ -107,7 +107,7 @@ public class ShadowMap extends PApplet {
   public void mouseWheel(MouseEvent event) {
     if (event.isShiftDown() && scene.isTagValid("light")) {
       depthShader.set("far", zFar += event.getCount() * 20);
-      shadowMapScene.setZFar(() -> zFar);
+      depthMapScene.setZFar(() -> zFar);
     }
     else
       scene.zoom(event.getCount() * 20);
@@ -115,13 +115,13 @@ public class ShadowMap extends PApplet {
 
   public void keyPressed() {
     if (key == ' ' && scene.isTagValid("light")) {
-      shadowMapScene.togglePerspective();
+      depthMapScene.togglePerspective();
     }
     if (key == 'p')
       scene.togglePerspective();
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.ShadowMap"});
+    PApplet.main(new String[]{"intellij.DepthMap"});
   }
 }
