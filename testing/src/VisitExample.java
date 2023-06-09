@@ -43,7 +43,7 @@ public class VisitExample extends PApplet {
   }
 
   @Override
-  public void draw(){
+  public void draw() {
     for(int i = 0; i < n; i++){
       focus = scenes[i].hasFocus() ? scenes[i] : focus;
       scenes[i].openContext();
@@ -66,7 +66,7 @@ public class VisitExample extends PApplet {
     pg.popStyle();
   }
 
-  public void generateRandomNodes(int n){
+  public void generateRandomNodes(int n) {
     for(int i = 0; i < n; i++){
       Node node = new CustomNode();
       node.randomize(new Vector(), 150,  true);
@@ -119,7 +119,7 @@ public class VisitExample extends PApplet {
   }
 
   @Override
-  public void mouseDragged(){
+  public void mouseDragged() {
     if(mouseButton == LEFT)
       focus.spin();
     else if(mouseButton == RIGHT)
@@ -143,7 +143,7 @@ public class VisitExample extends PApplet {
   }
 
   @Override
-  public void keyPressed(){
+  public void keyPressed() {
     if (key == ' ') {
       relativeToGraph = !relativeToGraph;
     }
