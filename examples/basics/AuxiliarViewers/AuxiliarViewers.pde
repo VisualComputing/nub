@@ -19,6 +19,9 @@ void settings() {
 
 void setup() {
   scene1 = onScreen ? new Scene(g) : new Scene(createGraphics(w, h, P3D));
+  scene1.setUpVector(Vector.minusK);
+  scene1.eye().setPosition(new Vector(150, 150, 50));
+  scene1.lookAt(Vector.zero);
   scene1.eye().tagging = false;
   shapes = new Node[15];
   for (int i = 0; i < shapes.length; i++) {
@@ -35,9 +38,14 @@ void setup() {
   // Note that we pass the upper left corner coordinates where the scene1
   // is to be drawn (see drawing code below) to its constructor.
   scene2 = new Scene(createGraphics(w / 2, h / 2, P3D));
+  scene2.setUpVector(Vector.minusJ);
+  scene2.eye().setPosition(new Vector(200, 0, 0));
+  scene2.lookAt(Vector.zero);
   scene2.eye().tagging = false;
   // idem here
   scene3 = new Scene(createGraphics(w / 2, h / 2, P3D));
+  scene3.eye().setPosition(new Vector(0, 200, 0));
+  scene3.lookAt(Vector.zero);
   scene3.eye().tagging = false;
 }
 
@@ -89,16 +97,16 @@ void mouseClicked(MouseEvent event) {
 
 void draw() {
   focus = scene2.hasFocus() ? scene2 : scene3.hasFocus() ? scene3 : scene1.hasFocus() ? scene1 : null;
-  scene1.display(color(75, 25, 15), false, color(0, 225, 15));
+  scene1.display(color(75, 25, 15), true, color(0, 225, 15));
   if (displayAuxiliarViewers) {
     scene2.openContext();
-    scene2.context().background(75, 25, 175);
+    scene2.context().background(75, 25, 175, 175);
     scene2.drawAxes();
     scene2.render();
     scene2.closeContext();
     scene2.image(w / 2, 0);
     scene3.openContext();
-    scene3.context().background(175, 200, 20);
+    scene3.context().background(175, 200, 20, 175);
     scene3.render();
     scene3.drawAxes();
     scene3.closeContext();
