@@ -1,3 +1,18 @@
+/**
+ * Ceva Sonia.
+ * by Jean Pierre Charalambos.
+ *
+ * Ceva Sonia ported to nub from Jacques Maire proscene example:
+ * See also:
+ * 1. https://github.com/remixlab/proscene/tree/master/examples/Geom/Projections/CevaSonia
+ * 2. https://openprocessing.org/user/14626?view=sketches&o=48
+ *
+ * Both, the spheres and the eye are interactive and controlled
+ * with the mouse. Hover over the spheres to pick them. Mouse
+ * dragging and clicking defines the interaction of a picked
+ * sphere or the eye when no sphere is currently picked.
+ */
+
 import nub.primitives.*;
 import nub.core.*;
 import nub.processing.*;
@@ -11,7 +26,7 @@ Vector intersection12, intersection23, intersection13;
 float temps = 0;
 
 void setup() {
-  size(640, 640, P3D);
+  size(840, 840, P3D);
   scene = new Scene(this, 800);
   scene.eye().setPosition(new Vector(0, 0, 800));
   reperes = new Node[nb];
